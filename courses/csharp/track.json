@@ -1,0 +1,870 @@
+{
+  "schema_version": 1,
+  "id": "csharp",
+  "title": "C#: from the first program to reliable .NET applications",
+  "summary": "48 detailed lessons from first programs through language mechanisms, reliable systems and independently designed projects.",
+  "lessons": [
+    {
+      "id": "csharp-001",
+      "title": "Source, compilation and the first observable result",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Source",
+        "Compiler",
+        "Entrypoint"
+      ],
+      "outcome": "Model boxes containing packets containing items. Explain each intermediate value and check the final product.",
+      "lab": "Write a program calculating the number of seats in four rows of six seats. Check 24 explicitly.",
+      "verification": "Hello, C# appears before the lesson marker. The total is 12, while adding the two inputs gives 7."
+    },
+    {
+      "id": "csharp-002",
+      "title": "Types, variables and explicit conversions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-001"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Static type",
+        "Conversion",
+        "Try pattern"
+      ],
+      "outcome": "Design an input boundary for a percentage and document its accepted textual and numeric ranges.",
+      "lab": "Write a TryParse-based validator accepting only nonnegative whole-number quantities.",
+      "verification": "The integer result is 3 and the floating result is 3.5. 42 parses successfully; words fail without an exception."
+    },
+    {
+      "id": "csharp-003",
+      "title": "Numeric range, checked overflow and decimal amounts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-002"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Overflow",
+        "Decimal",
+        "Rounding policy"
+      ],
+      "outcome": "Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.",
+      "lab": "Calculate a decimal subtotal and tax, rounding only the final payable amount.",
+      "verification": "The maximum int plus one is rejected; 100 plus 20 is accepted. Two valid midpoint policies produce 2.34 and 2.35."
+    },
+    {
+      "id": "csharp-004",
+      "title": "Strings, interpolation and Unicode text",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-003"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Code unit",
+        "Unicode scalar",
+        "Encoding"
+      ],
+      "outcome": "Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.",
+      "lab": "Implement case-insensitive machine-key comparison with an explicit policy.",
+      "verification": "The original remains data while the result is DATA. One scalar occupies two UTF-16 units and four UTF-8 bytes."
+    },
+    {
+      "id": "csharp-005",
+      "title": "Boolean decisions and exhaustive alternatives",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-004"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Predicate",
+        "Short circuit",
+        "Boundary"
+      ],
+      "outcome": "Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.",
+      "lab": "Write a classifier for negative, zero and positive temperatures.",
+      "verification": "The missing value is handled without dereferencing null. 59 retries, 60 passes, and 101 is rejected."
+    },
+    {
+      "id": "csharp-006",
+      "title": "Loops, invariants and termination",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-005"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Invariant",
+        "Accumulator",
+        "Termination"
+      ],
+      "outcome": "Design a bounded retry loop and explain both its invariant and its stopping argument.",
+      "lab": "Implement a first-match search returning a separate not-found representation.",
+      "verification": "The sum is 12 and the empty sum is zero. The first 8 is at index 1; 9 is absent."
+    },
+    {
+      "id": "csharp-007",
+      "title": "Methods, parameters and return contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-006"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Parameter",
+        "Argument",
+        "Pure function"
+      ],
+      "outcome": "Extract one computation from a larger program and state its input, output, mutation and failure contract.",
+      "lab": "Write a method computing an area from validated nonnegative dimensions.",
+      "verification": "The result is 14 and the caller still holds 7. 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2."
+    },
+    {
+      "id": "csharp-008",
+      "title": "Arrays, indices and rectangular data",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-007"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Array",
+        "Alias",
+        "Shape"
+      ],
+      "outcome": "Choose rectangular or jagged storage for variable-length sensor histories and justify the choice.",
+      "lab": "Compute each row sum of the two-by-three grid.",
+      "verification": "The alias changes source; the copied integer array retains 2. The shape is two by three and the sum is 21."
+    },
+    {
+      "id": "csharp-009",
+      "title": "Lists, capacity and safe mutation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-008"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Count",
+        "Capacity",
+        "Snapshot"
+      ],
+      "outcome": "Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.",
+      "lab": "Produce a filtered list while preserving the original.",
+      "verification": "Reserving ten slots leaves Count at zero; two appends produce Count two. Two entries are removed while the earlier integer snapshot keeps four values."
+    },
+    {
+      "id": "csharp-010",
+      "title": "Dictionaries, sets and identity policies",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-009"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Key",
+        "Hashing",
+        "Membership"
+      ],
+      "outcome": "Design stable identity for records and explain which fields may change without invalidating lookup.",
+      "lab": "Build a frequency dictionary from a list of tags.",
+      "verification": "OAK finds a present zero; Pine is absent. RED is a duplicate under the selected comparer."
+    },
+    {
+      "id": "csharp-011",
+      "title": "Nullability and optional information",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-010"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Null",
+        "Flow analysis",
+        "Fallback"
+      ],
+      "outcome": "Design an import field whose missing value has different meaning from an explicit zero or empty value.",
+      "lab": "Write a formatter preserving missing, zero and positive measurements.",
+      "verification": "The optional length is absent, not zero. A measured zero and an unknown measurement produce distinct descriptions."
+    },
+    {
+      "id": "csharp-012",
+      "title": "Value copies, references and mutation ownership",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-011"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Value semantics",
+        "Reference semantics",
+        "Ownership"
+      ],
+      "outcome": "Design a data boundary that prevents callers from mutating an internal collection.",
+      "lab": "Choose a representation for a coordinate and for a shared session, explaining the difference.",
+      "verification": "Changing the copied point leaves the original X at 2. Both references observe the same counter increment."
+    },
+    {
+      "id": "csharp-013",
+      "title": "Classes, constructors and encapsulated invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-012"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Invariant",
+        "Encapsulation",
+        "Failure atomicity"
+      ],
+      "outcome": "Explain whether a shared wallet needs synchronization when several tasks may spend concurrently.",
+      "lab": "Implement a bounded inventory whose reservations never make stock negative.",
+      "verification": "Spending 4 succeeds; spending 7 afterward fails without changing 6. Negative spending is rejected and zero is an accepted no-op."
+    },
+    {
+      "id": "csharp-014",
+      "title": "Records, structs and data equality",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-013"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Record",
+        "With expression",
+        "Shallow copy"
+      ],
+      "outcome": "Choose identity-based or data-based equality for an order and explain how updates affect collection membership.",
+      "lab": "Design an immutable coordinate using a readonly record struct.",
+      "verification": "Equal records can be distinct objects; with preserves the previous age. Both records see the appended list item."
+    },
+    {
+      "id": "csharp-015",
+      "title": "Patterns and explicit state models",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-014"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Pattern",
+        "Guard",
+        "State model"
+      ],
+      "outcome": "Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.",
+      "lab": "Model a loading, ready and failed operation with separate payloads.",
+      "verification": "The same method distinguishes type, value range and string shape. Success carries a count; failure carries a reason."
+    },
+    {
+      "id": "csharp-016",
+      "title": "Foundation project: a validated inventory report",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-015"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Pipeline",
+        "Rejection",
+        "Aggregation"
+      ],
+      "outcome": "Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.",
+      "lab": "Build a sorted text report from the accepted dictionary and the rejection count.",
+      "verification": "Pear totals 6 and apple totals 3. Three rejected lines do not alter the valid pear total."
+    },
+    {
+      "id": "csharp-017",
+      "title": "Interfaces and substitutable behavior",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-016"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Interface",
+        "Substitution",
+        "Dependency injection"
+      ],
+      "outcome": "Choose one dependency worth injecting in the inventory importer and explain the testing benefit.",
+      "lab": "Define a small interface for a deterministic label formatter.",
+      "verification": "Four units cost 12 and zero units cost zero. The same consumer applies a capped or uncapped policy."
+    },
+    {
+      "id": "csharp-018",
+      "title": "Generics and constraints that express capabilities",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-017"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Type parameter",
+        "Constraint",
+        "Type safety"
+      ],
+      "outcome": "Design a generic helper with the smallest useful capability constraint.",
+      "lab": "Create a generic immutable three-element container.",
+      "verification": "The same method returns an int or a string without object casts. Swap preserves the element type, and a tie remains a valid value."
+    },
+    {
+      "id": "csharp-019",
+      "title": "Delegates, closures and events",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-018"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Delegate",
+        "Closure",
+        "Subscription"
+      ],
+      "outcome": "Design ownership for subscriptions in a screen or service that can be disposed.",
+      "lab": "Write a transformation method accepting Func<int,int>.",
+      "verification": "Changing factor changes later calls through the closure. Only the first emission reaches the removed handler."
+    },
+    {
+      "id": "csharp-020",
+      "title": "LINQ, deferred execution and materialization",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-019"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Deferred execution",
+        "Projection",
+        "Materialization"
+      ],
+      "outcome": "Choose streaming or materialization for a large import and explain memory and repeatability tradeoffs.",
+      "lab": "Build a deterministic report selecting, transforming and ordering records.",
+      "verification": "The deferred query sees the subsequently appended 3. The earlier snapshot contains only 2 while a new projection sees three values."
+    },
+    {
+      "id": "csharp-021",
+      "title": "Grouping, joins and data grain",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-020"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Grain",
+        "Cardinality",
+        "Join key"
+      ],
+      "outcome": "Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.",
+      "lab": "Build a report joining unique item metadata to item totals.",
+      "verification": "Three event rows become two category totals. One left row becomes two joined rows."
+    },
+    {
+      "id": "csharp-022",
+      "title": "Iterators and lazy sequence contracts",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-021"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Iterator",
+        "Enumeration",
+        "Laziness"
+      ],
+      "outcome": "Choose a sequence API for a large file and document repeated-enumeration and resource-lifetime behavior.",
+      "lab": "Implement a lazy sequence of cumulative totals.",
+      "verification": "The consumer receives 5 and 6 and can stop before the full range. Negative count is rejected immediately, without enumeration."
+    },
+    {
+      "id": "csharp-023",
+      "title": "Exceptions and preserving failure meaning",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-022"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Exception",
+        "Stack trace",
+        "Translation"
+      ],
+      "outcome": "Decide which layer owns user-facing error translation and which details should remain private diagnostics.",
+      "lab": "Define an import API with distinct invalid-input and storage-failure outcomes.",
+      "verification": "Malformed numeric text is caught as a format error. The outer domain failure still contains the I/O cause."
+    },
+    {
+      "id": "csharp-024",
+      "title": "Disposable resources and deterministic cleanup",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-023"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Resource owner",
+        "IDisposable",
+        "Scope"
+      ],
+      "outcome": "Document ownership and leave-open behavior for a parser that wraps a stream reader.",
+      "lab": "Write a helper that reads from a caller-owned stream without closing it.",
+      "verification": "The resource is open inside and closed afterward. The controlled exception still triggers cleanup."
+    },
+    {
+      "id": "csharp-025",
+      "title": "Files, paths and local data ownership",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-024"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Working directory",
+        "Encoding",
+        "Owned temporary directory"
+      ],
+      "outcome": "Explain what must change to make a persistent report update crash-recoverable.",
+      "lab": "Build a temporary-file round trip for a small inventory report.",
+      "verification": "The Unicode text round-trips and the owned directory is removed. A simple leaf name and a nested path are recognized as different shapes."
+    },
+    {
+      "id": "csharp-026",
+      "title": "JSON contracts and schema evolution",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-025"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Serialization",
+        "Schema",
+        "Migration"
+      ],
+      "outcome": "Design a migration from a renamed quantity field while retaining old saved records.",
+      "lab": "Write a decoder returning explicit validation errors for missing name and negative quantity.",
+      "verification": "The restored name and quantity match the original record. Valid JSON can decode into a rejected domain value."
+    },
+    {
+      "id": "csharp-027",
+      "title": "Dates, durations and culture-independent data",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-026"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Instant",
+        "Offset",
+        "Duration"
+      ],
+      "outcome": "Design storage and display policies for appointments in a named time zone.",
+      "lab": "Build a duration report using fixed UTC timestamps.",
+      "verification": "The values denote the same instant despite different offsets. The elapsed duration is 90 minutes and the timestamp round-trips."
+    },
+    {
+      "id": "csharp-028",
+      "title": "Testing contracts with meaningful counterexamples",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-027"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Test oracle",
+        "Regression case",
+        "Boundary test"
+      ],
+      "outcome": "Separate unit and integration evidence for a JSON file importer.",
+      "lab": "Write table-driven checks for your inventory quantity validator.",
+      "verification": "Negative, zero and positive cases preserve their intended categories. The zero case catches the incorrect default, and clamping twice changes nothing further."
+    },
+    {
+      "id": "csharp-029",
+      "title": "Async, await and task completion",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-028"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Task",
+        "Await",
+        "Composition"
+      ],
+      "outcome": "Explain when CPU work might need scheduling separately from an asynchronous I/O API.",
+      "lab": "Write an async method returning a validated total.",
+      "verification": "Await yields 7 and confirms successful completion. WhenAll retains input order and await exposes the task exception."
+    },
+    {
+      "id": "csharp-030",
+      "title": "Cooperative cancellation and bounded waiting",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-029"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Cancellation token",
+        "Wait cancellation",
+        "Unknown result"
+      ],
+      "outcome": "Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.",
+      "lab": "Write an operation that stops cooperatively and preserves already committed work.",
+      "verification": "The token check acknowledges cancellation. The wait cancels, then the original task later completes with 9."
+    },
+    {
+      "id": "csharp-031",
+      "title": "Bounded channels and producer-consumer ownership",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-030"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Backpressure",
+        "Admission",
+        "Drain"
+      ],
+      "outcome": "Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.",
+      "lab": "Build a bounded producer-consumer pipeline with explicit writer completion.",
+      "verification": "The first item is accepted and the second immediate write is refused. Both admitted items are read after completion, and later writes fail."
+    },
+    {
+      "id": "csharp-032",
+      "title": "Composition project: a deterministic import service",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "csharp-031"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Transport model",
+        "Domain validation",
+        "Service result"
+      ],
+      "outcome": "Design an adapter boundary for a file or HTTP source without putting I/O inside the pure aggregation.",
+      "lab": "Build a per-item result while preserving the rejected count.",
+      "verification": "The service returns total 2 and one rejected record. A cancelled request and a successful empty import have different outcomes."
+    },
+    {
+      "id": "csharp-033",
+      "title": "Threads, locks and compound invariants",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-032"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Atomicity",
+        "Mutual exclusion",
+        "Deadlock"
+      ],
+      "outcome": "Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.",
+      "lab": "Implement a locked transfer preserving the sum of two balances.",
+      "verification": "Four tasks produce exactly 400 increments. The reader uses the same gate as mutation."
+    },
+    {
+      "id": "csharp-034",
+      "title": "Atomic operations and concurrent collections",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-033"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Interlocked",
+        "Thread-safe operation",
+        "Factory purity"
+      ],
+      "outcome": "Explain why atomically updating two separate balances does not preserve a transfer invariant.",
+      "lab": "Build a concurrent frequency counter using pure update functions.",
+      "verification": "The atomic count is exactly 400. Twenty admitted updates produce 20."
+    },
+    {
+      "id": "csharp-035",
+      "title": "Span, slices and memory lifetime",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-034"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Span",
+        "Slice",
+        "Lifetime"
+      ],
+      "outcome": "Choose Span or Memory for a synchronous parser and an asynchronous buffer owner.",
+      "lab": "Write a synchronous span helper counting separators.",
+      "verification": "Only the middle element changes. The digit total is 6 and empty input totals zero."
+    },
+    {
+      "id": "csharp-036",
+      "title": "Garbage collection, pooling and retained memory",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-035"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Reachability",
+        "Pool",
+        "Logical length"
+      ],
+      "outcome": "Decide whether pooling is justified using allocation measurements and a stated lifetime contract.",
+      "lab": "Write a pooled-buffer helper with finally-based return.",
+      "verification": "Only three initialized elements contribute to the total. Clearing removes the application references without promising collection timing."
+    },
+    {
+      "id": "csharp-037",
+      "title": "Algorithmic complexity and measured performance",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-036"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Complexity",
+        "Cost model",
+        "Benchmark"
+      ],
+      "outcome": "Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.",
+      "lab": "Compare repeated list scans with one built index while preserving equality policy.",
+      "verification": "Finding the last element needs four comparisons. The index answers membership while storing four identities."
+    },
+    {
+      "id": "csharp-038",
+      "title": "Validation, regular expressions and bounded input",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-037"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Syntax validation",
+        "Semantic validation",
+        "ReDoS"
+      ],
+      "outcome": "Choose a parser or regex for a nested format and justify complexity and error reporting.",
+      "lab": "Validate a structured identifier and then check its domain-specific reserved words.",
+      "verification": "The identifier begins with a lowercase letter and uses only admitted characters. The plus sign is matched literally."
+    },
+    {
+      "id": "csharp-039",
+      "title": "HTTP clients, status contracts and offline transport tests",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-038"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Transport",
+        "Status code",
+        "Test double"
+      ],
+      "outcome": "Design a retry policy that distinguishes safe reads from writes with unknown outcomes.",
+      "lab": "Write a client method accepting a supplied HttpClient and CancellationToken.",
+      "verification": "The handler supplies count 3 without network access. 503 remains an observable failure rather than a default successful count."
+    },
+    {
+      "id": "csharp-040",
+      "title": "Domain architecture and dependency direction",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-039"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Domain core",
+        "Adapter",
+        "Dependency direction"
+      ],
+      "outcome": "Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.",
+      "lab": "Extract the inventory aggregation into a transport-independent core.",
+      "verification": "The result uses the supplied instant. A different clock does not bypass identity validation."
+    },
+    {
+      "id": "csharp-041",
+      "title": "API design and the prepared ASP.NET project",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-040"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Endpoint",
+        "Status mapping",
+        "Idempotency"
+      ],
+      "outcome": "Design idempotent update behavior and explain how duplicate creation differs.",
+      "lab": "Run the separately prepared ApiLab project and inspect GET and POST responses.",
+      "verification": "Valid input maps to the created outcome. Invalid requests produce 400 decisions."
+    },
+    {
+      "id": "csharp-042",
+      "title": "Security boundaries, secrets and untrusted data",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-041"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Authentication",
+        "Authorization",
+        "Default deny"
+      ],
+      "outcome": "Describe authorization checks for a resource owned by another user and the evidence each check needs.",
+      "lab": "Design an allowlist of fields safe to include in an import error.",
+      "verification": "Read is allowed and delete is denied. The token is replaced while a status remains visible."
+    },
+    {
+      "id": "csharp-043",
+      "title": "Projects, packages and reproducible builds",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-042"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Target framework",
+        "Restore",
+        "Publish"
+      ],
+      "outcome": "Design a dependency update review including lock changes, license checks and runtime evidence.",
+      "lab": "Move a pure domain type into the supplied class-library project and run its executable checks.",
+      "verification": "The running framework generation is compatible with the declared classroom target. The example preserves the intended target and nullable policy."
+    },
+    {
+      "id": "csharp-044",
+      "title": "Diagnostics, structured events and operational evidence",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-043"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Structured event",
+        "Correlation identity",
+        "Metric"
+      ],
+      "outcome": "Design a latency report that includes percentiles, sample count and measurement boundaries.",
+      "lab": "Instrument your import project with submitted, accepted and rejected counts.",
+      "verification": "The serialized event contains an explicit rejected outcome. Five submitted records are fully accounted for and rejection rate is 0.4."
+    },
+    {
+      "id": "csharp-045",
+      "title": "Reflection, native boundaries and AOT tradeoffs",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-044"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Reflection",
+        "AOT",
+        "ABI"
+      ],
+      "outcome": "Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.",
+      "lab": "Replace string-based access in a small report with a typed projection.",
+      "verification": "The known property is an int and the missing property is absent. The fixed projection needs no string-based member lookup."
+    },
+    {
+      "id": "csharp-046",
+      "title": "Modern C# features and version-aware readability",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-045"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Language version",
+        "Target typing",
+        "Primary constructor"
+      ],
+      "outcome": "Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.",
+      "lab": "Refactor one simple class to a primary constructor without changing behavior.",
+      "verification": "The target types select array and list representations. The supplied factor is used by the instance operation."
+    },
+    {
+      "id": "csharp-047",
+      "title": "Resilience, idempotency and unknown outcomes",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-046"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Idempotency key",
+        "Transient failure",
+        "Reconciliation"
+      ],
+      "outcome": "Design durable atomic storage for an effect and its receipt and state remaining failure modes.",
+      "lab": "Implement a result lookup that does not execute the command again.",
+      "verification": "The repeated identity returns its prior result without increasing the total. A new identity applies separately, while a changed payload under an old key is rejected."
+    },
+    {
+      "id": "csharp-048",
+      "title": "Capstone: a reviewable .NET data application",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "csharp-047"
+      ],
+      "runtime": "csharp-dotnet",
+      "concepts": [
+        "Acceptance criteria",
+        "Evidence boundary",
+        "Maintainability"
+      ],
+      "outcome": "Deliver a project README with build commands, architecture, failure policies, tests, operational limits and a proposed next extension.",
+      "lab": "Build the external DomainLab and expose the domain contract through the ApiLab adapter.",
+      "verification": "The sorted report is a=3;b=6. A valid zero remains in the report while two invalid rows are counted."
+    }
+  ]
+}

@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>C++: from a source file to a running program · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>C++: from a source file to a running program</h1>
+      <p class="source-path">Generated from <code>courses/cpp/compile-and-run.md</code></p>
+    </header>
+    <article class="document"><h2 id="c-from-a-source-file-to-a-running-program">C++: from a source file to a running program<a class="heading-anchor" href="#c-from-a-source-file-to-a-running-program" aria-label="Link to this section">#</a></h2>
+<p>This tutorial is the run-path reference for <code>cpp-001</code> through <code>cpp-042</code>. Start with a fresh learner pad or an owned scratch folder. Reading source, compiling it, linking it, running it and explaining the result are different activities. Save evidence for the activity you actually performed.</p>
+<h3 id="1-what-is-main-cpp">1. What is main.cpp?<a class="heading-anchor" href="#1-what-is-main-cpp" aria-label="Link to this section">#</a></h3>
+<p><code>main.cpp</code> is a plain UTF-8 text file containing C++ source. The <code>.cpp</code> suffix tells common compiler drivers to interpret it as C++; it is not an executable. The base name <code>main</code> is a convention used by this course worker. A local compiler can compile <code>hello.cpp</code> instead if the command names that actual file. A program normally has one entry function named <code>main</code>, regardless of the source filename.</p>
+<p>Do not paste Markdown fences into a source pad. A guide can contain several independent examples, while one source file must form one valid translation unit. Two pasted <code>int main()</code> definitions cause a compilation error. A file named <code>main.cpp.txt</code> may not be discovered or interpreted as expected. Enable visible extensions in your file manager and inspect the exact filename.</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">hello, learner</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Read the program from top to bottom. The include supplies standard stream declarations. <code>int</code> is the entry function&#x27;s return type. Parentheses contain its parameter list, empty here. Braces enclose its body. <code>std::</code> names the standard-library namespace, and <code>cout</code> is the normal output stream. The <code>&lt;&lt;</code> operator inserts the string into that stream. Quotes delimit text; <code>\n</code> is the newline escape inside the text. A semicolon ends the statement. Returning 0 reports process success.</p>
+<p>The include supplies declarations, <code>main</code> supplies an entry point, the stream statement produces a line during execution, and the return value reports status. A successful compiler message does not prove either runtime observation.</p>
+<h3 id="2-start-with-the-docker-classroom">2. Start with the Docker classroom<a class="heading-anchor" href="#2-start-with-the-docker-classroom" aria-label="Link to this section">#</a></h3>
+<p>Follow the <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> for initial preparation. An installed local Linux-container engine and prepared classroom images replace the need for a host C++ compiler. First preparation needs network access; later prepared runs use local images. Image setup is a deliberate action, not a side effect of opening a lesson.</p>
+<p>From the course folder containing <code>compose.classroom.yaml</code>, add C++ after preparing the lab:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml --profile cpp20 --parallel 1 --progress plain build cpp-worker
+docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 up -d --no-build --pull never --wait lab python-core-worker cpp-worker</code></pre>
+<p>These commands work in Windows Command Prompt, PowerShell and POSIX terminals. Open <a href="http://127.0.0.1:8765/journeys">the local classroom</a>, select C++, read the guide and open the learner source. Predict, edit, save the pad, then choose Run. The worker copies the saved source into a job-owned directory as <code>main.cpp</code>, compiles and links it, then runs the resulting program under its limits.</p>
+<p>Read compilation diagnostics separately from stdout, stderr and the exit code. A syntax error means the new program was not built successfully. A timeout means the recorded phase exceeded its budget. Save the explanation as well as the source. The read-only preview is not the learner editor.</p>
+<p>Classroom pads live in the learning volume, separate from a visible local source folder. Export evidence before moving machines and follow the classroom guide&#x27;s stop/backup procedures. A successful example run does not finish six exercises or prove mastery. Only the existing <code>cpp-009</code> pilot has a registered independent ownership verifier; other lesson Runs execute the source without automatic exercise grading.</p>
+<h3 id="3-optional-native-compilation">3. Optional native compilation<a class="heading-anchor" href="#3-optional-native-compilation" aria-label="Link to this section">#</a></h3>
+<p>Use an already prepared GCC-compatible <code>g++</code> or <code>clang++</code> with C++20 support. Inspect <code>g++ --version</code> or <code>clang++ --version</code>; on macOS a command named g++ can invoke Clang. Command-not-found is a tooling issue, not a language error. Use Docker if a compatible compiler is unavailable. MSVC <code>cl</code> uses different flags and is not covered by the GCC/Clang command blocks below.</p>
+<p>Make a fresh learner-owned folder, save the example as <code>main.cpp</code>, and open a terminal in that folder. Do not paste the shell prompt character into the command. Replace g++ with clang++ when that is your prepared compiler.</p>
+<p>POSIX shell, including Bash or Zsh:</p>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">pwd</span>
+ls -l main.cpp
+g++ -std<span class="syntax-operator">=</span>c++20 -O0 -g -Wall -Wextra -Wconversion -Wpedantic -pthread main.cpp -o hello
+compile_status<span class="syntax-operator">=</span>$?
+<span class="syntax-builtin">printf</span> <span class="syntax-string">&#x27;compile/link status: %s\n&#x27;</span> <span class="syntax-string">&quot;</span>$compile_status<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-operator">[</span> <span class="syntax-string">&quot;</span>$compile_status<span class="syntax-string">&quot;</span> -eq <span class="syntax-number">0</span> <span class="syntax-operator">]</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">then</span>
+    ./hello
+    run_status<span class="syntax-operator">=</span>$?
+    <span class="syntax-builtin">printf</span> <span class="syntax-string">&#x27;run status: %s\n&#x27;</span> <span class="syntax-string">&quot;</span>$run_status<span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">fi</span></code></pre>
+<p>Windows PowerShell with a prepared GCC-compatible compiler:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Get-Location</span>
+<span class="syntax-builtin">Get-Item</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>main<span class="syntax-punctuation">.</span><span class="syntax-builtin">cpp</span>
+g<span class="syntax-punctuation">+</span><span class="syntax-punctuation">+</span> -std<span class="syntax-punctuation">=</span>c<span class="syntax-punctuation">+</span><span class="syntax-punctuation">+</span>20 -O0 -g -Wall -Wextra -Wconversion -Wpedantic -pthread <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>main<span class="syntax-punctuation">.</span><span class="syntax-builtin">cpp </span>-o <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>hello<span class="syntax-punctuation">.</span>exe
+$compileStatus <span class="syntax-punctuation">=</span> $LASTEXITCODE
+<span class="syntax-builtin">Write-Output</span> <span class="syntax-string">&quot;</span><span class="syntax-string">compile/link status: </span><span class="syntax-string">$</span><span class="syntax-string">compileStatus</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$compileStatus <span class="syntax-operator">-eq</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>hello<span class="syntax-punctuation">.</span>exe
+    $runStatus <span class="syntax-punctuation">=</span> $LASTEXITCODE
+    <span class="syntax-builtin">Write-Output</span> <span class="syntax-string">&quot;</span><span class="syntax-string">run status: </span><span class="syntax-string">$</span><span class="syntax-string">runStatus</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Expected: stdout <code>hello, learner</code> plus a newline, empty stderr, build status 0 and runtime status 0. Capture each status immediately because the next command can replace it. The conditional avoids running an old binary after a failed new build.</p>
+<p>The driver normally performs preprocessing, compilation, assembly and linking. <code>-std=c++20</code> selects the language standard, <code>-O0</code> favors debugging, <code>-g</code> includes debug data, and the warning groups request useful diagnostics. <code>-pthread</code> selects supported thread compilation/link options. <code>-o hello</code> names the output; it is the letter o. Stage controls are documented in the <a href="https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html">GCC driver manual</a>.</p>
+<h3 id="4-paths-file-formats-and-stale-binaries">4. Paths, file formats and stale binaries<a class="heading-anchor" href="#4-paths-file-formats-and-stale-binaries" aria-label="Link to this section">#</a></h3>
+<p>Relative paths start from the terminal&#x27;s working directory. POSIX <code>./hello</code> and PowerShell <code>.\hello.exe</code> explicitly select the local executable. The program&#x27;s <code>ifstream(&quot;readings.txt&quot;)</code> resolves a runtime file from the process working directory, not from the source file&#x27;s old directory.</p>
+<p>Quote paths containing spaces. POSIX: <code>g++ &quot;my work/main.cpp&quot; -o &quot;my work/hello&quot;</code>, then <code>&quot;./my work/hello&quot;</code>. PowerShell: <code>g++ &quot;.\my work\main.cpp&quot; -o &quot;.\my work\hello.exe&quot;</code>, then <code>&amp; &quot;.\my work\hello.exe&quot;</code>. The call operator <code>&amp;</code> in this form is PowerShell syntax.</p>
+<p>Source is text. An <code>.o</code> object contains compiled code awaiting linking. A linked executable contains the program to start. A <code>.csv</code> input is data with a separately specified delimiter/field contract. Renaming one suffix does not convert its format. When sharing evidence, retain source and data as text, and treat compiled binaries as platform-specific artifacts.</p>
+<p>Saving source does not update an old executable. If the new build fails, the prior output file can remain and print the prior greeting. Keep the exact source edit, build status and execution status together. An editor save notification is not a build receipt.</p>
+<h3 id="5-diagnose-the-first-failing-phase">5. Diagnose the first failing phase<a class="heading-anchor" href="#5-diagnose-the-first-failing-phase" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Observation</th>
+<th>Phase</th>
+<th>Smallest useful check</th>
+</tr></thead><tbody>
+<tr>
+<td>Expected semicolon near a line</td>
+<td>Compilation</td>
+<td>Inspect the preceding statement and braces</td>
+</tr>
+<tr>
+<td>cout not declared</td>
+<td>Compilation</td>
+<td>Check iostream include and std namespace</td>
+</tr>
+<tr>
+<td>Undefined reference/unresolved external</td>
+<td>Linking</td>
+<td>Check definition, signature and object/source list</td>
+</tr>
+<tr>
+<td>Duplicate symbol/multiple definition</td>
+<td>Linking</td>
+<td>Check repeated non-inline definitions</td>
+</tr>
+<tr>
+<td>Diagnostic text and exit 2</td>
+<td>Execution</td>
+<td>Check runtime validation branch and input</td>
+</tr>
+<tr>
+<td>File-open failure</td>
+<td>Execution</td>
+<td>Inspect working directory and resolved path</td>
+</tr>
+<tr>
+<td>Timeout</td>
+<td>Recorded build or execution phase</td>
+<td>Inspect budget, loop conditions and workload</td>
+</tr>
+</tbody></table></div>
+<p>In a scratch copy remove the output statement semicolon, build, retain the source location and phase, then repair and rebuild. Exact vendor wording can vary.</p>
+<p>For a linker experiment, compile this separate source:</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">int</span> <span class="syntax-function">answer</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">return</span> answer<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p><code>g++ -std=c++20 -c main.cpp -o main.o</code> stops before linking, so the declaration is enough. <code>g++ main.o -o hello</code> then fails because no definition of answer was linked. Supply exactly one matching definition, <code>int answer() { return 0; }</code>, and rebuild. The <a href="https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html">GCC stage controls</a> explain this object/link separation.</p>
+<p>A valid program can deliberately fail its runtime contract:</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cerr <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">input rejected</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Expected: compilation/linking succeed, stdout is empty, stderr is <code>input rejected</code> plus newline, runtime exit is 2. Do not turn every nonzero result into success just to make a test green.</p>
+<h3 id="6-multiple-files-and-cmake">6. Multiple files and CMake<a class="heading-anchor" href="#6-multiple-files-and-cmake" aria-label="Link to this section">#</a></h3>
+<p>The browser stages one C++ file. It does not accept arbitrary sibling headers, source trees, CMake scripts or compiler flags. Files created by a lesson live inside its bounded job and are not automatically durable exported learner artifacts. Record their contents or checks in evidence. Single-file execution cannot qualify a shared library, package installation, debugger, sanitizer configuration or multifile build.</p>
+<p>For <code>cpp-012</code> and later boundary exercises copy the complete <a href="fixtures/multifile/README.md.html">multifile fixture</a> into a new learner-owned host project. <code>math.hpp</code> declares functions, <code>math.cpp</code> defines them, and <code>main.cpp</code> calls them. Adding a header declaration does not add a source definition to the link target.</p>
+<p>CMake configures a build system from target definitions; it is not the compiler. With an already prepared CMake 3.28+ and Ninja, run these commands individually from the copied project root in either shell:</p>
+<pre class="highlighted-code"><code class="language-text">cmake -S . -B build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build/debug
+ctest --test-dir build/debug --output-on-failure</code></pre>
+<p><code>-S</code> chooses source and <code>-B</code> generated build output. <code>add_executable</code> names the program sources, and <code>target_link_libraries</code> connects the caller to the library target. CTest actually executes registered checks. Debug and Release need separate build directories. See the <a href="https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html">CMake 3.28 tutorial</a>.</p>
+<p>Missing native CMake/Ninja leaves the native CMake route unavailable;the Docker-only route below uses the prepared image instead. Do not infer CMake or CTest acceptance from a source review or compiler success. Do not install tools automatically during Run.</p>
+<h4 id="docker-only-cmake-project-route">Docker-only CMake project route<a class="heading-anchor" href="#docker-only-cmake-project-route" aria-label="Link to this section">#</a></h4>
+<p>Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared <code>ds60sqlpy-worker-cpp20:0.3.0</code> image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.</p>
+<p>Choose either <code>record-library</code> or <code>multifile</code>. Make a <strong>new copy</strong> before editing. The example name ends in <code>-01</code>; choose a new unused suffix for another attempt. Never point the writable project mount at the whole repository, your home folder or an existing learner project. A failure to create the new directory is a stop condition, not permission to overwrite it.</p>
+<p>On macOS or Linux, use a POSIX terminal:</p>
+<pre class="highlighted-code"><code class="language-bash">cpp_fixture<span class="syntax-operator">=</span>record-library
+cpp_project<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$PWD<span class="syntax-string">/.learning/cpp-projects/</span><span class="syntax-string">${</span>cpp_fixture<span class="syntax-string">}</span><span class="syntax-string">-01</span><span class="syntax-string">&quot;</span>
+mkdir -p <span class="syntax-string">&quot;</span>$PWD<span class="syntax-string">/.learning/cpp-projects</span><span class="syntax-string">&quot;</span>
+mkdir <span class="syntax-string">&quot;</span>$cpp_project<span class="syntax-string">&quot;</span> <span class="syntax-operator">&amp;&amp;</span> cp -R <span class="syntax-string">&quot;</span><span class="syntax-string">courses/cpp/fixtures/</span>$cpp_fixture<span class="syntax-string">/.</span><span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span>$cpp_project<span class="syntax-string">/</span><span class="syntax-string">&quot;</span></code></pre>
+<p>Stop if either creation or copy fails. The absolute <code>cpp_project</code> path identifies the host folder. Quoting preserves spaces. The <code>--mount</code> syntax below treats commas as separators, so choose a project path without commas. On Docker Desktop for macOS, ensure this folder is inside an already shared location. On Linux, the UID/GID arguments below keep created files owned by your current user. If the engine&#x27;s configured file-sharing or security policy denies the mount, diagnose that host setup rather than making the container privileged.</p>
+<pre class="highlighted-code"><code class="language-bash">cpp_image<span class="syntax-operator">=</span>ds60sqlpy-worker-cpp20:0.3.0
+cpp_tool<span class="syntax-operator">(</span><span class="syntax-operator">)</span> <span class="syntax-operator">{</span>
+    cpp_entrypoint<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$1<span class="syntax-string">&quot;</span>
+    <span class="syntax-builtin">shift</span>
+    docker run --rm --pull never --network none --read-only <span class="syntax-string">\</span>
+      --cap-drop ALL --security-opt no-new-privileges <span class="syntax-string">\</span>
+      --pids-limit <span class="syntax-number">128</span> --cpus <span class="syntax-number">2</span> --memory 1g <span class="syntax-string">\</span>
+      --user <span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>id -u<span class="syntax-keyword">)</span><span class="syntax-string">:</span><span class="syntax-keyword">$(</span>id -g<span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+      --tmpfs /tmp:rw,exec,nosuid,size<span class="syntax-operator">=</span>256m <span class="syntax-string">\</span>
+      --mount <span class="syntax-string">&quot;</span><span class="syntax-string">type=bind,source=</span>$cpp_project<span class="syntax-string">,target=/project</span><span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+      --workdir /project --entrypoint <span class="syntax-string">&quot;</span>$cpp_entrypoint<span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span>$cpp_image<span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span>$@<span class="syntax-string">&quot;</span>
+<span class="syntax-operator">}</span>
+cpp_tool cmake -S /project -B /project/build/debug -G Ninja -DCMAKE_BUILD_TYPE<span class="syntax-operator">=</span>Debug <span class="syntax-operator">&amp;&amp;</span>
+cpp_tool cmake --build /project/build/debug --parallel <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span>
+cpp_tool ctest --test-dir /project/build/debug --output-on-failure <span class="syntax-operator">&amp;&amp;</span>
+cpp_tool cmake --install /project/build/debug --prefix /project/install</code></pre>
+<p>Each <code>&amp;&amp;</code> requires the preceding phase to succeed. The final command status is available immediately as <code>$?</code>. A failure stops the chain, preserving the copied source and partial diagnostics for investigation. To capture a phase separately, run one <code>cpp_tool</code> command and inspect its status before continuing.</p>
+<p>On Windows, use PowerShell with Docker Desktop or another already configured local Linux-container engine. Use the actual Windows path returned by <code>Join-Path</code>/<code>Resolve-Path</code>; do not translate it manually into <code>/c/...</code>. If you use WSL instead, use the POSIX block with paths visible to that WSL-integrated engine and keep that choice consistent for the whole build directory.</p>
+<pre class="highlighted-code"><code class="language-powershell">$CppFixture <span class="syntax-punctuation">=</span> <span class="syntax-string">&#x27;record-library&#x27;</span>
+$CppProject <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Join-Path</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Get-Location</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path <span class="syntax-string">&quot;</span><span class="syntax-string">.learning/cpp-projects/</span><span class="syntax-string">$</span><span class="syntax-string">CppFixture-01</span><span class="syntax-string">&quot;</span>
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> -LiteralPath $CppProject<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Choose a new unused project suffix.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">New-Item</span> -ItemType Directory -Path $CppProject -ErrorAction Stop <span class="syntax-punctuation">|</span> <span class="syntax-builtin">Out-Null</span>
+<span class="syntax-builtin">Copy-Item</span> -Path <span class="syntax-string">&quot;</span><span class="syntax-string">courses/cpp/fixtures/</span><span class="syntax-string">$</span><span class="syntax-string">CppFixture/*</span><span class="syntax-string">&quot;</span> -Destination $CppProject -Recurse -ErrorAction Stop
+$CppProject <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> -LiteralPath $CppProject<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+$CppImage <span class="syntax-punctuation">=</span> <span class="syntax-string">&#x27;ds60sqlpy-worker-cpp20:0.3.0&#x27;</span>
+$CppDockerArgs <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">@</span><span class="syntax-punctuation">(</span>
+    <span class="syntax-string">&#x27;run&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--rm&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--pull&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;never&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--network&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;none&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--read-only&#x27;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--cap-drop&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ALL&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--security-opt&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;no-new-privileges&#x27;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--pids-limit&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;128&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--cpus&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--memory&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1g&#x27;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--user&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;1000:1000&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;--tmpfs&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/tmp:rw,exec,nosuid,size=256m&#x27;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--mount&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">type=bind,source=</span><span class="syntax-string">$</span><span class="syntax-string">CppProject,target=/project</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&#x27;--workdir&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;/project&#x27;</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">function</span> <span class="syntax-builtin">Invoke-CppTool</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">param</span><span class="syntax-punctuation">(</span>
+        [string]$Tool<span class="syntax-punctuation">,</span>
+        <span class="syntax-punctuation">[</span><span class="syntax-keyword">Parameter</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">ValueFromRemainingArguments</span><span class="syntax-punctuation">=</span>$true<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>[string[]]$ToolArgs
+    <span class="syntax-punctuation">)</span>
+    <span class="syntax-punctuation">&amp;</span> docker @CppDockerArgs <span class="syntax-punctuation">-</span>-entrypoint $Tool $CppImage @ToolArgs
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Container tool </span><span class="syntax-string">$</span><span class="syntax-string">Tool failed with exit </span><span class="syntax-string">$</span><span class="syntax-string">LASTEXITCODE.</span><span class="syntax-string">&quot;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">Invoke-CppTool</span> cmake -S <span class="syntax-punctuation">/</span>project -B <span class="syntax-punctuation">/</span>project<span class="syntax-punctuation">/</span>build<span class="syntax-punctuation">/</span>debug -G Ninja -DCMAKE_BUILD_TYPE<span class="syntax-punctuation">=</span>Debug
+<span class="syntax-builtin">Invoke-CppTool</span> cmake <span class="syntax-punctuation">-</span>-build <span class="syntax-punctuation">/</span>project<span class="syntax-punctuation">/</span>build<span class="syntax-punctuation">/</span>debug <span class="syntax-punctuation">-</span>-parallel 2
+<span class="syntax-builtin">Invoke-CppTool</span> ctest <span class="syntax-punctuation">-</span>-test-dir <span class="syntax-punctuation">/</span>project<span class="syntax-punctuation">/</span>build<span class="syntax-punctuation">/</span>debug <span class="syntax-punctuation">-</span>-output-on-failure
+<span class="syntax-builtin">Invoke-CppTool</span> cmake <span class="syntax-punctuation">-</span>-install <span class="syntax-punctuation">/</span>project<span class="syntax-punctuation">/</span>build<span class="syntax-punctuation">/</span>debug <span class="syntax-punctuation">-</span>-prefix <span class="syntax-punctuation">/</span>project<span class="syntax-punctuation">/</span>install</code></pre>
+<p>The Windows route uses a nonroot container identity and Docker Desktop&#x27;s host-file sharing. If the prepared engine cannot write that shared folder under this identity, leave the operation failed and resolve the documented sharing setup. Do not silently switch to privileged mode or mount an engine socket. The single quoted mount argument supports spaces; use a path without commas. Docker&#x27;s <a href="https://docs.docker.com/engine/storage/bind-mounts/">bind-mount guide</a> explains why the source path belongs to the daemon host and why files persist outside a removed container.</p>
+<p>Expected for <code>record-library</code>: CTest runs <code>record_contract</code> and reports one passing test. Installation writes <code>install/include/record.hpp</code>, <code>install/lib/libds60_records.a</code> and exported target files under <code>install/lib/cmake/ds60Records</code>. Expected for <code>multifile</code>: CTest runs <code>arithmetic_contract</code>, checks <code>add=5 subtract=2</code>, and reports one passing test. Installation writes <code>install/include/math.hpp</code>, <code>install/lib/libds60_math.a</code>, <code>install/bin/math_check</code> and exported target files under <code>install/lib/cmake/ds60Math</code>. To run that second workflow, choose <code>multifile</code> and a new project directory at the copy step; the configure/build/test/install commands stay the same.</p>
+<p>The copied source, <code>build/debug/</code>, CTest log <code>build/debug/Testing/Temporary/LastTest.log</code>, and <code>install/</code> are durable files in the learner-owned host project. <code>--rm</code> removes only each temporary container. It does not delete the bind-mounted project. The installed binaries and static libraries are Linux artifacts for the container architecture, even on Windows or macOS; do not try to launch them as native Windows <code>.exe</code> or macOS binaries. Run them inside the same prepared image, for example <code>cpp_tool /project/install/bin/math_check</code> or <code>Invoke-CppTool /project/install/bin/math_check</code> after the multifile installation.</p>
+<p>Use a separate <code>build/release</code> and install prefix for a Release comparison. Never reuse a native CMake cache inside Docker or a Docker cache on another architecture. A fresh directory preserves the compiler/path identity. Installing into <code>/project/install</code> is a local packaging exercise, not a system-wide installation. See the <a href="https://cmake.org/cmake/help/v3.28/manual/cmake.1.html#install-a-project">CMake install interface</a> for the build/install distinction.</p>
+<p>This project route is separate from the browser pad, which still accepts one C++ translation unit. Save your project edits and phase logs with the project; they are not automatically copied into the classroom learner pad or its progress record.</p>
+<h3 id="7-concurrency-instrumentation-and-evidence">7. Concurrency, instrumentation and evidence<a class="heading-anchor" href="#7-concurrency-instrumentation-and-evidence" aria-label="Link to this section">#</a></h3>
+<p>Concurrent examples join their owned workers and use bounded fixture sizes. A cooperative stop flag/token must be checked by the worker body; it does not interrupt arbitrary code. AddressSanitizer/UBSan and ThreadSanitizer are separate optional instrumented host builds with matching runtime libraries. Their flags are not browser-pad options. Never run intentionally racy or invalid memory code through the ordinary profile to simulate a detector.</p>
+<p>A native Clang pass does not qualify GCC Docker execution. One Docker architecture does not qualify every OS. Record compiler, architecture, flags, exact fixture, output, status and tooling limitations.</p>
+<p>Before advancing, explain a source edit followed by a failed build and stale executable, a declaration compiled with no linked definition, and a valid program returning 2. These phase distinctions make later C++ diagnostics understandable.</p></article>
+  </main>
+</body>
+</html>

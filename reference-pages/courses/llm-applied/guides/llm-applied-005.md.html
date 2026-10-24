@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-005: Chunking, overlap, offsets and context budgets · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-005: Chunking, overlap, offsets and context budgets</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/guides/llm-applied-005.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-005-chunking-overlap-offsets-and-context-budgets">llm-applied-005: Chunking, overlap, offsets and context budgets<a class="heading-anchor" href="#llm-applied-005-chunking-overlap-offsets-and-context-budgets" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 180 minutes. Direct prerequisites: <code>llm-applied-004</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Chunking determines the unit that retrieval can find and the context an answer can inspect. This chapter follows a handbook definition through competing splitting policies, connecting boundary choices to evidence sufficiency, citation coordinates and the budget available for other facts.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Chunking divides documents into retrieval units. Small chunks can isolate relevant facts but lose context; large chunks preserve context but consume more budget and may dilute lexical or embedding signals. Overlap repeats boundary text so a fact crossing a split is less likely to disappear, but it also creates duplicate evidence and additional storage. Preserve source offsets so a retrieved chunk can cite the exact original span. Chunk identity should include document version and chunk boundaries, not just its ordinal position in a list.</p>
+<p>The default splitter uses whitespace tokens only as a transparent fixture. Actual language-model tokenization may split a word into several tokens and add chat-template markers, so its counts must be measured with the intended tokenizer. A chunker should reject impossible overlap settings and handle an empty document deliberately. Evaluation should include facts at boundaries, repeated headings and documents whose key definition depends on an earlier section. No single chunk size is universally optimal; choose it through task-specific retrieval and answer evaluation.</p>
+<h3 id="retrieve-a-complete-meaning-not-merely-a-matching-sentence">Retrieve a complete meaning, not merely a matching sentence<a class="heading-anchor" href="#retrieve-a-complete-meaning-not-merely-a-matching-sentence" aria-label="Link to this section">#</a></h3>
+<p>The Methods Desk handbook defines conversion in one paragraph, lists exclusions in a table and explains the assignment unit in the next section. A question about the formula may need only the first paragraph. A question about yesterday&#x27;s reported value also needs the exclusions. A question about uncertainty needs the assignment and observation structure. The appropriate retrieval unit therefore depends on the claims the answer must support.</p>
+<p>A fixed-length chunker cannot know all of those dependencies from token positions alone. It can provide a predictable storage and retrieval unit, but a boundary can separate a term from its definition, a table value from its header or an exception from the rule it qualifies. The design task is to preserve enough local structure that relevant context can be recovered under a finite budget.</p>
+<p>Consider a two-sentence policy: “Count purchases over eligible visits. Test accounts are excluded from the eligible population.” A split after the first sentence creates a concise formula chunk and a separate exclusion chunk. That may work well if the query retrieves both. If only the formula enters the answer context, the model can produce a complete-looking calculation while omitting the eligibility rule. Increasing overlap can reduce some boundary failures, but it does not guarantee that every required relationship stays together.</p>
+<h3 id="separate-indexing-units-evidence-units-and-answer-context">Separate indexing units, evidence units and answer context<a class="heading-anchor" href="#separate-indexing-units-evidence-units-and-answer-context" aria-label="Link to this section">#</a></h3>
+<p>Three units are useful to distinguish. The indexing unit is what the retriever scores. The evidence unit is the smallest source material that establishes a required fact or relationship. The answer context is the assembled set of material supplied to the model. These units can differ without being inconsistent.</p>
+<p>For example, a short paragraph can be an effective indexing unit because its vector or lexical score focuses on one topic. Once selected, the application might also include the section heading and a linked eligibility table in the answer context. That expansion must remain versioned and budgeted. It should not silently fetch unauthorized material or add unrelated neighboring text merely because it is nearby.</p>
+<p>A long chunk offers more surrounding information but can make retrieval less discriminating. If a passage covers conversion, retention, experiment design and logging together, a similarity score may be influenced by several topics. A short chunk can isolate the intended topic but lose the qualifications that make its statements valid. There is no universal boundary size that resolves both tensions for every question.</p>
+<p>This suggests evaluating chunking at the claim level. For a formula question, label the formula span. For an eligibility question, label the rule and its scope. For a multi-part analytical question, record the set of required evidence and whether alternatives are interchangeable or jointly necessary. A single document-level relevance label can hide the fact that the returned chunk omitted the useful part of that document.</p>
+<h3 id="tables-and-headings-need-an-explicit-representation">Tables and headings need an explicit representation<a class="heading-anchor" href="#tables-and-headings-need-an-explicit-representation" aria-label="Link to this section">#</a></h3>
+<p>Suppose a table contains columns account_type,eligible and reason. A row containing “test,false,internal traffic” is hard to interpret if retrieved without its column labels. A structure-aware representation can attach those labels to the row or preserve a small table region. If the representation repeats labels for retrieval, keep a separate link to the original source span so the generated text is not falsely presented as a verbatim quote.</p>
+<p>Headings have a similar role. The sentence “Use account-level resampling” under “Repeated visits within accounts” has a more specific meaning than the same sentence in isolation. A chunk can carry the heading as metadata or expanded context. Repeating the heading into every indexed chunk also changes lexical frequencies and embedding inputs, so it becomes part of the retrieval policy rather than a neutral display choice.</p>
+<p>Preserving meaning does not mean inventing it. A missing table header should not be guessed from a plausible neighboring section. An extracted PDF row with damaged column order may need quarantine or a source-specific parser. The assistant can be fluent about a malformed representation, which is precisely why source-format failures need independent checks before answer generation.</p>
+<h3 id="overlap-changes-both-cost-and-apparent-support">Overlap changes both cost and apparent support<a class="heading-anchor" href="#overlap-changes-both-cost-and-apparent-support" aria-label="Link to this section">#</a></h3>
+<p>The window calculation later in this chapter makes duplication measurable. With size 3 and overlap 1, seven source tokens occupy nine stored token positions. At larger scales, overlapping chunks can cause several high-ranked candidates to repeat the same fact. Returning three such chunks may look like three supporting sources while actually supplying one piece of evidence three times.</p>
+<p>Deduplication should preserve evidence identity. Removing every repeated phrase blindly can discard a phrase that has different scope in two sources. Keeping every repeated chunk wastes context and can overstate corroboration. Source version, offsets and semantic role help distinguish exact overlap from independent evidence.</p>
+<p>The context budget introduces an opportunity cost. If redundant chunks consume the space needed for an exclusion rule or an independent contradictory source, higher raw retrieval recall can produce worse answers. A meaningful comparison records the unique evidence covered, the number of repeated positions, context cost and supported-answer outcome. It should not reward a splitter solely for producing many candidates that contain an answer keyword.</p>
+<h3 id="rebuilding-chunks-changes-the-experiment">Rebuilding chunks changes the experiment<a class="heading-anchor" href="#rebuilding-chunks-changes-the-experiment" aria-label="Link to this section">#</a></h3>
+<p>A splitter update can alter chunk identities, offsets, document frequencies, vectors and cached answers even when the original handbook is unchanged. The new index is therefore a new system configuration. Preserve the old policy long enough to reproduce a prior answer, and evaluate the new one on frozen questions before attributing an improvement to another component.</p>
+<p>Boundary tests should include negation, exceptions, units, table headers and references such as “the rule above.” Short-source and empty-source behavior also matters: a source should not acquire invented padding text merely to satisfy a window size. The literal splitter below provides a transparent baseline for those coordinate and termination checks. Structure-aware splitting can then be judged by whether it improves the actual evidence path, rather than by whether its chunks look more natural to the author.</p>
+<p>Once chunks have stable identities and meaningful boundaries, the next problem is ranking them. The lexical chapter begins with a method whose terms and scores can be calculated directly, giving the assistant a baseline that can be inspected before introducing learned geometry.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use sentence, paragraph or structure-aware chunks when the task depends on complete definitions, tables or procedure steps. Preserve headings and document metadata as separate context rather than blindly repeating them into every embedding. For tables, a row alone may lose column meanings; a chunk needs enough schema context to interpret its values. For code or formulas, splitting at arbitrary whitespace can destroy syntax or assumptions.</p>
+<p>Evaluate chunk policies on authored boundary questions. Measure retrieval recall, citation fidelity, duplicate rate, answer support and context consumption together. A policy that increases recall by returning many near-duplicate chunks may leave less room for other necessary evidence. Do not tune chunk size on the final test set. Record splitter version and tokenization policy so rebuilding an index does not silently change the experiment.</p>
+<p>Choose the retrieval unit from the question&#x27;s required evidence. A definition may fit in one paragraph, while a table answer may require a row, header, units and footnote together. Evaluate a splitter on those dependencies instead of optimizing only chunk length or embedding throughput.</p>
+<p>Keep a chunk&#x27;s original-source identity and its representation for retrieval separate. An index may add a heading or normalize whitespace for encoding, but citation offsets still need to refer to the admitted original text. Record the transformation rather than assuming the encoded string can be sliced back out unchanged.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Chunk:</strong> A bounded source span used as a retrieval unit.</p>
+<p><strong>Overlap:</strong> Repeated boundary material shared by adjacent chunks.</p>
+<p><strong>Source offset:</strong> A character boundary in the original document.</p>
+<p><strong>Context budget:</strong> The allowed amount of material supplied to an answerer.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>python-core</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-applied-005/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared <code>python-core</code> profile. For a separately prepared native environment, invoke its explicitly selected interpreter on <code>courses/llm-applied/lessons/llm-applied-005.py</code> from the repository root. The general repository <code>.venv</code> is not assumed to include the heavy model dependencies.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>re.finditer over non-whitespace spans records exact start/end offsets in the original text. A window of size tokens advances by size-overlap. The chunk text is sliced from the first token start to the last token end, preserving internal whitespace. Each output records document_id, version, start, end, text. Validate 0&lt;=overlap&lt;size before looping so a zero or negative step cannot hang the process.</p>
+<h3 id="derive-windows-duplication-and-citation-coordinates">Derive windows, duplication and citation coordinates<a class="heading-anchor" href="#derive-windows-duplication-and-citation-coordinates" aria-label="Link to this section">#</a></h3>
+<p>Let a nonempty document have n whitespace-token spans, window size s and overlap o, with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>≤</mo><mi>o</mi><mo>&lt;</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">0\le o&lt;s</annotation></semantics></math>. The advance is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>d</mi><mo>=</mo><mi>s</mi><mo>−</mo><mi>o</mi></mrow><annotation encoding="application/x-tex">d=s-o</annotation></semantics></math>. The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>≤</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">n\le s</annotation></semantics></math> and otherwise <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mfrac><mrow><mi>n</mi><mo>−</mo><mi>s</mi></mrow><mrow><mi>d</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow></mrow><annotation encoding="application/x-tex">1+\left\lceil \frac{n-s}{d}\right\rceil</annotation></semantics></math>. Empty input produces zero chunks under the declared policy.</p>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">n=7</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>s</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">s=3</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>o</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">o=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>d</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">d=2</annotation></semantics></math> and the chunk count is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mfrac><mrow><mn>4</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">1+\left\lceil \frac{4}{2}\right\rceil=3</annotation></semantics></math>. The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions 2 and 4 are repeated once. The redundancy ratio for this finite fixture is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>9</mn></mrow><mrow><mn>7</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{9}{7}</annotation></semantics></math>, about 1.286; it is not nine independent observations supporting the answer.</p>
+<p>For a long uniform document with full windows, stored token occurrences per newly covered position approach <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>s</mi></mrow><mrow><mi>s</mi><mo>−</mo><mi>o</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{s}{s-o}</annotation></semantics></math>. Overlap near the window size can therefore create a large storage and retrieval cost. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>s</mi><mo>=</mo><mn>100</mn></mrow><annotation encoding="application/x-tex">s=100</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>o</mi><mo>=</mo><mn>90</mn></mrow><annotation encoding="application/x-tex">o=90</annotation></semantics></math>, the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.</p>
+<p>The loop stops when a chunk reaches the end. Without that break, the range of starts could produce another tail containing only already-covered final tokens. For the seven-token example, continuing after the window beginning at four would add a window beginning at six containing only seven. Preventing that duplicate tail is a policy decision visible in the helper, not an automatic property of overlapping windows.</p>
+<p>Citation coordinates have units. Python string offsets count Unicode code points, while a UTF-8 byte stream and a model tokenizer can have different lengths. For example, the character β occupies one Python-string position but two UTF-8 bytes. Combining marks can make a visually single character contain multiple code points. The fixture&#x27;s offsets belong to the original Python string, and its tests correctly slice that same string. Calling them byte offsets would be inaccurate.</p>
+<p>Internal whitespace remains intact because chunk text is sliced from the first selected token&#x27;s start to the last token&#x27;s end. In a source containing alpha, two spaces, beta, a newline and gamma, the first two-token chunk retains two spaces between alpha and beta. Joining selected token strings with one space would produce different text and break the source-slice equality. The splitter excludes leading/trailing whitespace outside the selected token endpoints, which should also be understood when comparing full-document reconstruction.</p>
+<p>Overlap can improve boundary coverage without making each chunk self-sufficient. If a formula appears in one section and its eligibility rule appears several sections earlier, a one-token overlap does not recover that dependency. A retrieved passage saying “divide by the eligible population” may be insufficient without the definition of eligibility. Evaluate whether the selected context jointly covers all required facts, not only whether one answer phrase appears in any chunk.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why not increase overlap until recall is perfect?</strong> Duplication consumes storage and context, can return several copies of the same evidence and can displace a complementary source. Recall and useful context sufficiency are different measurements.</p>
+<p><strong>What should identify a chunk?</strong> The source/version and boundaries plus the splitter representation policy. An ordinal such as chunk 3 can refer to different content after an earlier section changes.</p>
+<p><strong>Can a whitespace chunk count predict model-token use?</strong> Only under an explicitly verified mapping, which this fixture does not supply. The intended tokenizer and rendered chat format must measure the actual model budget.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-split-a-fixed-document">Example A: Split a fixed document<a class="heading-anchor" href="#example-a-split-a-fixed-document" aria-label="Link to this section">#</a></h4>
+<p>The step is two tokens, so each adjacent pair shares one token. The final full window reaches the document end without creating a duplicate tail chunk.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
+<span class="syntax-keyword">def</span> <span class="syntax-function">chunk</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span>document_id<span class="syntax-punctuation">,</span>version<span class="syntax-punctuation">,</span>size<span class="syntax-punctuation">,</span>overlap<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>size<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>overlap<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> size<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>overlap<span class="syntax-operator">&lt;</span>size<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">0&lt;=overlap&lt;size required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    spans<span class="syntax-operator">=</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>re<span class="syntax-operator">.</span>finditer<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">\</span><span class="syntax-string">S+</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> result<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> step<span class="syntax-operator">=</span>size<span class="syntax-operator">-</span>overlap
+    <span class="syntax-keyword">for</span> begin <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>spans<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>step<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        end<span class="syntax-operator">=</span><span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>begin<span class="syntax-operator">+</span>size<span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>spans<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> start_char<span class="syntax-operator">=</span>spans<span class="syntax-punctuation">[</span>begin<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>start<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> end_char<span class="syntax-operator">=</span>spans<span class="syntax-punctuation">[</span>end<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>end<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+        result<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">document_id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>document_id<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">version</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>version<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">start</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>start_char<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">end</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>end_char<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>text<span class="syntax-punctuation">[</span>start_char<span class="syntax-punctuation">:</span>end_char<span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> end<span class="syntax-operator">==</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>spans<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">break</span>
+    <span class="syntax-keyword">return</span> result
+text<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">one two three four five six seven</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span> chunks<span class="syntax-operator">=</span>chunk<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">d</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> chunks<span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">one two three</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">three four five</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">five six seven</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> chunks one two three, three four five and five six seven.</p>
+<h4 id="example-b-verify-citation-offsets">Example B: Verify citation offsets<a class="heading-anchor" href="#example-b-verify-citation-offsets" aria-label="Link to this section">#</a></h4>
+<p>Offsets remain meaningful only relative to the exact source version. Reconstructing chunk text with join could normalize whitespace and break this equality.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">start</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>c<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">end</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span>c<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> chunks<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> chunks<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">start</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span>text<span class="syntax-operator">.</span>index<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">three</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> every source slice equals the stored chunk text.</p>
+<h4 id="example-c-preserve-unusual-whitespace">Example C: Preserve unusual whitespace<a class="heading-anchor" href="#example-c-preserve-unusual-whitespace" aria-label="Link to this section">#</a></h4>
+<p>The splitter counts token spans but retains original characters inside the chunk. Citation fidelity and tokenization are separate concerns.</p>
+<pre class="highlighted-code"><code class="language-python">odd<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha  beta</span><span class="syntax-string">\n</span><span class="syntax-string">gamma</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span> pieces<span class="syntax-operator">=</span>chunk<span class="syntax-punctuation">(</span>odd<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">odd</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> pieces<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">alpha  beta</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> pieces<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">text</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">gamma</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> first chunk retains the double space; second chunk is gamma.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Split a fixed document.</strong> Chunk one two three four five six seven with size 3 and overlap 1. <strong>Expected:</strong> chunks one two three, three four five and five six seven. <strong>Verify:</strong> Save the assertion results for exercise 1, including chunks one two three, three four five and five six seven.</li>
+</ol>
+<ol>
+<li><strong>Verify citation offsets.</strong> For every chunk, slice the original text using its start and end offsets. <strong>Expected:</strong> every source slice equals the stored chunk text. <strong>Verify:</strong> Save the assertion results for exercise 2, including every source slice equals the stored chunk text.</li>
+</ol>
+<ol>
+<li><strong>Preserve unusual whitespace.</strong> Chunk alpha, two spaces, beta, a newline and gamma with size 2 and overlap 0. <strong>Expected:</strong> first chunk retains the double space; second chunk is gamma. <strong>Verify:</strong> Save the assertion results for exercise 3, including first chunk retains the double space; second chunk is gamma.</li>
+</ol>
+<ol>
+<li><strong>Measure overlap duplication.</strong> Count total stored chunk token occurrences versus original source token positions in the first fixture. <strong>Expected:</strong> 9 stored token occurrences versus 7 source positions. <strong>Verify:</strong> Save the assertion results for exercise 4, including 9 stored token occurrences versus 7 source positions.</li>
+</ol>
+<ol>
+<li><strong>Reject invalid policies.</strong> Try overlap equal to window size, negative overlap and size 0. <strong>Expected:</strong> all policies raise ValueError before iteration. <strong>Verify:</strong> Save the assertion results for exercise 5, including all policies raise ValueError before iteration.</li>
+</ol>
+<ol>
+<li><strong>Handle empty and short sources.</strong> Chunk empty text and a two-token string with size 5. <strong>Expected:</strong> empty list for empty text; one short chunk for the two-token source. <strong>Verify:</strong> Save the assertion results for exercise 6, including empty list for empty text; one short chunk for the two-token source.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If citation text differs, compare coordinate units, exact source version and normalization history. If a splitter loops or repeats indefinitely, inspect the positive advance s-o before considering content. If the last chunk duplicates an already-covered tail, inspect the termination rule.</p>
+<p>If retrieval returns many near-identical passages, deduplicate by source spans or evidence identity before treating them as corroboration. If recall appears high but answers miss exclusions or units, inspect whether the relevant evidence set was defined as an isolated phrase instead of the complete dependency. Tune split policy on validation families, then retain unseen boundary cases for assessment.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Revisit the worked examples, then close them. Explain Chunk, Overlap, Source offset using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-applied-004</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-005, Chunking, overlap, offsets and context budgets.
+Read courses/llm-applied/guides/llm-applied-005.md and courses/llm-applied/lessons/llm-applied-005.py. Direct prerequisites: `llm-applied-004`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-applied/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

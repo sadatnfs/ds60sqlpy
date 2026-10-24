@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-12 · String Functions · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-12" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-12</p>
+        <h1>String Functions</h1>
+        <p class="hero-copy">SQL foundations and query building</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">75 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-11.html">sql-11</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/postgres-60day/day12_string_functions.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-12" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-12/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/companion-guides/day12_string_functions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day12_string_functions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--day-12-string-functions-and-text-processing-companion-guide">Day 12: String Functions and Text Processing (Companion Guide)<a class="heading-anchor" href="#guide--day-12-string-functions-and-text-processing-companion-guide" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Foundation (beginner)</li>
+<li><strong>Prerequisites:</strong> <a href="sql-11.html#guide">Day 11; CASE expressions</a></li>
+<li><strong>Artifacts:</strong> <a href="sql-12.html#learner">learner SQL</a> · <a href="sql-12.html#solution-1">solution reasoning</a> · <a href="sql-12.html#solution-2">executable solution</a></li>
+</ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<ol>
+<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+</ol>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
+<p>On macOS or Linux, run:</p>
+<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
+<ol>
+<li>Open <strong>SQL-12; String Functions</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
+<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-12/lesson/workspace/sql/postgres-60day/day12_string_functions.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
+<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
+</ol>
+<p>Manual <code>psql</code> fallback:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day12_string_functions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
+  -f sql/postgres-60day/day12_string_functions.sql</code></pre>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Normalization, Delimiter, Regular expression. Its worked SQL reads or creates <code>customers</code>, <code>products</code>.</p>
+<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: Compare a raw email with lower(trim(email)). Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence. The expected contract is that One row per customer. Predict keys, row count, <code>NULL</code> behavior, and ordering before running. Afterwards, compare keys/counts/totals with an independent control. A blank string, SQL <code>NULL</code>, numeric zero, and a missing row are different facts; use <code>COALESCE</code> only after choosing which meaning the business question requires.</p>
+<h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
+<p>These are answer-free worked excerpts from <code>sql/postgres-60day/day12_string_functions.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span>
+       email<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> email_clean<span class="syntax-punctuation">,</span>
+       split_part<span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;@&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">domain</span>
+<span class="syntax-keyword">FROM</span> customers
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>How to read it:</strong> Example 1: Start with <code>customers</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>customer_id</code>, <code>email</code>, <code>email_clean</code>, and <code>domain</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 1 returns one row per <code>customer_id</code>, capped at 50 rows with columns <code>customer_id</code>, <code>email</code>, <code>email_clean</code>, and <code>domain</code> from <code>customers</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span>
+       name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">replace</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Product&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Item&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> renamed<span class="syntax-punctuation">,</span>
+       substr<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> short_name
+<span class="syntax-keyword">FROM</span> products
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> product_id
+<span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>How to read it:</strong> Example 2: Start with <code>products</code> in <code>FROM</code>/<code>JOIN</code>. The final <code>SELECT</code> displays <code>product_id</code>, <code>name</code>, <code>renamed</code>, and <code>short_name</code>. <code>ORDER BY</code> determines presentation order and the final <code>LIMIT 50</code> caps displayed rows. Before running, predict the row grain, row count, <code>NULL</code> positions, and first/last key; afterwards, compare each prediction with the transcript.</p>
+<p><strong>Expected result/shape:</strong> Example 2 returns one row per <code>product_id</code>, capped at 50 rows with columns <code>product_id</code>, <code>name</code>, <code>renamed</code>, and <code>short_name</code> from <code>products</code>. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an <code>ORDER BY</code>, and inspect <code>NULL</code> only for columns this example can produce.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Normalize, split, concatenate, replace, and extract text with explicit assumptions.</li>
+<li>Distinguish display cleanup from a safe persistent data-quality rule.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Normalization:</strong> converting equivalent text forms to one comparison form.</li>
+<li><strong>Delimiter:</strong> a character or string separating parts of a value.</li>
+<li><strong>Regular expression:</strong> a pattern language for matching or replacing text.</li>
+</ul>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Compare a raw email with <code>lower(trim(email))</code>. Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.</p>
+<h4 id="guide--practice-assumptions-and-review-method">Practice assumptions and review method<a class="heading-anchor" href="#guide--practice-assumptions-and-review-method" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.</li>
+<li><strong>Assumptions:</strong> Course emails use one <code>@</code>; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.</li>
+<li><strong>Failure to watch for:</strong> Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.</li>
+<li><strong>Review loop:</strong> predict the row grain and NULL/order behavior, run the query, inspect a bounded sample, and reconcile counts or totals before accepting the result.</li>
+</ul>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.</p>
+<p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
+<ol>
+<li><strong>Query writing:</strong> Return normalized customer names and lowercase emails. <strong>Progressive hint:</strong> Use <code>btrim</code> for outer whitespace and <code>lower</code> for a declared case-normalized display value. <strong>Inputs/evidence:</strong> For sql-12 Exercise 1, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 1, expected output: One row per customer. The final columns are <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code>. The final order is <code>c.customer_id</code>. <strong>Verify:</strong> For sql-12 Exercise 1, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code> against <code>customers</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Query writing:</strong> Extract the email domain and count customers by domain, preserving missing emails. <strong>Progressive hint:</strong> <code>split_part</code> parses the second component; CASE keeps NULL distinct. <strong>Inputs/evidence:</strong> For sql-12 Exercise 2, read from <code>customers</code>. Build the answer toward <code>email_domain</code>, and <code>customer_count</code>; keep <code>email_domain</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 2, expected output: One row per domain label. The final columns are <code>email_domain</code>, and <code>customer_count</code>. The final order is <code>customer_count DESC, email_domain</code>. <strong>Verify:</strong> For sql-12 Exercise 2, independently aggregate <code>customers</code> by <code>email_domain</code>; require one output row for every distinct <code>email_domain</code> tuple and compare <code>customer_count</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>customer_count</code> for the existing <code>email_domain</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Query writing:</strong> Create an ordered comma-separated list of department employee names. <strong>Progressive hint:</strong> Put <code>ORDER BY</code> inside <code>string_agg</code> so concatenation order is deliberate. <strong>Inputs/evidence:</strong> For sql-12 Exercise 3, read from <code>departments</code>, and <code>employees</code>. Build the answer toward <code>department_id</code>, <code>department_name</code>, and <code>employees</code>; keep <code>department_id</code>, and <code>name</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 3, expected output: One row per department. The final columns are <code>department_id</code>, <code>department_name</code>, and <code>employees</code>. The final order is <code>d.department_id</code>. <strong>Verify:</strong> For sql-12 Exercise 3, independently aggregate <code>departments</code>, and <code>employees</code> by <code>department_id</code>, and <code>name</code>; require one output row for every distinct <code>department_id</code>, and <code>name</code> tuple and compare <code>employees</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>employees</code> for the existing <code>department_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Prediction:</strong> Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled. <strong>Progressive hint:</strong> Use a POSIX whitespace class and the global regex flag. <strong>Inputs/evidence:</strong> For sql-12 Exercise 4, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>source_text</code>, and <code>normalized_text</code>; keep <code>source_text</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 4, expected output: Three input/output rows. The final columns are <code>source_text</code>, and <code>normalized_text</code>. <strong>Verify:</strong> For sql-12 Exercise 4, reselect the returned keys directly from the source; require unique <code>source_text</code> where the expected grain is one row per key and confirm the projected <code>source_text</code>, and <code>normalized_text</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>source_text</code>; verify the result gains exactly one row carrying that <code>source_text</code> value.</li>
+<li><strong>Debugging:</strong> Safely find customer names containing a literal percent or underscore rather than treating them as wildcards. <strong>Progressive hint:</strong> Escape wildcard characters and declare the escape character. <strong>Inputs/evidence:</strong> For sql-12 Exercise 5, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, and <code>full_name</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 5, expected output: Rows only when the literal character occurs. The final columns are <code>customer_id</code>, and <code>full_name</code>. The final order is <code>c.customer_id</code>. <strong>Verify:</strong> For sql-12 Exercise 5, run an anti-check that counts rows where NOT ((c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)); require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, and <code>full_name</code> against <code>customers</code>. Add one row for which <code>(c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)</code> is true and one for which it is false; verify only the matching <code>customer_id</code> value is returned.</li>
+<li><strong>Extension:</strong> Parse the numeric suffix from names like <code>Customer 42</code>, returning NULL for nonmatching text. <strong>Progressive hint:</strong> Use a captured regex replacement only after a match predicate establishes the format. <strong>Inputs/evidence:</strong> For sql-12 Exercise 6, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-12 Exercise 6, expected output: One row per customer with a numeric suffix. The final columns are <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code>. The final order is <code>c.customer_id</code>. <strong>Verify:</strong> For sql-12 Exercise 6, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code> against <code>customers</code>. Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>full_name</code> and state whether the row is kept, rejected, or classified.</li>
+</ol>
+<h4 id="guide--common-mistakes-and-how-to-recover">Common mistakes and how to recover<a class="heading-anchor" href="#guide--common-mistakes-and-how-to-recover" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Lesson-specific semantic mistake:</strong> Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.</li>
+<li><strong>Unexpected row count:</strong> display keys before aggregates, count rows after each join/filter stage, and find the first stage whose grain differs from the contract. Do not hide fanout with <code>DISTINCT</code>.</li>
+<li><strong>Unexpected <code>NULL</code> or missing row:</strong> decide whether the fact is unknown, inapplicable, zero, or absent before using <code>COALESCE</code>; inspect outer-join predicate placement and empty-input aggregate behavior.</li>
+<li><strong>Unstable top/first/last output:</strong> add <code>ORDER BY</code> with a unique final tie-breaker before <code>LIMIT</code> or order-sensitive windows/aggregates.</li>
+<li><strong><code>psql</code> stops on an error:</strong> fix the first error shown by <code>ON_ERROR_STOP</code>, restore the declared transaction/setup state, and rerun the complete file. A later successful statement does not validate a partial run.</li>
+</ul>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Do text transformations define behavior for <code>NULL</code> and malformed input?</li>
+<li>Can the normalized output be traced back to the original value?</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue to <a href="sql-13.html#guide">Day 13; date, time, and time zones</a>.</p>
+<h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
+<p>Learning objectives</p>
+<ul>
+<li>Clean and standardize text: TRIM, UPPER/LOWER, REPLACE, REGEXP_REPLACE</li>
+<li>Parse text: SPLIT_PART, SUBSTRING, POSITION, regular expressions</li>
+<li>Compare case-insensitively: ILIKE, citext, trigram similarity (pg_trgm)</li>
+</ul>
+<p>Core concepts and deep dive</p>
+<ul>
+<li>Normalization: trim whitespace, unify case, collapse repeated spaces with regex.</li>
+<li>Parsing: SPLIT_PART(email,&#x27;@&#x27;,2) to get domain; SUBSTRING with regex for flexible extraction.</li>
+<li>Regular expressions: ~ (match), ~* (case-insensitive), !~ (not match); capture groups in SUBSTRING.</li>
+<li>Performance: Function on column may prevent index use; consider functional indexes or store normalized columns.</li>
+</ul>
+<p>Examples</p>
+<ul>
+<li>Standardize emails: lower(trim(email)).</li>
+<li>Extract an email domain: <code>split_part(email, &#x27;@&#x27;, 2)</code>.</li>
+<li>Build labels from <code>products.category</code>, <code>products.name</code>, and formatted <code>products.price</code>.</li>
+</ul>
+<p>Current practice map</p>
+<ul>
+<li>The authoritative six prompts, progressive hints, and expected shapes are maintained in <strong>Exercises</strong> above. They map one-for-one to both solution companions; older short exercise lists were removed to prevent prompt drift.</li>
+</ul>
+<p>Further reading</p>
+<ul>
+<li>String functions: https://www.postgresql.org/docs/current/functions-string.html</li>
+<li>Regex: https://www.postgresql.org/docs/current/functions-matching.html</li>
+<li>pg_trgm: https://www.postgresql.org/docs/current/pgtrgm.html</li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-12 — String Functions.
+
+I have completed the direct catalog prerequisite: `sql-11`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day12_string_functions.md
+- Answer-free learner SQL: sql/postgres-60day/day12_string_functions.sql
+
+Key terms to teach in context: Normalization, Delimiter, Regular expression. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare a raw email with lower(trim(email)). Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-12/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/day12_string_functions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day12_string_functions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 12: String functions</span></span>
+<span class="source-line"><span class="syntax-comment">-- BEGINNER WORKFLOW — sql-12: String Functions</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/postgres-60day/companion-guides/day12_string_functions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Recommended runner: open the private lesson reader and choose</span></span>
+<span class="source-line"><span class="syntax-comment">-- &quot;Create/open guided SQL notebook&quot;. It verifies advanced_sql_training,</span></span>
+<span class="source-line"><span class="syntax-comment">-- creates an ignored .learning/sql/sql-12/ copy, and prints the full</span></span>
+<span class="source-line"><span class="syntax-comment">-- psql transcript below the run cell. Edit that private copy, not this official</span></span>
+<span class="source-line"><span class="syntax-comment">-- source, while studying.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read every SELECT as FROM/JOIN -&gt; WHERE -&gt; GROUP BY/aggregate -&gt; HAVING -&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">-- window calculation -&gt; SELECT -&gt; ORDER BY -&gt; LIMIT. Before each statement,</span></span>
+<span class="source-line"><span class="syntax-comment">-- declare what one input row and one output row represent. A displayed result</span></span>
+<span class="source-line"><span class="syntax-comment">-- set is temporary; NULL, zero, an empty string, and an absent row differ.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Primary objects in the worked examples: customers, products.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Success means the first error never appears, psql exits 0, result keys and</span></span>
+<span class="source-line"><span class="syntax-comment">-- control totals match the stated contract, and verification passes. The lesson&#x27;s documented transaction/cleanup boundary restores disposable state.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep all numbered exercises answer-free here: write predictions and attempts</span></span>
+<span class="source-line"><span class="syntax-comment">-- only in your ignored working copy.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Study contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Predict row grain and NULL/order behavior before executing each example.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Clean emails and extract domains</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       email<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">trim</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> email_clean<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       split_part<span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;@&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">domain</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Replace and substring</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> product_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">replace</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Product&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;Item&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> renamed<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       substr<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> short_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> products</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> product_id</span>
+<span class="source-line"><span class="syntax-keyword">LIMIT</span> <span class="syntax-number">50</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Work prediction -&gt; query writing -&gt; debugging -&gt; extension in order.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep answers in your own scratch file; this learner script remains answer-free.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 1. [Query writing] Return normalized customer names and lowercase emails.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use `btrim` for outer whitespace and `lower` for a declared case-normalized display value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 1, read from `customers`. Build the answer toward `customer_id`, `original_name`, `trimmed_name`, and `normalized_email`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `original_name`, `trimmed_name`, and `normalized_email`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `original_name`, `trimmed_name`, and `normalized_email` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 1, check `c.customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 2. [Query writing] Extract the email domain and count customers by domain, preserving missing emails.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: `split_part` parses the second component; CASE keeps NULL distinct.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 2, read from `customers`. Build the answer toward `email_domain`, and `customer_count`; keep `email_domain` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 2, expected output: One row per domain label. The final columns are `email_domain`, and `customer_count`. The final order is `customer_count DESC, email_domain`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 2, independently aggregate `customers` by `email_domain`; require one output row for every distinct `email_domain` tuple and compare `customer_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `email_domain` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 2, confirm the groups are `email_domain`; then check `customer_count DESC, email_domain` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 3. [Query writing] Create an ordered comma-separated list of department employee names.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Put `ORDER BY` inside `string_agg` so concatenation order is deliberate.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 3, read from `departments`, and `employees`. Build the answer toward `department_id`, `department_name`, and `employees`; keep `department_id`, and `name` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 3, expected output: One row per department. The final columns are `department_id`, `department_name`, and `employees`. The final order is `d.department_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 3, independently aggregate `departments`, and `employees` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `employees` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employees` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 3, start with the first relation in `departments`, and `employees`; after each join, record total rows and distinct `department_id`, and `name` so the exact fanout or loss is visible.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 4. [Prediction] Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use a POSIX whitespace class and the global regex flag.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `source_text`, and `normalized_text`; keep `source_text` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 4, expected output: Three input/output rows. The final columns are `source_text`, and `normalized_text`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 4, reselect the returned keys directly from the source; require unique `source_text` where the expected grain is one row per key and confirm the projected `source_text`, and `normalized_text` against the inline `VALUES` fixture. Add one source row with a new `source_text`; verify the result gains exactly one row carrying that `source_text` value.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 4, select `source_text` from the inline `VALUES` fixture before adding derived columns.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 5. [Debugging] Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Escape wildcard characters and declare the escape character.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 5, read from `customers`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 5, expected output: Rows only when the literal character occurs. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 5, run an anti-check that counts rows where NOT ((c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`. Add one row for which `(c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)` is true and one for which it is false; verify only the matching `customer_id` value is returned.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 5, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.</span></span>
+<span class="source-line"><span class="syntax-comment">-- 6. [Extension] Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint: Use a captured regex replacement only after a match predicate establishes the format.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-12 Exercise 6, read from `customers`. Build the answer toward `customer_id`, `full_name`, and `parsed_customer_number`; keep `customer_id` visible whenever the result has row-level grain.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-12 Exercise 6, expected output: One row per customer with a numeric suffix. The final columns are `customer_id`, `full_name`, and `parsed_customer_number`. The final order is `c.customer_id`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Verify: For sql-12 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `parsed_customer_number` against `customers`. Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-12 Exercise 6, check `c.customer_id` before applying the row cap.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day12_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day12_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-12-solutions-string-functions-and-text-processing">Day 12 solutions: String Functions and Text Processing<a class="heading-anchor" href="#solution-1--day-12-solutions-string-functions-and-text-processing" aria-label="Link to this section">#</a></h3>
+<h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
+<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\solutions\day12_solutions.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
+  -f sql/postgres-60day/solutions/day12_solutions.sql</code></pre>
+<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
+<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
+<p>The lesson&#x27;s main concepts are Normalization, Delimiter, Regular expression. Its worked-model focus is: Compare a raw email with lower(trim(email)). Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.</p>
+<ul>
+<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
+<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
+<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
+<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
+<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
+<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
+</ul>
+<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
+<p>These answers align one-for-one with <a href="sql-12.html#learner">day12_string_functions.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
+<h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Focus:</strong> Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.</li>
+<li><strong>Assumptions:</strong> Course emails use one <code>@</code>; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.</li>
+<li><strong>Primary pitfall:</strong> Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.</li>
+<li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
+</ul>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Return normalized customer names and lowercase emails.</p>
+<p><strong>Reasoning:</strong> Use <code>btrim</code> for outer whitespace and <code>lower</code> for a declared case-normalized display value.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> original_name<span class="syntax-punctuation">,</span>
+       btrim<span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> trimmed_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> One row per customer.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 1, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 1, expected output: One row per customer. The final columns are <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code>. The final order is <code>c.customer_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 1, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code> against <code>customers</code>. Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 1, check <code>c.customer_id</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 1, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, <code>original_name</code>, <code>trimmed_name</code>, and <code>normalized_email</code> ordered by <code>c.customer_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use <code>btrim</code> for outer whitespace and <code>lower</code> for a declared case-normalized display value. Evaluate another form against the concrete expected result (One row per customer) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
+</ul>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Extract the email domain and count customers by domain, preserving missing emails.</p>
+<p><strong>Reasoning:</strong> <code>split_part</code> parses the second component; CASE keeps NULL distinct.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>CASE</code>: encodes ordered business conditions; the first true branch wins and <code>ELSE</code> defines the remainder.</li>
+<li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">CASE</span>
+         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;(missing)&#x27;</span>
+         <span class="syntax-keyword">ELSE</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span>split_part<span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;@&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> email_domain<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_count
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> email_domain
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_count <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> email_domain<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> One row per domain label.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 2, read from <code>customers</code>. Build the answer toward <code>email_domain</code>, and <code>customer_count</code>; keep <code>email_domain</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 2, expected output: One row per domain label. The final columns are <code>email_domain</code>, and <code>customer_count</code>. The final order is <code>customer_count DESC, email_domain</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 2, independently aggregate <code>customers</code> by <code>email_domain</code>; require one output row for every distinct <code>email_domain</code> tuple and compare <code>customer_count</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>customer_count</code> for the existing <code>email_domain</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 2, confirm the groups are <code>email_domain</code>; then check <code>customer_count DESC, email_domain</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 2, the solution actually uses <code>FROM</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>email_domain</code>, and finish with <code>email_domain</code>, and <code>customer_count</code> ordered by <code>customer_count DESC, email_domain</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 2, the chosen form is justified by this lesson-specific rationale: <code>split_part</code> parses the second component; CASE keeps NULL distinct. Evaluate another form against the concrete expected result (One row per domain label) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>customer_count</code> for the existing <code>email_domain</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Create an ordered comma-separated list of department employee names.</p>
+<p><strong>Reasoning:</strong> Put <code>ORDER BY</code> inside <code>string_agg</code> so concatenation order is deliberate.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>JOIN ... ON</code>: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</li>
+<li><code>GROUP BY</code>: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span>
+       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department_name<span class="syntax-punctuation">,</span>
+       string_agg<span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;, &#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> employees
+<span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> e
+  <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id
+<span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> One row per department.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 3, read from <code>departments</code>, and <code>employees</code>. Build the answer toward <code>department_id</code>, <code>department_name</code>, and <code>employees</code>; keep <code>department_id</code>, and <code>name</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 3, expected output: One row per department. The final columns are <code>department_id</code>, <code>department_name</code>, and <code>employees</code>. The final order is <code>d.department_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 3, independently aggregate <code>departments</code>, and <code>employees</code> by <code>department_id</code>, and <code>name</code>; require one output row for every distinct <code>department_id</code>, and <code>name</code> tuple and compare <code>employees</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>employees</code> for the existing <code>department_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 3, start with the first relation in <code>departments</code>, and <code>employees</code>; after each join, record total rows and distinct <code>department_id</code>, and <code>name</code> so the exact fanout or loss is visible.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 3, the solution actually uses <code>FROM</code>, <code>JOIN ... ON</code>, <code>GROUP BY</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>departments</code>, and <code>employees</code>, preserve one row per <code>department_id</code>, and <code>name</code>, and finish with <code>department_id</code>, <code>department_name</code>, and <code>employees</code> ordered by <code>d.department_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 3, the chosen form is justified by this lesson-specific rationale: Put <code>ORDER BY</code> inside <code>string_agg</code> so concatenation order is deliberate. Evaluate another form against the concrete expected result (One row per department) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>employees</code> for the existing <code>department_id</code>, and <code>name</code> tuple and verify the new tuple appears exactly once.</li>
+</ul>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.</p>
+<p><strong>Reasoning:</strong> Use a POSIX whitespace class and the global regex flag.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>VALUES</code>: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</li>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> source_text<span class="syntax-punctuation">,</span>
+       btrim<span class="syntax-punctuation">(</span>regexp_replace<span class="syntax-punctuation">(</span>source_text<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[[:space:]]+&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27; &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_text
+<span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span>
+  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;  Data   Tools  &#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>E<span class="syntax-string">&#x27;one\ttwo&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-punctuation">(</span>E<span class="syntax-string">&#x27;line1\nline2&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>source_text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> Three input/output rows.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 4, read from the inline <code>VALUES</code> fixture. Build the answer toward <code>source_text</code>, and <code>normalized_text</code>; keep <code>source_text</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 4, expected output: Three input/output rows. The final columns are <code>source_text</code>, and <code>normalized_text</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 4, reselect the returned keys directly from the source; require unique <code>source_text</code> where the expected grain is one row per key and confirm the projected <code>source_text</code>, and <code>normalized_text</code> against the inline <code>VALUES</code> fixture. Add one source row with a new <code>source_text</code>; verify the result gains exactly one row carrying that <code>source_text</code> value.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 4, select <code>source_text</code> from the inline <code>VALUES</code> fixture before adding derived columns.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 4, the solution actually uses <code>FROM</code>, and <code>SELECT</code>. Read only those operations: begin at the inline <code>VALUES</code> fixture, preserve one row per <code>source_text</code>, and finish with <code>source_text</code>, and <code>normalized_text</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a POSIX whitespace class and the global regex flag. Evaluate another form against the concrete expected result (Three input/output rows) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one source row with a new <code>source_text</code>; verify the result gains exactly one row carrying that <code>source_text</code> value.</li>
+</ul>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.</p>
+<p><strong>Reasoning:</strong> Escape wildcard characters and declare the escape character.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>WHERE</code>: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\%%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
+   <span class="syntax-keyword">OR</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\_%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> Rows only when the literal character occurs.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 5, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, and <code>full_name</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 5, expected output: Rows only when the literal character occurs. The final columns are <code>customer_id</code>, and <code>full_name</code>. The final order is <code>c.customer_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 5, run an anti-check that counts rows where NOT ((c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)); require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, and <code>full_name</code> against <code>customers</code>. Add one row for which <code>(c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)</code> is true and one for which it is false; verify only the matching <code>customer_id</code> value is returned.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 5, inspect the source keys that survive <code>WHERE</code>; then check <code>c.customer_id</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 5, the solution actually uses <code>FROM</code>, <code>WHERE</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, and <code>full_name</code> ordered by <code>c.customer_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 5, the chosen form is justified by this lesson-specific rationale: Escape wildcard characters and declare the escape character. Evaluate another form against the concrete expected result (Rows only when the literal character occurs) and the verification above.</li>
+<li><strong>Edge case:</strong> Add one row for which <code>(c.full_name LIKE &#x27;%\%%&#x27; ESCAPE &#x27;\&#x27; OR c.full_name LIKE &#x27;%\_%&#x27; ESCAPE &#x27;\&#x27;)</code> is true and one for which it is false; verify only the matching <code>customer_id</code> value is returned.</li>
+</ul>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<p><strong>Prompt:</strong> Parse the numeric suffix from names like <code>Customer 42</code>, returning NULL for nonmatching text.</p>
+<p><strong>Reasoning:</strong> Use a captured regex replacement only after a match predicate establishes the format.</p>
+<p><strong>Clause-by-clause reading:</strong></p>
+<ul>
+<li><code>SELECT</code>: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</li>
+<li><code>FROM</code>: establishes the starting relation and therefore the initial row grain.</li>
+<li><code>CASE</code>: encodes ordered business conditions; the first true branch wins and <code>ELSE</code> defines the remainder.</li>
+<li>pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</li>
+<li><code>ORDER BY</code>: defines presentation or ranking order; a unique final key makes tied values deterministic.</li>
+</ul>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span>
+         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Customer [0-9]+$&#x27;</span>
+           <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">substring</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;([0-9]+)$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span>
+         <span class="syntax-keyword">ELSE</span> <span class="syntax-keyword">NULL</span>
+       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> parsed_customer_number
+<span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected shape:</strong> One row per customer with a numeric suffix.</p>
+<p>Check the result at the stated grain. An alternative formulation is valid only if it preserves the same NULL, ordering, time, money, and cardinality contract.</p>
+<h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>Inputs/evidence:</strong> For sql-12 Exercise 6, read from <code>customers</code>. Build the answer toward <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code>; keep <code>customer_id</code> visible whenever the result has row-level grain.</li>
+<li><strong>Expected result/shape:</strong> For sql-12 Exercise 6, expected output: One row per customer with a numeric suffix. The final columns are <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code>. The final order is <code>c.customer_id</code>.</li>
+<li><strong>Independent verification:</strong> For sql-12 Exercise 6, reselect the returned keys directly from the source; require unique <code>customer_id</code> where the expected grain is one row per key and confirm the projected <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code> against <code>customers</code>. Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>full_name</code> and state whether the row is kept, rejected, or classified.</li>
+<li><strong>Intermediate relation check:</strong> For sql-12 Exercise 6, check <code>c.customer_id</code> before applying the row cap.</li>
+<li><strong>Clause check:</strong> For sql-12 Exercise 6, the solution actually uses <code>FROM</code>, <code>SELECT</code>, and <code>ORDER BY</code>. Read only those operations: begin at <code>customers</code>, preserve one row per <code>customer_id</code>, and finish with <code>customer_id</code>, <code>full_name</code>, and <code>parsed_customer_number</code> ordered by <code>c.customer_id</code>.</li>
+<li><strong>Alternative/trade-off:</strong> For sql-12 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use a captured regex replacement only after a match predicate establishes the format. Evaluate another form against the concrete expected result (One row per customer with a numeric suffix) and the verification above.</li>
+<li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>full_name</code> and state whether the row is kept, rejected, or classified.</li>
+</ul>
+<h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Can you explain the logical grain before and after every aggregation?</li>
+<li>Are missing values preserved or converted only by an explicit rule?</li>
+<li>Does every ordered result have a deterministic final tie-breaker?</li>
+<li>Are money and time assumptions visible beside the calculation?</li>
+<li>Does the complete executable solution finish with <code>ROLLBACK</code>?</li>
+</ul></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/postgres-60day/solutions/day12_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day12_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- Day 12 executable solutions</span></span>
+<span class="source-line"><span class="syntax-comment">-- SOLUTION READING MAP — sql-12: String Functions</span></span>
+<span class="source-line"><span class="syntax-comment">-- Explanation: sql/postgres-60day/solutions/day12_solutions.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Run from the repository root only against advanced_sql_training:</span></span>
+<span class="source-line"><span class="syntax-comment">--   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day12_solutions.sql</span></span>
+<span class="source-line"><span class="syntax-comment">-- Read each answer from inputs to output: establish FROM/JOIN grain; apply</span></span>
+<span class="source-line"><span class="syntax-comment">-- row filters; group/aggregate; filter groups; compute windows; project named</span></span>
+<span class="source-line"><span class="syntax-comment">-- keys/measures; then order with a deterministic tie-breaker. Treat every CTE</span></span>
+<span class="source-line"><span class="syntax-comment">-- as an intermediate relation whose keys, row count, and totals can be checked.</span></span>
+<span class="source-line"><span class="syntax-comment">-- A command tag is not enough for DDL/DML: inspect catalogs or before/after</span></span>
+<span class="source-line"><span class="syntax-comment">-- rows, test a boundary case, and reconcile with an independent control.</span></span>
+<span class="source-line"><span class="syntax-comment">-- NULL, zero, empty input, missing rows, and ties need explicit policies.</span></span>
+<span class="source-line"><span class="syntax-comment">-- The documented transaction/cleanup boundary must leave no unintended persistent object.</span></span>
+<span class="source-line"><span class="syntax-comment">--</span></span>
+<span class="source-line"><span class="syntax-comment">-- Target: PostgreSQL 16+; run only in advanced_sql_training.</span></span>
+<span class="source-line"><span class="syntax-comment">-- ON_ERROR_STOP is supplied by the documented psql command.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Shared teaching contract</span></span>
+<span class="source-line"><span class="syntax-comment">-- Focus: Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Assumptions: Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Pitfall: Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 1: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Return normalized customer names and lowercase emails.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use `btrim` for outer whitespace and `lower` for a declared case-normalized display value.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">AS</span> original_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       btrim<span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> trimmed_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_email</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 2: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Extract the email domain and count customers by domain, preserving missing emails.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: `split_part` parses the second component; CASE keeps NULL distinct.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per domain label.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">CASE</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;(missing)&#x27;</span></span>
+<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-keyword">lower</span><span class="syntax-punctuation">(</span>split_part<span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>email<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;@&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> email_domain<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COUNT</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> customer_count</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> email_domain</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> customer_count <span class="syntax-keyword">DESC</span><span class="syntax-punctuation">,</span> email_domain<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 3: Query writing</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Create an ordered comma-separated list of department employee names.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Put `ORDER BY` inside `string_agg` so concatenation order is deliberate.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per department.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input&#x27;s grain must agree.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       d<span class="syntax-punctuation">.</span>name <span class="syntax-keyword">AS</span> department_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       string_agg<span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;, &#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> e<span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">.</span>employee_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> employees</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> departments <span class="syntax-keyword">AS</span> d</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> employees <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">  <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span>department_id <span class="syntax-operator">=</span> d<span class="syntax-punctuation">.</span>department_id</span>
+<span class="source-line"><span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">.</span>name</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> d<span class="syntax-punctuation">.</span>department_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 4: Prediction</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use a POSIX whitespace class and the global regex flag.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Three input/output rows.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> source_text<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       btrim<span class="syntax-punctuation">(</span>regexp_replace<span class="syntax-punctuation">(</span>source_text<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;[[:space:]]+&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27; &#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> normalized_text</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;  Data   Tools  &#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span>E<span class="syntax-string">&#x27;one\ttwo&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">  <span class="syntax-punctuation">(</span>E<span class="syntax-string">&#x27;line1\nline2&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> sample<span class="syntax-punctuation">(</span>source_text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 5: Debugging</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Escape wildcard characters and declare the escape character.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Rows only when the literal character occurs.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `WHERE`: filters source rows before grouping and window calculation; SQL&#x27;s unknown NULL comparisons do not pass.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\%%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span></span>
+<span class="source-line">   <span class="syntax-keyword">OR</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">LIKE</span> <span class="syntax-string">&#x27;%\_%&#x27;</span> <span class="syntax-keyword">ESCAPE</span> <span class="syntax-string">&#x27;\&#x27;</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- ---------------------------------------------------------------------------</span></span>
+<span class="source-line"><span class="syntax-comment">-- Exercise 6: Extension</span></span>
+<span class="source-line"><span class="syntax-comment">-- Prompt: Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Why: Use a captured regex replacement only after a match predicate establishes the format.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: One row per customer with a numeric suffix.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Review the selected keys, grain, NULL behavior, and ordering before</span></span>
+<span class="source-line"><span class="syntax-comment">-- treating the output as evidence.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Clause-by-clause reading:</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `SELECT`: defines the output columns at the query&#x27;s final grain; aliases document the meaning of derived values.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `FROM`: establishes the starting relation and therefore the initial row grain.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.</span></span>
+<span class="source-line"><span class="syntax-comment">-- - `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span></span>
+<span class="source-line">         <span class="syntax-keyword">WHEN</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-operator">~</span> <span class="syntax-string">&#x27;^Customer [0-9]+$&#x27;</span></span>
+<span class="source-line">           <span class="syntax-keyword">THEN</span> <span class="syntax-keyword">substring</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>full_name <span class="syntax-keyword">FROM</span> <span class="syntax-string">&#x27;([0-9]+)$&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span></span>
+<span class="source-line">         <span class="syntax-keyword">ELSE</span> <span class="syntax-keyword">NULL</span></span>
+<span class="source-line">       <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> parsed_customer_number</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> customers <span class="syntax-keyword">AS</span> <span class="syntax-keyword">c</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- No course answer persists changes or temporary objects.</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-12 — String Functions.
+
+I have completed the direct catalog prerequisite: `sql-11`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
+- Guide: sql/postgres-60day/companion-guides/day12_string_functions.md
+- Answer-free learner SQL: sql/postgres-60day/day12_string_functions.sql
+
+Key terms to teach in context: Normalization, Delimiter, Regular expression. First define those terms in plain
+language and explain table, row, column, result set, row grain, SQL NULL, and
+deterministic ordering where they apply. Then explain the important clauses in
+logical order and state the expected row grain/shape before asking me to run
+anything. The guide&#x27;s lesson-specific worked-model focus is: Compare a raw email with lower(trim(email)). Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.
+
+Use only the local disposable advanced_sql_training database. Prefer the
+lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+.learning/sql/sql-12/ working copy. Never point setup, reset, DDL, or DML
+at a shared or valuable database, and never ask me to paste a password.
+
+Treat every path under `solutions/` as closed until I explicitly ask after an attempt.
+
+Follow guide -&gt; predict -&gt; my attempt -&gt; one progressive hint at a time -&gt;
+solution comparison. Do not open, quote, or summarize an official solution
+unless I explicitly ask after attempting the exercise. Ask for my actual SQL
+and the complete psql transcript/query result; inspect that evidence rather
+than assuming a completion declaration proves mastery. Explain the first error
+before changing later code. Finish with 2-3 retrieval questions and one small
+transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-11.html"><small>Previous lesson</small><strong>sql-11</strong><span>Case Expressions</span></a>
+        <a class="nav-card next" href="sql-13.html"><small>Next lesson</small><strong>sql-13</strong><span>Date Time Functions</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-12";
+    const LEARNER_PATH = "sql/postgres-60day/day12_string_functions.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-009",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed ConfigMap initial-value checks; separate stateful update observation",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Trace hello-config/message through environment and volume fields.",
+      "expected": "Both consumers reference the same namespaced key;mount path is read-only /config/message."
+    },
+    {
+      "exercise": 2,
+      "task": "Use the configured hello source under a freshly qualified contract-2 lease.",
+      "expected": "Fresh client verifies /version plus /message=reviewer and /file-message=reviewer,then owned cleanup."
+    },
+    {
+      "exercise": 3,
+      "task": "Keep the same process while a synthetic ConfigMap value changes from hello to reviewer.",
+      "expected": "Existing environment remains hello until a new process starts."
+    },
+    {
+      "exercise": 4,
+      "task": "In an authorized stateful host lab,record API value,file bytes and application response separately.",
+      "expected": "After observed projection,the file may be reviewer;application changes only if it rereads/reloads as designed."
+    },
+    {
+      "exercise": 5,
+      "task": "Try a Secret reference,hostPath,subPath or arbitrary environment variable in a scratch source.",
+      "expected": "Broker rejection before API mutation;the approved fixed reference still parses."
+    },
+    {
+      "exercise": 6,
+      "task": "Write a before/after record for a new message value with rollback and cleanup identities.",
+      "expected": "Record includes ConfigMap version/UID,Pod generation/UID,observed routes and restored source if rollback is needed."
+    }
+  ]
+}

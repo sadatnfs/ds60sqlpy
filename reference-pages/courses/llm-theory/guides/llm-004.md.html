@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-004: A count-based next-token baseline · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-004: A count-based next-token baseline</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-004.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-004-a-count-based-next-token-baseline">llm-004: A count-based next-token baseline<a class="heading-anchor" href="#llm-004-a-count-based-next-token-baseline" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 105 minutes. Direct prerequisite: <code>llm-003</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Fit and inspect a tiny bigram model before adding neural machinery. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="build-a-model-whose-entire-memory-fits-on-the-page">Build a model whose entire memory fits on the page<a class="heading-anchor" href="#build-a-model-whose-entire-memory-fits-on-the-page" aria-label="Link to this section">#</a></h4>
+<p>Before introducing neural weights, we can build a language model by counting what follows what. The vocabulary in this lesson contains A, B and C. Each symbol gets a row describing the next-symbol choices after it. This makes the model a small conditional-probability machine: look up the last symbol, read its row and use that distribution to score or choose the next symbol.</p>
+<p>Walk through the two training sequences without joining them. The first, [A,B,A], contributes A to B and B to A. The second, [A,A], contributes A to A. There are three observed transitions in total. A&#x27;s row therefore records one A, one B and no C; B&#x27;s row records one A; C&#x27;s row records nothing. The table is the model&#x27;s learned state. Fitting means constructing it from the training records, while inference means consulting it without changing it.</p>
+<p>A raw frequency model would give C zero probability after A. That is a strong conclusion from only two observations. Add-one smoothing changes the assumption: before normalization, place one pseudo-observation on every possible continuation. A&#x27;s three masses become [2,2,1], with total five, and its probabilities become [0.4,0.4,0.2]. The pseudo-observations are a declared estimation rule, not additional training examples that were actually collected. They prevent a missing event in a small sample from automatically becoming an impossible event in the model.</p>
+<p>The row shape clarifies an important compatibility requirement. A three-column table means the candidates are the three vocabulary entries in their frozen order. Adding a fourth candidate changes not only the new column but also the smoothing denominator of every existing row. Reordering columns changes which token each number represents. A saved matrix without its vocabulary mapping is therefore not a complete language model. The tokenizer and embedding lessons will revisit the same identity problem in neural form.</p>
+<p>What information does the model retain? Only the immediately preceding token. Prefixes [C,A] and [B,B,A] both end in A, so both receive the same next-token row [0.4,0.4,0.2]. If the correct continuation depends on the earlier part of the prefix, this model cannot express that distinction no matter how carefully its counts are implemented. This is a representational limitation, separate from a coding error or lack of training observations. Longer-context models enlarge the set of distinctions that can influence a prediction.</p>
+<p>The baseline remains useful because its failure modes are transparent. It can catch accidental boundary transitions, scoring mismatches or a neural training loop that is not improving beyond local frequency information. It is also inexpensive to fit and inspect. Its simplicity is not a reason to declare its held-out score invalid; the comparison becomes informative when both baseline and neural model predict the same target events. What would be invalid is changing the vocabulary, observation set or metric between them and calling the difference an architectural improvement.</p>
+<h3 id="what-the-count-table-assumes-and-what-smoothing-changes">What the count table assumes, and what smoothing changes<a class="heading-anchor" href="#what-the-count-table-assumes-and-what-smoothing-changes" aria-label="Link to this section">#</a></h3>
+<p>Let C_uv count how often context token u is followed by candidate v within the training documents, and let <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>C</mi><mi>u</mi></msub><mo>=</mo><msub><mo>∑</mo><mi>v</mi></msub><msub><mi>C</mi><mrow><mi>u</mi><mi>v</mi></mrow></msub></mrow><annotation encoding="application/x-tex">C_u=\sum_v C_{uv}</annotation></semantics></math>. The unsmoothed estimate is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>C</mi><mrow><mi>u</mi><mi>v</mi></mrow></msub></mrow><mrow><msub><mi>C</mi><mrow><mi>u</mi></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{C_{uv}}{C_{u}}</annotation></semantics></math> when C_u is positive. A bigram model uses one preceding token, so two long prefixes ending in the same u receive the same next-token distribution. This deliberately discards information before u. A transparent weak baseline is valuable precisely because its limitations are visible and its likelihood can be independently reconstructed.</p>
+<p>With vocabulary size V and a positive smoothing coefficient alpha, the additive estimate is (C_uv+alpha)/(C_u+alpha V). The lesson uses <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha=1</annotation></semantics></math>. The denominator must include alpha once per candidate, not merely once for the whole row. For context A, counts [1,1,0] and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>V</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">V=3</annotation></semantics></math> yield <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>5</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[2,2,1]}{5}</annotation></semantics></math>. Dividing by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>C</mi><mrow><mi>u</mi></mrow></msub><mo>+</mo><mn>1</mn><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">C_{u}+1=3</annotation></semantics></math> would make the row sum5/3, which is not a probability distribution. For B, [1,0,0] becomes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[2,1,1]}{4}</annotation></semantics></math>. For C, the zero row becomes uniform <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[1,1,1]}{3}</annotation></semantics></math>.</p>
+<p>When <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>C</mi><mrow><mi>u</mi></mrow></msub><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">C_{u}&gt;0</annotation></semantics></math>, rewrite the estimate as a mixture: [C_u/(C_u+alpha V)] times the empirical row plus [alpha V/(C_u+alpha V)] times the uniform row. For A this is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>5</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{5}</annotation></semantics></math> times [.5,.5,0] plus3/5 times <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[\frac{1}{3},\frac{1}{3},\frac{1}{3}]</annotation></semantics></math>. The result is [.4,.4,.2]. This makes the tradeoff concrete: with only two observed transitions, three pseudo-counts have substantial influence. A huge vocabulary with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\alpha=1</annotation></semantics></math> can dominate sparse observations. More smoothing avoids zero assigned probability but can flatten real preferences; tune the policy using designated validation data, then freeze it before final evaluation.</p>
+<p>The zero-count context and an unknown context string are distinct situations. C is inside the declared vocabulary but has no observed outgoing transition. A token outside [A,B,C] has no allocated row. The reference explicitly chooses a uniform known-candidate fallback for an unseen scoring context. That is an application policy, not an inference that all continuations of an arbitrary new symbol are equally plausible. Unknown training tokens are rejected so fitting cannot silently change the candidate domain. A richer system could reserve an UNK ID, but it would need an explicit mapping and a corresponding count row/column.</p>
+<p>Document boundaries determine which observations exist. The sequences [A,B,A] and [A,A] contain two and one transitions, for three total. Concatenating them would introduce an extra A→A transition across the boundary, incorrectly changing A&#x27;s row to [2,1,0]. Its smoothed distribution would become <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>3</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>6</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[3,2,1]}{6}</annotation></semantics></math> instead of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>5</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[2,2,1]}{5}</annotation></semantics></math>. The arithmetic would still normalize, so a row-sum test would miss the semantic defect. Counting the expected number of transitions, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mo>∑</mo><mi>d</mi></msub><mo>max</mo><mo stretchy="false">(</mo><msub><mrow><mi mathvariant="normal">l</mi><mi mathvariant="normal">e</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">g</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">h</mi></mrow><mi>d</mi></msub><mo>−</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum_d\max(\mathrm{length}_d-1,0)</annotation></semantics></math>, supplies an independent boundary oracle.</p>
+<p>This baseline does not model a start distribution or stopping probability unless BOS/EOS are explicitly added. It scores transitions conditioned on each document&#x27;s supplied first token. Scoring the transition path A→B→A gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0.4</mn><mo>·</mo><mn>0.5</mn><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">0.4\cdot 0.5=0.2</annotation></semantics></math>, with total loss log 5 over two targets. Calling that the unconditional probability of the complete string A,B,A would omit the start and termination contracts. State exactly what is conditioned on when comparing it with a neural next-token model.</p>
+<p>Fit-on-train-only covers more than the count values. It includes vocabulary selection, normalization, document segmentation, smoothing selection and any fallback policy learned from data. Merely freezing the final count matrix after examining validation failures does not undo that information use. Compare systems using the same held-out target events and compatible representations. If the neural model beats this baseline, that establishes improvement on the measured score and split; it does not independently prove grounded answering or reasoning.</p>
+<p><strong>Interview reasoning:</strong> &quot;Why keep a model we know ignores long context?&quot; It provides a cheap reproducible floor, exposes dataset and scoring mistakes, and shows whether a more expensive model captures useful structure beyond local frequencies. If a complex model fails to beat it, inspect training, leakage and evaluation alignment before adding architectural complexity.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Bigram:</strong> an ordered pair of neighboring tokens inside one sequence.</p>
+<p><strong>Context row:</strong> the counts or probabilities for next-token candidates after one preceding token.</p>
+<p><strong>Vocabulary:</strong> the fixed candidate set and its order; it is frozen before evaluation.</p>
+<p><strong>Add-one smoothing:</strong> adding one pseudo-count to every vocabulary candidate before normalization.</p>
+<p><strong>Fallback:</strong> the declared behavior for a context without training observations, rather than an undocumented default.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>A count matrix has one context row and one next-token column, both ordered by the vocabulary. For A, counts [1,1,0] become smoothed masses [2,2,1], whose denominator is five. For B, [1,0,0] becomes [2,1,1], denominator four. A context with no observations receives [1,1,1], denominator three.</p>
+<p>Count transitions by zipping each sequence with its one-position suffix. This creates no pair after the final token and no pair across documents. A dictionary maps token strings to fixed row/column indices. Reject unknown training tokens instead of silently changing the declared vocabulary. For an unseen scoring context, the reference explicitly chooses a uniform known-vocabulary fallback; it does not pretend that this estimates a rich semantic relationship.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, return to the classroom home and choose the LLM theory path and select <code>llm-004</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
+<p>Open <a href="../lessons/llm-004.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-004/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell: selected interpreter from the course setup.</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>expansion<span class="syntax-punctuation">\</span>llm<span class="syntax-punctuation">-</span>004<span class="syntax-punctuation">\</span>practice<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux: selected course interpreter path from setup.</span>
+<span class="syntax-string">&quot;</span>$DS60_COURSE_PYTHON<span class="syntax-string">&quot;</span> .learning/expansion/llm-004/practice.py</code></pre>
+<p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
+<h4 id="example-a-recover-smoothed-rows">Example A: Recover smoothed rows<a class="heading-anchor" href="#example-a-recover-smoothed-rows" aria-label="Link to this section">#</a></h4>
+<p>Read the three raw rows before adding pseudo-counts.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+counts <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>int64<span class="syntax-punctuation">)</span>
+mass <span class="syntax-operator">=</span> counts <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+probabilities <span class="syntax-operator">=</span> mass <span class="syntax-operator">/</span> mass<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span> <span class="syntax-operator">/</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>probabilities<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>probabilities<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Each row sums to one under the same three-candidate vocabulary. Smoothing changes the model; disclose it rather than labeling it raw frequency.</p>
+<h4 id="example-b-do-not-invent-a-document-boundary-transition">Example B: Do not invent a document-boundary transition<a class="heading-anchor" href="#example-b-do-not-invent-a-document-boundary-transition" aria-label="Link to this section">#</a></h4>
+<p>Count two single-token documents independently and contrast concatenation.</p>
+<pre class="highlighted-code"><code class="language-python">documents <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>pair <span class="syntax-keyword">for</span> document <span class="syntax-operator">in</span> documents <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>document<span class="syntax-punctuation">,</span> document<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+concatenated <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+wrong_pairs <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>concatenated<span class="syntax-punctuation">,</span> concatenated<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> pairs <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> wrong_pairs <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">,</span> wrong_pairs<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Joining documents creates a transition that the independent-document fixture never observed. Reset context at boundaries unless another explicit boundary-token policy is chosen.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace training counts.</strong> For vocabulary [A,B,C] and training [[A,B,A],[A,A]], list each within-sequence transition and fill the count matrix. <strong>Expected:</strong> Counts [[1,1,0],[1,0,0],[0,0,0]], totaling three transitions. <strong>Verify:</strong> Assert the complete matrix and total count three, not a transition count from concatenated documents.</li>
+</ol>
+<ol>
+<li><strong>Construct a smoothed row.</strong> Implement fit_bigram and next_probabilities using fixed vocabulary order and add-one smoothing. <strong>Expected:</strong> Rows <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>5</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">A=[\frac{2}{5},\frac{2}{5},\frac{1}{5}]</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>B</mi><mo>=</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">B=[\frac{1}{2},\frac{1}{4},\frac{1}{4}]</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mo stretchy="false">[</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo>,</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">C=[\frac{1}{3},\frac{1}{3},\frac{1}{3}]</annotation></semantics></math>. <strong>Verify:</strong> Assert all three arrays with rtol=0, atol=1e-12 and inspect each denominator.</li>
+</ol>
+<ol>
+<li><strong>Preserve document boundaries.</strong> Fit two separate documents [A] and [B], then compare with one concatenated [A,B] document. <strong>Expected:</strong> Separate documents contain zero transitions; concatenation contains one A-to-B transition. <strong>Verify:</strong> Assert both matrices and retain the wrong-boundary counterexample in your evidence.</li>
+</ol>
+<ol>
+<li><strong>Handle an unseen context.</strong> Request probabilities after Z without adding Z to the candidate vocabulary. <strong>Expected:</strong> The declared fallback returns three equal values <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> and leaves vocabulary/counts unchanged. <strong>Verify:</strong> Compare the before/after count matrix and assert output shape (3,) and row sum one.</li>
+</ol>
+<ol>
+<li><strong>Reject malformed training data.</strong> Try duplicate vocabulary entries, an empty vocabulary and an unknown training token Z. <strong>Expected:</strong> Each case raises ValueError instead of silently extending or merging the vocabulary. <strong>Verify:</strong> Capture all three ValueError exceptions and assert that a subsequent valid fit returns the original three-transition matrix.</li>
+</ol>
+<ol>
+<li><strong>Keep validation read-only.</strong> Score the transition C-to-A from a validation document using the frozen table. <strong>Expected:</strong> Probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> and negative log score <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>; no training count changes. <strong>Verify:</strong> Copy the count matrix before scoring, assert byte-equal values afterward and compare the held-out score with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> List pairs inside each sequence before adding them to a shared matrix.</li>
+<li><strong>Hint 2:</strong> Add one to every known candidate, including zero-count candidates, before summing the denominator.</li>
+<li><strong>Hint 3:</strong> Treat validation as a lookup-only path and compare the original table afterward.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If validation text changes a probability, inspect whether the scoring path increments counts or adds vocabulary entries. If a boundary pair appears unexpectedly, print the per-document transition list before aggregating. If a row sums above or below one, inspect its smoothed denominator and candidate order.</p>
+<p>Smoothing is not evidence that an unseen word or context is well modeled; it is a declared nonzero fallback over known candidates. A bigram model&#x27;s limited context can be useful as a baseline while still missing long dependencies. A later transformer should be compared on the same frozen split and scoring units, not against a baseline accidentally deprived of preprocessing information that the neural model received.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without the table, count transitions in the two documents [C,A] and [A]. State which boundary pair must not appear, then derive the smoothed C row under vocabulary [A,B,C].</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use <a href="llm-005.md.html">llm-005</a> to evaluate the probability rows with a clearly defined loss. Keep a copy of the count table, vocabulary and document boundaries: together they explain the score and form a transparent comparison for the later neural capstones. The central question will be how much probability the model gives each observed target, not how complicated its implementation is.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-004,
+A count-based next-token baseline. Read courses/llm-theory/guides/llm-004.md
+and courses/llm-theory/lessons/llm-004.py. Respect direct prerequisites
+llm-003 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/llm-theory/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>

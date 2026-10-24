@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-039: Resource budgets, spill and cost tradeoffs · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-039: Resource budgets, spill and cost tradeoffs</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-039.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-039-resource-budgets-spill-and-cost-tradeoffs">spark-039: Resource budgets, spill and cost tradeoffs<a class="heading-anchor" href="#spark-039-resource-budgets-spill-and-cost-tradeoffs" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 120 minutes. Direct design prerequisites: <code>spark-038</code>. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>;a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-039</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-039.scala.html">Scala learner</a> and <a href="../lessons/spark-039.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-039_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison;the <a href="../solutions/spark-039_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-039_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Choose a resource-aware strategy from measured work rather than a single elapsed time.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Work metric:</strong> A measured quantity such as bytes, records, partitions or operator spill, with its exact scope and unit.</li>
+</ul>
+<ul>
+<li><strong>Spill:</strong> An operator moving intermediate data out of its in-memory working structures;the reported metric must be interpreted under that operator contract.</li>
+</ul>
+<ul>
+<li><strong>Skewed key:</strong> A key receiving a disproportionately large share of records, which hashing alone keeps together.</li>
+</ul>
+<ul>
+<li><strong>Task granularity:</strong> The size and number of task work units, distinct from the number of CPU execution threads.</li>
+</ul>
+<ul>
+<li><strong>Cost model:</strong> An estimate from explicit resource quantities, prices and billing assumptions, not an observed bill.</li>
+</ul>
+<ul>
+<li><strong>Stop budget:</strong> A predeclared resource/input bound that prevents a teaching experiment from expanding without review.</li>
+</ul>
+<p>A performance choice should preserve correctness before it compares resource work. This lesson generates exactly 20000 rows and compares two versus four hash partitions under local[2], with AQE disabled and the same aggregation contract. It records actual executed SQL metrics, retained stage/task counters, physical partition row counts, file counts and elapsed time. It then evaluates a separate hypothetical price formula without pretending that the local run produced a cloud bill.</p>
+<p>The source has IDs 0 through 19999. IDs below 16000 share key 0;the remaining 4000 use id modulo 100. Therefore key 0 occurs 16040 times and each other key 1..99 occurs 40 times. The independent oracle has 100 key/count pairs whose counts total 20000. A result that drops the hot key or changes multiplicity is wrong even if its elapsed time is attractive.</p>
+<h3 id="what-the-comparison-actually-measures">What the comparison actually measures<a class="heading-anchor" href="#what-the-comparison-actually-measures" aria-label="Link to this section">#</a></h3>
+<p>The query explicitly repartitions by key, groups and counts, then collects the known 100-row result under a unique job group. The elapsed interval covers that collect action. Separate diagnostics count physical rows by spark_partition_id, and a later write/readback checks the persisted product. Those extra scans and writes are outside the reported collect interval. The guide states this boundary so the timings are not mistaken for full end-to-end pipeline duration.</p>
+<p>Executed-plan metrics are read after the action through classic Spark 4.0.1 JVM diagnostics. dataSize is kept under its actual metric name;it is not relabeled as bytes sent over a remote network. shuffleBytesWritten and spillSize are reported when present. Missing values remain unavailable rather than zero. The program prints the observations instead of asserting one exact machine-dependent byte or time value.</p>
+<p>The status tracker attaches retained stage/task counters to the named action. Retention and asynchronous updates mean these are bounded diagnostic observations rather than a permanent complete history. The reference requires meaningful stage evidence but does not assert one universal stage-ID sequence. Exact per-task duration distributions are not collected here. The measured max-to-mean partition-row ratio is explicitly a work-distribution proxy, not a claim about observed task runtime skew.</p>
+<h3 id="more-partitions-do-not-create-more-local-cpus">More partitions do not create more local CPUs<a class="heading-anchor" href="#more-partitions-do-not-create-more-local-cpus" aria-label="Link to this section">#</a></h3>
+<p>Both configurations still use two local execution threads. Four partitions can reduce some work-unit sizes but add scheduling and file-management overhead. Hash partitioning keeps the hot key together, so simply increasing the partition count does not divide that key&#x27;s records. A different aggregation strategy or deliberate salting may address some skew, but it must preserve the original grouping semantics and account for any second-stage merge.</p>
+<p>The two configurations write into separate owned output directories. The number of actual Parquet data files is recorded, excluding metadata/CRC files. The test allows one through the configured partition count rather than assuming every partition must write a file. The files are read back and compared with every expected key/count pair. A lower file count alone is not a quality metric:oversized files, too many small files and downstream access patterns introduce different tradeoffs.</p>
+<p>The tiny run may report zero spill. That is a valid measurement for this fixture, not proof that a larger workload will remain in memory. Deliberately forcing memory exhaustion would be a different bounded experiment and is not required here. Driver collections are restricted to known small aggregate/partition metadata results;the 20000 raw rows stay in Spark execution.</p>
+<h3 id="interpret-timing-and-cost-with-visible-assumptions">Interpret timing and cost with visible assumptions<a class="heading-anchor" href="#interpret-timing-and-cost-with-visible-assumptions" aria-label="Link to this section">#</a></h3>
+<p>Record the compiler/runtime family, local[2], AQE setting, input formula, partition count and whether caches were used. This reference does not persist the source, so the diagnostic scans can recompute it. Warmup, JIT, filesystem caches and concurrent host activity can affect elapsed time. Do not assert that the four-partition run must be faster or extrapolate a single small timing to a cluster.</p>
+<p>The cost worksheet uses deliberately hypothetical prices:0.05 currency units per vCPU-hour and 0.02 per GiB-month, with a30-day month. Two vCPUs for 3600 seconds cost 0.10 and two GiB for 30 days cost 0.04, for 0.14 total. This arithmetic does not include network, API requests, minimum charges, replication or support overhead. It is a model for reasoning about units, not financial advice or a real service quote.</p>
+<p>The stop budget is part of the experiment design:at most 20000 source rows and 8 partitions. A proposal to increase either is rejected before constructing a larger dataset. A sensible next experiment states what uncertainty it would resolve, which metric would change and when it would stop. The goal is a measured, correct comparison with honest limitations, not a dramatic benchmark at any cost.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span><span class="syntax-class">Path</span><span class="syntax-punctuation">,</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>util<span class="syntax-punctuation">.</span><span class="syntax-class">UUID</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>jdk<span class="syntax-punctuation">.</span><span class="syntax-class">CollectionConverters</span><span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQuery</span><span class="syntax-punctuation">,</span><span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>collection<span class="syntax-punctuation">.</span>mutable<span class="syntax-punctuation">.</span><span class="syntax-class">ArrayBuffer</span>
+
+require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;Prepared Spark4.0.1 required&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.streaming.stopTimeout&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;5000&quot;</span><span class="syntax-punctuation">)</span>
+ownedRoot<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createTempDirectory<span class="syntax-punctuation">(</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toAbsolutePath<span class="syntax-punctuation">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;spark-039-&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> source<span class="syntax-operator">=</span>spark<span class="syntax-punctuation">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">,</span>when<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">16000L</span><span class="syntax-punctuation">,</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>otherwise<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">import</span> shutil
+<span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">import</span> uuid
+
+<span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version<span class="syntax-operator">!=</span><span class="syntax-string">&quot;</span><span class="syntax-string">4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared Spark4.0.1 required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.streaming.stopTimeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">5000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+owned_root<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-039-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span>Path<span class="syntax-operator">.</span>cwd<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+source<span class="syntax-operator">=</span>spark<span class="syntax-operator">.</span>range<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">20000</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>withColumn<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>when<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">16000</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>cast<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">long</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>otherwise<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">%</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> expected<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0L</span> until <span class="syntax-number">100L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>k <span class="syntax-operator">=&gt;</span> <span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span><span class="syntax-keyword">if</span><span class="syntax-punctuation">(</span>k<span class="syntax-operator">==</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-number">16040L</span> <span class="syntax-keyword">else</span> <span class="syntax-number">40L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">100</span> <span class="syntax-operator">&amp;&amp;</span> expected<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sum<span class="syntax-operator">==</span><span class="syntax-number">20000L</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">expected<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>key<span class="syntax-punctuation">,</span><span class="syntax-number">16040</span> <span class="syntax-keyword">if</span> key<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-keyword">else</span> <span class="syntax-number">40</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> key <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">100</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>count <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span>count <span class="syntax-operator">in</span> expected<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">20000</span></code></pre>
+<p>This independent arithmetic oracle fixes the product before any performance measurement. The hot key remains a separate visible condition, not an accidental unknown in the benchmark.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> compute<span class="syntax-operator">=</span><span class="syntax-number">2.0</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">3600.0</span><span class="syntax-operator">/</span><span class="syntax-number">3600.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.05</span>
+<span class="syntax-keyword">val</span> storage<span class="syntax-operator">=</span><span class="syntax-number">2.0</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">30.0</span><span class="syntax-operator">/</span><span class="syntax-number">30.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.02</span>
+assert<span class="syntax-punctuation">(</span>math<span class="syntax-punctuation">.</span>abs<span class="syntax-punctuation">(</span>compute<span class="syntax-operator">+</span>storage<span class="syntax-operator">-</span><span class="syntax-number">0.14</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">compute<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">3600</span><span class="syntax-operator">/</span><span class="syntax-number">3600</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.05</span>
+storage<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-operator">/</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.02</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>compute<span class="syntax-operator">+</span>storage<span class="syntax-operator">-</span><span class="syntax-number">.14</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">1e-12</span></code></pre>
+<p>The hypothetical cost calculation exposes time/storage unit conversions. It is deliberately separate from actual Spark metrics and does not claim a cloud invoice.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-validate-the-generated-skewed-fixture">Exercise 1: Validate the generated skewed fixture<a class="heading-anchor" href="#exercise-1-validate-the-generated-skewed-fixture" aria-label="Link to this section">#</a></h4>
+<p>Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.</p>
+<p><strong>Expected result/shape:</strong> Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.</p>
+<p><strong>Verify:</strong> Compare aggregate counts and the independent formula 16000+4000/100.</p>
+<p><strong>Progressive hint:</strong> The first 16000 rows intentionally share key 0.</p>
+<h4 id="exercise-2-measure-the-two-partition-configuration">Exercise 2: Measure the two-partition configuration<a class="heading-anchor" href="#exercise-2-measure-the-two-partition-configuration" aria-label="Link to this section">#</a></h4>
+<p>Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.</p>
+<p><strong>Expected result/shape:</strong> 100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files.</p>
+<p><strong>Verify:</strong> Compare all rows with the literal formula before accepting any work/time report.</p>
+<p><strong>Progressive hint:</strong> Measure after the action and preserve metric names/units.</p>
+<h4 id="exercise-3-compare-four-partitions-without-assuming-a-speedup">Exercise 3: Compare four partitions without assuming a speedup<a class="heading-anchor" href="#exercise-3-compare-four-partitions-without-assuming-a-speedup" aria-label="Link to this section">#</a></h4>
+<p>Repeat with 4 partitions and a separate output directory.</p>
+<p><strong>Expected result/shape:</strong> All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed.</p>
+<p><strong>Verify:</strong> Assert parity and print actual elapsed time/file/metric values without an ordering claim.</p>
+<p><strong>Progressive hint:</strong> local[2] still has two execution threads.</p>
+<h4 id="exercise-4-interpret-work-imbalance-and-spill-honestly">Exercise 4: Interpret work imbalance and spill honestly<a class="heading-anchor" href="#exercise-4-interpret-work-imbalance-and-spill-honestly" aria-label="Link to this section">#</a></h4>
+<p>Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.</p>
+<p><strong>Expected result/shape:</strong> Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.</p>
+<p><strong>Verify:</strong> Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.</p>
+<p><strong>Progressive hint:</strong> Bucket-row imbalance is a work-distribution proxy, not measured per-task runtime imbalance.</p>
+<h4 id="exercise-5-compute-a-separate-hypothetical-cost-model">Exercise 5: Compute a separate hypothetical cost model<a class="heading-anchor" href="#exercise-5-compute-a-separate-hypothetical-cost-model" aria-label="Link to this section">#</a></h4>
+<p>Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month.</p>
+<p><strong>Expected result/shape:</strong> Estimated 0.14 currency units, not an actual cloud bill or a price recommendation.</p>
+<p><strong>Verify:</strong> Check each unit conversion and reject negative durations/resources.</p>
+<p><strong>Progressive hint:</strong> Keep measured local work separate from hypothetical pricing.</p>
+<h4 id="exercise-6-enforce-the-stop-budget-before-scaling-data">Exercise 6: Enforce the stop budget before scaling data<a class="heading-anchor" href="#exercise-6-enforce-the-stop-budget-before-scaling-data" aria-label="Link to this section">#</a></h4>
+<p>Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.</p>
+<p><strong>Expected result/shape:</strong> 20000/4 accepted;20001/4 and 20000/9 rejected.</p>
+<p><strong>Verify:</strong> Assert both refusals and confirm the session shuffle setting restored to 2.</p>
+<p><strong>Progressive hint:</strong> A resource experiment needs an admission budget, not just a timeout after exhaustion.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not equate serialized dataSize with remote network traffic, absent spill metrics with zero spill, or partition-row imbalance with measured task-duration imbalance. Do not compare elapsed times for different result contracts or different included work. More partitions do not increase local[2] CPU threads. Keep hypothetical prices and model assumptions separate from actual runtime observations, and enforce the stop budget before expanding data.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>fixtureMetrics</code> / <code>fixture_metrics</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/monitoring.html">Spark4.0.1 monitoring metrics</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-performance-tuning.html">Spark4.0.1 SQL performance tuning</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-039: Resource budgets, spill and cost tradeoffs.
+Read courses/scala-spark/guides/spark-039.md and courses/scala-spark/lessons/spark-039.scala;the paired sources are courses/scala-spark/lessons/spark-039.scala and courses/scala-spark/lessons/spark-039.py.
+Direct prerequisites: spark-038. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

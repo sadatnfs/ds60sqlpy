@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-050",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Distinguish Service API and data plane.",
+      "expected": "Desired routing objects versus actual packet handling."
+    },
+    {
+      "exercise": 2,
+      "task": "Identify why proxy-mode advice is version-sensitive.",
+      "expected": "Support and behavior change with Kubernetes and kernel releases."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw the watch-to-packet sequence.",
+      "expected": "API observation, reconciliation, programmed state and packet decision are separate."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose one-node-only Service failure.",
+      "expected": "Compare node-local data-plane and policy behavior."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why eBPF is not an application correctness proof.",
+      "expected": "It is an implementation technique for specific kernel behavior."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan an implementation-specific incident review.",
+      "expected": "Record active mode, versions, owned probe results and permitted diagnostics."
+    }
+  ]
+}

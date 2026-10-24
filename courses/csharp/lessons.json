@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "track_id": "csharp",
+  "lessons": [
+    {
+      "id": "csharp-001",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-001.md",
+      "source_path": "courses/csharp/lessons/csharp-001.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-001_solution.cs",
+        "courses/csharp/solutions/csharp-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-002",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-002.md",
+      "source_path": "courses/csharp/lessons/csharp-002.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-002_solution.cs",
+        "courses/csharp/solutions/csharp-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-003",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-003.md",
+      "source_path": "courses/csharp/lessons/csharp-003.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-003_solution.cs",
+        "courses/csharp/solutions/csharp-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-004",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-004.md",
+      "source_path": "courses/csharp/lessons/csharp-004.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-004_solution.cs",
+        "courses/csharp/solutions/csharp-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-005",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-005.md",
+      "source_path": "courses/csharp/lessons/csharp-005.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-005_solution.cs",
+        "courses/csharp/solutions/csharp-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-006",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-006.md",
+      "source_path": "courses/csharp/lessons/csharp-006.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-006_solution.cs",
+        "courses/csharp/solutions/csharp-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-007",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-007.md",
+      "source_path": "courses/csharp/lessons/csharp-007.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-007_solution.cs",
+        "courses/csharp/solutions/csharp-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-008",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-008.md",
+      "source_path": "courses/csharp/lessons/csharp-008.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-008_solution.cs",
+        "courses/csharp/solutions/csharp-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-009",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-009.md",
+      "source_path": "courses/csharp/lessons/csharp-009.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-009_solution.cs",
+        "courses/csharp/solutions/csharp-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-010",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-010.md",
+      "source_path": "courses/csharp/lessons/csharp-010.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-010_solution.cs",
+        "courses/csharp/solutions/csharp-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-011",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-011.md",
+      "source_path": "courses/csharp/lessons/csharp-011.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-011_solution.cs",
+        "courses/csharp/solutions/csharp-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-012",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-012.md",
+      "source_path": "courses/csharp/lessons/csharp-012.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-012_solution.cs",
+        "courses/csharp/solutions/csharp-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-013",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-013.md",
+      "source_path": "courses/csharp/lessons/csharp-013.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-013_solution.cs",
+        "courses/csharp/solutions/csharp-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-014",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-014.md",
+      "source_path": "courses/csharp/lessons/csharp-014.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-014_solution.cs",
+        "courses/csharp/solutions/csharp-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-015",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-015.md",
+      "source_path": "courses/csharp/lessons/csharp-015.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-015_solution.cs",
+        "courses/csharp/solutions/csharp-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-016",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-016.md",
+      "source_path": "courses/csharp/lessons/csharp-016.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-016_solution.cs",
+        "courses/csharp/solutions/csharp-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-017",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-017.md",
+      "source_path": "courses/csharp/lessons/csharp-017.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-017_solution.cs",
+        "courses/csharp/solutions/csharp-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-018",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-018.md",
+      "source_path": "courses/csharp/lessons/csharp-018.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-018_solution.cs",
+        "courses/csharp/solutions/csharp-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-019",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-019.md",
+      "source_path": "courses/csharp/lessons/csharp-019.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-019_solution.cs",
+        "courses/csharp/solutions/csharp-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-020",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-020.md",
+      "source_path": "courses/csharp/lessons/csharp-020.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-020_solution.cs",
+        "courses/csharp/solutions/csharp-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-021",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-021.md",
+      "source_path": "courses/csharp/lessons/csharp-021.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-021_solution.cs",
+        "courses/csharp/solutions/csharp-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-022",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-022.md",
+      "source_path": "courses/csharp/lessons/csharp-022.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-022_solution.cs",
+        "courses/csharp/solutions/csharp-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-023",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-023.md",
+      "source_path": "courses/csharp/lessons/csharp-023.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-023_solution.cs",
+        "courses/csharp/solutions/csharp-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-024",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-024.md",
+      "source_path": "courses/csharp/lessons/csharp-024.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-024_solution.cs",
+        "courses/csharp/solutions/csharp-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-025",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-025.md",
+      "source_path": "courses/csharp/lessons/csharp-025.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-025_solution.cs",
+        "courses/csharp/solutions/csharp-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-026",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-026.md",
+      "source_path": "courses/csharp/lessons/csharp-026.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-026_solution.cs",
+        "courses/csharp/solutions/csharp-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-027",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-027.md",
+      "source_path": "courses/csharp/lessons/csharp-027.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-027_solution.cs",
+        "courses/csharp/solutions/csharp-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-028",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-028.md",
+      "source_path": "courses/csharp/lessons/csharp-028.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-028_solution.cs",
+        "courses/csharp/solutions/csharp-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-029",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-029.md",
+      "source_path": "courses/csharp/lessons/csharp-029.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-029_solution.cs",
+        "courses/csharp/solutions/csharp-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-030",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-030.md",
+      "source_path": "courses/csharp/lessons/csharp-030.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-030_solution.cs",
+        "courses/csharp/solutions/csharp-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-031",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-031.md",
+      "source_path": "courses/csharp/lessons/csharp-031.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-031_solution.cs",
+        "courses/csharp/solutions/csharp-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-032",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-032.md",
+      "source_path": "courses/csharp/lessons/csharp-032.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-032_solution.cs",
+        "courses/csharp/solutions/csharp-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-033",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-033.md",
+      "source_path": "courses/csharp/lessons/csharp-033.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-033_solution.cs",
+        "courses/csharp/solutions/csharp-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-034",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-034.md",
+      "source_path": "courses/csharp/lessons/csharp-034.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-034_solution.cs",
+        "courses/csharp/solutions/csharp-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-035",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-035.md",
+      "source_path": "courses/csharp/lessons/csharp-035.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-035_solution.cs",
+        "courses/csharp/solutions/csharp-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-036",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-036.md",
+      "source_path": "courses/csharp/lessons/csharp-036.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-036_solution.cs",
+        "courses/csharp/solutions/csharp-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-037",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-037.md",
+      "source_path": "courses/csharp/lessons/csharp-037.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-037_solution.cs",
+        "courses/csharp/solutions/csharp-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-038",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-038.md",
+      "source_path": "courses/csharp/lessons/csharp-038.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-038_solution.cs",
+        "courses/csharp/solutions/csharp-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-039",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-039.md",
+      "source_path": "courses/csharp/lessons/csharp-039.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-039_solution.cs",
+        "courses/csharp/solutions/csharp-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-040",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-040.md",
+      "source_path": "courses/csharp/lessons/csharp-040.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-040_solution.cs",
+        "courses/csharp/solutions/csharp-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-041",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-041.md",
+      "source_path": "courses/csharp/lessons/csharp-041.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-041_solution.cs",
+        "courses/csharp/solutions/csharp-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-042",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-042.md",
+      "source_path": "courses/csharp/lessons/csharp-042.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-042_solution.cs",
+        "courses/csharp/solutions/csharp-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-043",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-043.md",
+      "source_path": "courses/csharp/lessons/csharp-043.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-043_solution.cs",
+        "courses/csharp/solutions/csharp-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-044",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-044.md",
+      "source_path": "courses/csharp/lessons/csharp-044.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-044_solution.cs",
+        "courses/csharp/solutions/csharp-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-045",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-045.md",
+      "source_path": "courses/csharp/lessons/csharp-045.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-045_solution.cs",
+        "courses/csharp/solutions/csharp-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-046",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-046.md",
+      "source_path": "courses/csharp/lessons/csharp-046.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-046_solution.cs",
+        "courses/csharp/solutions/csharp-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-047",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-047.md",
+      "source_path": "courses/csharp/lessons/csharp-047.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-047_solution.cs",
+        "courses/csharp/solutions/csharp-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "csharp-048",
+      "status": "authored",
+      "language": "csharp",
+      "runtime_profile": "csharp-dotnet",
+      "guide_path": "courses/csharp/guides/csharp-048.md",
+      "source_path": "courses/csharp/lessons/csharp-048.cs",
+      "solution_paths": [
+        "courses/csharp/solutions/csharp-048_solution.cs",
+        "courses/csharp/solutions/csharp-048_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

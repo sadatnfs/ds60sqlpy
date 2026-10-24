@@ -1,0 +1,101 @@
+{
+  "lesson_id": "spark-032",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Define watermark placement and window state",
+      "input_contract": "Apply with Watermark(event_time,5minutes) before grouping by a 5-minute window and team. Aggregate records and total amount, retaining the window struct in the result.",
+      "expected": "A streaming aggregate with window, team, records, total. The watermark is attached to the same event-time column used by the window.",
+      "verification": "Assert streaming status and the four output fields before starting the first phase."
+    },
+    {
+      "exercise": 2,
+      "title": "Record actual watermark progress after the first phase",
+      "input_contract": "Run phase 1 and extract nonmissing watermark strings from retained progress. Parse them as instants rather than wall-clock elapsed duration.",
+      "expected": "Exactly 2 input rows processed. At least one watermark observation exists;the final observed watermark is no later than 00:00 for this phase.",
+      "verification": "Assert input count 2 and actual watermark presence/order;do not infer finalization from the file count alone."
+    },
+    {
+      "exercise": 3,
+      "title": "Accept a retained out-of-order event and observe finalization",
+      "input_contract": "Publish phase 2, run the compatible query again and read finalized sink rows as(start, team, records, total). Verify the 00:03 event contributed before the first window closed.",
+      "expected": "The finalized sink contains only(00:00, A,3,35) at this point. The actual watermark reaches at least 00:07.",
+      "verification": "Assert the exact first-window tuple and the observed progress boundary."
+    },
+    {
+      "exercise": 4,
+      "title": "Observe a far-late drop after the window has closed",
+      "input_contract": "Publish phase 3 after phase 2 has terminated. Read the actual state-operator dropped-by-watermark counters and verify the 999 event does not change the finalized first window.",
+      "expected": "Two new source rows consumed, one observed watermark drop and unchanged first-window result 35. B at 00:13 remains in pending state.",
+      "verification": "Assert input 2, drop counter 1 and the unchanged sink tuple. Preserve missing metric evidence as an error rather than guessing zero."
+    },
+    {
+      "exercise": 5,
+      "title": "Advance event time and distinguish finalized frompending output",
+      "input_contract": "Publish the 00:30 administrative advancer, run phase 4 and return a ledger of total source inputs, observed drops and final business-window records.",
+      "expected": "Seven total inputs, one observed drop, five finalized business records across three tuples:(00:00, A,3,35),(00:10, A,1,30),(00:10, B,1,7). The advancer window remains pending.",
+      "verification": "Assert all final tuples, input/drop reconciliation and actual watermark at least 00:25."
+    },
+    {
+      "exercise": 6,
+      "title": "Verify output-mode and sink eligibility through explicit failures",
+      "input_contract": "Attempt two invalid configurations in separate owned paths:Update mode to Parquet, and Append mode for an unwatermarked team aggregate. Require analysis rejection and stop any unexpectedly created query in finally.",
+      "expected": "Both configurations raiseAnalysisException;no active query remains. The valid windowed append sink stays intact.",
+      "verification": "Assert each named analysis failure and the unchanged three-row valid sink after the checks."
+    }
+  ],
+  "golden": {
+    "phases": [
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        5,
+        6
+      ],
+      [
+        7
+      ]
+    ],
+    "accepted_business_ids": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "dropped_id": 5,
+    "advancer_id": 7,
+    "input_rows": 7,
+    "dropped_rows": 1,
+    "finalized_business_records": 5,
+    "final": [
+      [
+        "00:00",
+        "A",
+        3,
+        35
+      ],
+      [
+        "00:10",
+        "A",
+        1,
+        30
+      ],
+      [
+        "00:10",
+        "B",
+        1,
+        7
+      ]
+    ],
+    "watermark_delay": "5 minutes",
+    "window_duration": "5 minutes"
+  }
+}

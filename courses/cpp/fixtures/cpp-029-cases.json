@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-029",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Trace lifetimes",
+      "input_or_change": "Draw result, worker creation, write, join and scope exit.",
+      "expected": "The owner remains alive until after join."
+    },
+    {
+      "exercise": 2,
+      "task": "Read after joining",
+      "input_or_change": "Compute 42 on one worker and read afterward.",
+      "expected": "42, with a documented join before access."
+    },
+    {
+      "exercise": 3,
+      "task": "Request cancellation",
+      "input_or_change": "Run the supplied ready handshake then set stop and join.",
+      "expected": "Worker terminates without a sleep-based timing assumption."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair detach",
+      "input_or_change": "Review detaching a worker that captures a local by reference.",
+      "expected": "Reject detached borrow; keep ownership until join."
+    },
+    {
+      "exercise": 5,
+      "task": "Translate to jthread",
+      "input_or_change": "On a qualified C++20 library use jthread and stop_token.",
+      "expected": "request_stop followed by scope exit joins; record compiler/library support."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer failure cleanup",
+      "input_or_change": "Add an owner-side early return and keep joining mandatory.",
+      "expected": "No joinable thread reaches destructor; no dangling capture."
+    }
+  ]
+}

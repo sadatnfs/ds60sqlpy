@@ -1,0 +1,99 @@
+{
+  "lesson_id": "spark-011",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Construct a predicate without collapsing it to a driver Boolean",
+      "input_contract": "Implement aboveTen/above_ten returning a Spark Column for amount_cents>10. Do not collect values or return a Python/Scala scalar Boolean.",
+      "expected": "Passing the predicate to raw.filter retains IDs 2 and 4. In Python, bool(predicate) raises ValueError rather than choosing one row's truth value.",
+      "verification": "Assert the exact filtered IDs and, in the PySpark reference, catch the scalar-Boolean conversion failure."
+    },
+    {
+      "exercise": 2,
+      "title": "Apply the predicate and preserve event identity",
+      "input_contract": "Return the ordered event IDs selected by aboveTen from this tiny fixture. Preserve both equal-valued 20-cent events and leave raw unchanged.",
+      "expected": "The result is[2,4], and raw still contains IDs[1,2,3,4]. Projecting amount and calling distinct is not an acceptable implementation.",
+      "verification": "Compare the selected IDs with literals and independently check all four raw IDs."
+    },
+    {
+      "exercise": 3,
+      "title": "Select missingness explicitly",
+      "input_contract": "Return ordered IDs whose amount_cents is SQL NULL. Do not compare the Column to JVM null/Python None using driver identity logic, and do not treat zero as missing.",
+      "expected": "Only ID 3 is returned. The observed-zero ID 1 is absent from the missingness result.",
+      "verification": "Assert[3] and separately assert that the zero-amount filter returns [1]."
+    },
+    {
+      "exercise": 4,
+      "title": "Combine conditions with engine operators",
+      "input_contract": "Return ordered IDs with a known amount at least 10 and event_id less than 4. Combine parenthesized Column comparisons with engine Boolean operators in each language.",
+      "expected": "Only ID 2 qualifies. ID 4 fails the ID bound, ID 3 is missing, and ID 1 is below the amount threshold.",
+      "verification": "Assert the exact singleton and explain one exclusion reason for each other ID."
+    },
+    {
+      "exercise": 5,
+      "title": "Preserve NULL through a derived column",
+      "input_contract": "Return a DataFrame with event_id and amount_plus_one=amount_cents+1, without filling NULL or dropping identity. Keep a Long-compatible integer result.",
+      "expected": "Ordered rows are(1,1),(2,21),(3, NULL),(4,21). The two 21 values remain separate events and unknown remains unknown.",
+      "verification": "Compare every ordered row with literal expected values, including the NULL position."
+    },
+    {
+      "exercise": 6,
+      "title": "Compare SQL and Columns with an independent expectation",
+      "input_contract": "Register a session-local temporary view and return ordered IDs from SQL SELECT/WHERE amount_cents>10. Compare SQL and DataFrame paths to the literal expected IDs rather than only to one another.",
+      "expected": "Both paths return [2,4]. The temporary view exists only in this owned session and no external database connection is opened.",
+      "verification": "Assert SQL IDs and selectedIds against [2,4] independently, then let the complete program stop its session in finally."
+    }
+  ],
+  "golden": {
+    "rows": [
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        20
+      ],
+      [
+        3,
+        null
+      ],
+      [
+        4,
+        20
+      ]
+    ],
+    "above_ten_ids": [
+      2,
+      4
+    ],
+    "missing_ids": [
+      3
+    ],
+    "zero_ids": [
+      1
+    ],
+    "combined_ids": [
+      2
+    ],
+    "projection": [
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        21
+      ],
+      [
+        3,
+        null
+      ],
+      [
+        4,
+        21
+      ]
+    ]
+  }
+}

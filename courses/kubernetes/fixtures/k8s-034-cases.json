@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-034",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "identity-checked host traffic edits and bounded two-configuration request samples",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compare /version with /message in both fixture Deployments.",
+      "expected": "Same binary version; different synthetic configuration markers."
+    },
+    {
+      "exercise": 2,
+      "task": "Apply the stable selector to the two Deployment label sets.",
+      "expected": "Stable matches and candidate does not."
+    },
+    {
+      "exercise": 3,
+      "task": "Specify marker, sample size, error rule and bounded request deadline.",
+      "expected": "A concrete gate that can fail independently of Ready replicas."
+    },
+    {
+      "exercise": 4,
+      "task": "Evaluate reviewer,reviewer,ERROR,reviewer against the four-response gate.",
+      "expected": "Failure with one error; do not proceed to promotion."
+    },
+    {
+      "exercise": 5,
+      "task": "Use the conditional host selector repair, then sample the ordinary Service.",
+      "expected": "Correct Service identity and four observed hello responses."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare one-to-one replica counts with an uneven finite request sample.",
+      "expected": "Replica ratio does not establish an exact traffic ratio or production reliability."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-035",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "owned-object conditional update and bounded watch/relist observer",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Explain the role of hello-config,u1 and rv-A.",
+      "expected": "Name addresses an object; UID its lifetime; resourceVersion is an opaque API token."
+    },
+    {
+      "exercise": 2,
+      "task": "Apply an rv-A update to stored rv-B with the same UID.",
+      "expected": "409-style conflict with current data unchanged."
+    },
+    {
+      "exercise": 3,
+      "task": "Read rv-B and preserve unrelated fields while reconsidering the intended message edit.",
+      "expected": "A new conditional request uses current state and a bounded retry count."
+    },
+    {
+      "exercise": 4,
+      "task": "Reread the same name with UID u2 when the lease expected u1.",
+      "expected": "Refuse the mutation across object replacement."
+    },
+    {
+      "exercise": 5,
+      "task": "Replace a stale cache with a supplied fresh list after410.",
+      "expected": "Current u2 snapshot retained; watcher restarts from the new list token."
+    },
+    {
+      "exercise": 6,
+      "task": "Classify a bookmark and a repeated modified event.",
+      "expected": "Bookmark advances progress; duplicate state does not repeat external effects."
+    }
+  ]
+}

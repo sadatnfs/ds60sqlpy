@@ -1,0 +1,474 @@
+{
+  "schema_version": 1,
+  "track_id": "deep-learning-tensorflow",
+  "lessons": [
+    {
+      "id": "tf-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-001.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-001.md",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-001_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-002.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-002.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-002_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-003.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-003.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-003_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-004.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-004.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-004_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-005.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-005.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-005_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-006.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-006.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-006_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-007.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-007.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-007_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-008.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-008.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-008_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-008_solutions.md"
+      ],
+      "verification_id": "tf-gradient-v1"
+    },
+    {
+      "id": "tf-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-009.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-009.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-009_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-010.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-010.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-010_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-011.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-011.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-011_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-012.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-012.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-012_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-013.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-013.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-013_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-014.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-014.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-014_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-015.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-015.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-015_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-016.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-016.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-016_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-017.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-017.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-017_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-018.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-018.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-018_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-019.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-019.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-019_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-020.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-020.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-020_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-021.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-021.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-021_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-022.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-022.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-022_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-023.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-023.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-023_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-024.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-024.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-024_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-025.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-025.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-025_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-026.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-026.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-026_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-027.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-027.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-027_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-028.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-028.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-028_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-029.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-029.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-029_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-030",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-030.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-030.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-030_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-031.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-031.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-031_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-032",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-032.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-032.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-032_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-033.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-033.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-033_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-034",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-034.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-034.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-034_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-035",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-035.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-035.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-035_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "tf-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "tensorflow-cpu",
+      "guide_path": "courses/deep-learning-tensorflow/guides/tf-036.md",
+      "source_path": "courses/deep-learning-tensorflow/lessons/tf-036.py",
+      "solution_paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-036_solution.py",
+        "courses/deep-learning-tensorflow/solutions/tf-036_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

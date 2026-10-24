@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>torch-019: Convolutions, channel layouts and shared computation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>torch-019: Convolutions, channel layouts and shared computation</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-019.md</code></p>
+    </header>
+    <article class="document"><h2 id="torch-019-convolutions-channel-layouts-and-shared-computation">torch-019: Convolutions, channel layouts and shared computation<a class="heading-anchor" href="#torch-019-convolutions-channel-layouts-and-shared-computation" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>torch-018</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout. The finish condition is output shape 1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.</p>
+<p>The operation is cross-correlation: the kernel slides without spatial rotation. VALID-style padding 0 includes only fully contained patches. Stride controls the gap between patch starts. The 3 x3ramp image and asymmetric 2 x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose convolution when local structure and reuse of the same learned rule across positions are useful assumptions for the task. Decide the channel convention, boundary padding, stride and receptive-field growth before choosing a filter count. Weight sharing reduces parameters; it does not prove that a particular learned filter is useful or that the whole network is translation-invariant.</p>
+<p>For a framework comparison, match the mathematical kernel and input axes before comparing values. Keep the literal ramp fixture as an arithmetic oracle, then use a nonuniform changed pixel to test locality. The CPU example establishes those small computations. It does not measure accelerator throughput or train an image classifier.</p>
+<h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
+<p>Compare <a href="../../deep-learning-tensorflow/guides/tf-019.md.html">tf-019</a> after deriving the shared numerical contract.</p>
+<p>TensorFlow&#x27;s common C on v2D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>NCHW:</strong> Batch, channel, height, width axis order for PyTorch images.</p>
+<p><strong>Shared kernel:</strong> One weight pattern reused at many spatial locations.</p>
+<p><strong>Receptive field:</strong> Input positions capable of influencing an output.</p>
+<p><strong>Cross-correlation:</strong> Sliding a kernel without rotating it.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-019/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-019.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-019.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv 2 d with stride 1, padding 0. nn.Conv2d registers weight and optional bias. Count parameters as out_channels<em>in_channels</em>kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.</p>
+<h3 id="derive-the-spatial-map-and-its-backward-accumulation">Derive the spatial map and its backward accumulation<a class="heading-anchor" href="#derive-the-spatial-map-and-its-backward-accumulation" aria-label="Link to this section">#</a></h3>
+<p>Write a PyTorch image as X with shape(N, C_in, H, W) and a grouped Conv2d kernel as K with shape(C_out, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">i</mi><mi mathvariant="normal">n</mi></mrow></mrow></msub></mrow><mrow><mi>g</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{C_{\mathrm{in}}}{g}</annotation></semantics></math>, k_H, k_W), where g is groups. For the ordinary <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">g=1</annotation></semantics></math> case, each output channel sums over every input channel and one spatial patch. With stride s, symmetric numeric padding p and dilation d on one axis, the effective kernel width is k_eff=d(k-1)+1 and the output width is floor((W+2p-k_eff)/s)+1. Apply the same calculation independently to height. This is a count of valid kernel-start positions, not a statement that the image has been resized. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html">PyTorch 2.9 Conv2d</a>.</p>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mi>H</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">W=H=3</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">k=2</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>d</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p=0</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>s</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">s=1</annotation></semantics></math>, there are two starts on each axis. The tensor shape is therefore(1, 1, 2, 2). At the top-left start, the dot product is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>·</mo><mn>1</mn><mo>+</mo><mn>2</mn><mo>·</mo><mn>0</mn><mo>+</mo><mn>4</mn><mo>·</mo><mn>0</mn><mo>+</mo><mn>5</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">1\cdot 1+2\cdot 0+4\cdot 0+5\cdot (-1)=-4</annotation></semantics></math>. At the top-right start it is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>−</mo><mn>6</mn><mo>=</mo><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">2-6=-4</annotation></semantics></math>. Equal outputs follow from this ramp and this kernel, not from a rule that every convolution outputs a constant. Stride 2 keeps only the start at zero and produces(1, 1, 1, 1).</p>
+<p>Parameter count and evaluated output count are different. With two output channels, one input channel, a2×2 kernel and no bias, there are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mn>1</mn><mo>·</mo><mn>2</mn><mo>·</mo><mn>2</mn><mo>=</mo><mn>8</mn></mrow><annotation encoding="application/x-tex">2\cdot 1\cdot 2\cdot 2=8</annotation></semantics></math> learned scalars regardless of spatial image size. Enabling bias adds one scalar per output channel, not one per output pixel. The same coefficient participates in multiple local dot products, so its gradient must accumulate contributions from all positions where it was used.</p>
+<p>A separate analytic backward trace makes that sharing explicit. Suppose L is the sum of the four output values, so every upstream output derivative is one. Each kernel derivative is the sum of the corresponding input positions across the four patches:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Kernel entry</th>
+<th>Input values contributing</th>
+<th>dL/dK</th>
+</tr></thead><tbody>
+<tr>
+<td>top-left</td>
+<td>1, 2, 4, 5</td>
+<td>12</td>
+</tr>
+<tr>
+<td>top-right</td>
+<td>2, 3, 5, 6</td>
+<td>16</td>
+</tr>
+<tr>
+<td>bottom-left</td>
+<td>4, 5, 7, 8</td>
+<td>24</td>
+</tr>
+<tr>
+<td>bottom-right</td>
+<td>5, 6, 8, 9</td>
+<td>28</td>
+</tr>
+</tbody></table></div>
+<p>The input gradient, using the original kernel, is[[1, 1, 0], [1, 0, -1], [0, -1, -1]]. The center pixel participates in four patches, but its +1 and -1 contributions cancel while the other two coefficients are zero. A zero derivative at that pixel is therefore not a disconnected graph. Adding a trainable bias would give bias gradient four for this summed loss. These derivatives are an analytic extension of the fixture; the unchanged worked blocks test forward values and do not enable input/kernel autograd themselves.</p>
+<p>Receptive fields grow through compositions. Start with jump <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">j=1</annotation></semantics></math> and field size <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>r</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r=1</annotation></semantics></math>. A layer updates r to r+(k_eff-1)j and j to js. Two stride-one 2×2 layers have a 3×3 receptive field, not 4×4. If the first 2×2 layer has stride 2, the second stride-one 2×2 layer sees a 4×4 input field because its adjacent inputs are already two original pixels apart. Padding affects which positions refer to actual data at the boundary.</p>
+<p>Layout conversion must preserve these meanings. NCHW to NHWC uses permutation(0, 2, 3, 1); the inverse is(0, 3, 1, 2). A TensorFlow HWIO kernel becomes PyTorch OIHW with permutation(3, 2, 0, 1) for this ordinary convolution. A reshape with the same element count can produce legal dimensions while pairing the wrong channels or pixels. PyTorch channels_last memory format is yet another concept: it can change strides while the public tensor shape still uses NCHW semantics.</p>
+<p>Both frameworks perform cross-correlation here. Rotating the asymmetric kernel changes the output to+4. A symmetric kernel could hide an accidental rotation; the asymmetric fixture exposes it. Weight sharing gives an equivariance relationship under suitable shifts and boundary assumptions, not unconditional invariance. Stride, padding and later reductions can break a simple shift correspondence. Likewise, the zero-sum kernel ignores a constant image offset on these VALID patches, but zero padding at edges or a different learned kernel changes that statement.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-compute-the-fixed-spatial-filter">Example A: Compute the fixed spatial filter<a class="heading-anchor" href="#example-a-compute-the-fixed-spatial-filter" aria-label="Link to this section">#</a></h4>
+<p>Each patch subtracts its bottom-right value from its top-left value. The difference is four throughout this ramp fixture.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+
+image<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> kernel<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+out<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>kernel<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>out<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>full_like<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> output shape 1, 1, 2, 2; all values-4.</p>
+<h4 id="example-b-rotate-the-kernel-explicitly">Example B: Rotate the kernel explicitly<a class="heading-anchor" href="#example-b-rotate-the-kernel-explicitly" aria-label="Link to this section">#</a></h4>
+<p>An asymmetric kernel makes the convention observable. A symmetric kernel could hide an unintended rotation.</p>
+<pre class="highlighted-code"><code class="language-python">rotated<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>flip<span class="syntax-punctuation">(</span>kernel<span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> changed<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>conv2d<span class="syntax-punctuation">(</span>image<span class="syntax-punctuation">,</span>rotated<span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>full_like<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> all outputs+4.</p>
+<h4 id="example-c-translate-image-layout">Example C: Translate image layout<a class="heading-anchor" href="#example-c-translate-image-layout" aria-label="Link to this section">#</a></h4>
+<p>Permutation changes axis meaning without inventing new values. Reshaping the element count alone would not implement a general layout translation.</p>
+<pre class="highlighted-code"><code class="language-python">nhwc<span class="syntax-operator">=</span>image<span class="syntax-operator">.</span>permute<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>nhwc<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>nhwc<span class="syntax-operator">.</span>permute<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>image<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> exact round trip; NHWC shape 1, 3, 3, 1.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: output shape 1, 1, 2, 2; all values-4. 8trainable scalars. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Compute the fixed spatial filter.</strong> Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout. <strong>Expected:</strong> output shape 1, 1, 2, 2; all values-4. <strong>Verify:</strong> Save the assertion results for exercise 1, including output shape 1, 1, 2, 2; all values-4.</li>
+</ol>
+<ol>
+<li><strong>Rotate the kernel explicitly.</strong> Flip both kernel spatial axes and repeat. <strong>Expected:</strong> all outputs+4. <strong>Verify:</strong> Save the assertion results for exercise 2, including all outputs+4.</li>
+</ol>
+<ol>
+<li><strong>Translate image layout.</strong> Convert NCHW to NHWC with permute and back. <strong>Expected:</strong> exact round trip; NHWC shape 1, 3, 3, 1. <strong>Verify:</strong> Save the assertion results for exercise 3, including exact round trip; NHWC shape 1, 3, 3, 1.</li>
+</ol>
+<ol>
+<li><strong>Inspect stride output size.</strong> Repeat with stride 2 and padding 0. <strong>Expected:</strong> output shape 1, 1, 1, 1. <strong>Verify:</strong> Save the assertion results for exercise 4, including output shape 1, 1, 1, 1.</li>
+</ol>
+<ol>
+<li><strong>Trace one pixel influence.</strong> Add 10 to the top-left pixel and compare output delta. <strong>Expected:</strong> only top-left output increases 10. <strong>Verify:</strong> Save the assertion results for exercise 5, including only top-left output increases 10.</li>
+</ol>
+<ol>
+<li><strong>Count shared parameters.</strong> Build a1-input-channel, 2-output-channel, 2x2bias-free Conv2d. <strong>Expected:</strong> 8trainable scalars. <strong>Verify:</strong> Save the assertion results for exercise 6, including 8trainable scalars.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If output dimensions differ, write the effective kernel and start-position count for each axis before changing tensor layout. If the shape agrees but values differ, calculate one patch with channel indices visible and check whether the kernel was rotated. If a TensorFlow comparison fails, verify both image and kernel permutations and the dtype before adjusting tolerances.</p>
+<p>If a gradient differs by the number of positions, inspect whether shared contributions were summed or averaged by the loss. If only a center-pixel gradient is zero, check cancellation before diagnosing disconnection. A single changed corner pixel should influence only the outputs whose receptive fields include it. Keep stride, boundary and layout mistakes distinct: all can produce an accepted tensor operation with the wrong semantic result.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain NCHW, Shared kernel, Receptive field using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>torch-018</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html">PyTorch2.9 Conv2d</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/pytorch-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
+<p><strong>Why is reshape insufficient for layout conversion?</strong></p>
+<p>It changes how storage is grouped but does not generally move each semantic axis to its new position. Permute expresses the axis mapping explicitly.</p>
+<p><strong>Does weight sharing guarantee translation invariance?</strong></p>
+<p>No. Convolution is locally translation-equivariant under appropriate boundary conditions. Pooling, edges, strides and later layers affect the complete behavior.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-019, Convolutions, channel layouts and shared computation.
+Read courses/deep-learning-pytorch/guides/torch-019.md and courses/deep-learning-pytorch/lessons/torch-019.py. Direct prerequisites: `torch-018`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/deep-learning-pytorch/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

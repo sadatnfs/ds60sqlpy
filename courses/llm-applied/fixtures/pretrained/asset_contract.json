@@ -1,0 +1,11 @@
+{
+  "model_id": "HuggingFaceTB/SmolLM2-135M-Instruct",
+  "revision": "12fd25f77366fa6b3b4b768ec3050bf629380bac",
+  "model_card_license": "apache-2.0",
+  "checked_date": "2026-10-23",
+  "default_download": false,
+  "trust_remote_code": false,
+  "training_default_steps": 10,
+  "training_max_length": 128,
+  "status": "Linux arm64 Docker acquisition,10-step full and LoRA training,and adapter reload executed;domain quality unverified"
+}

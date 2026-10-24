@@ -1,0 +1,1274 @@
+{
+  "schema_version": 1,
+  "id": "javascript-typescript",
+  "title": "JavaScript and TypeScript: language, browser and Node applications",
+  "summary": "66 lessons in JavaScript and TypeScript, including a dedicated 24-lesson offline D3 visualization sequence. Progress from language foundations through browser behavior, typed applications, statistical graphics and accessible interactive dashboards.",
+  "lessons": [
+    {
+      "id": "js-001",
+      "title": "JavaScript, Node and the browser",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "javascript-node",
+      "concepts": [
+        "ECMAScript",
+        "Host",
+        "ES module"
+      ],
+      "outcome": "JavaScript is a language; Node and browsers are hosts that provide different APIs around it.",
+      "lab": "Check that the prepared runtime is Node 24 and that process exists.",
+      "verification": "major version 24; process.release.name is node. observed value 7 after await."
+    },
+    {
+      "id": "js-002",
+      "title": "Values, coercion and precise comparisons",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-001"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Coercion",
+        "Strict equality",
+        "Safe integer",
+        "BigInt"
+      ],
+      "outcome": "JavaScript values have runtime types, and operators can perform implicit conversion.",
+      "lab": "Compare 2+3, 2+string 3, and Number(string 3)+2.",
+      "verification": "5, string 23, and 5. valid 12 accepted; invalid cases throw."
+    },
+    {
+      "id": "js-003",
+      "title": "Control flow and loop boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-002"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Truthiness",
+        "Short circuit",
+        "Loop invariant",
+        "Nullish fallback"
+      ],
+      "outcome": "Control flow decides which expressions execute and how many times.",
+      "lab": "Inspect Boolean conversions of 0, empty string, empty array and empty object.",
+      "verification": "false, false, true, true. extra undefined element exposes the off-by-one."
+    },
+    {
+      "id": "js-004",
+      "title": "Functions, scope and closures",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-003"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Lexical scope",
+        "Closure",
+        "Default parameter",
+        "Receiver"
+      ],
+      "outcome": "Functions define reusable computations, and lexical scope determines which bindings a function can read.",
+      "lab": "Use add with 2, 3 and with negative 1, 1.",
+      "verification": "5 and 0. TypeError for 0 and 1.5; step 2 yields 2, 4."
+    },
+    {
+      "id": "js-005",
+      "title": "Arrays and immutable transformations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-004"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Transformation",
+        "Reduction",
+        "Shallow copy",
+        "Mutation"
+      ],
+      "outcome": "Array operations differ in whether they mutate the container, return a new container or reuse referenced objects.",
+      "lab": "Double 1, 2, 3, 4 and keep results above 4.",
+      "verification": "6, 8; original array unchanged. edited record changes; original record stays 1."
+    },
+    {
+      "id": "js-006",
+      "title": "Objects, properties and prototypes",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-005"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Own property",
+        "Prototype chain",
+        "Destructuring",
+        "Shallow freeze"
+      ],
+      "outcome": "Objects associate property keys with values and can inherit properties through a prototype chain.",
+      "lab": "Create a child inheriting kind and owning name.",
+      "verification": "kind found by in but not hasOwn; name is own. values 1 then 2; getter executed twice."
+    },
+    {
+      "id": "js-007",
+      "title": "Maps, sets and collection identity",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-006"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Reference identity",
+        "SameValueZero",
+        "Multiplicity",
+        "Membership"
+      ],
+      "outcome": "Map and Set provide collection contracts different from plain object records.",
+      "lab": "Create two {id: 1} objects and use them as Map keys.",
+      "verification": "size 2 and separate values. b, a, c."
+    },
+    {
+      "id": "js-008",
+      "title": "Strings, Unicode and regular expressions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-007"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "UTF-16 code unit",
+        "Code point",
+        "Normalization",
+        "Pattern escaping"
+      ],
+      "outcome": "JavaScript strings are sequences of UTF-16 code units.",
+      "lab": "Inspect A followed by one emoji.",
+      "verification": "length 3; spread count 2. item_1 accepted; oversized input rejected."
+    },
+    {
+      "id": "js-009",
+      "title": "Errors and explicit validation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-008"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Validation boundary",
+        "Error cause",
+        "Domain invariant",
+        "Failure category"
+      ],
+      "outcome": "Errors should distinguish an invalid request from an expected missing result and an operational failure.",
+      "lab": "Validate id A, quantity 2, price 125 and calculate integer cents.",
+      "verification": "total 250; fresh accepted object. input unchanged."
+    },
+    {
+      "id": "js-010",
+      "title": "Modules and dependency boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-009"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Live binding",
+        "Module namespace",
+        "Resolution",
+        "Module cache"
+      ],
+      "outcome": "A module is both a namespace and a dependency boundary.",
+      "lab": "Import a mutable counter and its increment function, then inspect the count before and after incrementing.",
+      "verification": "count changes from 0 to 1 through the imported namespace. TypeError; exported value remains 3."
+    },
+    {
+      "id": "js-011",
+      "title": "Iterators and generators",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-010"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Iterable",
+        "Iterator",
+        "Suspension",
+        "Iterator closing"
+      ],
+      "outcome": "An iterable describes how to obtain an iterator.",
+      "lab": "Create a generator, inspect its trace, then request one value.",
+      "verification": "trace is empty before next; then started, with value 2. empty array for 0; RangeError for -1 and 1.5."
+    },
+    {
+      "id": "js-012",
+      "title": "Promises and the event loop",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-011"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Settlement",
+        "Reaction",
+        "Microtask",
+        "Promise composition"
+      ],
+      "outcome": "A Promise records one eventual settlement: fulfillment with a value or rejection with a reason.",
+      "lab": "Record executor, synchronous continuation and then reaction.",
+      "verification": "executor, sync, reaction. sync,promise,microtask,timer."
+    },
+    {
+      "id": "js-013",
+      "title": "Async functions and cancellation",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-012"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Cooperative cancellation",
+        "Abort signal",
+        "Deadline",
+        "Cleanup ownership"
+      ],
+      "outcome": "Cancellation is a request communicated to cooperating code.",
+      "lab": "Start a timer with a signal, abort it, and inspect the rejection.",
+      "verification": "AbortError with the original reason as cause. combined signal is aborted with deadline reason."
+    },
+    {
+      "id": "js-014",
+      "title": "Collections, search and algorithmic complexity",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-013"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Complexity",
+        "Search invariant",
+        "Index",
+        "Heap invariant"
+      ],
+      "outcome": "An algorithm is a rule for transforming an input into a result; complexity describes how its required work grows with input size.",
+      "lab": "Find the first insertion position for 4 in 1,4,4,8 and inspect the visited intervals.",
+      "verification": "index 1; intervals shrink to the first duplicate. all invariants hold; invalid value throws."
+    },
+    {
+      "id": "js-015",
+      "title": "Testing with Node built-ins",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-014"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Test oracle",
+        "Negative test",
+        "Regression",
+        "Async test lifetime"
+      ],
+      "outcome": "Tests make a behavioral claim executable.",
+      "lab": "Start a real node --test process asserting add(2,3)=5.",
+      "verification": "child exit status 0; one passing test. two tests pass without shared mutable state."
+    },
+    {
+      "id": "js-016",
+      "title": "Files, paths and streaming text",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-015"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Encoding",
+        "Chunk boundary",
+        "Exclusive creation",
+        "Resource lifetime"
+      ],
+      "outcome": "A filesystem path names a resource in a host filesystem.",
+      "lab": "Write one line containing an emoji, then compare text length and byte length.",
+      "verification": "text round-trips; UTF-8 byte length exceeds code-unit length. no lines."
+    },
+    {
+      "id": "js-017",
+      "title": "HTTP, URLs and JSON boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-016"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "HTTP status",
+        "Representation",
+        "Query encoding",
+        "Application validation"
+      ],
+      "outcome": "HTTP transfers representations between a client and a server using a method, target, headers, status and body.",
+      "lab": "GET /sum with a=2 and b=3 and inspect status, content type and JSON.",
+      "verification": "status 200; application/json; total 5. status 400 rather than a rounded success value."
+    },
+    {
+      "id": "js-018",
+      "title": "A reliable command-line data tool",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-017"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "CLI contract",
+        "NDJSON",
+        "Failure atomicity",
+        "Process boundary"
+      ],
+      "outcome": "A reliable command-line program has an input contract, an output contract and a failure contract.",
+      "lab": "Send two rows worth 250 and 300 cents to the CLI.",
+      "verification": "exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty. exit 2 with input limit diagnostic; stdout empty."
+    },
+    {
+      "id": "js-019",
+      "title": "TypeScript values and compile-time types",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-018"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Static type",
+        "Inference",
+        "Erasure",
+        "Unknown boundary"
+      ],
+      "outcome": "TypeScript adds a static checker to JavaScript.",
+      "lab": "Define a function accepting two numbers and returning their sum; inspect its runtime value.",
+      "verification": "sum 5 with runtime typeof number. 12 doubles to 24; string 12 and Infinity reject."
+    },
+    {
+      "id": "js-020",
+      "title": "Unions, narrowing and exhaustiveness",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-019"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Union",
+        "Narrowing",
+        "Discriminant",
+        "Exhaustiveness"
+      ],
+      "outcome": "A union type describes a value that may belong to one of several alternatives.",
+      "lab": "Format both successful value 7 and a failure message.",
+      "verification": "value:7 and error:offline. runtime fallback throws rather than fabricating success."
+    },
+    {
+      "id": "js-021",
+      "title": "Object types and structural contracts",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-020"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Structural compatibility",
+        "Excess-property checking",
+        "Readonly view",
+        "Optional property"
+      ],
+      "outcome": "TypeScript object types describe the properties an operation requires.",
+      "lab": "Pass a wider named object with id and count to a function requiring only id.",
+      "verification": "label A; original count remains 2. new array 2,4; input remains 1,2."
+    },
+    {
+      "id": "js-022",
+      "title": "Generic functions and constraints",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-021"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Type parameter",
+        "Constraint",
+        "Keyof",
+        "Indexed access type"
+      ],
+      "outcome": "Generics express a relationship between types across a reusable operation.",
+      "lab": "Pass a number and an object through identity.",
+      "verification": "number remains 7; object is the same reference. expected compile error for returning a fabricated length-only object."
+    },
+    {
+      "id": "js-023",
+      "title": "Mapped, conditional and utility types",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-022"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Mapped type",
+        "Conditional type",
+        "Distributivity",
+        "Type derivation"
+      ],
+      "outcome": "Type operators can derive one static description from another, reducing duplicated declarations that drift apart.",
+      "lab": "Create a boolean flag type from id and count fields.",
+      "verification": "id true and count false; a missing flag is a compile error. valid table remains usable; misspelled literal key is a compiler error."
+    },
+    {
+      "id": "js-024",
+      "title": "Runtime validation and unknown input",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-023"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Unknown input",
+        "Schema validation",
+        "Domain validation",
+        "Diagnostic path"
+      ],
+      "outcome": "An external payload should enter typed code as unknown.",
+      "lab": "Parse an order with two line items and inspect the typed success.",
+      "verification": "success with total quantity 5; independent copied item records. every malformed fixture is rejected; an empty items array remains valid."
+    },
+    {
+      "id": "js-025",
+      "title": "Typed modules and NodeNext resolution",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-024"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "NodeNext",
+        "Type-only import",
+        "Emitted extension",
+        "NoEmitOnError"
+      ],
+      "outcome": "TypeScript source participates in two related dependency graphs: the compiler resolves source and declarations while checking, and Node resolves emitted JavaScript while running.",
+      "lab": "Compile a main module importing twice from ./math.mjs and run it.",
+      "verification": "both processes succeed; output 8; math.mjs is emitted. value dependency remains; runtime prints ready:A."
+    },
+    {
+      "id": "js-026",
+      "title": "Classes, composition and private state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-025"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Encapsulation",
+        "Private field",
+        "Composition",
+        "Interface"
+      ],
+      "outcome": "Classes combine state with operations that preserve invariants.",
+      "lab": "Start with 100 cents, deposit 50 and withdraw 30.",
+      "verification": "balance 120; no enumerable balance field. ordinary property 999; private cents remain 2."
+    },
+    {
+      "id": "js-027",
+      "title": "Typed async workflows and errors",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-026"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Result channel",
+        "Rejection channel",
+        "Error translation",
+        "Batch outcome policy"
+      ],
+      "outcome": "Promise<T> describes a fulfilled value.",
+      "lab": "Look up a known id and an absent id.",
+      "verification": "known value 7; absent error not_found. expected diagnostics for value before await or before narrowing."
+    },
+    {
+      "id": "js-028",
+      "title": "Data structures and dynamic programming",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-027"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Breadth-first search",
+        "Parent map",
+        "Dynamic programming",
+        "Recurrence"
+      ],
+      "outcome": "Types clarify an algorithm's interface, but correctness depends on its invariant.",
+      "lab": "Search a graph with two equal-length routes from A to D.",
+      "verification": "A,B,D under the stated neighbor order. RangeError for all invalid configurations; empty denominations cannot make 1."
+    },
+    {
+      "id": "js-029",
+      "title": "The DOM, events and accessible interaction",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-028"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "DOM node",
+        "Event target",
+        "Delegation",
+        "Focus"
+      ],
+      "outcome": "The Document Object Model is a live tree of nodes exposed by the browser.",
+      "lab": "Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count.",
+      "verification": "count 3; button remains keyboard reachable. null is detected before accessing a property."
+    },
+    {
+      "id": "js-030",
+      "title": "Forms, browser storage and application state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-029"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Form submission",
+        "Application state",
+        "Persistence",
+        "Origin"
+      ],
+      "outcome": "A form is a structured input interface, not merely a collection of text boxes.",
+      "lab": "Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity.",
+      "verification": "valid output Ada: 2; invalid input produces no accepted state. owned key absent; unrelated key unchanged."
+    },
+    {
+      "id": "js-031",
+      "title": "Safe browser rendering and security boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-030"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Injection boundary",
+        "Safe text insertion",
+        "URL policy",
+        "Content Security Policy"
+      ],
+      "outcome": "Rendering untrusted text is a data-versus-code boundary.",
+      "lab": "Save the snippet and inspect the resulting DOM and visible title.",
+      "verification": "the angle-bracket text is visible; no img element is created. no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors."
+    },
+    {
+      "id": "js-032",
+      "title": "Streams and backpressure",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-031"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Backpressure",
+        "High-water mark",
+        "Pipeline",
+        "Partial output"
+      ],
+      "outcome": "A stream transports chunks incrementally between a producer and a consumer.",
+      "lab": "Uppercase two byte chunks and collect the transformed output.",
+      "verification": "ABCD after successful pipeline completion. pipeline rejects with AbortError; generator finally runs."
+    },
+    {
+      "id": "js-033",
+      "title": "Worker threads and CPU-bound work",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-032"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Worker thread",
+        "Structured clone",
+        "Transfer",
+        "Worker lifecycle"
+      ],
+      "outcome": "An async function does not automatically move CPU work off the main JavaScript thread.",
+      "lab": "Sum integers 1 through 10000 in a worker and inspect its thread id.",
+      "verification": "sum 50005000; worker thread id positive. DataCloneError before useful worker execution."
+    },
+    {
+      "id": "js-034",
+      "title": "Memory, performance and profiling",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-033"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Measurement boundary",
+        "Monotonic clock",
+        "Retention",
+        "Event-loop delay"
+      ],
+      "outcome": "Performance measurement begins with a correctness contract and a question.",
+      "lab": "Sum a fixed numeric range and record elapsed duration.",
+      "verification": "correct sum 50005000; finite nonnegative elapsed time. monitor disabled afterward; sample count reported honestly."
+    },
+    {
+      "id": "js-035",
+      "title": "Dates, internationalization and time zones",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-034"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Instant",
+        "Calendar date",
+        "Timezone",
+        "Locale formatting"
+      ],
+      "outcome": "A date-time problem can involve an instant, a calendar date, a local clock reading or a duration.",
+      "lab": "Parse UTC midnight and the equivalent previous-day offset representation.",
+      "verification": "equal timestamps and UTC ISO output. NaN timestamp; toISOString and invalid timezone construction throw RangeError."
+    },
+    {
+      "id": "js-036",
+      "title": "Package design and reproducible toolchains",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-035"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Exports map",
+        "Dependency lock",
+        "Engine declaration",
+        "Content identity"
+      ],
+      "outcome": "A package is a public interface plus the files and metadata needed to implement it.",
+      "lab": "Create a package with exports pointing at index.mjs and import its version value.",
+      "verification": "actual child prints 1. child exits successfully for twice(0)=0 and twice(-2)=-4."
+    },
+    {
+      "id": "js-037",
+      "title": "Network retries, idempotency and bounded concurrency",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-036"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Retry classification",
+        "Backoff with jitter",
+        "Idempotency key",
+        "Bounded concurrency"
+      ],
+      "outcome": "A retry is a new attempt after an uncertain or failed operation.",
+      "lab": "Fail twice transiently, then succeed, using random value 0.5 and a recording wait.",
+      "verification": "three attempts; delays 50 and 100; result ready. original reason rejects; attempts remain 0."
+    },
+    {
+      "id": "js-038",
+      "title": "Typed API design and contract testing",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-037"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Envelope",
+        "Contract test",
+        "Versioned schema",
+        "Transport/domain agreement"
+      ],
+      "outcome": "A typed API contract connects request validation, domain behavior, transport status and response decoding.",
+      "lab": "Send 2 and 3 through the handler, JSON round-trip its reply, then decode it.",
+      "verification": "status 200 and decoded total 5. bad_request response does not echo the supplied value."
+    },
+    {
+      "id": "js-039",
+      "title": "Functional core and state machines",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-038"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "State machine",
+        "Event",
+        "Functional core",
+        "Replay"
+      ],
+      "outcome": "A state machine makes allowed transitions explicit.",
+      "lab": "Start a queued job and complete it with value 7.",
+      "verification": "succeeded with attempt 1 and value 7. input unchanged; new object returned; NaN rejects."
+    },
+    {
+      "id": "js-040",
+      "title": "A tested local JavaScript service",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-039"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Transport integration",
+        "Repository lifetime",
+        "Conflict",
+        "Structured event"
+      ],
+      "outcome": "A local service combines transport handling with domain state and resource ownership.",
+      "lab": "POST item A with value 2, then GET the list.",
+      "verification": "201 created; subsequent 200 list contains exactly A. matching id and status; server no longer listening."
+    },
+    {
+      "id": "js-041",
+      "title": "A typed analytics pipeline",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-040"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Framing",
+        "Quarantine",
+        "Aggregation state",
+        "Resource budget"
+      ],
+      "outcome": "An analytics pipeline combines framing, parsing, validation and aggregation.",
+      "lab": "Decode rows for groups A and B from three-byte chunks and aggregate their values.",
+      "verification": "A count 2 sum 5; B count 1 sum 4; zero rejected. zero accepted with one rejected versus zero accepted with zero rejected."
+    },
+    {
+      "id": "js-042",
+      "title": "Release, observability and maintenance",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-041"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Release artifact",
+        "Smoke test",
+        "Artifact verification",
+        "Compatibility gate"
+      ],
+      "outcome": "A release is a specific artifact with a reproducible behavior contract, not merely a folder that once worked during development.",
+      "lab": "Create the authored bundle, verify hashes and run its self-test in a child.",
+      "verification": "three checks passed; actual Node version reported. matching policy passes; mismatched policy throws."
+    },
+    {
+      "id": "js-043",
+      "title": "D3 and SVG: from a number to a visible mark",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-029",
+        "js-005"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "SVG",
+        "viewBox",
+        "selection",
+        "visual encoding"
+      ],
+      "outcome": "Explain why position and length suit count comparison.",
+      "lab": "Create three labeled bars from a saved blank pad.",
+      "verification": "A common baseline supports meaningful magnitude comparison."
+    },
+    {
+      "id": "js-044",
+      "title": "Selections and data joins: enter, update and exit",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-043"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "selection",
+        "data join",
+        "enter",
+        "exit"
+      ],
+      "outcome": "Apply the same pattern to an HTML list.",
+      "lab": "Write a render function using a data join.",
+      "verification": "Current records reconcile to current list items."
+    },
+    {
+      "id": "js-045",
+      "title": "Keyed joins and object identity through updates",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-044"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "key",
+        "identity",
+        "ordering",
+        "reconciliation"
+      ],
+      "outcome": "Transfer identity reasoning to a live leaderboard.",
+      "lab": "Implement a keyed redraw with two records.",
+      "verification": "Scores change and ranks reorder while participant IDs remain stable."
+    },
+    {
+      "id": "js-046",
+      "title": "Scales: domains, ranges, inversion and honest baselines",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-045"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "domain",
+        "range",
+        "linear scale",
+        "band scale"
+      ],
+      "outcome": "Defend a scale choice for signed residuals.",
+      "lab": "Build a scale-based bar chart.",
+      "verification": "A diverging domain with visible zero and explicit units."
+    },
+    {
+      "id": "js-047",
+      "title": "Axes, ticks, labels and numerical formatting",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-046"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "axis",
+        "tick",
+        "format",
+        "units"
+      ],
+      "outcome": "Design axes for counts and rates side by side.",
+      "lab": "Build a labeled quantitative axis.",
+      "verification": "Separate unit labels and denominators make the comparison explicit."
+    },
+    {
+      "id": "js-048",
+      "title": "Data cleaning: CSV parsing, missing values and aggregation",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-047"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "CSV",
+        "validation",
+        "missingness",
+        "rollup"
+      ],
+      "outcome": "Transfer the pipeline to a rate metric.",
+      "lab": "Parse and aggregate the inline fixture.",
+      "verification": "Validate numerator and denominator at a defined grain before division."
+    },
+    {
+      "id": "js-049",
+      "title": "Time series: dates, sorted lines and visible gaps",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-048"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "UTC",
+        "time scale",
+        "line generator",
+        "missing interval"
+      ],
+      "outcome": "Explain interpolation limits for irregular observations.",
+      "lab": "Build a UTC line chart with a gap.",
+      "verification": "Connecting samples is a visual assumption, not evidence between measurements."
+    },
+    {
+      "id": "js-050",
+      "title": "Scatterplots, size encodings and overplotting",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-049"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "scatterplot",
+        "area encoding",
+        "overplotting",
+        "correlation"
+      ],
+      "outcome": "Explain a correlation without claiming causation.",
+      "lab": "Build a three-variable scatterplot.",
+      "verification": "Describe association and identify alternative explanations."
+    },
+    {
+      "id": "js-051",
+      "title": "Histograms, bin boundaries and distribution shape",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-050"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "histogram",
+        "threshold",
+        "bin",
+        "density"
+      ],
+      "outcome": "Compare two groups with different sample sizes.",
+      "lab": "Build the explicit-boundary count histogram.",
+      "verification": "Choose counts or normalized density according to the comparison question."
+    },
+    {
+      "id": "js-052",
+      "title": "Statistical summaries, box plots and uncertainty intervals",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-051"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "quantile",
+        "median",
+        "interval",
+        "sampling uncertainty"
+      ],
+      "outcome": "Design a comparison of two estimated effects.",
+      "lab": "Draw a labeled box and median.",
+      "verification": "Show estimates, interval method, units and a meaningful zero reference."
+    },
+    {
+      "id": "js-053",
+      "title": "Grouped and stacked bars: totals, composition and denominators",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-052"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "stack",
+        "grouped bars",
+        "normalization",
+        "denominator"
+      ],
+      "outcome": "Choose grouped or stacked bars for subgroup comparison.",
+      "lab": "Build a two-series stacked chart.",
+      "verification": "Use shared baselines when precise subgroup comparison is the primary task."
+    },
+    {
+      "id": "js-054",
+      "title": "Reusable and responsive chart components",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "js-053"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "component",
+        "viewBox",
+        "render contract",
+        "empty state"
+      ],
+      "outcome": "Plan real narrow-screen acceptance.",
+      "lab": "Implement a reusable bar renderer.",
+      "verification": "Readable labels, no clipping, keyboard access and stable data meaning."
+    },
+    {
+      "id": "js-055",
+      "title": "Transitions, interruption and reduced-motion design",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-054"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "transition",
+        "interpolation",
+        "interruption",
+        "reduced motion"
+      ],
+      "outcome": "Defend when to use a static update.",
+      "lab": "Implement a bounded transition with completion checks.",
+      "verification": "Prefer immediate clarity when motion adds no explanatory value."
+    },
+    {
+      "id": "js-056",
+      "title": "Pointer interaction, keyboard access and safe tooltips",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-055"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "event",
+        "pointer coordinates",
+        "tooltip",
+        "keyboard focus"
+      ],
+      "outcome": "Review focus and announcement behavior.",
+      "lab": "Build an accessible selection list beside the chart.",
+      "verification": "Focus stays predictable and the live summary is concise."
+    },
+    {
+      "id": "js-057",
+      "title": "Brushing and coordinated views",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-056"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "brush",
+        "selection range",
+        "linked view",
+        "state"
+      ],
+      "outcome": "Design a two-chart coordination rule.",
+      "lab": "Link a brush to a textual record list.",
+      "verification": "One shared selected-ID set drives both views."
+    },
+    {
+      "id": "js-058",
+      "title": "Zoom, pan and rescaled axes",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-057"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "zoom transform",
+        "rescaleX",
+        "viewport",
+        "reset"
+      ],
+      "outcome": "Review zoom for a long time series.",
+      "lab": "Implement linked mark and axis zooming.",
+      "verification": "Bounds, clipping, readable ticks and accessible alternate controls."
+    },
+    {
+      "id": "js-059",
+      "title": "Hierarchies and tree layouts",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-058"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "hierarchy",
+        "parent",
+        "tree layout",
+        "link"
+      ],
+      "outcome": "Design a collapsible taxonomy state model.",
+      "lab": "Render a labeled left-to-right tree.",
+      "verification": "Stable node IDs and explicit collapsed sets preserve identity."
+    },
+    {
+      "id": "js-060",
+      "title": "Treemaps and area-based composition",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-059"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "treemap",
+        "hierarchical sum",
+        "area",
+        "tiling"
+      ],
+      "outcome": "Design a changing treemap with identity preserved.",
+      "lab": "Render labeled leaf rectangles.",
+      "verification": "Stable keys, explicit updates and a readable alternate value list."
+    },
+    {
+      "id": "js-061",
+      "title": "Networks, force simulation and reproducible layouts",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-060"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "graph",
+        "force simulation",
+        "mutation",
+        "layout convergence"
+      ],
+      "outcome": "Choose a strategy for a dense network.",
+      "lab": "Build a bounded three-node network.",
+      "verification": "Filter or aggregate according to an analytical question."
+    },
+    {
+      "id": "js-062",
+      "title": "Geographic data, GeoJSON and projection choices",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-061"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "GeoJSON",
+        "longitude",
+        "projection",
+        "geoPath"
+      ],
+      "outcome": "Plan a real boundary-data integration.",
+      "lab": "Render the synthetic point collection.",
+      "verification": "Source/license, date, stable IDs, topology and projection checks."
+    },
+    {
+      "id": "js-063",
+      "title": "Choropleths, rate denominators and missing geographic joins",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-062"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "choropleth",
+        "rate",
+        "geographic join",
+        "missing data"
+      ],
+      "outcome": "Explain ecological inference limits.",
+      "lab": "Build a stable-ID choropleth join.",
+      "verification": "Regional summaries do not automatically describe individuals."
+    },
+    {
+      "id": "js-064",
+      "title": "Canvas, rendering cost and spatial hit testing",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-063"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "Canvas",
+        "device pixel ratio",
+        "hit testing",
+        "quadtree"
+      ],
+      "outcome": "Design an accessible large-scatter interface.",
+      "lab": "Draw 100 bounded points and a textual summary.",
+      "verification": "Canvas marks plus keyboard filtering, summary and exact-record access."
+    },
+    {
+      "id": "js-065",
+      "title": "Dashboard state, cross-filtering and reproducible views",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-064"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "state",
+        "derived data",
+        "cross-filter",
+        "single source of truth"
+      ],
+      "outcome": "Design a reproducible saved view.",
+      "lab": "Build two coordinated views from one state.",
+      "verification": "Record data identity, filters, units and aggregation policy."
+    },
+    {
+      "id": "js-066",
+      "title": "D3 capstone: an accessible, tested analytical dashboard",
+      "level": "advanced",
+      "minutes": 110,
+      "prerequisites": [
+        "js-065"
+      ],
+      "runtime": "javascript-browser",
+      "concepts": [
+        "acceptance",
+        "accessibility",
+        "data provenance",
+        "visual regression"
+      ],
+      "outcome": "Defend the finished analysis and its evidence limits.",
+      "lab": "Build a complete accessible dashboard from a blank pad.",
+      "verification": "Explain data grain, cleaning, scales, aggregation, interactions and untested surfaces."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://nodejs.org/docs/latest-v24.x/api/",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+      "checked": "2026-10-22"
+    }
+  ]
+}

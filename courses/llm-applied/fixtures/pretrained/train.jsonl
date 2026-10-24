@@ -1,0 +1,4 @@
+{"id": "train-rate", "family": "rate", "prompt": [{"role": "user", "content": "Return only the assignment unit: This trial randomizes accounts."}], "completion": [{"role": "assistant", "content": "account"}]}
+{"id": "train-rack", "family": "rack", "prompt": [{"role": "user", "content": "Return only the assignment unit: This trial randomizes racks."}], "completion": [{"role": "assistant", "content": "rack"}]}
+{"id": "train-host", "family": "host", "prompt": [{"role": "user", "content": "Return only the assignment unit: This trial randomizes hosts."}], "completion": [{"role": "assistant", "content": "host"}]}
+{"id": "train-unknown", "family": "unknown", "prompt": [{"role": "user", "content": "Return only the assignment unit: The report does not describe assignment."}], "completion": [{"role": "assistant", "content": "unknown"}]}

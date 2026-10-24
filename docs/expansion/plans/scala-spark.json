@@ -1,0 +1,1055 @@
+{
+  "schema_version": 1,
+  "status": "planned",
+  "id": "scala-spark",
+  "title": "Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products",
+  "summary": "42 lessons in Scala and Apache Spark, with Scala and PySpark entry routes. Connect language foundations to DataFrame and SQL contracts, local batch and streaming examples, and capstone projects.",
+  "north_star": "A learner can explain, implement, test and operate the same correct bounded data product in Scala and PySpark, then justify its execution and recovery behavior with explicit evidence.",
+  "entry_prerequisites": [],
+  "runtime_profiles": [
+    "reading",
+    "scala-jvm",
+    "spark-local-scala",
+    "spark-local-python"
+  ],
+  "stages": [
+    {
+      "id": "beginner",
+      "title": "Language foundations and trustworthy rows",
+      "outcome": "Enter through Scala foundations or a tested Python bridge, then preserve identity, NULL meaning and a deterministic report contract."
+    },
+    {
+      "id": "intermediate",
+      "title": "Relational correctness and measured execution",
+      "outcome": "Test equivalent Scala/PySpark/SQL results and explain plans, partitions, shuffles, join strategy and columnar I/O using bounded evidence."
+    },
+    {
+      "id": "advanced",
+      "title": "Recoverable batch and streaming products",
+      "outcome": "Design finite streaming tests, explicit state and recovery policies, operational evidence and a defensible handoff without overstating delivery guarantees."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "spark-001",
+      "title": "Choose a Scala-first or PySpark-first local route",
+      "level": "beginner",
+      "minutes": 45,
+      "prerequisites": [],
+      "runtime": "reading",
+      "outcome": "Explain the JVM, Scala binary version, Python driver, Spark engine, and the difference between a proposed profile and an available runner.",
+      "lab": "Annotate a provided version report and choose a route. Scala-first takes 002-010 before 012; PySpark-first demonstrates python-10 skills, takes 011, then 012. Check the classroom capability notice for the prepared Scala and PySpark runtime profiles.",
+      "verification": "The worksheet identifies Spark 4.2.0, Scala binary 2.13, proposed Scala patch 2.13.18, JDK 21 and Python 3.12; it rejects a Scala 3 Spark artifact and a remote master URL. No installation is required.",
+      "concepts": [
+        "JVM and JDK",
+        "binary compatibility",
+        "driver and engine",
+        "local runtime boundary",
+        "alternative learning routes"
+      ]
+    },
+    {
+      "id": "spark-002",
+      "title": "Scala values, types, expressions, and the REPL",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "spark-001"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Read Scala 2.13 syntax and use immutable typed values and expression results.",
+      "lab": "Calculate a three-item basket using val, Int, Long, String and an if expression. Change a price and predict the inferred result type before compiling in the future local profile.",
+      "verification": "Prices 125L, 200L and 75L sum to 400L; a 450L budget leaves 50L. A deliberate reassignment to val fails at compile time and the learner explains the message.",
+      "concepts": [
+        "val and var",
+        "type inference",
+        "Long literals",
+        "if expressions",
+        "compile errors"
+      ]
+    },
+    {
+      "id": "spark-003",
+      "title": "Functions, arguments, and explicit return contracts",
+      "level": "beginner",
+      "minutes": 60,
+      "prerequisites": [
+        "spark-002"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Write small pure Scala functions with named inputs and explicit return types.",
+      "lab": "Implement feeCents(amount: Long, isMember: Boolean): Long. Nonpositive amounts have zero fee; members pay zero below 500 cents and 5 percent at or above 500 (integer division); nonmembers pay a flat 20 cents on positive amounts. Table-test the boundaries.",
+      "verification": "For amounts 0, 100 and 500, member fees are 0, 0 and 25, while nonmember fees are 0, 20 and 20. Tests distinguish Boolean branches and the zero amount boundary.",
+      "concepts": [
+        "def",
+        "parameters and return types",
+        "pure functions",
+        "boundary cases",
+        "expression blocks"
+      ]
+    },
+    {
+      "id": "spark-004",
+      "title": "Immutable collections and transformations",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-003"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Use Seq and Map with map, filter and fold without mutating shared state.",
+      "lab": "Transform five local order amounts, reject negatives into a separate collection, and produce a count and total from the accepted bag.",
+      "verification": "Input Seq(100L, -5L, 0L, 100L, 25L) yields accepted Seq(100L, 0L, 100L, 25L), rejected Seq(-5L), count 4 and sum 225L. Duplicate 100L values remain.",
+      "concepts": [
+        "Seq and Map",
+        "map and filter",
+        "foldLeft",
+        "bag multiplicity",
+        "immutability"
+      ]
+    },
+    {
+      "id": "spark-005",
+      "title": "Option, missing values, and total functions",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-004"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Represent absence explicitly and distinguish None, zero, empty text and JVM null.",
+      "lab": "Parse optional amount text into Option[Long]; retain a rejected-input ledger rather than converting every invalid value to zero.",
+      "verification": "Inputs Some(\"0\"), Some(\"25\"), None and Some(\"bad\") produce observed 0L and 25L, one missing value and one rejected token. No .get is used on an unchecked Option.",
+      "concepts": [
+        "Option",
+        "Some and None",
+        "map and getOrElse",
+        "JVM null boundary",
+        "total functions"
+      ]
+    },
+    {
+      "id": "spark-006",
+      "title": "Case classes, pattern matching, and domain states",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-005"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Model a small event domain with case classes and exhaustive pattern matching.",
+      "lab": "Create Paid and Voided event states using a sealed trait; classify four fixtures and carry event identity independently from amount.",
+      "verification": "Two paid events with equal values retain separate IDs. Every defined state has a match branch; adding a Refunded state makes the omitted-case warning visible before the match is repaired.",
+      "concepts": [
+        "case class",
+        "sealed trait",
+        "pattern matching",
+        "identity versus value",
+        "exhaustiveness"
+      ]
+    },
+    {
+      "id": "spark-007",
+      "title": "Either and validation without hidden data loss",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-006"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Return accepted data or an explicit validation reason without throwing away invalid rows.",
+      "lab": "Combine ID, status and amount parsers with Either and a for comprehension for six bounded CSV-like records.",
+      "verification": "The fixture has 3 accepted and 3 rejected records; rejection reasons are missing_id, invalid_amount and unknown_status, one each. Accepted plus rejected equals 6 and original IDs remain in evidence.",
+      "concepts": [
+        "Either",
+        "Left and Right",
+        "for comprehension",
+        "validation ledger",
+        "error taxonomy"
+      ]
+    },
+    {
+      "id": "spark-008",
+      "title": "Assertions, numeric boundaries, and independent oracles",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-007"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.",
+      "lab": "Build assertion helpers for sequences and bags; compare a hand-calculated fixture with a fold, then investigate Int overflow without using floating-point money.",
+      "verification": "A bag comparison treats Seq(1,1,2) as different from Seq(1,2), while sorting makes Seq(2,1,1) equivalent. 2147483647L + 1L is 2147483648L; the Int example demonstrates why the type matters.",
+      "concepts": [
+        "assertions",
+        "golden fixtures",
+        "multiset comparison",
+        "Int and Long",
+        "BigDecimal boundary"
+      ]
+    },
+    {
+      "id": "spark-009",
+      "title": "Packages, build inputs, and closure serialization",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-008"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Separate source code, compiled artifacts and dependency coordinates before distributing functions.",
+      "lab": "Inspect a small proposed Scala build and a closure that accidentally captures a nonserializable owner. Rewrite it to capture a plain value, without downloading dependencies in this design preview.",
+      "verification": "The dependency uses a _2.13 artifact with the selected Spark version; the rewritten function has only a serializable numeric capture. A dependency lock/report records Scala, Java and Spark versions.",
+      "concepts": [
+        "package and object",
+        "main entry point",
+        "artifact coordinates",
+        "closure capture",
+        "serialization"
+      ]
+    },
+    {
+      "id": "spark-010",
+      "title": "Laziness, iterators, and safe side effects",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-009"
+      ],
+      "runtime": "scala-jvm",
+      "outcome": "Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.",
+      "lab": "Trace an Iterator pipeline and a pure collection pipeline over four values; compare a repeated evaluation with an external counter as a deliberately unsafe design.",
+      "verification": "A lazy iterator emits no trace before consumption, produces accepted doubled values Seq(4,8), and is exhausted after one traversal. The learner rejects a counter as an exactly-once payment mechanism.",
+      "concepts": [
+        "Iterator",
+        "lazy evaluation",
+        "single traversal",
+        "referential transparency",
+        "retryable work"
+      ]
+    },
+    {
+      "id": "spark-011",
+      "title": "PySpark bridge: Python values versus Spark Columns",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "spark-001",
+        "python-10"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Translate known Python collections and tests into explicit Spark expressions while keeping Python and engine execution distinct.",
+      "lab": "In the prepared PySpark profile, compare a Python Boolean with a Column predicate over IDs 1-4. Read the paired Scala syntax card rather than completing every Scala foundation lesson first.",
+      "verification": "Filtering amounts greater than 10 keeps IDs [2,4] from [(1,0),(2,20),(3,None),(4,20)]. Python and/or on Columns is diagnosed and replaced with parenthesized &, | or ~ as appropriate.",
+      "concepts": [
+        "Python driver",
+        "Column expressions",
+        "three-valued filtering",
+        "paired API syntax",
+        "Python prerequisites"
+      ]
+    },
+    {
+      "id": "spark-012",
+      "title": "SparkSession, explicit schemas, and bounded actions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-001"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Create an owned local session and a typed schema, then distinguish transformations from actions in either API.",
+      "lab": "Entry gate: demonstrate Scala 010 competency OR complete the PySpark 011 branch. Create four explicit-schema rows, filter lazily, inspect schema, collect only this tiny result, and stop the owned session. Provide Scala and PySpark variants.",
+      "verification": "Both variants report fields event_id: long, team: string and amount_cents: long with declared nullability; an action returns IDs [1,3]. Session master is local[2], UI is disabled, and teardown stops only the session this lab created.",
+      "concepts": [
+        "SparkSession",
+        "DataFrame and Row",
+        "schema and nullability",
+        "transformations and actions",
+        "owned session lifecycle"
+      ]
+    },
+    {
+      "id": "spark-013",
+      "title": "One row, one event: NULL-aware aggregates",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-012"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Preserve event grain and compare NULL-aware aggregates using Scala, PySpark and SQL with deterministic result ordering.",
+      "lab": "Use the seven-row pilot fixture. Reconcile raw and paid rows, aggregate by team, isolate NULL and zero cases, expose projection-plus-distinct loss, and compare canonical results after repartitioning.",
+      "verification": "Paid metrics are (rows=6, valued=4, total_cents=250); ordered groups are A:(3,2,200), B:(1,1,0), C:(1,0,NULL), NULL:(1,1,50). A wrong projected distinct yields 5 rows and 150 cents. Both APIs and SQL match the golden fixture.",
+      "concepts": [
+        "row grain",
+        "bag semantics",
+        "NULL-aware count and sum",
+        "NULL group",
+        "explicit ordering",
+        "API parity"
+      ]
+    },
+    {
+      "id": "spark-014",
+      "title": "Capstone: a reconciled local revenue report",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-013"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Build and explain a small revenue product whose input, rejected and reported rows reconcile.",
+      "lab": "Extend the pilot to 12 documented events with one invalid status, one missing ID, a zero amount and repeated equal-valued events. Deliver paired implementations, a tiny plain-language oracle and a report contract.",
+      "verification": "Input count 12 equals 10 accepted plus 2 quarantined; each rejection has a reason. Both API outputs match the declared golden groups and cents totals, and a NULL-only group remains distinguishable from a zero group.",
+      "concepts": [
+        "data contract",
+        "quarantine ledger",
+        "independent oracle",
+        "paired implementation",
+        "beginner capstone"
+      ]
+    },
+    {
+      "id": "spark-015",
+      "title": "SQL and DataFrame expressions with ANSI boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-014"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Express the same relational result with SQL and Columns and make casting/error policy explicit.",
+      "lab": "Create a temporary view from eight local rows, compare SQL and DataFrame projections, and exercise invalid integer casts with ANSI behavior explicitly set. Use SQL syntax introduced in the lesson; sql-02 is optional enrichment.",
+      "verification": "Both paths produce the same six valid IDs and exact cents. Invalid casts either raise under the declared strict mode or enter a separately counted tolerant parse branch; no silent zero replacement occurs.",
+      "concepts": [
+        "temporary view",
+        "SQL and Column equivalence",
+        "ANSI mode",
+        "cast and try_cast",
+        "error policy"
+      ]
+    },
+    {
+      "id": "spark-016",
+      "title": "Join cardinality, fanout, semi joins and NULL-safe keys",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-015"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Predict join output counts from key multiplicities before running a join.",
+      "lab": "Join six fact rows to a dimension with a deliberately duplicated key and a NULL key. Compare inner, left, semi, anti and null-safe equality variants in both APIs and SQL.",
+      "verification": "For the supplied multiplicity ledger, key A has 2 facts and 3 dimension matches, so that key contributes 6 inner rows. A semi join retains only the 2 fact rows for A; the NULL match is present only in the explicit null-safe branch.",
+      "concepts": [
+        "join grain",
+        "multiplicity product",
+        "left semi and anti",
+        "null-safe equality",
+        "dimension uniqueness"
+      ]
+    },
+    {
+      "id": "spark-017",
+      "title": "Nested records, JSON and explode row accounting",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-016"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Flatten nested data while preserving parent identity and accounting for empty or missing arrays.",
+      "lab": "Parse four inline JSON strings with an explicit nested schema; compare explode and explode_outer for arrays of lengths 2, 0, NULL and 1. Implement the same schema and transformations in Scala.",
+      "verification": "explode yields 3 rows; explode_outer yields 5 rows and retains one placeholder for each empty or NULL array. Rejected malformed input is counted separately from valid nested records.",
+      "concepts": [
+        "StructType and ArrayType",
+        "from_json",
+        "explode",
+        "explode_outer",
+        "parent-child grain"
+      ]
+    },
+    {
+      "id": "spark-018",
+      "title": "Timestamp types, time zones and interval boundaries",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-017"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Distinguish an instant from a local timestamp and define event windows with explicit time-zone policy.",
+      "lab": "Use UTC strings and documented daylight-saving boundary fixtures, compare timestamp and timestamp_ntz semantics, and filter a half-open daily interval. Cross-check the same inputs in PySpark.",
+      "verification": "An event exactly at the lower boundary is included and one at the upper boundary is excluded. Two textual offsets denoting the same instant compare equal after the declared parse; local-clock ambiguity is surfaced rather than guessed.",
+      "concepts": [
+        "timestamp and timestamp_ntz",
+        "UTC",
+        "session time zone",
+        "half-open intervals",
+        "ambiguous local time"
+      ]
+    },
+    {
+      "id": "spark-019",
+      "title": "Windows, ties and deterministic deduplication",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-018"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Choose a stable winner per key without relying on partition arrival order.",
+      "lab": "Rank eight events with a duplicated timestamp using row_number over a complete order (event_time, event_id). Compare a deterministic winner policy with an intentionally incomplete order in both APIs.",
+      "verification": "The declared winners are event IDs [3,6,8]; repartitioning does not change them when the final tie-breaker is included. The learner explains why dropDuplicates alone cannot promise the newest row.",
+      "concepts": [
+        "Window specification",
+        "row_number",
+        "tie-breaker",
+        "dropDuplicates limitation",
+        "deterministic winner"
+      ]
+    },
+    {
+      "id": "spark-020",
+      "title": "Partitions, repartition, coalesce and output order",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-019"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Separate logical rows, physical partitions and a presentation order.",
+      "lab": "Distribute a 24-row fixture through repartition and coalesce; compare per-partition evidence with canonical content. Demonstrate sortWithinPartitions versus a final global order.",
+      "verification": "All variants retain 24 IDs with the same multiset and sum. Only final orderBy with a complete tie-breaker is accepted as the global display contract; no fixed raw collect sequence is asserted.",
+      "concepts": [
+        "partition",
+        "repartition",
+        "coalesce",
+        "sortWithinPartitions",
+        "global order"
+      ]
+    },
+    {
+      "id": "spark-021",
+      "title": "Read logical and physical plans",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-020"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Use explain output to connect filters, projections and exchanges to the written query.",
+      "lab": "Run a filtered projection and grouped aggregate over the same bounded file fixture, capture explain formatted and extended views, and annotate relevant operators. Record configuration and normalize unstable operator IDs.",
+      "verification": "The evidence locates the requested filter, projected columns and aggregate in each plan, and identifies any Exchange rather than assuming one exact plan string. Logical output is checked independently of the plan.",
+      "concepts": [
+        "logical plan",
+        "physical plan",
+        "Catalyst",
+        "projection pruning",
+        "Exchange"
+      ]
+    },
+    {
+      "id": "spark-022",
+      "title": "Shuffles, stages, tasks and aggregation cost",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-021"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Explain why a wide transformation moves data and distinguish partition count from row count.",
+      "lab": "Aggregate a generated 20000-row fixture by a high-cardinality key, compare two shuffle-partition settings with AQE explicitly disabled for the controlled observation, and inspect bounded task evidence.",
+      "verification": "Both configurations produce the same 1000 groups and total 20000. Recorded task and shuffle metrics are tied to the run configuration; elapsed-time variation alone is not treated as proof of improvement.",
+      "concepts": [
+        "wide transformation",
+        "shuffle",
+        "stage and task",
+        "shuffle partitions",
+        "controlled experiment"
+      ]
+    },
+    {
+      "id": "spark-023",
+      "title": "Broadcast joins, statistics and strategy evidence",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-022"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Choose and verify a join strategy without turning a hint into a correctness assumption.",
+      "lab": "Join 20000 facts to a 20-row dimension, compare automatic planning with a broadcast hint, and capture plans plus bounded metrics. Record the estimated dimension size and the configured threshold.",
+      "verification": "Both outputs retain 20000 fact identities and the same exact aggregate. The learner reports the observed strategy, including when a hint is ignored, and rejects broadcasting an unbounded table.",
+      "concepts": [
+        "broadcast join",
+        "statistics",
+        "join hints",
+        "strategy eligibility",
+        "driver and executor memory"
+      ]
+    },
+    {
+      "id": "spark-024",
+      "title": "AQE, skew and bounded salting experiments",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-023"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Diagnose a skewed key and compare adaptive execution with an explicit, reversible skew strategy.",
+      "lab": "Generate at most 100000 rows with one hot key, record a key-frequency ledger, then compare AQE on/off and a small salted-join design. Keep correctness and runtime evidence separate.",
+      "verification": "All variants match the reference bag and cents total. Evidence includes the hot-key fraction, initial and final adaptive plans when available, and task-size imbalance; salting must remove the helper key from the final contract.",
+      "concepts": [
+        "Adaptive Query Execution",
+        "skew",
+        "adaptive partitions",
+        "salted join",
+        "evidence and cost"
+      ]
+    },
+    {
+      "id": "spark-025",
+      "title": "Parquet, column pruning and file layout",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-024"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Use a columnar local file layout and verify that schema and logical results survive round trips.",
+      "lab": "Write at most 20000 explicit-schema rows into a fresh owned directory, read only two columns with a filter, inspect plan evidence and file counts, then compare a deliberately excessive partition layout.",
+      "verification": "Round-trip canonical content matches the input contract, filtered output has the declared IDs, and plan evidence identifies selected columns and supported pushdown. The report distinguishes directory partitions, Spark partitions and file counts.",
+      "concepts": [
+        "Parquet",
+        "columnar storage",
+        "predicate pushdown",
+        "partition pruning",
+        "small files"
+      ]
+    },
+    {
+      "id": "spark-026",
+      "title": "Built-ins, UDFs and Python-JVM columnar boundaries",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-025"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Prefer engine expressions when possible and make Python/JVM conversion and NULL behavior measurable.",
+      "lab": "Implement the same normalized-label rule using a built-in expression, Scala UDF and Python UDF over 12 edge-case rows. Inspect the Arrow/pandas path only in an explicitly provisioned optional profile.",
+      "verification": "All enabled variants match 12 golden values including NULL, empty and Unicode inputs. A plan annotation identifies Python evaluation when present; no claim is made that Arrow eliminates serialization or that a UDF is automatically faster.",
+      "concepts": [
+        "built-in functions",
+        "Scala UDF",
+        "Python UDF",
+        "Arrow boundary",
+        "NULL contract"
+      ]
+    },
+    {
+      "id": "spark-027",
+      "title": "Persistence lifecycle and cross-language golden tests",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-026"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Cache only reusable work and test Scala/PySpark results with schema and bag-aware comparisons.",
+      "lab": "Reuse a bounded transform twice with and without persistence, materialize it deliberately, unpersist in finally, and run shared golden fixtures across both implementations. Introduce one type mismatch and one dropped duplicate.",
+      "verification": "The correct variants pass schema, multiplicity and value checks; the deliberate Long/String mismatch and duplicate loss each fail a named assertion. The cache lifecycle records materialization and cleanup without relying on a speed threshold.",
+      "concepts": [
+        "cache and persist",
+        "materialization",
+        "unpersist",
+        "schema-aware comparison",
+        "cross-language testing"
+      ]
+    },
+    {
+      "id": "spark-028",
+      "title": "Capstone: a skewed join with correctness and cost evidence",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "spark-027"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Deliver a defensible batch-optimization change backed by a reference result and bounded measurements.",
+      "lab": "Process a generated fact/dimension product with duplicate dimension keys, a hot key and a nullable amount. Repair the data contract first, then compare a baseline with one chosen strategy in Scala and PySpark.",
+      "verification": "Accepted, rejected and joined grains reconcile; both APIs match the independent golden result. A before/after evidence packet includes configuration, plans, key frequencies and resource metrics, with a rollback and no unbounded collect.",
+      "concepts": [
+        "correctness before tuning",
+        "skewed joins",
+        "bounded benchmarking",
+        "evidence packet",
+        "intermediate capstone"
+      ]
+    },
+    {
+      "id": "spark-029",
+      "title": "Restartable batch writes and data-quality contracts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-028"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Make a bounded batch product repeatable without confusing overwrite, append and transactional publication.",
+      "lab": "Write a 30-row local product into run-specific staging directories, validate schema and counts, publish a small manifest only after validation, and inject a failure before publication. Use Scala and Python writer variants.",
+      "verification": "A successful run publishes one manifest with row count 30 and a declared schema; an interrupted run leaves the prior manifest intact. Re-running the same input does not append another 30 rows to the published logical product.",
+      "concepts": [
+        "write mode",
+        "staging and publication",
+        "idempotency",
+        "data-quality contract",
+        "failure injection"
+      ]
+    },
+    {
+      "id": "spark-030",
+      "title": "Deployment topology and dependency boundaries",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": [
+        "spark-029"
+      ],
+      "runtime": "reading",
+      "outcome": "Explain driver/executor responsibilities and distinguish local classic Spark from Connect and cluster deployment.",
+      "lab": "Annotate three provided deployment diagrams and a sanitized submit specification. Trace where Scala jars, Python dependencies, credentials and local paths must exist. No cluster or cloud account is required.",
+      "verification": "The design correctly locates driver and executor work, rejects a driver-only local file as executor-visible storage, and labels Connect support as a separate adapter with its own compatibility and lifecycle tests.",
+      "concepts": [
+        "driver and executor",
+        "client and cluster mode",
+        "Spark Connect",
+        "dependency distribution",
+        "deployment contract"
+      ]
+    },
+    {
+      "id": "spark-031",
+      "title": "Structured Streaming with finite microbatches",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-030"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Model an unbounded relation while running a finite, reproducible local streaming exercise.",
+      "lab": "Place three known files atomically into an owned input directory and use a bounded available-now microbatch run. Compare input, processed and sink counts with a batch oracle in Scala and PySpark.",
+      "verification": "The run terminates after processing the finite files, reports exactly 9 input records and produces the declared batch-equivalent aggregate. Every query is awaited and stopped in finally; no socket or Kafka service is required.",
+      "concepts": [
+        "unbounded table",
+        "microbatch",
+        "trigger",
+        "AvailableNow",
+        "atomic file arrival"
+      ]
+    },
+    {
+      "id": "spark-032",
+      "title": "Event time, watermarks and late-data policy",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-031"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "State what a watermark does and test a declared late-event policy with controlled event-time progression.",
+      "lab": "Use three explicit microbatches containing on-time, out-of-order and far-late events. Add a final event-time-advancing batch, inspect progress watermarks and compare append/update output-mode eligibility.",
+      "verification": "The event ledger distinguishes accepted late data from data outside the tested state-retention policy. The learner records actual watermark advancement and does not equate the configured delay with a universal wall-clock drop deadline.",
+      "concepts": [
+        "event versus processing time",
+        "watermark",
+        "state eviction",
+        "output mode",
+        "late-data contract"
+      ]
+    },
+    {
+      "id": "spark-033",
+      "title": "Stateful deduplication and event identity",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-032"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Bound deduplication state while distinguishing duplicate delivery from legitimate equal-valued events.",
+      "lab": "Replay an event twice within the declared watermark policy, include two distinct equal-valued events and a NULL event ID, then compare the stream with a hand-written identity ledger.",
+      "verification": "The repeated delivery contributes once, the two distinct event IDs both contribute, and the NULL ID enters a quarantine result. Evidence states the deduplication horizon and avoids promising perpetual deduplication.",
+      "concepts": [
+        "event identity",
+        "duplicate delivery",
+        "watermarked deduplication",
+        "state horizon",
+        "NULL-key quarantine"
+      ]
+    },
+    {
+      "id": "spark-034",
+      "title": "Stream-stream joins and bounded state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-033"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Express a time-bounded streaming join and explain which unmatched rows can be finalized.",
+      "lab": "Join finite impression and click file streams with explicit event-time bounds and watermarks. Provide a match ledger with one unmatched and one outside-window click; compare inner and supported outer behavior.",
+      "verification": "Only pairs meeting both identity and interval predicates appear. The report explains delayed outer-row emission and records state/progress evidence rather than assuming immediate unmatched output.",
+      "concepts": [
+        "stream-stream join",
+        "time-range condition",
+        "watermarks on both sides",
+        "outer-result finalization",
+        "state bounds"
+      ]
+    },
+    {
+      "id": "spark-035",
+      "title": "Checkpoints, restart and delivery guarantees",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-034"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Explain how source offsets, state, checkpoints and sink behavior jointly determine recovery semantics.",
+      "lab": "Run two finite batches, stop the owned query, restart the same compatible query with the same checkpoint, then compare with a new checkpoint in a separate output namespace.",
+      "verification": "Same-checkpoint recovery does not treat processed file offsets as fresh input. New-checkpoint behavior is recorded separately and never pointed at an existing append sink without an idempotency plan. A recovery ledger names source and sink assumptions.",
+      "concepts": [
+        "checkpoint",
+        "offset",
+        "state recovery",
+        "source replay",
+        "end-to-end guarantees"
+      ]
+    },
+    {
+      "id": "spark-036",
+      "title": "foreachBatch, idempotent sinks and failure injection",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "spark-035"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Design an idempotent microbatch sink instead of assuming foreachBatch is exactly once.",
+      "lab": "Use an owned local batch ledger keyed by query identity and batch ID. Inject a failure after a staged write and before publication, replay, and compare against an intentionally non-idempotent append implementation.",
+      "verification": "The repaired sink publishes each logical batch once under the documented recovery model; the unsafe append variant visibly duplicates rows. The report separates a local teaching ledger from a transactional production sink guarantee.",
+      "concepts": [
+        "foreachBatch",
+        "batchId",
+        "at-least-once delivery",
+        "idempotent sink",
+        "commit boundary"
+      ]
+    },
+    {
+      "id": "spark-037",
+      "title": "Deterministic streaming tests without sleep-based guesses",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-036"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Test finite streaming scenarios with explicit batch progression and bounded cleanup.",
+      "lab": "Build a shared case matrix for restart, duplicate delivery, late events and invalid input using local files or the deterministic rate-micro-batch source. Keep every checkpoint and sink inside the test-owned root.",
+      "verification": "Four scenario tests compare exact canonical results and progress evidence, terminate within a declared timeout, and remove only their own temporary roots. Tests fail meaningfully when duplicate suppression or publication is deliberately broken.",
+      "concepts": [
+        "finite streaming fixture",
+        "progress synchronization",
+        "timeout",
+        "failure scenario",
+        "test-owned cleanup"
+      ]
+    },
+    {
+      "id": "spark-038",
+      "title": "Observability: plans, progress, event logs and incidents",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-037"
+      ],
+      "runtime": "spark-local-python",
+      "outcome": "Turn a slow or stalled job report into a bounded evidence-based diagnosis.",
+      "lab": "Inspect sanitized batch event logs and streaming progress for three seeded incidents: skew, a growing state store and an input starvation case. Capture equivalent local evidence where the future profile supports it.",
+      "verification": "Each incident report cites a relevant metric or operator, distinguishes observation from hypothesis, proposes one reversible check and names a success condition. No UI screenshot alone is accepted as an end-to-end correctness check.",
+      "concepts": [
+        "Spark UI",
+        "event log",
+        "query progress",
+        "state metrics",
+        "incident evidence"
+      ]
+    },
+    {
+      "id": "spark-039",
+      "title": "Resource budgets, spill and cost tradeoffs",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-038"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Choose a resource-aware strategy from measured work rather than a single elapsed time.",
+      "lab": "Compare two bounded configurations for the same generated dataset, recording rows, file counts, shuffle bytes, spill and task imbalance. Use a hypothetical unit-price sheet only as a separate cost model.",
+      "verification": "Both runs pass the same correctness oracle; the report has explicit units and assumptions and distinguishes measured local resource work from an estimated cloud bill. It proposes a stop condition before increasing data size.",
+      "concepts": [
+        "memory budget",
+        "spill",
+        "shuffle bytes",
+        "task imbalance",
+        "cost model"
+      ]
+    },
+    {
+      "id": "spark-040",
+      "title": "SQL bridge, JDBC boundaries and data handling",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "spark-039"
+      ],
+      "runtime": "reading",
+      "outcome": "Design a bounded database handoff with explicit row, type, concurrency and privacy contracts.",
+      "lab": "Review a supplied PostgreSQL export and JDBC design without opening a live connection. Map cents, decimals, timestamps and NULLs; identify predicate pushdown and partitioned-read assumptions and redact a fake secret from logs.",
+      "verification": "The contract limits source concurrency, defines a consistent-read strategy, maps four tricky types, and rejects credentials in source or an unbounded collect. sql-quality-01 and sql-test-01 are optional cross-track enrichment, not entry requirements.",
+      "concepts": [
+        "JDBC read partitioning",
+        "snapshot consistency",
+        "type mapping",
+        "secret redaction",
+        "least-privilege boundary"
+      ]
+    },
+    {
+      "id": "spark-041",
+      "title": "Compatibility and recovery change rehearsal",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "spark-040"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Assess a Spark/runtime change without reusing incompatible state or trusting a version string alone.",
+      "lab": "Compare a documented source/target compatibility report and run the shared golden suite in each future provisioned profile. Rehearse a checkpoint-incompatible query change using a separate owned recovery path and an explicit rollback.",
+      "verification": "The evidence records Spark, Scala binary/patch, JDK, Python and optional Arrow versions; all golden fixtures pass or the change is rejected. No existing checkpoint is silently reset, migrated or deleted.",
+      "concepts": [
+        "migration contract",
+        "binary compatibility",
+        "golden regression suite",
+        "checkpoint compatibility",
+        "rollback"
+      ]
+    },
+    {
+      "id": "spark-042",
+      "title": "Capstone: a recoverable late-event data product",
+      "level": "advanced",
+      "minutes": 180,
+      "prerequisites": [
+        "spark-041"
+      ],
+      "runtime": "spark-local-scala",
+      "outcome": "Deliver a bounded streaming product with credible correctness, recovery and operational evidence.",
+      "lab": "Combine finite late and duplicate events, paired Scala/PySpark implementations, a state policy, an idempotent sink and failure injection. Hand off a runbook and a cost/evidence packet to a second learner acting as reviewer.",
+      "verification": "The product matches an independent identity-and-event-time oracle before and after one injected restart. The packet accounts for accepted, duplicate, late and invalid rows, proves cleanup ownership and explains every source/sink guarantee without a blanket exactly-once claim.",
+      "concepts": [
+        "recoverable data product",
+        "event ledger",
+        "failure injection",
+        "operational handoff",
+        "advanced capstone"
+      ]
+    }
+  ],
+  "capstones": [
+    {
+      "id": "spark-014",
+      "level": "beginner",
+      "title": "Reconciled local revenue report",
+      "brief": "Turn 12 explicit events into a trustworthy small report in Scala and PySpark with an independent reference ledger.",
+      "deliverables": [
+        "Paired Scala and PySpark implementations with explicit schemas",
+        "12-row fixture, accepted/rejected ledger and golden output",
+        "Short explanation of grain, NULL handling and ordering",
+        "Bounded run and cleanup evidence once profiles exist"
+      ],
+      "acceptance": [
+        "12 inputs reconcile to 10 accepted and 2 rejected records with named reasons",
+        "Duplicate-valued but distinct events remain present",
+        "NULL-only and zero-valued groups remain distinguishable",
+        "Both APIs and SQL match the declared canonical oracle"
+      ]
+    },
+    {
+      "id": "spark-028",
+      "level": "intermediate",
+      "title": "Skewed join correctness and cost review",
+      "brief": "Repair a join contract, then justify one optimization using generated local data and a reproducible comparison.",
+      "deliverables": [
+        "Fact/dimension fixture generator capped at 100000 rows",
+        "Independent key-multiplicity and aggregate oracle",
+        "Paired implementations and a deliberately failing regression case",
+        "Before/after plans, configuration and resource evidence",
+        "Reversible change and bounded cleanup notes"
+      ],
+      "acceptance": [
+        "Input, quarantine and output grains reconcile before any tuning claim",
+        "Both APIs match schema, multiplicity and exact cents values",
+        "The proposal cites observed strategy and resource work rather than elapsed time alone",
+        "No unbounded collect, paid service or remote cluster is required"
+      ]
+    },
+    {
+      "id": "spark-042",
+      "level": "advanced",
+      "title": "Recoverable late-event product and incident review",
+      "brief": "Build a finite streaming product that survives an injected interruption and explains its state and sink guarantees.",
+      "deliverables": [
+        "Controlled late/duplicate/invalid event microbatches and an independent ledger",
+        "Scala and PySpark queries with explicit watermarks and state policy",
+        "Owned checkpoints and an idempotent teaching sink",
+        "Failure-injection tests, recovery transcript and progress evidence",
+        "Incident runbook, resource budget and peer-review handoff"
+      ],
+      "acceptance": [
+        "Before/after-restart canonical outputs match the independent event-time and identity policy",
+        "Accepted, duplicate, late and invalid events are accounted for separately",
+        "Source, checkpoint and sink assumptions are explicit; foreachBatch is not labeled inherently exactly once",
+        "Every query terminates within its budget and cleanup touches only its own root",
+        "A second learner can reproduce the finite scenario from the packet"
+      ]
+    }
+  ],
+  "pilot": {
+    "lesson_id": "spark-013",
+    "guide_path": "docs/expansion/samples/scala-spark-pilot.md",
+    "solution_path": "docs/expansion/samples/scala-spark-pilot-solutions.md",
+    "language": "scala",
+    "code": "import org.apache.spark.sql.{Row, SparkSession}\nimport org.apache.spark.sql.functions._\nimport org.apache.spark.sql.types._\n\nval schema = StructType(Seq(\n  StructField(\"event_id\", LongType, false),\n  StructField(\"team\", StringType, true),\n  StructField(\"amount_cents\", LongType, true),\n  StructField(\"status\", StringType, false)\n))\nval rows = Seq(\n  Row(1L, \"A\", 100L, \"paid\"), Row(2L, \"A\", null, \"paid\"),\n  Row(3L, \"B\", 0L, \"paid\"), Row(4L, null, 50L, \"paid\"),\n  Row(5L, \"B\", 150L, \"void\"), Row(6L, \"A\", 100L, \"paid\"),\n  Row(7L, \"C\", null, \"paid\")\n)\n// Planned spark-local-scala profile supplies an owned local[2] session named spark.\nval raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)\n// Exercise 1: preserve event identity and filter status.\n// Exercise 2: compare row count, observed-amount count and sum.\n// Exercise 3: group by team and explicitly order NULL keys last.\n// Exercise 4: distinguish missing values, zero and NULL-safe equality.\n// Exercise 5: expose projected-distinct loss and check repartition invariance.\n// Exercise 6: compare Scala, PySpark and SQL with the independent golden fixture.\n",
+    "concept": {
+      "title": "An aggregate is a contract over a bag of identified rows",
+      "explanation": "One event per event_id is the input grain. Repeated team/amount values can represent different events. count(*) counts retained rows, count(amount_cents) counts observed amounts, and sum ignores missing amounts while retaining NULL for an all-missing group. Final ordering is an explicit display contract, independent of partition layout.",
+      "worked_example": "For amounts [10, NULL, 0], row count is 3, observed-amount count is 2 and sum is 10. For [NULL, NULL], sum remains NULL; replacing it with zero adds a business assumption."
+    },
+    "prediction": {
+      "prompt": "After filtering the seven-row fixture to status paid, which (row count, observed amount count, total cents) is correct?",
+      "choices": [
+        "(6, 6, 250)",
+        "(6, 4, 250)",
+        "(5, 4, 150)"
+      ],
+      "correct_index": 1,
+      "explanation": "Six events remain. IDs 2 and 7 have missing amounts, so only four amounts are observed. IDs 1 and 6 are distinct events and both contribute 100 cents."
+    },
+    "hint_steps": [
+      "Track event IDs before comparing values. Repeated team/amount pairs do not imply duplicate delivery.",
+      "Compare count of a non-null literal with count of amount_cents, then inspect the all-missing team C group before coalescing anything.",
+      "Build a canonical result with team ascending and NULL keys last; compare it with a hand-written golden list after repartitioning. Check whether a projection removed event identity before distinct."
+    ],
+    "transfer_prompt": "Replace team C with two missing-amount events and add a paid team D event worth 25 cents. Predict new row/observed/sum metrics and group rows before running either API; explain why a zero-fill report is a separate business rule.",
+    "rubric": [
+      "Preserves one-event grain and the exact paid ID set",
+      "Separately verifies row count, observed count and sum",
+      "Preserves the distinction among NULL amount, zero amount and NULL team",
+      "Uses NULL predicates and NULL-safe equality intentionally",
+      "Exposes projected-distinct loss and verifies partition-invariant content",
+      "Compares Scala, PySpark and SQL against an independent ordered golden fixture"
+    ]
+  },
+  "sources": [
+    {
+      "title": "Spark 4.2.0 overview and supported environments",
+      "url": "https://spark.apache.org/docs/4.2.0/",
+      "checked": "2026-10-22",
+      "supports": "Spark version, supported Java/Scala/Python lines, local mode and classic versus Connect distinction."
+    },
+    {
+      "title": "Spark 4.2.0 tagged build configuration",
+      "url": "https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml",
+      "checked": "2026-10-22",
+      "supports": "Tagged Scala 2.13.18 build and Scala binary 2.13; source-level compatibility evidence, not a tested course image."
+    },
+    {
+      "title": "Scala JDK compatibility",
+      "url": "https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html",
+      "checked": "2026-10-22",
+      "supports": "Scala 2.13 and JDK 21 compatibility; keep the Spark-specific binary line distinct from Scala 3."
+    },
+    {
+      "title": "Spark SQL, DataFrames and Datasets",
+      "url": "https://spark.apache.org/docs/4.2.0/sql-programming-guide.html",
+      "checked": "2026-10-22",
+      "supports": "Shared SQL/DataFrame engine and the Scala/Java typed Dataset versus Python DataFrame API distinction."
+    },
+    {
+      "title": "Spark SQL NULL semantics",
+      "url": "https://spark.apache.org/docs/4.2.0/sql-ref-null-semantics.html",
+      "checked": "2026-10-22",
+      "supports": "NULL predicates, NULL-safe equality, grouping, aggregate behavior and ordering used in the pilot."
+    },
+    {
+      "title": "Spark SQL performance tuning",
+      "url": "https://spark.apache.org/docs/4.2.0/sql-performance-tuning.html",
+      "checked": "2026-10-22",
+      "supports": "Statistics, broadcast hints, partition tuning, persistence, AQE and skew experiments."
+    },
+    {
+      "title": "Spark Parquet data source",
+      "url": "https://spark.apache.org/docs/4.2.0/sql-data-sources-parquet.html",
+      "checked": "2026-10-22",
+      "supports": "Columnar file reading, schema handling and Parquet-specific I/O evidence."
+    },
+    {
+      "title": "Structured Streaming overview",
+      "url": "https://spark.apache.org/docs/4.2.0/streaming/index.html",
+      "checked": "2026-10-22",
+      "supports": "Microbatch conceptual model and the need to distinguish processing modes."
+    },
+    {
+      "title": "Structured Streaming DataFrame and Dataset guide",
+      "url": "https://spark.apache.org/docs/4.2.0/streaming/apis-on-dataframes-and-datasets.html",
+      "checked": "2026-10-22",
+      "supports": "Watermarks, stateful operations, file sources, checkpoints, recovery and foreachBatch delivery assumptions."
+    },
+    {
+      "title": "Testing PySpark",
+      "url": "https://spark.apache.org/docs/4.2.0/api/python/getting_started/testing_pyspark.html",
+      "checked": "2026-10-22",
+      "supports": "Local testing patterns and schema/value comparison utilities; supplement with multiplicity-aware course oracles."
+    },
+    {
+      "title": "Spark monitoring and instrumentation",
+      "url": "https://spark.apache.org/docs/4.2.0/monitoring.html",
+      "checked": "2026-10-22",
+      "supports": "Event logs, metrics and observable execution evidence for incident and resource labs."
+    },
+    {
+      "title": "Scala Tour: basics",
+      "url": "https://docs.scala-lang.org/tour/basics.html",
+      "checked": "2026-10-22",
+      "supports": "Scala 2-compatible values, types, expression blocks, functions and entry-level syntax for the language-first route."
+    },
+    {
+      "title": "Scala Tour: case classes",
+      "url": "https://docs.scala-lang.org/tour/case-classes.html",
+      "checked": "2026-10-22",
+      "supports": "Immutable domain records, structural equality and the distinction between equal values and application-defined event identity."
+    },
+    {
+      "title": "Scala Tour: higher-order functions",
+      "url": "https://docs.scala-lang.org/tour/higher-order-functions.html",
+      "checked": "2026-10-22",
+      "supports": "Function values and collection transformations used before introducing distributed expression execution."
+    }
+  ]
+}

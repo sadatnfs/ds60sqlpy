@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-014",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Define the input contract",
+      "input_or_change": "Write the grammar and rejection policy for the five rows.",
+      "expected": "Nonnegative base-10 whole fields; bad and -2 rejected."
+    },
+    {
+      "exercise": 2,
+      "task": "Implement the ledger",
+      "input_or_change": "Store raw row, accepted value or rejection reason.",
+      "expected": "5 ledger entries, 3 accepted, 2 rejected."
+    },
+    {
+      "exercise": 3,
+      "task": "Produce the report",
+      "input_or_change": "Calculate accepted count and exact total.",
+      "expected": "accepted=3 rejected=2 total=35."
+    },
+    {
+      "exercise": 4,
+      "task": "Inject trailing junk",
+      "input_or_change": "Replace 25 with 25x.",
+      "expected": "accepted=2 rejected=3 total=10."
+    },
+    {
+      "exercise": 5,
+      "task": "Test empty input",
+      "input_or_change": "Run no rows through the same pipeline.",
+      "expected": "0 accepted, 0 rejected, total 0."
+    },
+    {
+      "exercise": 6,
+      "task": "Hand off reproducibility",
+      "input_or_change": "Package source, fixture, commands, test results and limitations.",
+      "expected": "Reviewer reproduces the 5-row ledger and failed suffix case."
+    }
+  ]
+}

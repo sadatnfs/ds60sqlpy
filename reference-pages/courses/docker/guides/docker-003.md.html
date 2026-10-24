@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>docker-003: The filesystem, writable layers and container lifetime · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>docker-003: The filesystem, writable layers and container lifetime</h1>
+      <p class="source-path">Generated from <code>courses/docker/guides/docker-003.md</code></p>
+    </header>
+    <article class="document"><h2 id="docker-003-the-filesystem-writable-layers-and-container-lifetime">docker-003: The filesystem, writable layers and container lifetime<a class="heading-anchor" href="#docker-003-the-filesystem-writable-layers-and-container-lifetime" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; about 100 minutes, with additional time for the optional host experiment. Direct prerequisites: <code>docker-002</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Make a restart-versus-recreate persistence table. Choose storage for user progress and transient scratch data. Explain the difference between a configuration, an observed process and evidence of the application&#x27;s behavior.</p>
+<h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A filesystem maps paths to objects such as files and directories. An image supplies initial read-only layers. A running container sees a merged view plus its own writable changes. Creating or modifying a file in that writable layer does not alter the underlying image used by other containers.</p>
+<p>The layer belongs to that container. A restart of the same container generally retains it. Removing and recreating a container creates a different layer, even when the new process has the same name and image. Persistent application data therefore belongs on an explicit volume or other durable store, not accidentally in a disposable container’s root filesystem.</p>
+<p>A path is meaningful inside a filesystem namespace. <code>/app/server.py</code> inside a container need not exist at that path on your laptop. A bind mount can deliberately map a host directory into a container; it also creates a path by which container processes can change host files. Later lessons treat that relationship explicitly rather than assuming all paths are interchangeable.</p>
+<h3 id="anatomy-and-a-trace-you-can-follow">Anatomy and a trace you can follow<a class="heading-anchor" href="#anatomy-and-a-trace-you-can-follow" aria-label="Link to this section">#</a></h3>
+<p>The fixture Dockerfile sets <code>WORKDIR /app</code> and copies <code>server.py</code> there. <code>docker run IMAGE python -c ...</code> starts in that image’s configured directory unless overridden. <code>--read-only</code> makes the container root filesystem read-only, but a separately mounted temporary filesystem or volume can still be writable. This is a property of each mount, not a promise that the process has no state.</p>
+<p>For diagnosis, first identify whether a file came from the image, the writable layer, a bind mount, a named volume or a temporary filesystem. Then ask which lifecycle operation affects that storage. Do not test persistence by deleting the learner’s real classroom volume.</p>
+<h3 id="how-to-use-this-lesson">How to use this lesson<a class="heading-anchor" href="#how-to-use-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>The classroom displays this guide and saves your worksheet. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.</p>
+<p>Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is <code>courses/docker/fixtures/compose-lab/</code>; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name <code>ds60-docker-study</code>. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.</p>
+<p>For Dockerfile examples, create a file named <code>Dockerfile</code> in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-inspect-a-packaged-file">Worked example 1: Inspect a packaged file<a class="heading-anchor" href="#worked-example-1-inspect-a-packaged-file" aria-label="Link to this section">#</a></h4>
+<p>The fixture image contains the app source at its documented path.</p>
+<pre class="highlighted-code"><code class="language-bash">docker run --rm --pull never ds60-docker-study:local python -c <span class="syntax-string">&quot;from pathlib import Path; print(Path(&#x27;/app/server.py&#x27;).is_file())&quot;</span></code></pre>
+<p><strong>Expected observation:</strong> True; this says the file is packaged, not that the server is running.</p>
+<h4 id="worked-example-2-try-a-write-on-a-read-only-root">Worked example 2: Try a write on a read-only root<a class="heading-anchor" href="#worked-example-2-try-a-write-on-a-read-only-root" aria-label="Link to this section">#</a></h4>
+<p>A deliberate failure demonstrates an enforcement boundary.</p>
+<pre class="highlighted-code"><code class="language-bash">docker run --rm --pull never --read-only ds60-docker-study:local python -c <span class="syntax-string">&quot;from pathlib import Path; Path(&#x27;/app/change.txt&#x27;).write_text(&#x27;x&#x27;)&quot;</span></code></pre>
+<p><strong>Expected observation:</strong> A nonzero exit and an operating-system write error; the image is unchanged.</p>
+<h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-classify-app-server-py-in-the-fixture">Exercise 1: Classify /app/server.py in the fixture.<a class="heading-anchor" href="#exercise-1-classify-app-server-py-in-the-fixture" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> An image-provided application file.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h4 id="exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file">Exercise 2: Predict whether a sibling container sees an unmounted new file.<a class="heading-anchor" href="#exercise-2-predict-whether-a-sibling-container-sees-an-unmounted-new-file" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> It does not share the first container writable layer.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h4 id="exercise-3-make-a-restart-versus-recreate-persistence-table">Exercise 3: Make a restart-versus-recreate persistence table.<a class="heading-anchor" href="#exercise-3-make-a-restart-versus-recreate-persistence-table" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Writable layer survives restart but not removal; volumes follow their own lifetime.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h4 id="exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service">Exercise 4: Diagnose a missing file after compose up recreates a service.<a class="heading-anchor" href="#exercise-4-diagnose-a-missing-file-after-compose-up-recreates-a-service" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Check whether it was written to the old disposable layer.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h4 id="exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes">Exercise 5: Explain why read-only plus tmpfs permits temporary writes.<a class="heading-anchor" href="#exercise-5-explain-why-read-only-plus-tmpfs-permits-temporary-writes" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> The root mount and tmpfs have different write policies.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h4 id="exercise-6-choose-storage-for-user-progress-and-transient-scratch-data">Exercise 6: Choose storage for user progress and transient scratch data.<a class="heading-anchor" href="#exercise-6-choose-storage-for-user-progress-and-transient-scratch-data" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> A named volume for progress and bounded temporary storage for scratch.</p>
+<p><strong>Hint:</strong> Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.</p>
+<h3 id="common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.</p>
+<p>The boundary case in this chapter is: Diagnose a missing file after compose up recreates a service. Use its expected observation, Check whether it was written to the old disposable layer., to avoid treating a successful command as proof of the wrong claim. Keep source edits in your own copy. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.</p>
+<h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
+<p>Close the explanations and draw the path from source files to image to container to the observation relevant here. Reconstruct the second worked example with one different value and predict what changes. Explain which state survives process restart, container recreation and image rebuild. If none of those operations applies to this mechanism, explain why.</p>
+<p>Before proceeding, retain six evidence records. For the optional host project, use <code>docker compose -p ds60-docker-study down</code> from the fixture copy to stop its containers and remove its ordinary network. This command preserves named volumes. Volume deletion is a separate deliberate reset of that disposable lab after a backup or export, never a general cleanup step. The fixture README describes its exact scoped reset.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.docker.com/engine/storage/">Official reference 1</a></li>
+<li><a href="https://docs.docker.com/engine/storage/drivers/">Official reference 2</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for docker-003: The filesystem, writable layers and container lifetime.
+Read courses/docker/guides/docker-003.md and courses/docker/lessons/docker-003.md. Direct prerequisites: `docker-002`
+Ask me to predict the first example, review my worksheet, and give one hint at a time.
+Keep courses/docker/solutions/ closed until I attempt or explicitly request comparison.
+Distinguish image metadata, container state and actual application evidence.
+Do not execute host commands, change Docker contexts or delete volumes on my behalf.
+Finish with a fresh transfer case and ask which evidence would falsify my explanation.</code></pre></article>
+  </main>
+</body>
+</html>

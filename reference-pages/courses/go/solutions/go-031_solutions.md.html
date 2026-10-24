@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>go-031: explained solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>go-031: explained solutions</h1>
+      <p class="source-path">Generated from <code>courses/go/solutions/go-031_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="go-031-explained-solutions">go-031: explained solutions<a class="heading-anchor" href="#go-031-explained-solutions" aria-label="Link to this section">#</a></h2>
+<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
+<p>Logs describe events; stable fields let operators inspect them without parsing prose. A correlation ID connects related work, a level indicates severity and numeric counts support diagnosis. Logging does not replace returning an error or checking an invariant. Avoid credentials, raw tokens, complete user payloads and unbounded identifiers. Structured output can still leak data if its fields are chosen badly. Tests should control timestamps and parse records instead of comparing incidental field order. Metrics describe aggregates, logs describe events and traces connect distributed spans. Choose which evidence answers the question rather than emitting everything indiscriminately.</p>
+<p>log/slog builds records from key/value attributes. JSONHandler writes to an io.Writer. HandlerOptions.ReplaceAttr can remove timestamps in deterministic tests. Logger.With attaches common attributes to a derived logger. A logged status is a report, while the actual operation and durable receipt remain separate evidence.</p>
+<h3 id="1-emit-a-structured-event">1. Emit a structured event<a class="heading-anchor" href="#1-emit-a-structured-event" aria-label="Link to this section">#</a></h3>
+<p>Log processed with count 3 and parse its JSON.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;processed&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;msg&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;processed&quot;</span> <span class="syntax-operator">&amp;&amp;</span> v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">float64</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;fields&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The record has message processed and numeric count 3.</p>
+<p>The check inspects meaning rather than serialized field order.</p>
+<h3 id="2-retain-correlation">2. Retain correlation<a class="heading-anchor" href="#2-retain-correlation" aria-label="Link to this section">#</a></h3>
+<p>Log request_id lesson-7.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;read&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;request_id&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson-7&quot;</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;request_id&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;lesson-7&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;correlation&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The ID is retained exactly.</p>
+<p>A bounded synthetic ID is sufficient. Secrets and complete payloads are inappropriate correlation fields.</p>
+<h3 id="3-control-variable-time">3. Control variable time<a class="heading-anchor" href="#3-control-variable-time" aria-label="Link to this section">#</a></h3>
+<p>Inspect the deterministic fixture record.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;stable&quot;</span><span class="syntax-punctuation">)</span>
+_<span class="syntax-punctuation">,</span> present <span class="syntax-operator">:=</span> v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;time&quot;</span><span class="syntax-punctuation">]</span>
+check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>present<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;time&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The time attribute is absent.</p>
+<p>Production logs generally need time. The fixture deliberately controls a variable field instead of asserting the current clock.</p>
+<h3 id="4-keep-status-structured">4. Keep status structured<a class="heading-anchor" href="#4-keep-status-structured" aria-label="Link to this section">#</a></h3>
+<p>Log a failed status separately from its message.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;read finished&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;status&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;failed&quot;</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;status&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;failed&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;status&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> status equals failed.</p>
+<p>Filtering a structured status is more reliable than searching for a particular sentence.</p>
+<h3 id="5-redact-before-logging">5. Redact before logging<a class="heading-anchor" href="#5-redact-before-logging" aria-label="Link to this section">#</a></h3>
+<p>Replace a credential value with a fixed marker.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;configuration&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;credential&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;[redacted]&quot;</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;credential&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;[redacted]&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;redaction&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Only [redacted] is present.</p>
+<p>Redaction at the producer boundary is easier to review than attempting to remove secrets after serialization.</p>
+<h3 id="6-transfer-numeric-evidence">6. Transfer numeric evidence<a class="heading-anchor" href="#6-transfer-numeric-evidence" aria-label="Link to this section">#</a></h3>
+<p>Log a byte count of 12.</p>
+<pre class="highlighted-code"><code class="language-go">v <span class="syntax-operator">:=</span> logRecord<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;read&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;bytes&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;bytes&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">float64</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;numeric&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The parsed field remains numeric 12.</p>
+<p>Numbers should remain numbers for aggregation. The test decoder represents JSON numbers as float64 by default.</p>
+<h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+  </main>
+</body>
+</html>

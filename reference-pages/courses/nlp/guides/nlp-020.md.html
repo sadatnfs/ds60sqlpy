@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>nlp-020: Weak supervision and active learning · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>nlp-020: Weak supervision and active learning</h1>
+      <p class="source-path">Generated from <code>courses/nlp/guides/nlp-020.md</code></p>
+    </header>
+    <article class="document"><h2 id="nlp-020-weak-supervision-and-active-learning">nlp-020: Weak supervision and active learning<a class="heading-anchor" href="#nlp-020-weak-supervision-and-active-learning" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-019</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Weak supervision creates noisy training signals from rules, heuristics, databases or model suggestions when full manual annotation is expensive. Active learning chooses which examples to send for labeling next. They address different parts of the data problem: weak supervision expands label supply, while active learning allocates a limited review budget. Neither makes an independently labeled evaluation set unnecessary.</p>
+<p>A labeling function can emit class zero, class one or abstain. Abstention means the rule has no applicable evidence under its scope, not that the example belongs to a negative class. Multiple rules can overlap, conflict or share the same underlying cue. Treating three correlated versions of one rule as three independent experts can exaggerate confidence.</p>
+<p>The executable reference implements transparent majority voting with tie abstention and uncertainty/diversity selection. It does not implement Snorkel&#x27;s learned label model or claim to estimate rule accuracies from unlabeled data. That distinction keeps the limitations of a simple baseline visible before introducing a probabilistic weak-supervision system.</p>
+<h3 id="measure-coverage-and-conflict-before-combining">Measure coverage and conflict before combining<a class="heading-anchor" href="#measure-coverage-and-conflict-before-combining" aria-label="Link to this section">#</a></h3>
+<p>Coverage is the fraction of examples receiving at least one non-abstaining label. Conflict is the fraction receiving both class-zero and class-one votes. State the denominator: conflict among all examples differs from conflict among covered examples. In the four-row fixture, three rows are covered and one conflicts, giving .75 coverage and .25 overall conflict, or one-third among covered rows.</p>
+<p>Majority voting counts positive and negative labels but ignores abstentions. Equal counts return abstain under the declared policy. An all-abstaining row also returns abstain, but its reason differs from a conflict tie. A production ledger should retain both the aggregate label and the underlying rule outputs so these cases can be diagnosed separately.</p>
+<p>A high coverage number does not mean high accuracy. A rule can label every example incorrectly, and a conflicting rule can sometimes be the more informative one. Use a reviewed development sample to inspect rule behavior, and reserve independent gold evaluation data for the final model.</p>
+<h3 id="correlations-and-learned-label-models">Correlations and learned label models<a class="heading-anchor" href="#correlations-and-learned-label-models" aria-label="Link to this section">#</a></h3>
+<p>Suppose two labeling functions both look for the same urgent keyword and a third uses a different contextual signal. Votes [1,1,0] favor one only because the duplicated cue is counted twice. Collapsing the duplicate family gives [1,0], a tie. This does not prove which label is correct; it exposes dependence in the evidence.</p>
+<p>Probabilistic label models attempt to estimate source accuracies and sometimes dependencies under specific assumptions. They can improve over majority voting, but identifiability and model misspecification matter. An LLM-generated label is another noisy source, and repeated prompts to the same model may share errors. Do not assume that more synthetic labels or more agreeing model calls create independent evidence.</p>
+<p>If weak labels train a downstream classifier, evaluate the classifier on independently reviewed examples. Agreement with its own labeling functions only measures imitation. Preserve the rule versions and source provenance because a changed heuristic changes the effective training target.</p>
+<h3 id="active-learning-and-the-sampling-bias-it-creates">Active learning and the sampling bias it creates<a class="heading-anchor" href="#active-learning-and-the-sampling-bias-it-creates" aria-label="Link to this section">#</a></h3>
+<p>Uncertainty sampling selects examples near a current decision boundary, using entropy, margin or another score. For binary probability p, entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>p</mi><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mi>p</mi><mo stretchy="false">)</mo><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-p\cdot \log(p)-(1-p)\cdot \log(1-p)</annotation></semantics></math>, largest at one-half. Uncertainty is model-dependent: a confidently wrong out-of-domain example may never be selected, while noise near the boundary can consume the budget repeatedly.</p>
+<p>Diversity constraints can prevent a batch from containing many near-duplicate documents from one family. The reference ranks by entropy and accepts at most one example per family until the budget is filled. This is a simple deterministic selection policy, not an optimal information-gain algorithm. A different task may need representative sampling, rare-class coverage or cost-aware review.</p>
+<p>Actively selected labels are not a representative test sample. Evaluating only on queried hard cases can make performance appear worse, while evaluating on chosen easy cases can make it appear better. Keep a separate representative gold set or use an appropriate sampling-aware analysis. Record which examples were selected by which policy at each iteration.</p>
+<h3 id="a-measured-weak-to-strong-workflow">A measured weak-to-strong workflow<a class="heading-anchor" href="#a-measured-weak-to-strong-workflow" aria-label="Link to this section">#</a></h3>
+<p>Start with an annotation guide and a small independent reviewed set. Write labeling functions with narrow documented scopes, inspect coverage/conflict and evaluate their errors. Train a baseline on weak labels, then use uncertainty and diversity to propose a bounded review batch from a pool disjoint from final evaluation. Reviewers should see the source evidence and know whether labels were model-assisted.</p>
+<p>After each iteration, retrain and compare on unchanged acceptance cases plus deliberately added regression cases. Measure annotation cost, class coverage and task utility, not only label volume. Stop when the marginal information gain no longer justifies the review effort or when the dominant issue is a label definition or data-collection gap rather than model uncertainty.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-read-a-weak-label-matrix">Worked example 1: Read a weak-label matrix<a class="heading-anchor" href="#worked-example-1-read-a-weak-label-matrix" aria-label="Link to this section">#</a></h4>
+<p>Rows [1,1,-1],[0,-1,0],[1,0,-1],[-1,-1,-1] produce majority outputs [1,0,-1,-1]. The third row abstains because of a tie and the fourth because no rule applies. Three rows are covered and one conflicts. Keep those reasons distinct.</p>
+<h4 id="worked-example-2-expose-duplicated-evidence">Worked example 2: Expose duplicated evidence<a class="heading-anchor" href="#worked-example-2-expose-duplicated-evidence" aria-label="Link to this section">#</a></h4>
+<p>Votes [1,1,0] appear to favor class one, but the first two rules may be copies of the same cue. Grouping them as one source yields [1,0], which abstains. Neither result is ground truth; the difference identifies a dependence assumption that a naive vote ignored.</p>
+<h4 id="worked-example-3-select-uncertainty-with-a-family-budget">Worked example 3: Select uncertainty with a family budget<a class="heading-anchor" href="#worked-example-3-select-uncertainty-with-a-family-budget" aria-label="Link to this section">#</a></h4>
+<p>Probabilities [0.5,0.6,0.95,0.1] make the first two examples most uncertain. Both belong to family a, so a one-per-family budget selects indices zero and three instead. The choice trades raw uncertainty for diversity and must be evaluated as a labeling policy, not a final classifier metric.</p>
+<h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
+<p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+labels<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+conflict<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span>np<span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>coverage<span class="syntax-punctuation">,</span>conflict<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> coverage<span class="syntax-operator">==</span><span class="syntax-number">.75</span> <span class="syntax-operator">and</span> conflict<span class="syntax-operator">==</span><span class="syntax-number">.25</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.95</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+entropy<span class="syntax-operator">=</span><span class="syntax-operator">-</span>p<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>p<span class="syntax-punctuation">)</span>
+order<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span>entropy<span class="syntax-punctuation">,</span>kind<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> order<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></code></pre>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-020.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-020-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-020.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-020_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-compute-weak-label-diagnostics">Exercise 1: Compute weak-label diagnostics<a class="heading-anchor" href="#exercise-1-compute-weak-label-diagnostics" aria-label="Link to this section">#</a></h4>
+<p>Calculate covered and conflicting rows in the supplied matrix.</p>
+<p><strong>Expected:</strong> Coverage.75,overall conflict.25 and conflict among covered1/3.</p>
+<p><strong>Verify:</strong> Coverage.75,overall conflict.25 and conflict among covered1/3. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Define the denominator before reporting a percentage.</p>
+<h4 id="exercise-2-implement-tie-aware-voting">Exercise 2: Implement tie-aware voting<a class="heading-anchor" href="#exercise-2-implement-tie-aware-voting" aria-label="Link to this section">#</a></h4>
+<p>Aggregate the four rows without treating -1 as a class vote.</p>
+<p><strong>Expected:</strong> Outputs[1,0,-1,-1].</p>
+<p><strong>Verify:</strong> Outputs[1,0,-1,-1]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Compare positive and negative vote counts; tie returns abstain.</p>
+<h4 id="exercise-3-inspect-source-correlation">Exercise 3: Inspect source correlation<a class="heading-anchor" href="#exercise-3-inspect-source-correlation" aria-label="Link to this section">#</a></h4>
+<p>Compare votes[1,1,0] with collapsed source-family votes[1,0].</p>
+<p><strong>Expected:</strong> Majority1 becomes abstain, with a written explanation of duplicated evidence.</p>
+<p><strong>Verify:</strong> Majority1 becomes abstain, with a written explanation of duplicated evidence. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Ask which rules use independent information.</p>
+<h4 id="exercise-4-rank-uncertainty">Exercise 4: Rank uncertainty<a class="heading-anchor" href="#exercise-4-rank-uncertainty" aria-label="Link to this section">#</a></h4>
+<p>Compute binary entropy for probabilities[.5,.6,.95,.1].</p>
+<p><strong>Expected:</strong> Top two uncertainty indices[0,1]; <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math> has maximum entropy.</p>
+<p><strong>Verify:</strong> Top two uncertainty indices[0,1]; <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math> has maximum entropy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Handle <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">p=0</annotation></semantics></math> and 1 without log-zero warnings.</p>
+<h4 id="exercise-5-enforce-diversity-and-budget">Exercise 5: Enforce diversity and budget<a class="heading-anchor" href="#exercise-5-enforce-diversity-and-budget" aria-label="Link to this section">#</a></h4>
+<p>Select two examples with families[a,a,b,c], at most one per family.</p>
+<p><strong>Expected:</strong> Selected indices[0,3]; budget0 returns an empty batch.</p>
+<p><strong>Verify:</strong> Selected indices[0,3]; budget0 returns an empty batch. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Walk the uncertainty order and skip already represented families.</p>
+<h4 id="exercise-6-protect-independent-evaluation">Exercise 6: Protect independent evaluation<a class="heading-anchor" href="#exercise-6-protect-independent-evaluation" aria-label="Link to this section">#</a></h4>
+<p>Design a weak-label/active-review experiment with disjoint query and gold IDs.</p>
+<p><strong>Expected:</strong> A written split and provenance ledger prevent reviewed pool cases from silently becoming the final acceptance set.</p>
+<p><strong>Verify:</strong> A written split and provenance ledger prevent reviewed pool cases from silently becoming the final acceptance set. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Separate development labels from representative held-out evaluation.</p>
+<h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Are many agreeing labeling functions strong evidence?</strong> Only after considering their accuracy and dependence. Several functions can repeat one flawed cue and create a misleading majority.</p>
+<p><strong>Interview: Can active-learning examples serve as an ordinary test set?</strong> They were selected by a model-dependent policy and are generally not representative. Use independent evaluation or a justified design-aware analysis.</p>
+<p><strong>Interview: What does the reference omit from a learned weak-supervision system?</strong> It uses transparent voting and diagnostics, not a probabilistic estimate of source accuracy/dependence. A label-model implementation would require additional assumptions and validation.</p>
+<h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
+<p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-021</code>.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://arxiv.org/abs/1711.10160">Ratner and colleagues, Snorkel and weak supervision</a></li>
+</ul>
+<ul>
+<li><a href="https://burrsettles.com/pub/settles.activelearning.pdf">Settles, Active Learning Literature Survey</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-020.
+Read courses/nlp/guides/nlp-020.md and courses/nlp/learners/nlp-020.py.
+Direct prerequisites: `nlp-019`.
+Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/nlp/solutions/ closed until I attempt or explicitly request comparison.
+Check numerical, span or task-level outputs and a counterexample; do not equate a toy mechanism with pretrained-model quality.
+Do not download corpora or models or send text to an external service.</code></pre></article>
+  </main>
+</body>
+</html>

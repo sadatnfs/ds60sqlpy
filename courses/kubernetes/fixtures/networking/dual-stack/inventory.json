@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "runtime": "manual-owned-cluster-only",
+  "image": "ds60sqlpy-k8s-dualstack-study:0.1.0",
+  "listener": {
+    "family": "AF_INET6",
+    "IPV6_V6ONLY": 0,
+    "container_bind": "::",
+    "port": 8080,
+    "native_default_bind": "::1"
+  },
+  "success": {
+    "path": "/version",
+    "body": "ds60-dualstack-v1\n",
+    "required_families": [
+      "IPv4",
+      "IPv6"
+    ]
+  },
+  "prerequisites": [
+    "owned disposable target",
+    "dual-stack kernel/CNI/Pod/Service support",
+    "preloaded local image",
+    "explicit family-specific in-cluster client",
+    "UID-aware cleanup"
+  ],
+  "claims": "Source and local listener checks are separate from actual cluster qualification."
+}

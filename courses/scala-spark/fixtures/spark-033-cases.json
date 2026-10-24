@@ -1,0 +1,91 @@
+{
+  "lesson_id": "spark-033",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Classify missing event identity before deduplication",
+      "input_contract": "Add reason missing_event_id for NULL event_id and accepted otherwise, retaining delivery_id, amount and event_time.",
+      "expected": "Delivery 3 is quarantined;known IDs are eligible for the separate deduplication policy.",
+      "verification": "Construct the first streaming classification with all declared fields and verify the exact quarantine row after the first phase."
+    },
+    {
+      "exercise": 2,
+      "title": "Define a bounded event-ID stateful operator",
+      "input_contract": "Filter accepted identities, drop the reason field, attach a five-minute watermark to event_time, and deduplicate within that watermark on event_id only.",
+      "expected": "The result remains streaming and retains delivery_id, event_id, amount, event_time. Equal amounts across distinct IDs remain distinct.",
+      "verification": "Assert output shape and use the explicit event_id key, then validate all retained identities through later sink checks."
+    },
+    {
+      "exercise": 3,
+      "title": "Execute accepted and quarantine branches with separate checkpoints",
+      "input_contract": "Run both first-phase branches with AvailableNow:deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.",
+      "expected": "Accepted(e1, delivery 1,10),(e2, delivery 2,10);quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows;prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.",
+      "verification": "Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3."
+    },
+    {
+      "exercise": 4,
+      "title": "Suppress a replay while retaining distinct equal-valued events",
+      "input_contract": "Publish the second file after the first phase terminates and run both compatible branches again. Compare the accepted business identities and their total.",
+      "expected": "Accepted(e1, delivery 1,10),(e2, delivery 2,10),(e3, delivery 5,10);delivery 4 replay contributes no additional row. Business total 30.",
+      "verification": "Assert all retained event/delivery pairs, sum 30, raw source total 5 and prepared branch metrics 2 accepted-eligible inputs versus 0 quarantined inputs for this phase."
+    },
+    {
+      "exercise": 5,
+      "title": "Observe state removal and state the retention limit",
+      "input_contract": "Publish the 00:20 advancer and run both branches. Sum actual numRowsRemoved state metrics from the accepted branch and inspect remaining state.",
+      "expected": "The three old business-key states are removed under the observed watermark progression;accepted output still retains their committed rows plus the advancer.",
+      "verification": "Assert removed state rows at least 3, unchanged business rows and one advancer output. Print actual state metrics without promising perpetual deduplication."
+    },
+    {
+      "exercise": 6,
+      "title": "Reconcile deliveries, quarantine, replay suppression and business totals",
+      "input_contract": "Read the six source deliveries once as a bounded batch and compare them with both sinks. Return source deliveries, known-ID deliveries, quarantine rows, accepted rows including advancer, and business total.",
+      "expected": "Ledger(6,5,1,4,30). One known-ID delivery is suppressed as an in-horizon replay;three distinct equal-valued business events remain.",
+      "verification": "Assert the complete ledger and six unique delivery IDs;confirm no active queries remain before cleanup."
+    }
+  ],
+  "golden": {
+    "branch_metric_scope": "PreparedSpark4.0.1 reports scan rows after branch filters;raw deliveries are independently counted.",
+    "reported_inputs_by_phase": {
+      "accepted": [
+        2,
+        2,
+        1
+      ],
+      "quarantine": [
+        1,
+        0,
+        0
+      ]
+    },
+    "source_deliveries": 6,
+    "known_id_deliveries": 5,
+    "quarantine_deliveries": [
+      3
+    ],
+    "replay_delivery": 4,
+    "business_rows": [
+      [
+        "e1",
+        1,
+        10
+      ],
+      [
+        "e2",
+        2,
+        10
+      ],
+      [
+        "e3",
+        5,
+        10
+      ]
+    ],
+    "advancer_delivery": 6,
+    "accepted_sink_rows": 4,
+    "business_total": 30,
+    "watermark_delay": "5 minutes",
+    "perpetual_deduplication_claim": false
+  }
+}

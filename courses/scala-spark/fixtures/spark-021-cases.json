@@ -1,0 +1,80 @@
+{
+  "lesson_id": "spark-021",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Check the query meaning before its execution plan",
+      "input_contract": "Execute the projection query and return ordered(id, doubled) tuples. Compare all nine rows with the literal rule id 3..11, doubled=20*id.",
+      "expected": "Nine tuples from(3,60) through(11,220), with no missing or extra identities.",
+      "verification": "Assert the complete tuple list, not only the first/last rows or a printed plan."
+    },
+    {
+      "exercise": 2,
+      "title": "Capture each extended planning stage",
+      "input_contract": "Return EXPLAIN EXTENDED text for the supplied query. Permit only EXTENDED or FORMATTED as the mode and reject another mode.",
+      "expected": "Text includes Parsed Logical Plan, Analyzed Logical Plan, Optimized Logical Plan and Physical Plan sections. An invalid mode is rejected.",
+      "verification": "Assert all four section labels and an explicit invalid-mode exception."
+    },
+    {
+      "exercise": 3,
+      "title": "Inspect the scan scope for column pruning",
+      "input_contract": "Capture FORMATTED output and extract lines containing ReadSchema. Verify that the projection scan requests id and amount but not group_id or unused_payload. Also locate Filter and Project operators.",
+      "expected": "ReadSchema includes id:bigint and amount:bigint only among the four stored fields. Filter and Project evidence are present.",
+      "verification": "Assert needed/excluded fields in the extracted scan lines rather than in the entire extended plan."
+    },
+    {
+      "exercise": 4,
+      "title": "Connect grouped output to a redistribution boundary",
+      "input_contract": "Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.",
+      "expected": "Groups 0,1,2 each have n3 with totals 180,210,240. The plan shows aggregation and an Exchange.",
+      "verification": "Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting."
+    },
+    {
+      "exercise": 5,
+      "title": "Normalize incidental identifiers without erasing semantics",
+      "input_contract": "Replace expression-number suffixes such as#123 with#ID and the exact owned root path with<owned-root> in plan text. Preserve operators, field names, predicates and partitioning descriptions.",
+      "expected": "A synthetic Project id#123L becomes Project id#IDL;the current temporary root is absent from normalized actual plan text.",
+      "verification": "Assert the synthetic replacement and required semantic tokens after normalizing the actual plan."
+    },
+    {
+      "exercise": 6,
+      "title": "Compare equivalent query forms with separate semantic and plan evidence",
+      "input_contract": "Execute a nested projection/filter form of the direct query and compare its exact rows. Capture its extended plan and return a bounded receipt containing Spark version, ANSI, AQE and shuffle partition settings.",
+      "expected": "The nested query has the same nine tuples. Receipt shows Spark 4.0.1, ANSItrue, AQEfalse, shuffle partitions 2. Both extended plans expose an optimized stage.",
+      "verification": "Assert full output parity with the literal oracle and exact controlled settings;do not assert whole-plan byte equality or faster execution."
+    }
+  ],
+  "golden": {
+    "projection_ids": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "groups": [
+      [
+        0,
+        3,
+        180
+      ],
+      [
+        1,
+        3,
+        210
+      ],
+      [
+        2,
+        3,
+        240
+      ]
+    ],
+    "fixture_rows": 12,
+    "file_scope": "Fresh owned .ds60-spark-021-* directory beneath current job;removed in finally."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-034",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Draw both layouts",
+      "input_or_change": "Sketch three records as AoS and as separate ID/value vectors.",
+      "expected": "Same three logical rows with different physical grouping."
+    },
+    {
+      "exercise": 2,
+      "task": "Prove result equality",
+      "input_or_change": "Sum values in both representations.",
+      "expected": "60 from each."
+    },
+    {
+      "exercise": 3,
+      "task": "Inspect reserve",
+      "input_or_change": "Reserve 100 on an empty vector, then inspect size.",
+      "expected": "Size 0; capacity at least 100."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair an unfair comparison",
+      "input_or_change": "One candidate omits the value 30.",
+      "expected": "Reject timing comparison until both checksums equal 60."
+    },
+    {
+      "exercise": 5,
+      "task": "Measure bounded work",
+      "input_or_change": "Repeat one-field summation with a fixed row cap and build mode.",
+      "expected": "Same checksum, duration units and repetitions recorded."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer the workload",
+      "input_or_change": "Now request ID and value together for every row.",
+      "expected": "Reassess the locality hypothesis without assuming SoA always wins."
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "lesson_id": "spark-039",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate the generated skewed fixture",
+      "input_contract": "Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.",
+      "expected": "Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.",
+      "verification": "Compare aggregate counts and the independent formula 16000+4000/100."
+    },
+    {
+      "exercise": 2,
+      "title": "Measure the two-partition configuration",
+      "input_contract": "Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.",
+      "expected": "100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files.",
+      "verification": "Compare all rows with the literal formula before accepting any work/time report."
+    },
+    {
+      "exercise": 3,
+      "title": "Compare four partitions without assuming a speedup",
+      "input_contract": "Repeat with 4 partitions and a separate output directory.",
+      "expected": "All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed.",
+      "verification": "Assert parity and print actual elapsed time/file/metric values without an ordering claim."
+    },
+    {
+      "exercise": 4,
+      "title": "Interpret work imbalance and spill honestly",
+      "input_contract": "Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.",
+      "expected": "Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.",
+      "verification": "Assert row conservation and positive ratio, then print exact available metric maps and stage receipts."
+    },
+    {
+      "exercise": 5,
+      "title": "Compute a separate hypothetical cost model",
+      "input_contract": "Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month.",
+      "expected": "Estimated 0.14 currency units, not an actual cloud bill or a price recommendation.",
+      "verification": "Check each unit conversion and reject negative durations/resources."
+    },
+    {
+      "exercise": 6,
+      "title": "Enforce the stop budget before scaling data",
+      "input_contract": "Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.",
+      "expected": "20000/4 accepted;20001/4 and 20000/9 rejected.",
+      "verification": "Assert both refusals and confirm the session shuffle setting restored to 2."
+    }
+  ],
+  "golden": {
+    "source_rows": 20000,
+    "distinct_ids": 20000,
+    "distinct_keys": 100,
+    "id_sum": 199990000,
+    "key_0_rows": 16040,
+    "other_key_rows": 40,
+    "configurations": [
+      2,
+      4
+    ],
+    "max_partitions": 8,
+    "hypothetical_prices": {
+      "vcpu_hour": 0.05,
+      "gib_month": 0.02,
+      "month_days": 30
+    },
+    "hypothetical_cost": 0.14,
+    "metrics_scope": "actual classic SQL operator metrics;partition row imbalance is a proxy,not task duration"
+  }
+}

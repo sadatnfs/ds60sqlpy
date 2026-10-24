@@ -1,0 +1,75 @@
+{
+  "apiVersion": "batch/v1",
+  "kind": "CronJob",
+  "metadata": {
+    "name": "lesson-schedule"
+  },
+  "spec": {
+    "schedule": "*/5 * * * *",
+    "timeZone": "Etc/UTC",
+    "suspend": true,
+    "concurrencyPolicy": "Forbid",
+    "startingDeadlineSeconds": 60,
+    "successfulJobsHistoryLimit": 1,
+    "failedJobsHistoryLimit": 1,
+    "jobTemplate": {
+      "spec": {
+        "backoffLimit": 0,
+        "activeDeadlineSeconds": 20,
+        "completions": 1,
+        "parallelism": 1,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app": "hello"
+            }
+          },
+          "spec": {
+            "automountServiceAccountToken": false,
+            "securityContext": {
+              "runAsNonRoot": true,
+              "runAsUser": 65532,
+              "seccompProfile": {
+                "type": "RuntimeDefault"
+              }
+            },
+            "containers": [
+              {
+                "name": "task",
+                "image": "ds60sqlpy-k8s-fixture:0.2.0",
+                "imagePullPolicy": "Never",
+                "command": [
+                  "python",
+                  "/fixture.py",
+                  "task",
+                  "--outcome",
+                  "success"
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "10m",
+                    "memory": "16Mi"
+                  },
+                  "limits": {
+                    "cpu": "100m",
+                    "memory": "64Mi"
+                  }
+                },
+                "securityContext": {
+                  "allowPrivilegeEscalation": false,
+                  "readOnlyRootFilesystem": true,
+                  "capabilities": {
+                    "drop": [
+                      "ALL"
+                    ]
+                  }
+                }
+              }
+            ],
+            "restartPolicy": "Never"
+          }
+        }
+      }
+    }
+  }
+}

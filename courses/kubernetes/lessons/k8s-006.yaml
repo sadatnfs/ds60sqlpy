@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: hello
+        image: ds60sqlpy-k8s-fixture:0.2.0
+        imagePullPolicy: Never
+        command:
+        - python
+        - /fixture.py
+        - server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+
+# Exercise 1: Draw ownership. Trace Deployment,ReplicaSet and Pod controller references for the baseline. Expected: A UID-linked graph connects exactly two owned Pods to the intended Deployment.
+# Exercise 2: Compare generation evidence. Interpret generation4 with observedGeneration3 and readyReplicas2. Expected: Latest desired state not yet confirmed observed.
+# Exercise 3: Establish a fresh baseline. Use the allowed two-replica source in a qualified browser operation. Expected: Two Ready owned Pod UIDs and cleanup evidence,with a new Run identity.
+# Exercise 4: Rehearse scoped Pod replacement. With a stateful owned host capability,delete only the recorded Pod UID and wait for replacement. Expected: Pod set changes from{pod-1,pod-2} to{pod-2,pod-3} in the synthetic trace; live names/UIDs are recorded separately.
+# Exercise 5: Reject a count-only shortcut. Add a foreign-controller Pod to a synthetic list while removing one owned Pod. Expected: Raw count2 but owned Ready count1,so acceptance fails.
+# Exercise 6: Separate recovery from availability. Explain which additional observations would show whether clients remained served during replacement. Expected: A bounded client timeline and error counts are required beyond final Ready replicas.

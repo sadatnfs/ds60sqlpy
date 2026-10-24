@@ -1,0 +1,8 @@
+# Compatibility entry point for the historical course path.
+#
+# Run this from the repository root:
+#   python -m pip install -r python/ds-60day/requirements.txt
+#
+# The canonical dependency groups live in pyproject.toml. This file installs
+# every course group, including the large optional deep-learning packages.
+-e .[notebooks,data,ml,production,bridge,deep-learning,nlp,geo,quality]

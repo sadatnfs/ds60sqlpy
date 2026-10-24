@@ -1,0 +1,59 @@
+{
+  "lesson_id": "spark-030",
+  "scope": "Sanitized architecture reasoning; no live connection or deployment.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Assign responsibilities in three deployment diagrams",
+      "input_contract": "The three diagrams and the proposal stating cluster deploy mode.",
+      "expected": "A role/location table for all three layouts, with collect returning to the driver wherever it runs and resource allocation assigned to the cluster manager.",
+      "verification": "Name every role and trace a collected 30-row result to the actual driver process in each layout;identify the submitting-host-loss or remote-driver-environment failure."
+    },
+    {
+      "exercise": 2,
+      "title": "Repair a driver-only input path assumption",
+      "input_contract": "The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.",
+      "expected": "An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.",
+      "verification": "Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked."
+    },
+    {
+      "exercise": 3,
+      "title": "Map dependencies to driver and executor environments",
+      "input_contract": "Spark 4.0.1, Scala binary 2.13, JDK 17, course_2.13.jar, rules.zip and an unqualified native-extension wheel.",
+      "expected": "A matrix locating each dependency and its qualification evidence;reject aScala 3 binary substitution and treating a native wheel as an ordinary pure-Python source zip.",
+      "verification": "Name compiler/binary family, Python interpreter/platform compatibility and worker import checks separately."
+    },
+    {
+      "exercise": 4,
+      "title": "Review a captured connection and a retrying task",
+      "input_contract": "An open driver connection captured by a task function and evidence that a failed task can be retried.",
+      "expected": "No connection object serialized from the driver;a defined task-side resource lifecycle if externalIO is later authorized, and a stable operation identity preventing duplicate external effects.",
+      "verification": "Explain why serializability alone would not guarantee exactly-once writes and name the cleanup and deduplication evidence needed."
+    },
+    {
+      "exercise": 5,
+      "title": "Define the Connect adapter boundary honestly",
+      "input_contract": "The existing _jdf/queryExecution and RDD-based diagnostic helpers, plus the proposed remote logical-plan client.",
+      "expected": "Classic internals are not assumed available;semantic goldens are retained while a separate supported diagnostic/runtime adapter is qualified.",
+      "verification": "List client/server version checks, API support, cancellation, result limits, authentication and cleanup receipts without claiming any already ran."
+    },
+    {
+      "exercise": 6,
+      "title": "Write a reviewable deployment acceptance checklist",
+      "input_contract": "All previous design findings, the 30-row/schema/digest contract and only an existing local classic runtime receipt.",
+      "expected": "A bounded acceptance plan separating proposed configuration, artifact inspection, remote execution and production readiness;unresolved path/package/Connect gaps remain explicit.",
+      "verification": "Name concrete artifacts and receipts, owners and failure actions;do not mark deployment accepted based on diagram orsyntax alone."
+    }
+  ],
+  "golden": {
+    "layouts": [
+      "local-classic",
+      "client-deploy",
+      "cluster-deploy"
+    ],
+    "proposal_only": true,
+    "expected_rows": 30,
+    "remote_execution_performed": false,
+    "connect_status": "Separate unimplemented/unqualified adapter boundary."
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-011",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Implement the dictionary matcher for the three-entity sentence.",
+      "expected": "Exact spans [0,3),[11,20),[24,29) and correct PER/ORG/LOC types."
+    },
+    {
+      "exercise": 2,
+      "task": "Include Acme and Acme Labs in the lexicon; also match Ada met Ada.",
+      "expected": "Longer organization wins; repeated Ada mentions occupy [0,3) and [8,11)."
+    },
+    {
+      "exercise": 3,
+      "task": "Match the literal C++ Labs and reject an empty lexicon name.",
+      "expected": "C++ Labs occupies [0,8); empty names raise a clear error."
+    },
+    {
+      "exercise": 4,
+      "task": "Compare the stated three gold mentions with the two predicted mentions.",
+      "expected": "TP=1,FP=1,FN=2,precision=.5,recall=1/3,F1=.4."
+    },
+    {
+      "exercise": 5,
+      "task": "Implement the strict affirmative acquisition grammar and reverse the company order.",
+      "expected": "Roles reverse exactly; negation and rumor-prefixed sentences abstain."
+    },
+    {
+      "exercise": 6,
+      "task": "Explain why Ada told Bea that she joined Acme Labs cannot be resolved by nearest-name matching alone.",
+      "expected": "A written ambiguity record identifies Ada/Bea candidates and withholds a confirmed person-organization relation."
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+from render import add, ex, SPECS
+
+ATTENTION = '''def attention_parts(query, key, value, allowed=None):
+    query = np.asarray(query, dtype=np.float64)
+    key = np.asarray(key, dtype=np.float64)
+    value = np.asarray(value, dtype=np.float64)
+    if any(array.ndim != 2 for array in (query, key, value)):
+        raise ValueError('query, key and value must be rank-two matrices')
+    if query.shape[1] == 0 or query.shape[1] != key.shape[1]:
+        raise ValueError('query and key feature widths must match and be positive')
+    if key.shape[0] == 0 or key.shape[0] != value.shape[0]:
+        raise ValueError('every key must have one value row')
+    if not all(np.isfinite(array).all() for array in (query, key, value)):
+        raise ValueError('finite inputs required')
+    if allowed is None:
+        allowed = np.ones((query.shape[0], key.shape[0]), dtype=bool)
+    else:
+        allowed = np.asarray(allowed)
+        if allowed.dtype != np.bool_ or allowed.shape != (query.shape[0], key.shape[0]):
+            raise ValueError('allowed must be a Boolean query-by-key matrix')
+    if not allowed.any(axis=-1).all():
+        raise ValueError('each query needs at least one allowed key')
+    scores = query @ key.T / np.sqrt(query.shape[-1])
+    masked_scores = np.where(allowed, scores, -np.inf)
+    shifted_scores = masked_scores - masked_scores.max(axis=-1, keepdims=True)
+    mass = np.exp(shifted_scores)
+    weights = mass / mass.sum(axis=-1, keepdims=True)
+    output = weights @ value
+    return scores, weights, output
+
+
+def attention(query, key, value, allowed=None):
+    return attention_parts(query, key, value, allowed)[2]
+'''
+NORMALIZATION = '''def layer_norm(values, epsilon=1e-5):
+    values = np.asarray(values, dtype=np.float64)
+    if values.ndim < 1 or values.shape[-1] == 0:
+        raise ValueError('a nonempty feature axis is required')
+    if not np.isfinite(values).all() or not np.isfinite(epsilon) or epsilon <= 0:
+        raise ValueError('finite inputs and positive finite epsilon are required')
+    mean = values.mean(axis=-1, keepdims=True)
+    variance = ((values - mean) ** 2).mean(axis=-1, keepdims=True)
+    return (values - mean) / np.sqrt(variance + epsilon)
+'''
+
+add('llm-010',
+'''Content, position and visibility answer different questions in a Transformer. Content vectors describe the token representation available to a layer. Positional information distinguishes where a token occurs or how far apart two tokens are. A causal mask specifies which key positions a query may read. Normalization controls feature scale. None of these mechanisms automatically supplies all the others, and a correct mask cannot repair future information that has already entered a token representation through an earlier operation.
+
+Begin with content-only attention and no mask. Every query compares itself with the same collection of keys. If we reorder query, key and value rows together, the comparisons are relabelled but their numerical relationships are unchanged. The output rows follow the same reorder. This property is permutation equivariance. It does not mean every output is identical, and it does not mean the function ignores token identity. It means the function has no separate knowledge of an absolute row number beyond the information supplied in its inputs.
+
+Now hold a lower-triangular causal mask fixed while moving token content between rows. The first row can read only its current first key, the second can read the first two, and later rows have progressively larger accessible prefixes. Reordering content changes which token participates in each prefix. The mask therefore introduces an ordered visibility structure. It still does not directly encode a distance such as three positions ago, and identical content can remain indistinguishable in a single normalized weighted average. Explicit positional representations supply additional order or distance information.
+
+Finally, every path feeding an earlier output must respect the intended visibility boundary. LayerNorm in a sequence model normally reduces the feature axis of each token separately. If an implementation instead centers a feature using all token rows, a future value changes the statistic subtracted from an earlier token. That earlier token is already contaminated before attention begins. This chapter derives these distinctions and tests them with literal float64 arrays. The simplified LayerNorm uses gain one and bias zero; learned gain and bias, pre/post-norm placement and RMSNorm receive deeper treatment in llm-045.''',
+r'''Use the shape convention Q:[Tq,Dk], K:[Tk,Dk], V:[Tk,Dv]. Scores have shape [Tq,Tk], one comparison for each query/key pair. Row-wise softmax reduces the key axis, so every query receives a distribution over allowed keys. Multiplying weights [Tq,Tk] by V [Tk,Dv] gives output [Tq,Dv]. The key and value row counts must match because each attention weight selects a corresponding value row. Query count need not equal key count in cross-attention, although this lesson's main self-attention fixture uses both equal to three.
+
+The score rule is S = Q K^T / sqrt(Dk). Stable softmax subtracts each row maximum before exponentiation. Subtracting a common row constant preserves the normalized probabilities, while reducing the risk of overflow. A Boolean allowed matrix has the score shape. Forbidden scores become negative infinity, giving zero exponential mass. Each query needs at least one allowed key: an all-forbidden row has no normalized distribution and is rejected instead of silently producing NaN.
+
+For feature normalization of X:[B,T,D], the mean and variance have shape [B,T,1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is sigma_squared/(sigma_squared+epsilon), not exactly one when epsilon is positive.
+
+### Deriving the permutation identity
+
+Let P be a permutation matrix reordering token rows. Replacing Q,K,V by P Q,P K,P V gives scores P S P^T. This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: softmax(P S P^T) = P softmax(S) P^T. The output is therefore P softmax(S) P^T P V = P softmax(S) V, because P^T P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.
+
+If a mask M is present, the corresponding relabelling identity requires reordering the mask too, as P M P^T. Keeping a causal triangle fixed is intentionally different: it keeps the visibility graph attached to row positions while moving content. Similarly, adding a fixed position table E gives input P X + E after a content reorder, while a pure reorder of the original positioned input would be P(X+E) = P X + P E. Unless E happens to remain unchanged under P, those expressions differ.''',
+[('Permutation equivariance','Reordering inputs produces the corresponding reorder of outputs, rather than necessarily leaving outputs unchanged.'),('Positional representation','Information attached to positions or position relationships, distinct from token content.'),('Causal visibility','A rule forbidding a query from reading future key positions.'),('Reduction axis','The array dimension over which a statistic combines values.'),('Prefix invariance','Earlier outputs are unchanged when future tokens are appended or changed under the stated causal computation.'),('Epsilon','A positive denominator stabilizer that also slightly changes normalized variance.')],[
+ex('Permute content-only attention','Use Q=K=[[1,0],[0,1],[1,1]] and V=[[1,2],[3,4],[5,6]]. Reorder all three by [2,0,1] and compare outputs.','attention weights move with key identities; output follows the same row reorder; the first original output is [3,4].',r'''query = np.array([[1., 0.], [0., 1.], [1., 1.]])
+value = np.array([[1., 2.], [3., 4.], [5., 6.]])
+order = np.array([2, 0, 1])
+scores, weights, original = attention_parts(query, query, value)
+changed = attention(query[order], query[order], value[order])
+np.testing.assert_allclose(changed, original[order], atol=1e-12, rtol=0)
+scale = np.exp(1 / np.sqrt(2))
+expected_first_weights = np.array([scale, 1, scale]) / (2 * scale + 1)
+np.testing.assert_allclose(weights[0], expected_first_weights, atol=1e-12, rtol=0)
+np.testing.assert_allclose(original[0], [3, 4], atol=1e-12, rtol=0)
+assert scores.shape == weights.shape == (3, 3)
+assert original.shape == (3, 2)''','The first query has scores [1/sqrt(2),0,1/sqrt(2)], so keys one and three receive equal weight. Their values are symmetric around [3,4], and the middle value is [3,4] itself, making the first weighted result exactly [3,4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.'),
+ex('Normalize each token','Normalize [[1,3],[10,20]] across each row, then replace only the second row with [1000,2000].','the first normalized row remains [-1,1]/sqrt(1+1e-5), approximately [-0.999995,0.999995].',r'''values = np.array([[1., 3.], [10., 20.]])
+changed = values.copy()
+changed[1] = [1000., 2000.]
+normalized = layer_norm(values)
+expected_first = np.array([-1., 1.]) / np.sqrt(1 + 1e-5)
+np.testing.assert_allclose(normalized[0], expected_first, atol=1e-12, rtol=0)
+np.testing.assert_allclose(layer_norm(changed)[0], normalized[0], atol=1e-12, rtol=0)
+assert normalized.shape == values.shape''','For [1,3], the mean is 2, centered features are [-1,1], and the mean squared centered value is 1. The second token uses a different mean and variance, but neither statistic appears in the first token calculation. Altering the future row cannot change the first normalized row. Positive epsilon makes the magnitude slightly below one.'),
+ex('Expose sequence-wide leakage','Center each feature across the two token rows, then change the future row from [10,20] to [1000,2000].','the first centered row changes from [-4.5,-8.5] to [-499.5,-998.5].',r'''values = np.array([[1., 3.], [10., 20.]])
+changed = values.copy()
+changed[1] = [1000., 2000.]
+original_first = (values - values.mean(axis=0, keepdims=True))[0]
+changed_first = (changed - changed.mean(axis=0, keepdims=True))[0]
+np.testing.assert_array_equal(original_first, [-4.5, -8.5])
+np.testing.assert_array_equal(changed_first, [-499.5, -998.5])
+assert not np.allclose(original_first, changed_first)''','The original feature means are [5.5,11.5]. Replacing the future row changes them to [500.5,1001.5], so subtracting those means changes the earlier row. There is no attention operation in this counterexample: the leakage is already present in preprocessing. This is why a mask test must be complemented by a full computation-path prefix test.'),
+ex('Attach fixed positions','Add E=[[0,0],[1,0],[0,2]] to query/key content, then reorder content while keeping E attached to the original row positions.','fixed-position outputs do not follow a pure content permutation; jointly reordering E restores the relabelling identity.',r'''query = np.array([[1., 0.], [0., 1.], [1., 1.]])
+value = np.array([[1., 2.], [3., 4.], [5., 6.]])
+positions = np.array([[0., 0.], [1., 0.], [0., 2.]])
+order = np.array([2, 0, 1])
+original = attention(query + positions, query + positions, value)
+fixed_positions = attention(query[order] + positions, query[order] + positions, value[order])
+assert not np.allclose(fixed_positions, original[order])
+relabelled = attention((query + positions)[order], (query + positions)[order], value[order])
+np.testing.assert_allclose(relabelled, original[order], atol=1e-12, rtol=0)''','The position vector is part of the input to the score computation. Moving content to a new location while preserving the location table is different from relabelling all rows of an already positioned representation. The fixture adds positions only to query/key construction to isolate score effects; a full Transformer commonly adds token and position representations before all projections, including values.'),
+ex('Check feature centering and causal prefixes','Check tokenwise means, then compare causal attention over normalized full input with recomputed prefixes.','row means are approximately zero and every causal prefix matches; fixed-mask content permutation need not match.',r'''values = np.array([[1., 2., 5.], [10., 20., 15.], [7., 0., -2.]])
+normalized = layer_norm(values)
+np.testing.assert_allclose(normalized.mean(axis=-1), 0, atol=1e-12, rtol=0)
+allowed = np.tri(len(values), dtype=bool)
+full = attention(normalized, normalized, normalized, allowed)
+for length in [1, 2, 3]:
+    prefix = layer_norm(values[:length])
+    result = attention(prefix, prefix, prefix, np.tri(length, dtype=bool))
+    np.testing.assert_allclose(result, full[:length], atol=1e-12, rtol=0)
+order = np.array([2, 0, 1])
+permuted = normalized[order]
+fixed_mask = attention(permuted, permuted, permuted, allowed)
+assert not np.allclose(fixed_mask, full[order])''','Feature normalization does not mix token rows, and the triangle prevents attention from reading future keys, so the combined operation preserves every prefix. The fixed-mask permutation comparison changes which content occupies each causal prefix. This separates the visibility graph from the content-only equivariance theorem.'),
+ex('Handle constant tokens and invalid normalization','Normalize [5,5], then reject an empty feature axis, zero epsilon and an all-forbidden attention row.','constant token becomes finite [0,0]; each invalid contract raises ValueError.',r'''constant = layer_norm(np.array([[5., 5.]]))
+np.testing.assert_array_equal(constant, [[0., 0.]])
+assert np.isfinite(constant).all()
+for operation in [
+    lambda: layer_norm(np.empty((2, 0))),
+    lambda: layer_norm(np.array([[5., 5.]]), epsilon=0),
+    lambda: attention(np.ones((1, 2)), np.ones((1, 2)), np.ones((1, 2)), np.zeros((1, 1), dtype=bool)),
+]:
+    try:
+        operation()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid contract was accepted')''','A constant token has zero centered values and zero variance. Positive epsilon produces a finite zero output. This stabilizer does not justify accepting an empty feature dimension, nonfinite data or a query with no allowed key. Rejecting these cases makes the cause observable instead of producing NaN and diagnosing it several layers later.')],
+('Attention Is All You Need','https://arxiv.org/abs/1706.03762'),helper=ATTENTION+'\n\n'+NORMALIZATION)
+
+spec = SPECS['llm-010']
+spec['mechanism_notes'] = r'''## Worked values and a full-path failure diagnosis
+
+For the three-token attention fixture, the weight rows are approximately [0.40111209,0.19777581,0.40111209], [0.19777581,0.40111209,0.40111209] and [0.24825508,0.24825508,0.50348984]. Multiplication by V gives [3,4], [3.40667256,4.40667256] and [3.51046953,4.51046953]. These rounded values are for inspection; the assertions use the underlying arithmetic with a stated float64 tolerance. A row permutation changes the array order of these outputs, not the relationships attached to token identities.
+
+The first normalization fixture deliberately uses only two features, making every statistic calculable by hand. Row [10,20] has mean 15 and variance 25, so its result is [-5,5]/sqrt(25+1e-5). Replacing that row with [1000,2000] changes its own mean to 1500 and variance to 250000. The first row's mean remains 2 and variance remains 1. In contrast, reducing axis=0 replaces per-token statistics with one statistic per feature across time. The output shape can still be [T,D], so a shape-only test does not catch this semantic mistake.
+
+A causal-prefix test must rerun the whole path on the prefix. Slicing the already computed full result merely reuses any leaked statistics and cannot detect their source. Example C below first normalizes each token and proves prefix equality through masked attention. It then centers across the full time axis before attention and shows the first output disagrees with a separately recomputed one-token prefix. For the first causal row, the only allowed attention weight is one, so its output equals its preprocessed value row. This makes upstream leakage impossible for the attention mask to hide.
+
+This reasoning is local to the specified computation. It does not claim that any normalization named LayerNorm is configured correctly, that a framework's default axis matches your layout, or that a long model has no other leakage path. Residual branches, preprocessing, pooling and cache offsets all deserve their own data-dependency checks. The connected [Transformer walkthrough](../../../docs/learning/inside-a-transformer.md) shows how these components fit into a full small decoder. The [position chapter](llm-044.md) develops RoPE and relative biases, while [normalization and gated feed-forward blocks](llm-045.md) derives their gradients and parameter choices.
+
+## When to use each mechanism
+
+Use a causal boundary when a prediction must depend only on its prefix. Use positional information when the model needs location or distance distinctions beyond content and visibility. Learned absolute tables need a defined maximum range; sinusoidal or rotary formulas can be evaluated at new positions but do not by themselves establish reliable long-context behavior. Choose tokenwise feature normalization when independent per-position statistics are intended. A sequence-wide reduction can be valid for a deliberately noncausal encoder or a summary statistic, but it changes the causal contract and should not enter this decoder accidentally.
+
+LayerNorm's learned affine gain and bias are omitted here so the centering arithmetic is visible. If gain differs across features or bias is nonzero, the final affine output need not have zero mean even though the internal normalized values did. Epsilon prevents division by zero; it also weakens exact scale invariance near constant inputs. For x scaled by a positive factor a, the denominator contains a_squared times variance plus epsilon, so the result is not exactly unchanged unless epsilon is negligible or transformed consistently. These details matter when a unit test expects exact invariances that the implemented formula does not promise.
+'''
+spec['diagnosis'] = '''If the permutation test fails, first check whether Q, K and V were reordered consistently. Next inspect whether a position table, a mask or another row-dependent operation was held fixed. A test that changes only one of those ingredients cannot be interpreted as the unmasked content-only theorem. Inspect weights as well as outputs: a symmetric value fixture can hide a wrong weight permutation by accidentally producing the same mixture. Very large query/key norms can also make attention nearly one-hot on each self-match, reducing a mask-order difference below a loose comparison tolerance. Use moderate score magnitudes and non-identical value rows when designing the negative control.
+
+If a prefix test fails, recompute preprocessing and normalization on the prefix rather than slicing their full-sequence results. Print the reduction axis and statistic shapes. For X:[B,T,D], a feature mean should be [B,T,1]; [B,1,D] mixes time. A causal triangle applied afterward cannot remove information already included in a value row. Use non-identical token rows and change a future row by a large controlled amount to make the dependency obvious.
+
+If NaN appears, check finite inputs, positive epsilon and at least one allowed key per query. An all-masked softmax row is undefined under this contract. Do not replace its NaNs with zeros and call that normalization: that invents a new output policy. Constant feature rows are a different case and legitimately normalize to zero with positive epsilon. Finally, compare float64 arithmetic with the declared tolerance and keep exact identity/shape checks separate from approximate numerical checks.'''
+example_c = ex('Recompute the entire causal prefix', 'Compare correct and leaking preprocessing through a causal attention operation.', 'tokenwise preprocessing preserves the prefix; time-wide centering changes the first output.', r'''values = np.array([[1., 2., 5.], [10., 20., 15.], [7., 0., -2.]])
+normalized = layer_norm(values)
+full = attention(normalized, normalized, normalized, np.tri(3, dtype=bool))
+prefix = layer_norm(values[:1])
+short = attention(prefix, prefix, prefix, np.ones((1, 1), dtype=bool))
+np.testing.assert_allclose(short, full[:1], atol=1e-12, rtol=0)
+leaking = values - values.mean(axis=0, keepdims=True)
+leaking_full = attention(leaking, leaking, leaking, np.tri(3, dtype=bool))
+leaking_prefix = values[:1] - values[:1].mean(axis=0, keepdims=True)
+leaking_short = attention(leaking_prefix, leaking_prefix, leaking_prefix, np.ones((1, 1), dtype=bool))
+assert not np.allclose(leaking_short, leaking_full[:1])
+np.testing.assert_array_equal(leaking_short, [[0., 0., 0.]])''', 'The one-token prefix has zero time-centered values, while the first row centered using future rows is nonzero. The first causal attention row reads only itself, so it exposes exactly that contaminated value. This is a test of the full preprocessing-plus-attention path, not only of the mask matrix.')
+spec['worked_examples'] = [spec['exercises'][0], spec['exercises'][1], example_c]
+spec['worked_examples'][0]['preamble'] = 'import numpy as np\n\n'+ATTENTION
+spec['worked_examples'][1]['preamble'] = 'import numpy as np\n\n'+NORMALIZATION
+example_c['preamble'] = 'import numpy as np\n\n'+ATTENTION+'\n\n'+NORMALIZATION
+
+spec['mechanism_notes'] += '\nFor the original normalization definition and learned gain/bias, read [Layer Normalization](https://arxiv.org/abs/1607.06450). The examples and permutation derivation here are original small-array demonstrations.\n'

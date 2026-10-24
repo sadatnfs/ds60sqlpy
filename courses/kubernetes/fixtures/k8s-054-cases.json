@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-054",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Name the roles of class, gateway and route.",
+      "expected": "Implementation class, listener/entrypoint and application routing intent."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict a route with an unavailable parent.",
+      "expected": "It cannot establish the intended attached traffic path."
+    },
+    {
+      "exercise": 3,
+      "task": "Design a route attachment boundary.",
+      "expected": "Listener allowedRoutes and route parentRef agree on intended ownership."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose ResolvedRefs=False.",
+      "expected": "Inspect backend identity and required reference authorization."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain a narrow cross-namespace grant.",
+      "expected": "Only the intended source kind/namespace can reference the intended target kind."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan Gateway acceptance evidence.",
+      "expected": "API/controller support, conditions, listener reachability and expected app response."
+    }
+  ]
+}

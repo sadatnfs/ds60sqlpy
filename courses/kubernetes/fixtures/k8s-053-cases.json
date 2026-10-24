@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-053",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict behavior with no Ingress controller.",
+      "expected": "The object can exist without any serving proxy."
+    },
+    {
+      "exercise": 2,
+      "task": "Distinguish host and path matching.",
+      "expected": "Host identifies the requested site; path identifies a route within it."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw the full Ingress-to-Pod request path.",
+      "expected": "The Service backend reference and the actual configured upstream path are distinguished."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose an app 404 after a matched prefix route.",
+      "expected": "The forwarded path may not exist in the application."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why controller annotations are not universal.",
+      "expected": "They belong to a particular implementation contract."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare Ingress and a Layer 4 Service.",
+      "expected": "Ingress interprets HTTP routing; the Service handles transport endpoint selection."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-020",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Calculate covered and conflicting rows in the supplied matrix.",
+      "expected": "Coverage.75,overall conflict.25 and conflict among covered1/3."
+    },
+    {
+      "exercise": 2,
+      "task": "Aggregate the four rows without treating -1 as a class vote.",
+      "expected": "Outputs[1,0,-1,-1]."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare votes[1,1,0] with collapsed source-family votes[1,0].",
+      "expected": "Majority1 becomes abstain, with a written explanation of duplicated evidence."
+    },
+    {
+      "exercise": 4,
+      "task": "Compute binary entropy for probabilities[.5,.6,.95,.1].",
+      "expected": "Top two uncertainty indices[0,1]; p=.5 has maximum entropy."
+    },
+    {
+      "exercise": 5,
+      "task": "Select two examples with families[a,a,b,c], at most one per family.",
+      "expected": "Selected indices[0,3]; budget0 returns an empty batch."
+    },
+    {
+      "exercise": 6,
+      "task": "Design a weak-label/active-review experiment with disjoint query and gold IDs.",
+      "expected": "A written split and provenance ledger prevent reviewed pool cases from silently becoming the final acceptance set."
+    }
+  ]
+}

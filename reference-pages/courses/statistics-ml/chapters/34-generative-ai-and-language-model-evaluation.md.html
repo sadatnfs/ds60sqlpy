@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>34. Generative AI and Language-Model Evaluation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>34. Generative AI and Language-Model Evaluation</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md</code></p>
+    </header>
+    <article class="document"><h2 id="34-generative-ai-and-language-model-evaluation">34. Generative AI and Language-Model Evaluation<a class="heading-anchor" href="#34-generative-ai-and-language-model-evaluation" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-034</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Evaluating a language-model system means measuring whether a specified workflow produces useful, supported results under the conditions where it will be used. The unit is often a task, document family or user interaction rather than an isolated sentence. A benchmark score is meaningful only with the sampled population, information available to the system, rubric, evaluator and uncertainty attached.</p>
+<h4 id="build-a-task-contract-before-choosing-a-metric">Build a task contract before choosing a metric<a class="heading-anchor" href="#build-a-task-contract-before-choosing-a-metric" aria-label="Link to this section">#</a></h4>
+<p>For structured extraction, define fields, allowed values, missingness, evidence spans and the cost of each error. For classification, define label boundaries and ambiguous cases rather than assuming a model-generated category is ground truth. For a subject-matter assistant, distinguish answerability, factual correctness, support from permitted documents, citation quality, appropriate abstention and usefulness. For statistical assistance, require executed code and a defensible analysis design behind numerical or causal claims.</p>
+<p>A useful evaluation case contains a stable ID, the user task, the permitted evidence snapshot, expected constraints and a scoring rationale. Some tasks admit exact answers or executable tests. Others need an expert rubric or multiple valid references. Include negative cases with missing evidence, contradictory sources, irrelevant retrieval and plausible but unsupported claims. A system that answers every case fluently should fail when abstention is the correct behavior.</p>
+<h4 id="separate-component-diagnosis-from-end-to-end-acceptance">Separate component diagnosis from end-to-end acceptance<a class="heading-anchor" href="#separate-component-diagnosis-from-end-to-end-acceptance" aria-label="Link to this section">#</a></h4>
+<p>A RAG pipeline can fail because the required passage was absent from the corpus, retrieval missed it, reranking discarded it, context construction truncated it or generation misused it. Evaluate retrieval recall and ranking separately from answer support. An oracle-context experiment gives the generator the right evidence to isolate its capability; a retrieved-context experiment tests the real pipeline. Passing with oracle evidence does not establish operational retrieval quality.</p>
+<p>Likewise, a fine-tuned model may improve schema validity while degrading factuality or increasing unsupported confidence. Compare the base and adapted system on the same held-out case families, including prior capabilities and known refusal/abstention boundaries. Record tokenizer, base-model identity, adapter identity, prompt template, retrieval index version and decoding configuration. Otherwise an apparent improvement may be caused by an unrecorded change elsewhere in the workflow.</p>
+<h4 id="human-judgment-is-an-experiment">Human judgment is an experiment<a class="heading-anchor" href="#human-judgment-is-an-experiment" aria-label="Link to this section">#</a></h4>
+<p>Write a rubric with observable criteria and examples of borderline cases. Sample tasks from the intended population, blind system identity, randomize response order and allow ties when the distinction is not meaningful. Use raters with relevant expertise for domain correctness. Collect independent first judgments before adjudication so disagreement can be measured rather than erased. A consensus label after discussion is useful, but it is not the same data as the original agreement rate.</p>
+<p>Pairwise comparisons can reduce scale-use differences between raters, but presentation effects remain. Longer answers may appear more thorough even when they add unsupported claims. Reverse the order of the same pair and test whether preferences change. An automated judge is another model whose reliability must be validated on representative human-scored cases, especially failure cases where fluent wrong answers are tempting. A judge&#x27;s explanation is evidence about its scoring behavior, not proof of its correctness.</p>
+<h4 id="use-the-right-uncertainty-unit">Use the right uncertainty unit<a class="heading-anchor" href="#use-the-right-uncertainty-unit" aria-label="Link to this section">#</a></h4>
+<p>Repeated generations of one prompt reveal run-to-run variability, while many prompts from one document may still share the same underlying difficulty. Treating every token or paraphrase as an independent trial can make intervals implausibly narrow. Preserve case families and use paired comparisons or clustered resampling at the appropriate unit. Report uncertainty for rare but serious failures, and avoid concluding that a zero observed failure count proves zero risk.</p>
+<p>For independent Bernoulli cases, a success fraction estimates a population success probability under the sample design. A Wilson interval offers a finite-sample alternative to the naive normal interval, particularly near zero or one. When cases are dependent, the binomial calculation is an illustrative lower-level model rather than a justified final interval. The scripts below show the arithmetic and explicitly state its assumptions.</p>
+<h4 id="evaluate-utility-cost-and-failure-handling-together">Evaluate utility, cost and failure handling together<a class="heading-anchor" href="#evaluate-utility-cost-and-failure-handling-together" aria-label="Link to this section">#</a></h4>
+<p>Task success should be linked to a useful action: correctly populated analytical fields, a cited answer that resolves a question, or checked code that reproduces a requested result. Measure latency distributions, token or compute use, retrieval cost, human-review time and escalation frequency. A model can reduce generation cost while increasing expert correction effort. Compare Pareto-efficient alternatives rather than collapsing all tradeoffs into an unexplained weighted score.</p>
+<p>The final acceptance packet should make a result reconstructable: case version, evidence snapshot, system configuration, raw output, scores, evaluator version and adjudication notes. Keep development cases separate from final acceptance, and rerun meaningful regression cases after changing prompts, retrieval or weights. The dedicated applied LLM route provides complete local examples of these boundaries; this chapter explains why their measurements support only the claims they actually test.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-34-01">Task-specific evaluation<a class="heading-anchor" href="#stat-34-01" aria-label="Link to this section">#</a></h4>
+<p>Task-specific evaluation measures the actual success contract, such as exact extracted fields, executable code behavior or correctly supported answers. Decompose success into observable criteria without losing the end-to-end outcome. A summary can be fluent yet omit a required exception, and valid JSON can contain wrong values. Weight errors according to the decision only after reporting the underlying counts so a composite score cannot hide a critical failure.</p>
+<h4 id="stat-34-02">Reference-based evaluation<a class="heading-anchor" href="#stat-34-02" aria-label="Link to this section">#</a></h4>
+<p>Reference-based evaluation compares output with accepted answers, evidence spans or executable expected behavior. Multiple valid phrasings and incomplete references make exact text match too restrictive for many tasks. Semantic similarity can help but may reward a contradiction sharing the same vocabulary. Use field-level or claim-level checks when possible, and preserve expert rationale for references rather than treating one generated answer as unquestionable truth.</p>
+<h4 id="stat-34-03">Reference-free evaluation<a class="heading-anchor" href="#stat-34-03" aria-label="Link to this section">#</a></h4>
+<p>Reference-free evaluation assesses properties such as consistency, support from supplied evidence or rubric adherence without a fixed target answer. It is useful when many answers are acceptable or labels are expensive. The absence of a reference does not remove the need to validate the evaluator. A model judge may systematically accept plausible unsupported text, so compare its scores with independent human or executable checks on representative failures.</p>
+<h4 id="stat-34-04">Human evaluation design<a class="heading-anchor" href="#stat-34-04" aria-label="Link to this section">#</a></h4>
+<p>Human evaluation design specifies the task sample, rater population, rubric, blinding, assignment and analysis unit. Domain experts may be needed for technical correctness, while intended users can judge usefulness. Randomize order and balance workload to reduce fatigue and learning effects. Preserve individual ratings before adjudication and report uncertainty across tasks and raters instead of presenting one average as universally representative.</p>
+<h4 id="stat-34-05">Pairwise preference testing<a class="heading-anchor" href="#stat-34-05" aria-label="Link to this section">#</a></h4>
+<p>Pairwise preference testing asks which of two outputs better satisfies a rubric, often allowing ties. It reduces some problems with absolute rating scales but introduces order and comparison-context effects. Use the same tasks for both systems and randomize which response is shown first. Preference is an outcome about the rubric and rater population, not necessarily factual correctness unless the comparison explicitly checks it.</p>
+<h4 id="stat-34-06">Bradley–Terry models<a class="heading-anchor" href="#stat-34-06" aria-label="Link to this section">#</a></h4>
+<p>The Bradley-Terry model assigns a latent strength s_i to each system and models <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>i</mi><mtext> beats </mtext><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mo>logistic</mo><mo stretchy="false">(</mo><msub><mi>s</mi><mi>i</mi></msub><mo>−</mo><msub><mi>s</mi><mi>j</mi></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\Pr(i\text{ beats }j)=\operatorname{logistic}(s_i-s_j)</annotation></semantics></math>. One reference level or sum constraint is needed for identifiability. The comparison graph should connect systems adequately, and repeated tasks/raters create dependence beyond a simple independent model. Ties and nontransitive preferences need explicit extensions or diagnostics rather than forced binary labels.</p>
+<h4 id="stat-34-07">Interrater agreement analysis<a class="heading-anchor" href="#stat-34-07" aria-label="Link to this section">#</a></h4>
+<p>Interrater agreement measures consistency of judgments, using raw agreement and chance-adjusted measures such as kappa or suitable ordinal alternatives. Agreement depends on prevalence and category use, so high raw agreement can coexist with low kappa. Disagreement may reveal an unclear rubric, genuine ambiguity or insufficient expertise. Inspect cases, not only the summary coefficient, before deciding whether adjudication or rubric revision is needed.</p>
+<h4 id="stat-34-08">Judge-model validation<a class="heading-anchor" href="#stat-34-08" aria-label="Link to this section">#</a></h4>
+<p>Judge-model validation compares automated scores with trusted human or executable judgments on representative held-out cases. Include incorrect but polished answers, concise correct answers and domain-specific edge cases. Measure error types and calibration across score levels. A judge evaluated only on easy cases can look reliable while failing the exact boundary used for release decisions, and self-evaluation can share errors with the generating model.</p>
+<h4 id="stat-34-09">Position and verbosity bias<a class="heading-anchor" href="#stat-34-09" aria-label="Link to this section">#</a></h4>
+<p>Position bias favors a response because it appears first or second, while verbosity bias favors length independent of useful content. Reverse pair order and compare equally informative short/long variants to detect these effects. Blinding model identity does not remove them. A scoring rubric should reward supported completeness and penalize unsupported additions, so extra text cannot earn quality merely by occupying more space.</p>
+<h4 id="stat-34-10">Factuality evaluation<a class="heading-anchor" href="#stat-34-10" aria-label="Link to this section">#</a></h4>
+<p>Factuality evaluation checks whether claims are true against an appropriate external reference or validated computation. Break a long answer into atomic claims so one correct sentence cannot mask several false ones. Time, jurisdiction, scope and source reliability matter. A statement can be factually true but irrelevant or unsupported by the provided context, so factuality should remain distinct from groundedness and task success.</p>
+<h4 id="stat-34-11">Groundedness evaluation<a class="heading-anchor" href="#stat-34-11" aria-label="Link to this section">#</a></h4>
+<p>Groundedness evaluates whether an answer&#x27;s claims are supported by the evidence actually supplied or permitted. A correct fact recalled from weights may be ungrounded under a source-restricted task. Support requires the cited passage to entail the claim at the stated scope, including qualifiers and dates. Evaluate unsupported additions and contradictions separately, and permit an explicit unknown when the evidence does not answer the question.</p>
+<h4 id="stat-34-12">Retrieval evaluation<a class="heading-anchor" href="#stat-34-12" aria-label="Link to this section">#</a></h4>
+<p>Retrieval evaluation measures whether relevant, authorized and current evidence reaches the generator. Recall at k assesses coverage of needed evidence, while ranking measures consider placement and relevance. Some questions require multiple passages, so one relevant hit may be insufficient. Evaluate on the actual corpus snapshot and candidate filters. Oracle-context performance isolates generation but must not be reported as real retrieval success.</p>
+<h4 id="stat-34-13">Citation quality evaluation<a class="heading-anchor" href="#stat-34-13" aria-label="Link to this section">#</a></h4>
+<p>Citation quality includes source validity, passage location, claim support and coverage of claims needing evidence. A syntactically valid link or matching document title is insufficient. Check that the cited version contains the relevant passage and supports the precise conclusion. Citation precision asks whether supplied citations support their claims; citation coverage asks whether claims that need support received it. These are different denominators.</p>
+<h4 id="stat-34-14">Benchmark contamination analysis<a class="heading-anchor" href="#stat-34-14" aria-label="Link to this section">#</a></h4>
+<p>Benchmark contamination occurs when evaluation material or close relatives influence pretraining, fine-tuning, prompt development or retrieval curation in a way that invalidates the intended holdout. Exact deduplication catches only some overlap; templates, paraphrases and shared source documents can also leak. Track provenance and split related families together. A contaminated score may still describe memorized performance, but it cannot establish generalization to unseen tasks.</p>
+<h4 id="stat-34-15">Prompt sensitivity analysis<a class="heading-anchor" href="#stat-34-15" aria-label="Link to this section">#</a></h4>
+<p>Prompt sensitivity analysis evaluates reasonable alternative formulations of the same task while preserving its semantics. Large changes in correctness or abstention indicate fragility. Separate legitimate instruction changes from harmless wording changes, and keep paraphrase families together when estimating uncertainty. Tuning a prompt on every test case converts the benchmark into development data and obscures expected real-user variability.</p>
+<h4 id="stat-34-16">Robustness and adversarial evaluation<a class="heading-anchor" href="#stat-34-16" aria-label="Link to this section">#</a></h4>
+<p>Robustness and adversarial evaluation tests difficult inputs such as irrelevant context, conflicting evidence, malformed records or instructions embedded in retrieved data. The threat or perturbation model must match the application. Passing a small attack list does not prove comprehensive robustness. Record the exact failure boundary and ensure the system treats external text as evidence rather than authority to change permissions or task requirements.</p>
+<h4 id="stat-34-17">Agent trajectory evaluation<a class="heading-anchor" href="#stat-34-17" aria-label="Link to this section">#</a></h4>
+<p>Agent trajectory evaluation inspects tool choices, arguments, intermediate observations and final actions. A correct final answer reached through an unauthorized write or unsupported assumption is not a successful workflow. Conversely, a failed tool can be handled correctly through bounded recovery. Define allowed actions, required evidence and stop/escalation conditions, and score the actual recorded trajectory rather than a model&#x27;s retrospective narrative about it.</p>
+<h4 id="stat-34-18">Repeated-trial reliability<a class="heading-anchor" href="#stat-34-18" aria-label="Link to this section">#</a></h4>
+<p>Repeated-trial reliability estimates how often a system succeeds across repeated stochastic runs or varied cases. Distinguish repeatability on one prompt from generalization across independent task families. Report the number of trials, seeds or decoding conditions and confidence intervals under the correct dependence model. A single impressive run is weak evidence for a workflow expected to work consistently.</p>
+<h4 id="stat-34-19">Cost–latency–quality analysis<a class="heading-anchor" href="#stat-34-19" aria-label="Link to this section">#</a></h4>
+<p>Cost-latency-quality analysis compares task performance with compute, token use, elapsed time and human correction effort. Tail latency matters when users or downstream jobs wait for the slowest responses. Pareto analysis identifies alternatives not dominated on all objectives. A cheap model that requires frequent expert repair may be more expensive end to end, so define the accounting boundary and expected task mix.</p>
+<h4 id="stat-34-20">End-to-end system evaluation<a class="heading-anchor" href="#stat-34-20" aria-label="Link to this section">#</a></h4>
+<p>End-to-end evaluation measures the complete path from request and permitted data to an accepted operational result. Retrieval, parsing, tool execution, generation, validation and human escalation interact. Component improvements can fail to improve the final task if another stage is the bottleneck. Preserve raw artifacts and failure categories so a final score supports diagnosis and reproducibility rather than only a leaderboard.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_34.py.html">chapter_34.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_34.py</code></pre>
+<h4 id="put-uncertainty-around-eight-successes">Put uncertainty around eight successes<a class="heading-anchor" href="#put-uncertainty-around-eight-successes" aria-label="Link to this section">#</a></h4>
+<p>Eight of ten independent illustrative cases succeed. The empirical rate is 0.8, but the Wilson interval is broad, roughly 0.49 to 0.94. Ten paraphrases from one document would not justify this independent-case interpretation. The calculation demonstrates why a small acceptance set cannot support a precise reliability claim.</p>
+<h4 id="separate-citation-presence-from-support">Separate citation presence from support<a class="heading-anchor" href="#separate-citation-presence-from-support" aria-label="Link to this section">#</a></h4>
+<p>The retriever finds only one of two required source IDs, giving evidence recall one-half. All three answer claims have citations, but a human support annotation marks only two as supported. Citation presence is therefore 100 percent while supported-citation precision is two-thirds. The example explicitly consumes annotations; it does not pretend a Boolean lookup is a general factuality evaluator.</p>
+<h4 id="preserve-paired-outcomes-and-rater-disagreement">Preserve paired outcomes and rater disagreement<a class="heading-anchor" href="#preserve-paired-outcomes-and-rater-disagreement" aria-label="Link to this section">#</a></h4>
+<p>Two raters agree on four of six binary cases. Their marginal positive rates imply chance agreement one-half, so kappa is one-third. A separate paired system example shows one B-only success and no A-only successes. Those counts retain the paired design; a reliable improvement claim would need more representative cases and uncertainty analysis.</p>
+<h4 id="compare-alternatives-without-hiding-the-tradeoff">Compare alternatives without hiding the tradeoff<a class="heading-anchor" href="#compare-alternatives-without-hiding-the-tradeoff" aria-label="Link to this section">#</a></h4>
+<p>System C is worse than A in quality, cost and latency, so it is dominated. A and B remain on the Pareto frontier: B has higher quality but costs more and takes longer. Choosing between them requires the application&#x27;s utility and constraints, not an unexplained average of incompatible units.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">wilson_interval</span><span class="syntax-punctuation">(</span>successes<span class="syntax-punctuation">,</span>total<span class="syntax-punctuation">,</span>z<span class="syntax-operator">=</span><span class="syntax-number">1.96</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    p<span class="syntax-operator">=</span>successes<span class="syntax-operator">/</span>total<span class="syntax-punctuation">;</span>denominator<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-operator">+</span>z<span class="syntax-operator">*</span>z<span class="syntax-operator">/</span>total
+    center<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">+</span>z<span class="syntax-operator">*</span>z<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>total<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>denominator
+    half<span class="syntax-operator">=</span>z<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>p<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>total<span class="syntax-operator">+</span>z<span class="syntax-operator">*</span>z<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-operator">*</span>total<span class="syntax-operator">*</span>total<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>denominator
+    <span class="syntax-keyword">return</span> center<span class="syntax-operator">-</span>half<span class="syntax-punctuation">,</span>center<span class="syntax-operator">+</span>half
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">repeated_reliability</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    outcomes<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    low<span class="syntax-punctuation">,</span>high<span class="syntax-operator">=</span>wilson_interval<span class="syntax-punctuation">(</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>outcomes<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>outcomes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> outcomes<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.8</span> <span class="syntax-operator">and</span> low<span class="syntax-operator">&lt;</span><span class="syntax-number">.8</span><span class="syntax-operator">&lt;</span>high <span class="syntax-operator">and</span> low<span class="syntax-operator">&gt;</span><span class="syntax-number">.45</span> <span class="syntax-operator">and</span> high<span class="syntax-operator">&lt;</span><span class="syntax-number">.96</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Independent-case success rate and Wilson interval:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>outcomes<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>low<span class="syntax-punctuation">,</span>high<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">retrieval_and_claim_support</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    needed<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">policy-v2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">runtime-17</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>retrieved<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">policy-v2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">glossary-v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    recall<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>needed <span class="syntax-operator">&amp;</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>retrieved<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>needed<span class="syntax-punctuation">)</span>
+    <span class="syntax-comment"># Human-supplied support labels for three atomic claims, not an automatic entailment model.</span>
+    claim_support<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>has_citation<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    supported_citations<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>claim_support <span class="syntax-operator">&amp;</span> has_citation<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>has_citation<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> recall<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>supported_citations<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> has_citation<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> supported_citations<span class="syntax-operator">&lt;</span><span class="syntax-number">1</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Evidence recall:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>recall<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">citations present:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>has_citation<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">supported:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>supported_citations<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">paired_and_agreement</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    first<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>second<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    agreement<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>first<span class="syntax-operator">==</span>second<span class="syntax-punctuation">)</span>
+    expected<span class="syntax-operator">=</span>first<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span>second<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>first<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>second<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    kappa<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>agreement<span class="syntax-operator">-</span>expected<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>expected<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>agreement<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>kappa<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    a<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>b<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-operator">==</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Raw agreement, kappa:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>agreement<span class="syntax-punctuation">,</span>kappa<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">paired B-only success:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">pareto_tradeoff</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># Higher quality, lower cost and latency are preferred.</span>
+    systems<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">.80</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">.85</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">.78</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    efficient<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span>q<span class="syntax-punctuation">,</span>c<span class="syntax-punctuation">,</span>l <span class="syntax-operator">in</span> systems<span class="syntax-punctuation">:</span>
+        dominated<span class="syntax-operator">=</span><span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>q2<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>q <span class="syntax-operator">and</span> c2<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>c <span class="syntax-operator">and</span> l2<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>l <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>q2<span class="syntax-operator">&gt;</span>q <span class="syntax-operator">or</span> c2<span class="syntax-operator">&lt;</span>c <span class="syntax-operator">or</span> l2<span class="syntax-operator">&lt;</span>l<span class="syntax-punctuation">)</span>
+                      <span class="syntax-keyword">for</span> name2<span class="syntax-punctuation">,</span>q2<span class="syntax-punctuation">,</span>c2<span class="syntax-punctuation">,</span>l2 <span class="syntax-operator">in</span> systems <span class="syntax-keyword">if</span> name2<span class="syntax-operator">!=</span>name<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> dominated<span class="syntax-punctuation">:</span>efficient<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> efficient<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Pareto-efficient alternatives:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>efficient<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    repeated_reliability<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>retrieval_and_claim_support<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>paired_and_agreement<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>pareto_tradeoff<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Can an LLM judge replace domain experts?</strong> It can reduce review effort if validated for the specific rubric and case distribution. Keep expert audits, executable checks where possible, and failure-case analysis. Agreement on general preference data does not establish correctness on specialized statistical, scientific or policy questions.</p>
+<p><strong>Interview: How do you diagnose a RAG failure?</strong> Check corpus presence and access first, then retrieval, ranking, context assembly and generation. Compare oracle-context with real-context runs. A generator that fails with the correct passage needs a different repair from a retriever that never supplied it.</p>
+<p><strong>Interview: What is a fair base-versus-fine-tuned comparison?</strong> Freeze held-out case families and run both systems with matched evidence and decoding conditions, recording model/adaptor versions. Score task success, support, abstention, format and regressions, with paired uncertainty and cost. Training examples or near-duplicates must not become the final test set.</p>
+<p><strong>Interview: Does zero observed hallucination establish a zero hallucination rate?</strong> No. It is a finite sample outcome conditional on the tested distribution and evaluator sensitivity. Report the sample size, interval or bound under stated assumptions, and what kinds of unsupported claims the test could actually detect.</p>
+<p><strong>Interview: How should model-written statistical conclusions be graded?</strong> Require the executed analysis artifact, data contract and estimator assumptions. Check numerical values against code output and causal language against the study design. A persuasive explanation or citation to a statistics page cannot validate an unexecuted calculation.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://arxiv.org/abs/2211.09110">Liang and colleagues, Holistic Evaluation of Language Models</a></li>
+</ul>
+<ul>
+<li><a href="https://arxiv.org/abs/2306.05685">Zheng and colleagues, Judging LLM-as-a-Judge</a></li>
+</ul>
+<ul>
+<li><a href="https://arxiv.org/abs/2309.15217">Es and colleagues, evaluation of retrieval-augmented generation</a></li>
+</ul>
+<h3 id="continue-into-applied-evaluation">Continue into applied evaluation<a class="heading-anchor" href="#continue-into-applied-evaluation" aria-label="Link to this section">#</a></h3>
+<p>The <a href="../../llm-applied/guides/llm-applied-012.md.html">retrieval and answer evaluation guide</a> separates oracle-context controls from the real retrieved-context pipeline. The <a href="../../llm-applied/guides/llm-applied-011.md.html">grounded claims guide</a> supplies explicit support and abstention boundaries. A component test should remain labeled by the component it actually observes.</p>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="33-deep-learning-language-and-generative-modeling.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="35-bandits-reinforcement-learning-and-adaptive-decisions.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

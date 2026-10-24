@@ -1,0 +1,30 @@
+{
+  "provenance": "synthetic request samples",
+  "rows": [
+    {
+      "request_id": "r1",
+      "status": 200,
+      "latency_ms": 10
+    },
+    {
+      "request_id": "r2",
+      "status": 200,
+      "latency_ms": 20
+    },
+    {
+      "request_id": "r3",
+      "status": 500,
+      "latency_ms": 30
+    },
+    {
+      "request_id": "r4",
+      "status": 200,
+      "latency_ms": 40
+    },
+    {
+      "request_id": "r5",
+      "status": 200,
+      "latency_ms": 100
+    }
+  ]
+}

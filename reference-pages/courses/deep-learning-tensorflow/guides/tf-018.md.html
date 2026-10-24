@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-018: Normalization state and batch dependence · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-018: Normalization state and batch dependence</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/guides/tf-018.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-018-normalization-state-and-batch-dependence">tf-018: Normalization state and batch dependence<a class="heading-anchor" href="#tf-018-normalization-state-and-batch-dependence" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>tf-017</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Distinguish BatchNorm moving statistics from per-example LayerNorm. The central investigation is concrete: Use momentum 0.5 and a fixed batch mean [2,4]; inspect the first BatchNorm moving-mean update and compare per-row normalization. The finish condition is Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Normalization has three distinct contracts: which values share statistics, which state changes during training, and which affine parameters are learned. BatchNorm and LayerNorm can use similar arithmetic while differing on all three. A layer name or an axis number is not enough to infer the dependency structure.</p>
+<p>For BatchNormalization(axis=-1) on input [N,C], the final axis identifies separate channels whose statistics are retained. The reduction happens over the other axis N. On channels-last images [N,H,W,C], separate channel statistics reduce over N,H,W. In contrast, LayerNormalization(axis=-1) reduces the final feature axis itself. On [N,T,D] it computes a distinct mean and variance for every [N,T] token, reducing D and preserving the token positions. These opposite roles for the axis argument are a common source of plausible-looking but incorrect comparisons.</p>
+<p>BatchNorm uses current-batch statistics during a training call and updates moving statistics for later inference. Its scale gamma and offset beta are trainable parameters, while moving mean and variance are nontrainable state updated by the layer. Inference uses the stored state and should not update it. LayerNorm uses the current row&#x27;s feature statistics in both ordinary training and inference, without maintaining running batch statistics. Its learned affine parameters still matter.</p>
+<p>The main fixture keeps the familiar Keras momentum 0.5 example, then adds momentum 0.8 so the update convention becomes visible. Keras momentum is the retention weight of the old statistic. PyTorch BatchNorm momentum is the weight of the new statistic. Equal numerical arguments usually describe different updates; the value 0.5 happens to hide that distinction. Matching moving means alone also does not establish full cross-framework parity, because epsilon, variance-state conventions, layout and mode behavior must be matched explicitly.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Channel axis:</strong> For BatchNorm, the dimension whose distinct channel statistics are retained while other axes are reduced.</p>
+<p><strong>Reduction axis:</strong> A dimension whose values are combined to compute a statistic; LayerNorm axis=-1 reduces the feature dimension.</p>
+<p><strong>Moving statistics:</strong> Nontrainable state accumulated across training calls and used during BatchNorm inference.</p>
+<p><strong>Affine parameters:</strong> Learned scale gamma and offset beta applied after normalization.</p>
+<p><strong>Momentum convention:</strong> The meaning of the coefficient in a moving-statistic update, which differs between Keras and PyTorch.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-018</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-018/</code> so the checked-in worksheet remains available.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<h4 id="reduction-axes-and-statistic-shapes">Reduction axes and statistic shapes<a class="heading-anchor" href="#reduction-axes-and-statistic-shapes" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Layer and input</th>
+<th>Axis argument means</th>
+<th>Reduction axes</th>
+<th>Statistic shape before broadcasting</th>
+</tr></thead><tbody>
+<tr>
+<td>BatchNorm on [N,C]</td>
+<td>retain C distinct channels</td>
+<td>N</td>
+<td>[C]</td>
+</tr>
+<tr>
+<td>BatchNorm on [N,H,W,C]</td>
+<td>retain C distinct channels</td>
+<td>N,H,W</td>
+<td>[C]</td>
+</tr>
+<tr>
+<td>LayerNorm on [N,T,D]</td>
+<td>reduce D features</td>
+<td>D</td>
+<td>[N,T,1]</td>
+</tr>
+<tr>
+<td>LayerNorm on [N,H,W,C] with axis=-1</td>
+<td>reduce channels at each location</td>
+<td>C</td>
+<td>[N,H,W,1]</td>
+</tr>
+</tbody></table></div>
+<p>The last row is not whole-image normalization. Likewise, PyTorch&#x27;s common channels-first convolution layout requires its own axis reasoning. Translate tensor layout before comparing framework calls. A statistical reduction can preserve the final output shape while changing which observations influence one another.</p>
+<h4 id="calculate-current-and-moving-statistics">Calculate current and moving statistics<a class="heading-anchor" href="#calculate-current-and-moving-statistics" aria-label="Link to this section">#</a></h4>
+<p>For batch [[1,3],[3,5]], the per-channel mean is [2,4]. Each channel has centered values [-1,1] and population variance 1. With initial moving mean [0,0] and Keras momentum <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>m</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">m=0.5</annotation></semantics></math>, the update m<em>old+(1-m)</em>batch gives [1,2]. A second identical batch gives [1.5,3]. With a constant batch mean and zero initial mean, the value after t updates is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mrow><mi>m</mi></mrow><mrow><mi>t</mi></mrow></msup></mrow><annotation encoding="application/x-tex">1-{m}^{t}</annotation></semantics></math> times that batch mean. Early inference statistics still reflect their initialization.</p>
+<p>The initial moving variance is one. The main batch&#x27;s variance is also one, so that state would not visibly change. A separate probe [[0,0],[4,4]] has population variance four per channel. The Keras update with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>m</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">m=0.5</annotation></semantics></math> gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0.5</mn><mo>·</mo><mn>1</mn><mo>+</mo><mn>0.5</mn><mo>·</mo><mn>4</mn><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">0.5\cdot 1+0.5\cdot 4=2.5</annotation></semantics></math>. PyTorch&#x27;s documented running-variance update uses the unbiased batch estimate, which is eight for those two observations, so matching its new-batch weight to 0.5 gives 4.5 instead. The TensorFlow fixture executes the Keras result; the paired PyTorch chapter separately exercises that framework&#x27;s state convention.</p>
+<h4 id="training-output-is-not-inference-output">Training output is not inference output<a class="heading-anchor" href="#training-output-is-not-inference-output" aria-label="Link to this section">#</a></h4>
+<p>With <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>γ</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">\gamma=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>β</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\beta=0</annotation></semantics></math> and explicit <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>ϵ</mi><mo>=</mo><mn>0.001</mn></mrow><annotation encoding="application/x-tex">\epsilon=0.001</annotation></semantics></math>, the training output of the main batch is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mo>−</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><mrow><msqrt><mrow><mn>1.001</mn></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[[-1,-1],[1,1]]}{\sqrt{1.001}}</annotation></semantics></math>. After one moving-state update, inference instead subtracts [1,2] and divides by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>1.001</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{1.001}</annotation></semantics></math>, giving <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><mrow><msqrt><mrow><mn>1.001</mn></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[[0,1],[2,3]]}{\sqrt{1.001}}</annotation></semantics></math>. It need not be centered on the new inference batch. Using inference mode on unrepresentative or barely initialized state can therefore produce a different result even when no trainable weight changed.</p>
+<p>LayerNorm on row [1,3] uses row mean 2 and variance 1. Appending [100,200] as another row does not change those statistics. Learned gamma/beta are omitted from this hand arithmetic by using their default initial values. After affine parameters are learned, the final output need not retain zero mean even though the normalized internal values are centered.</p>
+<h3 id="comparing-frameworks-and-choosing-the-normalization-contract">Comparing frameworks and choosing the normalization contract<a class="heading-anchor" href="#comparing-frameworks-and-choosing-the-normalization-contract" aria-label="Link to this section">#</a></h3>
+<p>For the same moving-mean update, translate Keras retention momentum m to PyTorch new-statistic momentum 1-m. Do not stop there: PyTorch documents a population variance for its training normalization but an unbiased estimate for its running-variance update. The Keras fixture above checks its moving-variance rule directly. Epsilon and affine parameters also affect outputs. The paired <a href="../../deep-learning-pytorch/guides/torch-018.md.html">PyTorch chapter</a> gives that framework&#x27;s actual state checks; matching one printed mean is not a complete equivalence argument.</p>
+<p>BatchNorm can be useful when its batch/statistical assumptions fit the task and data pipeline, but small, unusual or changing batches can make training and inference behavior diverge. Evaluation must avoid accidentally updating state using held-out examples. For sequence models, a reduction that includes future time positions can violate an autoregressive boundary even if attention is masked. Tokenwise LayerNorm avoids that particular cross-token dependency, although it does not prevent unrelated leakage elsewhere in a model.</p>
+<p>Keras BatchNorm&#x27;s trainable=False behavior is special: a direct call uses moving statistics even if training=True is supplied. For a compiled Keras training workflow, changing trainable after compilation requires recompilation for the changed setting to take effect as documented. These exercises use direct layer calls, so they do not claim a compiled-fit reconfiguration was tested. PyTorch separates parameter gradient flags from module mode, and its track_running_stats option introduces another distinct policy. Always name the state and mode contract being compared.</p>
+<p>Primary API references: <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization">Keras BatchNormalization</a>, <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/LayerNormalization">Keras LayerNormalization</a>, and <a href="https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html">PyTorch2.9 BatchNorm1d</a>. The formulas and fixtures here use small literal CPU arrays; they do not establish distributed synchronization or deployment behavior.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-update-and-inspect-moving-state">Example A: Update and inspect moving state<a class="heading-anchor" href="#example-a-update-and-inspect-moving-state" aria-label="Link to this section">#</a></h4>
+<p>The mean update reveals old-versus-new weighting. The separate variance probe is necessary because a batch variance equal to the initial moving variance would hide whether an update occurred. The output expectation uses current-batch statistics, not the newly updated moving mean.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+
+epsilon <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span>
+values <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+bn <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>BatchNormalization<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> momentum<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> epsilon<span class="syntax-operator">=</span>epsilon<span class="syntax-punctuation">)</span>
+training_output <span class="syntax-operator">=</span> bn<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn<span class="syntax-operator">.</span>moving_mean<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn<span class="syntax-operator">.</span>moving_variance<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+expected <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">+</span> epsilon<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>training_output<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> expected<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+probe <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>BatchNormalization<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> momentum<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> epsilon<span class="syntax-operator">=</span>epsilon<span class="syntax-punctuation">)</span>
+probe<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>probe<span class="syntax-operator">.</span>moving_variance<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</p>
+<h4 id="example-b-repeat-updates-and-translate-asymmetric-momentum">Example B: Repeat updates and translate asymmetric momentum<a class="heading-anchor" href="#example-b-repeat-updates-and-translate-asymmetric-momentum" aria-label="Link to this section">#</a></h4>
+<p>At 0.5 the coefficients are equal, hiding the convention difference. The asymmetric example identifies which coefficient belongs to the new batch. The Torch values here are an arithmetic comparison from its documented formula, not a claim that a Torch layer ran inside the TensorFlow profile.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+
+values <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+bn <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>BatchNormalization<span class="syntax-punctuation">(</span>momentum<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span>
+bn<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+bn<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn<span class="syntax-operator">.</span>moving_mean<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+asymmetric <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>BatchNormalization<span class="syntax-punctuation">(</span>momentum<span class="syntax-operator">=</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">)</span>
+asymmetric<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>asymmetric<span class="syntax-operator">.</span>moving_mean<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+asymmetric<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>asymmetric<span class="syntax-operator">.</span>moving_mean<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.72</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.44</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+batch_mean <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+keras_first <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">-</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> batch_mean
+torch_same_number_formula <span class="syntax-operator">=</span> <span class="syntax-number">0.8</span> <span class="syntax-operator">*</span> batch_mean
+torch_matched_formula <span class="syntax-operator">=</span> <span class="syntax-number">0.2</span> <span class="syntax-operator">*</span> batch_mean
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>keras_first<span class="syntax-punctuation">,</span> torch_same_number_formula<span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>keras_first<span class="syntax-punctuation">,</span> torch_matched_formula<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</p>
+<h4 id="example-c-compare-channel-retention-with-feature-reduction">Example C: Compare channel retention with feature reduction<a class="heading-anchor" href="#example-c-compare-channel-retention-with-feature-reduction" aria-label="Link to this section">#</a></h4>
+<p>Both calls specify axis=-1 and return the same shape, but they reduce different axes. The independent NumPy formulas identify the distinction directly. This protects against a misleading axis label or a shape-only comparison.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+
+values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+epsilon <span class="syntax-operator">=</span> <span class="syntax-number">1e-3</span>
+bn <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>BatchNormalization<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> momentum<span class="syntax-operator">=</span><span class="syntax-number">0.8</span><span class="syntax-punctuation">,</span> epsilon<span class="syntax-operator">=</span>epsilon<span class="syntax-punctuation">)</span>
+bn_output <span class="syntax-operator">=</span> bn<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> training<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+channel_mean <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+channel_variance <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>channel_mean<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>channel_variance<span class="syntax-operator">.</span>reshape<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn_output<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>values <span class="syntax-operator">-</span> channel_mean<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>channel_variance <span class="syntax-operator">+</span> epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn<span class="syntax-operator">.</span>moving_mean<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>bn<span class="syntax-operator">.</span>moving_variance<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+ln <span class="syntax-operator">=</span> tf<span class="syntax-operator">.</span>keras<span class="syntax-operator">.</span>layers<span class="syntax-operator">.</span>LayerNormalization<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> epsilon<span class="syntax-operator">=</span>epsilon<span class="syntax-punctuation">)</span>
+ln_output <span class="syntax-operator">=</span> ln<span class="syntax-punctuation">(</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+local_mean <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+local_variance <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>ln_output<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>values <span class="syntax-operator">-</span> local_mean<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span>local_variance <span class="syntax-operator">+</span> epsilon<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>bn_output<span class="syntax-punctuation">,</span> ln_output<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> BN uses channel means [3,4] and variances [5,5]; LN reduces each location&#x27;s two features.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Update and inspect moving state.</strong> Apply Keras BatchNorm with momentum 0.5 to [[1,3],[3,5]], then use a separate variance-four probe. <strong>Expected:</strong> moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5]. <strong>Verify:</strong> Save the assertion results for exercise 1, including moving mean [1,2]; main variance stays [1,1]; variance-four probe updates moving variance to [2.5,2.5].</li>
+</ol>
+<ol>
+<li><strong>Freeze evaluation state.</strong> After one training call, evaluate the same batch and compare with the stored-statistic formula. <strong>Expected:</strong> moving state stays unchanged; inference output uses mean [1,2] and differs from training output. <strong>Verify:</strong> Save the assertion results for exercise 2, including moving state stays unchanged; inference output uses mean [1,2] and differs from training output.</li>
+</ol>
+<ol>
+<li><strong>Test LayerNorm row independence.</strong> Normalize [1,3] alone and as the first row beside [100,200]. <strong>Expected:</strong> the first output is unchanged; LayerNorm has no running-statistic variables. <strong>Verify:</strong> Save the assertion results for exercise 3, including the first output is unchanged; LayerNorm has no running-statistic variables.</li>
+</ol>
+<ol>
+<li><strong>Expose actual BatchNorm batch dependence.</strong> Compare the first row of training normalization with and without the added row [98,199]. <strong>Expected:</strong> the output changes and matches independent per-channel NumPy mean/variance calculations. <strong>Verify:</strong> Save the assertion results for exercise 4, including the output changes and matches independent per-channel NumPy mean/variance calculations.</li>
+</ol>
+<ol>
+<li><strong>Repeat updates and translate asymmetric momentum.</strong> Repeat the 0.5 update, then run a fresh Keras layer with momentum 0.8 and compare old/new-weight arithmetic. <strong>Expected:</strong> 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2. <strong>Verify:</strong> Save the assertion results for exercise 5, including 0.5 repeat gives [1.5,3]; Keras0.8 first/second means are [0.4,0.8] and [0.72,1.44]; matching Torch new-batch weight is 0.2.</li>
+</ol>
+<ol>
+<li><strong>Handle constant rows and frozen BatchNorm.</strong> Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with training=True. <strong>Expected:</strong> LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics. <strong>Verify:</strong> Save the assertion results for exercise 6, including LayerNorm returns finite zeros; frozen Keras BatchNorm preserves moving state and uses its inference statistics.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If changing another record changes an output, first ask which layer and mode are being tested. It is expected for training BatchNorm and unexpected for feature-only LayerNorm under fixed affine parameters. Write the reduced axes and statistic shapes explicitly. BatchNorm axis=-1 retains channel identities; LayerNorm axis=-1 reduces those feature values within each record.</p>
+<p>If moving state does not match, expand one update numerically and check which coefficient weights the old statistic. The value 0.5 can hide reversed conventions. A variance probe equal to its initializer can also hide whether the state updated, so use the separate variance-four fixture. If inference output is not centered on a new batch, inspect the stored statistics rather than assuming the inference implementation is broken.</p>
+<p>If state changes during evaluation, check the training argument, layer mode and any unexpected calls from preprocessing or validation. If freezing behaves differently across frameworks, separate affine-gradient control from moving-statistic updates and inference mode. Finally, keep epsilon and variance-estimator choices explicit before adjusting numerical tolerances; an API-convention mismatch is not floating-point noise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Channel axis, Reduction axis, Moving statistics using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>tf-017</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization">Keras BatchNormalization</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-018, Normalization state and batch dependence.
+Read courses/deep-learning-tensorflow/guides/tf-018.md and courses/deep-learning-tensorflow/lessons/tf-018.py. Direct prerequisites: `tf-017`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/deep-learning-tensorflow/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-037",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "State range requirements",
+      "input_or_change": "Explain why one pass is sufficient for keep_positive.",
+      "expected": "Input-range traversal only, no size prepass."
+    },
+    {
+      "exercise": 2,
+      "task": "Preserve multiplicity",
+      "input_or_change": "Filter [-1,0,2,2] with >0.",
+      "expected": "[2,2]."
+    },
+    {
+      "exercise": 3,
+      "task": "Retain ownership",
+      "input_or_change": "Call with a temporary vector and use result afterward.",
+      "expected": "Result remains valid and owns its elements."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair two-pass design",
+      "input_or_change": "Review counting an input_range then traversing it again.",
+      "expected": "Use one pass or require forward_range with justification."
+    },
+    {
+      "exercise": 5,
+      "task": "Check empty input",
+      "input_or_change": "Use an empty vector and an empty span.",
+      "expected": "Both yield empty vectors."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a projection",
+      "input_or_change": "Filter records by their points while retaining complete records.",
+      "expected": "Output retains IDs, values and duplicate qualifying rows."
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>nlp-005: Morphology, syntax and linguistic structure · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>nlp-005: Morphology, syntax and linguistic structure</h1>
+      <p class="source-path">Generated from <code>courses/nlp/guides/nlp-005.md</code></p>
+    </header>
+    <article class="document"><h2 id="nlp-005-morphology-syntax-and-linguistic-structure">nlp-005: Morphology, syntax and linguistic structure<a class="heading-anchor" href="#nlp-005-morphology-syntax-and-linguistic-structure" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-004</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Linguistic structure supplies distinctions that a sequence of token IDs does not explain by itself. Morphology concerns word formation and meaningful parts; syntax concerns how words combine into phrases and grammatical relationships. A tokenizer chooses computational units, which may cut across morphemes or combine punctuation. A BPE fragment is therefore not automatically a linguistic root, and a short tokenization is not evidence of correct grammatical analysis.</p>
+<p>This lesson uses a few deliberately authored English examples to distinguish stemming, lemmatization, part-of-speech tagging and dependency structure. It does not download a tagger or parser. The small lookup and context rule are intentionally incomplete so you can see what they do, why one counterexample defeats them and which checks establish only structural validity.</p>
+<p>A surface form is the observed spelling, such as saw. A lemma is a dictionary-like base form under a grammatical interpretation. Saw as a past-tense verb can have lemma see, while saw as a cutting-tool noun retains lemma saw. The same character string therefore needs context before normalization can safely collapse it.</p>
+<h3 id="morphology-and-the-cost-of-normalization">Morphology and the cost of normalization<a class="heading-anchor" href="#morphology-and-the-cost-of-normalization" aria-label="Link to this section">#</a></h3>
+<p>Inflection changes grammatical features without necessarily creating a new dictionary word, as in study and studies. Derivation creates related words with changed category or meaning, as in teach and teacher. These distinctions vary across languages and are not reducible to deleting a final letter. Compounds, irregular forms and spelling changes make simple suffix rules incomplete.</p>
+<p>A stemmer applies an algorithmic reduction, often producing a useful retrieval key that is not a valid word. A lemmatizer aims for a lexical base and may need part of speech and morphological features. The lookup studies/NOUN -&gt; study in this lesson is an explicit table entry, not a general English lemmatizer. Better/ADJ -&gt; good demonstrates an irregular relation that cannot be recovered by trimming a suffix.</p>
+<p>Choose normalization from the downstream task. Collapsing inflections may improve retrieval recall but remove tense or number distinctions needed for extraction. Preserve the raw word and transformation record so a reviewer can recover what was actually written. A successful lookup is evidence only for a covered entry.</p>
+<h3 id="part-of-speech-is-contextual">Part of speech is contextual<a class="heading-anchor" href="#part-of-speech-is-contextual" aria-label="Link to this section">#</a></h3>
+<p>Part of speech labels a token&#x27;s grammatical role, such as noun, verb or adjective. The inventories and annotation conventions differ between corpora. In I saw her, saw is a verb; in the saw broke, it is a noun. A rule that checks only whether the immediately preceding token is the captures those two examples.</p>
+<p>The old saw is a deliberate counterexample. The determiner is separated from saw by an adjective, so the one-token rule incorrectly labels saw as a verb. More local rules can patch this example, but a general solution needs a representation of broader context and representative labeled data. Do not turn a two-example success into a claim that the algorithm understands English grammar.</p>
+<p>Tagging errors can propagate into lemmatization and relation extraction. If the noun saw is tagged as a verb, a POS-conditioned lemma table may convert a physical tool into see. Evaluate the combined pipeline and preserve ambiguity when the input does not support a unique interpretation.</p>
+<h3 id="dependency-trees-and-what-a-validator-can-prove">Dependency trees and what a validator can prove<a class="heading-anchor" href="#dependency-trees-and-what-a-validator-can-prove" aria-label="Link to this section">#</a></h3>
+<p>A dependency representation links each token to a head token, with a root marking the main organizing predicate under a chosen annotation scheme. For tokens [I,saw,her], heads [1,-1,1] attach I and her to saw, which is the root. Indices refer to token positions, and -1 is the explicit root sentinel in this lesson.</p>
+<p>A structural validator checks legal indices, exactly one root and absence of cycles. Following each head chain should eventually reach -1. These conditions establish that the array forms one rooted tree. They do not establish that the attachments or relation labels are linguistically correct. Heads [1,-1,0] also form a tree but attach her to I, which is not the intended analysis of this sentence.</p>
+<p>The distinction matters for learned parsers and language-model-generated structures. A schema-valid parse can be wrong. Measure attachment accuracy against an annotation contract, inspect coordination and long-distance dependencies, and account for tokenization alignment. Projectivity is an additional property that some parsing algorithms assume; it is not required by this basic tree validator.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-one-form-two-lemmas">Worked example 1: One form, two lemmas<a class="heading-anchor" href="#worked-example-1-one-form-two-lemmas" aria-label="Link to this section">#</a></h4>
+<p>The pair (saw,VERB) maps to see, while (saw,NOUN) maps to saw. The word alone is insufficient for this table. Store surface, POS and lemma together so the normalization can be audited. A default lowercased fallback means no covered transformation was found, not that a lexicon has confirmed the lemma.</p>
+<h4 id="worked-example-2-a-minimal-pair-rule-and-its-failure">Worked example 2: A minimal-pair rule and its failure<a class="heading-anchor" href="#worked-example-2-a-minimal-pair-rule-and-its-failure" aria-label="Link to this section">#</a></h4>
+<p>The handcrafted tagger handles I saw her and the saw broke, then fails on the old saw. The expected gold role in the third phrase is noun, but the rule returns verb. This is a useful error analysis result: it identifies the limited context window rather than hiding the failure by changing the expected label.</p>
+<h4 id="worked-example-3-two-trees-one-intended-reading">Worked example 3: Two trees, one intended reading<a class="heading-anchor" href="#worked-example-3-two-trees-one-intended-reading" aria-label="Link to this section">#</a></h4>
+<p>Both [1,-1,1] and [1,-1,0] pass the structural validator for three tokens. The cycle [1,0,-1], two-root array [-1,-1] and out-of-range [2,-1] fail. Structural success is necessary for a usable tree representation, while semantic correctness requires separate evidence.</p>
+<h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
+<p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
+<pre class="highlighted-code"><code class="language-python">lemmas<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VERB</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">see</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">NOUN</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>lemmas<span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VERB</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lemmas<span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">NOUN</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> lemmas<span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">VERB</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">see</span><span class="syntax-string">&#x27;</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">tokens<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">I</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">her</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>heads<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+edges<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>head<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>tokens<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>head <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span>heads<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> head<span class="syntax-operator">!=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>edges<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> edges<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">I</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">saw</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">her</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-005.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-005-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-005.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-005_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-retain-grammatical-context">Exercise 1: Retain grammatical context<a class="heading-anchor" href="#exercise-1-retain-grammatical-context" aria-label="Link to this section">#</a></h4>
+<p>Implement the four explicit lemma mappings and preserve raw/POS/lemma records.</p>
+<p><strong>Expected:</strong> saw/VERB -&gt; see; saw/NOUN -&gt; saw; studies/NOUN -&gt; study; better/ADJ -&gt; good.</p>
+<p><strong>Verify:</strong> saw/VERB -&gt; see; saw/NOUN -&gt; saw; studies/NOUN -&gt; study; better/ADJ -&gt; good. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Key the table by both surface and POS.</p>
+<h4 id="exercise-2-trace-the-context-rule">Exercise 2: Trace the context rule<a class="heading-anchor" href="#exercise-2-trace-the-context-rule" aria-label="Link to this section">#</a></h4>
+<p>Implement the one-token determiner rule for saw in the first two sentences.</p>
+<p><strong>Expected:</strong> I saw her gives VERB; the saw broke gives NOUN.</p>
+<p><strong>Verify:</strong> I saw her gives VERB; the saw broke gives NOUN. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Inspect the token immediately before saw and handle position zero.</p>
+<h4 id="exercise-3-preserve-a-known-error">Exercise 3: Preserve a known error<a class="heading-anchor" href="#exercise-3-preserve-a-known-error" aria-label="Link to this section">#</a></h4>
+<p>Run the old saw and compare with an independently stated NOUN label.</p>
+<p><strong>Expected:</strong> The rule returns VERB, and the error is recorded rather than relabeled as correct.</p>
+<p><strong>Verify:</strong> The rule returns VERB, and the error is recorded rather than relabeled as correct. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> An intervening adjective defeats immediate-predecessor logic.</p>
+<h4 id="exercise-4-validate-head-indices">Exercise 4: Validate head indices<a class="heading-anchor" href="#exercise-4-validate-head-indices" aria-label="Link to this section">#</a></h4>
+<p>Check one-root, range and cycle rules on the supplied arrays.</p>
+<p><strong>Expected:</strong> Accept [1,-1,1]; reject [1,0,-1],[-1,-1],[2,-1] and empty input.</p>
+<p><strong>Verify:</strong> Accept [1,-1,1]; reject [1,0,-1],[-1,-1],[2,-1] and empty input. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Follow each head chain with a set of visited positions.</p>
+<h4 id="exercise-5-separate-structure-from-meaning">Exercise 5: Separate structure from meaning<a class="heading-anchor" href="#exercise-5-separate-structure-from-meaning" aria-label="Link to this section">#</a></h4>
+<p>Compare [1,-1,1] and [1,-1,0] for I saw her.</p>
+<p><strong>Expected:</strong> Both structurally valid; only the first matches the intended head assignment.</p>
+<p><strong>Verify:</strong> Both structurally valid; only the first matches the intended head assignment. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Draw the edges and describe the changed attachment.</p>
+<h4 id="exercise-6-choose-task-specific-normalization">Exercise 6: Choose task-specific normalization<a class="heading-anchor" href="#exercise-6-choose-task-specific-normalization" aria-label="Link to this section">#</a></h4>
+<p>Explain whether tense and number should be collapsed for search versus event extraction.</p>
+<p><strong>Expected:</strong> A concrete policy preserves raw text and names at least one lost distinction for each transformation.</p>
+<p><strong>Verify:</strong> A concrete policy preserves raw text and names at least one lost distinction for each transformation. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Ask what downstream decision depends on the distinction.</p>
+<h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Is stemming a cheaper version of correct lemmatization?</strong> It solves a different normalization problem and may produce nonwords. Its usefulness depends on the task, while lemmatization attempts a lexical interpretation often requiring grammar.</p>
+<p><strong>Interview: Why keep a counterexample in the reference?</strong> It teaches the actual capability boundary and protects against claiming a handcrafted rule is a general parser. Expected failure is evidence when it is clearly labeled and independently justified.</p>
+<p><strong>Interview: Does one root and no cycle prove a correct parse?</strong> It proves a valid tree shape. Linguistic attachments, labels and token alignment need separate checks against an annotation contract.</p>
+<h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
+<p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-006</code>.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://web.stanford.edu/~jurafsky/slp3/">Jurafsky and Martin, linguistic structure and tagging</a></li>
+</ul>
+<ul>
+<li><a href="https://www.nltk.org/book/ch05.html">NLTK book, categorizing and tagging words</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-005.
+Read courses/nlp/guides/nlp-005.md and courses/nlp/learners/nlp-005.py.
+Direct prerequisites: `nlp-004`.
+Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/nlp/solutions/ closed until I attempt or explicitly request comparison.
+Check numerical, span or task-level outputs and a counterexample; do not equate a toy mechanism with pretrained-model quality.
+Do not download corpora or models or send text to an external service.</code></pre></article>
+  </main>
+</body>
+</html>

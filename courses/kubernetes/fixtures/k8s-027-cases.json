@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-027",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "bounded request ledger and optional qualified namespace metrics",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "State eligible requests,success rule,time window and units for the ledger.",
+      "expected": "A reproducible numerator/denominator with five synthetic observations."
+    },
+    {
+      "exercise": 2,
+      "task": "Count the single500 response and four200 responses.",
+      "expected": "Error.2,success.8 under the declared status rule."
+    },
+    {
+      "exercise": 3,
+      "task": "Use empirical nearest rank on all five latencies.",
+      "expected": "p50=30ms,p95=100ms."
+    },
+    {
+      "exercise": 4,
+      "task": "Compare observations120 then3 across a process restart.",
+      "expected": "Do not report negative117 requests;record reset and available interval evidence."
+    },
+    {
+      "exercise": 5,
+      "task": "Record an unavailable namespace metrics API alongside successful client evidence.",
+      "expected": "Metrics capability unavailable,not zero resource use."
+    },
+    {
+      "exercise": 6,
+      "task": "Combine one controller fact and one application metric with a hypothesis and next check.",
+      "expected": "A bounded evidence record with units,window,UIDs and a reversible diagnostic."
+    }
+  ]
+}

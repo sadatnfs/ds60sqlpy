@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-008: Assertions, numeric boundaries, and independent oracles · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-008: Assertions, numeric boundaries, and independent oracles</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-008.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-008-assertions-numeric-boundaries-and-independent-oracles">spark-008: Assertions, numeric boundaries, and independent oracles<a class="heading-anchor" href="#spark-008-assertions-numeric-boundaries-and-independent-oracles" aria-label="Link to this section">#</a></h2>
+<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 105 minutes. Direct design prerequisites: <code>spark-007</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current <a href="../execution-baseline.md.html">execution baseline</a> for this authored material.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-008</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-008.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-008_solution.scala.html">reference program</a> and <a href="../solutions/spark-008_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.</li>
+<li>Explain the result of both worked examples before running them.</li>
+<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Oracle:</strong> An independently specified expected result used to challenge an implementation, rather than a second copy of the same algorithm.</li>
+</ul>
+<ul>
+<li><strong>Bag equality:</strong> Equality of values and multiplicities while ignoring sequence order.</li>
+</ul>
+<ul>
+<li><strong>Checked arithmetic:</strong> An operation that reports representational overflow instead of silently wrapping.</li>
+</ul>
+<ul>
+<li><strong>Absolute and relative tolerance:</strong> Two explicit scales for comparing approximate values, with absolute tolerance governing behavior near zero.</li>
+</ul>
+<p>An assertion is useful when it distinguishes the intended behavior from a plausible mistake. Checking only that a program exits or returns a nonempty result is weak evidence. Exact integer fixtures, empty inputs, zero values, repeated occurrences and malformed boundaries each expose different failure modes. The reference deliberately includes candidates that drop zero or deduplicate equal amounts so the oracle proves it can reject them.</p>
+<p>Sequence equality compares order and values. Bag equality compares each value&#x27;s occurrence count. Set equality discards multiplicity and is therefore insufficient for an event ledger. The sequences(1,1,2) and (2,1,1) are the same bag, while(1,2) is not. Decide which equality the output contract requires before choosing a comparison helper.</p>
+<p>Numeric type conversion must happen before an overflowing operation. Int.MaxValue+1 wraps in Int arithmetic; converting that wrapped result to Long does not recover the intended 2147483648. Convert the operand to Long first, then add. For arbitrary Long sums, use Math.addExact when silent wraparound would invalidate the result. A wider type increases range but does not make it unlimited.</p>
+<p>Approximate floating values require a different comparison contract. The rule abs(actual-expected)&lt;=atol+rtol*abs(expected) combines a near-zero allowance with scale-relative error. It is not a substitute for exact money arithmetic. Reject nonfinite comparison inputs and invalid tolerances explicitly so NaN or infinity cannot make a failed calculation appear acceptable.</p>
+<p>A partition audit should verify more than accepted_count+rejected_count=input_count. Two changed values can preserve both count and sum. Compare the full bag and the classification rule: accepted amounts must be nonnegative and rejected amounts negative. This catches hidden replacement and a zero assigned to the wrong branch.</p>
+<p>Finally, a finite fixture suite is evidence rather than a proof for every possible input. An implementation can overfit known cases, and a model can satisfy arithmetic checks while representing the wrong business quantity. State the input domain, choose adversarial examples from the mechanism, and combine exact fixtures with general invariants. The lesson&#x27;s candidate-checking function is a teaching harness, not the classroom&#x27;s registered trusted verifier.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> values <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>toSet <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toSet<span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>sorted <span class="syntax-operator">!=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sorted<span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>sorted <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>sorted<span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Set equality loses a repeated occurrence&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The first assertion intentionally shows a misleading equality: sets agree despite a lost occurrence. Sorting retains every occurrence and lets order-insensitive sequence comparison expose the loss. An oracle should name whether order, multiplicity or identity matters rather than choosing a convenient collection conversion.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> wrapped<span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span> <span class="syntax-operator">=</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">.</span><span class="syntax-class">MaxValue</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span>
+<span class="syntax-keyword">val</span> promoted<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">.</span><span class="syntax-class">MaxValue</span><span class="syntax-punctuation">.</span>toLong <span class="syntax-operator">+</span> <span class="syntax-number">1L</span>
+<span class="syntax-keyword">val</span> tooLate<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span> <span class="syntax-operator">=</span> wrapped<span class="syntax-punctuation">.</span>toLong
+assert<span class="syntax-punctuation">(</span>wrapped <span class="syntax-operator">==</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">.</span><span class="syntax-class">MinValue</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>promoted <span class="syntax-operator">==</span> <span class="syntax-number">2147483648L</span> <span class="syntax-operator">&amp;&amp;</span> tooLate <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">2147483648L</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">s&quot;</span><span class="syntax-string">promoted=</span><span class="syntax-string">$</span>promoted<span class="syntax-string"> tooLate=</span><span class="syntax-string">$</span>tooLate<span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The expression is evaluated using the operand types at the time of addition. A later conversion preserves the already-wrong wrapped value. The independent literal 2147483648 L shows the intended mathematical result and the Long suffix prevents the expected value from suffering the same type mistake.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-compare-multiplicity-without-requiring-order">Exercise 1: Compare multiplicity without requiring order<a class="heading-anchor" href="#exercise-1-compare-multiplicity-without-requiring-order" aria-label="Link to this section">#</a></h4>
+<p>Return whether two Long sequences contain the same values with the same occurrence counts, ignoring order. Do not convert to Set. Empty sequences are equal.</p>
+<p><strong>Expected result/shape:</strong> (1,1,2) equals(2,1,1) as a bag but differs from(1,2). Equal count and sum alone are insufficient for(1,3) versus(2,2).</p>
+<p><strong>Verify:</strong> Assert all three comparisons and the empty case against literal expected Booleans.</p>
+<p><strong>Progressive hint:</strong> Build a value-to-count Map for each sequence using groupMapReduce or a fold.</p>
+<h4 id="exercise-2-detect-a-sum-outside-long-range">Exercise 2: Detect a sum outside Long range<a class="heading-anchor" href="#exercise-2-detect-a-sum-outside-long-range" aria-label="Link to this section">#</a></h4>
+<p>Sum Long values with checked addition and an explicit empty identity. Report overflow through ArithmeticException instead of allowing wraparound. Negative values are permitted for this arithmetic contract.</p>
+<p><strong>Expected result/shape:</strong> (100,-25,0,100) sums to 175; empty sums to 0; Long.MaxValue plus 1 and Long.MinValue minus 1 both fail.</p>
+<p><strong>Verify:</strong> Assert both exact sums and catch each directional overflow with the supplied exception helper.</p>
+<p><strong>Progressive hint:</strong> Use Math.addExact in a fold, not ordinary addition followed by a sign check.</p>
+<h4 id="exercise-3-promote-before-arithmetic">Exercise 3: Promote before arithmetic<a class="heading-anchor" href="#exercise-3-promote-before-arithmetic" aria-label="Link to this section">#</a></h4>
+<p>Return the mathematical value of an Int plus one as a Long. Convert before adding and support the full Int range.</p>
+<p><strong>Expected result/shape:</strong> Int.MaxValue becomes 2147483648 L, Int.MinValue becomes-2147483647L, and 0 becomes 1 L.</p>
+<p><strong>Verify:</strong> Assert exact literals at both boundaries and zero; compare with the deliberately too-late conversion example.</p>
+<p><strong>Progressive hint:</strong> The receiver of toLong must be the input, not the result of an Int addition.</p>
+<h4 id="exercise-4-define-an-approximate-comparison-policy">Exercise 4: Define an approximate comparison policy<a class="heading-anchor" href="#exercise-4-define-an-approximate-comparison-policy" aria-label="Link to this section">#</a></h4>
+<p>Compare finite Double values using absolute plus reference-relative tolerance. Require finite nonnegative tolerances with IllegalArgumentException on invalid policy. Return false for nonfinite actual or expected values.</p>
+<p><strong>Expected result/shape:</strong> 1e8+1 versus 1 e8 passes with atol 0, rtol 1 e-7;1e-9 versus 0 passes with atol 1 e-8; NaN never passes; negative tolerance is rejected.</p>
+<p><strong>Verify:</strong> Assert large-scale and near-zero cases separately, then a strict zero-tolerance failure and nonfinite rejection.</p>
+<p><strong>Progressive hint:</strong> Validate the policy before computing the reference-scaled tolerance.</p>
+<h4 id="exercise-5-check-both-conservation-and-classification">Exercise 5: Check both conservation and classification<a class="heading-anchor" href="#exercise-5-check-both-conservation-and-classification" aria-label="Link to this section">#</a></h4>
+<p>Validate a nonnegative/negative partition by checking the full combined bag and each branch predicate. Do not accept equal counts or sums as sufficient evidence.</p>
+<p><strong>Expected result/shape:</strong> Input(1,-1,0,1) with accepted(1,0,1), rejected(-1) passes. Dropping a duplicate, replacing(1,3) with (2,2), or placing zero in rejected fails.</p>
+<p><strong>Verify:</strong> Assert the good split and all three distinct counterexamples.</p>
+<p><strong>Progressive hint:</strong> Combine bagEqual with forall checks on both branches.</p>
+<h4 id="exercise-6-show-that-an-oracle-rejects-real-misconceptions">Exercise 6: Show that an oracle rejects real misconceptions<a class="heading-anchor" href="#exercise-6-show-that-an-oracle-rejects-real-misconceptions" aria-label="Link to this section">#</a></h4>
+<p>Test a supplied nonnegative-filter candidate against four independent literal fixtures: empty,(0),(-1,0,2),(2,2,-1). Return false if it throws or violates a sequence result. Demonstrate rejection of zero-dropping and deduplicating candidates.</p>
+<p><strong>Expected result/shape:</strong> The &gt;=0 filter passes. The &gt;0 filter and a nonnegative-then-distinct implementation fail. A candidate throwing an exception also fails.</p>
+<p><strong>Verify:</strong> Assert one accepted candidate and three rejected candidates, so a success-only harness cannot pass unnoticed.</p>
+<p><strong>Progressive hint:</strong> Keep expected sequences as literals instead of computing them with the same filter being tested.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If a test passes despite a dropped duplicate, inspect whether the oracle compared Sets or only a total. If a boundary result is negative after increasing an Int, move the conversion before the operation. If a floating comparison passes NaN or a huge tolerance hides a logic error, review the policy rather than weakening assertions. If an invalid candidate passes every test, add a mechanism-specific counterexample and keep expected values independent of the candidate implementation. Finite fixture success is not automatic learner mastery or a universal correctness proof.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without opening the reference, trace the listed boundary case through <code>bagEqual</code>. Then explain why <code>filterContract</code> needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.scala-lang.org/overviews/collections-2.13/operations.html">Scala 2.13 collections operations</a>.</li>
+</ul>
+<ul>
+<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long">Java17 Math.addExact</a>).</li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-008: Assertions, numeric boundaries, and independent oracles.
+Read courses/scala-spark/guides/spark-008.md and courses/scala-spark/lessons/spark-008.scala. Direct prerequisites: spark-007.
+Explain the Scala 2.13 syntax and data contract, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact assertion evidence and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt. Use only the prepared scala-jvm profile and preserve my saved work; do not install or download dependencies.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why an incorrect implementation fails.</code></pre></article>
+  </main>
+</body>
+</html>

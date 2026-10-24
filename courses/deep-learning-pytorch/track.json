@@ -1,0 +1,722 @@
+{
+  "schema_version": 1,
+  "id": "deep-learning-pytorch",
+  "title": "Deep Learning with PyTorch: tensors to reliable model releases",
+  "summary": "36 lessons in PyTorch, from tensors and autograd to training, neural architectures, diagnosis, checkpoints and deployment. Paired TensorFlow examples help explain where the frameworks differ.",
+  "lessons": [
+    {
+      "id": "torch-001",
+      "title": "A bounded PyTorch investigation and framework comparison",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [],
+      "runtime": "reading",
+      "concepts": [
+        "Prediction unit",
+        "Training",
+        "Holdout",
+        "Baseline"
+      ],
+      "outcome": "A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction.",
+      "lab": "Use three training points(1, 2), (2, 4), (3, 6) and four untouched points(4, 8)..(7, 14); name one row as the prediction unit.",
+      "verification": "3 training rows, 4 holdout rows, one prediction per row. report says arithmetic/software checked; population reliability unestablished.",
+      "paired_lesson_id": "tf-001"
+    },
+    {
+      "id": "torch-002",
+      "title": "Tensors, devices, dtypes, strides and views",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-001"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Stride",
+        "View",
+        "Device",
+        "Broadcasting"
+      ],
+      "outcome": "A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state.",
+      "lab": "Create a 2-by-3 float64 CPU tensor from values 0..5.",
+      "verification": "shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.",
+      "paired_lesson_id": "tf-002"
+    },
+    {
+      "id": "torch-003",
+      "title": "Linear modules, parameters and matrix contracts",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-002"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Affine map",
+        "Parameter registration",
+        "Weight layout"
+      ],
+      "outcome": "A linear layer computes an affine transformation from input features to output features.",
+      "lab": "UseX[[1, 2, 3], [0, 1, 0]], weight[[1, 0, -1]], bias 2.",
+      "verification": "outputs[[0], [2]], shape(2, 1). RuntimeError from incompatible matrix dimensions.",
+      "paired_lesson_id": "tf-003"
+    },
+    {
+      "id": "torch-004",
+      "title": "Loss functions, reductions and gradient scale",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-003"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Reduction",
+        "Loss unit",
+        "Gradient scale"
+      ],
+      "outcome": "A loss is a numerical objective with a declared unit and denominator.",
+      "lab": "Use residuals[1, -1, 2] against zero targets.",
+      "verification": "squared entries 1, 1, 4; sum 6; mean 2. MAE 4/3; MSE 2.",
+      "paired_lesson_id": "tf-004"
+    },
+    {
+      "id": "torch-005",
+      "title": "Derivatives, requires_grad and finite-difference checks",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-004"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Derivative",
+        "Finite difference",
+        "Learning rate"
+      ],
+      "outcome": "A derivative measures local sensitivity: how much a function changes for a small input change.",
+      "lab": "Differentiate (w-2)**2 at w=0 using autograd.grad.",
+      "verification": "derivative -4; loss 4. all raise ValueError.",
+      "paired_lesson_id": "tf-005"
+    },
+    {
+      "id": "torch-006",
+      "title": "Autograd graphs, the chain rule and in-place hazards",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-005"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Autograd graph",
+        "Saved tensor",
+        "In-place hazard"
+      ],
+      "outcome": "Autograd follows the chain of tensor operations from a scalar objective back to its inputs.",
+      "lab": "Use w=1, z=2*w, a=z*z and loss=(a-1)**2.",
+      "verification": "z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2.",
+      "paired_lesson_id": "tf-006"
+    },
+    {
+      "id": "torch-007",
+      "title": "Leaf tensors, detach, no_grad and gradient accumulation",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-006"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Leaf tensor",
+        "Detach",
+        "Gradient accumulation",
+        "Gradient mode"
+      ],
+      "outcome": "PyTorch distinguishes graph tracking from gradient storage.",
+      "lab": "Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.",
+      "verification": "w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.",
+      "paired_lesson_id": "tf-007"
+    },
+    {
+      "id": "torch-008",
+      "title": "One optimizer step you can audit",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-007"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Optimizer membership",
+        "SGD step",
+        "Independent oracle"
+      ],
+      "outcome": "One optimizer step is the smallest complete training experiment.",
+      "lab": "Use float64 x = [1, 2, 3], y = 2x and scalar w = 0.",
+      "verification": "mean squared loss 56/3. w.grad None; updated weight unchanged.",
+      "paired_lesson_id": "tf-008"
+    },
+    {
+      "id": "torch-009",
+      "title": "Batches, zero_grad and repeated updates",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-008"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Epoch",
+        "Batch",
+        "Gradient reset"
+      ],
+      "outcome": "An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once.",
+      "lab": "Partition IDs 1..6 into batches of 2.",
+      "verification": "three batches[[1, 2], [3, 4], [5, 6]]. epoch mean 4, not 5.",
+      "paired_lesson_id": "tf-009"
+    },
+    {
+      "id": "torch-010",
+      "title": "Datasets, held-out families and leakage controls",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-009"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Map-style Dataset",
+        "Subset",
+        "Split unit",
+        "Training-only fit"
+      ],
+      "outcome": "A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.",
+      "lab": "Create eight records with groups A, A, B, B, C, C, D, D and values 1, 3, 5, 7, 20, 22, 30, 32.",
+      "verification": "length 8; item 0 has ID 0, group A, value 1. 16, 18, 26, 28.",
+      "paired_lesson_id": "tf-010"
+    },
+    {
+      "id": "torch-011",
+      "title": "nn.Module, registered parameters and explicit training loops",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-010"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Module",
+        "Buffer",
+        "Optimizer membership"
+      ],
+      "outcome": "Annn.",
+      "lab": "Build Scalar Model with weight 0 and buffer offset 0.",
+      "verification": "one parameter weight; one buffer offset; both in state_dict. same weight object and one parameter.",
+      "paired_lesson_id": "tf-011"
+    },
+    {
+      "id": "torch-012",
+      "title": "Capstone: an auditable tiny PyTorch regressor",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "torch-011"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Experiment manifest",
+        "Training baseline",
+        "Frozen assessment"
+      ],
+      "outcome": "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.",
+      "lab": "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target 2 a-b+c.",
+      "verification": "targets 0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.",
+      "paired_lesson_id": "tf-012"
+    },
+    {
+      "id": "torch-013",
+      "title": "Binary logits, BCEWithLogitsLoss and thresholds",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-012"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Logit",
+        "BCEWithLogitsLoss",
+        "Decision threshold"
+      ],
+      "outcome": "A binary logit is an unrestricted score.",
+      "lab": "Apply sigmoid to-2, 0, 2.",
+      "verification": "middle probability.5 and strictly increasing values. 0 errors at.5 and 1 at.8.",
+      "paired_lesson_id": "tf-013"
+    },
+    {
+      "id": "torch-014",
+      "title": "CrossEntropyLoss, multiclass and multilabel contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-013"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Multiclass target",
+        "Multilabel target",
+        "Class axis"
+      ],
+      "outcome": "Multiclass classification chooses exactly one outcome among mutually exclusive classes.",
+      "lab": "Use one row of three zero logits and target class 1.",
+      "verification": "cross entropy log 3. IndexError or RuntimeError identifying an invalid target.",
+      "paired_lesson_id": "tf-014"
+    },
+    {
+      "id": "torch-015",
+      "title": "Dataset, DataLoader, collation and reproducible sampling",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-014"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "DataLoader",
+        "Collation",
+        "Sampler generator",
+        "Worker count"
+      ],
+      "outcome": "Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation.",
+      "lab": "Load five paired ID/value records with batch size 2 and no shuffle.",
+      "verification": "sizes 2, 2, 1 and IDs 0..4 exactly once. ValueError before padding; token IDs must be nonnegative int64 integers.",
+      "paired_lesson_id": "tf-015"
+    },
+    {
+      "id": "torch-016",
+      "title": "Initialization, nonlinearities and gradient diagnostics",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-015"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Nonlinearity",
+        "Initialization",
+        "Capacity",
+        "Symmetry"
+      ],
+      "outcome": "Nonlinearity changes which functions a network can represent.",
+      "lab": "Use inputs 00, 01, 10, 11 and two rectified differences.",
+      "verification": "outputs 0, 1, 1, 0. both.6; the function is absolute difference.",
+      "paired_lesson_id": "tf-016"
+    },
+    {
+      "id": "torch-017",
+      "title": "Dropout, regularization, train and eval modes",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-016"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Regularization penalty",
+        "Dropout mode",
+        "Weight decay"
+      ],
+      "outcome": "Regularization and training mode affect different parts of the experiment.",
+      "lab": "Use weights 1, -2 and compute L1 and squared L2 sums.",
+      "verification": "L1=3; squared L2=5. output still requires grad; backward gives ones.",
+      "paired_lesson_id": "tf-017"
+    },
+    {
+      "id": "torch-018",
+      "title": "BatchNorm, LayerNorm and stateful normalization",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-017"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Running statistic",
+        "Momentum convention",
+        "Batch coupling",
+        "LayerNorm axis"
+      ],
+      "outcome": "Normalization can introduce both state and cross-observation dependencies.",
+      "lab": "Apply BatchNorm momentum.5 to rows 1, 3 and 3, 5.",
+      "verification": "running mean 1, 2; batch counter 1. finite zeros with default affine initialization.",
+      "paired_lesson_id": "tf-018"
+    },
+    {
+      "id": "torch-019",
+      "title": "Convolutions, channel layouts and shared computation",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-018"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "NCHW",
+        "Shared kernel",
+        "Receptive field",
+        "Cross-correlation"
+      ],
+      "outcome": "Convolution applies a shared local kernel across spatial positions.",
+      "lab": "Apply kernel 1, 0; 0, -1 to image 1..9 in 3 x 3 NCHW layout.",
+      "verification": "output shape 1, 1, 2, 2; all values-4. 8trainable scalars.",
+      "paired_lesson_id": "tf-019"
+    },
+    {
+      "id": "torch-020",
+      "title": "Pooling, local augmentation and label invariants",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-019"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Pooling",
+        "Augmentation",
+        "Label invariance"
+      ],
+      "outcome": "Pooling reduces local spatial information.",
+      "lab": "Pool patch 1, 3; 2, 4 with a 2-by-2 window.",
+      "verification": "max 4; average 2.5. left->right->left.",
+      "paired_lesson_id": "tf-020"
+    },
+    {
+      "id": "torch-021",
+      "title": "Embeddings, padded sequences and recurrent models",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-020"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Padding index",
+        "Packed sequence",
+        "Final valid state",
+        "Valid-target denominator"
+      ],
+      "outcome": "A padded sequence contains real positions and artificial storage positions.",
+      "lab": "Use IDs 2, 3, 0 and a fixed 4 x 2 table with zero padding row.",
+      "verification": "embedding shape 1, 3, 2; mask True, True, False. RuntimeError for invalid length.",
+      "paired_lesson_id": "tf-021"
+    },
+    {
+      "id": "torch-022",
+      "title": "Attention, transformer masks and information boundaries",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-021"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "SDPA",
+        "Mask polarity",
+        "Prefix invariance",
+        "Dropout argument"
+      ],
+      "outcome": "Attention forms weighted combinations of value vectors using query-key comparisons.",
+      "lab": "Use zero 3-by-2 queries/keys and values 2, 0; 0, 2; 6, 6.",
+      "verification": "outputs 2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.",
+      "paired_lesson_id": "tf-022"
+    },
+    {
+      "id": "torch-023",
+      "title": "Debugging custom loops, accumulation and clipping",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-022"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Disconnected loss",
+        "Gradient clipping",
+        "Update trace"
+      ],
+      "outcome": "A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction.",
+      "lab": "Detach (w-2)**2 before backward and inspect tracking.",
+      "verification": "detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675.",
+      "paired_lesson_id": "tf-023"
+    },
+    {
+      "id": "torch-024",
+      "title": "Capstone: a small classifier with honest evaluation",
+      "level": "intermediate",
+      "minutes": 210,
+      "prerequisites": [
+        "torch-023"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Confusion matrix",
+        "Frozen threshold",
+        "Population standard deviation",
+        "Subgroup evidence"
+      ],
+      "outcome": "A classifier capstone must connect the task definition to training and evaluation evidence.",
+      "lab": "Use training x-2, -1, 1, 2 with labels 0, 0, 1, 1 and test x-3, 3.",
+      "verification": "4training records, 2test records. negative 0/1errors; positive 1/1.",
+      "paired_lesson_id": "tf-024"
+    },
+    {
+      "id": "torch-025",
+      "title": "Contrastive embeddings and negative sampling",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-024"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Contrastive objective",
+        "Cosine similarity",
+        "False negative"
+      ],
+      "outcome": "Embedding objectives teach a representation to preserve selected relationships.",
+      "lab": "Use anchor[1, 0], positive[1, 1], negative[0, 1].",
+      "verification": "dots 1, 0; cosines 1/sqrt 2, 0. positive probability increases; argmax remains 0.",
+      "paired_lesson_id": "tf-025"
+    },
+    {
+      "id": "torch-026",
+      "title": "Custom modules, residual paths, buffers and autograd checks",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-025"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Custom module",
+        "Buffer",
+        "Grad check",
+        "Incoming gradient"
+      ],
+      "outcome": "Custom modules should make state ownership and differentiation explicit.",
+      "lab": "Create a width 2 residual with zero kernel and scale buffer 1.",
+      "verification": "output equals input; one parameter and one buffer. gradient 24.",
+      "paired_lesson_id": "tf-026"
+    },
+    {
+      "id": "torch-027",
+      "title": "Transfer learning, frozen layers and optimizer membership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-026"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Frozen base",
+        "Optimizer membership",
+        "Mode-dependent buffer",
+        "Unfreeze phase"
+      ],
+      "outcome": "Transfer learning reuses a representation while adapting a task-specific head.",
+      "lab": "Create a bias-free 2-to-2 identity Linear base and disable its parameter gradients.",
+      "verification": "base output equals input; all base parameters frozen. base weight now changes.",
+      "paired_lesson_id": "tf-027"
+    },
+    {
+      "id": "torch-028",
+      "title": "Restartable training, optimizer state and RNG evidence",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "torch-027"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Training checkpoint",
+        "RNG state",
+        "Data position",
+        "Next-step parity"
+      ],
+      "outcome": "Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.",
+      "lab": "Take two Adam updates of a zero-weight linear model onx 1, 2 and y 2 x.",
+      "verification": "optimizer step 2 and positive weight. directory absent; no distributed-loader claim.",
+      "paired_lesson_id": "tf-028"
+    },
+    {
+      "id": "torch-029",
+      "title": "Stable objectives, precision and mixed-precision boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-028"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Overflow",
+        "Log-sum-exp",
+        "Mixed precision",
+        "Gradient scaling"
+      ],
+      "outcome": "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.",
+      "lab": "Exponentiate float32 logits 1000, 999 directly.",
+      "verification": "both exponentials infinite. ValueError before loss evaluation.",
+      "paired_lesson_id": "tf-029"
+    },
+    {
+      "id": "torch-030",
+      "title": "Distributed gradients and accumulation semantics on CPU",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-029"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Global objective",
+        "Microbatch accumulation",
+        "Sha rd weighting",
+        "Distributed acceptance"
+      ],
+      "outcome": "Distributed and accumulated gradients should represent a declared global objective.",
+      "lab": "Combine means 2, 6 with counts 1, 3.",
+      "verification": "global mean 5; unweighted shard mean 4. empty shard contributes 0; global mean 5.",
+      "paired_lesson_id": "tf-030"
+    },
+    {
+      "id": "torch-031",
+      "title": "Profiling, torch.compile and honest performance measurement",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-030"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Graph capture",
+        "Backend",
+        "Warmup",
+        "Profiler overhead"
+      ],
+      "outcome": "Compilation and profiling answer different questions.",
+      "lab": "Evaluatef(x)=x*x+1 at float32[1, 2].",
+      "verification": "output[2, 5]. receipt does not claim universal speedup.",
+      "paired_lesson_id": "tf-031"
+    },
+    {
+      "id": "torch-032",
+      "title": "state_dict, torch.export and inference parity",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "torch-031"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "state_dict",
+        "Exported program",
+        "Dynamic dimension",
+        "Inference parity"
+      ],
+      "outcome": "A state dictionary stores named parameters and buffers, not the complete Python architecture.",
+      "lab": "Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows 1, 2 and 3, 4.",
+      "verification": "outputs 0, 2. three-row parity passes; temporary directory absent.",
+      "paired_lesson_id": "tf-032"
+    },
+    {
+      "id": "torch-033",
+      "title": "Inference mode, model contracts and bounded batching",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-032"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Inference mode",
+        "Input contract",
+        "Batch independence",
+        "Owned output"
+      ],
+      "outcome": "Inference is a bounded function with an input and output contract.",
+      "lab": "Use float32 CPU rows 1, 2 and 3, 4.",
+      "verification": "outputs 0, 2 with shape(2, ). input unchanged.",
+      "paired_lesson_id": "tf-033"
+    },
+    {
+      "id": "torch-034",
+      "title": "Robustness, privacy and evidence beyond a score",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "torch-033"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Subgroup denominator",
+        "Robustness condition",
+        "Finite safety evidence",
+        "Model card"
+      ],
+      "outcome": "A reliability report should preserve the conditions and denominators behind a score.",
+      "lab": "Use groups A, A, B with truth 1, 1, 0 and prediction 1, 0, 0.",
+      "verification": "A1/2errors; B0/1. card explicitly has no privacy guarantee.",
+      "paired_lesson_id": "tf-034"
+    },
+    {
+      "id": "torch-035",
+      "title": "Paired model comparisons and uncertainty",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "torch-034"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Paired difference",
+        "Resampling unit",
+        "Selection bias",
+        "Local generator"
+      ],
+      "outcome": "Model comparisons should preserve the pairing between predictions on the same held-out identities.",
+      "lab": "Use truth a0, b1, c2 with A0, 2, 2 and B 1, 2, 3 in different dictionary order.",
+      "verification": "paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.",
+      "paired_lesson_id": "tf-035"
+    },
+    {
+      "id": "torch-036",
+      "title": "Capstone: release a small reproducible PyTorch model",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "torch-035"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Release bundle",
+        "Integrity gate",
+        "Fresh-process inference",
+        "Rollback identity"
+      ],
+      "outcome": "A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.",
+      "lab": "Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.",
+      "verification": "3 training and 2 holdout records. local checks True; production no-go; directory absent.",
+      "paired_lesson_id": "tf-036"
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://docs.pytorch.org/docs/2.9/index.html",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "checked": "2026-10-22"
+    }
+  ]
+}

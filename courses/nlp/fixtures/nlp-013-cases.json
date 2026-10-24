@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-013",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Fit a count vocabulary on the four authored documents and retain its column mapping.",
+      "expected": "Four rows with a fixed vocabulary; held-out newplanet does not add a column."
+    },
+    {
+      "exercise": 2,
+      "task": "Fit two-component TruncatedSVD on TF-IDF and reconstruct the matrix.",
+      "expected": "Document coordinates shape(4,2); reconstruction error below the zero-matrix baseline."
+    },
+    {
+      "exercise": 3,
+      "task": "Fit two-component NMF on counts and inspect pet and wheel loadings.",
+      "expected": "W and H nonnegative; pet and wheel have different dominant component indices."
+    },
+    {
+      "exercise": 4,
+      "task": "Fit actual two-topic LDA to the count matrix and inspect document mixtures.",
+      "expected": "Four rows, two columns and each row sums to one."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare H with its reversed row order using cosine and assignment.",
+      "expected": "Permutation[1,0] and matched similarities[1,1]."
+    },
+    {
+      "exercise": 6,
+      "task": "Label one component using top words and source documents, then state what remains unproven.",
+      "expected": "A label linked to concrete words/documents, plus limits on uniqueness, coherence and downstream causal meaning."
+    }
+  ]
+}

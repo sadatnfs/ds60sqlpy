@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-013",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Read flags",
+      "input_or_change": "Explain -std=c++20, -Wall, -Wextra and -Wpedantic.",
+      "expected": "Language selection and three diagnostic groups distinguished."
+    },
+    {
+      "exercise": 2,
+      "task": "Run named tests",
+      "input_or_change": "Use the supplied CMake project and ctest --output-on-failure.",
+      "expected": "One or more registered tests actually execute; record count and status."
+    },
+    {
+      "exercise": 3,
+      "task": "Create a failing check",
+      "input_or_change": "Change the expected twice(3) result to 7 in a scratch copy.",
+      "expected": "Executable exit 1 and failing test."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair a disabled test",
+      "input_or_change": "Build a scratch assert-only test with -DNDEBUG.",
+      "expected": "The wrong assert disappears; an if-based test still fails."
+    },
+    {
+      "exercise": 5,
+      "task": "Test zero",
+      "input_or_change": "Keep the always-active twice(0)==0 check.",
+      "expected": "Exit 0 for the correct function."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a regression",
+      "input_or_change": "Break twice to x+x+1, run both tests, then restore.",
+      "expected": "Both normal and zero contracts reject the broken function."
+    }
+  ]
+}

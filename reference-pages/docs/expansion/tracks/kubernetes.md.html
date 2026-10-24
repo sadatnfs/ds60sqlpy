@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Kubernetes track design · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Kubernetes track design</h1>
+      <p class="source-path">Generated from <code>docs/expansion/tracks/kubernetes.md</code></p>
+    </header>
+    <article class="document"><h2 id="kubernetes-track-design">Kubernetes track design<a class="heading-anchor" href="#kubernetes-track-design" aria-label="Link to this section">#</a></h2>
+<p>Status: planned, checked 2026-10-22. These files are design artifacts outside the active catalog. They install no cluster, add no runner and grant no credential. The existing Kubernetes descriptor remains save/view only. The canonical <a href="../plans/kubernetes.json.html">42-lesson plan</a> supplies each outcome, lab, verification, prerequisite and study estimate.</p>
+<h3 id="outcome-and-beginner-entry">Outcome and beginner entry<a class="heading-anchor" href="#outcome-and-beginner-entry" aria-label="Link to this section">#</a></h3>
+<p>A learner starts with files, a terminal, processes, containers and port diagrams, then learns to declare an owned workload and prove what it is actually doing. No Python or SQL catalog chain is required. <code>python-55</code>, <code>python-svc-02</code> and <code>bridge-ops-01</code> are optional transfer reading for someone who already completed them. They are not mandatory planner gates.</p>
+<p>The 42 units separate three different kinds of evidence: control-plane convergence, application traffic/data behavior, and permission/ownership boundaries. Fourteen beginner lessons build a complete stateless service and a fault diagnosis. Fourteen intermediate lessons add identity, state, Gateway/Ingress routing, node-local DaemonSet placement and real policy enforcement. Fourteen advanced lessons use dedicated fixtures for API extension, admission, disruption, recovery and release review. Three capstones integrate those mechanisms; lesson count is a consequence of the distinct mechanisms, not a new promise of 60 calendar days.</p>
+<h3 id="runtime-and-privilege-model">Runtime and privilege model<a class="heading-anchor" href="#runtime-and-privilege-model" aria-label="Link to this section">#</a></h3>
+<p>The proposed runtime IDs are <code>reading</code> and <code>k8s-kind</code>. A host-side provisioner creates a named course-owned kind cluster only after explicit local-engine selection and consent. It records kind version, Kubernetes node image digest, architecture, node container identities and the control-plane CA/endpoint identity. Kubernetes has no universal user-visible cluster UID; the receipt uses a host-verified <code>kube-system</code> namespace UID plus the CA/endpoint and owned node identities. It must never treat the user&#x27;s ambient kubectl current-context as authorization.</p>
+<p>The normal worker receives only a short-lived, audience-appropriate credential for one lease namespace. Its ServiceAccount lives in a private provisioner-owned authentication namespace, outside the workload namespace. No privileged ServiceAccount, real credential or production Secret is placed in the learner namespace. The application browser never receives a raw Docker socket, admin kubeconfig or cluster-admin token. The worker also receives no Docker socket. Host admin material and worker kubeconfig/token files stay in an ephemeral private host-session directory or read-only worker mount, never in <code>.learning</code>, course exports, learner backups or evidence transcripts. Token expiration uses the server-returned expiry, not an invented guarantee based on the requested duration. <a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/">ServiceAccount lifecycle</a>.</p>
+<p>A namespace Role is not a hostile-workload sandbox. Creating Pods can expose namespace resources indirectly, so only synthetic data belongs there. Host-installed admission rejects privileged workloads, host namespaces/paths, arbitrary volume/device mounts, service-account token mounting and images outside the fixture allowlist. RBAC denies cross-namespace access and privilege escalation. <a href="https://kubernetes.io/docs/concepts/security/rbac-good-practices/">RBAC guidance</a> supports this least-privilege boundary. Network isolation requires separately qualified enforcement; do not assume kind&#x27;s default networking implements every policy.</p>
+<p>The default transport is a host-provisioned worker on the controlled engine network, orchestrated by a host-local broker with fixed reviewed operations and explicit target arguments. Its internal control-plane endpoint, TLS CA and server name must be qualified together. An optional manual host-terminal path uses a separately scoped worker identity; it is not a browser-controlled host shell. A containerized worker cannot simply use the host&#x27;s loopback API address. That proof is an implementation gate, not an excuse to expose the API on every host interface or mount an admin kubeconfig. Structured manifest content is input; manifests cannot supply an arbitrary shell command or cluster target.</p>
+<p>Advanced lessons needing CRDs, admission policy, node disruption, metrics/CNI changes or control-plane recovery require an exclusive dedicated cluster lease. The host provisioner performs fixed reviewed privileged operations after the lease/operation check. Browser and ordinary worker identities remain limited. RBAC <code>resourceNames</code> does not constrain creation to a name, so the design does not hand the worker unrestricted CRD/role creation and call it scoped. A host-precreated named fixture or broker-owned operation is the boundary. No shared user cluster, production context or another learner&#x27;s namespace is used for an advanced exercise.</p>
+<h3 id="version-and-platform-qualification">Version and platform qualification<a class="heading-anchor" href="#version-and-platform-qualification" aria-label="Link to this section">#</a></h3>
+<p>The primary-source review found kind v0.33.0 and supported Kubernetes minor branches 1.37, 1.36 and 1.35. The kind release publishes a default 1.37.0 node image digest; a final implementation must qualify a supported patch/node-image pair from that release&#x27;s supported assets, pin the full digest for each architecture and recheck support at release time. A later Kubernetes patch is not assumed usable with an arbitrary kind node image. <a href="https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0">kind release</a>, <a href="https://kubernetes.io/releases/">Kubernetes releases</a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Host</th>
+<th>Proposed route</th>
+<th>Qualification still required</th>
+</tr></thead><tbody>
+<tr>
+<td>Windows 11 x64</td>
+<td>Existing supported local Linux engine, preferably its WSL 2 route; host preparation and worker tools stay in one clearly named Windows/WSL environment</td>
+<td>API reachability/TLS, quoted paths, loopback service inspection, filesystem permissions and complete cancellation/cleanup</td>
+</tr>
+<tr>
+<td>Windows ARM</td>
+<td>Separate pending profile</td>
+<td>Native Linux arm64 node/workload image availability and the selected Windows engine/tool support; no x64-emulation acceptance claim</td>
+</tr>
+<tr>
+<td>macOS Apple Silicon</td>
+<td>Native arm64 kind node/workload images through the existing local engine</td>
+<td>Multi-node boot, storage, host-broker transport and disconnected cache proof</td>
+</tr>
+<tr>
+<td>macOS Intel</td>
+<td>Native amd64 images on a supported OS/engine</td>
+<td>Same proof with its exact architecture and current host support</td>
+</tr>
+<tr>
+<td>Linux amd64/arm64</td>
+<td>Matching local engine and native node/workload images</td>
+<td>Rootful/rootless capabilities, cgroups, ownership and addon-specific behavior; rootless is not blanket claimed</td>
+</tr>
+</tbody></table></div>
+<p>The official <a href="https://kind.sigs.k8s.io/docs/user/using-wsl2/">kind WSL2 guide</a> documents a Linux route; it is not permission to install WSL, change the learner&#x27;s existing engine settings or assume every current Windows machine qualifies. Windows-container mode is not the profile. All platform runtime cells are pending in this design phase. Cluster preparation, addons and multi-node labs have measured CPU/RAM/disk budgets only after actual proof. No existing engine VM is resized or restarted by this plan.</p>
+<h3 id="offline-fixture-contract">Offline fixture contract<a class="heading-anchor" href="#offline-fixture-contract" aria-label="Link to this section">#</a></h3>
+<p>The host preparation bundle will include checksummed kind/kubectl binaries, release-pinned node images, architecture-matched workload/client images, public schemas, a pinned vendored Helm chart, synthetic storage/data fixtures, failure transcripts and controller/policy/metrics fixtures for the relevant advanced lease. It will record licenses, download sources and fixture digests. The <a href="https://kind.sigs.k8s.io/docs/user/working-offline/">kind offline guide</a> requires preparing node images and using release digests; workload images must also be loaded onto every node that can schedule them. A cached host image alone is not evidence of a node cache.</p>
+<p>The beginner HTTP fixture is a proposed course-owned image alias <code>ds60-http-fixture:v1</code>, not an existing published image. Host preparation must resolve/verify its content and preload it before enabling the pilot. Its planned server runs as UID 65532, has no writable root filesystem requirement and exposes only GET <code>/ready</code> returning status 200/body <code>ready</code>, GET <code>/version</code> returning a fixed version, and 404 for unknown paths. It has no HTTP shell/upload interface. A separate <code>check</code> mode performs a bounded HTTP request and exits0 only for its expected status/body. The fixture requires no Kubernetes token. The upstream agnhost test server was reviewed but is not the default: its <a href="https://raw.githubusercontent.com/kubernetes/kubernetes/master/test/images/agnhost/netexec/netexec.go">netexec source</a> also contains shell/upload endpoints. No HTTP fixture image is built or claimed available here.</p>
+<p>Gateway lessons use a dedicated host-qualified controller/CRD lease and an owned Route; there is no assumed cloud LoadBalancer address. A synthetic TLS fixture verifies its supplied public CA explicitly without <code>--insecure</code> or installing a trust root globally. Ingress remains useful to read, but the <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">official Ingress documentation</a> calls its API frozen and recommends Gateway for new development. Restricted synthetic DaemonSets teach one Pod per eligible node without pretending a learner can install a privileged node agent.</p>
+<p>The <a href="../samples/kubernetes-pilot.md.html">pilot</a> uses <code>imagePullPolicy: Never</code> and is therefore honest about a missing preload. Missing images, unsupported CNI, absent metrics, expired credentials and an unprepared cluster each have their own capability message. Run never repairs those states by installing a cluster/addon or downloading arbitrary images. Offline transcript/diagram exercises remain useful when an owned live lease is unavailable; they are labeled reading evidence, not live acceptance.</p>
+<h3 id="teaching-and-assessment-model">Teaching and assessment model<a class="heading-anchor" href="#teaching-and-assessment-model" aria-label="Link to this section">#</a></h3>
+<p>Beginners predict controller behavior, inspect desired versus observed state, make one change, verify independently and explain a failure. The <a href="../samples/kubernetes-pilot-solutions.md.html">separate pilot solution</a> opens only after an attempt or an explicit reveal. Teacher feedback first asks for the relevant observation, then offers one hint. A pass requires the learner&#x27;s explanation plus discriminating evidence; clicking Apply, waiting for a green badge or listing an object is insufficient.</p>
+<p>The core evidence triangle is: Deployment generation/replica convergence, Pod readiness and eligible EndpointSlice target UIDs, then an in-cluster client response. A Pod can be Running but unready. Unready addresses may remain in EndpointSlices with <code>ready:false</code>; count eligible entries, not only objects. A Service port-forward often forwards directly to a selected Pod and is not sufficient proof of ClusterIP selection or ordinary Service routing. <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployments</a>, <a href="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/">EndpointSlices</a>.</p>
+<p>Other anti-misconceptions have explicit counterexamples: labels do not create application health; readiness is not liveness; a request is not a CPU cap; quota admission is not scheduling; a Secret is not encrypted by base64; a PVC is not a backup; an applied NetworkPolicy is not enforcement; HPA is not instant; PDB does not prevent every outage; a digest is not publisher identity; and a kind replacement rehearsal is not a production HA or in-place upgrade proof. NetworkPolicy lessons require an actual allowed/denied connection test on a qualified CNI, as the <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Kubernetes documentation</a> requires.</p>
+<h3 id="three-integration-reviews">Three integration reviews<a class="heading-anchor" href="#three-integration-reviews" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><code>k8s-014</code>: a stateless service must converge to two eligible backend UIDs, return the fixed payload through an in-cluster client, recover one fault and clean up only its owned resources.</li>
+<li><code>k8s-028</code>: a synthetic stateful release must prove data markers, actual network policy, limited identity, failed-change recovery and an explicit retention/reclaim choice.</li>
+<li><code>k8s-042</code>: a custom-resource release and incident drill must include application/data/authorization gates, dedicated-lease receipts for every privileged action and measured recovery evidence. An etcd snapshot is assessed separately from a PVC/data backup.</li>
+</ol>
+<p>Every stage includes retrieval after a delay, a fault whose symptoms resemble another fault, and a transfer task with changed resource names/labels. The advanced learner explains why their evidence excludes a competing cause and which production claims the local fixture cannot support.</p>
+<h3 id="cleanup-progress-and-activation-gates">Cleanup, progress and activation gates<a class="heading-anchor" href="#cleanup-progress-and-activation-gates" aria-label="Link to this section">#</a></h3>
+<p>The host records namespace UID and created resource UIDs before allowing changes. Cleanup is idempotent, bounded and owner-checked: remove only recorded resources or the still-owned disposable namespace, verify no owned objects remain, then revoke the RoleBinding and delete the provisioner-owned worker identity. Deleting the identity/permissions and checking denial is distinct from waiting for token expiry. An expired lease must not keep a stale credential active. Never force-remove arbitrary finalizers, delete an ambient namespace or delete a cluster whose owned node identities no longer match.</p>
+<p>Progress stores learner manifests, predictions, redacted observation fields, fixture hashes and reasoning. It never stores kubeconfig, bearer tokens, admin certificates, raw Secret data or an etcd snapshot. A snapshot can contain credentials and belongs only in private lease storage with an explicit retention decision. The learner&#x27;s source/evidence survives cancellation or unavailable infrastructure; the temporary cluster does not become a portable credential backup.</p>
+<p>Before catalog activation, create the real <code>courses/kubernetes/</code> files and local guidance, implement and test the reviewed broker/lease/credential lifecycle, qualify the full OS/architecture/addon matrix, prove offline operation and cleanup after every failure stage, then register additively and run the normal depth/practice/navigation/app/MCP checks. This design performs none of those cluster actions and claims no live Kubernetes acceptance.</p>
+<h3 id="planned-lesson-sequence">Planned lesson sequence<a class="heading-anchor" href="#planned-lesson-sequence" aria-label="Link to this section">#</a></h3>
+<p>This table is a compact view of the canonical JSON plan; the JSON contains the concrete lab and independent verification for every row.</p>
+<h4 id="beginner">Beginner<a class="heading-anchor" href="#beginner" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Direct planned prerequisites</th>
+</tr></thead><tbody>
+<tr>
+<td><code>k8s-001</code></td>
+<td>Terminal, files and an owned lab receipt</td>
+<td>75</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>k8s-002</code></td>
+<td>Processes, containers, images and ports</td>
+<td>90</td>
+<td><code>k8s-001</code></td>
+</tr>
+<tr>
+<td><code>k8s-003</code></td>
+<td>Kubernetes objects and YAML anatomy</td>
+<td>90</td>
+<td><code>k8s-002</code></td>
+</tr>
+<tr>
+<td><code>k8s-004</code></td>
+<td>Identity, namespaces and explicit targeting</td>
+<td>90</td>
+<td><code>k8s-003</code></td>
+</tr>
+<tr>
+<td><code>k8s-005</code></td>
+<td>Pods, image locality and logs</td>
+<td>90</td>
+<td><code>k8s-004</code></td>
+</tr>
+<tr>
+<td><code>k8s-006</code></td>
+<td>Deployments and reconciliation</td>
+<td>105</td>
+<td><code>k8s-005</code></td>
+</tr>
+<tr>
+<td><code>k8s-007</code></td>
+<td>Labels, selectors and Services</td>
+<td>90</td>
+<td><code>k8s-006</code></td>
+</tr>
+<tr>
+<td><code>k8s-008</code></td>
+<td>Readiness and eligible Service backends</td>
+<td>120</td>
+<td><code>k8s-007</code></td>
+</tr>
+<tr>
+<td><code>k8s-009</code></td>
+<td>ConfigMaps and configuration boundaries</td>
+<td>90</td>
+<td><code>k8s-008</code></td>
+</tr>
+<tr>
+<td><code>k8s-010</code></td>
+<td>Requests, limits and namespace budgets</td>
+<td>105</td>
+<td><code>k8s-006</code></td>
+</tr>
+<tr>
+<td><code>k8s-011</code></td>
+<td>Jobs and scheduled work</td>
+<td>90</td>
+<td><code>k8s-005</code></td>
+</tr>
+<tr>
+<td><code>k8s-012</code></td>
+<td>Debug from conditions, events and logs</td>
+<td>105</td>
+<td><code>k8s-008</code>, <code>k8s-010</code>, <code>k8s-011</code></td>
+</tr>
+<tr>
+<td><code>k8s-013</code></td>
+<td>Rollouts, revisions and recovery</td>
+<td>105</td>
+<td><code>k8s-009</code>, <code>k8s-012</code></td>
+</tr>
+<tr>
+<td><code>k8s-014</code></td>
+<td>Capstone 1: observable stateless service</td>
+<td>180</td>
+<td><code>k8s-009</code>, <code>k8s-010</code>, <code>k8s-011</code>, <code>k8s-012</code>, <code>k8s-013</code></td>
+</tr>
+</tbody></table></div>
+<h4 id="intermediate">Intermediate<a class="heading-anchor" href="#intermediate" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Direct planned prerequisites</th>
+</tr></thead><tbody>
+<tr>
+<td><code>k8s-015</code></td>
+<td>Startup, liveness and readiness are different</td>
+<td>105</td>
+<td><code>k8s-008</code>, <code>k8s-013</code></td>
+</tr>
+<tr>
+<td><code>k8s-016</code></td>
+<td>Init containers and ephemeral shared files</td>
+<td>105</td>
+<td><code>k8s-005</code>, <code>k8s-009</code></td>
+</tr>
+<tr>
+<td><code>k8s-017</code></td>
+<td>Nonroot workloads and Pod Security</td>
+<td>105</td>
+<td><code>k8s-010</code></td>
+</tr>
+<tr>
+<td><code>k8s-018</code></td>
+<td>ServiceAccounts and RBAC boundaries</td>
+<td>120</td>
+<td><code>k8s-004</code>, <code>k8s-017</code></td>
+</tr>
+<tr>
+<td><code>k8s-019</code></td>
+<td>Synthetic Secrets and reload semantics</td>
+<td>105</td>
+<td><code>k8s-009</code>, <code>k8s-018</code></td>
+</tr>
+<tr>
+<td><code>k8s-020</code></td>
+<td>DNS and layered network diagnosis</td>
+<td>105</td>
+<td><code>k8s-007</code>, <code>k8s-012</code></td>
+</tr>
+<tr>
+<td><code>k8s-021</code></td>
+<td>NetworkPolicy with enforcement evidence</td>
+<td>120</td>
+<td><code>k8s-018</code>, <code>k8s-020</code></td>
+</tr>
+<tr>
+<td><code>k8s-022</code></td>
+<td>Volumes, claims and stateful identity</td>
+<td>120</td>
+<td><code>k8s-010</code>, <code>k8s-016</code></td>
+</tr>
+<tr>
+<td><code>k8s-023</code></td>
+<td>Gateway, Ingress and the external route</td>
+<td>120</td>
+<td><code>k8s-013</code>, <code>k8s-017</code>, <code>k8s-020</code></td>
+</tr>
+<tr>
+<td><code>k8s-024</code></td>
+<td>Kustomize and field ownership</td>
+<td>105</td>
+<td><code>k8s-003</code>, <code>k8s-013</code></td>
+</tr>
+<tr>
+<td><code>k8s-025</code></td>
+<td>Helm values without hidden side effects</td>
+<td>120</td>
+<td><code>k8s-019</code>, <code>k8s-024</code></td>
+</tr>
+<tr>
+<td><code>k8s-026</code></td>
+<td>Placement and node-local DaemonSets</td>
+<td>120</td>
+<td><code>k8s-010</code>, <code>k8s-012</code></td>
+</tr>
+<tr>
+<td><code>k8s-027</code></td>
+<td>Observability and service-level evidence</td>
+<td>120</td>
+<td><code>k8s-012</code>, <code>k8s-015</code>, <code>k8s-020</code></td>
+</tr>
+<tr>
+<td><code>k8s-028</code></td>
+<td>Capstone 2: stateful change with policy</td>
+<td>240</td>
+<td><code>k8s-017</code>, <code>k8s-018</code>, <code>k8s-021</code>, <code>k8s-022</code>, <code>k8s-023</code>, <code>k8s-025</code>, <code>k8s-027</code></td>
+</tr>
+</tbody></table></div>
+<h4 id="advanced">Advanced<a class="heading-anchor" href="#advanced" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Direct planned prerequisites</th>
+</tr></thead><tbody>
+<tr>
+<td><code>k8s-029</code></td>
+<td>Custom resources and structural schemas</td>
+<td>120</td>
+<td><code>k8s-028</code></td>
+</tr>
+<tr>
+<td><code>k8s-030</code></td>
+<td>Operators and reconciliation contracts</td>
+<td>135</td>
+<td><code>k8s-006</code>, <code>k8s-029</code></td>
+</tr>
+<tr>
+<td><code>k8s-031</code></td>
+<td>Admission policy and controlled denial</td>
+<td>120</td>
+<td><code>k8s-017</code>, <code>k8s-029</code></td>
+</tr>
+<tr>
+<td><code>k8s-032</code></td>
+<td>Disruptions and availability budgets</td>
+<td>135</td>
+<td><code>k8s-026</code>, <code>k8s-028</code></td>
+</tr>
+<tr>
+<td><code>k8s-033</code></td>
+<td>Autoscaling with a qualified metrics path</td>
+<td>135</td>
+<td><code>k8s-010</code>, <code>k8s-027</code>, <code>k8s-032</code></td>
+</tr>
+<tr>
+<td><code>k8s-034</code></td>
+<td>Traffic changes and progressive delivery</td>
+<td>135</td>
+<td><code>k8s-013</code>, <code>k8s-021</code>, <code>k8s-027</code></td>
+</tr>
+<tr>
+<td><code>k8s-035</code></td>
+<td>Watches and optimistic concurrency</td>
+<td>120</td>
+<td><code>k8s-003</code>, <code>k8s-018</code>, <code>k8s-030</code></td>
+</tr>
+<tr>
+<td><code>k8s-036</code></td>
+<td>Control-plane snapshots and data backups</td>
+<td>150</td>
+<td><code>k8s-018</code>, <code>k8s-022</code>, <code>k8s-028</code></td>
+</tr>
+<tr>
+<td><code>k8s-037</code></td>
+<td>Version skew and replacement-cluster rehearsal</td>
+<td>135</td>
+<td><code>k8s-024</code>, <code>k8s-028</code>, <code>k8s-029</code></td>
+</tr>
+<tr>
+<td><code>k8s-038</code></td>
+<td>Image provenance and offline verification</td>
+<td>135</td>
+<td><code>k8s-017</code>, <code>k8s-025</code>, <code>k8s-031</code></td>
+</tr>
+<tr>
+<td><code>k8s-039</code></td>
+<td>Multitenancy and threat boundaries</td>
+<td>120</td>
+<td><code>k8s-018</code>, <code>k8s-021</code>, <code>k8s-031</code></td>
+</tr>
+<tr>
+<td><code>k8s-040</code></td>
+<td>Incident response and bounded fault injection</td>
+<td>150</td>
+<td><code>k8s-027</code>, <code>k8s-032</code>, <code>k8s-035</code></td>
+</tr>
+<tr>
+<td><code>k8s-041</code></td>
+<td>Recovery objectives and reviewable runbooks</td>
+<td>150</td>
+<td><code>k8s-036</code>, <code>k8s-037</code>, <code>k8s-040</code></td>
+</tr>
+<tr>
+<td><code>k8s-042</code></td>
+<td>Capstone 3: platform release and incident review</td>
+<td>300</td>
+<td><code>k8s-030</code>, <code>k8s-031</code>, <code>k8s-033</code>, <code>k8s-034</code>, <code>k8s-038</code>, <code>k8s-039</code>, <code>k8s-041</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="primary-sources-checked-2026-10-22">Primary sources checked 2026-10-22<a class="heading-anchor" href="#primary-sources-checked-2026-10-22" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://kind.sigs.k8s.io/docs/user/quick-start/">kind Quick Start</a>: Host preparation, platform binaries, owned cluster names and loading local images.</li>
+<li><a href="https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0">kind v0.33.0 release</a>: Version qualification candidate and release-published node image digests.</li>
+<li><a href="https://kind.sigs.k8s.io/docs/user/working-offline/">kind Working Offline</a>: Preload node/workload images and record exact content digests before disconnected study.</li>
+<li><a href="https://kind.sigs.k8s.io/docs/user/using-wsl2/">kind Using WSL2</a>: Windows Linux-container/WSL2 route; current engine prerequisites require separate verification.</li>
+<li><a href="https://kubernetes.io/releases/">Kubernetes supported releases</a>: Recheck supported minor/patch versions at implementation;1.37/1.36/1.35 are listed at review.</li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Kubernetes Deployments</a>: Desired/observed state, rollout generation and controller-managed Pods.</li>
+<li><a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Kubernetes probes</a>: Readiness traffic eligibility versus liveness/startup restart behavior.</li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/">Kubernetes EndpointSlices</a>: Ready/serving/terminating endpoint conditions and UID-based backend checks.</li>
+<li><a href="https://kubernetes.io/docs/concepts/security/rbac-good-practices/">Kubernetes RBAC good practices</a>: Least privilege, namespace escalation risks and separation of worker/admin identities.</li>
+<li><a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/">Kubernetes ServiceAccounts</a>: Bound short-lived tokens and credential lifecycle; requested duration is not a fabricated expiration guarantee.</li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Kubernetes NetworkPolicy</a>: A policy object does not prove enforcement without a capable networking implementation.</li>
+<li><a href="https://raw.githubusercontent.com/kubernetes/kubernetes/master/test/images/agnhost/netexec/netexec.go">agnhost netexec source</a>: The test server exposes shell/upload endpoints, motivating a smaller course-owned HTTP fixture instead.</li>
+</ul>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/gateway/">Kubernetes Gateway API</a>: Route/controller roles and separate qualification.</li>
+<li><a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">Kubernetes Ingress</a>: frozen API and the Gateway direction.</li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">Kubernetes DaemonSet</a>: one Pod per eligible node and placement semantics.</li>
+</ul></article>
+  </main>
+</body>
+</html>

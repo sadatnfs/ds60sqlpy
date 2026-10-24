@@ -1,0 +1,516 @@
+{
+  "captured_for": "prose-only textbook expansion",
+  "protected_files": [
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-001.py",
+      "sha256": "22485c334cc09f556f8c67abc06f4ce729bae7422e72391253759377362d21e5"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-002.py",
+      "sha256": "290785023ab9daf99485211a4f9525a1d2e8f9608fb4356963d5287a67a68f4d"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-003.py",
+      "sha256": "a733eeb1ab76384030b48eb3c5c840b8d66d22b4fa4af9c0625e8fbfa9f41cd7"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-004.py",
+      "sha256": "a0d4e151aeea952d23e9589dbaf56e4f9a9217d94444641b70aa53ba800a0b10"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-005.py",
+      "sha256": "b6c593b8670305745ae05dd320aa882332821800fd7a10e5d6f23a775de0992e"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-006.py",
+      "sha256": "5df69d761006a006c0c9e0a29be4733b7b2d613eda70689f401d9e4e7e0c2aaa"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-007.py",
+      "sha256": "6f980519a8a35301b82503eb9ea936d1c97425f0de44c3d802a360c1dcd67d3d"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-008.py",
+      "sha256": "694b1c221c7839d7fb8ff96ad81b6caa3be4aeb07c7a3ae9effe5d874ad425ac"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-009.py",
+      "sha256": "f4f395a37d4bbfb07b672d8e8f842f8a45cd51be9b1b572018861039dd4a1fe8"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-010.py",
+      "sha256": "ee95fd51c95ee903283bf39ae632c78a3da125e9985a47631fcb0f90793407b3"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-011.py",
+      "sha256": "f4290435f19323d208644d78d60dbca571a6b7641bba67ae77278ba8162cf725"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-012.py",
+      "sha256": "19dcc1b13934612920d224545ed529c7fe76fa67894ec9065b4171f03d89aa38"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-013.py",
+      "sha256": "4efdb474d2bc9e160812801b03e30cb8e6577bd7c179004f0938eb8172f517b9"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-014.py",
+      "sha256": "c42425f671b8f9def2eb5cc8005f9bab1df07b0d23749e7cc8ca171e294d60c7"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-015.py",
+      "sha256": "ab94e21300cac50baa6027720873ded3bdf8153062c8bc85706e3beff2b4d167"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-016.py",
+      "sha256": "ce3b6e0d0f32e8e4ac9d310d95476c9621dd7c790388bf41ea4b682e253022ae"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-017.py",
+      "sha256": "c960968717e69e91af7303ccbc544c4fb3e376f195412fe1ca2cb46b3989fd7d"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-018.py",
+      "sha256": "7635b871dcca079b526f7f9b24385255ea97e19a371058a7247d40964483d66a"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-019.py",
+      "sha256": "03274fabb23d8b35c871426c47482c70fabef47f02237c6d3dbe3c2d06525697"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-020.py",
+      "sha256": "52cb50bbd3dfe7139e3ffb166c4d238c9bf314c36de884f7608b784ea43a3756"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-021.md",
+      "sha256": "ed3c052f887b3925cc69aedb95c7f5e417e55ee1b9afff985cdd65b6202e840a"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-022.py",
+      "sha256": "acd441032670e7c746bc9eab73473f293403d8a5694e16b9418179f61e2e3134"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-023.py",
+      "sha256": "5fb6f1eaf10eac04ee2b4ebb60feff9c6b530a74e1410382e002f177cd0a6e08"
+    },
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-024.py",
+      "sha256": "1cf16fb23b5b7b2ddf28efcfea8d5cde8a5a605f4a4cf89d871a5610d213fe87"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-001_solution.py",
+      "sha256": "e9ac95f1f2f947566a43a1d4c7e742002b97acd1bc77200f1b2304f34d48d7f5"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-001_solutions.md",
+      "sha256": "a2699deeb8238ef6db7e61fe3ecad12c4cfc4426ff7d87e86e27205c0fecf798"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-002_solution.py",
+      "sha256": "7e7514d26e01bea930838bc68e06fd5d966bd2bce9e9fcb592bc09fb9e8ed24c"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-002_solutions.md",
+      "sha256": "6613e175ab88dae0647278c27d82c8974821d545a80ad6e9740415c54be494d2"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-003_solution.py",
+      "sha256": "ccf965628c517d4c289b16fd419dcad6f3a1e58de0defc15794a0cfb322757f0"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-003_solutions.md",
+      "sha256": "4e775351aa61698442c14aeac79dbee8217cc7f048371a691ff30cb33fb1f77d"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-004_solution.py",
+      "sha256": "75f8dbe1033c7ef45f7d90ee89d6397ac7c2065c8c0927c90002613422132f23"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-004_solutions.md",
+      "sha256": "27aea03ea15122ee974d75b60b9f44e0b93af7770afde49ea0df0e2d53c6d24d"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-005_solution.py",
+      "sha256": "28845b4b2d8477cbbc6de7dd5ec9fbc8a866a1311c7ae6b45e7ad0e2a3d68cc4"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-005_solutions.md",
+      "sha256": "8043016a017435fee8df5587edc42164bca52a5384274da0d6e2e84eb576ddb2"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-006_solution.py",
+      "sha256": "6928123329fb4757b274c5b6caf8dd6a22091eb7d8d881992f485d4f63bd6ec0"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-006_solutions.md",
+      "sha256": "3bc9fb6dc1af3a85042534dfde562065915ceb13d1dfb7220891ae90f5775ee9"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-007_solution.py",
+      "sha256": "e2e7118af54f8181d0926f2698bcdc4a357fb665058df8a0cd72c28729500b0f"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-007_solutions.md",
+      "sha256": "74bb98b2dadb398871f442d4956133e2eaac6f2bfe77a1352650da367b937978"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-008_solution.py",
+      "sha256": "f2bb89a81142c87d8eca75a3d11c4615c9e76710f3b051c5711230fc09e891bd"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-008_solutions.md",
+      "sha256": "16407550ae5bbf155f443aad832cd4a4a0a864406d23ef0b8ef593dbfe1ab822"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-009_solution.py",
+      "sha256": "44498cbaae112783bd888f2bcbe0b5e72939b48115103b997f6f6b0d7968acdf"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-009_solutions.md",
+      "sha256": "293189245aaf36efa650675734f5c829080c224524f44771666a4f8cf2c79ea4"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-010_solution.py",
+      "sha256": "2df24c0a62b78d09451ef3dd50b7d686dfdf11bdfd29d46c56ad56fe6770c86c"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-010_solutions.md",
+      "sha256": "5b206a251ba4b7aa3e8abd281e976ed182c4613dc1d7afd6bc51574758034e13"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-011_solution.py",
+      "sha256": "512bc5f7205c0a48d1b4da508839ba8894980b927aba0e7f7db3fd530256607d"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-011_solutions.md",
+      "sha256": "5bd950dd7a82724983a4591dc84cb0ec035b1f5ad5860f87b5f3926a35be7b99"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-012_solution.py",
+      "sha256": "d25230f2dc3a9351a503f1ab096d0cfc6120ef1ecf915b6c3c8aa8938dc72623"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-012_solutions.md",
+      "sha256": "ccca757ba8e40fecd6491a50d1acd5005ed33ab955d44b696156ed521910d925"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-013_solution.py",
+      "sha256": "b9ccc6874bc0bca8fb06601965daa4f9371f6553d7c843d761d85a354aea2594"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-013_solutions.md",
+      "sha256": "c36e3bd2a779bdf2d2ab641d33a199cfd9a3eae301fd53b4d8aff06a99b41826"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-014_solution.py",
+      "sha256": "66c650312c1c4dd0f17fe3d0b8b0206afdfb41404fcec79ff72768517741bf2f"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-014_solutions.md",
+      "sha256": "9772400a0eafae378f900f79e805db2ec5a0455bbd25aa0e0bdcc51fe558d6a3"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-015_solution.py",
+      "sha256": "cf4f7ada6283bd5994c99539fbfe72be9cfd9bdcdd257006ce9f1e78a1c637c1"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-015_solutions.md",
+      "sha256": "8b96e046876d195ddf9841777e0270226aa56eac1fe7f9b661d1919cb858084f"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-016_solution.py",
+      "sha256": "c813b587232d63a9837d5b84191a2b0b5943e810917d61e0fdd6db038be1d140"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-016_solutions.md",
+      "sha256": "c9b8b8084b09924092fdbeb6c705d10b52a58c3e659766c6715836e6344c0a20"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-017_solution.py",
+      "sha256": "d0b07d4ba4fe7e298362b520cae075f580d1b4b5a13e8b4e9b2afebb86ef3298"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-017_solutions.md",
+      "sha256": "7bf5bdd4ccdcd66689972e4ea497b6a36547c7258edcbe9014360353e2a3b5c2"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-018_solution.py",
+      "sha256": "fbcb8e47cc3da9c9f0f60eef1d5cca41ac22578d997c9040103c34e13d3941f7"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-018_solutions.md",
+      "sha256": "bef1629a2ef5a23474a9f78b9455854f7064ec11dde668a11093580acd4284bf"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-019_solution.py",
+      "sha256": "ea0757149dbe5b66392f288e2488086afc979e8bb3d8f64445a95e95b853d17b"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-019_solutions.md",
+      "sha256": "b0f112eab7967fb4b238b41c99ab6c084332fdca033323c22237fa3e1073ab97"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-020_solution.py",
+      "sha256": "27e1de99b88bc93685d97ac03366fa1cac67d7872e34d0e5b333e8fae0167889"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-020_solutions.md",
+      "sha256": "7a351cd30f8281e48ceeb15fe4d630a0c8ca4af4da82af80a3a600c414b5542a"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-021_solutions.md",
+      "sha256": "af64d7d45f8d15353d1058b0fdbcde360363b2b589adc850e5d739307b955a76"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-022_solution.py",
+      "sha256": "b2b2d41a7e86f8413252a5a2df8b02ef5ebb2777577852f2a6379ae8139dc0d4"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-022_solutions.md",
+      "sha256": "1703504390d064eb4e0d1bf6f98f204e9d7a4c652bae1cd1aa89ee0606fecaf5"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-023_solution.py",
+      "sha256": "91fcef096599cc1c3dbb3d86a22fe67b69e44e48877a043c2342612000eeda42"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-023_solutions.md",
+      "sha256": "a015b1cd349e1e190f40f918cb36f5ef393a89a95cee0ec45e6ec2bf3073f3e0"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-024_solution.py",
+      "sha256": "98982650f8575f467bf3dafe94ad1b134cc6395d22d80216000a628be2375f59"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-024_solutions.md",
+      "sha256": "f66d0b42a18fcbdbd9c849597efc0e077cc4692c74a470d214766c7c33f893d6"
+    },
+    {
+      "path": "courses/llm-applied/track.json",
+      "sha256": "ff50a33b82c114aa48d9bb427893e570e06e3186146385fdb6ecc37a005d6041"
+    },
+    {
+      "path": "courses/llm-applied/lessons.json",
+      "sha256": "2297df514f1797a30d4a28498e7f0329139d3cf014e43dd882ebf577eb5fc370"
+    }
+  ],
+  "guide_fences": [
+    {
+      "path": "courses/llm-applied/guides/llm-applied-001.md",
+      "fence_sha256": [
+        "642ccf9d81fdc1a7104d252b4e2ac1fd03e02db38bc302d692deab6ffdb87997",
+        "e5b3422776eeb2838674426b876feda5d685e73571a3e4a7393ef2a6ca34dffa",
+        "ec6c21c47b3dfd162537270caa1617874e8c690e0f394227828228708376ad6c",
+        "7a36b16489e5dc0851f30c9b06b63931be56088269cb29fd4a0d673fdcfc85d3"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-002.md",
+      "fence_sha256": [
+        "79245a5a5beab969d96b0a69b6a2383bc7217b2e69eba5cb630b0ad7eedb3fc8",
+        "88c12115ec9045c4e93d4afe085a6e6821ddc88a60cddbf42a2b74f10ed35255",
+        "7f4f6fc9ad0e994e81eeeb00ab9ea028f822a1572eae4e2183318b49ce92a2a1",
+        "039c369e90dc932cf3d131092c29c03b95031d9ebc143dc88a27ab94a426b0e8"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-003.md",
+      "fence_sha256": [
+        "2fd420bcdf96513eaf715665ddaa6fbe201e7cebb6a1e7e20d96a05bbf79fc54",
+        "8fd039c1e2d1aa4a5678485d3530b25f6789006232b4c3ac38420afe66fa13c8",
+        "6bc94c6a6cc205ffb6a6fcc0cb99a5a1673dd1be6e69303ca7cc0ad903f496a8",
+        "26d3a67894855458107fd2f29c4769d3913d9c982a87567e23d46f94a89dea2b"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-004.md",
+      "fence_sha256": [
+        "7bee1a0246df9f115847a7dd119e068a7209d6b8756a78484a287167d9594cbb",
+        "21cca7f3b1df14c3892947e016cc7af8228e3763fd2f16234861f022039fad67",
+        "06514c4f3af07960a255fd7ad2d136b6d2ceb8384f438857aa9e58381e22a465",
+        "52b79a0861e883938176f65a9055030ff50c67592ce7dbaa8c773dc5e85dbb81"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-005.md",
+      "fence_sha256": [
+        "bd3c20babec8aae1d0ecb62b8de8ddf62b28e5d8b73d842288c5cebd49b10c5c",
+        "821d3853a43683bb34a1f4003762fde4e2fa54faf25248b1ed073ab7f2ebe161",
+        "c2b292a772df435986c44aa568f8078eef7dfd66ca54b7e34d5ee653b8189f19",
+        "0c2c79ea34926329986d3286b86f96b1d6d30a2d8c42b541d33e3d5329462c24"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-006.md",
+      "fence_sha256": [
+        "5fb557122d3c7532b9a6a2907f067fe10f4e3fa785ab8d7ee0c7f679d88283c5",
+        "3aef5594d997e32e5577d159bee514ff81c2ac660e7b217b03e7abf70c6c248c",
+        "62f22a78c532a541139642d2750f5c67f6dee8d4bd0f34f021a52111a4b1a0c9",
+        "202338a725f513b0c599f266d7f4425807184e7c7ca8f04c10dd804400daf3ec"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-007.md",
+      "fence_sha256": [
+        "7cdc6e21b93e18fb048956d85d42d8d92147aeb11f0e66d3e9572b88f080f38f",
+        "343311bf987f55a47f139e24323baf00c59067a71a51ded2e9de897ff108473b",
+        "f3e989c29ed66a3f4062e5b992b47b61a68530d59c43e35f8a31d76f0ebdc6b1",
+        "4b15d8611d12a14b81960f8d770b46bfc397e0e0ecf2aac8894c7acaff6b24c5"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-008.md",
+      "fence_sha256": [
+        "2c1affb6a729d85f0e3172453d7ac77356a204432ce647e023599cf2ae5d9974",
+        "46da92ea4415f194f2a0403b92d4bd4d943032371409fe40f662f982c4902e20",
+        "ddad20563df31a4973394993671784ed0f8cd7012f71153364e1fae982fc0f14",
+        "2edb94266f8a3319bd597d1a7252fe4aede100164d141794f437a2b016d9f7b7"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-009.md",
+      "fence_sha256": [
+        "b17f01e5dbad66181b007b8bb5547fc11e6f8035d13777186cf46306738e2d0b",
+        "281bde7c73eed1d815f943ad97936aef8ea555c404f0d5bd0fe95cc84574630a",
+        "f04ee058bd301465b95011c7dafc9be1243c17f142104ad1dd2bb9bbc42e3d69",
+        "b89694e85b1afc081d4402f3c40f15f8e45c6059949b1d8a75b86dd2a151e081"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-010.md",
+      "fence_sha256": [
+        "60d0278c18cba3ea11b65059c3e0365baf2924a05ea0ea1f990ffbeb9d9d4f30",
+        "91f75ab1c71e22533e4a811cbf7386241b85a80a7406657d3c0cab1cbd483232",
+        "983ccf9b7f8f57de1d925bc1604b788523ffeca82f5ef877b38bf7f663274b8a",
+        "3410665ef5d95ba04cc96028a34d467aa8a056017345f5ddf6126d363805e791"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-011.md",
+      "fence_sha256": [
+        "865a45a3e667cdf8914d32a00924a156c707226f7d9ab5095c29d6af42fcfe53",
+        "c8dda1dcd2cd6b0e5a390fc9283516206e66845a1dd7874591892dc92ee11c0e",
+        "da7b16fc05add22480266c116683d4f967fef89c64815ecc190da6953a6ad0dc",
+        "c91a5b9c27bce83eab190367fc13b5f1a21e9f1001c2dec00d2ba3d36707c960"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-012.md",
+      "fence_sha256": [
+        "7d801672f8c265a3b83367014a5a89e78fbe15ed8c2dcf5ee2a1a72b5f786804",
+        "1661cc45ad769fbc7fda56cb2e06978a48ab15110471939a95be8b2b9191774f",
+        "8b7a46f2407e3b6b4a3b928a25e7c72bc75415b082e35992a8e5731f1fe037cd",
+        "3e1e796d0ea406687c50145d42948208241d889a871affdf26189727171f4a7b"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-013.md",
+      "fence_sha256": [
+        "f622937550332aafcb55f59ff41fe664dec2df66ba8b5da7b4c77aba2dc3d7af",
+        "ac9c25ee201331356ab3c18cc5d2d0c66e8ba5878d1fa5241879e43b6b3b7c35",
+        "1e89590777c96d2aca74fcacdcfc1da4a21d14140023c34dcc95eceb50eb8ab2",
+        "16764e3c4773954a77cdc70cf90dfbb9c507a37fffad83272051d2a19351f35c"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-014.md",
+      "fence_sha256": [
+        "f344b2a25475459644425c3546766dd32e0a544cf55e81da59da318a4979c7db",
+        "4a14bf9adfdb464a3c4ca09a7ecba69a058dc337f01d3f1b4fa05e866ab1bb57",
+        "da2403404b94d2ca39d95a981c8ff7ec566acbc2e2d9e9fe69ea9f87a654b662",
+        "b5e326eda301186ef7e8cc2cd9dbf7e2ac4e7356cb94a6de18b708c07a679640"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-015.md",
+      "fence_sha256": [
+        "961de24a129f218482f78e6175a13e534659f52529b338019279a83bc077a81f",
+        "29abccc0c380a1800f5ba8c2c16a2ff62515c09aac0fdebd46a3a6f050421d81",
+        "ea870d89bee672e4ff157532520359eb1981002a85ca4c0ba9e702524684b16e",
+        "8628ba90d85492608ad2f0ebacbbbfe559299492cd7a12f9258a66f20f9b4454"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-016.md",
+      "fence_sha256": [
+        "e816e49069d9809704ec82ac2ef08e7918464bfad7c038d61c23f200dc7e795e",
+        "8e948d1301efd714c97010bafbb725f449954c755d77eecd6028482c63e9dc81",
+        "4ede9fc4f8389986f2650366e6f859e2c27d5243f18c4afd8c022d5f0d14cc9a",
+        "8f479ff9e77745acb742799c1baf770e82c730b5207c2d41c11c5775c7103b4c",
+        "24384a879d6c1de71913b1d06a8cf4b58ba639bc1851fd89c1101c590293be1a"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-017.md",
+      "fence_sha256": [
+        "0210debe2a3a05e333de00106b30278cb4bfcc1583c31e5c1a481ef5f8c2723c",
+        "8d30c7458a91e07a7de4c0179392379ee0520cae1cbf76e12f10bc149a4d9657",
+        "073ae9a8881aa5813192065098d3ac29096f4547e18a2f64665d4ce515d9e850",
+        "7fc5b3529a1d1f5f1ec3e25c3c86fc7641dbfcd7b2678ee6fdae080f0398fe21"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-018.md",
+      "fence_sha256": [
+        "02eed3e052e8f8e94eb0d8b7b92ff2cb69cc4b46d61c362cbbd639de38e6a52d",
+        "c77f9f74db743090d3fd339122fa2264fa2c41997db188524736423ee646bb70",
+        "d4025a9ab4255b181e4443d8c3ae4dbb3c4319f45a3d11042de5dd17089251aa",
+        "4ffc03ffc526730ff3ab03280f4ea0d432705f43a69a216d92756b2939e0336d"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-019.md",
+      "fence_sha256": [
+        "8ca0de3013af567e687c7c2b3018cadb37ed879f7022aec3709cdd058ee02ca2",
+        "ee2ce8a2747018116d87e25aab91af07c56f5f597f28954d8c5f97151c96e0fa",
+        "91b92d40b20ba4f6967468a3d6ade98de962063e44bd75ef334dae5b3cac3996",
+        "35d8cbf94ea4ccb3a631267bc0e95b9b0c1829dcc8b65c73cf758c9012efcdbb"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-020.md",
+      "fence_sha256": [
+        "e70a63aacd2c7f4784c52bc188f887e625d9712331e5f162ac238c4357b0f1a2",
+        "70b54d318961df1e50609bdcf4930977c53d19f39812d2c2691bca355aeafb07",
+        "895a1ff5cecbf398f61820157e3ed147fb037294f374e21760f9c50cd5d665b3",
+        "da8c183b52d23b9aa70cb22cf7a20b1b78e494543478dc808186a16a4eedb35e"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-021.md",
+      "fence_sha256": [
+        "ae0183d0efc69fb5547dbc69c07aa54616c221e87017f89bbb894d2727c76dd4",
+        "294df3fdc56321d51c2c0e27b6d7bd0d8a63e1d79aad6aa47f92a5eb938e7dfa",
+        "c828c7314c8a23ce8503414423571e83e9449356278fbf6ce05432402d839aa5",
+        "4a116c4c3dfc0d3452a3218af53fff495f6378d5987825fa1cdd00049e1806c6"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-022.md",
+      "fence_sha256": [
+        "a3761bf343517176b6d9a065bc19b09eb4457a9ee979c92bb271aec04d3874a9",
+        "b1c60bcf48c47f95c5cbbb051b502650f8cc5ce90c32cb523d5d6364f406ec64",
+        "4395d843008c30193ed343e8992b2e0194fc590d00e12f746fc93a24fcbe1cd0",
+        "537fcacf85862dc2bc952bda2ca79b863d71b55c459a880b5d09939e4234bcfa"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-023.md",
+      "fence_sha256": [
+        "56f2d334eb884aa8e317ce6326633ce1e8796baa5dcff273aeb8aca625510846",
+        "f7291635597a864b75bf633add79eca222e9486771fb0533d1b020c7bb666d72",
+        "13ee6b0050e1804dde2d624eea28fccb8db4ea6d6ce22894db423fa1300c75e5",
+        "676444fc634507c776ddd6e1a239ac326b84b3856c6eabdf1cf29269c8a0adea"
+      ]
+    },
+    {
+      "path": "courses/llm-applied/guides/llm-applied-024.md",
+      "fence_sha256": [
+        "dc69bcae8bfa9152ff123179a8ba074ce61aeabc57c6cd638863073a8c034412",
+        "1960068adee195182be19b5f56ec84ea7e8454d8ad0951117f378e1507d451c5",
+        "5ea5cca1e1b2f92c94ac32458f4ed9cdd6de138caaa98986653291403d711167",
+        "46a9f30f723858c4671278f2083d2a0008e6309bbb7b1d3dec5193aa36c6453e"
+      ]
+    }
+  ]
+}

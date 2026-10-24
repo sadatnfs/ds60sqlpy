@@ -1,0 +1,870 @@
+{
+  "schema_version": 1,
+  "id": "swift",
+  "title": "Swift: portable language foundations and Apple app architecture",
+  "summary": "48 detailed lessons from first programs through language mechanisms, reliable systems and independently designed projects.",
+  "lessons": [
+    {
+      "id": "swift-001",
+      "title": "A Swift source file and its explicit entrypoint",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Source",
+        "Entrypoint",
+        "Precondition"
+      ],
+      "outcome": "Model a three-level capacity calculation and explain every intermediate value.",
+      "lab": "Compute the capacity of three shelves holding eight books each.",
+      "verification": "Hello, Swift appears before the lesson marker. The computed seat count is 24."
+    },
+    {
+      "id": "swift-002",
+      "title": "Constants, variables and static types",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-001"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Binding",
+        "Type inference",
+        "Conversion"
+      ],
+      "outcome": "Choose units and types for a small measurement model.",
+      "lab": "Compute a mean from an integer total and count using a deliberate conversion.",
+      "verification": "The accumulator becomes 8 while the fixed amount remains 4. Integer division yields 3; floating division yields 3.5."
+    },
+    {
+      "id": "swift-003",
+      "title": "Numeric limits and intentional arithmetic",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-002"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Overflow",
+        "Tolerance",
+        "Wrapping arithmetic"
+      ],
+      "outcome": "Choose a numeric representation and rounding policy for a price calculation.",
+      "lab": "Write checked quantity addition that returns an explicit rejected outcome.",
+      "verification": "255 plus one reports overflow and a wrapped partial result of zero. The floating result meets the stated tolerance and the decimal fixture retains decimal intent."
+    },
+    {
+      "id": "swift-004",
+      "title": "Strings, Unicode and collection indices",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-003"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Grapheme cluster",
+        "String.Index",
+        "Substring"
+      ],
+      "outcome": "Design a text-field limit and document whether it counts bytes or visible characters.",
+      "lab": "Write a function returning the first Character as an optional value.",
+      "verification": "Both spellings contain one Character but differ in UTF-8 bytes. The split preserves the emoji as a complete Character."
+    },
+    {
+      "id": "swift-005",
+      "title": "Optionals and honest absence",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-004"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Optional",
+        "Unwrapping",
+        "Nil"
+      ],
+      "outcome": "Model an optional measurement whose absence must survive serialization and reporting.",
+      "lab": "Write a parser accepting only present nonnegative integers.",
+      "verification": "A present zero remains distinct from nil. Parsing produces an optional and malformed text is absent."
+    },
+    {
+      "id": "swift-006",
+      "title": "Branches, switch and exhaustive reasoning",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-005"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Exhaustiveness",
+        "Closed range",
+        "Half-open range"
+      ],
+      "outcome": "Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.",
+      "lab": "Write a three-way classifier for negative, zero and positive quantities.",
+      "verification": "59 retries, 60 passes and 101 is invalid. The early exit excludes missing and empty values before the valid path."
+    },
+    {
+      "id": "swift-007",
+      "title": "Loops, invariants and safe traversal",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-006"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Invariant",
+        "Accumulator",
+        "Termination argument"
+      ],
+      "outcome": "Design a bounded retry loop and explain both its invariant and its stop condition.",
+      "lab": "Implement a first-match search with an optional result.",
+      "verification": "The total is 12 and the empty total is zero. The first 8 appears at offset 1 and 9 is absent."
+    },
+    {
+      "id": "swift-008",
+      "title": "Functions, argument labels and value contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-007"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Argument label",
+        "Parameter",
+        "Inout"
+      ],
+      "outcome": "Choose return values or inout for an API and justify who owns state changes.",
+      "lab": "Write a pure function normalizing a quantity without mutating its caller.",
+      "verification": "Labels show which dimension each argument supplies. The caller explicitly grants mutation and observes 5."
+    },
+    {
+      "id": "swift-009",
+      "title": "Arrays and copy-on-write value semantics",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-008"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Value semantics",
+        "Copy-on-write",
+        "Capacity"
+      ],
+      "outcome": "Explain what changes when array elements are mutable class instances.",
+      "lab": "Build a filtered array without changing the source.",
+      "verification": "Appending to the copy leaves the original unchanged. Reserving twenty slots creates no logical elements."
+    },
+    {
+      "id": "swift-010",
+      "title": "Dictionaries, sets and stable hashing",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-009"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Hashable",
+        "Key",
+        "Set membership"
+      ],
+      "outcome": "Design a custom Hashable key using only stable identity fields.",
+      "lab": "Build a unique sorted list of accepted inventory names.",
+      "verification": "Pear is present with zero and apple is absent. Duplicate red is not inserted and sorted output is deterministic."
+    },
+    {
+      "id": "swift-011",
+      "title": "Tuples, enums and associated values",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-010"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Tuple",
+        "Enum",
+        "Associated value"
+      ],
+      "outcome": "Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.",
+      "lab": "Model loading, ready and failed states with an enum.",
+      "verification": "Named tuple fields expose the accounting relationship. Each outcome exposes only its own meaningful payload."
+    },
+    {
+      "id": "swift-012",
+      "title": "Structures and controlled value mutation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-011"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Struct",
+        "Mutating method",
+        "Encapsulation"
+      ],
+      "outcome": "Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.",
+      "lab": "Build a bounded counter with private mutation.",
+      "verification": "Reserving from the copied inventory does not change the original. Rejected requests retain the previous valid stock."
+    },
+    {
+      "id": "swift-013",
+      "title": "Classes, identity and shared state",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-012"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Reference identity",
+        "Final class",
+        "Composition"
+      ],
+      "outcome": "Explain whether a shared class needs synchronization before use from concurrent tasks.",
+      "lab": "Choose class or struct for a shared connection coordinator and a coordinate value.",
+      "verification": "Both names observe the same increment. Two fresh counters have equal state but distinct identities."
+    },
+    {
+      "id": "swift-014",
+      "title": "Properties, observers and derived state",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-013"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Stored property",
+        "Computed property",
+        "Observer"
+      ],
+      "outcome": "Choose an explicit method instead of a setter for a state change with validation and failure.",
+      "lab": "Build a value model with one stored unit and a documented converted view.",
+      "verification": "Area changes with width without a separately updated area field. The getter and setter translate between temperature scales."
+    },
+    {
+      "id": "swift-015",
+      "title": "Closures, captures and transformation pipelines",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-014"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Closure",
+        "Capture list",
+        "Higher-order function"
+      ],
+      "outcome": "Choose a named function or closure for a reusable domain transformation and explain readability and capture policy.",
+      "lab": "Write a function accepting a transformation closure.",
+      "verification": "Map creates transformed values while retaining the original array. The explicit capture list retains factor 2 for the closure."
+    },
+    {
+      "id": "swift-016",
+      "title": "Foundation project: an honest inventory importer",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-015"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Admission",
+        "Aggregation",
+        "Rejection evidence"
+      ],
+      "outcome": "Design a reusable result that retains safe line-specific reasons without storing raw sensitive input.",
+      "lab": "Produce a sorted text report with accepted totals and rejected count.",
+      "verification": "Pear totals 6 and apple totals 3. The valid zero remains present while three records are rejected."
+    },
+    {
+      "id": "swift-017",
+      "title": "Protocols and behavioral substitution",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-016"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Protocol",
+        "Conformance",
+        "Existential"
+      ],
+      "outcome": "Choose a dependency worth abstracting in the importer and explain why a protocol helps.",
+      "lab": "Define a protocol for a deterministic label formatter.",
+      "verification": "The consumer calls the pricing capability without needing its storage details. Two conforming policies produce different valid prices."
+    },
+    {
+      "id": "swift-018",
+      "title": "Generics and relationships between types",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-017"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Generic parameter",
+        "Constraint",
+        "Type relationship"
+      ],
+      "outcome": "Choose generic or existential abstraction for an API that must preserve concrete result type.",
+      "lab": "Create a generic immutable triple with a rotation operation.",
+      "verification": "One implementation preserves Int and String results. Swapping retains the same concrete element type."
+    },
+    {
+      "id": "swift-019",
+      "title": "Associated types, opaque results and existentials",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-018"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Associated type",
+        "Opaque type",
+        "Type erasure"
+      ],
+      "outcome": "Choose opaque output or existential storage for an API and document the preserved relationships.",
+      "lab": "Write a generic transformation preserving the producer item type.",
+      "verification": "The generic consumer knows the produced value is an Int. The caller uses sequence behavior without naming the concrete array type."
+    },
+    {
+      "id": "swift-020",
+      "title": "Collection protocols, laziness and algorithm costs",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-019"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Sequence",
+        "Collection",
+        "Materialization"
+      ],
+      "outcome": "Choose lazy or materialized processing for a large input and explain repeatability and memory costs.",
+      "lab": "Write a generic sum over Sequence where the element type is suitable.",
+      "verification": "The slice starts at index 1 while traversal still produces two elements. The lazy recipe produces 20 and 30 when consumed."
+    },
+    {
+      "id": "swift-021",
+      "title": "Throwing functions and explicit result values",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-020"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Error",
+        "Throwing function",
+        "Result"
+      ],
+      "outcome": "Choose Optional, throws or Result for three APIs and explain each semantic distinction.",
+      "lab": "Write a throwing validator for an inventory record.",
+      "verification": "Three is accepted and a negative quantity is rejected. The stored outcome retains a QuantityError."
+    },
+    {
+      "id": "swift-022",
+      "title": "ARC, weak references and retain cycles",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-021"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "ARC",
+        "Weak reference",
+        "Retain cycle"
+      ],
+      "outcome": "Choose weak or unowned for a relationship and justify the lifetime guarantee required.",
+      "lab": "Design a weak delegate relationship.",
+      "verification": "The weak observer becomes nil after the last strong reference is removed. The child survives independently without retaining its parent."
+    },
+    {
+      "id": "swift-023",
+      "title": "Codable and validated data boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-022"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Codable",
+        "Coding key",
+        "Schema evolution"
+      ],
+      "outcome": "Plan migration of a renamed field without discarding existing saved records.",
+      "lab": "Write a decoder that validates before returning a trusted item.",
+      "verification": "The modeled fields round-trip through JSON. Valid JSON can still describe an invalid item."
+    },
+    {
+      "id": "swift-024",
+      "title": "Files, URLs and owned persistence",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-023"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "File URL",
+        "Defer",
+        "Persistence scope"
+      ],
+      "outcome": "Design a durable app save with atomic replacement and a recoverable previous version.",
+      "lab": "Persist a Codable value in a temporary file and validate after reading.",
+      "verification": "The UTF-8 bytes round-trip in a uniquely owned location. The two URLs carry different location schemes."
+    },
+    {
+      "id": "swift-025",
+      "title": "Dates, calendars and elapsed time",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-024"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Instant",
+        "Calendar",
+        "Monotonic clock"
+      ],
+      "outcome": "Design storage, display and duration-measurement policies for an appointment app.",
+      "lab": "Build a report from fixed timestamp fixtures.",
+      "verification": "The elapsed interval is 5,400 seconds. Both strings represent the same instant."
+    },
+    {
+      "id": "swift-026",
+      "title": "Swift packages and module boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-025"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Package",
+        "Target",
+        "Module"
+      ],
+      "outcome": "Add a new target only when it creates a useful dependency boundary and document that direction.",
+      "lab": "Run swift test and the journey-demo executable.",
+      "verification": "The pure kernel is suitable for a reusable library. Presentation is independently testable."
+    },
+    {
+      "id": "swift-027",
+      "title": "Testing behavior with the prepared package",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-026"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Oracle",
+        "Regression",
+        "Property"
+      ],
+      "outcome": "Create a verification plan distinguishing unit, package, UI and device evidence.",
+      "lab": "Add a real JourneyCore test for rejected negative quantity.",
+      "verification": "Normal and boundary values satisfy the clamp contract. The zero case catches the wrong default and clamping is idempotent."
+    },
+    {
+      "id": "swift-028",
+      "title": "Async functions and suspension points",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-027"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Suspension point",
+        "Task",
+        "Structured concurrency"
+      ],
+      "outcome": "Identify suspension points in an app load operation and explain what state may change around them.",
+      "lab": "Write an async adapter that returns a validated domain value.",
+      "verification": "The awaited result is 8. The async boundary preserves both the valid result and the domain error."
+    },
+    {
+      "id": "swift-029",
+      "title": "Task groups and bounded parallel ownership",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-028"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Child task",
+        "Completion order",
+        "Admission limit"
+      ],
+      "outcome": "Choose a concurrency bound for an I/O workload and explain its resource basis.",
+      "lab": "Implement bounded admission for a small list with at most two outstanding children.",
+      "verification": "Sorted results are deterministic despite unspecified completion order. No admitted children produces the identity result zero."
+    },
+    {
+      "id": "swift-030",
+      "title": "Cancellation and cleanup in asynchronous work",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-029"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Cooperative cancellation",
+        "CancellationError",
+        "Operation outcome"
+      ],
+      "outcome": "Design a receipt distinguishing success, confirmed cancellation and unknown outcome.",
+      "lab": "Write a bounded processing loop with cleanup on cancellation.",
+      "verification": "The task acknowledges cancellation and its completion is awaited. This task still returns 9 because its body does not check cancellation."
+    },
+    {
+      "id": "swift-031",
+      "title": "Actors and serialized state ownership",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-030"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Actor isolation",
+        "Reentrancy",
+        "Sendable"
+      ],
+      "outcome": "Design a reservation state machine for an operation requiring external I/O before commitment.",
+      "lab": "Implement a bounded actor-owned queue with explicit admission.",
+      "verification": "All twenty increments are retained. The second reservation is rejected without making stock negative."
+    },
+    {
+      "id": "swift-032",
+      "title": "Composition project: an actor-owned import ledger",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "swift-031"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Idempotency",
+        "Receipt",
+        "Conflict"
+      ],
+      "outcome": "Design a durable adapter and document what actor isolation alone cannot guarantee.",
+      "lab": "Add a read-only receipt lookup that never re-executes work.",
+      "verification": "A repeated operation returns its receipt without applying again. A changed payload is rejected and prior state remains intact."
+    },
+    {
+      "id": "swift-033",
+      "title": "Sendable and strict concurrency boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-032"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Sendable",
+        "Isolation domain",
+        "Snapshot"
+      ],
+      "outcome": "Design data exchange between a UI model and a background actor using immutable snapshots.",
+      "lab": "Replace a shared mutable result class with a sendable value result.",
+      "verification": "The task receives immutable value data and returns 6. The parent owns result aggregation and sorts it deterministically."
+    },
+    {
+      "id": "swift-034",
+      "title": "AsyncSequence, streams and bounded buffering",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-033"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "AsyncSequence",
+        "Buffer policy",
+        "Termination"
+      ],
+      "outcome": "Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.",
+      "lab": "Build a finite event stream with explicit completion ownership.",
+      "verification": "The finite stream totals 5 and terminates. The newest-one policy retains 2 and drops the older buffered value."
+    },
+    {
+      "id": "swift-035",
+      "title": "Unsafe memory, buffers and scope-limited access",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-034"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Pointer",
+        "Borrowed access",
+        "Undefined behavior"
+      ],
+      "outcome": "Write an interoperability checklist covering ownership, alignment, initialization and error reporting.",
+      "lab": "Wrap a scoped read-only buffer operation behind a safe function contract.",
+      "verification": "The result escapes as an integer while the borrowed pointer does not. An empty buffer is valid to inspect by count."
+    },
+    {
+      "id": "swift-036",
+      "title": "Performance, copy costs and complexity",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-035"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Complexity",
+        "Allocation",
+        "Benchmark equivalence"
+      ],
+      "outcome": "Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.",
+      "lab": "Compare repeated array scans with one built Set under the same identity policy.",
+      "verification": "The last-element search performs four comparisons. The index preserves four identities and answers membership."
+    },
+    {
+      "id": "swift-037",
+      "title": "Property wrappers and reusable access policy",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-036"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Property wrapper",
+        "Wrapped value",
+        "Projection"
+      ],
+      "outcome": "Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.",
+      "lab": "Create a wrapper with an explicit normalization policy for a local display field.",
+      "verification": "Assignments are clamped into zero through ten. A valid interior value is unchanged and the projection exposes the range."
+    },
+    {
+      "id": "swift-038",
+      "title": "Result builders and declarative composition",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-037"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Result builder",
+        "Declarative composition",
+        "Intermediate result"
+      ],
+      "outcome": "Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.",
+      "lab": "Build a small report declaration using the existing builder.",
+      "verification": "Two expressions become an ordered array of sections. The conditional contributes its section when true."
+    },
+    {
+      "id": "swift-039",
+      "title": "App architecture: a portable domain core",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-038"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Domain core",
+        "Reducer",
+        "Presentation state"
+      ],
+      "outcome": "Draw the dependency direction among core, persistence adapter, view model and SwiftUI views.",
+      "lab": "Build and test JourneyCore before opening the Apple app.",
+      "verification": "The transformed item changes completion while retaining the original value. Completion changes do not manufacture a new identity."
+    },
+    {
+      "id": "swift-040",
+      "title": "SwiftUI state, bindings and a single source of truth",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-039"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Source of truth",
+        "Binding",
+        "View identity"
+      ],
+      "outcome": "Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.",
+      "lab": "Run JourneyApp and edit a title through its real binding.",
+      "verification": "The label follows the stored completion state. Changing completion changes the derived label while retaining the title."
+    },
+    {
+      "id": "swift-041",
+      "title": "Navigation, stable identity and deep-link validation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-040"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Route",
+        "Deep link",
+        "Navigation path"
+      ],
+      "outcome": "Design a restoration format for navigation without storing view instances or private payloads.",
+      "lab": "Run JourneyApp and navigate by stable item identity.",
+      "verification": "The admitted scheme and host resolve to item one. Unrelated schemes, missing identity and unlisted actions are rejected."
+    },
+    {
+      "id": "swift-042",
+      "title": "App persistence, migrations and recoverable saves",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-041"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Schema version",
+        "Migration",
+        "Recovery policy"
+      ],
+      "outcome": "Design a version-one to version-two migration with backup, rollback and verification steps.",
+      "lab": "Inspect JourneyApp save and load errors with an owned test file.",
+      "verification": "The supported envelope round-trips with two titles. The unsupported document is rejected without modifying its payload."
+    },
+    {
+      "id": "swift-043",
+      "title": "Networking, loading states and stale-result protection",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-042"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Loading state",
+        "Stale result",
+        "Transport adapter"
+      ],
+      "outcome": "Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.",
+      "lab": "Implement a deterministic fake transport returning success and failure values.",
+      "verification": "The matching generation updates current state. The stale response cannot overwrite the newer value."
+    },
+    {
+      "id": "swift-044",
+      "title": "Accessibility, localization and inclusive interaction",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-043"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Accessible name",
+        "Dynamic Type",
+        "Localization"
+      ],
+      "outcome": "Create a manual accessibility acceptance checklist with concrete observations and retained defects.",
+      "lab": "Run JourneyApp using keyboard navigation and VoiceOver on macOS.",
+      "verification": "The label communicates completion without relying on color. Display text changes while identity remains stable."
+    },
+    {
+      "id": "swift-045",
+      "title": "UIKit and AppKit integration boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-044"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Representable adapter",
+        "Coordinator",
+        "Feedback loop"
+      ],
+      "outcome": "Document coordinator ownership, delegate cleanup and platform-specific API availability.",
+      "lab": "Inspect and build SelectableText.swift in the Apple project.",
+      "verification": "The same value is not assigned twice. The portable kernel exposes a deliberate state transition."
+    },
+    {
+      "id": "swift-046",
+      "title": "App tests, simulator evidence and signing",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-045"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Scheme",
+        "Simulator",
+        "Signing"
+      ],
+      "outcome": "Prepare a release note listing platform, SDK, destination, test results and remaining device/signing limitations.",
+      "lab": "Generate JourneyApp, list destinations and run its provided test scheme on an available simulator or macOS destination.",
+      "verification": "Domain and package evidence do not imply UI or device qualification. Save/reload remains an explicit incomplete gate."
+    },
+    {
+      "id": "swift-047",
+      "title": "Multiplatform design and deployment contracts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-046"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Deployment target",
+        "Conditional compilation",
+        "Platform adapter"
+      ],
+      "outcome": "Create a platform support matrix listing compiled, executed and manually inspected surfaces separately.",
+      "lab": "Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS.",
+      "verification": "The same domain summary works without a UI framework. The Linux capability set does not invent SwiftUI support."
+    },
+    {
+      "id": "swift-048",
+      "title": "Capstone: an offline-first study planner",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "swift-047"
+      ],
+      "runtime": "swift-linux",
+      "concepts": [
+        "Offline-first",
+        "Acceptance evidence",
+        "Extension boundary"
+      ],
+      "outcome": "Deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.",
+      "lab": "Build and test JourneyCore, then run the complete JourneyApp on a prepared Apple destination.",
+      "verification": "One of two uniquely identified items is complete. The update retains identity and the prior snapshot."
+    }
+  ]
+}

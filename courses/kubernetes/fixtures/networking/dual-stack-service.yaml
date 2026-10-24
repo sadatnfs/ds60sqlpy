@@ -1,0 +1,12 @@
+# API-design fixture only: the supplied app binds IPv4.
+# IPv6 acceptance requires a separately reviewed dual-stack listener and client.
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-study-dual
+  labels: {course-fixture: deep-networking}
+spec:
+  ipFamilyPolicy: RequireDualStack
+  ipFamilies: [IPv4, IPv6]
+  selector: {app: network-study}
+  ports: [{name: http, port: 80, targetPort: http}]

@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "verification_id": "tf-gradient-v1",
+  "callable": "gradient_step",
+  "runtime_profile": "tensorflow-cpu",
+  "absolute_tolerance": 1e-12,
+  "relative_tolerance": 0,
+  "cases": [
+    {
+      "kwargs": {
+        "rate": 0.1,
+        "initial_weight": 0
+      },
+      "expected": {
+        "loss_before": 18.666666666666668,
+        "gradient": -18.666666666666668,
+        "weight_after": 1.8666666666666667,
+        "loss_after": 0.08296296296296296
+      }
+    },
+    {
+      "kwargs": {
+        "rate": 0.25,
+        "initial_weight": 0
+      },
+      "expected": {
+        "loss_before": 18.666666666666668,
+        "gradient": -18.666666666666668,
+        "weight_after": 4.666666666666667,
+        "loss_after": 33.18518518518518
+      }
+    },
+    {
+      "kwargs": {
+        "rate": 0.1,
+        "initial_weight": 2
+      },
+      "expected": {
+        "loss_before": 0,
+        "gradient": 0,
+        "weight_after": 2,
+        "loss_after": 0
+      }
+    }
+  ],
+  "negative_cases": [
+    {
+      "kwargs": {
+        "rate": 0
+      },
+      "exception": "ValueError"
+    },
+    {
+      "kwargs": {
+        "rate": -1
+      },
+      "exception": "ValueError"
+    },
+    {
+      "kwargs": {
+        "rate": true
+      },
+      "exception": "TypeError"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-038",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "qualified offline image-digest/signature verification and separate host admission enforcement",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "List payload,signature,public key and expected content digest.",
+      "expected": "Four distinct roles with an independently chosen trust key."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare the original synthetic content hash with a changed byte sequence.",
+      "expected": "Different content produces a different expected comparison result."
+    },
+    {
+      "exercise": 3,
+      "task": "Run the qualified CLI over attestation.json with the fixed key/signature.",
+      "expected": "Exit0 plus successful verification output, with tool identity recorded."
+    },
+    {
+      "exercise": 4,
+      "task": "Repeat against attestation-tampered.json without changing key or signature.",
+      "expected": "Nonzero exit and verification failure."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why a valid signed statement about artifactA does not approve artifactB.",
+      "expected": "The signed subject digest must match the actual artifact under the correct format contract."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare this local signature check with OCI/Sigstore provenance and admission enforcement.",
+      "expected": "Synthetic RSA fixture only; real image and cluster policy qualification remain separate."
+    }
+  ]
+}

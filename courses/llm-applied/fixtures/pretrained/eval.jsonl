@@ -1,0 +1,1 @@
+{"id": "eval-cluster", "family": "cluster", "prompt": [{"role": "user", "content": "Return only the assignment unit: This trial randomizes clusters."}], "completion": [{"role": "assistant", "content": "cluster"}]}

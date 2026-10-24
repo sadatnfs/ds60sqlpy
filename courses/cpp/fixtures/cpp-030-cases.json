@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-030",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "State the invariant",
+      "input_or_change": "List queue state protected by m.",
+      "expected": "Queue contents and closed flag share one mutex."
+    },
+    {
+      "exercise": 2,
+      "task": "Drain before exit",
+      "input_or_change": "Produce 2 and 3 then close.",
+      "expected": "Total 5 with both items consumed."
+    },
+    {
+      "exercise": 3,
+      "task": "Bound the queue",
+      "input_or_change": "Add capacity 2 and a producer wait predicate.",
+      "expected": "Observed size never exceeds 2."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair naked wait",
+      "input_or_change": "Replace cv.wait(lock) with predicate waiting.",
+      "expected": "Spurious notifications cannot trigger front on empty queue."
+    },
+    {
+      "exercise": 5,
+      "task": "Test empty close",
+      "input_or_change": "Close before enqueueing any items.",
+      "expected": "Consumer exits with total 0."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer cancellation",
+      "input_or_change": "Define whether cancellation drains or discards pending work.",
+      "expected": "Chosen policy accounts for every accepted item and joins all workers."
+    }
+  ]
+}

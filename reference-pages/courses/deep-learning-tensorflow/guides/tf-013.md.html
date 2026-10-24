@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-013: Binary logits, probabilities and thresholds · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-013: Binary logits, probabilities and thresholds</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/guides/tf-013.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-013-binary-logits-probabilities-and-thresholds">tf-013: Binary logits, probabilities and thresholds<a class="heading-anchor" href="#tf-013-binary-logits-probabilities-and-thresholds" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>tf-012</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Use a binary loss with the correct logit/probability convention. The central investigation is concrete: Compare logits [-2,0,2], sigmoid probabilities and thresholds 0.5 versus 0.8 on fixed labels; deliberately mismatch from_logits. The finish condition is At logit 0 the probability is 0.5 and positive-label BCE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> within 1e-6. Threshold changes predictions, not the already fitted logits. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A binary logit is an unrestricted score whose sigmoid is a probability under the chosen model. It is not already a probability. Binary cross entropy compares that probability with a zero-or-one target. A logits-aware implementation combines the sigmoid and logarithms into a stable calculation. The decision threshold is a separate policy: moving it changes predicted classes without changing the fitted scores. This distinction matters when false positives and false negatives have different costs. The three-point fixture is designed to make the boundary at probability one half explicit. It cannot show that the probabilities are calibrated on real observations.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Logit:</strong> An unrestricted binary score before the sigmoid transformation.</p>
+<p><strong>Threshold:</strong> A probability boundary used to choose a class.</p>
+<p><strong>Binary cross entropy:</strong> Negative log probability assigned to the observed binary label.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>tf-013</code>. Start its <code>tensorflow-cpu</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/tf-013/</code> so the checked-in worksheet remains available.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>tf.math.sigmoid converts each score independently. sigmoid_cross_entropy_with_logits requires labels and logits of equal shape and computes a loss per entry. reduce_mean chooses the example denominator. Compare probability&gt;=threshold for a declared tie policy. Do not apply sigmoid twice or feed a probability to a function that expects a logit; both can produce finite but incorrectly interpreted losses.</p>
+<h3 id="separate-the-probability-model-from-the-action-rule">Separate the probability model from the action rule<a class="heading-anchor" href="#separate-the-probability-model-from-the-action-rule" aria-label="Link to this section">#</a></h3>
+<p>A logit z represents log odds. Its sigmoid <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mo>−</mo><mi>z</mi><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">p=\frac{1}{1+\exp(-z)}</annotation></semantics></math> lies between zero and one. A zero logit therefore represents probability 0.5, not probability zero. For a binary target y, the logits form of cross entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mi>z</mi><mo stretchy="false">)</mo><mo stretchy="false">)</mo><mo>−</mo><mi>y</mi><mi>z</mi></mrow><annotation encoding="application/x-tex">\log(1+\exp(z))-yz</annotation></semantics></math>; a stable implementation avoids directly exponentiating a very large positive z. Its derivative with respect to z is p-y.</p>
+<p>The from_logits setting is a contract about the supplied numbers. Feeding probability 0.5 as if it were a logit applies another sigmoid, producing about 0.622 rather than 0.5. For target 1 the corresponding loss is about 0.474 instead of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>, about 0.693. The calculation remains finite, so a NaN check cannot detect this semantic mismatch.</p>
+<p>A decision threshold adds a policy on top of probabilities. With false-positive cost C_FP and false-negative cost C_FN, zero cost for correct decisions and calibrated probabilities for the decision population, predicting positive has expected cost C_FP(1-p), while predicting negative costs C_FN p. The resulting threshold is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow></mrow></msub></mrow><mrow><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">P</mi></mrow></mrow></msub><mo>+</mo><msub><mi>C</mi><mrow><mrow><mi mathvariant="normal">F</mi><mi mathvariant="normal">N</mi></mrow></mrow></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{C_{\mathrm{FP}}}{C_{\mathrm{FP}}+C_{\mathrm{FN}}}</annotation></semantics></math>. Costs 1 and 4 give 0.2. Those assumptions matter: class weighting during fitting can change how a score should be interpreted.</p>
+<p>Specify the equality convention at the threshold. This lesson includes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">p=0.5</annotation></semantics></math>, so greater-than and greater-than-or-equal rules differ on an actual fixture row. Moving a threshold changes decisions and error counts without changing the fitted logits, ranking or probability-loss calculation.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-convert-scores">Example A: Convert scores<a class="heading-anchor" href="#example-a-convert-scores" aria-label="Link to this section">#</a></h4>
+<p>The sigmoid is monotonic, so ordering survives. A score of zero lies at the probability midpoint, which makes it a useful exact boundary fixture.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+
+z<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> p<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> middle probability 0.5; probabilities increase.</p>
+<h4 id="example-b-check-the-midpoint-loss">Example B: Check the midpoint loss<a class="heading-anchor" href="#example-b-check-the-midpoint-loss" aria-label="Link to this section">#</a></h4>
+<p>A fifty-fifty prediction assigns probability one half to either outcome. Its negative logarithm provides an independent reference that does not depend on a trained model.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> tensorflow <span class="syntax-keyword">as</span> tf
+
+z<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> p<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>math<span class="syntax-operator">.</span>sigmoid<span class="syntax-punctuation">(</span>z<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> p<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+loss<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>nn<span class="syntax-operator">.</span>sigmoid_cross_entropy_with_logits<span class="syntax-punctuation">(</span>labels<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>logits<span class="syntax-operator">=</span>tf<span class="syntax-operator">.</span>constant<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>numpy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> within 1e-6.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: At logit 0 the probability is 0.5 and positive-label BCE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> within 1e-6. Threshold changes predictions, not the already fitted logits. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Convert scores.</strong> Convert logits[-2,0,2] into probabilities and inspect the central value. <strong>Expected:</strong> middle probability 0.5; probabilities increase. <strong>Verify:</strong> Save the assertion results for exercise 1, including middle probability 0.5; probabilities increase.</li>
+</ol>
+<ol>
+<li><strong>Check the midpoint loss.</strong> Calculate positive-label binary cross entropy at zero logit. <strong>Expected:</strong> loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> within 1e-6. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> within 1e-6.</li>
+</ol>
+<ol>
+<li><strong>Move the threshold.</strong> Compare decisions at thresholds.5 and.8 with &gt;= ties. <strong>Expected:</strong> decisions[False,True,True] versus[False,False,True]. <strong>Verify:</strong> Save the assertion results for exercise 3, including decisions[False,True,True] versus[False,False,True].</li>
+</ol>
+<ol>
+<li><strong>Expose a convention mismatch.</strong> Treat probability 0.5 as if it were a logit and compare the positive-label loss with log2. <strong>Expected:</strong> wrong loss differs from log2 by more than.1. <strong>Verify:</strong> Save the assertion results for exercise 4, including wrong loss differs from log2 by more than.1.</li>
+</ol>
+<ol>
+<li><strong>Stress large scores.</strong> Calculate losses for logits 1000,-1000 with labels1,0 using the logits-aware form. <strong>Expected:</strong> both finite losses approximately0. <strong>Verify:</strong> Save the assertion results for exercise 5, including both finite losses approximately0.</li>
+</ol>
+<ol>
+<li><strong>Count decisions separately.</strong> For labels[0,1,1], count errors under the two thresholds. <strong>Expected:</strong> 0 errors at.5 and 1 at.8 on this fixture. <strong>Verify:</strong> Save the assertion results for exercise 6, including 0 errors at.5 and 1 at.8 on this fixture.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Check whether the loss expects logits before adding sigmoid. Compare the zero-logit case with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>, then inspect large positive and negative scores using the stable operation. If probability loss is correct but classification counts differ, inspect the threshold and its equality rule. A three-row success does not establish population calibration.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Logit, Threshold, Binary cross entropy using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>tf-012</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://www.tensorflow.org/guide">TensorFlow guide</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for tf-013, Binary logits, probabilities and thresholds.
+Read courses/deep-learning-tensorflow/guides/tf-013.md and courses/deep-learning-tensorflow/lessons/tf-013.py. Direct prerequisites: `tf-012`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/deep-learning-tensorflow/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

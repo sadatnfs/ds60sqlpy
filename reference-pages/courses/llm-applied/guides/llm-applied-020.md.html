@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-020: Fine-tuning embeddings and a small reranker · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-020: Fine-tuning embeddings and a small reranker</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/guides/llm-applied-020.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-020-fine-tuning-embeddings-and-a-small-reranker">llm-applied-020: Fine-tuning embeddings and a small reranker<a class="heading-anchor" href="#llm-applied-020-fine-tuning-embeddings-and-a-small-reranker" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 240 minutes. Direct prerequisites: <code>llm-applied-019</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Retrieval adaptation learns which evidence should be nearby or highly ranked for a question. This chapter develops domain relevance labels, positive and negative construction, contrastive objectives and index consistency, connecting the tiny gradient example to a realistic retrieval-training study.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation. A bi-encoder maps queries and documents separately so document vectors can be indexed once. A cross-encoder or reranker jointly evaluates a query-document pair and is usually applied to a smaller candidate set. Contrastive training requires positives and negatives whose labels reflect the task. A false negative, such as another relevant passage labelled irrelevant, can teach contradictory geometry.</p>
+<p>This chapter performs actual CPU updates on a small linear query projection and a separate pairwise reranker. Literal feature vectors stand in for encoded text so the gradient and ranking changes are inspectable. The bi-encoder objective makes each query favor its paired document over the other candidate. The reranker learns a scalar preference from two authored pair features. These are real trainable models, but they are not pretrained sentence encoders and do not establish semantic retrieval quality on natural language. Held-out domain evaluation remains necessary after any realistic fine-tuning.</p>
+<h3 id="train-the-relationship-the-analyst-actually-needs">Train the relationship the analyst actually needs<a class="heading-anchor" href="#train-the-relationship-the-analyst-actually-needs" aria-label="Link to this section">#</a></h3>
+<p>The Methods Desk repeatedly retrieves a general variance passage when the question concerns uncertainty for repeated visits within accounts. This may be a representation gap rather than an answer-model gap. A retrieval-training example can pair that question with the relevant account-level method passage and distinguish it from a topically similar but unsuitable passage.</p>
+<p>Relevance is conditional on the query. A visit-level analysis page can be useful for a different experiment and a negative candidate for this account-level question. Labeling the whole document as globally bad would lose that distinction. Store the query, positive evidence, negative candidate, source identities and the reason the pair expresses the intended task.</p>
+<p>The task may have several valid positive passages. One can state the rule directly, while another supplies an equivalent explanation under the same assumptions. Treating every nonselected passage as negative can push away useful evidence. Annotation should preserve alternatives and uncertainty rather than force all candidates into a single-positive classification merely because the loss interface makes that convenient.</p>
+<h3 id="understand-what-the-contrastive-denominator-means">Understand what the contrastive denominator means<a class="heading-anchor" href="#understand-what-the-contrastive-denominator-means" aria-label="Link to this section">#</a></h3>
+<p>For a query q, a common single-positive contrastive objective is the negative log of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mrow><mo>score</mo><mo stretchy="false">(</mo><mi>q</mi><mo>,</mo><msub><mi>d</mi><mo>+</mo></msub><mo stretchy="false">)</mo></mrow><mrow><mi>τ</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\exp\!\left(\frac{\operatorname{score}(q,d_+)}{\tau}\right)</annotation></semantics></math> divided by the sum of those exponentials over the candidate documents. The denominator defines the alternatives the model must distinguish. The temperature tau changes the scale of score differences and the gradient, so it is part of the objective rather than a display parameter.</p>
+<p>With two identical scores, the positive probability is one-half and the loss is log2. With three identical scores and one designated positive, the loss is log3. A change in negative-set size can therefore change the initial loss scale even when the representation has not improved or worsened. Compare ranking and held-out relevance beside the optimization curve.</p>
+<p>A false negative can make the task contradictory. If the positive and negative are the same document under the same representation, their scores cannot be separated by changing a shared encoder. With only those two identical candidates and a single-positive target, the probability remains one-half. A multi-positive formulation or corrected labels may be appropriate, depending on the actual evidence relationship. More training cannot resolve a contradiction created by the dataset definition.</p>
+<p>The tiny reference uses two fixed identity-feature pairs, so the first gradient can be derived exactly. It establishes that the optimizer changes the projection in the direction implied by the labels. It does not establish a tokenizer, a pretrained semantic representation or a domain benchmark. The later held-out feature probe tests one point relative to the learned linear boundary.</p>
+<h3 id="mine-difficult-cases-without-turning-them-into-wrong-labels">Mine difficult cases without turning them into wrong labels<a class="heading-anchor" href="#mine-difficult-cases-without-turning-them-into-wrong-labels" aria-label="Link to this section">#</a></h3>
+<p>Random negatives can be easy enough that the model learns only broad topic differences. Hard negatives are candidates a retriever currently ranks highly despite their being unsuitable under the task. They can expose the fine distinctions the assistant needs, such as account versus visit units, a superseded definition or a missing exception.</p>
+<p>Hardness does not establish incorrectness. A highly ranked candidate may be another valid answer or may contain the relevant fact in a different span. Review those cases before using them as negative supervision. Exact IDs help detect direct collisions, while content and family relationships can reveal near-duplicates or alternative positives with different filenames.</p>
+<p>Mining also belongs to the development history. Record which retriever and corpus snapshot produced the candidates. Keep final assessment labels out of training and selection. A retrieval corpus may legitimately contain documents used during evaluation, but using their held-out relevance judgments to construct training pairs changes the independence claim.</p>
+<h3 id="a-reranker-learns-a-different-interface">A reranker learns a different interface<a class="heading-anchor" href="#a-reranker-learns-a-different-interface" aria-label="Link to this section">#</a></h3>
+<p>A bi-encoder supports reusable document vectors and relatively cheap candidate search. A reranker can jointly inspect a query-candidate pair and learn a more detailed ordering inside a bounded pool. A pairwise objective such as softplus of the negative positive-minus-negative score margin rewards the chosen candidate over the rejected candidate for that query.</p>
+<p>That relative score does not automatically calibrate across queries. A high score for one easy query and a lower score for another can reflect different score distributions rather than different probabilities of relevance. If the application needs an answerability threshold, calibrate and evaluate that decision separately under the relevant request population.</p>
+<p>The candidate ceiling remains. A well-trained reranker cannot recover evidence absent from its input unless the system explicitly performs another admitted retrieval step. Report candidate recall, reranked ordering and final-context sufficiency separately. Otherwise an answer-stage failure may be incorrectly attributed to the component that merely received an incomplete pool.</p>
+<h3 id="rebuild-the-serving-representation-after-adaptation">Rebuild the serving representation after adaptation<a class="heading-anchor" href="#rebuild-the-serving-representation-after-adaptation" aria-label="Link to this section">#</a></h3>
+<p>Updating an encoder changes the coordinate system used for retrieval. Query and document representations must remain a compatible pair. If document vectors are produced by an old encoder while the query side uses a new incompatible one, dimensions can still match and the scores can still be finite. Those arithmetic facts do not establish meaningful similarity.</p>
+<p>A release should bind encoder identity, tokenizer/preprocessing, pooling, normalization and index build. Evaluate exact vector search before attributing a miss to an approximate index. Retain lexical and unadapted baselines so a domain adaptation that helps paraphrases but harms exact identifiers is visible.</p>
+<p>Finally, measure the effect on the assistant&#x27;s answers. A retriever can improve its own ranking metric while supplying context the generator misuses. The complete task still requires supported claims, valid calculations and appropriate abstention. Retrieval training is one targeted intervention in that evidence path, not a replacement for its other contracts.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Fine-tune retrieval models when error analysis shows that the representation or pair scorer systematically misses domain relevance despite sound chunking and metadata. Choose negatives carefully: random negatives may be too easy, while hard negatives may contain relevant alternatives. Label quality and domain coverage often matter more than increasing the number of updates.</p>
+<p>Do not train a retriever on the final relevance benchmark and then present its score as independent evidence. Split query/document families before mining negatives. Compare lexical, unadapted embedding, adapted embedding and reranked variants under matched candidate budgets. Track recall, ranking quality, unsupported-answer rate and resource cost. A better retriever can still feed a generator that ignores evidence, so answer evaluation remains a separate stage.</p>
+<p>Adapt the stage that error analysis identifies. A query projection can change retrieval geometry, while a reranker changes ordering inside a candidate set. Preserve a frozen lexical and unadapted-vector baseline, and evaluate whether the improved retrieval actually supplies better evidence to the answer stage.</p>
+<p>Treat negative selection as part of the supervised task. A visually similar passage can be an excellent hard negative or another relevant answer. Decide that from relevance labels and source-family relationships before optimizing the contrastive loss.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Bi-encoder:</strong> Separate query and document encoders enabling reusable document vectors.</p>
+<p><strong>Contrastive objective:</strong> A loss favoring positive pairs over selected negatives.</p>
+<p><strong>False negative:</strong> A relevant pair incorrectly labelled as a negative example.</p>
+<p><strong>Pairwise reranker:</strong> A scorer trained to rank one candidate above another for a query.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-applied-020/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared <code>llm-torch-cpu</code> profile. For a separately prepared native environment, invoke its explicitly selected interpreter on <code>courses/llm-applied/lessons/llm-applied-020.py</code> from the repository root. The general repository <code>.venv</code> is not assumed to include the heavy model dependencies.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Compute query_embeddings=query_features@W andscore_matrix=query_embeddings@document_features.T. Cross entropy uses the diagonal document index as the positive label. Clear gradients and updateW under a fixed budget. For the reranker, score each pair with a linear weight and optimize softplus(-(positive_score-negative_score)). Inspect parameter changes, training loss and ranking separately. Freeze document features in this fixture so only the query projection is trained.</p>
+<h3 id="derive-the-first-query-projection-and-reranker-updates">Derive the first query-projection and reranker updates<a class="heading-anchor" href="#derive-the-first-query-projection-and-reranker-updates" aria-label="Link to this section">#</a></h3>
+<p>Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>Q</mi><mi>W</mi><mi>D</mi></mrow><mrow><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">{QWD}^{T}</annotation></semantics></math> is therefore W itself. Each row has uniform class probabilities[0.5, 0.5], and the labels are[0, 1]. Mean cross entropy across two rows gives gradient[[-0.25, 0.25], [0.25, -0.25]]. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.</p>
+<p>The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query[x, y], the two scores are[a(x-y), -a(x-y)], so the decision boundary is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x=y</annotation></semantics></math>. The held-out[0.9, 0.1] lies well on the document 0 side; after the first step its scores are[0.1, -0.1]. That is a local feature-space check, not a test of understanding a new sentence.</p>
+<p>The cross-entropy derivative can be written <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><msup><mi>Q</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mo stretchy="false">(</mo><mi>P</mi><mo>−</mo><mi>Y</mi><mo stretchy="false">)</mo><mi>D</mi></mrow><mrow><mi>B</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{Q^{\mathsf T}(P-Y)D}{B}</annotation></semantics></math> for this fixed-feature linear projection, where P contains row probabilities, Y the one-hot targets and B the number of query rows. Its shape matches W. In a real trainable encoder, gradients would flow through encoder and embedding parameters for fixed tokenized inputs; ordinary discrete token IDs and the tokenizer are not differentiable parts of that graph. Here document features remain fixed and only four projection entries are updated.</p>
+<p>The reranker has weight w=[w = 0, w1], positive feature[1, 0] and negative[0, 1]. Its score margin is w0-w1 and its loss is softplus(-(w0-w1)). At zero, the gradient is[-0.5, 0.5]. A0.2 SGD step produces[0.1, -0.1], giving margin 0.2 and a smaller loss. This independent calculation shows what the pairwise objective favors without assuming the training loop&#x27;s result.</p>
+<p>A pairwise loss for one query should compare candidates under that same query&#x27;s intended relevance. Mixing a positive from one question with a negative from an unrelated question can teach a shortcut unless the dataset design explicitly calls for it. In-batch negatives also assume that another row&#x27;s positive is not a valid answer for the current query. Multiple correct passages or duplicated source families can violate that assumption.</p>
+<p>The false-negative exercise detects that positive and negative IDs are identical. It does not supply a reusable admission function that automatically blocks all future training pairs. Different IDs can still refer to the same content or to two valid answers. Real admission needs identity, content/family and semantic relevance checks, with uncertainty preserved for review rather than forced into a negative label.</p>
+<p>The trained models are small but real: parameters change under gradients and rankings are observed. Their input features are literal arrays, so they are not pretrained text encoders. Sentence representation training motivates this distinction between reusable encoders and pair scorers, but the local result does not inherit a natural-language benchmark score. <a href="https://arxiv.org/abs/1908.10084">Sentence-BERT</a>.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why can a hard negative be harmful?</strong> If it is actually relevant, the objective pushes away evidence the system should retrieve. Hardness is a model score property; correctness of the negative label is a task property.</p>
+<p><strong>Why evaluate candidate recall after reranker training?</strong> A better ordering cannot recover evidence absent from the candidate set. Improvements at one stage must be measured under the full retrieval budget.</p>
+<p><strong>What does the perturbed feature result establish?</strong> The learned linear boundary behaves as expected at one nearby point with an authored label. It does not establish transfer to unseen document or language families.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-construct-paired-retrieval-features">Example A: Construct paired retrieval features<a class="heading-anchor" href="#example-a-construct-paired-retrieval-features" aria-label="Link to this section">#</a></h4>
+<p>The identity fixture isolates learning the pairing. A real encoder receives text and requires a tokenizer, pooling policy and governed relevance labels.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+
+queries<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> documents<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> projection<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+scores<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>queries<span class="syntax-decorator">@projection</span><span class="syntax-punctuation">)</span><span class="syntax-decorator">@documents</span><span class="syntax-operator">.</span>T
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>scores<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> labels<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> score shape(2, 2); one positive per query.</p>
+<h4 id="example-b-train-the-query-projection">Example B: Train the query projection<a class="heading-anchor" href="#example-b-train-the-query-projection" aria-label="Link to this section">#</a></h4>
+<p>The projection actually changes through gradients. The resulting training ranking is a mechanics check, not evidence of transfer to unseen language.</p>
+<pre class="highlighted-code"><code class="language-python">opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>SGD<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>projection<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> initial<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> scores<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>queries<span class="syntax-decorator">@projection</span><span class="syntax-punctuation">)</span><span class="syntax-decorator">@documents</span><span class="syntax-operator">.</span>T<span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+final_scores<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>queries<span class="syntax-decorator">@projection</span><span class="syntax-punctuation">)</span><span class="syntax-decorator">@documents</span><span class="syntax-operator">.</span>T
+<span class="syntax-keyword">assert</span> F<span class="syntax-operator">.</span>cross_entropy<span class="syntax-punctuation">(</span>final_scores<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span>initial <span class="syntax-operator">and</span> final_scores<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> loss decreases; each query ranks its paired document first.</p>
+<h4 id="example-c-evaluate-a-perturbed-held-out-query">Example C: Evaluate a perturbed held-out query<a class="heading-anchor" href="#example-c-evaluate-a-perturbed-held-out-query" aria-label="Link to this section">#</a></h4>
+<p>This tests one nearby feature perturbation under an authored relevance label. It is much narrower than evaluating new document families or real paraphrases.</p>
+<pre class="highlighted-code"><code class="language-python">held<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span><span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> held_scores<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>held<span class="syntax-decorator">@projection</span><span class="syntax-punctuation">)</span><span class="syntax-decorator">@documents</span><span class="syntax-operator">.</span>T
+<span class="syntax-keyword">assert</span> held_scores<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
+<p><strong>Expected:</strong> document 0 remains higher on this declared local perturbation.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: score shape(2, 2); one positive per query. actual gradient updates True; pretrained_semantic_encoder False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Construct paired retrieval features.</strong> Use queries and documents equal to the 2x2identity matrix, with positive labels 0, 1. <strong>Expected:</strong> score shape(2, 2); one positive per query. <strong>Verify:</strong> Save the assertion results for exercise 1, including score shape(2, 2); one positive per query.</li>
+</ol>
+<ol>
+<li><strong>Train the query projection.</strong> Run 30SGD at 0.5 updates on cross entropy against diagonal positives. <strong>Expected:</strong> loss decreases; each query ranks its paired document first. <strong>Verify:</strong> Save the assertion results for exercise 2, including loss decreases; each query ranks its paired document first.</li>
+</ol>
+<ol>
+<li><strong>Evaluate a perturbed held-out query.</strong> Use held-out feature[.9, .1] and compare its two document scores. <strong>Expected:</strong> document 0 remains higher on this declared local perturbation. <strong>Verify:</strong> Save the assertion results for exercise 3, including document 0 remains higher on this declared local perturbation.</li>
+</ol>
+<ol>
+<li><strong>Train a pairwise reranker.</strong> Use positive feature[1, 0], negative[0, 1] and a zero linear weight; run 20SGD at 0.2 updates. <strong>Expected:</strong> positive score exceeds negative and pairwise loss decreases. <strong>Verify:</strong> Save the assertion results for exercise 4, including positive score exceeds negative and pairwise loss decreases.</li>
+</ol>
+<ol>
+<li><strong>Detect a false-negative identity.</strong> Assign the same document ID to positive and negative roles and identify the collision as a prospective admission failure. <strong>Expected:</strong> identity collision detected; this check is separate from the earlier training loops. <strong>Verify:</strong> Save the assertion results for exercise 5, including identity collision detected; this check is separate from the earlier training loops.</li>
+</ol>
+<ol>
+<li><strong>Bound the model claim.</strong> Record that fixed vectors were used and natural-language encoder quality was not measured. <strong>Expected:</strong> actual gradient updates True; pretrained_semantic_encoder False. <strong>Verify:</strong> Save the assertion results for exercise 6, including actual gradient updates True; pretrained_semantic_encoder False.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If the first projection update has the wrong sign, derive P-Y for the paired labels and check the mean denominator. If the held-out feature changes class unexpectedly, inspect its side of the analytic <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi></mrow><annotation encoding="application/x-tex">x=y</annotation></semantics></math> boundary. If a reranker prefers the negative, verify feature and response identity pairing before changing the loss.</p>
+<p>If training improves but retrieval quality falls, inspect false negatives, family leakage and whether the served index uses the new encoder space. If a duplicate-ID assertion is described as a complete admission system, identify the absent enforcement function and broader semantic checks. Keep training ranking, held-out relevance and downstream answer support as distinct results.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Revisit the worked examples, then close them. Explain Bi-encoder, Contrastive objective, False negative using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-applied-019</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/1908.10084">Sentence-BERT</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-020, Fine-tuning embeddings and a small reranker.
+Read courses/llm-applied/guides/llm-applied-020.md and courses/llm-applied/lessons/llm-applied-020.py. Direct prerequisites: `llm-applied-019`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-applied/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

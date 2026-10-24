@@ -1,0 +1,8 @@
+ARG DS60_PYTHON_IMAGE=python:3.12-slim
+FROM ${DS60_PYTHON_IMAGE}
+WORKDIR /app
+COPY server.py probe.py /app/
+USER 65532:65532
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+EXPOSE 8080
+CMD ["python", "server.py", "--bind", "::"]

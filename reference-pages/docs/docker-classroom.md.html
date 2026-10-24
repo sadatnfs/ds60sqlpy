@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Docker-only classroom · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Docker-only classroom</h1>
+      <p class="source-path">Generated from <code>docs/docker-classroom.md</code></p>
+    </header>
+    <article class="document"><h2 id="docker-only-classroom">Docker-only classroom<a class="heading-anchor" href="#docker-only-classroom" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
+<p>The primary workflow is one command from the course folder:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
+<p>It resumes the same project&#x27;s remembered worker selection, reuses local images, starts existing containers and opens the browser after actual readiness checks. Only missing images are built. A new project selects all fifteen ordinary workers; <code>--starter</code> selects Python Core. Use <code>./classroom resume</code> for strict no-build startup, or <code>./classroom --rebuild</code> to install source updates. The launcher selects available loopback host ports on first startup. Windows uses the same launcher through WSL 2. The thin Windows/Mac launchers delegate to it. See <a href="one-command-classroom.md.html">the beginner one-command guide</a> for engine/WSL setup, a smaller starter, persistence, fixed ports and recovery.</p>
+<p>The remainder of this page is the <strong>manual Compose reference</strong>. Direct Docker commands remain available without the Bash wrapper. Use a local Linux-container engine and Docker Compose 2.28.0 or newer. Its fixed default ports may differ from the automatic host ports selected by <code>./classroom</code>; use the launcher&#x27;s printed URL or <code>./classroom status</code> for its actual address.</p>
+<h3 id="1-check-the-engine-and-configuration">1. Check the engine and configuration<a class="heading-anchor" href="#1-check-the-engine-and-configuration" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">docker compose version
+docker info --format &quot;{{.OSType}}&quot;
+docker compose -f compose.classroom.yaml config --quiet</code></pre>
+<p>The engine type must be <code>linux</code>; the configuration check should finish without an error. Select your local engine rather than a remote Docker context. An unknown <code>!reset</code> tag means Compose needs updating. A plain YAML validator does not understand every Compose tag.</p>
+<h3 id="2-build-the-starter-with-visible-logs">2. Build the starter, with visible logs<a class="heading-anchor" href="#2-build-the-starter-with-visible-logs" aria-label="Link to this section">#</a></h3>
+<p>First preparation needs internet and several gigabytes of free disk. Heavy framework and Spark images need additional space. Build one image at a time and keep the terminal open until each command succeeds:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml pull postgres
+docker compose -f compose.classroom.yaml --parallel 1 --progress plain build lab
+docker compose -f compose.classroom.yaml --profile python-core --parallel 1 --progress plain build python-core-worker</code></pre>
+<p>Build the lab first; its Python worker reuses that base. These foreground builds show download and package-install output; they do not publish images. Later starts reuse the prepared local images.</p>
+<h4 id="if-the-image-registry-cannot-be-reached">If the image registry cannot be reached<a class="heading-anchor" href="#if-the-image-registry-cannot-be-reached" aria-label="Link to this section">#</a></h4>
+<p>An <code>x509: certificate signed by unknown authority</code> error during image metadata or layer download is a connection/certificate problem before the lesson code runs. Use your organization&#x27;s approved engine certificate/proxy configuration. Keep TLS verification enabled.</p>
+<p>The repository also includes an explicit, public <a href="../docker/registry-mirrors.env.txt.html">build-only mirror configuration</a>. It selects <a href="https://cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images">Google&#x27;s Docker Hub mirror</a> for the compiler/JVM/Node/Spark bases and <a href="https://docs.astral.sh/uv/guides/integration/docker/">Astral&#x27;s pinned Python image</a> on GitHub Container Registry for the Python base. It does not contain credentials, modify the engine, or publish images. Use the mirror configuration only when it fits your network and trust policy. Registry availability is separate from whether a built lesson runtime works.</p>
+<p>To build every ordinary profile with that configuration and visible logs, run this single line from the extracted course folder on any OS:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose --env-file docker/registry-mirrors.env.txt --progress plain -f compose.classroom.yaml --profile &quot;*&quot; --parallel 1 build</code></pre>
+<p>Use this file for the <strong>build</strong> command only. An explicit <code>--env-file</code> replaces Compose&#x27;s automatic <code>.env</code> loading, so use the normal start command below to retain your local port/storage settings. If you intentionally need both local build overrides and these mirrors, put <code>--env-file .env</code> before the mirror file, provided that <code>.env</code> exists. Shell environment values still take precedence. A mirror may not cache every upstream image; an unavailable image remains a build failure to resolve, not a reason to bypass certificate checks.</p>
+<h3 id="3-start-and-practice">3. Start and practice<a class="heading-anchor" href="#3-start-and-practice" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml --profile python-core up -d --no-build --pull never --wait lab python-core-worker
+docker compose -f compose.classroom.yaml --profile &quot;*&quot; ps</code></pre>
+<p>Wait for readiness, then open <a href="http://127.0.0.1:8765/classroom">the unified classroom</a> yourself. Python, SQL and every subject share that entrypoint. No website account is needed. The initializer prepares private worker credentials and writable learner storage inside Docker volumes.</p>
+<p>Start with a reading lesson or a <code>python-core</code> lesson such as <code>llm-002</code>. Read the guide, predict the result, edit and save your source, then choose Run. Save your explanation as well as your code. A successful example run does not complete the six exercises or establish mastery. Planned lessons remain planned.</p>
+<p>If a runtime is unavailable, prepare that profile before running its lesson:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th>
+<th>Service to build/start</th>
+<th>Used for</th>
+</tr></thead><tbody>
+<tr>
+<td><code>python-core</code></td>
+<td><code>python-core-worker</code></td>
+<td>NumPy, pandas, statistics, NLP, LLM foundations</td>
+</tr>
+<tr>
+<td><code>cpp20</code></td>
+<td><code>cpp-worker</code></td>
+<td>C++20 compilation</td>
+</tr>
+<tr>
+<td><code>c17</code></td>
+<td><code>c-worker</code></td>
+<td>C17 compilation and bounded execution</td>
+</tr>
+<tr>
+<td><code>go</code></td>
+<td><code>go-worker</code></td>
+<td>Prepared standard-library compile/link/run</td>
+</tr>
+<tr>
+<td><code>csharp-dotnet</code></td>
+<td><code>csharp-worker</code></td>
+<td>C# through the immutable offline .NET project</td>
+</tr>
+<tr>
+<td><code>rust-stable</code></td>
+<td><code>rust-worker</code></td>
+<td>Rust 2024 edition and prepared Arrow dependency</td>
+</tr>
+<tr>
+<td><code>swift-linux</code></td>
+<td><code>swift-worker</code></td>
+<td>Swift 6 Linux/Foundation, with Apple SDK projects separate</td>
+</tr>
+<tr>
+<td><code>tensorflow-cpu</code></td>
+<td><code>tensorflow-worker</code></td>
+<td>Actual TensorFlow tensors and gradient updates</td>
+</tr>
+<tr>
+<td><code>scala-jvm</code></td>
+<td><code>scala-worker</code></td>
+<td>Standalone Scala/JVM</td>
+</tr>
+<tr>
+<td><code>spark-local-scala</code></td>
+<td><code>spark-scala-worker</code></td>
+<td>Local Spark using Scala</td>
+</tr>
+<tr>
+<td><code>spark-local-python</code></td>
+<td><code>spark-python-worker</code></td>
+<td>Local Spark using Python</td>
+</tr>
+<tr>
+<td><code>llm-torch-cpu</code></td>
+<td><code>llm-worker</code></td>
+<td>PyTorch and tensor-based LLM lessons</td>
+</tr>
+<tr>
+<td><code>java21</code></td>
+<td><code>java-worker</code></td>
+<td>Java 21 compilation and the prepared H2 teaching database</td>
+</tr>
+<tr>
+<td><code>javascript-node</code></td>
+<td><code>javascript-worker</code></td>
+<td>Node24 JavaScript ES modules</td>
+</tr>
+<tr>
+<td><code>typescript-node</code></td>
+<td><code>typescript-worker</code></td>
+<td>Strict TypeScript5.9 compilation and Node24 execution</td>
+</tr>
+</tbody></table></div>
+<p>For example, add C++ after the starter:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml --profile cpp20 --parallel 1 --progress plain build cpp-worker
+docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 up -d --no-build --pull never --wait lab python-core-worker cpp-worker</code></pre>
+<p>Use the matching profile and service names for another subject. Build selected workers sequentially and start only those you need. The NumPy LLM foundations need no pretrained model. The PyTorch route uses <code>llm-torch-cpu</code>, and its small teaching models train locally on CPU. Optional pretrained-model experiments have a separate explicit download and preparation guide.</p>
+<p>To build every ordinary worker locally with visible logs, use:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose --progress plain -f compose.classroom.yaml --profile &quot;*&quot; --parallel 1 build</code></pre>
+<p>This builds all ordinary language/framework images; it does not start them or push them to a registry. Building everything uses substantially more disk than the starter. Select the profiles you want for <code>up</code> so unused frameworks do not consume memory. Kubernetes cluster preparation remains a separate operation.</p>
+<h3 id="4-pause-return-and-keep-your-work">4. Pause, return, and keep your work<a class="heading-anchor" href="#4-pause-return-and-keep-your-work" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml --profile &quot;*&quot; stop</code></pre>
+<p>For the shared launcher, return with <code>./classroom</code> or the strict no-build <code>./classroom resume</code>. Its <code>.classroom/&lt;project&gt;/selection.env</code> remembers selected profiles and registry mode. Supply the same <code>--project NAME</code> if you used one. Existing containers are reused. If Docker reassigns the automatic browser port while restarting PostgreSQL, only the app is recreated from its existing image to accept the new exact address. The database and workers retain their IDs, and there is no image build or pull. Missing containers can also be recreated from local images while retaining their volumes. Fixed <code>--port</code> and <code>--database-port</code> settings give a stable address and let all existing IDs survive later unchanged resumes; apply changed port settings deliberately with <code>--rebuild</code>.</p>
+<p>For the manual Compose route shown above, start the same engine, open the same course folder, and repeat your Step 3 <code>up</code> command with the same profiles. Direct Compose does not read the launcher&#x27;s saved selection or automatically recover its port choices. Use one route consistently, or carry the exact project, profiles and ports across deliberately. Replacing app containers preserves the named volumes. The default project is <strong><code>ds60-classroom</code></strong>:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Docker volume</th>
+<th>What it keeps</th>
+</tr></thead><tbody>
+<tr>
+<td><code>ds60-classroom_classroom-learning</code></td>
+<td>Pads, module drafts, notes, saved results, history, progress and caches</td>
+</tr>
+<tr>
+<td><code>ds60-classroom_postgres-data</code></td>
+<td>PostgreSQL tables</td>
+</tr>
+<tr>
+<td><code>ds60-classroom_classroom-runtime</code></td>
+<td>Private worker credential, excluded from learning exports</td>
+</tr>
+</tbody></table></div>
+<p>This is machine-local Docker storage, usually inside the engine&#x27;s Linux VM. It is <strong>not</strong> the visible <code>.learning</code> folder beside your checkout. The older host-folder launchers keep using their own storage; switching routes does not copy or merge either learning work or databases. Keep the same Docker project to resume the same classroom. A different project name selects different volumes.</p>
+<p>Use <code>stop</code> for ordinary pauses. <strong>Do not use <code>down -v</code> or remove these volumes to troubleshoot:</strong> that can delete saved work and database data. Engine removal or a factory reset can also remove volumes. Export before moving machines.</p>
+<h3 id="5-export-learning-work-and-the-database">5. Export learning work and the database<a class="heading-anchor" href="#5-export-learning-work-and-the-database" aria-label="Link to this section">#</a></h3>
+<p>Choose unused host filenames for every backup. The date below is just an example; change it for a new backup. Save all drafts and let active Runs finish first. With PostgreSQL still running, create and copy its ordinary dump file:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml exec -T postgres pg_dump -U ds60_admin -d advanced_sql_training -Fc -f /tmp/classroom-database.dump
+docker compose -f compose.classroom.yaml cp postgres:/tmp/classroom-database.dump ./classroom-database-20261022.dump
+docker compose -f compose.classroom.yaml --profile &quot;*&quot; stop</code></pre>
+<p>Now archive only the learning volume through a temporary container. Verify the volume name first. If it is missing, stop and check the project name rather than creating an empty replacement. The helper name must also be unused:</p>
+<pre class="highlighted-code"><code class="language-text">docker volume inspect ds60-classroom_classroom-learning --format &quot;{{.Name}}&quot;
+docker create --name ds60-classroom-backup --network none --mount type=volume,source=ds60-classroom_classroom-learning,target=/learning,readonly --entrypoint tar postgres:17 -czf /tmp/classroom-learning.tar.gz -C /learning .
+docker start -a ds60-classroom-backup
+docker inspect --format &quot;{{.State.ExitCode}}&quot; ds60-classroom-backup
+docker cp ds60-classroom-backup:/tmp/classroom-learning.tar.gz ./classroom-learning-20261022.tar.gz</code></pre>
+<p>The exit-code check must print <code>0</code> before copying. Check the copied archive in your normal file manager or archive utility. It should contain the saved learning files you used, including <code>modules/</code> for module drafts. Keep both the learning archive and database dump in your backup location. After the copy succeeds, remove <strong>only</strong> the temporary helper:</p>
+<pre class="highlighted-code"><code class="language-text">docker rm ds60-classroom-backup</code></pre>
+<p>The source volume was read-only; private runtime credentials were not mounted or exported. These commands avoid binary shell redirection and work without a host Python installation. The database dump and learning archive protect different data; neither replaces the other.</p>
+<p>To transfer, copy both exports to the new machine and retain the originals. An archive utility lets you inspect the exported source and notes. For a few exercises, copy that source into a fresh workspace and Save; this does not move its full history or database. The optional <a href="docker-beginners.md.html#keep-the-same-learning-folder-across-a-future-checkout">host-folder route</a> has a different storage contract. Full database/volume restoration needs a deliberate target and ownership checks; the export commands here do not import, merge, or overwrite another classroom.</p>
+<p>If you chose another Compose project, substitute its actual learning-volume name and keep that project consistent throughout. Never include the private <code>classroom-runtime</code> volume or a Kubernetes session in a learning backup.</p>
+<h3 id="troubleshooting-and-optional-kubernetes">Troubleshooting and optional Kubernetes<a class="heading-anchor" href="#troubleshooting-and-optional-kubernetes" aria-label="Link to this section">#</a></h3>
+<p>Inspect startup without deleting data:</p>
+<pre class="highlighted-code"><code class="language-text">docker compose -f compose.classroom.yaml --profile &quot;*&quot; ps -a
+docker compose -f compose.classroom.yaml logs --tail 100 lab classroom-init postgres</code></pre>
+<p>If a port is already occupied, choose unused ports for this classroom. Create or edit the plain-text <code>.env</code> file beside <code>compose.classroom.yaml</code>, preserving any settings already present, and add these two lines:</p>
+<pre class="highlighted-code"><code class="language-dotenv">DS60_LAB_PORT=8766
+DS60_POSTGRES_PORT=55433</code></pre>
+<p>Then repeat the same <code>up</code> command and open &lt;http://127.0.0.1:8766/classroom&gt;. These numbers are examples; choose other unused ports if necessary. The PostgreSQL container publishes both the database and classroom ports because they share a network namespace. An older course database can therefore hold port8765 even when its web app is stopped. Keeping the same Compose project and volume names preserves this classroom&#x27;s work when changing its ports.</p>
+<p>A worker health failure needs its service log, for example <code>docker compose -f compose.classroom.yaml logs --tail 100 cpp-worker</code>.</p>
+<p>Kubernetes remains an extra <a href="modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">owned host-preparation workflow</a> with an expiring scoped lease. It is not created by these commands. No engine socket is mounted into the ordinary app or its language workers. The optional PowerShell/Bash launchers remain available for the existing host-folder route.</p>
+<p>Command semantics checked against Docker&#x27;s official <a href="https://docs.docker.com/compose/how-tos/profiles/">Compose profiles</a>, <a href="https://docs.docker.com/engine/storage/volumes/">volume storage</a> and <a href="https://docs.docker.com/reference/cli/docker/container/cp/">file-copy reference</a>, plus the <a href="https://docs.docker.com/reference/compose-file/merge/">Compose merge requirements</a> on 22 October 2026. Runtime qualification is recorded in the <a href="implementation/CHECKPOINT.md.html">implementation checkpoint</a>.</p>
+<h3 id="java-javascript-and-typescript-workers">Java, JavaScript and TypeScript workers<a class="heading-anchor" href="#java-javascript-and-typescript-workers" aria-label="Link to this section">#</a></h3>
+<p>These profiles use the same local progress volume as the other journeys. You need Docker with Linux containers and Compose; no host Java, Node, TypeScript or Python installation is needed. On Windows, use your engine&#x27;s WSL 2 backend. Run these single-line commands from the repository folder in PowerShell, Command Prompt or a macOS/Linux terminal.</p>
+<p>Build the classroom and the three language profiles, showing every build step:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose --progress plain -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node --parallel 1 build</code></pre>
+<p>On a fresh engine, download the database image once, then start the classroom:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose -f compose.classroom.yaml pull postgres
+docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node up -d --no-build --pull never --wait</code></pre>
+<p>Open &lt;http://localhost:8765/classroom&gt;. Compose itself cannot open a host browser; the shared and double-click launchers open it for the project&#x27;s saved selection. You can add the <code>--profile python-core</code> flag to both commands above to run statistics and LLM examples alongside the language tracks. The <code>--wait</code> flag checks actual worker startup probes. Read the last error if a service fails to become healthy; do not repeatedly delete volumes to diagnose a build.</p>
+<p>Java uses a prepared Java 21 compiler, saves the pad as <code>Main.java</code>, compiles to <code>classes/</code>, and runs <code>Main</code> with assertions enabled. Keep <code>public class Main</code> and omit a package declaration in this single-file pad. JavaScript uses Node24 ES modules saved as <code>main.mjs</code>. TypeScript uses <code>main.mts</code>, strict TypeScript5.9 checking and NodeNext module rules, then runs the emitted <code>compiled/main.mjs</code>. Compilation errors prevent execution. The pad&#x27;s <strong>How this code runs</strong> panel explains the filename and lets you download the current source.</p>
+<p>Node is a JavaScript host with filesystem and server APIs. Browser <code>document</code> and <code>window</code> are different APIs. Browser DOM chapters disclose their separate browser workflow and are not executed as if those APIs existed in Node. External Java libraries and npm packages are not implicitly installed by a pad. Runtime files are temporary; the saved source, notes and job receipts persist.</p>
+<p>View running logs or stop the classroom while retaining progress:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose -f compose.classroom.yaml logs --follow lab java-worker javascript-worker typescript-worker
+docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node stop</code></pre>
+<p>Press Ctrl+C to leave the log view. Stopping containers retains local named volumes. Do not use <code>down -v</code> unless you deliberately intend to erase their data.</p>
+<h4 id="reproducible-language-toolchain-inputs">Reproducible language toolchain inputs<a class="heading-anchor" href="#reproducible-language-toolchain-inputs" aria-label="Link to this section">#</a></h4>
+<p>The Node and Java image recipes pin multi-architecture upstream manifest digests. The TypeScript toolchain uses a checked-in npm lock with integrity hashes for TypeScript5.9.3, Node24 types and their undici-types dependency. The lock uses the TLS-verified Yarn registry mirror for the same upstream package bytes. npm lifecycle scripts are disabled during installation. Network access is needed while building; examples run offline after those images exist. Java and Node run in separate private workers with the same bounded output, scratch, deadline and cancellation rules as the other language profiles.</p>
+<h3 id="nlp-fine-tuning-and-rag-classroom">NLP, fine-tuning and RAG classroom<a class="heading-anchor" href="#nlp-fine-tuning-and-rag-classroom" aria-label="Link to this section">#</a></h3>
+<p>Most NLP, retrieval, evaluation and statistics examples use <code>python-core</code>. The small neural training, LoRA, preference and embedding-adaptation examples use the CPU <code>llm-torch-cpu</code> profile. Build them with visible logs:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose --progress plain -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu --parallel 1 build</code></pre>
+<p>After the initial database-image preparation above, start both profiles:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu up -d --no-build --pull never --wait</code></pre>
+<p>These default examples use small authored data, no paid API and no model-weight download. They expose mechanisms on CPU, with explicit limits on what tiny models demonstrate. The applied course&#x27;s optional pretrained-model chapter has a separate download, artifact verification and offline training workflow. Its model assets and training outputs need the documented user-mounted folder; temporary classroom job files are discarded after each run. Source drafts, notes, read markers and job receipts persist in the learning volume.</p>
+<p>To build every ordinary profile locally, including Java, Node, TensorFlow and Spark, use this single-line command in any supported shell:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose --progress plain -f compose.classroom.yaml --profile &quot;*&quot; --parallel 1 build</code></pre>
+<p>This can download several gigabytes on a fresh engine. It builds local images and does not push to a registry. Kubernetes retains its separate explicit owned cluster preparation. You can keep the initial classroom small and add profiles when a lesson needs them. The optional Makefile accepts, for example, <code>make classroom-build CLASSROOM_PROFILES=&quot;python-core llm-torch-cpu&quot;</code>.</p>
+<h3 id="optional-kubernetes-inside-the-same-classroom">Optional Kubernetes inside the same classroom<a class="heading-anchor" href="#optional-kubernetes-inside-the-same-classroom" aria-label="Link to this section">#</a></h3>
+<p>Kubernetes uses a separately prepared, owned disposable kind cluster. It does not attach to an existing personal or company cluster. Follow <a href="modules-runtime.md.html">the Kubernetes runtime preparation guide</a> for the pinned host tools, local fixture image and owned-session workflow. That explicit host preparation is separate from the Docker-only ordinary classroom and may need host Python, kind and kubectl. Windows users run this companion inside WSL 2 with Linux paths and a Unix-socket Docker endpoint. Native Windows credential preparation and named-pipe endpoints are unsupported. The browser and worker never receive the Docker engine socket.</p>
+<p>Finish tool preparation and all image builds before creating the fresh session. Build the private broker directly from the repository root, so this build does not require an existing lease path for Compose interpolation:</p>
+<pre class="highlighted-code"><code class="language-console">docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .</code></pre>
+<p>The preparation guide also gives the fixture-image build and any explicitly selected base-image override. Once these builds have succeeded, create the new owned session immediately before starting the broker. Its scoped credential lasts about 15 minutes; downloading or compiling after preparation can consume that lease before the first lesson. If it expires, release that exact session and prepare a new one. Do not edit its timestamps or reuse released credentials.</p>
+<p>After preparation, set <code>DS60_K8S_SESSION_DIR</code> to the exact private session path printed by the helper. In the same Linux, WSL 2 or macOS Bash terminal, use <code>export DS60_K8S_SESSION_DIR=&quot;printed-path&quot;</code>. Never copy credential contents into the learning folder or a message.</p>
+<p>Start the already built private broker in the same classroom and progress volume:</p>
+<pre class="highlighted-code"><code class="language-console">docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind up -d --no-build --pull never --wait lab kubernetes-worker</code></pre>
+<p>This overlay preserves the ordinary worker endpoints and adds only the scoped Kubernetes endpoint. It reuses the private classroom credential volume and mounts the prepared lease/config read-only. It does not provision a cluster, use an ambient kubeconfig, publish the worker port or install tools in the browser. The current fixture0.2 operations support the curated hello Deployment/Service, fixed ConfigMap inputs, finite task Job and fixed probe paths. Other Kubernetes lessons explicitly identify their separate reading or owned host-lab workflow.</p>
+<p>When finished, stop the broker and then release the exact owned session using the preparation guide. Keep the private session path until release succeeds; that receipt is how cleanup identifies the resources it owns.</p>
+<pre class="highlighted-code"><code class="language-console">docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind stop kubernetes-worker
+python scripts/prepare_kubernetes.py release --session &quot;printed-path&quot; --confirm-release</code></pre>
+<p>A normal classroom start without the overlay leaves Kubernetes unprepared. Existing source drafts and receipts remain available for reading. Never use <code>down -v</code> as a cluster cleanup shortcut; classroom volumes contain learning work.</p></article>
+  </main>
+</body>
+</html>

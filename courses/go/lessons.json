@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "track_id": "go",
+  "lessons": [
+    {
+      "id": "go-001",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-001.md",
+      "source_path": "courses/go/lessons/go-001.go",
+      "solution_paths": [
+        "courses/go/solutions/go-001_solution.go",
+        "courses/go/solutions/go-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-002",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-002.md",
+      "source_path": "courses/go/lessons/go-002.go",
+      "solution_paths": [
+        "courses/go/solutions/go-002_solution.go",
+        "courses/go/solutions/go-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-003",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-003.md",
+      "source_path": "courses/go/lessons/go-003.go",
+      "solution_paths": [
+        "courses/go/solutions/go-003_solution.go",
+        "courses/go/solutions/go-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-004",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-004.md",
+      "source_path": "courses/go/lessons/go-004.go",
+      "solution_paths": [
+        "courses/go/solutions/go-004_solution.go",
+        "courses/go/solutions/go-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-005",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-005.md",
+      "source_path": "courses/go/lessons/go-005.go",
+      "solution_paths": [
+        "courses/go/solutions/go-005_solution.go",
+        "courses/go/solutions/go-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-006",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-006.md",
+      "source_path": "courses/go/lessons/go-006.go",
+      "solution_paths": [
+        "courses/go/solutions/go-006_solution.go",
+        "courses/go/solutions/go-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-007",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-007.md",
+      "source_path": "courses/go/lessons/go-007.go",
+      "solution_paths": [
+        "courses/go/solutions/go-007_solution.go",
+        "courses/go/solutions/go-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-008",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-008.md",
+      "source_path": "courses/go/lessons/go-008.go",
+      "solution_paths": [
+        "courses/go/solutions/go-008_solution.go",
+        "courses/go/solutions/go-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-009",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-009.md",
+      "source_path": "courses/go/lessons/go-009.go",
+      "solution_paths": [
+        "courses/go/solutions/go-009_solution.go",
+        "courses/go/solutions/go-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-010",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-010.md",
+      "source_path": "courses/go/lessons/go-010.go",
+      "solution_paths": [
+        "courses/go/solutions/go-010_solution.go",
+        "courses/go/solutions/go-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-011",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-011.md",
+      "source_path": "courses/go/lessons/go-011.go",
+      "solution_paths": [
+        "courses/go/solutions/go-011_solution.go",
+        "courses/go/solutions/go-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-012",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-012.md",
+      "source_path": "courses/go/lessons/go-012.go",
+      "solution_paths": [
+        "courses/go/solutions/go-012_solution.go",
+        "courses/go/solutions/go-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-013",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-013.md",
+      "source_path": "courses/go/lessons/go-013.go",
+      "solution_paths": [
+        "courses/go/solutions/go-013_solution.go",
+        "courses/go/solutions/go-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-014",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-014.md",
+      "source_path": "courses/go/lessons/go-014.go",
+      "solution_paths": [
+        "courses/go/solutions/go-014_solution.go",
+        "courses/go/solutions/go-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-015",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-015.md",
+      "source_path": "courses/go/lessons/go-015.go",
+      "solution_paths": [
+        "courses/go/solutions/go-015_solution.go",
+        "courses/go/solutions/go-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-016",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-016.md",
+      "source_path": "courses/go/lessons/go-016.go",
+      "solution_paths": [
+        "courses/go/solutions/go-016_solution.go",
+        "courses/go/solutions/go-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-017",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-017.md",
+      "source_path": "courses/go/lessons/go-017.go",
+      "solution_paths": [
+        "courses/go/solutions/go-017_solution.go",
+        "courses/go/solutions/go-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-018",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-018.md",
+      "source_path": "courses/go/lessons/go-018.go",
+      "solution_paths": [
+        "courses/go/solutions/go-018_solution.go",
+        "courses/go/solutions/go-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-019",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-019.md",
+      "source_path": "courses/go/lessons/go-019.go",
+      "solution_paths": [
+        "courses/go/solutions/go-019_solution.go",
+        "courses/go/solutions/go-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-020",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-020.md",
+      "source_path": "courses/go/lessons/go-020.go",
+      "solution_paths": [
+        "courses/go/solutions/go-020_solution.go",
+        "courses/go/solutions/go-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-021",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-021.md",
+      "source_path": "courses/go/lessons/go-021.go",
+      "solution_paths": [
+        "courses/go/solutions/go-021_solution.go",
+        "courses/go/solutions/go-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-022",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-022.md",
+      "source_path": "courses/go/lessons/go-022.go",
+      "solution_paths": [
+        "courses/go/solutions/go-022_solution.go",
+        "courses/go/solutions/go-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-023",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-023.md",
+      "source_path": "courses/go/lessons/go-023.go",
+      "solution_paths": [
+        "courses/go/solutions/go-023_solution.go",
+        "courses/go/solutions/go-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-024",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-024.md",
+      "source_path": "courses/go/lessons/go-024.go",
+      "solution_paths": [
+        "courses/go/solutions/go-024_solution.go",
+        "courses/go/solutions/go-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-025",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-025.md",
+      "source_path": "courses/go/lessons/go-025.go",
+      "solution_paths": [
+        "courses/go/solutions/go-025_solution.go",
+        "courses/go/solutions/go-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-026",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-026.md",
+      "source_path": "courses/go/lessons/go-026.go",
+      "solution_paths": [
+        "courses/go/solutions/go-026_solution.go",
+        "courses/go/solutions/go-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-027",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-027.md",
+      "source_path": "courses/go/lessons/go-027.go",
+      "solution_paths": [
+        "courses/go/solutions/go-027_solution.go",
+        "courses/go/solutions/go-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-028",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-028.md",
+      "source_path": "courses/go/lessons/go-028.go",
+      "solution_paths": [
+        "courses/go/solutions/go-028_solution.go",
+        "courses/go/solutions/go-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-029",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-029.md",
+      "source_path": "courses/go/lessons/go-029.go",
+      "solution_paths": [
+        "courses/go/solutions/go-029_solution.go",
+        "courses/go/solutions/go-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-030",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-030.md",
+      "source_path": "courses/go/lessons/go-030.go",
+      "solution_paths": [
+        "courses/go/solutions/go-030_solution.go",
+        "courses/go/solutions/go-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-031",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-031.md",
+      "source_path": "courses/go/lessons/go-031.go",
+      "solution_paths": [
+        "courses/go/solutions/go-031_solution.go",
+        "courses/go/solutions/go-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-032",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-032.md",
+      "source_path": "courses/go/lessons/go-032.go",
+      "solution_paths": [
+        "courses/go/solutions/go-032_solution.go",
+        "courses/go/solutions/go-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-033",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-033.md",
+      "source_path": "courses/go/lessons/go-033.go",
+      "solution_paths": [
+        "courses/go/solutions/go-033_solution.go",
+        "courses/go/solutions/go-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-034",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-034.md",
+      "source_path": "courses/go/lessons/go-034.go",
+      "solution_paths": [
+        "courses/go/solutions/go-034_solution.go",
+        "courses/go/solutions/go-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-035",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-035.md",
+      "source_path": "courses/go/lessons/go-035.go",
+      "solution_paths": [
+        "courses/go/solutions/go-035_solution.go",
+        "courses/go/solutions/go-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-036",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-036.md",
+      "source_path": "courses/go/lessons/go-036.go",
+      "solution_paths": [
+        "courses/go/solutions/go-036_solution.go",
+        "courses/go/solutions/go-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-037",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-037.md",
+      "source_path": "courses/go/lessons/go-037.go",
+      "solution_paths": [
+        "courses/go/solutions/go-037_solution.go",
+        "courses/go/solutions/go-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-038",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-038.md",
+      "source_path": "courses/go/lessons/go-038.go",
+      "solution_paths": [
+        "courses/go/solutions/go-038_solution.go",
+        "courses/go/solutions/go-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-039",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-039.md",
+      "source_path": "courses/go/lessons/go-039.go",
+      "solution_paths": [
+        "courses/go/solutions/go-039_solution.go",
+        "courses/go/solutions/go-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-040",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-040.md",
+      "source_path": "courses/go/lessons/go-040.go",
+      "solution_paths": [
+        "courses/go/solutions/go-040_solution.go",
+        "courses/go/solutions/go-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-041",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-041.md",
+      "source_path": "courses/go/lessons/go-041.go",
+      "solution_paths": [
+        "courses/go/solutions/go-041_solution.go",
+        "courses/go/solutions/go-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-042",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-042.md",
+      "source_path": "courses/go/lessons/go-042.go",
+      "solution_paths": [
+        "courses/go/solutions/go-042_solution.go",
+        "courses/go/solutions/go-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-043",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-043.md",
+      "source_path": "courses/go/lessons/go-043.go",
+      "solution_paths": [
+        "courses/go/solutions/go-043_solution.go",
+        "courses/go/solutions/go-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-044",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-044.md",
+      "source_path": "courses/go/lessons/go-044.go",
+      "solution_paths": [
+        "courses/go/solutions/go-044_solution.go",
+        "courses/go/solutions/go-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-045",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-045.md",
+      "source_path": "courses/go/lessons/go-045.go",
+      "solution_paths": [
+        "courses/go/solutions/go-045_solution.go",
+        "courses/go/solutions/go-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-046",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-046.md",
+      "source_path": "courses/go/lessons/go-046.go",
+      "solution_paths": [
+        "courses/go/solutions/go-046_solution.go",
+        "courses/go/solutions/go-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-047",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-047.md",
+      "source_path": "courses/go/lessons/go-047.go",
+      "solution_paths": [
+        "courses/go/solutions/go-047_solution.go",
+        "courses/go/solutions/go-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "go-048",
+      "status": "authored",
+      "language": "go",
+      "runtime_profile": "go",
+      "guide_path": "courses/go/guides/go-048.md",
+      "source_path": "courses/go/lessons/go-048.go",
+      "solution_paths": [
+        "courses/go/solutions/go-048_solution.go",
+        "courses/go/solutions/go-048_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

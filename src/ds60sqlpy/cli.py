@@ -1,0 +1,420 @@
+"""Command-line interface for learners, maintainers, and coding agents."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from collections import Counter
+from dataclasses import asdict
+from pathlib import Path
+from typing import Any
+
+from ds60sqlpy.catalog import Catalog, Track, find_repo_root
+from ds60sqlpy.checks import CheckResult, run_checks
+from ds60sqlpy.doctor import Diagnostic, diagnose
+from ds60sqlpy.portal import serve_portal
+from ds60sqlpy.progress import ProgressStore
+from ds60sqlpy.sql_notebook import SqlNotebookError, generate_sql_notebook
+from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
+from ds60sqlpy.study_plan import build_study_plan, learning_paths
+
+STATUS_MARK = {"pass": "PASS", "warn": "WARN", "fail": "FAIL"}
+
+
+def _print_diagnostic(item: Diagnostic) -> None:
+    print(f"[{STATUS_MARK[item.status]:4}] {item.name}: {item.detail}")
+
+
+def _print_check(item: CheckResult) -> None:
+    location = f" ({item.path})" if item.path else ""
+    print(f"[{STATUS_MARK[item.severity]:4}] {item.code}: {item.message}{location}")
+
+
+def _catalog_rows(catalog: Catalog, track: Track | None) -> list[dict[str, Any]]:
+    return [asdict(lesson) for lesson in catalog.lessons(track)]
+
+
+def _cmd_doctor(args: argparse.Namespace, catalog: Catalog) -> int:
+    diagnostics = diagnose(catalog, check_database=not args.no_database)
+    for diagnostic in diagnostics:
+        _print_diagnostic(diagnostic)
+    counts = Counter(item.status for item in diagnostics)
+    print(
+        f"\nEnvironment summary: {counts['pass']} pass, "
+        f"{counts['warn']} warning, {counts['fail']} fail"
+    )
+    if counts["fail"]:
+        return 1
+    return 1 if args.strict and counts["warn"] else 0
+
+
+def _cmd_catalog(args: argparse.Namespace, catalog: Catalog) -> int:
+    track: Track | None = args.track
+    rows = _catalog_rows(catalog, track)
+    if args.json:
+        print(json.dumps(rows, indent=2))
+        return 0
+    lessons = catalog.lessons(track)
+    id_width = max((len(lesson.id) for lesson in lessons), default=9)
+    for lesson in lessons:
+        solutions = len(lesson.solution_paths)
+        print(
+            f"{lesson.id:{id_width}} {lesson.level:12} {lesson.estimated_minutes:>3}m "
+            f"{lesson.title} "
+            f"[deps={lesson.dependency_group}; network={lesson.network}; "
+            f"solutions={solutions}]"
+        )
+    return 0
+
+
+def _cmd_validate(args: argparse.Namespace, catalog: Catalog) -> int:
+    results = run_checks(catalog)
+    if args.json:
+        print(json.dumps([asdict(result) for result in results], indent=2))
+    else:
+        for result in results:
+            if args.all or result.severity != "pass" or result.code.endswith(".summary"):
+                _print_check(result)
+        counts = Counter(item.severity for item in results)
+        print(
+            f"\nValidation summary: {counts['pass']} pass, "
+            f"{counts['warn']} warning, {counts['fail']} fail"
+        )
+    counts = Counter(item.severity for item in results)
+    if counts["fail"]:
+        return 1
+    return 1 if args.strict and counts["warn"] else 0
+
+
+def _cmd_plan(args: argparse.Namespace, catalog: Catalog) -> int:
+    paths = learning_paths(catalog)
+    targets = list(args.targets)
+    if args.path:
+        if args.path not in paths:
+            raise ValueError(f"Unknown learning path: {args.path}. Choose from {', '.join(paths)}.")
+        targets.extend(paths[args.path].targets)
+    if not targets:
+        for name, path in paths.items():
+            print(f"{name}: {path.title}. {path.description}")
+        print("\nChoose --path NAME or one or more stable lesson IDs.")
+        return 0
+    try:
+        completed = (
+            [item.lesson_id for item in ProgressStore(catalog).completions()]
+            if args.use_progress
+            else []
+        )
+        plan = build_study_plan(
+            catalog, targets, completed=completed, weekly_hours=args.weekly_hours
+        )
+    except (KeyError, OSError, ValueError) as exc:
+        print(f"Could not build study plan: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(asdict(plan), indent=2))
+        return 0
+    print(f"Goals: {', '.join(plan.targets)}")
+    print(
+        f"{len(plan.lessons)} remaining lessons, {plan.estimated_minutes / 60:.1f} hours, "
+        f"about {plan.estimated_weeks} weeks at {plan.weekly_hours:g} hours/week."
+    )
+    print("Allow extra time for review, exercises, and project revisions.")
+    for index, lesson in enumerate(plan.lessons, 1):
+        ready = " [ready]" if lesson.id in plan.ready else ""
+        print(f"{index:3}. {lesson.id}: {lesson.title} ({lesson.estimated_minutes}m){ready}")
+    return 0
+
+
+def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
+    store = ProgressStore(catalog)
+    try:
+        if args.progress_action == "complete":
+            record = store.mark_complete(args.lesson_id, args.notes)
+            print(f"Marked {record.lesson_id} complete at {record.completed_at}")
+            return 0
+        if args.progress_action == "reset":
+            if not args.yes:
+                print("Refusing to delete local progress without --yes.", file=sys.stderr)
+                return 2
+            store.reset()
+            print("Removed .learning/progress.json")
+            return 0
+        completions = store.completions()
+    except (KeyError, OSError, ValueError) as exc:
+        print(f"Could not update progress: {exc}", file=sys.stderr)
+        return 2
+
+    if completions:
+        print("Completed lessons:")
+        for completion in completions:
+            suffix = f": {completion.notes}" if completion.notes else ""
+            print(f"  {completion.lesson_id} ({completion.completed_at}){suffix}")
+    else:
+        print("No local progress recorded yet.")
+    for track in catalog.tracks:
+        if not catalog.lessons(track):
+            print(f"{catalog.tracks[track]['title']}: no published lessons yet.")
+            continue
+        next_lesson = store.next_lesson(track)
+        if next_lesson:
+            print(f"Next {track}: {next_lesson.id}: {next_lesson.title}")
+        else:
+            print(f"{track.capitalize()} track complete.")
+    return 0
+
+
+def _cmd_portal(args: argparse.Namespace, catalog: Catalog) -> int:
+    serve_portal(
+        catalog,
+        port=args.port,
+        open_browser=not args.no_browser,
+        allow_launches=not args.no_launches,
+    )
+    return 0
+
+
+def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
+    if args.sql_action == "notebook":
+        try:
+            workspace = generate_sql_notebook(
+                catalog,
+                args.lesson_id,
+                args.artifact,
+                args.solution_index,
+            )
+        except SqlNotebookError as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        print(f"Guided notebook: {workspace.notebook_path}")
+        print(f"Editable SQL:    {workspace.sql_path}")
+        print(
+            "Open the notebook through the course portal or start JupyterLab "
+            "from the repository root."
+        )
+        return 0
+
+    try:
+        runner = SqlRunner(catalog, args.database, quiet=args.quiet)
+    except SqlRunnerError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    if args.sql_action == "setup":
+        if not args.yes:
+            print(
+                "SQL setup drops and recreates the course-owned training schema. "
+                "Re-run with --yes.",
+                file=sys.stderr,
+            )
+            return 2
+        run = runner.setup()
+        if run.returncode:
+            return run.returncode
+        return runner.verify().returncode
+
+    if args.sql_action == "verify":
+        return runner.verify().returncode
+
+    if args.sql_action == "run":
+        run = runner.lesson(args.day)
+        return run.returncode
+
+    if args.sql_action == "run-id":
+        try:
+            run = runner.lesson_id(args.lesson_id)
+        except (KeyError, SqlRunnerError) as exc:
+            print(str(exc), file=sys.stderr)
+            return 2
+        return run.returncode
+
+    if args.sql_action == "all":
+        if args.reset:
+            setup_run = runner.setup()
+            if setup_run.returncode:
+                return setup_run.returncode
+            verify_run = runner.verify()
+            if verify_run.returncode:
+                return verify_run.returncode
+        runs = runner.all_lessons()
+        passed = sum(run.returncode == 0 for run in runs)
+        expected = sum(lesson.runner == "sql" for lesson in catalog)
+        print(f"SQL lessons passed: {passed}/{expected}")
+        return 0 if len(runs) == expected and passed == expected else 1
+
+    if args.sql_action == "solutions":
+        if args.reset:
+            setup_run = runner.setup()
+            if setup_run.returncode:
+                return setup_run.returncode
+            verify_run = runner.verify()
+            if verify_run.returncode:
+                return verify_run.returncode
+        runs = runner.all_solutions()
+        passed = sum(run.returncode == 0 for run in runs)
+        expected = sum(
+            Path(path).suffix == ".sql"
+            for lesson in catalog
+            if lesson.runner == "sql"
+            for path in lesson.solution_paths
+        )
+        print(f"Executable SQL solutions passed: {passed}/{expected}")
+        return 0 if len(runs) == expected and passed == expected else 1
+
+    raise AssertionError(f"Unhandled SQL action: {args.sql_action}")
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="ds60",
+        description=(
+            "Manage and validate the DS60 Python, PostgreSQL, and engineering curriculum."
+        ),
+    )
+    parser.add_argument(
+        "--repo",
+        type=Path,
+        help="Repository root (normally discovered automatically).",
+    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    doctor_parser = subparsers.add_parser("doctor", help="Check local tools and packages.")
+    doctor_parser.add_argument("--strict", action="store_true", help="Fail on warnings.")
+    doctor_parser.add_argument(
+        "--no-database",
+        action="store_true",
+        help="Keep diagnostics entirely local; do not check course-database reachability.",
+    )
+
+    catalog_parser = subparsers.add_parser("catalog", help="List cataloged lessons.")
+    catalog_parser.add_argument("--track", metavar="TRACK", help="A registered track ID.")
+    catalog_parser.add_argument("--json", action="store_true")
+
+    plan_parser = subparsers.add_parser("plan", help="Plan a prerequisite-aware learning route.")
+    plan_parser.add_argument("targets", nargs="*", help="Stable target lesson IDs.")
+    plan_parser.add_argument("--path", metavar="NAME", help="A registered learning path ID.")
+    plan_parser.add_argument("--weekly-hours", type=float, default=5)
+    plan_parser.add_argument("--use-progress", action="store_true")
+    plan_parser.add_argument("--json", action="store_true")
+
+    validate_parser = subparsers.add_parser(
+        "validate", help="Run fast structural repository checks."
+    )
+    validate_parser.add_argument("--strict", action="store_true", help="Fail on warnings.")
+    validate_parser.add_argument("--json", action="store_true")
+    validate_parser.add_argument("--all", action="store_true", help="Print passing details too.")
+
+    progress_parser = subparsers.add_parser("progress", help="Track local learning progress.")
+    progress_subparsers = progress_parser.add_subparsers(dest="progress_action", required=True)
+    progress_subparsers.add_parser("show", help="Show completions and next lessons.")
+    complete_parser = progress_subparsers.add_parser("complete", help="Complete a lesson.")
+    complete_parser.add_argument(
+        "lesson_id",
+        help="For example: python-04, sql-12, or bridge-03",
+    )
+    complete_parser.add_argument("--notes", default="")
+    reset_parser = progress_subparsers.add_parser("reset", help="Delete local progress.")
+    reset_parser.add_argument("--yes", action="store_true")
+
+    portal_parser = subparsers.add_parser(
+        "portal",
+        help="Open the private progress dashboard on 127.0.0.1.",
+    )
+    portal_parser.add_argument(
+        "--port",
+        type=int,
+        default=0,
+        help="Loopback port; 0 chooses a free port.",
+    )
+    portal_parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="Print the URL without opening the browser.",
+    )
+    portal_parser.add_argument(
+        "--no-launches",
+        action="store_true",
+        help="Disable native VS Code and Jupyter actions.",
+    )
+
+    sql_parser = subparsers.add_parser("sql", help="Run PostgreSQL course scripts with psql.")
+    sql_parser.add_argument(
+        "--database",
+        help="PostgreSQL URL; defaults to DS60_DATABASE_URL or the Compose database.",
+    )
+    sql_parser.add_argument("--quiet", action="store_true")
+    sql_subparsers = sql_parser.add_subparsers(dest="sql_action", required=True)
+    setup_parser = sql_subparsers.add_parser("setup", help="Reset and seed training schema.")
+    setup_parser.add_argument("--yes", action="store_true")
+    sql_subparsers.add_parser("verify", help="Verify course seed-data invariants.")
+    run_parser = sql_subparsers.add_parser("run", help="Run one SQL lesson.")
+    run_parser.add_argument("day", type=int, choices=range(1, 61), metavar="DAY")
+    run_id_parser = sql_subparsers.add_parser(
+        "run-id",
+        help="Run one SQL lesson by stable catalog ID.",
+    )
+    run_id_parser.add_argument(
+        "lesson_id",
+        help="For example: sql-found-01, sql-18, or sql-ops-01",
+    )
+    notebook_parser = sql_subparsers.add_parser(
+        "notebook",
+        help="Create a private guided notebook and editable SQL copy.",
+    )
+    notebook_parser.add_argument(
+        "lesson_id",
+        help="A cataloged SQL ID, for example sql-01 or sql-ops-01.",
+    )
+    notebook_parser.add_argument(
+        "--artifact",
+        choices=("lesson", "solution"),
+        default="lesson",
+        help="Generate the learner lesson or executable SQL solution.",
+    )
+    notebook_parser.add_argument(
+        "--solution-index",
+        type=int,
+        default=1,
+        help="One-based executable solution number (default: 1).",
+    )
+    all_parser = sql_subparsers.add_parser("all", help="Run all SQL lessons sequentially.")
+    all_parser.add_argument(
+        "--reset", action="store_true", help="Run destructive course setup first."
+    )
+    solutions_parser = sql_subparsers.add_parser(
+        "solutions",
+        help="Run every cataloged executable SQL solution sequentially.",
+    )
+    solutions_parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Run destructive course setup first.",
+    )
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    """Run the CLI and return a process exit code."""
+
+    args = _parser().parse_args(argv)
+    try:
+        root = find_repo_root(args.repo)
+        catalog = Catalog.load(root)
+    except (FileNotFoundError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    handlers = {
+        "doctor": _cmd_doctor,
+        "catalog": _cmd_catalog,
+        "plan": _cmd_plan,
+        "validate": _cmd_validate,
+        "progress": _cmd_progress,
+        "portal": _cmd_portal,
+        "sql": _cmd_sql,
+    }
+    try:
+        return handlers[args.command](args, catalog)
+    except (KeyError, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return 2

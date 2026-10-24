@@ -1,0 +1,199 @@
+name: Application builds
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"
+
+concurrency:
+  group: application-builds-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docker-starter:
+    name: Portable Docker classroom starter
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Install locked rendering and packaging dependencies
+        run: uv sync --frozen
+      - name: Package the complete Docker classroom starter
+        run: >-
+          uv run --no-sync python scripts/build_windows_starter.py
+          --output dist/DS60LearningLab-Docker-Starter.zip
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: DS60LearningLab-Docker-Starter
+          path: dist/DS60LearningLab-Docker-Starter.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  docker:
+    name: Docker classroom (${{ matrix.group }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      # Four independent runners shorten the expanded matrix. Each runner keeps
+      # sequential local builds and owns a disposable project. Related profiles share layers;
+      # frameworks run separately so cold builds do not exhaust one runner's disk.
+      matrix:
+        include:
+          - group: python-core
+            profiles: python-core
+          - group: cpp
+            profiles: cpp20
+          - group: java
+            profiles: java21
+          - group: c-go
+            profiles: c17 go
+          - group: csharp
+            profiles: csharp-dotnet
+          - group: rust
+            profiles: rust-stable
+          - group: swift
+            profiles: swift-linux
+          - group: javascript-typescript
+            profiles: javascript-node typescript-node
+          - group: scala-spark
+            profiles: scala-jvm spark-local-scala spark-local-python
+          - group: tensorflow
+            profiles: tensorflow-cpu
+          - group: pytorch
+            profiles: llm-torch-cpu
+    env:
+      COMPOSE_PROJECT_NAME: ds60-ci-${{ matrix.group }}
+      DS60_PROFILES: ${{ matrix.profiles }}
+      DS60_CI_GROUP: ${{ matrix.group }}
+      DS60_CLASSROOM_PORT: "0"
+      DS60_POSTGRES_PORT: "0"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Build and start through the learner entrypoint
+        shell: bash
+        run: |
+          read -r -a profiles <<< "$DS60_PROFILES"
+          options=()
+          for profile in "${profiles[@]}"; do options+=(--profile "$profile"); done
+          bash classroom --registry upstream --rebuild --no-browser "${options[@]}"
+      - name: Exercise Python, SQL, saved pads and run receipts
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_lab_http.py --url "$url" --confirm-disposable --reset-sql
+      - name: Execute a real reference through every selected private worker
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
+            --profiles "python-core $DS60_PROFILES" --report work/runtime-receipts.json
+      - name: Exercise real compiler failures and bounded runtime recovery
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          options=()
+          if [ "$DS60_CI_GROUP" = python-core ]; then options+=(--check-timeout); fi
+          python scripts/check_classroom_failures.py --url "$url" --confirm-disposable \
+            --profiles "python-core $DS60_PROFILES" --report work/runtime-failures.json "${options[@]}"
+      - name: Execute every authored reference in the selected runtime profiles
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_module_references.py --url "$url" --confirm-disposable \
+            --profiles "$DS60_PROFILES" --report work/module-reference-results.json
+      - name: Run all SQL lessons and executable solutions with the limited course login
+        if: matrix.group == 'cpp'
+        run: |
+          docker compose -f compose.classroom.yaml exec -T lab python scripts/course.py sql --quiet all --reset
+          docker compose -f compose.classroom.yaml exec -T lab python scripts/course.py sql --quiet solutions --reset
+      - name: Replace the project containers while retaining named learning volumes
+        shell: bash
+        run: |
+          docker compose -f compose.classroom.yaml --profile '*' down
+          read -r -a profiles <<< "$DS60_PROFILES"
+          options=()
+          for profile in "${profiles[@]}"; do options+=(--profile "$profile"); done
+          bash classroom --registry upstream --no-build --no-browser "${options[@]}"
+      - name: Verify source, evidence and results survive replacement
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_lab_http.py --url "$url" --confirm-disposable --check-persistence
+          python scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
+            --profiles "python-core $DS60_PROFILES" --report work/runtime-receipts.json \
+            --check-persistence
+      - name: Prepare isolated Chromium acceptance tools
+        if: matrix.group == 'python-core'
+        run: |
+          python -m venv work/browser-env
+          work/browser-env/bin/python -m pip install --require-hashes --only-binary=:all: -r requirements/ci-browser.lock
+          work/browser-env/bin/python -m playwright install --with-deps chromium
+      - name: Exercise the real classroom and browser-language examples
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_classroom_browser.py --url "$url" \
+            --confirm-disposable --report work/browser-receipts.json
+      - name: Execute all D3 references through the isolated classroom preview
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_d3_browser.py --url "$url" \
+            --confirm-disposable --report work/d3-browser-receipts.json
+      - name: Replace Core containers after saving D3 browser observations
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          docker compose -f compose.classroom.yaml --profile '*' down
+          bash classroom --registry upstream --no-build --no-browser --profile python-core
+      - name: Read original D3 observations and drafts without rerunning
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_d3_browser.py --url "$url" \
+            --confirm-disposable --report work/d3-browser-receipts.json --check-persistence
+      - name: Capture service diagnostics
+        if: failure()
+        run: docker compose -f compose.classroom.yaml --profile '*' logs --no-color
+      - name: Retain runtime receipts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: classroom-runtime-${{ matrix.group }}
+          path: |
+            work/runtime-receipts.json
+            work/runtime-failures.json
+            work/module-reference-results.json
+            work/browser-receipts.json
+            work/d3-browser-receipts.json
+            work/browser-screenshots/*.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Remove only this disposable CI project's containers and volumes
+        if: always()
+        run: docker compose -f compose.classroom.yaml --profile '*' down --volumes --remove-orphans

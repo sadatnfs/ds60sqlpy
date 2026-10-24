@@ -1,0 +1,16 @@
+{
+  "provenance": "synthetic course publisher only",
+  "algorithm": "RSA PKCS1 v1.5 with SHA256",
+  "public_key_sha256": "bda34a2b4813ae2ee98c80734c83ff1603eb75d9708aa11bc4dd1a1a8816ef02",
+  "tool": "LibreSSL 3.3.6",
+  "cases": {
+    "attestation.json": {
+      "exit_code": 0,
+      "accepted": true
+    },
+    "attestation-tampered.json": {
+      "exit_code": 1,
+      "accepted": false
+    }
+  }
+}

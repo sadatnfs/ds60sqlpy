@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-018",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Count code points, UTF-8 bytes and whitespace segments for the supplied Chinese string.",
+      "expected": "Counts4,12,1 respectively, with no claim that whitespace identifies linguistic words."
+    },
+    {
+      "exercise": 2,
+      "task": "Implement the narrow cue rule and test English,Spanish,bank and the mixed cue sentence.",
+      "expected": "en,es,None,None under the declared cue inventory."
+    },
+    {
+      "exercise": 3,
+      "task": "Apply mark removal to r\u00e9sum\u00e9 and compare with the original resume string.",
+      "expected": "Both transformed strings equal resume although raw strings differ."
+    },
+    {
+      "exercise": 4,
+      "task": "Inspect lowercased \u0130 and casefolded Stra\u00dfe.",
+      "expected": "i plus combining dot has length2; Stra\u00dfe casefolds to strasse."
+    },
+    {
+      "exercise": 5,
+      "task": "Compute pooled and equal-language accuracy from the two sample arrays.",
+      "expected": "English.9,Spanish.5,pooled5/6,macro.7 with counts10 and2."
+    },
+    {
+      "exercise": 6,
+      "task": "Analyze charge in payment versus battery messages and propose a held-out transfer evaluation.",
+      "expected": "A plan includes target labels, ambiguous cases, source/target family separation and an abstention policy."
+    }
+  ]
+}

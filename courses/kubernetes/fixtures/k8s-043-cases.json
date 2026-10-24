@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-043",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Label all three synthetic address roles.",
+      "expected": "One node address, one Pod address and one virtual Service address."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict what can change after Pod replacement.",
+      "expected": "Pod UID and IP can change while the Service remains stable."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw the internal request path with both ports.",
+      "expected": "Service port 80 maps to Pod listener 8080."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a host browser trying a ClusterIP directly.",
+      "expected": "The host may have no route to that virtual cluster destination."
+    },
+    {
+      "exercise": 5,
+      "task": "Distinguish a node address from a public load-balancer address.",
+      "expected": "They may be different infrastructure endpoints with different policies."
+    },
+    {
+      "exercise": 6,
+      "task": "Explain a successful request with a changed backend UID.",
+      "expected": "Service continuity and backend identity are separate observations."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-060",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict a RequireDualStack request on a single-stack cluster.",
+      "expected": "The intended requirement cannot be satisfied."
+    },
+    {
+      "exercise": 2,
+      "task": "Distinguish A and AAAA records.",
+      "expected": "IPv4 addresses versus IPv6 addresses."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a family-specific acceptance table.",
+      "expected": "DNS, Service, endpoints, policy and app response for both families."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose IPv4 success with IPv6 timeout.",
+      "expected": "Inspect the IPv6 route, listener, endpoints and policy path."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain bracketed IPv6 URL syntax.",
+      "expected": "Brackets delimit the address before a colon-prefixed port."
+    },
+    {
+      "exercise": 6,
+      "task": "Review dual-stack security coverage.",
+      "expected": "Intended allow/deny rules and observations cover both families."
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "lesson_id": "spark-031",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Publish complete input files atomically",
+      "input_contract": "Write each declared file in the owned staging directory, then atomically move it into input under a new batch-N.json name. Reject invalid names or an existing destination.",
+      "expected": "Three input files, each with 3 completeJSON records;no staging temporary file remains. Reusing batch-0.json is rejected.",
+      "verification": "Assert the file count and explicit existing-name rejection before starting any query."
+    },
+    {
+      "exercise": 2,
+      "title": "Construct an explicit streaming relation without starting it",
+      "input_contract": "Read the owned JSON input through readStream with the declared schema and maxFilesPerTrigger 1. Return the streamingDataFrame;do not call an ordinary batch collect on it.",
+      "expected": "isStreaming istrue, columns areid, team, amount and their types arebigint, string, bigint. No query is started by construction alone.",
+      "verification": "Assert streaming status and exact type mapping while the active query list remains empty."
+    },
+    {
+      "exercise": 3,
+      "title": "Define a cumulative aggregate with separate completeness counts",
+      "input_contract": "Group by team and compute row_count, known_amounts and total_amount. Use the same expression for streaming and batch relations without filling unknown amounts.",
+      "expected": "The streaming result remains streaming and has one state/result row per team. Its eventual literal result isA(4,3,15), B(3,2,35), C(2,2,30).",
+      "verification": "Assert output columns and streaming status now;verify the exact final tuples after bounded execution."
+    },
+    {
+      "exercise": 4,
+      "title": "Run AvailableNow with a deadline and owned cleanup",
+      "input_contract": "Start the aggregate in a uniquely named memory sink with complete mode, a fresh checkpoint and AvailableNow. Await at most 30 seconds, require termination and always stop the query in finally.",
+      "expected": "The query terminates and isActive isfalse. The memory table holds the final finite aggregate;the checkpoint belongs only to this run.",
+      "verification": "Assert bounded await success, no query exception and inactive state. No sleep or external producer is used."
+    },
+    {
+      "exercise": 5,
+      "title": "Reconcile processed input through progress evidence",
+      "input_contract": "Return(batch_id, num_input_rows) from retained query progress. Sum input rows and inspect positive-input batches without confusing cumulative sink snapshots with new input.",
+      "expected": "Three positive-input batches of 3 records and total input 9. Any zero-input progress entry contributes zero to that total.",
+      "verification": "Assert total 9, three positive batches of 3 and unique recorded batch IDs;print the actual ledger."
+    },
+    {
+      "exercise": 6,
+      "title": "Compare final streaming output with batch and literal oracles",
+      "input_contract": "Read the final memory table, compare its ordered summary tuples with a batch read of the same nine source records, and compare both with the literalA/B/C oracle.",
+      "expected": "ExactlyA(4,3,15), B(3,2,35), C(2,2,30), whose record counts sum 9, known counts 7 and amounts 80.",
+      "verification": "Assert both path comparisons and the independent literal tuple list;confirm no active query remains before cleanup."
+    }
+  ],
+  "golden": {
+    "input_rows": 9,
+    "files": 3,
+    "rows_per_file": 3,
+    "known_amounts": 7,
+    "amount_total": 80,
+    "expected": [
+      [
+        "A",
+        4,
+        3,
+        15
+      ],
+      [
+        "B",
+        3,
+        2,
+        35
+      ],
+      [
+        "C",
+        2,
+        2,
+        30
+      ]
+    ],
+    "sink": "owned memory table in complete mode;inspection only,not durable",
+    "trigger": "AvailableNow",
+    "max_files_per_trigger": 1
+  }
+}

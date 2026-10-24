@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cpp-009 pilot: vectors own; references borrow · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cpp-009 pilot: vectors own; references borrow</h1>
+      <p class="source-path">Generated from <code>courses/cpp/guides/cpp-009.md</code></p>
+    </header>
+    <article class="document"><h2 id="cpp-009-pilot-vectors-own-references-borrow">cpp-009 pilot: vectors own; references borrow<a class="heading-anchor" href="#cpp-009-pilot-vectors-own-references-borrow" aria-label="Link to this section">#</a></h2>
+<p>Use the prepared C++ browser worker for this lesson&#x27;s single-file program. The app reports compilation, execution and the independent ownership check separately. Use <a href="../compile-and-run.md.html">the compile and run tutorial</a> for a Docker-only project or an optional native compiler workflow.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner, about 120 minutes plus retrieval practice. Direct prerequisites are <code>cpp-006</code> (integer input and conversions) and <code>cpp-008</code> (copies, const references and lifetimes). No Python or SQL prerequisite is required. You should be able to read a small function, a loop and <code>std::vector&lt;int&gt;</code>. The optional-return and bounds helpers used here are explained below.</p>
+<p>Use the saved learner pad or create a new owned scratch project as described in the compile/run tutorial. Keep the <a href="../solutions/cpp-009_solutions.md.html">explanatory solution</a> closed until an attempt or an explicit reveal. The checked-in learner source is <a href="../lessons/cpp-009.cpp.html">cpp-009.cpp</a>; copy it into your own workspace before editing.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Preserve owning values and explain borrowed access.</li>
+<li>Reject invalid indices and prove exact bounded results.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Owner:</strong> an object responsible for its element storage lifetime.</li>
+<li><strong>Borrow:</strong> an access path that depends on another object remaining valid.</li>
+</ul>
+<h4 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h4>
+<p>A vector is an object that owns a sequence of elements. Its destructor releases the storage it owns when its lifetime ends. This is an example of RAII: resource ownership is tied to object lifetime, including early returns and exceptions. It is usually easier to compose such owning objects than to manually match every <code>new</code> with a <code>delete</code>.</p>
+<p>A copy is another owning vector with independent element values. A reference is another way to access an existing object; it is not another owner. A reference to a particular element is valid only while that element&#x27;s lifetime and the container&#x27;s invalidation rules allow it. Growing a vector can move its elements to new storage. A previously borrowed element reference can then dangle even though the vector itself still exists.</p>
+<p>An index is a position, starting at zero. For a vector of size 3, valid indices are 0, 1 and 2. Index3 is already outside the sequence. <code>values.at(index)</code> checks this boundary and throws <code>std::out_of_range</code> when the index is invalid. <code>values[index]</code> does not supply this check. An invalid unchecked access is undefined behavior, not a reliable exception or a predictable value.</p>
+<p><code>const std::vector&lt;int&gt;&amp;</code> means a borrowed vector that this function cannot mutate through that parameter. It does not make the original object globally immutable. <code>std::optional&lt;int&gt;</code> is a value that either contains an integer or contains no value; <code>std::nullopt</code> names the empty case. Check <code>has_value()</code> before using a contained value. <code>std::in_range&lt;std::size_t&gt;(index)</code>, from <code>&lt;utility&gt;</code> in C++20, asks whether an integer can be represented by that unsigned index type before a cast.</p>
+<p>These ideas follow the ownership guidance in the <a href="https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines">C++ Core Guidelines</a>. The lesson&#x27;s examples and checks below are original fixtures, not a claim that a diagnostic tool proves every lifetime correct.</p>
+<h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
+<p>Given <code>values{3,8}</code>, an independent copy named <code>snapshot</code>, and <code>const auto&amp; alias = values</code>, change <code>values.at(0)</code> to 4. Write the first values observed through <code>snapshot</code> and <code>alias</code>, with one sentence explaining which object each name refers to. Do not run it until you have committed a prediction.</p>
+<h3 id="compile-and-run-reference">Compile and run reference<a class="heading-anchor" href="#compile-and-run-reference" aria-label="Link to this section">#</a></h3>
+<p>Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for <code>main.cpp</code>, the Docker route, native compiler flags, paths, exit codes, compilation versus linking, stale binaries and single-file limits. Record the displayed build and run phases separately.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-an-independent-copy">Worked example 1: an independent copy<a class="heading-anchor" href="#worked-example-1-an-independent-copy" aria-label="Link to this section">#</a></h4>
+<p>In <code>main.cpp</code>, construct <code>original{4,7,9}</code>, copy it, then change only the original&#x27;s first element. The copy must still contain4; the original must contain5. The expression <code>const auto copy = original</code> asks the compiler to infer the vector type, creates a value copy and prevents later mutation through <code>copy</code>.</p>
+<h4 id="worked-example-2-reject-one-past-the-end-access">Worked example 2: reject one-past-the-end access<a class="heading-anchor" href="#worked-example-2-reject-one-past-the-end-access" aria-label="Link to this section">#</a></h4>
+<p>The same program deliberately calls <code>original.at(original.size())</code>. This is exactly one past the last valid position. The program catches <code>std::out_of_range</code> and prints <code>bounds rejected</code>. It never tries an unchecked invalid access. The standard exception&#x27;s detailed <code>what()</code> text is implementation-specific, so the check uses its type rather than matching a vendor&#x27;s whole message.</p>
+<p>The app learner source is <a href="../lessons/cpp-009.cpp.html">cpp-009.cpp</a>, copied by the fixed worker to main.cpp. Its helpers are intentionally incomplete; complete one after predicting. The manual multi-file project below is an alternative for an already-qualified CMake environment. A compiler worker run is not a CMake/CTest receipt.</p>
+<p>Save this worked-example program as <code>main.cpp</code> in that separate manual project:</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdexcept&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
+
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> original<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> copy <span class="syntax-operator">=</span> original<span class="syntax-punctuation">;</span>
+    original<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>copy<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">4</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> original<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+    std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">copy=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> copy<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+              <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> original=</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> original<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span>original<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>out_of_range<span class="syntax-operator">&amp;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bounds rejected</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> exit 0, with exactly these two lines:</p>
+<pre class="highlighted-code"><code class="language-text">copy=4 original=5
+bounds rejected</code></pre>
+<p>If the exception is not thrown, the program returns 2. These checks use ordinary control flow, so a Release build cannot remove them by defining <code>NDEBUG</code>.</p>
+<h3 id="a-small-portable-build-and-test-project">A small portable build and test project<a class="heading-anchor" href="#a-small-portable-build-and-test-project" aria-label="Link to this section">#</a></h3>
+<p>Save <code>CMakeLists.txt</code> next to <code>main.cpp</code>. It uses only target-scoped properties and already-installed tools. No configure-time network download is allowed.</p>
+<pre class="highlighted-code"><code class="language-cmake"><span class="syntax-builtin">cmake_minimum_required</span><span class="syntax-punctuation">(</span><span class="syntax-string">VERSION</span> <span class="syntax-string">3.28</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">project</span><span class="syntax-punctuation">(</span><span class="syntax-string">ds60_cpp_pilot</span> <span class="syntax-string">LANGUAGES</span> <span class="syntax-string">CXX</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">include</span><span class="syntax-punctuation">(</span><span class="syntax-string">CTest</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">option</span><span class="syntax-punctuation">(</span><span class="syntax-string">DS60_BUILD_EXERCISE_TESTS</span> <span class="syntax-string">&quot;Build the learner exercise checks&quot;</span> <span class="syntax-string">OFF</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-builtin">function</span><span class="syntax-punctuation">(</span><span class="syntax-string">ds60_target</span> <span class="syntax-string">target</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">set_target_properties</span><span class="syntax-punctuation">(</span><span class="syntax-operator">${</span>target<span class="syntax-operator">}</span> <span class="syntax-string">PROPERTIES</span>
+    <span class="syntax-string">CXX_STANDARD</span> <span class="syntax-string">20</span> <span class="syntax-string">CXX_STANDARD_REQUIRED</span> <span class="syntax-string">ON</span> <span class="syntax-string">CXX_EXTENSIONS</span> <span class="syntax-string">OFF</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">if</span><span class="syntax-punctuation">(</span><span class="syntax-string">MSVC</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">target_compile_options</span><span class="syntax-punctuation">(</span><span class="syntax-operator">${</span>target<span class="syntax-operator">}</span> <span class="syntax-string">PRIVATE</span> <span class="syntax-string">/W4</span> <span class="syntax-string">/permissive-</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">else</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">target_compile_options</span><span class="syntax-punctuation">(</span><span class="syntax-operator">${</span>target<span class="syntax-operator">}</span> <span class="syntax-string">PRIVATE</span> <span class="syntax-string">-Wall</span> <span class="syntax-string">-Wextra</span> <span class="syntax-string">-Wconversion</span> <span class="syntax-string">-Wpedantic</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">endif</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">endfunction</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-builtin">add_executable</span><span class="syntax-punctuation">(</span><span class="syntax-string">pilot_examples</span> <span class="syntax-string">main.cpp</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">ds60_target</span><span class="syntax-punctuation">(</span><span class="syntax-string">pilot_examples</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">add_test</span><span class="syntax-punctuation">(</span><span class="syntax-string">NAME</span> <span class="syntax-string">worked-examples</span> <span class="syntax-string">COMMAND</span> <span class="syntax-string">pilot_examples</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">set_tests_properties</span><span class="syntax-punctuation">(</span><span class="syntax-string">worked-examples</span> <span class="syntax-string">PROPERTIES</span> <span class="syntax-string">TIMEOUT</span> <span class="syntax-string">5</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-builtin">if</span><span class="syntax-punctuation">(</span><span class="syntax-string">DS60_BUILD_EXERCISE_TESTS</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">add_executable</span><span class="syntax-punctuation">(</span><span class="syntax-string">exercise_checks</span> <span class="syntax-string">exercises.cpp</span> <span class="syntax-string">exercise_checks.cpp</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">ds60_target</span><span class="syntax-punctuation">(</span><span class="syntax-string">exercise_checks</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">add_test</span><span class="syntax-punctuation">(</span><span class="syntax-string">NAME</span> <span class="syntax-string">exercise-contracts</span> <span class="syntax-string">COMMAND</span> <span class="syntax-string">exercise_checks</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-builtin">set_tests_properties</span><span class="syntax-punctuation">(</span><span class="syntax-string">exercise-contracts</span> <span class="syntax-string">PROPERTIES</span> <span class="syntax-string">TIMEOUT</span> <span class="syntax-string">5</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">endif</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<p>In Bash on macOS/Linux/WSL, or PowerShell in an already-qualified Windows developer environment, these CMake commands have the same argument syntax:</p>
+<pre class="highlighted-code"><code class="language-text">cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+cmake --build build/pilot --target pilot_examples
+ctest --test-dir build/pilot --output-on-failure --no-tests=error</code></pre>
+<p><strong>Expected:</strong> configure succeeds, the target compiles, then CTest reports one passed test. Each is a separate phase. If Ninja is absent, report the missing tool; do not install one from this lesson. A qualified MSVC environment may use its documented multi-configuration generator instead, in which case build/CTest require the matching <code>--config Debug</code>/<code>-C Debug</code>. Do not mix those build directories.</p>
+<p>CMake documents why <a href="https://cmake.org/cmake/help/v3.28/prop_tgt/CXX_STANDARD_REQUIRED.html">requiring the standard</a> matters. The <a href="https://cmake.org/cmake/help/v3.28/manual/ctest.1.html">CTest manual</a> describes test selection and output. These commands are instructions, not a claim that CMake or a native Windows toolchain was run in this design phase.</p>
+<h3 id="learner-exercise-interface">Learner exercise interface<a class="heading-anchor" href="#learner-exercise-interface" aria-label="Link to this section">#</a></h3>
+<p>Save <code>exercises.hpp</code>:</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">pragma once</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;cstddef&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;optional&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
+
+<span class="syntax-keyword">namespace</span> ds60 <span class="syntax-punctuation">{</span>
+<span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> <span class="syntax-function">positive_sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">bool</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span> index<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> replacement<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> checked_read<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">,</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> index<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span> readings<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Save <code>exercises.cpp</code> with explicit incomplete bodies. Replace one body at a time after its prediction; a stub is supposed to fail the exercise test, not to masquerade as a solution.</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&quot;exercises.hpp&quot;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdexcept&gt;</span>
+
+<span class="syntax-keyword">namespace</span> ds60 <span class="syntax-punctuation">{</span>
+<span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span> <span class="syntax-function">positive_sum</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>logic_error<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exercise 2 is not implemented</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">bool</span> <span class="syntax-function">replace_at</span><span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">,</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span><span class="syntax-keyword">size_t</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>logic_error<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exercise 3 is not implemented</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> checked_read<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">long</span> <span class="syntax-keyword">long</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>logic_error<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exercise 5 is not implemented</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>logic_error<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Exercise 6 is not implemented</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>The independent check program appears after the exercises so it can verify your implementation without opening the solution.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-prediction-and-an-ownership-trace">Exercise 1: Prediction and an ownership trace<a class="heading-anchor" href="#exercise-1-prediction-and-an-ownership-trace" aria-label="Link to this section">#</a></h4>
+<p>Use <code>values{3,8}</code>, <code>auto snapshot = values</code>, <code>const auto&amp; alias = values</code>, then assign <code>values.at(0)=4</code>. Predict both first values. Draw two vector objects and the alias arrow, then write and run a tiny program to check the trace.</p>
+<p><strong>Expected:</strong> <code>snapshot.at(0)==3</code> and <code>alias.at(0)==4</code>; the original remains size 2. Explain why <code>const</code> did not prevent mutation through <code>values</code>.</p>
+<p><strong>Verify:</strong> use explicit <code>if</code>/nonzero-return checks for both values and size; compare the drawing with the addresses of the vector objects if useful, without requiring a particular address value.</p>
+<p>Hints: (1) count owning objects, not variable names; (2) a reference aliases an object; (3) <code>const</code> limits that access path, while the copy owns independent elements.</p>
+<h4 id="exercise-2-read-a-batch-without-changing-it">Exercise 2: Read a batch without changing it<a class="heading-anchor" href="#exercise-2-read-a-batch-without-changing-it" aria-label="Link to this section">#</a></h4>
+<p>Implement <code>positive_sum</code>. Accept at most 10000 integers, each between -1000000 and 1000000. Return the sum of values strictly greater than zero as <code>long long</code>; preserve the input. For <code>{4,-2,7,0,9}</code>, the answer is 20.</p>
+<p><strong>Expected:</strong> mixed input20, empty input0, all-negative input0 and 10000 copies of 1000000 produce 10000000000. Adding zero is observably equivalent for this sum, so the output checks do not claim to prove an internal branch choice. These bounds keep the accumulator representable.</p>
+<p><strong>Verify:</strong> run all four published checks and compare the input with a saved copy after the call. Do not use a32-bit accumulator and hope that a small fixture hides overflow.</p>
+<p>Hints: (1) identify the accumulator&#x27;s type before the loop; (2) the parameter is a const reference, so the function only reads; (3) start at zero and add only strictly positive values.</p>
+<h4 id="exercise-3-replace-exactly-one-valid-element">Exercise 3: Replace exactly one valid element<a class="heading-anchor" href="#exercise-3-replace-exactly-one-valid-element" aria-label="Link to this section">#</a></h4>
+<p>Implement <code>replace_at</code>. For a valid index, replace that element and return true. Otherwise return false and leave the vector unchanged. <code>{4,7,9}</code>, index 1 and replacement8 must become <code>{4,8,9}</code>.</p>
+<p><strong>Expected:</strong> the normal case returns true; index 3 for a size 3 vector returns false with unchanged values; an empty vector at index 0 also returns false and stays empty.</p>
+<p><strong>Verify:</strong> check both the returned Boolean and the entire vector for each case. The equality case <code>index==size()</code> is invalid, not just values greater than size.</p>
+<p>Hints: (1) valid positions satisfy <code>index &lt; size</code>; (2) guard before writing; (3) no allocation or insertion is needed to replace an existing integer.</p>
+<h4 id="exercise-4-debug-a-borrowed-element-without-executing-undefined-behavior">Exercise 4: Debug a borrowed element without executing undefined behavior<a class="heading-anchor" href="#exercise-4-debug-a-borrowed-element-without-executing-undefined-behavior" aria-label="Link to this section">#</a></h4>
+<p>Review this unsafe proposal. Do not run the last line to see whether it happens to work:</p>
+<pre class="highlighted-code"><code class="language-cpp">std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> <span class="syntax-keyword">int</span><span class="syntax-operator">&amp;</span> first <span class="syntax-operator">=</span> values<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+values<span class="syntax-punctuation">.</span>push_back<span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>  <span class="syntax-comment">// May reallocate and invalidate first.</span>
+<span class="syntax-operator">/</span><span class="syntax-operator">/</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> first<span class="syntax-punctuation">;</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> Unsafe after a possible reallocation<span class="syntax-punctuation">.</span></code></pre>
+<p>Write two safe variants: one keeps the old value as an owned integer; the other keeps an index and reacquires the current element after append-only growth. After the append, set <code>values.at(0)=6</code> and explain the difference between old and current observations.</p>
+<p><strong>Expected:</strong> the owned snapshot remains4; the reacquired current element is 6; vector size is 4. Explain why the original reference cannot be used to decide whether it was invalidated. Reacquiring by index is valid under the stated append-only change, not after arbitrary erasure/reordering.</p>
+<p><strong>Verify:</strong> run explicit checks on the two safe variants only, and retain a short lifetime diagram. A sanitizer report is optional supporting evidence, not permission to execute an arbitrary dangling read.</p>
+<p>Hints: (1) the borrow points to an element&#x27;s storage, not to a forever-stable logical record; (2) ownership is appropriate when you need the old value; (3) fetch through the vector after growth when you need the current value at a still-valid position.</p>
+<h4 id="exercise-5-accept-a-signed-external-index-safely">Exercise 5: Accept a signed external index safely<a class="heading-anchor" href="#exercise-5-accept-a-signed-external-index-safely" aria-label="Link to this section">#</a></h4>
+<p>Implement <code>checked_read</code> for a <code>long long</code> index. Return an optional copy of the element when the index can be represented as <code>std::size_t</code> and is within the vector; otherwise return <code>std::nullopt</code>. Do not change the input.</p>
+<p><strong>Expected:</strong> <code>{4,7,9}</code>, index 1 returns an optional containing7; indices -1 and 3 return no value; empty input at 0 returns no value. A value too large for the platform&#x27;s size type must not wrap into a valid small index.</p>
+<p><strong>Verify:</strong> inspect <code>has_value()</code> before using a returned value, run all four fixtures, and explain the conversion check before the cast. <code>std::in_range&lt;std::size_t&gt;</code> is a C++20 helper for that representability check.</p>
+<p>Hints: (1) negative values cannot be valid unsigned indices; (2) a cast is not validation and can wrap on a narrower target; (3) first check representability, then the collection boundary, then read.</p>
+<h4 id="exercise-6-transfer-ownership-to-a-new-temperature-batch">Exercise 6: Transfer ownership to a new temperature batch<a class="heading-anchor" href="#exercise-6-transfer-ownership-to-a-new-temperature-batch" aria-label="Link to this section">#</a></h4>
+<p>Implement <code>nonnegative_copy</code>. Preserve order, keep zero, omit negative values and return an independently owned result. For <code>{3,-1,0,5}</code>, return <code>{3,0,5}</code> without changing the source. Mutating the returned vector afterward must not change the source.</p>
+<p><strong>Expected:</strong> the mixed result is exact, an empty input yields empty output and all-negative input yields empty output. The input bytes/values remain unchanged.</p>
+<p><strong>Verify:</strong> compare result and source separately, mutate only the result&#x27;s first element when it is nonempty, and check that the original still starts with 3.</p>
+<p>Hints: (1) the return value should own storage; (2) borrowing the input is useful only while reading it; (3) build a new vector in input order and return that value.</p>
+<h3 id="independent-check-program">Independent check program<a class="heading-anchor" href="#independent-check-program" aria-label="Link to this section">#</a></h3>
+<p>Save <code>exercise_checks.cpp</code>. These checks express the contracts; they do not implement the functions for you.</p>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&quot;exercises.hpp&quot;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;exception&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;iostream&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdexcept&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;vector&gt;</span>
+
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">int</span> checks <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> require <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">&amp;</span>checks<span class="syntax-punctuation">]</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> ok<span class="syntax-punctuation">,</span> <span class="syntax-keyword">const</span> <span class="syntax-keyword">char</span><span class="syntax-operator">*</span> message<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ok<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>runtime_error<span class="syntax-punctuation">(</span>message<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-operator">+</span><span class="syntax-operator">+</span>checks<span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> mixed<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">-2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> before <span class="syntax-operator">=</span> mixed<span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>positive_sum<span class="syntax-punctuation">(</span>mixed<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> mixed <span class="syntax-operator">=</span><span class="syntax-operator">=</span> before<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">mixed sum/input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>positive_sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>positive_sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-number">-4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>positive_sum<span class="syntax-punctuation">(</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">10000</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1000000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">10000000000L</span>L<span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">wide accumulator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+        std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> values<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>replace_at<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> values <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+                <span class="syntax-string">&quot;</span><span class="syntax-string">valid replacement</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">const</span> <span class="syntax-keyword">auto</span> saved <span class="syntax-operator">=</span> values<span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>replace_at<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> values <span class="syntax-operator">=</span><span class="syntax-operator">=</span> saved<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one-past replacement</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> empty<span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>replace_at<span class="syntax-punctuation">(</span>empty<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> empty<span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty replacement</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+        <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> readings<span class="syntax-punctuation">{</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>checked_read<span class="syntax-punctuation">(</span>readings<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>optional<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">valid read</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>checked_read<span class="syntax-punctuation">(</span>readings<span class="syntax-punctuation">,</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>has_value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative read</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>checked_read<span class="syntax-punctuation">(</span>readings<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>has_value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">one-past read</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>checked_read<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>has_value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty read</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+
+        <span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> temperatures<span class="syntax-punctuation">{</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">auto</span> result <span class="syntax-operator">=</span> ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nonnegative_copy<span class="syntax-punctuation">(</span>temperatures<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">const</span> <span class="syntax-keyword">bool</span> correct <span class="syntax-operator">=</span> result <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span>
+                             temperatures <span class="syntax-operator">=</span><span class="syntax-operator">=</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>vector<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>result<span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> result<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-number">99</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>correct <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> temperatures<span class="syntax-punctuation">.</span>at<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">filter and independent ownership</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">empty filter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        require<span class="syntax-punctuation">(</span>ds60<span class="syntax-operator">:</span><span class="syntax-operator">:</span>nonnegative_copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-number">-3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">-1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>empty<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">negative filter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cout <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> checks <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> checks passed</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>exception<span class="syntax-operator">&amp;</span> error<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+        std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>cerr <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FAIL: </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> error<span class="syntax-punctuation">.</span>what<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&lt;</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\n</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>After writing your function bodies, enable the exercise target:</p>
+<pre class="highlighted-code"><code class="language-text">cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DDS60_BUILD_EXERCISE_TESTS=ON
+cmake --build build/pilot
+ctest --test-dir build/pilot --output-on-failure --no-tests=error</code></pre>
+<p><strong>Expected:</strong> two CTest tests pass; <code>exercise_checks</code> prints <code>14 checks passed</code>. A stub produces a clear nonzero failure. Repeat in a separate Release build directory and do not delete your sources when changing profiles. Exercise4 also needs its safe-variant transcript and explanation; the fourteen function checks cannot prove that lifetime argument by themselves.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Can you explain the original/copy/alias values without running?</li>
+<li>Can you state why size() is one past the final index?</li>
+</ul>
+<h4 id="diagnosis">Diagnosis<a class="heading-anchor" href="#diagnosis" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Observation</th>
+<th>Likely mechanism</th>
+<th>First useful check</th>
+</tr></thead><tbody>
+<tr>
+<td>Original and copy both appear changed</td>
+<td>You probably kept a reference or compared the wrong object</td>
+<td>Inspect the declaration containing <code>&amp;</code> and check both vector values</td>
+</tr>
+<tr>
+<td>Index equal to size was accepted</td>
+<td>The guard used <code>&gt;</code> instead of <code>&gt;=</code></td>
+<td>Run the size 3/index 3 fixture</td>
+</tr>
+<tr>
+<td>Large sum differs between builds</td>
+<td>A too-narrow accumulator or undefined behavior may exist</td>
+<td>Inspect accumulator type and run a supported UBSan profile later</td>
+</tr>
+<tr>
+<td>Linker reports an undefined function</td>
+<td>Declaration and definition are different or implementation was omitted</td>
+<td>Compare namespace/signature and target source list</td>
+</tr>
+<tr>
+<td>A repeated run prints a different borrowed value</td>
+<td>You may be using invalidated storage</td>
+<td>Stop the unsafe read and draw lifetimes before repairing it</td>
+</tr>
+</tbody></table></div>
+<h3 id="retrieval-and-transfer-review">Retrieval and transfer review<a class="heading-anchor" href="#retrieval-and-transfer-review" aria-label="Link to this section">#</a></h3>
+<p>Close the code and explain: which object owns the elements, why <code>const</code> on an alias is not global immutability, why <code>at(size())</code> fails, why a cast is not an index check, and when appending can invalidate an element reference. Then apply the reasoning to a different vector of sensor records with no solution open. If the explanation relies on one particular address or one lucky run, revisit the lifetime model.</p>
+<h3 id="rubric">Rubric<a class="heading-anchor" href="#rubric" aria-label="Link to this section">#</a></h3>
+<p>Score each item 0, 1 or 2: ownership prediction; all fourteen normal/boundary checks; safe lifetime repair; separate compile/test/run evidence; and transfer explanation. A ready-for-next-lesson result needs at least 8/10, every published function check passing, no executed dangling read, and an explanation of both snapshot versus current-value strategies. Compiler execution alone is not mastery. Native Windows/Linux builds, CMake/CTest execution and sanitizer matrices are pending unless a separate actual transcript is supplied; a local snippet compile cannot establish other tooling or platform capabilities.</p>
+<h3 id="design-phase-code-check">Design-phase code check<a class="heading-anchor" href="#design-phase-code-check" aria-label="Link to this section">#</a></h3>
+<p>On 2026-10-22, the existing Apple Clang 21.0.0 toolchain on Darwin arm64 directly compiled and ran the worked program and complete solution/check program in Debug and Release (<code>-DNDEBUG</code>). The exact two worked-example lines and <code>14 checks passed</code> were observed; the unchanged learner stubs returned a clear nonzero failure. This is a narrow snippet check. CMake/Ninja/CTest were not installed or run, and no Windows/Linux build, sanitizer profile or browser compiler adapter was qualified.</p>
+<h3 id="current-worker-and-evidence-boundary">Current worker and evidence boundary<a class="heading-anchor" href="#current-worker-and-evidence-boundary" aria-label="Link to this section">#</a></h3>
+<p>The durable single-file source exports four helpers in namespace ds60. The trusted cpp-ownership-v1 harness calls the learner worked-example main and then14 independent value checks. The fixed controller must use its registered harness, not a learner-selected path or stdout keyword. It does not grade the ownership drawing or establish sanitizer/platform acceptance. Direct prerequisites <code>cpp-006</code> and <code>cpp-008</code> now have durable authored content. Their process checks and platform qualification remain separate from this pilot&#x27;s typed verifier.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>A vector reference is not ownership, a cast is not index validation, and one successful dangling read is not evidence of a valid lifetime. Keep the input bounds and wide accumulator explicit.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>The next design unit cpp 010 develops owning class invariants; it remains a separate publication gate. Consult the <a href="../../../docs/expansion/tracks/cpp.md.html">full plan</a> and retain your ownership trace.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach authored lesson cpp-009, Vectors own; references borrow.
+Read courses/cpp/guides/cpp-009.md and courses/cpp/lessons/cpp-009.cpp, which contains the learner main.cpp and exercise project snippets.
+This is an unregistered design preview; do not claim an active Run button or query it as an existing catalog ID.
+Direct prerequisites are cpp-006 and cpp-008; assume a beginner who knows only those concepts.
+Explain one ownership or bounds idea, ask me to predict, let me attempt one exercise, then give one hint at a time.
+Do not read docs/expansion/samples/../solutions/cpp-009_solutions.md or any solutions/ content until I ask or make an honest attempt.
+Review exact outputs/tests and my lifetime diagram; never ask me to execute a possibly dangling read.
+Finish with a transfer example and retrieval in my own words, and distinguish source checks from unverified platform/runner claims.</code></pre></article>
+  </main>
+</body>
+</html>

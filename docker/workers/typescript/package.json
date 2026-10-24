@@ -1,0 +1,11 @@
+{
+  "name": "ds60-typescript-runtime",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline classroom compiler only; learner programs cannot install packages.",
+  "dependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "24.10.0",
+    "undici-types": "7.16.0"
+  }
+}

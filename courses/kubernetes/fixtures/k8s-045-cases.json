@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-045",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict same-Pod localhost access.",
+      "expected": "The sidecar shares the app network namespace."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict different-Pod localhost access.",
+      "expected": "The client reaches its own Pod namespace."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw a sidecar and app port allocation.",
+      "expected": "Distinct listeners share one Pod port space."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose two containers binding 0.0.0.0:8080.",
+      "expected": "They compete for the same socket within one Pod namespace."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain containerPort versus a real listener.",
+      "expected": "One is declared metadata; the other is process behavior."
+    },
+    {
+      "exercise": 6,
+      "task": "Defend whether a helper belongs in a sidecar or separate Deployment.",
+      "expected": "Consider shared lifecycle, scaling, networking and failure requirements."
+    }
+  ]
+}

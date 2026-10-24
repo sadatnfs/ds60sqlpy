@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-022",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Specify the wire format",
+      "input_or_change": "Document v1,7,125 field order and units.",
+      "expected": "Version v1, ID 7, cents 125, three fields."
+    },
+    {
+      "exercise": 2,
+      "task": "Check zero values",
+      "input_or_change": "Encode ID 0 and cents 0.",
+      "expected": "v1,0,0."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a strict decoder",
+      "input_or_change": "Require v1 and exactly three comma-separated fields.",
+      "expected": "v2,7,125 and v1,7,125,junk rejected."
+    },
+    {
+      "exercise": 4,
+      "task": "Reject raw layout",
+      "input_or_change": "Explain why writing sizeof(record) is not a portable format.",
+      "expected": "Padding, type width and byte order named."
+    },
+    {
+      "exercise": 5,
+      "task": "Resolve a path",
+      "input_or_change": "Print current_path and records/batch.csv absolute resolution in an owned directory.",
+      "expected": "Both anchor and resolved file documented."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer versioning",
+      "input_or_change": "Design v2 with a fourth status field.",
+      "expected": "Explicit v2 reader or rejection, never v1 silent truncation."
+    }
+  ]
+}

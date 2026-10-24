@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-002: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-002: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-002_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-002-explanatory-solutions">js-002: explanatory solutions<a class="heading-anchor" href="#js-002-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>JavaScript values have runtime types, and operators can perform implicit conversion. The plus operator adds numbers but concatenates when string conversion applies. Strict equality avoids the broad coercion of loose equality, but it still has specific semantics for NaN and signed zero. Object.is provides another comparison contract. Choose the relation required by the domain rather than assuming one operator means every notion of same.</p>
+<p>Numbers use binary floating-point arithmetic and have a finite safe-integer range. Exact decimal fractions such as 0.1 are generally approximate. BigInt represents arbitrary-size integers but cannot be mixed with Number arithmetic without an explicit conversion policy. null and undefined are distinct values commonly used for absence; neither should be silently converted to a domain count. Validate external numeric text before calculation instead of relying on a convenient coercion.</p>
+<p><strong>Coercion:</strong> An implicit conversion performed by an operator or API.</p>
+<p><strong>Strict equality:</strong> A comparison that does not broadly convert different primitive types.</p>
+<p><strong>Safe integer:</strong> An integer exactly distinguishable within the Number representation.</p>
+<p><strong>BigInt:</strong> An arbitrary-size integer type with separate arithmetic rules.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>typeof reports primitive categories but typeof null is the historical string object. Number.isNaN tests NaN without coercing its argument. Number.isFinite rejects non-number values and infinities. Object.is distinguishes +0 and -0 while treating NaN as equal to itself. BigInt literals end in n. JSON does not serialize BigInt by default, so an explicit wire-format policy is needed.</p>
+<h3 id="exercise-1-trace-plus-versus-numeric-conversion">Exercise 1: Trace plus versus numeric conversion<a class="heading-anchor" href="#exercise-1-trace-plus-versus-numeric-conversion" aria-label="Link to this section">#</a></h3>
+<p>Task: Compare 2+3, 2+string 3, and Number(string 3)+2.</p>
+<p>The same symbol has different behavior when a string participates. Explicit conversion makes the intended numeric operation visible.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-string">&#x27;3&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;23&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;3&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> 5, string 23, and 5.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-2-inspect-absence-and-nan">Exercise 2: Inspect absence and NaN<a class="heading-anchor" href="#exercise-2-inspect-absence-and-nan" aria-label="Link to this section">#</a></h3>
+<p>Task: Compare typeof null, undefined and Number.isNaN results.</p>
+<p>The typeof null result is a language legacy, not evidence that null has usable object properties. Number.isNaN avoids converting arbitrary text.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> <span class="syntax-keyword">null</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;object&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-operator">typeof</span> <span class="syntax-keyword">undefined</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;undefined&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isNaN</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span><span class="syntax-builtin">isNaN</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;not a number&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> null reports object; undefined reports undefined; only numeric NaN passes isNaN.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-3-compare-equality-contracts">Exercise 3: Compare equality contracts<a class="heading-anchor" href="#exercise-3-compare-equality-contracts" aria-label="Link to this section">#</a></h3>
+<p>Task: Use NaN, +0 and -0 with strict equality and Object.is.</p>
+<p>Different APIs use different equality relations. A collection key policy may differ from Object.is, which is examined in the Map/Set lesson.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span> <span class="syntax-operator">===</span> <span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>is<span class="syntax-punctuation">(</span><span class="syntax-keyword">NaN</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">NaN</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-number">0</span> <span class="syntax-operator">===</span> <span class="syntax-operator">-</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>is<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-4-expose-floating-point-approximation">Exercise 4: Expose floating-point approximation<a class="heading-anchor" href="#exercise-4-expose-floating-point-approximation" aria-label="Link to this section">#</a></h3>
+<p>Task: Add 0.1 and 0.2 and compare with 0.3 under an explicit tolerance.</p>
+<p>A tolerance is appropriate only when the domain permits approximate arithmetic. Currency or identity calculations may require integer units or another representation.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">+</span> <span class="syntax-number">0.2</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span><span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>abs<span class="syntax-punctuation">(</span>value <span class="syntax-operator">-</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-15</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> strict equality false; absolute error below 1e-15.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-5-protect-integer-identity">Exercise 5: Protect integer identity<a class="heading-anchor" href="#exercise-5-protect-integer-identity" aria-label="Link to this section">#</a></h3>
+<p>Task: Compare the two integers just beyond Number.MAX_SAFE_INTEGER and then use BigInt.</p>
+<p>Losing a unit difference is unacceptable for an identifier or counter requiring exactness. Converting after rounding cannot recover the original integer.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> max <span class="syntax-operator">=</span> <span class="syntax-builtin">Number</span><span class="syntax-punctuation">.</span>MAX_SAFE_INTEGER<span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>max <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> max <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> exact <span class="syntax-operator">=</span> <span class="syntax-builtin">BigInt</span><span class="syntax-punctuation">(</span>max<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>exact <span class="syntax-operator">+</span> <span class="syntax-number">1n</span><span class="syntax-punctuation">,</span> exact <span class="syntax-operator">+</span> <span class="syntax-number">2n</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> Number collapses a difference; BigInt preserves it.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-6-reject-ambiguous-numeric-input">Exercise 6: Reject ambiguous numeric input<a class="heading-anchor" href="#exercise-6-reject-ambiguous-numeric-input" aria-label="Link to this section">#</a></h3>
+<p>Task: Validate finite nonblank numeric text and reject blank, Infinity and mixed BigInt arithmetic.</p>
+<p>The parser states its accepted text domain instead of accepting every Number coercion. BigInt and Number mixing needs an explicit precision policy.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;12&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27; &#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> parseFinite<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;Infinity&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">1n</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> TypeError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> valid 12 accepted; invalid cases throw.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+  </main>
+</body>
+</html>

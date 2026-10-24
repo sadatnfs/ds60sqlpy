@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>25. Time-Series Foundations and Diagnostics · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>25. Time-Series Foundations and Diagnostics</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md</code></p>
+    </header>
+    <article class="document"><h2 id="25-time-series-foundations-and-diagnostics">25. Time-Series Foundations and Diagnostics<a class="heading-anchor" href="#25-time-series-foundations-and-diagnostics" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-025</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Time-series analysis begins by preserving information order. Let y_t denote an observation made at time t, and let F_t contain the information actually available by that time. A forecast of y_(t+h) must depend only on F_t. A smooth curve fitted retrospectively may use later observations and therefore solve a different problem from forecasting. Recording event time, availability time, cadence, missing periods and revisions is part of the statistical model.</p>
+<h4 id="dependence-changes-uncertainty">Dependence changes uncertainty<a class="heading-anchor" href="#dependence-changes-uncertainty" aria-label="Link to this section">#</a></h4>
+<p>For n observations with common variance <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>σ</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\sigma}^{2}</annotation></semantics></math> and lag-h correlation rho_h, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><mover><mrow><mi>Y</mi></mrow><mo stretchy="true">¯</mo></mover><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><mrow><mi>n</mi></mrow></mfrac><mrow><mo stretchy="true" fence="true" form="prefix">[</mo><mn>1</mn><mo>+</mo><mn>2</mn><msubsup><mo>∑</mo><mrow><mi>h</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><mfrac><mrow><mi>h</mi></mrow><mrow><mi>n</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow><msub><mi>ρ</mi><mi>h</mi></msub><mo stretchy="true" fence="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\operatorname{Var}(\bar{Y})=\frac{\sigma^2}{n}\left[1+2\sum_{h=1}^{n-1}\left(1-\frac{h}{n}\right)\rho_h\right]</annotation></semantics></math>. Positive serial correlation increases variance relative to independent observations. This is why randomly shuffling adjacent rows can exaggerate both effective sample size and validation performance. The formula assumes a covariance-stationary setting; a strong evolving trend needs separate treatment.</p>
+<h4 id="stationarity-is-a-model-property-with-several-meanings">Stationarity is a model property with several meanings<a class="heading-anchor" href="#stationarity-is-a-model-property-with-several-meanings" aria-label="Link to this section">#</a></h4>
+<p>Strict stationarity asks whether every finite joint distribution is invariant to shifting time. Weak stationarity asks for a constant finite mean and a covariance depending only on lag. The second is often sufficient for linear forecasting tools, but neither says observations are independent. A stationary AR(1) can have strong dependence. A deterministic trend plus stationary noise can be detrended, while a random walk requires a different argument because shocks persist.</p>
+<h4 id="diagnose-before-transforming">Diagnose before transforming<a class="heading-anchor" href="#diagnose-before-transforming" aria-label="Link to this section">#</a></h4>
+<p>Plot the series, align missing timestamps, inspect lag and seasonal patterns, then select transformations that match a hypothesis. First differencing turns a linear deterministic trend into a constant increment. Seasonal differencing compares the same seasonal position across cycles. Applying both mechanically can over-difference a stable series and manufacture negative correlation. Unit-root tests depend on deterministic terms, lag choices, sample size and structural breaks; they are pieces of evidence rather than automatic preprocessing switches.</p>
+<p>The demonstrations isolate exact algebraic mechanisms: differencing a trend-plus-season fixture, locating a known Fourier frequency, and enforcing past-only feature availability. They deliberately avoid interpreting a tiny manufactured sequence as evidence for a real stochastic model.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-25-01">Temporal dependence<a class="heading-anchor" href="#stat-25-01" aria-label="Link to this section">#</a></h4>
+<p>Temporal dependence means observations carry information about one another across time. In an AR(1), <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><mi>ϕ</mi><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">y_t=\phi y_{t-1}+\epsilon_t</annotation></semantics></math>, a shock influences later observations through powers of phi. Inspect dependence at the same cadence used by the decision, and keep entire related trajectories together in validation. Treating hourly measurements as independent can understate uncertainty even when the sample contains millions of rows.</p>
+<h4 id="stat-25-02">Strict stationarity<a class="heading-anchor" href="#stat-25-02" aria-label="Link to this section">#</a></h4>
+<p>Strict stationarity requires the joint law of (Y_t1,...,Y_tk) to equal that of (Y_(t1+h),...,Y_(tk+h)) for every finite selection and shift h. It concerns distributions, not whether a plotted line looks flat. Changes in tail behavior can violate it while the mean remains constant. Empirical diagnostics can challenge plausible stationarity, but finite data cannot prove all such distributional equalities.</p>
+<h4 id="stat-25-03">Weak stationarity<a class="heading-anchor" href="#stat-25-03" aria-label="Link to this section">#</a></h4>
+<p>Weak stationarity requires finite second moments, constant <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><msub><mi>Y</mi><mi>t</mi></msub><mo stretchy="false">]</mo><mo>=</mo><mi>μ</mi></mrow><annotation encoding="application/x-tex">\mathbb{E}[Y_t]=\mu</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Cov</mo><mo stretchy="false">(</mo><msub><mi>Y</mi><mi>t</mi></msub><mo>,</mo><msub><mi>Y</mi><mrow><mi>t</mi><mo>−</mo><mi>h</mi></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mi>γ</mi><mo stretchy="false">(</mo><mi>h</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{Cov}(Y_t,Y_{t-h})=\gamma(h)</annotation></semantics></math>. It supports covariance-based tools such as ACF analysis and linear prediction. A constant mean alone is insufficient if variance changes. Strict stationarity with finite second moments implies weak stationarity; weak stationarity need not imply strict stationarity outside special families such as jointly Gaussian processes.</p>
+<h4 id="stat-25-04">Trend<a class="heading-anchor" href="#stat-25-04" aria-label="Link to this section">#</a></h4>
+<p>A trend is sustained change in the series level over the analysis window. A deterministic trend is modeled through functions of time; a stochastic trend accumulates innovations. Removing a fitted straight line and differencing a random walk address different mechanisms. Inspect whether residual behavior and forecast errors support the chosen treatment, especially near endpoints where estimated trends are least stable.</p>
+<h4 id="stat-25-05">Seasonality<a class="heading-anchor" href="#stat-25-05" aria-label="Link to this section">#</a></h4>
+<p>Seasonality repeats at a known calendar-related period, such as hours within a day or months within a year. Additive seasonality has roughly constant amplitude; multiplicative descriptions scale amplitude with level and need suitable positive data or transformations. Holidays and variable month lengths are not identical to a fixed numeric period. Use multiple complete cycles and preserve future calendar information without using future outcomes.</p>
+<h4 id="stat-25-06">Cycles<a class="heading-anchor" href="#stat-25-06" aria-label="Link to this section">#</a></h4>
+<p>Cycles are rises and falls without a fixed calendar period. Economic expansions and contractions can vary in duration and amplitude, so a seasonal dummy with a fixed frequency may describe them poorly. A spectral peak can suggest repeated oscillation but does not establish a stable forecastable cycle. Distinguish a domain mechanism from an attractive pattern discovered after inspecting many candidate periods.</p>
+<h4 id="stat-25-07">Autocorrelation functions<a class="heading-anchor" href="#stat-25-07" aria-label="Link to this section">#</a></h4>
+<p>The autocorrelation function <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>ρ</mi><mo stretchy="false">(</mo><mi>h</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>γ</mi><mo stretchy="false">(</mo><mi>h</mi><mo stretchy="false">)</mo></mrow><mrow><mi>γ</mi><mo stretchy="false">(</mo><mn>0</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\rho(h)=\frac{\gamma(h)}{\gamma(0)}</annotation></semantics></math> describes linear association between values h steps apart. Estimate it after addressing relevant level changes and missing timestamps. Slow ACF decay can arise from persistence, trend or a unit root, so it does not uniquely identify a model. Standard reference bands depend on assumptions and multiple-lag inspection is not one isolated hypothesis test.</p>
+<h4 id="stat-25-08">Partial autocorrelation functions<a class="heading-anchor" href="#stat-25-08" aria-label="Link to this section">#</a></h4>
+<p>Partial autocorrelation at lag h measures the remaining linear association after intermediate lags are controlled. For a correctly specified finite-order AR process, the theoretical PACF truncates after its order; finite samples do not exhibit a perfect cutoff. Estimation methods and high-lag sample size matter. Use PACF patterns to propose a few models, then compare residuals and forward validation.</p>
+<h4 id="stat-25-09">White noise<a class="heading-anchor" href="#stat-25-09" aria-label="Link to this section">#</a></h4>
+<p>White noise has constant mean, constant finite variance and zero autocovariance at nonzero lags in its weak definition. It need not be independent: a sequence can have uncorrelated values but dependent squares. Residual ACF near zero therefore does not prove the absence of volatility clustering. Gaussian white noise adds stronger distributional structure that should not be assumed merely from the label.</p>
+<h4 id="stat-25-10">Differencing<a class="heading-anchor" href="#stat-25-10" aria-label="Link to this section">#</a></h4>
+<p>First differencing forms <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>Δ</mi><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><msub><mi>y</mi><mi>t</mi></msub><mo>−</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub></mrow><annotation encoding="application/x-tex">\Delta y_t=y_t-y_{t-1}</annotation></semantics></math>, removing one unit of integration in appropriate models and converting a deterministic linear trend into a constant. It loses the first observation and changes the forecast target, so predictions must be integrated back to levels. Differencing stationary noise can introduce negative lag-one correlation and increase noise. Choose differencing using a model argument and residual/forecast evidence.</p>
+<h4 id="stat-25-11">Seasonal differencing<a class="heading-anchor" href="#stat-25-11" aria-label="Link to this section">#</a></h4>
+<p>Seasonal differencing forms y_t-y_(t-m) for period m. It cancels an exactly repeating seasonal component, but a trend can remain as a nonzero seasonal increment. The first m observations are lost. Combining ordinary and seasonal differences consumes further information and can over-difference. A wrong seasonal period removes the wrong comparison and can leave structured residuals.</p>
+<h4 id="stat-25-12">Unit roots<a class="heading-anchor" href="#stat-25-12" aria-label="Link to this section">#</a></h4>
+<p>A unit root in an autoregressive polynomial makes shocks persistent rather than geometrically decaying. A random walk <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">y_t=y_{t-1}+\epsilon_t</annotation></semantics></math> has variance growing with t and is not covariance-stationary. Near-unit-root stationary processes can resemble it in short samples. The distinction affects long-horizon uncertainty and whether level relationships require cointegration analysis, not just which button transforms the data.</p>
+<h4 id="stat-25-13">Augmented Dickey–Fuller tests<a class="heading-anchor" href="#stat-25-13" aria-label="Link to this section">#</a></h4>
+<p>The augmented Dickey-Fuller regression tests a unit-root null using a lagged level and enough lagged differences to handle residual dependence. A constant or trend term changes the null/alternative specification and critical values. Rejecting the null supports the chosen stationary alternative under the test assumptions. Failure to reject can reflect weak power; lag selection and structural breaks should be reported.</p>
+<h4 id="stat-25-14">KPSS tests<a class="heading-anchor" href="#stat-25-14" aria-label="Link to this section">#</a></h4>
+<p>KPSS starts from a null of level or trend stationarity and examines cumulative residual behavior relative to a long-run variance estimate. Its null differs from ADF, so the two can offer complementary evidence. Results depend on bandwidth and deterministic-term choice. If both tests reject their respective nulls, consider breaks, misspecification or finite-sample limitations instead of declaring a logical contradiction.</p>
+<h4 id="stat-25-15">Cointegration<a class="heading-anchor" href="#stat-25-15" aria-label="Link to this section">#</a></h4>
+<p>Cointegration occurs when individually integrated series have a stationary linear combination, such as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi></mrow></msub><mo>−</mo><mi>β</mi><mo>·</mo><msub><mi>x</mi><mrow><mi>t</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{t}-\beta\cdot x_{t}</annotation></semantics></math>. The combination represents an equilibrium relation even though levels wander. Regressing unrelated trending series can look convincing without cointegration. Define integration order, deterministic terms and testing method, then use an error-correction model when short-run changes adjust toward a supported long-run relation.</p>
+<h4 id="stat-25-16">Granger causality<a class="heading-anchor" href="#stat-25-16" aria-label="Link to this section">#</a></h4>
+<p>Granger causality asks whether past X improves prediction of Y beyond the included past information. It is a conditional predictive statement, not proof that intervening on X changes Y. Omitted common drivers, measurement timing and model order can create misleading results. Align availability times and compare the restricted and expanded forecasting models under assumptions appropriate to the series properties.</p>
+<h4 id="stat-25-17">Cross-correlation analysis<a class="heading-anchor" href="#stat-25-17" aria-label="Link to this section">#</a></h4>
+<p>Cross-correlation compares X_t with Y_(t+h) across lags. Shared trends or strong autocorrelation can generate broad apparent lead-lag patterns without a meaningful direct relationship. Prewhitening or a joint dynamic model may clarify the comparison. State the lag sign convention explicitly, because different tools reverse it, and never use a variable whose measurement is only available after the forecast origin.</p>
+<h4 id="stat-25-18">Spectral analysis<a class="heading-anchor" href="#stat-25-18" aria-label="Link to this section">#</a></h4>
+<p>Spectral analysis represents second-order variation by frequency rather than lag. A frequency in cycles per observation converts to a period by taking its reciprocal. This is useful for oscillations and multiple seasonalities, but sampling cadence limits identifiable frequencies and irregular timing requires different methods. Detrending, windowing and domain plausibility matter before treating a frequency peak as a stable mechanism.</p>
+<h4 id="stat-25-19">Periodograms<a class="heading-anchor" href="#stat-25-19" aria-label="Link to this section">#</a></h4>
+<p>A periodogram estimates power from squared Fourier coefficients. Its raw values can be noisy even with long samples, so smoothing or averaging often stabilizes interpretation. Finite windows cause leakage when an oscillation does not align with a Fourier bin. A spike at zero frequency may reflect the mean or trend rather than a meaningful cycle. Report frequency units and preprocessing.</p>
+<h4 id="stat-25-20">Fourier representations<a class="heading-anchor" href="#stat-25-20" aria-label="Link to this section">#</a></h4>
+<p>Fourier terms <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>sin</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>2</mn><mo>·</mo><mi>π</mi><mo>·</mo><mi>k</mi><mo>·</mo><mi>t</mi></mrow><mrow><mi>m</mi></mrow></mfrac><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sin(\frac{2\cdot \pi\cdot k\cdot t}{m})</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>cos</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>2</mn><mo>·</mo><mi>π</mi><mo>·</mo><mi>k</mi><mo>·</mo><mi>t</mi></mrow><mrow><mi>m</mi></mrow></mfrac><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\cos(\frac{2\cdot \pi\cdot k\cdot t}{m})</annotation></semantics></math> encode smooth periodic components with period m and harmonic k. Regression coefficients set amplitude and phase. A small number of harmonics can represent long seasonal periods parsimoniously, while too many terms can fit noise. Future time indices are known, but choosing harmonics using the full future evaluation period leaks model-selection information.</p>
+<h4 id="stat-25-21">Wavelet analysis<a class="heading-anchor" href="#stat-25-21" aria-label="Link to this section">#</a></h4>
+<p>Wavelets localize variation in both time and scale using translated, rescaled basis functions. They can reveal transient oscillations or abrupt local changes that a global Fourier representation spreads over time. Boundary handling, wavelet family and scale resolution affect conclusions. A visually sharp coefficient is not automatically an anomaly; calibrate it against a stated noise model and multiple-scale inspection.</p>
+<h4 id="stat-25-22">Time-series decomposition<a class="heading-anchor" href="#stat-25-22" aria-label="Link to this section">#</a></h4>
+<p>Decomposition writes a series as trend, seasonal and remainder components, often additively as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>y</mi><mi>t</mi></msub><mo>=</mo><msub><mi>T</mi><mi>t</mi></msub><mo>+</mo><msub><mi>S</mi><mi>t</mi></msub><mo>+</mo><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">y_t=T_t+S_t+R_t</annotation></semantics></math>. This is a representation, not a unique physical separation. Smoothing choices change each component, and a small remainder does not guarantee forecastability. Retrospective centered smoothers use future observations, so refit decomposition within each forecast origin for honest forecasting evaluation.</p>
+<h4 id="stat-25-23">STL decomposition<a class="heading-anchor" href="#stat-25-23" aria-label="Link to this section">#</a></h4>
+<p>STL estimates seasonal and trend components using locally weighted regression and can reduce the influence of outliers through robust iterations. It allows evolving seasonal shapes, but requires an appropriate regular cadence and period. Endpoint components have different information support from interior components. In forecasting, fit the decomposition only on history and specify how the extracted components will be projected forward.</p>
+<h4 id="stat-25-24">Ljung–Box tests<a class="heading-anchor" href="#stat-25-24" aria-label="Link to this section">#</a></h4>
+<p>The Ljung-Box statistic combines squared residual autocorrelations through several lags to test a no-autocorrelation null. Degrees of freedom should reflect estimated model parameters where appropriate. A significant result suggests leftover linear structure or misspecification; a nonsignificant result does not prove independent Gaussian errors. Choose lags meaningfully, report the tested range and inspect variance and outliers separately.</p>
+<h4 id="stat-25-25">Structural breaks<a class="heading-anchor" href="#stat-25-25" aria-label="Link to this section">#</a></h4>
+<p>A structural break changes parameters or distributional behavior at a time, such as a new measurement system or intervention. One stable model spanning the break can create misleading persistence diagnostics. Use known change dates when available; when searching for unknown dates, account for the search and minimum segment sizes. Forecast comparisons should reflect whether the future resembles the old regime, new regime or neither.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_25.py.html">chapter_25.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_25.py</code></pre>
+<h4 id="remove-a-known-seasonal-component-without-guessing">Remove a known seasonal component without guessing<a class="heading-anchor" href="#remove-a-known-seasonal-component-without-guessing" aria-label="Link to this section">#</a></h4>
+<p>The fixture is 10+3t plus a four-position pattern [0,2,0,-2]. Comparing y_t with y_(t-4) cancels the repeating pattern and leaves <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mn>4</mn><mo>=</mo><mn>12</mn></mrow><annotation encoding="application/x-tex">3\cdot 4=12</annotation></semantics></math>. First differencing those increments then gives zero. This exact algebra explains the transformation; it does not justify differencing an arbitrary observed series twice.</p>
+<h4 id="read-a-frequency-in-the-correct-units">Read a frequency in the correct units<a class="heading-anchor" href="#read-a-frequency-in-the-correct-units" aria-label="Link to this section">#</a></h4>
+<p>A sine with period eight is observed for 32 equally spaced positions, exactly four cycles. Its peak is at 0.125 cycles per observation, whose reciprocal is eight. Changing the sampling interval changes the physical units. A non-integer number of observed cycles would spread power across bins and require a leakage-aware interpretation.</p>
+<h4 id="preserve-the-information-set">Preserve the information set<a class="heading-anchor" href="#preserve-the-information-set" aria-label="Link to this section">#</a></h4>
+<p>At origin three, a row with event time four is unavailable, and a historical row would also be unavailable if its arrival time exceeded the origin. The lag feature for time four is the value 15 from time three, not the current outcome 18. These explicit index checks are the foundation for rolling-origin validation.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">differencing_trace</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    t<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">16</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    seasonal<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>tile<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>t<span class="syntax-operator">+</span>seasonal
+    seasonal_difference<span class="syntax-operator">=</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Seasonal difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>seasonal_difference<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">then first difference:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>seasonal_difference<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">frequency_trace</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    t<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">32</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sin<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>pi<span class="syntax-operator">*</span>t<span class="syntax-operator">/</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+    power<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>fft<span class="syntax-operator">.</span>rfft<span class="syntax-punctuation">(</span>y<span class="syntax-operator">-</span>y<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span>
+    frequency<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>fft<span class="syntax-operator">.</span>rfftfreq<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>d<span class="syntax-operator">=</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    peak<span class="syntax-operator">=</span>frequency<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>argmax<span class="syntax-punctuation">(</span>power<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">8</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Peak cycles per observation:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>peak<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">period:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-operator">/</span>peak<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">information_order</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    event_time<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>available_time<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    origin<span class="syntax-operator">=</span><span class="syntax-number">3</span>
+    allowed<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>event_time<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>origin<span class="syntax-punctuation">)</span><span class="syntax-operator">&amp;</span><span class="syntax-punctuation">(</span>available_time<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>origin<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> allowed<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span>
+    y<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.</span><span class="syntax-punctuation">,</span><span class="syntax-number">12.</span><span class="syntax-punctuation">,</span><span class="syntax-number">15.</span><span class="syntax-punctuation">,</span><span class="syntax-number">18.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    lag1<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>r_<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>nan<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">assert</span> lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">15</span> <span class="syntax-operator">and</span> lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span>y<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Available rows at origin 3:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>flatnonzero<span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">lagged feature at time 4:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>lag1<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    differencing_trace<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>frequency_trace<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>information_order<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Does a flat-looking series establish stationarity?</strong> No. Its variance, tails or dependence can change while its mean looks stable. State the stationarity property required by the method, inspect relevant diagnostics and assess whether the assumption remains useful over the decision horizon.</p>
+<p><strong>Interview: What if ADF and KPSS disagree?</strong> Their null hypotheses differ. Interpret both with their trend/constant specification, lag or bandwidth settings and sample size. Near-unit roots, breaks and low power can make the result inconclusive; a forecast comparison and domain explanation are more useful than forcing a binary label.</p>
+<p><strong>Interview: Why is Granger causality weaker than intervention causality?</strong> It measures incremental predictive information conditional on a chosen history. Shared causes, timing and omitted variables can supply that information without a causal effect of manipulating the predictor.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://otexts.com/fpp3/">Hyndman and Athanasopoulos, Forecasting: Principles and Practice</a></li>
+</ul>
+<ul>
+<li><a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.adfuller.html">statsmodels ADF API and null specification</a></li>
+</ul>
+<ul>
+<li><a href="https://www.statsmodels.org/stable/generated/statsmodels.tsa.stattools.kpss.html">statsmodels KPSS API and stationarity null</a></li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="24-explainability-fairness-and-model-robustness.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="26-classical-forecasting-methods.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

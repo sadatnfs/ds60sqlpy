@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-020",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed internal version-client path; separate bounded DNS/port host probes",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Draw client namespace,DNS,Service,EndpointSlice,Pod port and HTTP route.",
+      "expected": "Each layer has a distinct observation and possible failure."
+    },
+    {
+      "exercise": 2,
+      "task": "Run the fixed Deployment/Service source under a qualified lease.",
+      "expected": "Owned backend identity and exact /version response pass,with cleanup."
+    },
+    {
+      "exercise": 3,
+      "task": "Interpret a host-provided failed name-resolution trace.",
+      "expected": "Investigate name,namespace and DNS context before backend application state."
+    },
+    {
+      "exercise": 4,
+      "task": "Interpret resolution success followed by a bounded connection failure.",
+      "expected": "Inspect ports,eligible endpoints and qualified policy evidence;cause remains conditional until discriminated."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare404 at /missing and200 with a wrong version.",
+      "expected": "Route mismatch versus application-contract mismatch."
+    },
+    {
+      "exercise": 6,
+      "task": "Specify a wrong-port or cross-namespace test only under a named host capability.",
+      "expected": "Explicit target,allowed client,timeout,expected layer failure and cleanup are recorded."
+    }
+  ]
+}

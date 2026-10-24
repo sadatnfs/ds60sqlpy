@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-008",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Calculate the two class-by-feature count rows and document priors.",
+      "expected": "Counts [[0,3],[3,1]] in class order[0,1]; priors [.5,.5]."
+    },
+    {
+      "exercise": 2,
+      "task": "Compute the class token probabilities with alpha=1 and V=2.",
+      "expected": "Likelihoods [[1/5,4/5],[4/6,2/6]], each summing to one."
+    },
+    {
+      "exercise": 3,
+      "task": "Score probe [1,0] in log space and normalize with logsumexp.",
+      "expected": "Posterior [3/13,10/13] for classes[0,1]."
+    },
+    {
+      "exercise": 4,
+      "task": "Fit MultinomialNB on the exact matrix and compare classes, feature logs and posterior.",
+      "expected": "All three agree with the independent manual oracle."
+    },
+    {
+      "exercise": 5,
+      "task": "Use an all-zero probe and then change prior to [.9,.1] for the urgent-only probe.",
+      "expected": "Empty evidence returns prior; changed prior makes class zero more probable."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare urgent and not urgent under the fixed two-term vocabulary and explain correlated-word evidence.",
+      "expected": "Identical represented inputs/posteriors; a written warning distinguishes class accuracy from probability calibration."
+    }
+  ]
+}

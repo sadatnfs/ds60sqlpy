@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-33 · Linear Algebra Matrices · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-33" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-33</p>
+        <h1>Linear Algebra Matrices</h1>
+        <p class="hero-copy">Statistics and machine learning</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">data setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-32.html">python-32</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+
+          <a class="button lab-only" href="../learn?lesson=python-33" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day33_linear_algebra_matrices.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day33_linear_algebra_matrices.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--day-33-linear-algebra-and-matrices">Day 33: Linear Algebra and Matrices<a class="heading-anchor" href="#guide--day-33-linear-algebra-and-matrices" aria-label="Link to this section">#</a></h3>
+<p><strong>Lesson ID:</strong> <code>python-33</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
+<p>This lesson connects NumPy operations with the geometry underneath linear models. The goal is practical intuition and reliable computation, not a complete linear-algebra course.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of the lesson, you can:</p>
+<ul>
+<li>predict and verify vector and matrix shapes;</li>
+<li>interpret a dot product, matrix product, norm, rank, and projection;</li>
+<li>add an intercept column to a design matrix;</li>
+<li>solve ordinary least squares without explicitly inverting a matrix; and</li>
+<li>explain how collinearity and conditioning affect numerical stability.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Complete <code>python-32</code> (statistical inference).</li>
+<li>Recall NumPy indexing, broadcasting, and array shapes from <code>python-16</code>.</li>
+<li>Be comfortable reading a simple linear-regression equation.</li>
+</ul>
+<h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Definition and intuition</th>
+</tr></thead><tbody>
+<tr>
+<td>Vector</td>
+<td>Ordered one-dimensional numeric array; a point, direction, or feature row</td>
+</tr>
+<tr>
+<td>Matrix</td>
+<td>Rectangular numeric array; often rows are observations and columns are features</td>
+</tr>
+<tr>
+<td>Dot product</td>
+<td>Sum of elementwise products; measures alignment and produces a scalar</td>
+</tr>
+<tr>
+<td>Matrix multiplication</td>
+<td>Composes linear transformations; inner dimensions must agree</td>
+</tr>
+<tr>
+<td>Rank</td>
+<td>Number of independent directions represented by a matrix</td>
+</tr>
+<tr>
+<td>Condition number</td>
+<td>Sensitivity of a solution to small input changes</td>
+</tr>
+<tr>
+<td>Projection</td>
+<td>Closest point in a subspace under a chosen geometry</td>
+</tr>
+<tr>
+<td>Pseudoinverse</td>
+<td>Generalized inverse that supports least-squares solutions even when a matrix is not invertible</td>
+</tr>
+</tbody></table></div>
+<p>For a design matrix <code>X</code> with shape <code>(n_samples, n_features)</code> and coefficients <code>w</code> with shape <code>(n_features,)</code>, <code>X @ w</code> has one prediction per sample.</p>
+<h4 id="guide--worked-example-solve-directly">Worked example: solve directly<a class="heading-anchor" href="#guide--worked-example-solve-directly" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+true_w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> true_w <span class="syntax-operator">+</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>scale<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-comment"># Least-squares solvers use stable decompositions internally.</span>
+w_hat<span class="syntax-punctuation">,</span> residuals<span class="syntax-punctuation">,</span> rank<span class="syntax-punctuation">,</span> singular_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>w_hat<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>rank<span class="syntax-punctuation">,</span> singular_values<span class="syntax-punctuation">)</span></code></pre>
+<p>The notebook shows a pseudoinverse form of the normal equation. It is useful for understanding the algebra, but production numerical code should prefer <code>np.linalg.lstsq</code> or a tested library estimator. Forming <code>X.T @ X</code> squares the condition number and can amplify error.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<ol>
+<li>Open the Day 33 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares">Concept deep dive: matrix shapes, linear transformations, rank, and stable least squares<a class="heading-anchor" href="#guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>A vector or matrix is both stored numbers and a transformation with a shape contract. For <code>A @ B</code>, the inner dimensions must agree; the outer dimensions determine the result. In a design matrix, rows represent observations and columns represent features. Coefficients map feature space to predictions.</p>
+<p>Least squares chooses coefficients that minimize squared residuals. Full column rank gives a unique coefficient solution, but near collinearity can make that solution numerically sensitive. Prediction may remain stable even while individual coefficients swing, which is why rank and condition number belong in the diagnostic story.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>A.shape</code> and <code>B.shape</code>:</strong> state the dimensional contract before multiplication; never infer it from a successful broadcast.</li>
+<li><strong><code>A @ B</code>:</strong> performs matrix multiplication, which is different from elementwise <code>A * B</code>.</li>
+<li><strong><code>np.linalg.lstsq(X, y, rcond=None)</code>:</strong> solves least squares directly and reports rank without explicitly forming an unstable inverse.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand">Focused example A: trace a matrix product by shape and by hand<a class="heading-anchor" href="#guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+observations <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+coefficients <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+predictions <span class="syntax-operator">=</span> observations <span class="syntax-operator">@</span> coefficients
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>observations<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> coefficients<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> predictions<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">26.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">44.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> A <code>(3, 2)</code> matrix multiplied by a <code>(2,)</code> vector returns one prediction for each of three rows.</p>
+<p><strong>Assumption to name:</strong> Columns of the matrix and positions in the coefficient vector use the same feature order.</p>
+<h5 id="guide--focused-example-b-observe-coefficient-instability-under-collinearity">Focused example B: observe coefficient instability under collinearity<a class="heading-anchor" href="#guide--focused-example-b-observe-coefficient-instability-under-collinearity" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> x <span class="syntax-operator">+</span> <span class="syntax-number">1e-10</span> <span class="syntax-operator">*</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> <span class="syntax-number">3.0</span> <span class="syntax-operator">+</span> <span class="syntax-number">2.0</span> <span class="syntax-operator">*</span> x
+
+coef<span class="syntax-punctuation">,</span> residuals<span class="syntax-punctuation">,</span> rank<span class="syntax-punctuation">,</span> singular_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span>
+condition <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span>
+max_prediction_error <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>X <span class="syntax-operator">@</span> coef <span class="syntax-operator">-</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">rank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rank<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">condition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> condition<span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">coef</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> coef<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> max_prediction_error<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> The condition number is huge and individual duplicate-feature coefficients are not trustworthy even though predictions are accurate.</p>
+<p><strong>Assumption to name:</strong> The nearly duplicated columns do not represent independently identifiable effects.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define matrix shapes, linear transformations, rank, and stable least squares in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Computing <code>(X.T @ X) ** -1</code> or <code>np.linalg.inv(X.T @ X)</code> as a default least-squares recipe.</p>
+<p><strong>Debug it deliberately:</strong> Print shapes, rank, singular values, and condition number; compare <code>lstsq</code> predictions with the target before interpreting coefficients.</p>
+<p><strong>Stop condition:</strong> Do not assign meaning to a coefficient when feature order, units, rank, or intercept handling is unknown.</p>
+<h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add an intercept column of ones and recompute the coefficients.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
+<ol>
+<li>Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
+<ol>
+<li>Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
+<h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>The augmented matrix has one more column. Decide whether the first or last coefficient will represent the intercept before inspecting the result.</li>
+<li><code>LinearRegression(fit_intercept=True)</code> keeps the intercept separate from <code>coef_</code>; align the two representations before comparing.</li>
+<li>Construct two almost-duplicate feature columns and inspect <code>np.linalg.cond(X)</code> or the singular values. Think about both memory and computational complexity as dimensions grow.</li>
+</ol>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Shape tracing:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1). <strong>Progressive hint:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</li>
+</ol>
+<p><strong>Verify:</strong> Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
+<ol>
+<li><strong>Rank-deficiency debugging:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank. <strong>Progressive hint:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</li>
+</ol>
+<p><strong>Verify:</strong> Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
+<ol>
+<li><strong>Robust vector operation:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector. <strong>Progressive hint:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</li>
+</ol>
+<p><strong>Verify:</strong> Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why is <code>A @ B</code> generally different from <code>B @ A</code>?</li>
+<li>What shape must an intercept column have for 200 observations?</li>
+<li>What does a very small singular value tell you about independent directions?</li>
+<li>Why can coefficients vary dramatically while predictions remain similar when features are highly correlated?</li>
+</ul>
+<p>Expected behavior: the fitted feature coefficients should be close to <code>[2.0, -1.0, 0.5]</code>, while the estimated intercept should be close to zero within sampling noise.</p>
+<h4 id="guide--pitfalls-diagnostics-and-tradeoffs">Pitfalls, diagnostics, and tradeoffs<a class="heading-anchor" href="#guide--pitfalls-diagnostics-and-tradeoffs" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Symptom</th>
+<th>Cause</th>
+<th>Response</th>
+</tr></thead><tbody>
+<tr>
+<td><code>matmul</code> dimension mismatch</td>
+<td>Inner dimensions do not agree</td>
+<td>Write every operand&#x27;s shape before multiplying</td>
+</tr>
+<tr>
+<td>Exact <code>np.linalg.inv(X.T @ X)</code> fails</td>
+<td>Matrix is singular</td>
+<td>Use <code>lstsq</code>, <code>pinv</code>, regularization, or remove redundancy</td>
+</tr>
+<tr>
+<td>Coefficients have unexpected scale</td>
+<td>Features use different units</td>
+<td>Interpret units explicitly; standardize when appropriate</td>
+</tr>
+<tr>
+<td>Solution changes under tiny perturbations</td>
+<td>Poor conditioning</td>
+<td>Inspect singular values/condition number and use robust solvers</td>
+</tr>
+<tr>
+<td>Pseudoinverse is assumed to make inference valid</td>
+<td>Numerical solvability confused with statistical assumptions</td>
+<td>Check residual structure and data-generating assumptions separately</td>
+</tr>
+</tbody></table></div>
+<p>Direct solvers are excellent for small dense problems. Iterative solvers reduce memory and can scale to large or streaming datasets, but require convergence diagnostics and hyperparameters.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Work in the <a href="python-33.html#learner">Day 33 learner notebook</a>.</li>
+<li>Compare only after attempting the exercises: <a href="python-33.html#solution-1">Day 33 solution</a>.</li>
+<li>Continue to <a href="python-34.html#guide">Day 34; scikit-learn Pipelines</a>.</li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize matrix shapes, linear transformations, rank, and stable least squares. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day33_linear_algebra_matrices.md`
+- learner artifact: `python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-33-linear-algebra-matrices-for-ml-intuition">Day 33 — Linear algebra &amp; matrices for ML intuition<a class="heading-anchor" href="#learner--cell-1--day-33-linear-algebra-matrices-for-ml-intuition" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>Vectors/matrices with NumPy.</li>
+<li>Normal equation for linear regression (closed form).</li>
+<li>Geometric view: projections, rank (intuition).</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment"># Synthetic linear regression y = Xw + noise</span></span>
+<span class="source-line">n<span class="syntax-punctuation">,</span> d <span class="syntax-operator">=</span> <span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span>d<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">true_w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> true_w <span class="syntax-operator">+</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>scale<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>n<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-comment"># Closed-form (normal equation) solution: w = (X^T X)^{-1} X^T y</span></span>
+<span class="source-line">w_hat <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>pinv<span class="syntax-punctuation">(</span>X<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> X<span class="syntax-punctuation">)</span> <span class="syntax-operator">@</span> X<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> y</span>
+<span class="source-line">true_w<span class="syntax-punctuation">,</span> w_hat</span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-3--concept-lab-matrix-shapes-linear-transformations-rank-and-stable-least-squares">Concept lab — matrix shapes, linear transformations, rank, and stable least squares<a class="heading-anchor" href="#learner--cell-3--concept-lab-matrix-shapes-linear-transformations-rank-and-stable-least-squares" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
+<p>A vector or matrix is both stored numbers and a transformation with a shape contract. For <code>A @ B</code>, the inner dimensions must agree; the outer dimensions determine the result. In a design matrix, rows represent observations and columns represent features. Coefficients map feature space to predictions.</p>
+<p>Least squares chooses coefficients that minimize squared residuals. Full column rank gives a unique coefficient solution, but near collinearity can make that solution numerically sensitive. Prediction may remain stable even while individual coefficients swing, which is why rank and condition number belong in the diagnostic story.</p>
+<h5 id="learner--cell-3--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-3--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>A.shape</code> and <code>B.shape</code>:</strong> state the dimensional contract before multiplication; never infer it from a successful broadcast.</li>
+<li><strong><code>A @ B</code>:</strong> performs matrix multiplication, which is different from elementwise <code>A * B</code>.</li>
+<li><strong><code>np.linalg.lstsq(X, y, rcond=None)</code>:</strong> solves least squares directly and reports rank without explicitly forming an unstable inverse.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand">Focused example A — trace a matrix product by shape and by hand<a class="heading-anchor" href="#learner--cell-4--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> Columns of the matrix and positions in the coefficient vector use the same feature order.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">observations <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">coefficients <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">predictions <span class="syntax-operator">=</span> observations <span class="syntax-operator">@</span> coefficients</span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>observations<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> coefficients<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> predictions<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">26.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">44.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> A <code>(3, 2)</code> matrix multiplied by a <code>(2,)</code> vector returns one prediction for each of three rows.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-observe-coefficient-instability-under-collinearity">Focused example B — observe coefficient instability under collinearity<a class="heading-anchor" href="#learner--cell-7--focused-example-b-observe-coefficient-instability-under-collinearity" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> The nearly duplicated columns do not represent independently identifiable effects.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linspace<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> x<span class="syntax-punctuation">,</span> x <span class="syntax-operator">+</span> <span class="syntax-number">1e-10</span> <span class="syntax-operator">*</span> np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>size<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> <span class="syntax-number">3.0</span> <span class="syntax-operator">+</span> <span class="syntax-number">2.0</span> <span class="syntax-operator">*</span> x</span>
+<span class="source-line"></span>
+<span class="source-line">coef<span class="syntax-punctuation">,</span> residuals<span class="syntax-punctuation">,</span> rank<span class="syntax-punctuation">,</span> singular_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">condition <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>cond<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">)</span></span>
+<span class="source-line">max_prediction_error <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>X <span class="syntax-operator">@</span> coef <span class="syntax-operator">-</span> y<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">rank</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> rank<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">condition</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> condition<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">coef</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> coef<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">prediction_error</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> max_prediction_error<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The condition number is huge and individual duplicate-feature coefficients are not trustworthy even though predictions are accurate.</p>
+<h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Computing <code>(X.T @ X) ** -1</code> or <code>np.linalg.inv(X.T @ X)</code> as a default least-squares recipe.</p>
+<p><strong>Diagnostic:</strong> Print shapes, rank, singular values, and condition number; compare <code>lstsq</code> predictions with the target before interpreting coefficients.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define matrix shapes, linear transformations, rank, and stable least squares in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not assign meaning to a coefficient when feature order, units, rank, or intercept handling is unknown.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Add an intercept column of ones and recompute the coefficients.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
+<ol>
+<li>Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
+<ol>
+<li>Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
+<h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>The augmented matrix has one more column. Decide whether the first or last coefficient will represent the intercept before inspecting the result.</li>
+<li><code>LinearRegression(fit_intercept=True)</code> keeps the intercept separate from <code>coef_</code>; align the two representations before comparing.</li>
+<li>Construct two almost-duplicate feature columns and inspect <code>np.linalg.cond(X)</code> or the singular values. Think about both memory and computational complexity as dimensions grow.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Shape tracing:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1). <strong>Progressive hint:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</li>
+</ol>
+<p><strong>Verify:</strong> Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
+<ol>
+<li><strong>Rank-deficiency debugging:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank. <strong>Progressive hint:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</li>
+</ol>
+<p><strong>Verify:</strong> Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
+<ol>
+<li><strong>Robust vector operation:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector. <strong>Progressive hint:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</li>
+</ol>
+<p><strong>Verify:</strong> Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Shape tracing</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Rank-deficiency debugging</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Robust vector operation</span></span>
+<span class="source-line"></span></code></pre>
+</article></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition">Day 33: Solutions: Linear Algebra &amp; Matrices for ML Intuition<a class="heading-anchor" href="#solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition" aria-label="Link to this section">#</a></h3>
+<p>We implement the normal equation (closed-form least squares), add an intercept, and compare to scikit-learn. We also discuss numerical stability and when to prefer iterative methods.</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Add an intercept column and recompute w</li>
+<li>Exercise 2: Compare closed-form solution vs sklearn LinearRegression</li>
+<li>Exercise 3: When normal equation is unstable; why gradient/iterative methods are preferred</li>
+</ul>
+<hr>
+<p>Setup and synthetic data</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+
+n<span class="syntax-punctuation">,</span> d <span class="syntax-operator">=</span> <span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span>
+X <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+true_w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> true_w <span class="syntax-operator">+</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>scale<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>n<span class="syntax-punctuation">)</span></code></pre>
+<p>Worked reference for Exercise 1; Add intercept and recompute w</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Add a column of ones for intercept</span>
+X1 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>c_<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">]</span>   <span class="syntax-comment"># shape (n, d+1)</span>
+
+<span class="syntax-comment"># Normal equation with pseudo-inverse for stability</span>
+w_hat <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>pinv<span class="syntax-punctuation">(</span>X1<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> X1<span class="syntax-punctuation">)</span> <span class="syntax-operator">@</span> X1<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> y
+w_hat</code></pre>
+<p>Line-by-line</p>
+<ul>
+<li>np.c_ concatenates a column of 1s to X to model an intercept term</li>
+<li>pinv (Moore–Penrose) is numerically safer than explicit inverse</li>
+</ul>
+<hr>
+<p>Worked reference for Exercise 2; Compare to sklearn LinearRegression</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LinearRegression
+
+lr <span class="syntax-operator">=</span> LinearRegression<span class="syntax-punctuation">(</span>fit_intercept<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+lr<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span>
+
+w0 <span class="syntax-operator">=</span> lr<span class="syntax-operator">.</span>intercept_
+w  <span class="syntax-operator">=</span> lr<span class="syntax-operator">.</span>coef_
+
+w0<span class="syntax-punctuation">,</span> w</code></pre>
+<p>Notes</p>
+<ul>
+<li>LinearRegression with fit_intercept=True estimates intercept internally</li>
+<li>Expect close agreement between (w = 0, w) and the closed-form solution above</li>
+</ul>
+<hr>
+<p>Worked reference for Exercise 3; Stability and iterative methods</p>
+<ul>
+<li>Normal equation inverts <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math> (or solves a system); if X has multicollinearity or large condition number, numerical errors grow</li>
+<li>Use np.linalg.lstsq or pinv to mitigate; better yet, rely on QR/SVD inside libraries</li>
+<li>For large n,d or online learning, gradient-based solvers (SGD, coordinate descent) scale better (avoid <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>d</mi><mn>3</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(d^3)</annotation></semantics></math> inversion)</li>
+</ul>
+<p>Takeaways</p>
+<ul>
+<li>Prefer library solvers (sklearn) that use robust decompositions</li>
+<li>Add regularization (Ridge/Lasso) when features are collinear or high-dimensional</li>
+</ul>
+<hr>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>A.shape</code> and <code>B.shape</code>:</strong> state the dimensional contract before multiplication; never infer it from a successful broadcast.</li>
+<li><strong><code>A @ B</code>:</strong> performs matrix multiplication, which is different from elementwise <code>A * B</code>.</li>
+<li><strong><code>np.linalg.lstsq(X, y, rcond=None)</code>:</strong> solves least squares directly and reports rank without explicitly forming an unstable inverse.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Shape reasoning proves the operation is defined, while <code>lstsq</code> and rank diagnostics address numerical and identifiability risk.</p>
+<p><strong>Useful alternative:</strong> A pseudoinverse produces a minimum-norm solution, while regularization intentionally trades bias for stability.</p>
+<p><strong>Trade-off:</strong> Centering and scaling improve numerical behavior but change coefficient units and do not create missing information.</p>
+<p><strong>Edge case to test:</strong> An empty matrix, mismatched row counts, NaN/inf values, or a rank-deficient design needs an explicit failure or policy.</p>
+<p><strong>Evidence of correctness:</strong> Assert every intended shape, compare predictions and residuals, report rank/condition, and avoid coefficient interpretation when the design is not identifiable.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add an intercept column of ones and recompute the coefficients.</p>
+<p><strong>How to reason about it:</strong> Adding a ones column changes X from (rows, features) to (rows, features+1). Decide which coefficient is the intercept and verify predictions by multiplying the augmented matrix by the full coefficient vector.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</p>
+<p><strong>How to reason about it:</strong> scikit-learn stores intercept_ separately when fit_intercept=True. Compare both predictions and aligned coefficients on the same inputs; matching rounded coefficients alone can hide a column-order error.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</p>
+<p><strong>How to reason about it:</strong> The normal equation magnifies numerical problems when columns are nearly dependent and requires a costly inverse. Use condition number as a warning and <code>lstsq</code>/QR/SVD-based solvers as the default.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
+<h5 id="solution-1--exercise-4-shape-tracing">Exercise 4: Shape tracing<a class="heading-anchor" href="#solution-1--exercise-4-shape-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).</p>
+<p><strong>Reasoning before implementation:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</p>
+<p><code>X.T</code> is <code>(8, 120)</code>, <code>X.T @ X</code> is <code>(8, 8)</code>, <code>X @ beta</code> is <code>(120,)</code>, and <code>(X @ beta) - y</code> is <code>(120,)</code>. With <code>beta</code> shaped <code>(8, 1)</code>, the prediction is <code>(120, 1)</code>. Subtracting a <code>(120,)</code> target from it broadcasts to <code>(120, 120)</code>, a severe bug that can still produce numeric output.</p>
+<p>Use <code>assert prediction.shape == y.shape</code> at the modeling boundary. Reshape deliberately with <code>ravel()</code> only when a one-dimensional target is truly the contract.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
+<h5 id="solution-1--exercise-5-rank-deficiency-debugging">Exercise 5: Rank-deficiency debugging<a class="heading-anchor" href="#solution-1--exercise-5-rank-deficiency-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank.</p>
+<p><strong>Reasoning before implementation:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</p>
+<p>An exact linear dependency means multiple coefficient vectors make identical predictions. A direct solve can raise <code>LinAlgError</code> or become unstable, while least squares reports the deficient rank.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+x1 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+x2 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x1<span class="syntax-punctuation">,</span> x2<span class="syntax-punctuation">,</span> x1 <span class="syntax-operator">+</span> x2<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+coefficients<span class="syntax-punctuation">,</span> residuals<span class="syntax-punctuation">,</span> rank<span class="syntax-punctuation">,</span> singular_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> rank <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>X <span class="syntax-operator">@</span> coefficients<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The coefficient values are not uniquely identifiable. Remove redundant features, regularize with a documented purpose, or interpret predictions rather than inventing meaning for unstable individual coefficients.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
+<h5 id="solution-1--exercise-6-robust-vector-operation">Exercise 6: Robust vector operation<a class="heading-anchor" href="#solution-1--exercise-6-robust-vector-operation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.</p>
+<p><strong>Reasoning before implementation:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">cosine_similarity</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> left<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> right<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> left<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> right<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">vectors must be one-dimensional with equal length</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    denominator <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> denominator <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cosine similarity is undefined for a zero vector</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>dot<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> denominator<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>
+    cosine_similarity<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span></code></pre>
+<p>Clipping a computed result into <code>[-1, 1]</code> can protect a later <code>arccos</code> from tiny floating-point overshoot, but it must not conceal incorrect shapes or a zero denominator.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day33_linear_algebra_matrices/day33_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition">Day 33 — Solutions: Linear Algebra &amp; Matrices for ML Intuition<a class="heading-anchor" href="#solution-2--cell-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition" aria-label="Link to this section">#</a></h3>
+<p>Normal equation with intercept; compare to scikit-learn; discuss stability.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">n<span class="syntax-punctuation">,</span> d <span class="syntax-operator">=</span> <span class="syntax-number">200</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">true_w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> true_w <span class="syntax-operator">+</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>scale<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>n<span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-add-intercept-and-compute-closed-form-w">Exercise 1 — Add intercept and compute closed-form w<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-add-intercept-and-compute-closed-form-w" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">X1 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>c_<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">]</span></span>
+<span class="source-line">w_hat <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>pinv<span class="syntax-punctuation">(</span>X1<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> X1<span class="syntax-punctuation">)</span> <span class="syntax-operator">@</span> X1<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> y</span>
+<span class="source-line">w_hat</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--exercise-2-compare-to-sklearn-linearregression">Exercise 2 — Compare to sklearn LinearRegression<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-compare-to-sklearn-linearregression" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LinearRegression</span>
+<span class="source-line">lr <span class="syntax-operator">=</span> LinearRegression<span class="syntax-punctuation">(</span>fit_intercept<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">lr<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">(</span>lr<span class="syntax-operator">.</span>intercept_<span class="syntax-punctuation">,</span> lr<span class="syntax-operator">.</span>coef_<span class="syntax-punctuation">)</span>&#32;</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-3-stability-notes">Exercise 3 — Stability notes<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-stability-notes" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>pinv/least squares preferred over explicit inverse.</li>
+<li>For ill-conditioned <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math> or large problems, prefer regularized or iterative solvers (Ridge, SGD).</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
+<h4 id="solution-2--cell-8--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-8--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-2--cell-8--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-8--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Add an intercept column of ones and recompute the coefficients.</p>
+<p><strong>How to reason about it:</strong> Adding a ones column changes X from (rows, features) to (rows, features+1). Decide which coefficient is the intercept and verify predictions by multiplying the augmented matrix by the full coefficient vector.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-8--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-8--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</p>
+<p><strong>How to reason about it:</strong> scikit-learn stores intercept_ separately when fit_intercept=True. Compare both predictions and aligned coefficients on the same inputs; matching rounded coefficients alone can hide a column-order error.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-8--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-8--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</p>
+<p><strong>How to reason about it:</strong> The normal equation magnifies numerical problems when columns are nearly dependent and requires a costly inverse. Use condition number as a warning and <code>lstsq</code>/QR/SVD-based solvers as the default.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-8--exercise-4-shape-tracing">Exercise 4 — Shape tracing<a class="heading-anchor" href="#solution-2--cell-8--exercise-4-shape-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).</p>
+<p><strong>Reasoning before implementation:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</p>
+<p><code>X.T</code> is <code>(8, 120)</code>, <code>X.T @ X</code> is <code>(8, 8)</code>, <code>X @ beta</code> is <code>(120,)</code>, and <code>(X @ beta) - y</code> is <code>(120,)</code>. With <code>beta</code> shaped <code>(8, 1)</code>, the prediction is <code>(120, 1)</code>. Subtracting a <code>(120,)</code> target from it broadcasts to <code>(120, 120)</code>, a severe bug that can still produce numeric output.</p>
+<p>Use <code>assert prediction.shape == y.shape</code> at the modeling boundary. Reshape deliberately with <code>ravel()</code> only when a one-dimensional target is truly the contract.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-8--exercise-5-rank-deficiency-debugging">Exercise 5 — Rank-deficiency debugging<a class="heading-anchor" href="#solution-2--cell-8--exercise-5-rank-deficiency-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank.</p>
+<p><strong>Reasoning before implementation:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</p>
+<p>An exact linear dependency means multiple coefficient vectors make identical predictions. A direct solve can raise <code>LinAlgError</code> or become unstable, while least squares reports the deficient rank.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">x1 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">x2 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x1<span class="syntax-punctuation">,</span> x2<span class="syntax-punctuation">,</span> x1 <span class="syntax-operator">+</span> x2<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">coefficients<span class="syntax-punctuation">,</span> residuals<span class="syntax-punctuation">,</span> rank<span class="syntax-punctuation">,</span> singular_values <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> rank <span class="syntax-operator">==</span> <span class="syntax-number">2</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>X <span class="syntax-operator">@</span> coefficients<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>The coefficient values are not uniquely identifiable. Remove redundant features, regularize with a documented purpose, or interpret predictions rather than inventing meaning for unstable individual coefficients.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-10--exercise-6-robust-vector-operation">Exercise 6 — Robust vector operation<a class="heading-anchor" href="#solution-2--cell-10--exercise-6-robust-vector-operation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.</p>
+<p><strong>Reasoning before implementation:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">cosine_similarity</span><span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> left<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> right<span class="syntax-operator">.</span>ndim <span class="syntax-operator">!=</span> <span class="syntax-number">1</span> <span class="syntax-operator">or</span> left<span class="syntax-operator">.</span>shape <span class="syntax-operator">!=</span> right<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">vectors must be one-dimensional with equal length</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    denominator <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>norm<span class="syntax-punctuation">(</span>right<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> denominator <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">cosine similarity is undefined for a zero vector</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>dot<span class="syntax-punctuation">(</span>left<span class="syntax-punctuation">,</span> right<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> denominator<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    cosine_similarity<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">    <span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><p>Clipping a computed result into <code>[-1, 1]</code> can protect a later <code>arccos</code> from tiny floating-point overshoot, but it must not conceal incorrect shapes or a zero denominator.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize matrix shapes, linear transformations, rank, and stable least squares. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day33_linear_algebra_matrices.md`
+- learner artifact: `python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-32`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-32.html"><small>Previous lesson</small><strong>python-32</strong><span>Statistical Inference</span></a>
+        <a class="nav-card next" href="python-34.html"><small>Next lesson</small><strong>python-34</strong><span>scikit-learn Intro Pipelines</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-33";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

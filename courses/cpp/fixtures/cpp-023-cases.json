@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-023",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Separate interfaces",
+      "input_or_change": "List the add_checked source contract and binary assumptions.",
+      "expected": "Names/types/statuses versus compiler/platform/linkage distinguished."
+    },
+    {
+      "exercise": 2,
+      "task": "Call a valid boundary",
+      "input_or_change": "Pass 2,3 and a writable output integer.",
+      "expected": "Status 0 and output 5."
+    },
+    {
+      "exercise": 3,
+      "task": "Reject null output",
+      "input_or_change": "Pass nullptr for out.",
+      "expected": "Status 1, no invalid access."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair exception leakage",
+      "input_or_change": "Review a C wrapper that lets std::runtime_error escape.",
+      "expected": "Catch inside wrapper and map to a documented status."
+    },
+    {
+      "exercise": 5,
+      "task": "Check overflow",
+      "input_or_change": "Call INT_MAX plus 1.",
+      "expected": "Status 2; no overflowing addition."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a shared library",
+      "input_or_change": "Build the wrapper separately in an owned host project and record compiler/architecture.",
+      "expected": "Real link/load receipt plus matching header, no inferred portability."
+    }
+  ]
+}

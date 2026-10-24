@@ -1,0 +1,97 @@
+{
+  "lesson_id": "spark-017",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Parse once and retain rejection evidence",
+      "input_contract": "Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.",
+      "expected": "Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.",
+      "verification": "Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7."
+    },
+    {
+      "exercise": 2,
+      "title": "Record collection state before changing grain",
+      "input_contract": "For accepted records return source_id, parent_id, items, array_state, with array_state unknown, empty or populated. Keep arrays typed and preserve the two repeated SKU occurrences.",
+      "expected": "Parent 10 populated,20 empty,30 unknown,40 populated. Parent 10 has size 2;parent 40 size 1.",
+      "verification": "Assert the four parent/state rows and item lengths independently of any later explode output."
+    },
+    {
+      "exercise": 3,
+      "title": "Flatten observed child occurrences",
+      "input_contract": "Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.",
+      "expected": "Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children;parents 20 and 30 produce none.",
+      "verification": "Assert the entire three-row occurrence list and unique(parent_id, position) count 3."
+    },
+    {
+      "exercise": 4,
+      "title": "Preserve parents without inventing observed children",
+      "input_contract": "Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.",
+      "expected": "Five rows:the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).",
+      "verification": "Assert five rows, four distinct parents and exactly three nonnull generated positions."
+    },
+    {
+      "exercise": 5,
+      "title": "Reconcile child counts and nullable measures",
+      "input_contract": "Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.",
+      "expected": "Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.",
+      "verification": "Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2."
+    },
+    {
+      "exercise": 6,
+      "title": "Choose Cartesian or positional array semantics",
+      "input_contract": "For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.",
+      "expected": "Independent generators produce 6 pairs;zip produces(a, web),(b, shop),(NULL, api), three rows.",
+      "verification": "Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL."
+    }
+  ],
+  "golden": {
+    "accepted_sources": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "array_lengths": [
+      2,
+      0,
+      null,
+      1
+    ],
+    "child_rows": [
+      [
+        10,
+        0,
+        "a",
+        2
+      ],
+      [
+        10,
+        1,
+        "a",
+        3
+      ],
+      [
+        40,
+        0,
+        "b",
+        null
+      ]
+    ],
+    "outer_count": 5,
+    "quarantine": [
+      [
+        5,
+        "malformed_json"
+      ],
+      [
+        6,
+        "missing_parent"
+      ],
+      [
+        7,
+        "missing_payload"
+      ]
+    ]
+  }
+}

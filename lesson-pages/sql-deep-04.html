@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-deep-04 · Recursive Graph Reachability, Paths, Cycles, and Dependency Order · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-deep-04" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-deep-04</p>
+        <h1>Recursive Graph Reachability, Paths, Cycles, and Dependency Order</h1>
+        <p class="hero-copy">SQL semantics, temporal metrics and correctness</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-24.html">sql-24</a> <a class="tag" href="sql-25.html">sql-25</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_deep_04.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-deep-04" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-deep-04/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_deep_04.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_deep_04.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--recursive-graph-reachability-paths-cycles-and-dependency-order">Recursive Graph Reachability, Paths, Cycles, and Dependency Order<a class="heading-anchor" href="#guide--recursive-graph-reachability-paths-cycles-and-dependency-order" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>sql-deep-04</code>. <strong>Estimated time:</strong> 150 minutes, split across reading and query investigation.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<p>Use the private reader&#x27;s <strong>Create/open guided SQL notebook</strong> action. It creates the ignored editable copy at <code>.learning/sql/sql-deep-04/lesson/workspace/sql/professional/lessons/sql_deep_04.sql</code>. Read the supplied fixture, write a prediction, edit that copy and run the complete script. The prepared target must be the local disposable <code>advanced_sql_training</code> database. These lessons never require a production connection or a new cloud service.</p>
+<p>The learner file starts a transaction, checks the database name, creates only temporary tables, runs two worked examples and ends with ROLLBACK. Your six query attempts belong before that final rollback. Re-run the complete file after an error so the fixture and transaction state are known. Output appears in the notebook or terminal as named columns and bounded rows; a command tag alone does not verify a SELECT result.</p>
+<p>Windows PowerShell fallback, from the repository root:</p>
+<pre class="highlighted-code"><code class="language-powershell">psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_deep_04.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<p>macOS/Linux fallback, from the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_deep_04.sql</code></pre>
+<p>If the prepared database is unavailable, return to classroom setup rather than changing the target. Keep credentials outside lesson files and command text. Read the <a href="sql-deep-04.html#learner">learner SQL</a>; keep <a href="sql-deep-04.html#solution-1">explanatory solutions</a> and <a href="sql-deep-04.html#solution-2">executable solutions</a> closed until an attempt or an explicit worked comparison. PostgreSQL 16+ syntax is used; the canonical runtime is PostgreSQL 17.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> Advanced. The guide defines each new mechanism before relying on it.</li>
+<li><strong>Prerequisites:</strong> <a href="sql-24.html#guide"><code>sql-24</code></a>, <a href="sql-25.html#guide"><code>sql-25</code></a>.</li>
+<li><strong>Artifacts:</strong> <a href="sql-deep-04.html#learner">Learner SQL</a>, <a href="sql-deep-04.html#solution-1">explained reference</a>, and <a href="sql-deep-04.html#solution-2">executable reference</a>. Every fixture is local, deterministic and rolled back; no prior lesson state is required.</li>
+</ul>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>State the output grain and identity before writing a query, including the NULL and duplicate policies.</li>
+<li>Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.</li>
+<li>Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Recursive state:</strong> The columns carried from one recursive CTE iteration to the next; they determine both meaning and duplicate elimination.</li>
+</ul>
+<ul>
+<li><strong>Simple path:</strong> A route that visits no vertex more than once, represented here by a text-array path.</li>
+</ul>
+<ul>
+<li><strong>Cycle-closing edge:</strong> An edge whose target already appears in the current path, proving a repeated vertex in that traversal.</li>
+</ul>
+<ul>
+<li><strong>Blocked dependency:</strong> A vertex that cannot yet be processed because an unprocessed prerequisite remains; it may depend on a cycle without lying in the cycle itself.</li>
+</ul>
+<p>A recursive CTE consists of an anchor query and a recursive step. The anchor defines initial state. The step joins that state to relationships and emits new state. Termination depends on the meaning of those columns, not merely on using the keyword RECURSIVE. A graph with cycles needs explicit duplicate elimination, a visited condition or another finite-state argument.</p>
+<p>UNION can safely deduplicate reachability states containing only vertex identity. Once a vertex has been reached, another route to the same vertex adds no new information for that question. If the state also contains a growing path or depth, those rows differ and UNION no longer prevents cycling. The appropriate state depends on whether the target is reachability, every route, minimum hops or weighted cost.</p>
+<p>Path arrays make the traversal inspectable. Append the next vertex and refuse expansion when it already appears in the path to enumerate simple paths. To diagnose cycles, permit one closing step, mark it and stop expanding that marked row. The resulting route may include a noncyclic prefix before the repeated vertex; do not describe the entire prefix as a cycle.</p>
+<p>A depth limit guarantees a bounded exploration but does not prove completeness. If a boundary state still has an unexplored outgoing edge, a missing vertex may simply lie beyond the budget. Report a truncation flag rather than labeling every absent vertex unreachable. Reachability with a finite identity state can terminate without an arbitrary depth cutoff on this fixture.</p>
+<p>Enumerating all simple paths can identify the cheapest path on a tiny nonnegative graph, but the number of paths can grow exponentially. It is an explanatory reference, not a scalable replacement for Dijkstra or a specialized graph engine. Return an actual chosen path along with its cost so the value can be independently checked.</p>
+<p>Dependency ordering uses different logic. A vertex is eligible only when all of its incoming prerequisites have already been processed. Repeatedly choose an eligible vertex, append it to processed state and stop when none remain. If some vertices remain, they may form a cycle or depend on one. Distinguish that blocked set from proof that every remaining vertex lies in a cycle.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> sequence<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> value<span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> sequence <span class="syntax-keyword">WHERE</span> value<span class="syntax-operator">&lt;</span><span class="syntax-number">4</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> value<span class="syntax-punctuation">,</span>value<span class="syntax-operator">*</span>value <span class="syntax-keyword">AS</span> square <span class="syntax-keyword">FROM</span> sequence <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> value<span class="syntax-punctuation">;</span></code></pre>
+<p>The anchor starts at one and the step adds one only while the current value is below four. The output grain is one integer value with its square, yielding(1,1),(2,4),(3,9),(4,16). The strict step condition supplies a finite termination argument; ORDER BY supplies presentation, not recursion execution order.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revisits_b<span class="syntax-punctuation">,</span>
+       <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> extended_path<span class="syntax-punctuation">;</span></code></pre>
+<p>The one-row output has path, revisits_b, extended_path. Membership is true for b, and appending d yields [a, b, c, d]. The path array records vertex identities, making a cycle guard independent of depth or a total-cost value that might repeat for unrelated routes.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Compute reachability with a finite identity state.</strong> Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 1, Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 1, Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 1, compare the distinct returned vertices with a hand traversal from the start; confirm the cycle does not produce an unbounded growing recursion state.</p>
+<ol>
+<li><strong>Enumerate simple routes to a target.</strong> Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.</p>
+<ol>
+<li><strong>Emit one cycle-closing step as evidence.</strong> Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.</p>
+<ol>
+<li><strong>Report a truncated search honestly.</strong> Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.</p>
+<ol>
+<li><strong>Return cheapest path evidence for every vertex.</strong> Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.</p>
+<ol>
+<li><strong>Separate processed dependencies from cyclic or blocked vertices.</strong> Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 6, Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 6, Only a and isolated f are processed. Vertices b, c, d, e, g are cyclic_or_blocked=true; e and g depend on the cycle but are not themselves on its directed loop.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 6, repeatedly remove zero-indegree vertices by hand and compare the processed-vertex output; distinguish vertices on the cycle from a downstream vertex blocked by it, rather than calling the entire remainder a cycle.</p>
+<h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<p>If recursion does not terminate on a cycle, inspect every state column used by UNION duplicate elimination. A growing path makes every row new. If a bounded search omits a vertex, inspect the frontier before declaring it unreachable. If cheapest and fewest-hop paths differ, preserve the edge-weight objective. If a dependency check marks every remaining node as a cycle member, distinguish actual cycle witnesses from downstream blockage. Use actual path arrays and exact costs as evidence, and keep exponential path enumeration confined to the tiny teaching fixture.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.</li>
+<li>Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Transfer the same reasoning to a new small fixture before using it on larger data, then continue with <a href="sql-deep-05.html#guide">the next deepening lesson</a>. Keep the result columns, ordering, NULL policy and observation horizon explicit. The <a href="../reference-pages/sql/professional/README.md.html">professional SQL track</a> provides the wider route.</p>
+<h4 id="guide--primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#guide--primary-sources-and-official-apis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="https://www.postgresql.org/docs/17/queries-with.html">PostgreSQL17 recursive CTEs, search order and cycle handling</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.postgresql.org/docs/17/functions-array.html">PostgreSQL17 array functions</a>.</li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through sql-deep-04: Recursive Graph Reachability, Paths, Cycles, and Dependency Order.
+Read sql/professional/companion-guides/sql_deep_04.md and sql/professional/lessons/sql_deep_04.sql. Direct prerequisites: sql-24, sql-25.
+Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
+Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
+Done when all six projected-result contracts and their counterexamples have inspected evidence and I can explain why the wrong query fails.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_deep_04.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_deep_04.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- sql-deep-04: Recursive Graph Reachability, Paths, Cycles, and Dependency Order</span></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_deep_04.md</span></span>
+<span class="source-line"><span class="syntax-comment">-- Use the complete file in the disposable advanced_sql_training database.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_vertices<span class="syntax-punctuation">(</span>vertex <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_vertices <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;f&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_edges<span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span> <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>target <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>cost <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span>cost<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_edges <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Worked example 1</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> sequence<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> value<span class="syntax-operator">+</span><span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> sequence <span class="syntax-keyword">WHERE</span> value<span class="syntax-operator">&lt;</span><span class="syntax-number">4</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> value<span class="syntax-punctuation">,</span>value<span class="syntax-operator">*</span>value <span class="syntax-keyword">AS</span> square <span class="syntax-keyword">FROM</span> sequence <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> value<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Worked example 2</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AS</span> path<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revisits_b<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span> <span class="syntax-keyword">AS</span> extended_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Write attempts in your ignored working copy before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Compute reachability with a finite identity state</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 1, Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 1, Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 1, compare the distinct returned vertices with a hand traversal from the start; confirm the cycle does not produce an unbounded growing recursion state.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Enumerate simple routes to a target</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Emit one cycle-closing step as evidence</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Report a truncated search honestly</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Return cheapest path evidence for every vertex</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Separate processed dependencies from cyclic or blocked vertices</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-deep-04 Exercise 6, Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-deep-04 Exercise 6, Only a and isolated f are processed. Vertices b, c, d, e, g are cyclic_or_blocked=true; e and g depend on the cycle but are not themselves on its directed loop.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-deep-04 Exercise 6, repeatedly remove zero-indegree vertices by hand and compare the processed-vertex output; distinguish vertices on the cycle from a downstream vertex blocked by it, rather than calling the entire remainder a cycle.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_deep_04_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_deep_04_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-deep-04-explained-reference-solutions">sql-deep-04: Explained reference solutions<a class="heading-anchor" href="#solution-1--sql-deep-04-explained-reference-solutions" aria-label="Link to this section">#</a></h3>
+<p>Read <a href="sql-deep-04.html#guide">Recursive Graph Reachability, Paths, Cycles, and Dependency Order</a> and attempt its six queries before comparing. The <a href="sql-deep-04.html#solution-2">complete reference script</a> recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.</p>
+<h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-compute-reachability-with-a-finite-identity-state">Exercise 1: Compute reachability with a finite identity state<a class="heading-anchor" href="#solution-1--exercise-1-compute-reachability-with-a-finite-identity-state" aria-label="Link to this section">#</a></h4>
+<p>Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 1, Starting at a, return vertex for every reachable vertex including a. Use recursive UNION over vertex identity only so the b-c-d cycle terminates. One output row represents one vertex, ordered by vertex.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 1, Rows a, b, c, d, e, g appear once each; isolated f is absent. No arbitrary depth cap is required for this finite identity-state traversal.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 1, compare the distinct returned vertices with a hand traversal from the start; confirm the cycle does not produce an unbounded growing recursion state.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reachable<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target <span class="syntax-keyword">FROM</span> reachable <span class="syntax-keyword">AS</span> r <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>r<span class="syntax-punctuation">.</span>vertex
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> vertex <span class="syntax-keyword">FROM</span> reachable <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></code></pre>
+<p>The recursive state contains only the identity needed for reachability. UNION removes repeated vertices across iterations, so traversing the cycle cannot create endlessly new states. Adding path or depth columns would change this duplicate identity and invalidate that termination argument. The isolated vertex is absent because no edge sequence from a reaches it, not because an exploration budget was exhausted.</p>
+<h4 id="solution-1--exercise-2-enumerate-simple-routes-to-a-target">Exercise 2: Enumerate simple routes to a target<a class="heading-anchor" href="#solution-1--exercise-2-enumerate-simple-routes-to-a-target" aria-label="Link to this section">#</a></h4>
+<p>Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost
+ <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex
+ <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span><span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> hops <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">WHERE</span> vertex<span class="syntax-operator">=</span><span class="syntax-string">&#x27;d&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">;</span></code></pre>
+<p>UNION ALL retains genuinely different paths to the same vertex, while the visited-array condition prevents infinite expansion around the cycle. Cost adds edge weights and hops counts transitions, demonstrating that minimum hops differs from minimum cost. The path itself is the output identity because the same target can have several legitimate routes. This exhaustive construction is intentionally limited to a tiny graph.</p>
+<h4 id="solution-1--exercise-3-emit-one-cycle-closing-step-as-evidence">Exercise 3: Emit one cycle-closing step as evidence<a class="heading-anchor" href="#solution-1--exercise-3-emit-one-cycle-closing-step-as-evidence" aria-label="Link to this section">#</a></h4>
+<p>Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> walks<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>is_cycle<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">FROM</span> walks <span class="syntax-keyword">AS</span> w <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>w<span class="syntax-punctuation">.</span>vertex
+ <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> w<span class="syntax-punctuation">.</span>is_cycle
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> path <span class="syntax-keyword">AS</span> cycle_path<span class="syntax-punctuation">,</span>vertex <span class="syntax-keyword">AS</span> repeated_vertex<span class="syntax-punctuation">,</span>total_cost <span class="syntax-keyword">AS</span> cycle_cost
+<span class="syntax-keyword">FROM</span> walks <span class="syntax-keyword">WHERE</span> is_cycle <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">;</span></code></pre>
+<p>The guard checks the previous state rather than excluding the closing edge outright. That preserves a concrete witness of repetition and then prevents further expansion. The route beginning at a includes a prefix leading into the cycle, so the repeated vertex identifies where the cyclic portion closes. A depth-only diagnostic would show long paths without proving why they recur.</p>
+<h4 id="solution-1--exercise-4-report-a-truncated-search-honestly">Exercise 4: Report a truncated search honestly<a class="heading-anchor" href="#solution-1--exercise-4-report-a-truncated-search-honestly" aria-label="Link to this section">#</a></h4>
+<p>Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>hops<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">+</span><span class="syntax-number">1</span>
+ <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex
+ <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">&lt;</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex
+               <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> truncated
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span><span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>hops<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> min_hops<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>truncated <span class="syntax-keyword">AS</span> search_truncated
+<span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> budget <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>truncated <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></code></pre>
+<p>The depth condition bounds computation, while the separate boundary inspection asks whether unexplored continuations remain. The minimum observed hop count is valid for reached vertices in this breadth-depth enumeration, but the search is not complete for all reachability. The flag prevents a bounded operational budget from being mistaken for proof of nonexistence. Comparing with the complete reachability result reveals g as the concrete omitted reachable vertex.</p>
+<h4 id="solution-1--exercise-5-return-cheapest-path-evidence-for-every-vertex">Exercise 5: Return cheapest path evidence for every vertex<a class="heading-anchor" href="#solution-1--exercise-5-return-cheapest-path-evidence-for-every-vertex" aria-label="Link to this section">#</a></h4>
+<p>Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost
+ <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex
+ <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> best <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">ON</span><span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">)</span> vertex<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>path <span class="syntax-keyword">FROM</span> paths
+ <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span><span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>path
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>total_cost<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>path <span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> best <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span>v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></code></pre>
+<p>DISTINCT ON selects one route only after the ordering states the optimization and tie policy. The outer vertex table preserves unreachable nodes, making absence explicit instead of silently omitting them from a report. Nonnegative weights mean cycles cannot improve a minimum-cost route, so a simple-path optimum exists for reachable vertices. Enumeration can still grow exponentially and should not be advertised as a scalable shortest-path engine.</p>
+<h4 id="solution-1--exercise-6-separate-processed-dependencies-from-cyclic-or-blocked-vertices">Exercise 6: Separate processed dependencies from cyclic or blocked vertices<a class="heading-anchor" href="#solution-1--exercise-6-separate-processed-dependencies-from-cyclic-or-blocked-vertices" aria-label="Link to this section">#</a></h4>
+<p>Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</p>
+<p><strong>Inputs/evidence:</strong> For sql-deep-04 Exercise 6, Repeatedly select the lexicographically smallest unprocessed vertex whose incoming prerequisites are all processed. Return vertex, processed, cyclic_or_blocked for every vertex ordered by vertex. Stop when no eligible vertex remains and label remaining vertices as cyclic or blocked, not all proven cycle members.</p>
+<p><strong>Expected result/shape:</strong> For sql-deep-04 Exercise 6, Only a and isolated f are processed. Vertices b, c, d, e, g are cyclic_or_blocked=true; e and g depend on the cycle but are not themselves on its directed loop.</p>
+<p><strong>Verify:</strong> For sql-deep-04 Exercise 6, repeatedly remove zero-indegree vertices by hand and compare the processed-vertex output; distinguish vertices on the cycle from a downstream vertex blocked by it, rather than calling the entire remainder a cycle.</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> steps<span class="syntax-punctuation">(</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+ <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+ <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>done<span class="syntax-operator">|</span><span class="syntax-operator">|</span>candidate<span class="syntax-punctuation">.</span>vertex
+ <span class="syntax-keyword">FROM</span> steps <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v
+  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep4_edges <span class="syntax-keyword">AS</span> e
+                   <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span>v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span>
+ <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> done <span class="syntax-keyword">FROM</span> steps <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> processed<span class="syntax-punctuation">,</span>
+ <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cyclic_or_blocked
+<span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">AS</span> f <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></code></pre>
+<p>Every step appends one previously unprocessed eligible vertex, so at most the number of vertices can be processed. The b-c-d cycle prevents any of its members from losing all unprocessed prerequisites, which also blocks downstream e and g. The remaining-set label deliberately avoids overclaiming exact cycle membership. The isolated vertex is eligible independently of reachability from a, showing that dependency ordering and single-source reachability answer different questions.</p>
+<h4 id="solution-1--verification-and-transaction-boundary">Verification and transaction boundary<a class="heading-anchor" href="#solution-1--verification-and-transaction-boundary" aria-label="Link to this section">#</a></h4>
+<p>Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_deep_04_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_deep_04_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- sql-deep-04: complete reference queries and exact result assertions</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_vertices<span class="syntax-punctuation">(</span>vertex <span class="syntax-builtin">text</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_vertices <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;f&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> deep4_edges<span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span> <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>target <span class="syntax-builtin">text</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span><span class="syntax-punctuation">,</span>cost <span class="syntax-builtin">integer</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">CHECK</span><span class="syntax-punctuation">(</span>cost<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">source</span><span class="syntax-punctuation">,</span>target<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> deep4_edges <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;c&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;b&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;e&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;d&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;g&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Compute reachability with a finite identity state</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> reachable<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target <span class="syntax-keyword">FROM</span> reachable <span class="syntax-keyword">AS</span> r <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>r<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> vertex <span class="syntax-keyword">FROM</span> reachable <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> vertex <span class="syntax-keyword">FROM</span> answer_1 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_1<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_1<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;}, {&quot;vertex&quot;: &quot;b&quot;}, {&quot;vertex&quot;: &quot;c&quot;}, {&quot;vertex&quot;: &quot;d&quot;}, {&quot;vertex&quot;: &quot;e&quot;}, {&quot;vertex&quot;: &quot;g&quot;}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Enumerate simple routes to a target</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"> <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span><span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span><span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> hops <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">WHERE</span> vertex<span class="syntax-operator">=</span><span class="syntax-string">&#x27;d&#x27;</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>hops <span class="syntax-keyword">FROM</span> answer_2 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_2<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_2<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 3, &quot;hops&quot;: 3}, {&quot;path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;], &quot;total_cost&quot;: 5, &quot;hops&quot;: 2}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Emit one cycle-closing step as evidence</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> walks<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>is_cycle<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>w<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost<span class="syntax-punctuation">,</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>w<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> walks <span class="syntax-keyword">AS</span> w <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>w<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"> <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span> w<span class="syntax-punctuation">.</span>is_cycle</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> path <span class="syntax-keyword">AS</span> cycle_path<span class="syntax-punctuation">,</span>vertex <span class="syntax-keyword">AS</span> repeated_vertex<span class="syntax-punctuation">,</span>total_cost <span class="syntax-keyword">AS</span> cycle_cost</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> walks <span class="syntax-keyword">WHERE</span> is_cycle <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> cycle_path<span class="syntax-punctuation">,</span>repeated_vertex<span class="syntax-punctuation">,</span>cycle_cost <span class="syntax-keyword">FROM</span> answer_3 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_3<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> cycle_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_3<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;cycle_path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;], &quot;repeated_vertex&quot;: &quot;b&quot;, &quot;cycle_cost&quot;: 4}, {&quot;cycle_path&quot;: [&quot;a&quot;, &quot;c&quot;, &quot;d&quot;, &quot;b&quot;, &quot;c&quot;], &quot;repeated_vertex&quot;: &quot;c&quot;, &quot;cycle_cost&quot;: 7}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Report a truncated search honestly</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>hops<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">+</span><span class="syntax-number">1</span></span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"> <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">&lt;</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> budget <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line">               <span class="syntax-keyword">WHERE</span> p<span class="syntax-punctuation">.</span>hops<span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> truncated</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span><span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>hops<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> min_hops<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>truncated <span class="syntax-keyword">AS</span> search_truncated</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> budget <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>truncated <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> p<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> vertex<span class="syntax-punctuation">,</span>min_hops<span class="syntax-punctuation">,</span>search_truncated <span class="syntax-keyword">FROM</span> answer_4 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_4<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_4<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;min_hops&quot;: 0, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;b&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;min_hops&quot;: 1, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;min_hops&quot;: 2, &quot;search_truncated&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Return cheapest path evidence for every vertex</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> paths<span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">,</span>path<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;a&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-operator">|</span><span class="syntax-operator">|</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-punctuation">,</span>p<span class="syntax-punctuation">.</span>total_cost<span class="syntax-operator">+</span>e<span class="syntax-punctuation">.</span>cost</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> paths <span class="syntax-keyword">AS</span> p <span class="syntax-keyword">JOIN</span> deep4_edges <span class="syntax-keyword">AS</span> e <span class="syntax-keyword">ON</span> e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span>p<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"> <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">.</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> best <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">ON</span><span class="syntax-punctuation">(</span>vertex<span class="syntax-punctuation">)</span> vertex<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>path <span class="syntax-keyword">FROM</span> paths</span>
+<span class="source-line"> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span><span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>path</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>total_cost<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">.</span>path <span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> best <span class="syntax-keyword">AS</span> b <span class="syntax-keyword">ON</span> b<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span>v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> vertex<span class="syntax-punctuation">,</span>total_cost<span class="syntax-punctuation">,</span>path <span class="syntax-keyword">FROM</span> answer_5 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_5<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_5<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;total_cost&quot;: 0, &quot;path&quot;: [&quot;a&quot;]}, {&quot;vertex&quot;: &quot;b&quot;, &quot;total_cost&quot;: 1, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;]}, {&quot;vertex&quot;: &quot;c&quot;, &quot;total_cost&quot;: 2, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]}, {&quot;vertex&quot;: &quot;d&quot;, &quot;total_cost&quot;: 3, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;]}, {&quot;vertex&quot;: &quot;e&quot;, &quot;total_cost&quot;: 6, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;e&quot;]}, {&quot;vertex&quot;: &quot;f&quot;, &quot;total_cost&quot;: null, &quot;path&quot;: null}, {&quot;vertex&quot;: &quot;g&quot;, &quot;total_cost&quot;: 4, &quot;path&quot;: [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;g&quot;]}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Separate processed dependencies from cyclic or blocked vertices</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> <span class="syntax-keyword">RECURSIVE</span> steps<span class="syntax-punctuation">(</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">VALUES</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">text</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"> <span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>done<span class="syntax-operator">|</span><span class="syntax-operator">|</span>candidate<span class="syntax-punctuation">.</span>vertex</span>
+<span class="source-line"> <span class="syntax-keyword">FROM</span> steps <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">LATERAL</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v</span>
+<span class="source-line">  <span class="syntax-keyword">WHERE</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">EXISTS</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">FROM</span> deep4_edges <span class="syntax-keyword">AS</span> e</span>
+<span class="source-line">                   <span class="syntax-keyword">WHERE</span> e<span class="syntax-punctuation">.</span>target<span class="syntax-operator">=</span>v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">AND</span> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">.</span><span class="syntax-keyword">source</span><span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">  <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span></span>
+<span class="source-line"> <span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> candidate</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> done <span class="syntax-keyword">FROM</span> steps <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> <span class="syntax-keyword">cardinality</span><span class="syntax-punctuation">(</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">DESC</span> <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">,</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> processed<span class="syntax-punctuation">,</span></span>
+<span class="source-line"> <span class="syntax-keyword">NOT</span><span class="syntax-punctuation">(</span>v<span class="syntax-punctuation">.</span>vertex<span class="syntax-operator">=</span><span class="syntax-keyword">ANY</span><span class="syntax-punctuation">(</span>f<span class="syntax-punctuation">.</span>done<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> cyclic_or_blocked</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> deep4_vertices <span class="syntax-keyword">AS</span> v <span class="syntax-keyword">CROSS</span> <span class="syntax-keyword">JOIN</span> <span class="syntax-keyword">final</span> <span class="syntax-keyword">AS</span> f <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> v<span class="syntax-punctuation">.</span>vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> vertex<span class="syntax-punctuation">,</span>processed<span class="syntax-punctuation">,</span>cyclic_or_blocked <span class="syntax-keyword">FROM</span> answer_6 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>jsonb_agg<span class="syntax-punctuation">(</span>to_jsonb<span class="syntax-punctuation">(</span>answer_6<span class="syntax-punctuation">)</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> vertex<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;[]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> answer_6<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;[{&quot;vertex&quot;: &quot;a&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;b&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;c&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;d&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;e&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}, {&quot;vertex&quot;: &quot;f&quot;, &quot;processed&quot;: true, &quot;cyclic_or_blocked&quot;: false}, {&quot;vertex&quot;: &quot;g&quot;, &quot;processed&quot;: false, &quot;cyclic_or_blocked&quot;: true}]&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span>jsonb<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;sql-deep-04 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through sql-deep-04: Recursive Graph Reachability, Paths, Cycles, and Dependency Order.
+Read sql/professional/companion-guides/sql_deep_04.md and sql/professional/lessons/sql_deep_04.sql. Direct prerequisites: sql-24, sql-25.
+Explain the row grain and SQL clauses, then ask me to predict a concrete result before my attempt. Give one hint at a time and review my exact result rows, identity, NULL behavior and boundary evidence. Ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt.
+Use only the prepared local disposable advanced_sql_training database and the complete rollback-safe script. Preserve my ignored working copy and do not start services or redirect to another database.
+Done when all six projected-result contracts and their counterexamples have inspected evidence and I can explain why the wrong query fails.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-deep-03.html"><small>Previous lesson</small><strong>sql-deep-03</strong><span>ROWS, RANGE, GROUPS, Exclusions, and Sessionization</span></a>
+        <a class="nav-card next" href="sql-deep-05.html"><small>Next lesson</small><strong>sql-deep-05</strong><span>Predicate Proof, Partial Indexes, and Conditional Mutation Contracts</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-deep-04";
+    const LEARNER_PATH = "sql/professional/lessons/sql_deep_04.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-015: Startup, liveness and readiness are different · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-015: Startup, liveness and readiness are different</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/guides/k8s-015.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-015-startup-liveness-and-readiness-are-different">k8s-015: Startup, liveness and readiness are different<a class="heading-anchor" href="#k8s-015-startup-liveness-and-readiness-are-different" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; about 105 minutes plus review. Direct prerequisites: <code>k8s-008</code>, <code>k8s-013</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Select a probe by the action Kubernetes should take after failure.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>Startup, readiness and liveness probes answer different questions. Startup asks whether initialization has completed. Readiness asks whether this container should currently receive normal Service traffic. Liveness asks whether the container should be restarted after repeated failed checks. One endpoint can be used for several probes, but that does not make their control effects identical.</p>
+<p>The contract-2 fixture exposes /startup, /ready and /live as separate fixed paths. A synthetic three-second startup delay makes /startup temporarily return503 while the process exists. Once a configured startup probe succeeds, the kubelet begins the normal liveness/readiness behavior. The healthy browser source is a bounded initial-state demonstration; detailed restart-count and transient-unreadiness comparisons require stateful host observations.</p>
+<p>A probe is an operational policy about recovery and traffic. An expensive or dependency-sensitive liveness check can restart a healthy process during a downstream outage. A readiness check can remove traffic without restarting the container. Choose the intended effect before choosing a URL.</p>
+<h3 id="trace-probe-control-effects">Trace probe control effects<a class="heading-anchor" href="#trace-probe-control-effects" aria-label="Link to this section">#</a></h3>
+<p>When a startup probe is configured, its success gates the other probe types. It can protect slow initialization from an aggressive liveness policy. The allowed source uses /startup with period1 and failureThreshold10 for the fixed delay3 case. This is a nominal probe budget, not a promise of an exact wall-clock transition because scheduling and request duration also matter.</p>
+<p>A failed readiness check changes readiness and endpoint eligibility. It does not directly restart the container. Repeated liveness failure triggers a container restart according to the Pod&#x27;s restart policy; the Pod UID can remain the same while restartCount increases. A Pod replacement is a different event with a new UID.</p>
+<p>The fixture&#x27;s /live route reports process health independently of its synthetic startup delay. Its /ready route retains the legacy response. Kubernetes&#x27;s startup gating is therefore part of the lesson, not a property invented by changing every server endpoint to fail together.</p>
+<h3 id="interpret-thresholds-with-actual-observations">Interpret thresholds with actual observations<a class="heading-anchor" href="#interpret-thresholds-with-actual-observations" aria-label="Link to this section">#</a></h3>
+<p>Record configured period, timeout/failure policy, container state, restartCount, Ready condition and endpoint eligibility. A sample with Ready=False and unchanged restartCount is consistent with readiness removal; an increasing restartCount after liveness failures shows a different control action. Events and timestamps help link the cause to the observed transition.</p>
+<p>The current one-shot verifier establishes a bounded healthy baseline and application response. It does not automatically grade every transient or long-running failure scenario. A wrong /missing liveness or startup path is an admitted fixed negative configuration, but the report must describe what was actually observed within the operation window rather than assume one exact restart sequence.</p>
+<p>Use the smallest startup allowance justified by measured initialization with margin. Making thresholds huge can hide a broken service, and making them tiny can create a restart loop. The synthetic delay is a teaching fixture, not a production tuning recommendation.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-read-the-healthy-startup-budget">Worked example 1: Read the healthy startup budget<a class="heading-anchor" href="#worked-example-1-read-the-healthy-startup-budget" aria-label="Link to this section">#</a></h4>
+<p>The source uses startup /startup, period1, failureThreshold10 and delay value3. The server may be Running while startup is still failing503.</p>
+<p><strong>Expected:</strong> The configured startup gate protects the declared slow-start fixture; actual transition time must be observed.</p>
+<h4 id="worked-example-2-compare-two-synthetic-failures">Worked example 2: Compare two synthetic failures<a class="heading-anchor" href="#worked-example-2-compare-two-synthetic-failures" aria-label="Link to this section">#</a></h4>
+<p>Case A:Ready=False, restartCount0, endpoint eligible false. Case B:liveness failures followed by restartCount1 with the same Pod UID.</p>
+<p><strong>Expected:</strong> A removes traffic without a direct restart; B records a container restart, not necessarily a new Pod.</p>
+<h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
+<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>POSIX:</p>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pods -l app<span class="syntax-operator">=</span>hello -o json</code></pre>
+<p>PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get pods -l app<span class="syntax-punctuation">=</span>hello -o json
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
+<p>This lesson supplies an allowlisted <code>k8s-kind</code> source. Use <code>courses/kubernetes/lessons/k8s-015.yaml</code> in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. <a href="../host-labs.md.html">The run/host-lab guide</a> explains the precise boundary and POSIX/PowerShell targeting.</p>
+<p>The <a href="../solutions/k8s-015_solution.yaml.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-015_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-015_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-015-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-name-each-question">Exercise 1: Name each question<a class="heading-anchor" href="#exercise-1-name-each-question" aria-label="Link to this section">#</a></h4>
+<p>Explain the decision made by startup, readiness and liveness.</p>
+<p><strong>Expected result/shape:</strong> Initialization gate, traffic eligibility and restart policy are distinguished.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Initialization gate, traffic eligibility and restart policy are distinguished.</p>
+<p><strong>Progressive hints:</strong> Describe the control action, not only the HTTP path.</p>
+<h4 id="exercise-2-run-the-healthy-delayed-fixture">Exercise 2: Run the healthy delayed fixture<a class="heading-anchor" href="#exercise-2-run-the-healthy-delayed-fixture" aria-label="Link to this section">#</a></h4>
+<p>Use the admitted source and record its actual bounded healthy result.</p>
+<p><strong>Expected result/shape:</strong> Startup delay is configured3; controller/backend/client checks eventually establish the observed healthy baseline.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Startup delay is configured3; controller/backend/client checks eventually establish the observed healthy baseline.</p>
+<p><strong>Progressive hints:</strong> Keep configured timing separate from observed timing.</p>
+<h4 id="exercise-3-trace-readiness-removal">Exercise 3: Trace readiness removal<a class="heading-anchor" href="#exercise-3-trace-readiness-removal" aria-label="Link to this section">#</a></h4>
+<p>Analyze case A and identify what additional evidence would show recovery.</p>
+<p><strong>Expected result/shape:</strong> No direct restart claim; new Ready/endpoint/client observations are required after repair.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: No direct restart claim; new Ready/endpoint/client observations are required after repair.</p>
+<p><strong>Progressive hints:</strong> Restart count and Pod UID should remain explicit.</p>
+<h4 id="exercise-4-trace-liveness-restart">Exercise 4: Trace liveness restart<a class="heading-anchor" href="#exercise-4-trace-liveness-restart" aria-label="Link to this section">#</a></h4>
+<p>Analyze case B and distinguish restart from replacement.</p>
+<p><strong>Expected result/shape:</strong> Same Pod UID with increased container restartCount.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Same Pod UID with increased container restartCount.</p>
+<p><strong>Progressive hints:</strong> Compare both UID and restart count.</p>
+<h4 id="exercise-5-predict-a-wrong-fixed-path">Exercise 5: Predict a wrong fixed path<a class="heading-anchor" href="#exercise-5-predict-a-wrong-fixed-path" aria-label="Link to this section">#</a></h4>
+<p>Compare /startup or /live with /missing in a scratch admitted configuration.</p>
+<p><strong>Expected result/shape:</strong> The wrong path returns404; the actual bounded result and cleanup must be recorded rather than inventing a fixed timing.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: The wrong path returns404; the actual bounded result and cleanup must be recorded rather than inventing a fixed timing.</p>
+<p><strong>Progressive hints:</strong> Use the same image and change only the path.</p>
+<h4 id="exercise-6-choose-a-production-probe-policy">Exercise 6: Choose a production probe policy<a class="heading-anchor" href="#exercise-6-choose-a-production-probe-policy" aria-label="Link to this section">#</a></h4>
+<p>Explain why a downstream outage should not automatically restart every caller.</p>
+<p><strong>Expected result/shape:</strong> A concrete design separates process-deadlock detection from traffic readiness and dependency behavior.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A concrete design separates process-deadlock detection from traffic readiness and dependency behavior.</p>
+<p><strong>Progressive hints:</strong> Ask whether restarting can repair the failed condition.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: A removes traffic without a direct restart; B records a container restart, not necessarily a new Pod. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not use a remote dependency check as liveness merely because it is convenient:restarting every caller may amplify the dependency outage. Do not call a Running Pod ready or assume a successful startup probe means all future requests succeed. A startup success is an initial milestone; readiness and liveness continue to have distinct roles.</p>
+<p>A source change alone is not evidence that the kubelet used the intended probe. Observe the current Pod template and identity, then the relevant conditions/events/restart counts. Preserve the bounded cleanup result even for an intentionally unhealthy configuration.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the answer and reconstruct the reasoning for Exercise6, Choose a production probe policy. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>k8s-016</code> after preserving the six evidence records.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/pods/probes/">Kubernetes probe semantics</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-015.
+Read courses/kubernetes/guides/k8s-015.md and courses/kubernetes/lessons/k8s-015.yaml. Direct prerequisites: `k8s-008`, `k8s-013`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/kubernetes/solutions/ closed until I attempt or explicitly ask for comparison.
+Distinguish source, synthetic fixtures, API acceptance, observed controllers, application/data results and cleanup.
+Use only an explicit owned lease and the stated capability; never select an ambient cluster or install a controller for me.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,85 @@
+{
+  "lesson_id": "spark-010",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Establish a pure strict result",
+      "input_contract": "For inputs between-1000000 and 1000000, retain even values and double them in order. Preserve input and duplicates. Reject values outside the bound so Int multiplication is safe.",
+      "expected": "Seq(1,2,3,4) becomes Seq(4,8);Seq(0,2,2) becomes Seq(0,4,4);empty remains empty.",
+      "verification": "Assert the exact results, input preservation and the out-of-domain rejection."
+    },
+    {
+      "exercise": 2,
+      "title": "Locate the evaluation boundary",
+      "input_contract": "Return a lazy even-filter/double-map iterator with local trace messages filter:value and map:value. Validate the same numeric domain before construction. The trace should remain empty until consumption.",
+      "expected": "Taking one output from 1,2,3,4 yields 4 with trace filter:1, filter:2, map:2. Consuming the rest yields 8 and appends filter:3, filter:4, map:4.",
+      "verification": "Assert the empty initial trace, both exact output pieces and all six messages in order."
+    },
+    {
+      "exercise": 3,
+      "title": "Expose one-shot traversal state",
+      "input_contract": "Consume a supplied iterator into a Vector twice and return both results. Do not cache or recreate the iterator inside this function. Explain why this intentionally returns an empty second traversal.",
+      "expected": "A fresh iterator over 1,2,3 yields (Vector(1,2,3), Vector.empty). An already empty iterator yields two empty Vectors.",
+      "verification": "Assert both tuple components and the already-exhausted case."
+    },
+    {
+      "exercise": 4,
+      "title": "Provide repeatability deliberately",
+      "input_contract": "Return a factory creating a fresh bounded even-filter/double-map iterator on each call. Validate source values once and preserve them. Do not return the same iterator object repeatedly.",
+      "expected": "Two factory calls both yield Vector(4,8) for 1,2,3,4, even after the first is exhausted.",
+      "verification": "Consume two independently obtained iterators and assert both exact results;verify the immutable source remains unchanged."
+    },
+    {
+      "exercise": 5,
+      "title": "Separate repeated delivery from logical identity",
+      "input_contract": "For bounded nonnegative event amounts and nonblank IDs, compute naive delivered cents over attempts and logical once-per-ID cents when attempts>0. Reject conflicting amounts for one ID and negative attempt counts. This is a pure ledger calculation, not a real sink.",
+      "expected": "Records(a,100),(b,50),(a,100) with two attempts give naive 500, logical 150. Zero attempts gives (0,0);same ID with 100 and 101 is rejected.",
+      "verification": "Assert both totals, the zero-attempt identity and a conflicting-payload failure."
+    },
+    {
+      "exercise": 6,
+      "title": "Consume only a declared bounded prefix",
+      "input_contract": "Return at most limit values from an iterator, requiring 0<=limit<=1000. Support infinite iterators without collecting the whole source. Limit 0 must leave the next source value unconsumed.",
+      "expected": "Taking three values from Iterator.from(1) yields 1,2,3 and leaves 4 next. Limit 0 yields empty and leaves 1 next;limit 1001 is rejected.",
+      "verification": "Use a local next-value counter to assert three produced values, and test zero consumption and the upper-budget failure."
+    }
+  ],
+  "golden": {
+    "source": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "accepted_doubled": [
+      4,
+      8
+    ],
+    "trace": [
+      "filter:1",
+      "filter:2",
+      "map:2",
+      "filter:3",
+      "filter:4",
+      "map:4"
+    ],
+    "retry_records": [
+      [
+        "a",
+        100
+      ],
+      [
+        "b",
+        50
+      ],
+      [
+        "a",
+        100
+      ]
+    ],
+    "attempts": 2,
+    "naive_cents": 500,
+    "logical_cents": 150
+  }
+}

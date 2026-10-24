@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>nlp-023: Reliable NLP systems and changing corpora · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>nlp-023: Reliable NLP systems and changing corpora</h1>
+      <p class="source-path">Generated from <code>courses/nlp/guides/nlp-023.md</code></p>
+    </header>
+    <article class="document"><h2 id="nlp-023-reliable-nlp-systems-and-changing-corpora">nlp-023: Reliable NLP systems and changing corpora<a class="heading-anchor" href="#nlp-023-reliable-nlp-systems-and-changing-corpora" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-022</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A reliable NLP system includes data ingestion, representation, model inference, source access, output validation and monitoring. A correct model file does not establish that the surrounding system is current, authorized or useful. Text corpora change through new documents, revisions, removals and altered permissions, while labels often arrive after predictions.</p>
+<p>This lesson treats those boundaries as inspectable data contracts. The reference filters a versioned synthetic document collection by role and validity time, fingerprints its contents, measures a simple distribution shift and computes accuracy only on mature labels. It also keeps adversarial-looking source text as an inert data field. No external service, credential or private corpus is used.</p>
+<p>Distinguish data drift from performance degradation. A change in word or category frequencies can be harmless, while an unchanged input distribution can accompany a changed meaning or label policy. Monitoring should lead to a bounded investigation rather than automatically declaring failure or retraining every time a distribution statistic moves.</p>
+<h3 id="version-the-full-text-pipeline">Version the full text pipeline<a class="heading-anchor" href="#version-the-full-text-pipeline" aria-label="Link to this section">#</a></h3>
+<p>A source record should identify the document, version, publication/availability time, validity or freshness policy, access scope and content. A stable document ID alone is insufficient when text changes. Chunk IDs should connect back to the source version and offsets, and a removed document should not remain available through a stale index.</p>
+<p>A content hash detects byte changes under a canonical serialization. The reference sorts document records by ID/version and JSON keys before hashing, so input iteration order does not change the snapshot identity. Changing the text does change the hash. This establishes reproducible content identity, not truth, completeness or approval of the contents.</p>
+<p>The deployed system also includes tokenizer, vocabulary, preprocessing, model, calibration, prompt and retrieval/ranking configuration. An index update can change answers without changing weights. Record the configuration that actually produced an output, rather than only the latest desired version.</p>
+<h3 id="enforce-scope-before-exposing-evidence">Enforce scope before exposing evidence<a class="heading-anchor" href="#enforce-scope-before-exposing-evidence" aria-label="Link to this section">#</a></h3>
+<p>The eligible function includes a source only when the requesting role is listed and the current time lies within the source&#x27;s declared validity interval. At time ten, the old policy is expired, policy version two is current and the finance-only document is unauthorized for ops. The result contains exactly the current permitted policy.</p>
+<p>This fixture is a teaching authorization rule, not a replacement for an organization&#x27;s identity system. In production the role and time must come from trusted context, not arbitrary model output. Filtering should occur before unauthorized text reaches a model context. A generated answer that promises not to quote private material does not enforce the same boundary.</p>
+<p>External documents can contain instructions, misleading claims or malformed data. They are source material to inspect under the task, not authority to redefine tool permissions or reveal files. The reference merely stores an adversarial sentence in an evidence record and never evaluates or executes it. A real assistant needs independent action controls as well as prompt-level instructions.</p>
+<h3 id="monitor-drift-delayed-labels-and-subgroups">Monitor drift, delayed labels and subgroups<a class="heading-anchor" href="#monitor-drift-delayed-labels-and-subgroups" aria-label="Link to this section">#</a></h3>
+<p>Total variation distance between two categorical distributions is one-half the sum of absolute probability differences. Counts [50,50] and [80,20] normalize to [.5,.5] and [.8,.2], giving distance .3. This is an interpretable amount of distribution movement under a fixed category vocabulary. It does not indicate whether predictions became wrong.</p>
+<p>Outcome labels may be delayed. For predictions [1,1,0] and labels [1,unknown,0], accuracy is one on the two mature labeled cases, while one case remains unassessed. Treating unknown as negative would create an artificial error and contaminate retraining. Report the mature count and cohort age alongside performance.</p>
+<p>Inspect performance and missingness by language, document source, length and other task-relevant slices. Small slices need uncertainty and a minimum-evidence policy. Monitoring a single aggregate can hide a domain shift concentrated in one group, while triggering on every small statistical difference can overwhelm operators.</p>
+<h3 id="privacy-redaction-and-a-reviewable-recovery-path">Privacy, redaction and a reviewable recovery path<a class="heading-anchor" href="#privacy-redaction-and-a-reviewable-recovery-path" aria-label="Link to this section">#</a></h3>
+<p>A regex can remove a synthetic email pattern, but that is only one narrow redaction mechanism. Names, contextual identifiers, quoted secrets and combinations of fields can still disclose information. Do not label an entire corpus anonymous because one pattern was replaced. Define the data-minimization and access requirements before deciding which text is retained in logs or training.</p>
+<p>A production incident record should connect an observed problem to an affected snapshot/model, a reversible check, a recovery action and an acceptance condition. Reindexing may restore missing current documents; rollback may restore a prior model; retraining may be inappropriate if the issue is a changed schema or permission filter. Preserve original evidence and avoid deleting user data as a troubleshooting shortcut.</p>
+<p>The system&#x27;s output contract should include unsupported, stale, unauthorized and malformed outcomes. A reliable assistant can escalate when evidence is insufficient. Measure unnecessary abstention and review workload too, so reliability does not become an excuse for a system that never completes useful tasks.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-filter-a-changing-corpus">Worked example 1: Filter a changing corpus<a class="heading-anchor" href="#worked-example-1-filter-a-changing-corpus" aria-label="Link to this section">#</a></h4>
+<p>At time ten with role ops, policy version one is expired, version two is eligible and finance is inaccessible. At time thirty no policy version is eligible under the fixture&#x27;s validity intervals. The exact returned IDs and versions are asserted before any retrieval or generation occurs.</p>
+<h4 id="worked-example-2-separate-drift-from-known-performance">Worked example 2: Separate drift from known performance<a class="heading-anchor" href="#worked-example-2-separate-drift-from-known-performance" aria-label="Link to this section">#</a></h4>
+<p>The category distribution moves from [.5,.5] to [.8,.2], giving total variation .3. A separate prediction ledger has two mature correct labels and one unknown, so its reported mature accuracy is one on two observations. Neither number can substitute for the other.</p>
+<h4 id="worked-example-3-check-lineage-and-a-limited-redaction">Worked example 3: Check lineage and a limited redaction<a class="heading-anchor" href="#worked-example-3-check-lineage-and-a-limited-redaction" aria-label="Link to this section">#</a></h4>
+<p>Reversing the document list preserves the canonical snapshot hash, while changing one policy sentence changes it. Replacing learner@example.test with [EMAIL] confirms one literal regex behavior. The guide explicitly withholds a claim of complete privacy protection from that single successful replacement.</p>
+<h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
+<p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
+<pre class="highlighted-code"><code class="language-python">docs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">old</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">role</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ops</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">until</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">8</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">current</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">role</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ops</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">until</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">private</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">role</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">finance</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">until</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
+allowed<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">id</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> docs <span class="syntax-keyword">if</span> d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">role</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ops</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> <span class="syntax-number">10</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>d<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">until</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>allowed<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> allowed<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">current</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+p<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">50.</span><span class="syntax-punctuation">,</span><span class="syntax-number">50.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">80.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+distance<span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>abs<span class="syntax-punctuation">(</span>p<span class="syntax-operator">/</span>p<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>q<span class="syntax-operator">/</span>q<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>distance<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>distance<span class="syntax-punctuation">,</span><span class="syntax-number">.3</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-023.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-023-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-023.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-023_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-filter-permission-and-freshness">Exercise 1: Filter permission and freshness<a class="heading-anchor" href="#exercise-1-filter-permission-and-freshness" aria-label="Link to this section">#</a></h4>
+<p>Apply the role/time rule to the three source records at time10.</p>
+<p><strong>Expected:</strong> Only policy version 2 for ops; unknown role and expired time30 yield no records.</p>
+<p><strong>Verify:</strong> Only policy version 2 for ops; unknown role and expired time30 yield no records. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Evaluate authorization and validity before constructing context.</p>
+<h4 id="exercise-2-fingerprint-content-reproducibly">Exercise 2: Fingerprint content reproducibly<a class="heading-anchor" href="#exercise-2-fingerprint-content-reproducibly" aria-label="Link to this section">#</a></h4>
+<p>Hash canonical records, reverse their input order and change one text field.</p>
+<p><strong>Expected:</strong> Reordering leaves hash unchanged; text change produces a different hash.</p>
+<p><strong>Verify:</strong> Reordering leaves hash unchanged; text change produces a different hash. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Sort records and keys before serialization.</p>
+<h4 id="exercise-3-measure-a-defined-drift">Exercise 3: Measure a defined drift<a class="heading-anchor" href="#exercise-3-measure-a-defined-drift" aria-label="Link to this section">#</a></h4>
+<p>Compute total variation for [50,50] and [80,20].</p>
+<p><strong>Expected:</strong> Distance.3; negative,nonfinite or zero-total count vectors are rejected.</p>
+<p><strong>Verify:</strong> Distance.3; negative,nonfinite or zero-total count vectors are rejected. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Normalize counts and take half the L1 difference.</p>
+<h4 id="exercise-4-respect-label-maturity">Exercise 4: Respect label maturity<a class="heading-anchor" href="#exercise-4-respect-label-maturity" aria-label="Link to this section">#</a></h4>
+<p>Evaluate predictions[1,1,0] with labels[1,None,0], then an all-unknown case.</p>
+<p><strong>Expected:</strong> Two mature cases with accuracy1; all-unknown returns count0 and no accuracy.</p>
+<p><strong>Verify:</strong> Two mature cases with accuracy1; all-unknown returns count0 and no accuracy. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Exclude unknown outcomes explicitly and report their count.</p>
+<h4 id="exercise-5-treat-external-text-as-data">Exercise 5: Treat external text as data<a class="heading-anchor" href="#exercise-5-treat-external-text-as-data" aria-label="Link to this section">#</a></h4>
+<p>Store the adversarial fixture in an evidence packet and apply the synthetic email redaction.</p>
+<p><strong>Expected:</strong> Text remains inert; only the declared email pattern is replaced; no broad anonymization claim.</p>
+<p><strong>Verify:</strong> Text remains inert; only the declared email pattern is replaced; no broad anonymization claim. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Do not evaluate source strings or turn them into tool instructions.</p>
+<h4 id="exercise-6-write-a-recovery-and-monitoring-contract">Exercise 6: Write a recovery and monitoring contract<a class="heading-anchor" href="#exercise-6-write-a-recovery-and-monitoring-contract" aria-label="Link to this section">#</a></h4>
+<p>Specify a stale-document incident with versions,diagnostics,rollback/reindex choice and acceptance evidence.</p>
+<p><strong>Expected:</strong> A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery.</p>
+<p><strong>Verify:</strong> A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Choose the repair for the failed component rather than automatically retraining.</p>
+<h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Does a changed input distribution imply model degradation?</strong> No. It is a signal to investigate. Performance requires outcomes or other task evidence, and label delays can make that evidence incomplete.</p>
+<p><strong>Interview: Why version the retrieval index separately from weights?</strong> Changing source contents, permissions or ranking changes the evidence presented to the model even when its parameters stay fixed. Reproducibility requires both identities.</p>
+<p><strong>Interview: Does redacting email addresses anonymize a corpus?</strong> It removes one pattern under one implementation. Other identifiers and contextual combinations may remain. Privacy claims require a broader defined mechanism and review.</p>
+<h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
+<p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-024</code>.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://www.nist.gov/itl/ai-risk-management-framework">NIST AI Risk Management Framework</a></li>
+</ul>
+<ul>
+<li><a href="https://proceedings.neurips.cc/paper/5656-hidden-technical-debt-in-machine-learning-systems">Sculley and colleagues, ML system technical debt</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-023.
+Read courses/nlp/guides/nlp-023.md and courses/nlp/learners/nlp-023.py.
+Direct prerequisites: `nlp-022`.
+Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/nlp/solutions/ closed until I attempt or explicitly request comparison.
+Check numerical, span or task-level outputs and a counterexample; do not equate a toy mechanism with pretrained-model quality.
+Do not download corpora or models or send text to an external service.</code></pre></article>
+  </main>
+</body>
+</html>

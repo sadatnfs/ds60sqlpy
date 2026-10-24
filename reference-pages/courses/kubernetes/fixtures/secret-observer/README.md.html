@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Observe a synthetic Secret through three lifetimes · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Observe a synthetic Secret through three lifetimes</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/fixtures/secret-observer/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="observe-a-synthetic-secret-through-three-lifetimes">Observe a synthetic Secret through three lifetimes<a class="heading-anchor" href="#observe-a-synthetic-secret-through-three-lifetimes" aria-label="Link to this section">#</a></h2>
+<p>This teacher-operated fixture belongs to <code>k8s-019</code>. It gives a real consuming application to the lesson&#x27;s environment, projected-file and reload explanation. It accepts exactly two public byte strings, <code>DUMMY_LESSON_ONLY</code> and <code>DUMMY_LESSON_ROTATED</code>. They are teaching markers, not credentials. Never replace these strings with a password, API token or real Secret value.</p>
+<p>The normal browser worker continues to reject Secrets, Secret references and this program override. A teacher must separately prepare an exclusive local course session and authorize this fixed observation. The teacher runner uses the preparation&#x27;s private administrator context because the ordinary worker Role deliberately lacks these operations. It does not change that Role, launch a cluster, select an ambient context, execute commands inside Pods or download an image. The caller needs the repository&#x27;s prepared Python environment, pinned kubectl, existing fixture image and an already prepared owned session.</p>
+<h3 id="follow-one-value-through-the-system">Follow one value through the system<a class="heading-anchor" href="#follow-one-value-through-the-system" aria-label="Link to this section">#</a></h3>
+<p>The API object&#x27;s desired value is only the first stage. On container startup, Kubernetes supplies <code>SYNTHETIC_MARKER</code> through <code>env[].valueFrom.secretKeyRef</code>. The operating system gives the process that environment. The Python application captures its label once in <code>Observation.__init__</code>. A later API update does not rewrite the environment of the running process.</p>
+<p>The same Secret key is mounted as <code>/synthetic/message</code>. The manifest mounts the whole Secret volume read-only, with an <code>items</code> entry selecting one key and renaming it to <code>message</code>. There is no <code>subPath</code>. The application opens that path again on each observation, so it can see a newer projected file after Kubernetes refreshes the volume. Holding an old file descriptor or using <code>subPath</code> would change this experiment. Kubernetes propagates Secret volume updates eventually; an accepted patch does not establish that the file has already changed.</p>
+<p>The application also keeps a separate <code>cached</code> label in memory. It initializes this once from the projected file and changes it only when the fixed <code>POST /reload</code> endpoint succeeds. Thus file freshness and application use can disagree without either observation being fabricated. Reload reads the file once and returns the label it actually adopted. A lock serializes observations and reloads within this process; it does not make a transaction with the Kubernetes API.</p>
+<p>The label <code>initial</code> stands for the first public marker and <code>rotated</code> for the second. <code>pod_uid</code> is supplied by the downward API. <code>boot_id</code> is a newly generated process identifier. The teacher crosschecks the Pod UID against API readback and the controller owner graph; merely receiving a UID in an HTTP body would not prove ownership.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Observation stage</th>
+<th>Environment</th>
+<th>Projected file</th>
+<th>Application cache</th>
+<th>Identity expectation</th>
+</tr></thead><tbody>
+<tr>
+<td>Initial ready process</td>
+<td>initial</td>
+<td>initial</td>
+<td>initial</td>
+<td>First Pod UID and boot ID</td>
+</tr>
+<tr>
+<td>Secret patch accepted</td>
+<td>initial</td>
+<td>initial or rotated</td>
+<td>initial</td>
+<td>Same process; projection timing unobserved</td>
+</tr>
+<tr>
+<td>File refresh observed</td>
+<td>initial</td>
+<td>rotated</td>
+<td>initial</td>
+<td>Same Pod UID and boot ID</td>
+</tr>
+<tr>
+<td>Explicit reload completed</td>
+<td>initial</td>
+<td>rotated</td>
+<td>rotated</td>
+<td>Same Pod UID and boot ID</td>
+</tr>
+<tr>
+<td>Replacement Pod ready</td>
+<td>rotated</td>
+<td>rotated</td>
+<td>rotated</td>
+<td>New Pod UID and new boot ID</td>
+</tr>
+</tbody></table></div>
+<p>This table is a prediction until the teacher obtains an actual evidence record. A container restart could change the boot ID while keeping the Pod UID. This runner deliberately replaces one recorded Pod, allowing the Deployment&#x27;s ReplicaSet to create a new Pod, so both identities must change. It does not claim to test a rollout, every restart cause or simultaneous API updates.</p>
+<h3 id="read-the-concrete-manifest">Read the concrete manifest<a class="heading-anchor" href="#read-the-concrete-manifest" aria-label="Link to this section">#</a></h3>
+<p><code>render.py</code> embeds the exact <code>app.py</code> text into the fixed ConfigMap and produces <code>manifest.json</code> and <code>rotate.json</code> without contacting any API. The three objects are Secret <code>synthetic-message</code>, ConfigMap <code>synthetic-secret-observer-program</code> and Deployment <code>synthetic-secret-observer</code>. There is one replica and no Service, Ingress, persistent storage or host mount. Before creating anything, the runner refuses existing objects under any of these names. It adds the explicit owned namespace and fresh run nonce itself.</p>
+<p>The Pod uses <code>ds60sqlpy-k8s-fixture:0.2.0</code> with <code>imagePullPolicy: Never</code>. Its command is the fixed Python observer mounted at <code>/lesson/app.py</code>. It runs as UID/GID 65532, with <code>fsGroup: 65532</code> so the group-readable Secret projection can be read. JSON&#x27;s <code>defaultMode: 288</code> is decimal for octal 0440: owner and group may read, neither may write, and other users have no permissions from these mode bits. File permissions are separate from API authorization or encryption at rest. A mode declaration does not prove either of those controls.</p>
+<p>The Pod has a read-only root filesystem, drops all capabilities, disallows privilege escalation, uses RuntimeDefault seccomp, and does not mount a service account token. It requests 25m CPU/32Mi memory and is limited to 100m/96Mi. A readiness probe calls <code>/ready</code>, which validates the marker without mutating the cache. The one-second termination grace bounds this teaching process&#x27;s shutdown; it is not advice for an application that needs time to flush durable work.</p>
+<p>The observer exposes only <code>GET /ready</code>, <code>GET /observe</code> and <code>POST /reload</code>. Responses contain the five identity/label fields, never marker bytes. Unknown paths return a fixed error. Reload rejects bodies, duplicate Content-Length headers and every Transfer-Encoding header. The file reader accepts only the exact two byte sequences, with no newline normalization, and bounds its read. An unknown or missing marker yields a generic 503 without revealing bytes or paths. Routine HTTP logging is disabled. This small server demonstrates a lifecycle mechanism; it is not a general authenticated secret-management service.</p>
+<h3 id="regenerate-and-inspect-offline">Regenerate and inspect offline<a class="heading-anchor" href="#regenerate-and-inspect-offline" aria-label="Link to this section">#</a></h3>
+<p>From the repository root, use the prepared interpreter. POSIX:</p>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python courses/kubernetes/fixtures/secret-observer/render.py
+.venv/bin/python -m pytest tests/test_kubernetes_secret_observer.py</code></pre>
+<p>PowerShell, using the interpreter printed by setup:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython courses<span class="syntax-punctuation">/</span>kubernetes<span class="syntax-punctuation">/</span>fixtures<span class="syntax-punctuation">/</span>secret-observer<span class="syntax-punctuation">/</span>render<span class="syntax-punctuation">.</span>py
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fixture rendering failed.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">/</span>test_kubernetes_secret_observer<span class="syntax-punctuation">.</span>py
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fixture contract tests failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>The tests use fresh temporary files, a loopback HTTP server and fake API responses. They establish program and ownership logic, not kubelet projection or actual Kubernetes cleanup. The lesson&#x27;s small encoding check remains useful as a separate offline exercise and also makes no cluster request.</p>
+<h3 id="run-only-against-a-fresh-teacher-owned-session">Run only against a fresh teacher-owned session<a class="heading-anchor" href="#run-only-against-a-fresh-teacher-owned-session" aria-label="Link to this section">#</a></h3>
+<p>Prepare the owned session immediately before the lesson using the explicit preparation workflow in <a href="../../host-labs.md.html">host-labs.md</a>. The usual worker credential expires after about 15 minutes. This runner requires at least seven minutes remaining, even though it uses the matching teacher context, so an old session cannot silently become an indefinite administrator route. A released session cannot be reused. Keep its private files outside learner progress and exports, and never print the kubeconfig, token or private key.</p>
+<p>The teacher supplies the absolute session directory from the new preparation receipt and the absolute pinned kubectl path. The runner derives the explicit teacher context, namespace and expected namespace UID from the matching private receipt and lease. It checks the kubeconfig has one fixed context, the exact loopback server and cluster CA, and embedded certificate credentials only. It rejects credential plugins and ambient kubeconfig selection. Use a new output directory whose parent already exists. These commands neither prepare nor release a cluster:</p>
+<p>POSIX:</p>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_SESSION<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set the fresh private session directory from preparation</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECTL<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set the pinned kubectl executable path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_EVIDENCE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Set a new evidence directory beneath an existing parent</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+.venv/bin/python courses/kubernetes/fixtures/secret-observer/teacher.py <span class="syntax-string">\</span>
+  --session <span class="syntax-string">&quot;</span>$LAB_SESSION<span class="syntax-string">&quot;</span> --kubectl <span class="syntax-string">&quot;</span>$LAB_KUBECTL<span class="syntax-string">&quot;</span> <span class="syntax-string">\</span>
+  --output <span class="syntax-string">&quot;</span>$LAB_EVIDENCE<span class="syntax-string">&quot;</span> --confirm-synthetic-secret</code></pre>
+<p>PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_SESSION <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_KUBECTL <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_EVIDENCE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Fresh owned session, pinned kubectl and new evidence paths are required.&#x27;</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython courses<span class="syntax-punctuation">/</span>kubernetes<span class="syntax-punctuation">/</span>fixtures<span class="syntax-punctuation">/</span>secret-observer<span class="syntax-punctuation">/</span>teacher<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-session $env:LAB_SESSION <span class="syntax-punctuation">-</span>-kubectl $env:LAB_KUBECTL <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-output $env:LAB_EVIDENCE <span class="syntax-punctuation">-</span>-confirm-synthetic-secret
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Read the fixture evidence and cleanup status.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Argument paths are separate tokens, so paths containing spaces work. The runner uses no shell interpolation or default context. Do not paste an example session from a previous teacher&#x27;s notes. Do not replace a denial with another identity. The observation is limited to the prepared owned namespace; the wrapper&#x27;s fixed operations do not reduce the underlying administrator credential&#x27;s authority, so keep that file private and under teacher control.</p>
+<p>The runner first checks the namespace UID and ownership label, then refuses preexisting fixture names. It records creation intent and returned object UIDs. The Deployment, ReplicaSet and Pod must have the expected owner chain and fresh nonce. One port-forward targets that exact Pod and binds only 127.0.0.1 on an OS-assigned port. There is no arbitrary Pod selector or exec command.</p>
+<p>Rotation uses a JSON Patch with tests for the Secret UID and resourceVersion before changing the public marker. A changed identity or concurrent edit fails instead of overwriting someone else&#x27;s state. The runner polls the real file label for at most 150 seconds. It does not sleep a fixed duration and assume an update happened. It requires the environment and cache to remain initial during that observation, invokes reload, then stops its port-forward and deletes only the recorded Pod UID. A replacement Pod must belong to the same owned Deployment. Its environment, file and initial cache must all be rotated.</p>
+<h3 id="interpret-evidence-and-failure">Interpret evidence and failure<a class="heading-anchor" href="#interpret-evidence-and-failure" aria-label="Link to this section">#</a></h3>
+<p>The new directory contains <code>evidence.json</code> with source hashes, namespace and object identities, observed image IDs, four label snapshots, elapsed projection time and cleanup status. API resourceVersion strings establish that the source was observed at two versions; they are opaque and are not seconds or a global sequence to subtract. A measured projection delay is one observation, not an upper bound for other clusters. The program does not prove encryption at rest, real-secret confidentiality, network-policy isolation or production readiness.</p>
+<p>A startup failure can mean missing image, key, mode/group access or application validation. Distinguish Deployment progress, Pod events and readiness before assuming a networking fault. A 150-second projection timeout is a failed or inconclusive observation in this environment. Inspect the explicit owned Pod and kubelet setup through the teacher workflow; do not lengthen waits forever or broaden normal worker privileges. If the boot ID changes during the wait, the test refuses to mix observations from different processes.</p>
+<p>A nonzero exit is never a pass. Read both <code>observation_passed</code> and <code>cleanup_confirmed</code>. A successful observation with failed cleanup still exits 2. The runner suppresses raw kubectl error bodies because those can echo submitted fields. Its value-free failure type is a lead for private diagnosis, not a claim that the exact root cause was established.</p>
+<h3 id="cleanup-is-an-independent-result">Cleanup is an independent result<a class="heading-anchor" href="#cleanup-is-an-independent-result" aria-label="Link to this section">#</a></h3>
+<p>The runner closes its own port-forward in a <code>finally</code> block. It rechecks the namespace and object ownership before cleanup and issues Kubernetes DeleteOptions with <code>preconditions.uid</code>, foreground propagation and a bounded grace period. It removes the recorded Deployment, ConfigMap and Secret, then checks their absence and the absence of its nonce-labeled Pods/ReplicaSets. It never issues a broad namespace delete or deletes a same-name replacement. SIGINT/SIGTERM trigger the same bounded cleanup path; a second such signal is ignored during cleanup. A process kill or machine crash can prevent this path.</p>
+<p>If creation may have succeeded but its UID could not be recorded, cleanup refuses that ambiguous object and retains the intent/nonce for teacher review. Do not delete by name alone to make the receipt green. The separate owned-session release operation validates the recorded control-plane identity before removing that exclusive course cluster. Use the exact preparation receipt&#x27;s session:</p>
+<p>POSIX:</p>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/prepare_kubernetes.py release <span class="syntax-string">\</span>
+  --session <span class="syntax-string">&quot;</span>$LAB_SESSION<span class="syntax-string">&quot;</span> --confirm-release</code></pre>
+<p>PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">/</span>prepare_kubernetes<span class="syntax-punctuation">.</span>py release <span class="syntax-punctuation">`</span>
+    <span class="syntax-punctuation">-</span>-session $env:LAB_SESSION <span class="syntax-punctuation">-</span>-confirm-release
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned session release needs inspection.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Release is separate from this fixture&#x27;s object cleanup. Retain both receipts. After expiry, release that exact owned session and prepare a new one; never edit expiry timestamps or reuse its credentials. Do not remove learner pads, progress, unrelated containers or another teacher&#x27;s objects.</p>
+<h3 id="references">References<a class="heading-anchor" href="#references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-files-from-a-pod">Kubernetes Secret volume updates and subPath behavior</a></li>
+<li><a href="https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-container-environment-variables-using-secret-data">Secret-backed environment variables and updates</a></li>
+<li><a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment ownership and replacement</a></li>
+</ul></article>
+  </main>
+</body>
+</html>

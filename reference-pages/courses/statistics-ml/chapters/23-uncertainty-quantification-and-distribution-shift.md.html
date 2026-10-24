@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>23. Uncertainty Quantification and Distribution Shift · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>23. Uncertainty Quantification and Distribution Shift</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/23-uncertainty-quantification-and-distribution-shift.md</code></p>
+    </header>
+    <article class="document"><h2 id="23-uncertainty-quantification-and-distribution-shift">23. Uncertainty Quantification and Distribution Shift<a class="heading-anchor" href="#23-uncertainty-quantification-and-distribution-shift" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-023</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A point prediction hides at least two uncertainties: variability in future outcomes even if the model were known, and uncertainty about the model itself. Which component can be reduced depends on the intervention. More training data can reduce some parameter uncertainty; improved sensors may reduce apparent outcome noise. The decomposition is conditional on what information the model observes.</p>
+<h4 id="split-conformal-prediction-by-ranks">Split conformal prediction by ranks<a class="heading-anchor" href="#split-conformal-prediction-by-ranks" aria-label="Link to this section">#</a></h4>
+<p>Fit a prediction model on training data. On n fresh calibration observations, compute nonconformity scores, such as absolute residuals <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>s</mi><mi>i</mi></msub><mo>=</mo><mo stretchy="false">|</mo><msub><mi>y</mi><mi>i</mi></msub><mo>−</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo stretchy="false">|</mo></mrow><annotation encoding="application/x-tex">s_i=|y_i-f(x_i)|</annotation></semantics></math>. For desired miscoverage alpha, take <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow></mrow><annotation encoding="application/x-tex">k=\left\lceil(n+1)(1-\alpha)\right\rceil</annotation></semantics></math> and the kth smallest calibration score q. If k exceeds n, use an unbounded interval rather than quietly substituting the largest observed score. Predict <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>−</mo><mi>q</mi><mo>,</mo><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>q</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[f(x)-q,f(x)+q]</annotation></semantics></math>. Under exchangeability of calibration and new observations, conditional on the training fit, the new score&#x27;s rank among n+1 scores provides finite-sample marginal coverage of at least 1-alpha, with suitable handling of ties.</p>
+<p>This is marginal coverage across new observations, not a promise of 90% coverage at every exact x or within every subgroup. A model can meet overall coverage while systematically under-covering a rare region. Conformalized quantile regression uses scores max(lower(x)-y,y-upper(x)) to adapt interval width to heteroskedasticity, then applies an analogous rank correction. Better base models can improve efficiency, while the calibration argument supplies coverage under its assumptions.</p>
+<h4 id="shift-changes-the-guarantee">Shift changes the guarantee<a class="heading-anchor" href="#shift-changes-the-guarantee" aria-label="Link to this section">#</a></h4>
+<p>Covariate shift changes p(x) while preserving p(y|x); importance weights p_target(x)/p_source(x) can adjust target expectations when support overlaps. Label shift changes class priors while preserving p(x|y), enabling a different correction. Concept drift changes the outcome mechanism itself. These assumptions are distinct and cannot be established by one generic drift score. Once calibration exchangeability fails, an old conformal guarantee no longer automatically applies.</p>
+<p>Selective prediction trades coverage of cases against error among accepted cases. Abstaining on uncertain inputs can be valuable, but the human or fallback path has its own accuracy, cost and fairness constraints. Evaluate the entire decision system.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-23-01">Aleatoric uncertainty<a class="heading-anchor" href="#stat-23-01" aria-label="Link to this section">#</a></h4>
+<p>Aleatoric uncertainty is residual outcome variation conditional on the modeled information. It is not always permanently irreducible: richer measurements may explain part of it. Specify the conditioning information when using the term.</p>
+<h4 id="stat-23-02">Epistemic uncertainty<a class="heading-anchor" href="#stat-23-02" aria-label="Link to this section">#</a></h4>
+<p>Epistemic uncertainty reflects unknown parameters, functions or model structure. It can shrink with informative data but remain large outside support. Agreement among misspecified models can create false confidence.</p>
+<h4 id="stat-23-03">Uncertainty propagation<a class="heading-anchor" href="#stat-23-03" aria-label="Link to this section">#</a></h4>
+<p>Propagate joint input and parameter uncertainty through a calculation using derivatives or simulation. Preserve dependence among uncertain inputs. Plugging independent marginal draws into a dependent system can misstate tail risk.</p>
+<h4 id="stat-23-04">Predictive distributions<a class="heading-anchor" href="#stat-23-04" aria-label="Link to this section">#</a></h4>
+<p>Represent possible outcomes with probabilities, densities or samples. Evaluate both calibration and sharpness using proper scores and relevant diagnostics. A narrow distribution is useful only when it assigns plausible mass to actual outcomes.</p>
+<h4 id="stat-23-05">Quantile prediction<a class="heading-anchor" href="#stat-23-05" aria-label="Link to this section">#</a></h4>
+<p>Estimate conditional quantiles through pinball loss or distributional models. Quantiles can describe asymmetric risk and heterogeneous spread. Separately fitted quantiles may cross and do not automatically supply joint coverage guarantees.</p>
+<h4 id="stat-23-06">Prediction set construction<a class="heading-anchor" href="#stat-23-06" aria-label="Link to this section">#</a></h4>
+<p>Return a set whose inclusion rule targets a coverage criterion. Set size measures informativeness but must be considered alongside coverage. Trivially returning every outcome covers perfectly while supporting few decisions.</p>
+<h4 id="stat-23-07">Conformal prediction<a class="heading-anchor" href="#stat-23-07" aria-label="Link to this section">#</a></h4>
+<p>Calibrate scores using exchangeability or another explicitly justified validity framework. The classical guarantee is finite-sample marginal coverage, not universal conditional coverage or immunity to distribution change.</p>
+<h4 id="stat-23-08">Split conformal prediction<a class="heading-anchor" href="#stat-23-08" aria-label="Link to this section">#</a></h4>
+<p>Separate model fitting from calibration and use the finite-sample corrected order statistic. Reusing calibration data to tune many model choices can invalidate the simple argument. Very small calibration sets limit attainable finite intervals.</p>
+<h4 id="stat-23-09">Conformalized quantile regression<a class="heading-anchor" href="#stat-23-09" aria-label="Link to this section">#</a></h4>
+<p>Start with lower and upper quantile predictions and calibrate their worst signed boundary error. This can adapt width to local noise while preserving a marginal conformal guarantee under the relevant assumptions.</p>
+<h4 id="stat-23-10">Conditional versus marginal coverage<a class="heading-anchor" href="#stat-23-10" aria-label="Link to this section">#</a></h4>
+<p>Marginal coverage averages over the target population, while conditional coverage holds within specified conditions or at each covariate value. The latter is harder and cannot generally be obtained distribution-free with informative intervals everywhere.</p>
+<h4 id="stat-23-11">Distribution-free inference<a class="heading-anchor" href="#stat-23-11" aria-label="Link to this section">#</a></h4>
+<p>Distribution-free means no specified parametric distribution within the stated class. It still requires assumptions such as exchangeability, boundedness or design validity. The phrase is not shorthand for assumption-free inference.</p>
+<h4 id="stat-23-12">Deep ensembles<a class="heading-anchor" href="#stat-23-12" aria-label="Link to this section">#</a></h4>
+<p>Train multiple neural models and examine their predictive mixture or disagreement. Diversity depends on seeds, data and architecture. Ensembles can all fail similarly under shared misspecification or novel inputs.</p>
+<h4 id="stat-23-13">Bayesian neural networks<a class="heading-anchor" href="#stat-23-13" aria-label="Link to this section">#</a></h4>
+<p>Place distributions over weights or related components and integrate predictions. Computational approximations and priors affect uncertainty. Bayesian terminology alone does not establish empirical calibration or protection against shift.</p>
+<h4 id="stat-23-14">Selective prediction<a class="heading-anchor" href="#stat-23-14" aria-label="Link to this section">#</a></h4>
+<p>Accept only predictions satisfying an uncertainty or utility criterion and route others elsewhere. Report accepted-case error and acceptance rate together. Abstention can concentrate difficult cases in an overloaded fallback system.</p>
+<h4 id="stat-23-15">Covariate shift<a class="heading-anchor" href="#stat-23-15" aria-label="Link to this section">#</a></h4>
+<p>Assume predictor distribution changes while the conditional outcome law remains stable. Importance weighting can then target a new population with overlap. If p(y|x) changes too, this correction is insufficient.</p>
+<h4 id="stat-23-16">Label shift<a class="heading-anchor" href="#stat-23-16" aria-label="Link to this section">#</a></h4>
+<p>Assume class prevalence changes but class-conditional feature distributions remain stable. Adjust class-prior odds or estimate new priors under identifiability conditions. Misclassification and feature shift can complicate prior estimation.</p>
+<h4 id="stat-23-17">Concept drift<a class="heading-anchor" href="#stat-23-17" aria-label="Link to this section">#</a></h4>
+<p>The relation between inputs and outcomes changes, potentially through policy, behavior or measurement. Input histograms can stay stable while performance deteriorates. Mature labels or independent mechanisms are needed to detect some drift.</p>
+<h4 id="stat-23-18">Importance weighting<a class="heading-anchor" href="#stat-23-18" aria-label="Link to this section">#</a></h4>
+<p>Reweight source observations by target-to-source density ratios. Large weights increase variance and reveal poor support. Clipping improves stability at the cost of bias and a changed approximation.</p>
+<h4 id="stat-23-19">Distributionally robust prediction<a class="heading-anchor" href="#stat-23-19" aria-label="Link to this section">#</a></h4>
+<p>Optimize against a specified set of plausible distributions. The uncertainty set determines what protection exists and how conservative the result becomes. Robustness against that set is not robustness to every possible shift.</p>
+<h4 id="stat-23-20">Out-of-distribution detection<a class="heading-anchor" href="#stat-23-20" aria-label="Link to this section">#</a></h4>
+<p>Score novelty relative to development data or learned representations. A detector can miss harmful semantic shifts and flag benign changes. Evaluate false alarms, missed shifts and downstream performance consequences separately.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-derive-the-rank-guarantee-without-a-parametric-error-model">Case study: derive the rank guarantee without a parametric error model<a class="heading-anchor" href="#case-study-derive-the-rank-guarantee-without-a-parametric-error-model" aria-label="Link to this section">#</a></h4>
+<p>Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mrow><mo stretchy="true" fence="true" form="prefix">⌈</mo><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="false">)</mo><mo stretchy="true" fence="true" form="postfix">⌉</mo></mrow></mrow><annotation encoding="application/x-tex">k=\left\lceil(n+1)(1-\alpha)\right\rceil</annotation></semantics></math> therefore gives coverage at least 1-alpha.</p>
+<p>With <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>n</mi><mo>=</mo><mn>19</mn></mrow><annotation encoding="application/x-tex">n=19</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.1</mn></mrow><annotation encoding="application/x-tex">\alpha=0.1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mn>18</mn></mrow><annotation encoding="application/x-tex">k=18</annotation></semantics></math>. Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>k</mi><mo>=</mo><mi>n</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k=n+1</annotation></semantics></math>, there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.</p>
+<p>Ties can make coverage conservative with the usual nonrandomized threshold. Randomized tie-breaking can produce more exact rank behavior under suitable construction, but the implementation and interpretation must be explicit. The core result concerns marginal prediction coverage, not the accuracy of the point model or the conditional coverage of every subgroup.</p>
+<h4 id="case-study-overall-coverage-hides-a-difficult-subgroup">Case study: overall coverage hides a difficult subgroup<a class="heading-anchor" href="#case-study-overall-coverage-hides-a-difficult-subgroup" aria-label="Link to this section">#</a></h4>
+<p>Suppose 90% of observations belong to an easy group with nearly deterministic outcomes and 10% to a noisy group. A constant-width interval calibrated to 90% marginal coverage can cover almost every easy case while failing most noisy cases. The aggregate target may be met even though the system is least reliable for the group where uncertainty matters most.</p>
+<p>A quantile model can adapt interval width to predictors of noise, and conformalized quantile regression calibrates its remaining boundary errors. Group-specific calibration can target coverage within prespecified groups if each has enough calibration data. Both approaches introduce design choices and finite-sample limits. Tiny intersections may require wide intervals, pooling assumptions or an explicit abstention policy.</p>
+<p>Measure interval width as well as coverage. An interval spanning every possible operational outcome is calibrated but not useful. Evaluate proper scores or quantile losses, coverage by meaningful group, and the downstream action. Avoid choosing the narrowest of many interval methods on the same calibration labels and then claiming the original split-conformal guarantee without accounting for that selection.</p>
+<h4 id="case-study-distinguish-three-shifts-before-reweighting">Case study: distinguish three shifts before reweighting<a class="heading-anchor" href="#case-study-distinguish-three-shifts-before-reweighting" aria-label="Link to this section">#</a></h4>
+<p>A model predicts incident severity from diagnostic features. A new product mix changes feature frequencies while severity conditional on features remains unchanged: this is covariate shift. If all target feature regions are represented in training, target-to-source density ratios can reweight evaluation or learning. Extremely large ratios reveal that target performance depends on a small number of source examples.</p>
+<p>Alternatively, severity prevalence changes while each severity class retains the same feature distribution: this is label shift. Prior-odds correction follows a different model and can change calibrated probabilities without changing some class-conditional patterns. If a new software architecture changes how the same diagnostic features map to severity, the conditional mechanism itself has changed: concept drift. Neither simple covariate weights nor prior-odds correction is sufficient in general.</p>
+<p>Observed data rarely prove one shift model perfectly. Use domain changes, label feedback and diagnostics to assess plausibility. A classifier that distinguishes source from target shows distributional difference in the observed inputs, not which correction is valid. A model can also suffer concept drift with unchanged input distributions, so input monitoring alone misses some failures.</p>
+<h4 id="case-study-uncertainty-must-reach-the-final-decision">Case study: uncertainty must reach the final decision<a class="heading-anchor" href="#case-study-uncertainty-must-reach-the-final-decision" aria-label="Link to this section">#</a></h4>
+<p>A demand model outputs a predictive distribution, then a staffing optimizer treats its mean as certain. The uncertainty has disappeared at the interface between components. If understaffing is costly, optimize against the predictive distribution, quantiles or explicitly defined scenarios rather than only the average. Preserve correlation across locations when shared shocks affect all of them.</p>
+<p>Monte Carlo propagation can sample model parameters and future outcomes jointly, then compute the decision outcome for each draw. Distinguish posterior or parameter uncertainty from process variability, and preserve shared latent effects. Sampling each location independently can drastically understate the probability of simultaneous overload.</p>
+<p>An abstention policy similarly needs a complete fallback model. If difficult cases are routed to people, evaluate reviewer capacity, error, delay and consistency. A model with excellent accepted-case accuracy may produce a worse system if it sends an unmanageable fraction to review. Report coverage, conditional risk and end-to-end utility together.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_23.py.html">chapter_23.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_23.py</code></pre>
+<h4 id="the-finite-sample-correction-matters">The finite-sample correction matters<a class="heading-anchor" href="#the-finite-sample-correction-matters" aria-label="Link to this section">#</a></h4>
+<p>Nineteen calibration residuals and alpha .1 require the eighteenth ordered residual. Twenty illustrative equally likely new-score ranks give coverage .9. The program checks the rank arithmetic, not real-world calibration. A real guarantee needs the exchangeability argument and a predictor fitted without calibration leakage.</p>
+<h4 id="reweight-the-target-not-the-narrative">Reweight the target, not the narrative<a class="heading-anchor" href="#reweight-the-target-not-the-narrative" aria-label="Link to this section">#</a></h4>
+<p>Two strata have unchanged conditional outcomes one and nine, but their shares reverse from <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>0.8</mn></mrow><mrow><mn>0.2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{0.8}{0.2}</annotation></semantics></math> to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>0.2</mn></mrow><mrow><mn>0.8</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{0.2}{0.8}</annotation></semantics></math>. The mean changes from 2.6 to 7.4. Density ratios .25 and four recover the target mean exactly. If the conditional outcomes also changed, these weights alone would not suffice.</p>
+<h4 id="zero-accepted-error-can-hide-low-coverage">Zero accepted error can hide low coverage<a class="heading-anchor" href="#zero-accepted-error-can-hide-low-coverage" aria-label="Link to this section">#</a></h4>
+<p>Accepting only the two high-confidence cases produces zero errors on accepted cases but processes only half the population. The other two cases still need a decision. Four observations are a mechanism illustration, not evidence that the policy is reliably error-free.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">conformal_rank</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">)</span>
+    alpha<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">;</span>n<span class="syntax-operator">=</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>k<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>ceil<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-operator">-</span>alpha<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    q<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sort<span class="syntax-punctuation">(</span>scores<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span>k<span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">if</span> k<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>n <span class="syntax-keyword">else</span> np<span class="syntax-operator">.</span>inf
+    <span class="syntax-keyword">assert</span> k<span class="syntax-operator">==</span><span class="syntax-number">18</span> <span class="syntax-operator">and</span> q<span class="syntax-operator">==</span><span class="syntax-number">18</span>
+    possible_new_scores<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span><span class="syntax-number">20.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">)</span>
+    rank_coverage<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>possible_new_scores<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>q<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> rank_coverage<span class="syntax-operator">==</span><span class="syntax-number">.9</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Calibration n/k/q:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>n<span class="syntax-punctuation">,</span>k<span class="syntax-punctuation">,</span>q<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">coverage over illustrative equally likely ranks:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>rank_coverage<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">shift_weighting</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    source<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>target<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.2</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>outcome<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">9.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    weights<span class="syntax-operator">=</span>target<span class="syntax-operator">/</span>source
+    target_mean<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>source<span class="syntax-operator">*</span>weights<span class="syntax-operator">*</span>outcome<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span>target<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-number">7.4</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.6</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Source mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>source<span class="syntax-decorator">@outcome</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">target reweighted mean:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>target_mean<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">ratios:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>weights<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">selective_prediction</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    confidence<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.55</span><span class="syntax-punctuation">,</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.95</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>error<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    accepted<span class="syntax-operator">=</span>confidence<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span><span class="syntax-number">.8</span>
+    coverage<span class="syntax-operator">=</span>accepted<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>risk<span class="syntax-operator">=</span>error<span class="syntax-punctuation">[</span>accepted<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> coverage<span class="syntax-operator">==</span><span class="syntax-number">.5</span> <span class="syntax-operator">and</span> risk<span class="syntax-operator">==</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.5</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Accepted fraction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>coverage<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted empirical error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>risk<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">all-case error:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>error<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    conformal_rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>shift_weighting<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>selective_prediction<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Does 90% conformal coverage mean every subgroup gets 90%?</strong> No. Standard split conformal provides marginal coverage under exchangeability. Rare subgroups can have poor coverage. Group-conditional methods need sufficient calibration data and a clearly specified grouping scheme.</p>
+<p><strong>Interview: Can an ensemble be confidently wrong?</strong> Yes. Shared training data, architecture or objective can produce similar predictions under shared misspecification. Disagreement is one signal, not a complete measure of uncertainty.</p>
+<p><strong>Interview: Which shift can importance weighting fix?</strong> For ordinary covariate-shift correction, the conditional outcome mechanism must stay stable and target support must be covered by the source. Different forms of shift require different assumptions and methods.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://arxiv.org/abs/2107.07511">Angelopoulos and Bates, conformal prediction tutorial</a>.</li>
+</ul>
+<ul>
+<li><a href="https://arxiv.org/abs/1905.03222">Romano et al., Conformalized Quantile Regression</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="22-model-validation-and-predictive-performance.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="24-explainability-fairness-and-model-robustness.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

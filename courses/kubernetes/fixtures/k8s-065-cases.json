@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-065",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Identify mesh control and data planes.",
+      "expected": "Configuration/identity distribution versus actual traffic handling."
+    },
+    {
+      "exercise": 2,
+      "task": "Distinguish mTLS and business authorization.",
+      "expected": "Peer identity versus permission for a domain-specific action."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw a two-cluster request path.",
+      "expected": "Discovery, inter-cluster route, trust and application hops are named."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose retry amplification.",
+      "expected": "Uncoordinated retry budgets multiply attempts and load."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain overlapping CIDR risk across clusters.",
+      "expected": "Address routing can become ambiguous without a deliberate connectivity design."
+    },
+    {
+      "exercise": 6,
+      "task": "Defend whether a mesh is justified for a workload.",
+      "expected": "Name required capabilities, operational cost and simpler alternatives."
+    }
+  ]
+}

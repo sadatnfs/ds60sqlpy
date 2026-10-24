@@ -1,0 +1,107 @@
+{
+  "lesson_id": "spark-026",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Implement the pure scalar rule precisely",
+      "input_contract": "ReturnNULL/None unchanged;collapse only space, tab, newline andcarriage return runs, trim ordinary spaces, and translateASCII A-Z to a-z. Preserve otherUnicode code points.",
+      "expected": "All 12 golden outputs, includingcafÉ,İi, nonbreaking-space-wrapped a and unchanged decomposed e-plus-accent.",
+      "verification": "Apply the scalar function to every raw fixture value and compare with all golden pairs."
+    },
+    {
+      "exercise": 2,
+      "title": "Express the same rule with native Spark functions",
+      "input_contract": "Produce id, normalized using translate, regexp_replace andtrim on the label column. PreserveNULL propagation and the exact golden values.",
+      "expected": "The twelve ordered output pairs equal the golden fixture and normalized has string type.",
+      "verification": "Assert the full pair list andStringType;do not accept agreement with only one UDF implementation."
+    },
+    {
+      "exercise": 3,
+      "title": "Wrap the scalar rule with a declared UDF return type",
+      "input_contract": "Create a ScalaString UDF or a PythonStringType scalar UDF with useArrow=False, then return id, normalized. Keep the function pure and validate all outputs.",
+      "expected": "Every pair matches the same twelve golden values. Python uses the non-Arrow scalar path;Scala stays in the JVM.",
+      "verification": "Assert all golden pairs and string result type for the enabled language-specific UDF."
+    },
+    {
+      "exercise": 4,
+      "title": "Locate the execution boundary in physical evidence",
+      "input_contract": "Return the physical plan strings for the built-in and language-specific UDF relations. Identify Python evaluation only where it is actually present.",
+      "expected": "Python UDF plan containsBatchEvalPython;built-in contains noPython evaluator. Scala UDF expression is present withoutBatchEvalPython orArrowEvalPython.",
+      "verification": "Assert the language-appropriate markers and print both plans;do not infer a speed ratio from them."
+    },
+    {
+      "exercise": 5,
+      "title": "Preserve missing, empty and ordinary-text populations",
+      "input_contract": "Classify normalized values as missing, empty or text and count each category. Separately select the identity whose normalized text equals the literal null.",
+      "expected": "Missing 1, empty 2, text 9. Literal null text belongs only toID 12;unknown value belongs only toID 1.",
+      "verification": "Assert all category counts and both exact identity selections for built-in and UDF results."
+    },
+    {
+      "exercise": 6,
+      "title": "Reject a plausible but semantically broader implementation",
+      "input_contract": "Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.",
+      "expected": "The wrong implementation disagrees at least onIDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces atID 8.",
+      "verification": "Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization."
+    }
+  ],
+  "golden": {
+    "rows": 12,
+    "expected": [
+      [
+        1,
+        null
+      ],
+      [
+        2,
+        ""
+      ],
+      [
+        3,
+        ""
+      ],
+      [
+        4,
+        "alpha beta"
+      ],
+      [
+        5,
+        "a b"
+      ],
+      [
+        6,
+        "cafÉ"
+      ],
+      [
+        7,
+        "straße"
+      ],
+      [
+        8,
+        " a "
+      ],
+      [
+        9,
+        "İi"
+      ],
+      [
+        10,
+        "🙂 ok"
+      ],
+      [
+        11,
+        "é"
+      ],
+      [
+        12,
+        "null"
+      ]
+    ],
+    "categories": {
+      "missing": 1,
+      "empty": 2,
+      "text": 9
+    },
+    "optional_dependencies": "Arrow/pandas path disabled until a dedicated profile records exact package pins and runtime qualification."
+  }
+}

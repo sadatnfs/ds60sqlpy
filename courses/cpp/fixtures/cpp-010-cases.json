@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-010",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Read the record",
+      "input_or_change": "Describe each field of Payment{7,200,paid}.",
+      "expected": "Identity 7, integer cents 200, named state paid."
+    },
+    {
+      "exercise": 2,
+      "task": "Filter state",
+      "input_or_change": "Aggregate paid 200 and pending 200 records.",
+      "expected": "Settled total 200, input count 2."
+    },
+    {
+      "exercise": 3,
+      "task": "Add a named state",
+      "input_or_change": "Add refunded and specify a zero settled contribution policy.",
+      "expected": "paid 200 plus refunded 200 contributes 200."
+    },
+    {
+      "exercise": 4,
+      "task": "Reject an invalid amount",
+      "input_or_change": "Construct paid amount -1 and call settled.",
+      "expected": "invalid_argument before returning revenue."
+    },
+    {
+      "exercise": 5,
+      "task": "Retain zero payments",
+      "input_or_change": "Inspect paid 0.",
+      "expected": "Valid paid record contributing 0."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer identity",
+      "input_or_change": "Use two paid records with equal 200 amounts and distinct IDs.",
+      "expected": "Total 400 and two identities."
+    }
+  ]
+}

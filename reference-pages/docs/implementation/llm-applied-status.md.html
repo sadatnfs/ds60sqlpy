@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Applied LLM content, depth review and execution checkpoint · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Applied LLM content, depth review and execution checkpoint</h1>
+      <p class="source-path">Generated from <code>docs/implementation/llm-applied-status.md</code></p>
+    </header>
+    <article class="document"><h2 id="applied-llm-content-depth-review-and-execution-checkpoint">Applied LLM content, depth review and execution checkpoint<a class="heading-anchor" href="#applied-llm-content-depth-review-and-execution-checkpoint" aria-label="Link to this section">#</a></h2>
+<p>Updated 23 October 2026. All <strong>24 lesson bundles are authored and substantively reviewed</strong>. This pass reviewed23 chapters; the independently completed LoRA016 review was preserved. Lesson021 remains a reading chapter with a separate optional pretrained recipe. The other23 use their existing17 Core and six PyTorch runtime profiles. No default program downloads a model or dataset.</p>
+<h3 id="completed-topic-review">Completed topic review<a class="heading-anchor" href="#completed-topic-review" aria-label="Link to this section">#</a></h3>
+<p>The review adds explicit formulas, state/shape traces, counterexamples, stage-specific decisions, diagnosis and69 explanatory interview answers across the23 reviewed chapters. It distinguishes literal retrieval/extraction baselines, actual tiny-model training, observed pretrained mechanics and domain-quality acceptance. The <a href="../../courses/llm-applied/authoring/review_matrix.json.html">machine-readable matrix</a> records every chapter&#x27;s concrete findings and executable-change scope.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Chapter</th>
+<th>Substantive review outcome</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-001.md.html">llm-applied-001</a></td>
+<td>Stage-level routing, capability evidence and conditional pipeline success</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-002.md.html">llm-applied-002</a></td>
+<td>Typed extraction, provenance coordinates, estimands and rejected-record coverage</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-003.md.html">llm-applied-003</a></td>
+<td>Context overhead, greedy allocation, prompt identity and injection-test scope</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-004.md.html">llm-applied-004</a></td>
+<td>Version lineage, historical applicability, integrity and source admission</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-005.md.html">llm-applied-005</a></td>
+<td>Window-count derivation, overlap cost and Unicode citation coordinates</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-006.md.html">llm-applied-006</a></td>
+<td>Exact BM25 scores, saturation, length normalization and corpus dependence</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-007.md.html">llm-applied-007</a></td>
+<td>Cosine geometry, encoder-space compatibility and search-versus-relevance recall</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-008.md.html">llm-applied-008</a></td>
+<td>Exact RRF gaps, correlated rankings and reranking evidence ceilings</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-009.md.html">llm-applied-009</a></td>
+<td>Pre-filtering, cache equivalence, revocation and trusted policy inputs</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-010.md.html">llm-applied-010</a></td>
+<td>BFS frontier, integer hop bounds, branching and semantic bridge limits</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-011.md.html">llm-applied-011</a></td>
+<td>Span integrity, entailment, computed claims and abstention utility</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-012.md.html">llm-applied-012</a></td>
+<td>Cutoffs, macro/micro denominators, oracle controls and saved-label scope</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-013.md.html">llm-applied-013</a></td>
+<td>Exact family-bootstrap distribution, pairing and selective-answer metrics</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-014.md.html">llm-applied-014</a></td>
+<td>Shifted answer masks, conditioning gradients, truncation and packing boundaries</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-015.md.html">llm-applied-015</a></td>
+<td>Decoder shapes/parameter counts, target gradients and final-state loss reporting</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-016.md.html">llm-applied-016</a></td>
+<td>Independent LoRA orientation, first-step derivatives, rank and merge review</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-017.md.html">llm-applied-017</a></td>
+<td>Quantization codes/bytes, output error, adapter objective and memory levels</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-018.md.html">llm-applied-018</a></td>
+<td>Controlled SFT/adapter state, target modules and optimization-budget limits</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-019.md.html">llm-applied-019</a></td>
+<td>Preference derivative/curvature, reference identity and scalar-versus-policy scope</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-020.md.html">llm-applied-020</a></td>
+<td>Retrieval projection/reranker gradients, analytic boundary and negative-label quality</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-021.md.html">llm-applied-021</a></td>
+<td>Qualified pretrained evidence ladder, real masks, repeatability and quality failure</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-022.md.html">llm-applied-022</a></td>
+<td>Typed analysis grain, stable finite means, reporting lineage and causal limits</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-023.md.html">llm-applied-023</a></td>
+<td>Time boundaries, admitted attempts, cancellation and trace-value contracts</td>
+</tr>
+<tr>
+<td><a href="../../courses/llm-applied/guides/llm-applied-024.md.html">llm-applied-024</a></td>
+<td>Actual integrated call path, coverage, evidence gates and bounded no-go</td>
+</tr>
+</tbody></table></div>
+<p>The guides contain about2136-3283 whitespace words each after this pass. Counts describe size; the derivations, independent counterexamples and explicit limits are the content evidence. Every guide retains three worked cases, six distinct tasks and separate learner/reference/explained artifacts. Reading021 now has a written-case study contract instead of instructions to execute its text cases as a program.</p>
+<h3 id="durable-authoring-and-code-preservation">Durable authoring and code preservation<a class="heading-anchor" href="#durable-authoring-and-code-preservation" aria-label="Link to this section">#</a></h3>
+<p>The separate <code>authoring/depth_reviews_applied.py</code> supplies the new explanations through a hook after the existing LoRA review. It adds to the rendered anatomy and decisions and replaces generic diagnosis. The original <code>lora_depth.py</code>, its derivative oracle and the optional pretrained fixture remain separately owned and were not changed by this review. The applied renderer now gives Docker-first directions while preserving the declared profiles.</p>
+<p>An immutable <a href="../../courses/llm-applied/authoring/review_baseline.json.html">review baseline</a> records reference and sequential worked-program hashes before the pass. Tests require every unchanged program to match that baseline. The only reference behavior changes are010,015 and022; only010 and022 change the sequential worked program. All other default executable content is byte-identical to the baseline. The three A-C blocks remain one documented sequential fresh-process program.</p>
+<h3 id="concrete-repaired-defects-and-runtime-evidence">Concrete repaired defects and runtime evidence<a class="heading-anchor" href="#concrete-repaired-defects-and-runtime-evidence" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>010, bounded graph traversal:</strong> fractional max_hops previously passed validation but could never equal an integer depth, so it bypassed the intended stop. The helper now requires a nonnegative Python integer and rejects fractional, Boolean, NaN and negative budgets before traversal. Reference and sequential guide both passed current Core Docker. Receipts: <code>work/applied010-depth-repaired-acceptance.jsonl</code> and <code>work/ml-worked-applied010-depth-repaired-acceptance.jsonl</code>.</li>
+<li><strong>015, training receipt:</strong> curve[-1] described the state before the twentieth optimizer update while held-out loss described the state after it. Final training loss is now recomputed from the same frozen final model and checked in the receipt. The changed reference passed current PyTorch CPU Docker in <code>work/applied015-final-state-repaired-acceptance.jsonl</code>. The worked A-C program was unchanged.</li>
+<li><strong>022, grouped mean:</strong> finite values[1e308,1e308] could overflow an intermediate sum despite having a finite mean. Scaled summation now returns1e308 and handles opposite-sign cancellation, with an output-finiteness check. Reference and sequential guide passed current Core Docker. Receipts: <code>work/applied022-stable-mean-repaired-acceptance.jsonl</code> and <code>work/ml-worked-applied022-stable-mean-repaired-acceptance.jsonl</code>.</li>
+</ul>
+<p>The checked-in <a href="../../courses/llm-applied/authoring/review_runtime_evidence.json.html">review runtime evidence</a> preserves all three reference and two guide-program results with source/image identities and applicable worker/guide hashes. Focused tests recompute those hashes. Qualification used the existing bounded production worker, network disabled, read-only course mounts and one2CPU slot at a time. This author did not build images, acquire models or modify the optional fixture.</p>
+<p>Earlier parent-owned receipts establish all23 default references and the sequential example baseline: <code>work/applied-llm-core-acceptance.jsonl</code>, <code>work/applied-llm-torch-acceptance.jsonl</code> and the records associated with <code>work/ml-sequential-examples-manifest.json</code>. The current three repairs are covered by the new receipts above rather than being attributed to older source versions.</p>
+<h3 id="focused-validation">Focused validation<a class="heading-anchor" href="#focused-validation" aria-label="Link to this section">#</a></h3>
+<p>The applied suite now passes <strong>36 tests</strong>, with six explicit host-side PyTorch execution skips. The combined applied/PyTorch command passes <strong>46 tests with44 declared host runtime skips</strong>. Actual heavy-runtime proof is the separate prepared-worker evidence above; skipped host tests are not presented as numerical execution. Both test files pass Ruff, formatting and strict MyPy. The new prose-review module also passes strict MyPy. A read-only independent review verified the017 quantization/adapter derivatives and020 projection/reranker arithmetic, and clarified that gradients do not flow through discrete tokenization. Additional NumPy checks covered exact source spans,2805 chunk-window configurations, the RRF score gap, the family-bootstrap distribution, parameter counts and preference arithmetic.</p>
+<p>The checks cover complete routes and profiles, practice/depth contracts, literal Core execution, chunk coordinates, independent BM25 arithmetic, vector failures, duplicate-resistant fusion, access-separated caches, integer-bounded cyclic traversal, answer masks, restricted-answer nondisclosure, optional asset tamper detection, local-only loading, the preserved LoRA finite-difference oracle, complete review records, immutable unchanged-code baselines and matching repair receipts.</p>
+<h3 id="optional-pretrained-execution-and-its-observed-quality-failure">Optional pretrained execution and its observed quality failure<a class="heading-anchor" href="#optional-pretrained-execution-and-its-observed-quality-failure" aria-label="Link to this section">#</a></h3>
+<p>The separate recipe is fully documented under <a href="../../courses/llm-applied/fixtures/pretrained/README.md.html">fixtures/pretrained</a>. Parent-owned evidence records locked preparation, explicit pinned acquisition, offline local loading, mask inspection, ten full-SFT updates, ten LoRA updates and saved-adapter reload on Linux arm64. Full SFT updated134515008 parameters; LoRA updated230400. The supplied data has four authored training records and one held-out entity label sharing an extraction task/template. Its loss changes are mechanics observations, not an independent domain benchmark.</p>
+<p>The saved adapter generated an incorrect conversion formula despite supplied correct evidence. That output was not accepted as a supported answer. The review retains this concrete failure: successful acquisition, training, saving and reload do not establish subject-assistant quality. Two same-environment LoRA runs matched artifact hashes and loss after seed placement was corrected before construction. Platform locks for other architectures are preparation evidence, not executed platform qualification.</p>
+<p>The reading chapter separates this observed maintainer run from a hypothetical new learner who has not yet acquired assets or trained. A learner still needs an explicit optional preparation and execution path. The capstone&#x27;s pretrained_generation_executed=False field concerns its local extractive run, not the separately executed recipe.</p>
+<h3 id="remaining-evidence-limits-and-handoff">Remaining evidence limits and handoff<a class="heading-anchor" href="#remaining-evidence-limits-and-handoff" aria-label="Link to this section">#</a></h3>
+<p>There are no pending chapter-authoring or changed-program requalification gaps in this review. The explanations retain bounded local limits: metadata comparisons are not automatically integrated authorization gates; an extractive span constructor is not a general entailment checker; finite score fixtures are not a calibrated relevance model; low teacher-forced loss is not generation quality; local clocks/counters do not implement remote deadlines or real identity-provider integration.</p>
+<p>The default capstone is an access-filtered fixed-lookup/extractive baseline with a separate validated calculation. It does not secretly integrate the learned retriever, tiny decoder, dynamic revocation service or pretrained adapter. Its local success and no-go production decision remain compatible. Root owns final evidence-index refresh, generated classroom/readers, full-suite checks and browser delivery. No further executable changes are pending from this author.</p></article>
+  </main>
+</body>
+</html>

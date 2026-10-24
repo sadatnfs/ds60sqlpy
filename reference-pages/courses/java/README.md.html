@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Java: from the first compile to reliable applications · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Java: from the first compile to reliable applications</h1>
+      <p class="source-path">Generated from <code>courses/java/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="java-from-the-first-compile-to-reliable-applications">Java: from the first compile to reliable applications<a class="heading-anchor" href="#java-from-the-first-compile-to-reliable-applications" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>Java: from the first compile to reliable applications</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
+<p>All36 lessons in the <a href="track.json.html">reviewed route</a> now have complete authored bundles in the <a href="lessons.json.html">manifest</a>. The course starts with source,types,control flow and objects,then develops collections,generics,functional code,testing,algorithms,concurrency,files,HTTP,JDBC,serialization,service discovery,profiling and release engineering. Every guide has two complete worked examples,six inspectable exercises,mechanism explanations,diagnosis,hints and separate executable/explanatory solutions.</p>
+<p>Use the Docker classroom&#x27;s prepared Java 21 profile. The pad is compiled as <code>Main.java</code> with <code>--release 21</code> and run with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing,compilation,reference execution and learner mastery are separate evidence;the <a href="../../docs/implementation/java-content-status.md.html">checkpoint</a> records actual prepared-container results.</p>
+<h3 id="runtime-and-resource-boundaries">Runtime and resource boundaries<a class="heading-anchor" href="#runtime-and-resource-boundaries" aria-label="Link to this section">#</a></h3>
+<p>Default examples use small local fixtures and prepared JDK libraries. JDBC29 additionally uses the pinned H2 driver already included in the Java image at <code>/opt/course-libs/h2-2.5.252.jar</code>. It opens only owned in-memory H2 databases and performs real SQL/transaction checks. No lesson installs a package or contacts a shared database.</p>
+<p>HTTP lessons start short-lived loopback servers on ephemeral ports and close them after checks. Concurrency lessons use bounded waits andcooperative cleanup. Module,JAR,JFR and release examples write only owned temporary files. The <a href="fixtures/java-026/README.md.html">manual module fixture</a>, <a href="fixtures/java-027/README.md.html">manual JAR fixture</a> and <a href="fixtures/java-036/README.md.html">optional jlink workflow</a> explain multi-file or larger packaging work outside the single-file pad. A custom runtime image is platform-specific and is not claimed built by the default reference.</p>
+<p>Keep attempts in saved classroom pads or your own ignored <code>.learning/</code> copy. Do not edit official solutions to obtain a passing run. Predict outputs and failure types,attempt the exercises,then compare with the reference and solve a fresh boundary case.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Topic</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/java-001.md.html">java-001</a></td>
+<td>From source file to running JVM</td>
+</tr>
+<tr>
+<td><a href="guides/java-002.md.html">java-002</a></td>
+<td>Values, numeric types and conversion</td>
+</tr>
+<tr>
+<td><a href="guides/java-003.md.html">java-003</a></td>
+<td>Decisions, loops and invariants</td>
+</tr>
+<tr>
+<td><a href="guides/java-004.md.html">java-004</a></td>
+<td>Methods and explicit contracts</td>
+</tr>
+<tr>
+<td><a href="guides/java-005.md.html">java-005</a></td>
+<td>Arrays, strings and Unicode</td>
+</tr>
+<tr>
+<td><a href="guides/java-006.md.html">java-006</a></td>
+<td>Lists, sets and maps</td>
+</tr>
+<tr>
+<td><a href="guides/java-007.md.html">java-007</a></td>
+<td>Classes and encapsulation</td>
+</tr>
+<tr>
+<td><a href="guides/java-008.md.html">java-008</a></td>
+<td>Constructors, records and invariants</td>
+</tr>
+<tr>
+<td><a href="guides/java-009.md.html">java-009</a></td>
+<td>Exceptions and resource lifetime</td>
+</tr>
+<tr>
+<td><a href="guides/java-010.md.html">java-010</a></td>
+<td>Interfaces and polymorphism</td>
+</tr>
+<tr>
+<td><a href="guides/java-011.md.html">java-011</a></td>
+<td>Equality, hashing and ordering</td>
+</tr>
+<tr>
+<td><a href="guides/java-012.md.html">java-012</a></td>
+<td>Generics and variance</td>
+</tr>
+<tr>
+<td><a href="guides/java-013.md.html">java-013</a></td>
+<td>Lambdas and functional interfaces</td>
+</tr>
+<tr>
+<td><a href="guides/java-014.md.html">java-014</a></td>
+<td>Streams and collectors</td>
+</tr>
+<tr>
+<td><a href="guides/java-015.md.html">java-015</a></td>
+<td>Dates, time zones and formatting</td>
+</tr>
+<tr>
+<td><a href="guides/java-016.md.html">java-016</a></td>
+<td>Files, paths and character encoding</td>
+</tr>
+<tr>
+<td><a href="guides/java-017.md.html">java-017</a></td>
+<td>Optional values and validation boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-018.md.html">java-018</a></td>
+<td>Tests that detect broken behavior</td>
+</tr>
+<tr>
+<td><a href="guides/java-019.md.html">java-019</a></td>
+<td>Data structures and complexity</td>
+</tr>
+<tr>
+<td><a href="guides/java-020.md.html">java-020</a></td>
+<td>Search, sorting and dynamic programming</td>
+</tr>
+<tr>
+<td><a href="guides/java-021.md.html">java-021</a></td>
+<td>Threads and the memory model</td>
+</tr>
+<tr>
+<td><a href="guides/java-022.md.html">java-022</a></td>
+<td>Executors, futures and cancellation</td>
+</tr>
+<tr>
+<td><a href="guides/java-023.md.html">java-023</a></td>
+<td>Locks, atomics and concurrent collections</td>
+</tr>
+<tr>
+<td><a href="guides/java-024.md.html">java-024</a></td>
+<td>Virtual threads and blocking work</td>
+</tr>
+<tr>
+<td><a href="guides/java-025.md.html">java-025</a></td>
+<td>JVM memory, GC and allocation</td>
+</tr>
+<tr>
+<td><a href="guides/java-026.md.html">java-026</a></td>
+<td>Packages, classpaths and modules</td>
+</tr>
+<tr>
+<td><a href="guides/java-027.md.html">java-027</a></td>
+<td>Builds and dependency reproducibility</td>
+</tr>
+<tr>
+<td><a href="guides/java-028.md.html">java-028</a></td>
+<td>HTTP services and clients</td>
+</tr>
+<tr>
+<td><a href="guides/java-029.md.html">java-029</a></td>
+<td>JDBC and transactions</td>
+</tr>
+<tr>
+<td><a href="guides/java-030.md.html">java-030</a></td>
+<td>Serialization and schema evolution</td>
+</tr>
+<tr>
+<td><a href="guides/java-031.md.html">java-031</a></td>
+<td>Reflection, annotations and service loading</td>
+</tr>
+<tr>
+<td><a href="guides/java-032.md.html">java-032</a></td>
+<td>Profiling and benchmark reasoning</td>
+</tr>
+<tr>
+<td><a href="guides/java-033.md.html">java-033</a></td>
+<td>Secure application boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-034.md.html">java-034</a></td>
+<td>Application design and dependency boundaries</td>
+</tr>
+<tr>
+<td><a href="guides/java-035.md.html">java-035</a></td>
+<td>Build a tested local data service</td>
+</tr>
+<tr>
+<td><a href="guides/java-036.md.html">java-036</a></td>
+<td>Package, diagnose and maintain a release</td>
+</tr>
+</tbody></table></div>
+<h3 id="evidence-and-next-work">Evidence and next work<a class="heading-anchor" href="#evidence-and-next-work" aria-label="Link to this section">#</a></h3>
+<p>The references include actual compiler diagnostics,controlled lost updates,executor cancellation and queue rejection,virtual-thread admission limits,module resolution,fresh-JVM JAR launch,prepared JDBC transactions,JFR readback and negative integrity gates. Their bounded fixtures do not establish production service reliability,cross-platform installer acceptance or universal performance claims.</p>
+<p>Use the <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> for image preparation,visible logs,persistent learner state and stopping the environment. The course&#x27;s full quality review also checks explanation depth,assumptions and failure analysis beyond minimum word or artifact counts.</p></article>
+  </main>
+</body>
+</html>

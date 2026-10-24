@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-007: worked solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-007: worked solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-007_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-007-worked-solutions">llm-007: worked solutions<a class="heading-anchor" href="#llm-007-worked-solutions" aria-label="Link to this section">#</a></h2>
+<p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/llm-007.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
+<p>The <a href="llm-007_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
+<h3 id="exercise-1-trace-the-first-candidate-counts">Exercise 1: Trace the first candidate counts<a class="heading-anchor" href="#exercise-1-trace-the-first-candidate-counts" aria-label="Link to this section">#</a></h3>
+<p>The two words contain pairs a/b, b/EOW, a/c and c/EOW, each once. Integer-tuple lexical ordering chooses a/b because its left token a is smaller than b or c and its right token b is smaller than c. Reversing the order of training words must not change this choice. Record the table before replacement so the decision is auditable; a saved tokenizer hash alone would not explain why that rule was chosen.</p>
+<p><strong>Expected:</strong> Four pairs each have count one, and the selected pair is ((97,),(98,)).</p>
+<p><strong>Verify:</strong> Inspect the explicit pair-count table and assert the chosen rule under the declared lexical tie policy.</p>
+<h3 id="exercise-2-construct-a-one-step-trainer">Exercise 2: Construct a one-step trainer<a class="heading-anchor" href="#exercise-2-construct-a-one-step-trainer" aria-label="Link to this section">#</a></h3>
+<p>The trainer counts adjacent current tokens, selects the declared maximum/tie candidate and merges its nonoverlapping occurrences. With budget one, the only rule is ((97,),(98,)). Encoding ab then gives token (97,98) followed by (256,). Decoding flattens the bytes, removes the final marker and uses strict UTF-8. The ordered merge list is the learned state. A vocabulary set without that order is insufficient to reproduce the same encoding procedure.</p>
+<p><strong>Expected:</strong> The ordered rule list contains only a+b; encoded ab is [(97,98),(256,)].</p>
+<p><strong>Verify:</strong> Assert the exact rule tuple, encoded tokens and decoded ab round trip.</p>
+<h3 id="exercise-3-diagnose-overlapping-replacement">Exercise 3: Diagnose overlapping replacement<a class="heading-anchor" href="#exercise-3-diagnose-overlapping-replacement" aria-label="Link to this section">#</a></h3>
+<p>For aaaa, a left-to-right scan matches positions zero/one, consumes both, then matches two/three. The result is two aa tokens and one end marker. Reusing position one in another pair would count the same source byte twice and break a round-trip check. Some implementations might produce different intermediate data structures, but they must reconstruct exactly four a bytes and respect the declared nonoverlapping replacement policy.</p>
+<p><strong>Expected:</strong> The result is two (97,97) tokens followed by the end marker, not overlapping triple coverage.</p>
+<p><strong>Verify:</strong> Assert the output token list and reconstruct exactly four original a bytes.</p>
+<h3 id="exercise-4-freeze-validation-encoding">Exercise 4: Freeze validation encoding<a class="heading-anchor" href="#exercise-4-freeze-validation-encoding" aria-label="Link to this section">#</a></h3>
+<p>The saved a+b rule does not match ad, so encoding returns the two separate base byte tokens and the marker. Serialize the same ordered rule list before and after and compare its hash. No fit call belongs in encoding. A new byte is supported by the fixed byte base, so there is no need to leak validation into merge selection. This fixture distinguishes an honest fallback from a tokenizer that silently retrains on every incoming document.</p>
+<p><strong>Expected:</strong> Tokens [(97,),(100,),(256,)] and an unchanged merge hash.</p>
+<p><strong>Verify:</strong> Assert the complete token sequence and hash equality; no fit call may occur in the encoding path.</p>
+<h3 id="exercise-5-handle-a-bounded-or-absent-fit">Exercise 5: Handle a bounded or absent fit<a class="heading-anchor" href="#exercise-5-handle-a-bounded-or-absent-fit" aria-label="Link to this section">#</a></h3>
+<p>A zero merge budget deliberately retains the base representation and produces an empty learned rule list. It is valid and still round-trips text. An empty training collection has no declared fitting evidence and raises ValueError; a negative budget is invalid and also raises. Keep the valid zero-budget case distinct from absent data. The loop also stops when no adjacent pairs remain, so it never invents filler merges merely to reach a requested count.</p>
+<p><strong>Expected:</strong> Zero limit returns no rules; empty training and negative limit raise ValueError.</p>
+<p><strong>Verify:</strong> Capture both exceptions and assert zero-limit byte encoding still round-trips ab.</p>
+<h3 id="exercise-6-transfer-to-utf-8-text">Exercise 6: Transfer to UTF-8 text<a class="heading-anchor" href="#exercise-6-transfer-to-utf-8-text" aria-label="Link to this section">#</a></h3>
+<p>The UTF-8 representation of é is the two-byte sequence 195,169. With no matching a+b pair, those bytes remain separate tokens plus the marker. Strict decoding reconstructs the original single code point. Token count, byte count and code-point count differ under this representation. This is a reversible toy encoding, not an embedding vocabulary-ID assignment; the following unit requires a separate fixed mapping from whatever tokens are chosen to legal table rows.</p>
+<p><strong>Expected:</strong> Base byte IDs 195 and 169 plus the end marker; decoding returns one code point é.</p>
+<p><strong>Verify:</strong> Assert token byte contents and strict decoded equality without changing the learned rules.</p>
+<h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
+<p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
+<span class="syntax-keyword">import</span> hashlib
+<span class="syntax-keyword">import</span> json
+
+END <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">256</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">byte_tokens</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">training words must be text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> word<span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> <span class="syntax-punctuation">[</span>END<span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">merge_pair</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    output <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    index <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
+    <span class="syntax-keyword">while</span> index <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> index <span class="syntax-operator">+</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> pair<span class="syntax-punctuation">:</span>
+            output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> tokens<span class="syntax-punctuation">[</span>index <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+        <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+            output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">[</span>index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+            index <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> output
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">fit_bpe</span><span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    words <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>words<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> words <span class="syntax-operator">or</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">or</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty training collection and nonnegative integer limit required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    corpus <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>byte_tokens<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> words<span class="syntax-punctuation">]</span>
+    rules <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>limit<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        counts <span class="syntax-operator">=</span> Counter<span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> corpus <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> word<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> counts<span class="syntax-punctuation">:</span>
+            <span class="syntax-keyword">break</span>
+        maximum <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+        pair <span class="syntax-operator">=</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>pair <span class="syntax-keyword">for</span> pair<span class="syntax-punctuation">,</span> count <span class="syntax-operator">in</span> counts<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> count <span class="syntax-operator">==</span> maximum<span class="syntax-punctuation">)</span>
+        rules<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>pair<span class="syntax-punctuation">)</span>
+        corpus <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>merge_pair<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> word <span class="syntax-operator">in</span> corpus<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">return</span> rules
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">encode_word</span><span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">,</span> rules<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tokens <span class="syntax-operator">=</span> byte_tokens<span class="syntax-punctuation">(</span>word<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">for</span> pair <span class="syntax-operator">in</span> rules<span class="syntax-punctuation">:</span>
+        tokens <span class="syntax-operator">=</span> merge_pair<span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">,</span> pair<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> tokens
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">decode_tokens</span><span class="syntax-punctuation">(</span>tokens<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>value <span class="syntax-keyword">for</span> token <span class="syntax-operator">in</span> tokens <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> token<span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> values <span class="syntax-operator">or</span> values<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> <span class="syntax-number">256</span> <span class="syntax-operator">or</span> <span class="syntax-number">256</span> <span class="syntax-operator">in</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">exactly one final end marker required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">bytes</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>decode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">merge_hash</span><span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> hashlib<span class="syntax-operator">.</span>sha256<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>rules<span class="syntax-punctuation">,</span> separators<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>encode<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>hexdigest<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
+<p>Without the reference, explain why a merge list must be ordered and why a left-to-right scan cannot reuse one byte in two overlapping matches. Then propose a fresh tied training fixture and state its deterministic first choice.</p>
+<p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
+  </main>
+</body>
+</html>

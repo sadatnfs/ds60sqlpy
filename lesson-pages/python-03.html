@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-03 · Control Flow Exceptions · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-03" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-03</p>
+        <h1>Control Flow Exceptions</h1>
+        <p class="hero-copy">Python foundations</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">75 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-02.html">python-02</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+
+          <a class="button lab-only" href="../learn?lesson=python-03" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day03_control_flow_exceptions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day03_control_flow_exceptions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--day-3-control-flow-truthiness-and-exceptions">Day 3: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#guide--day-3-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
+<p><strong>Level:</strong> Beginner</p>
+<p>Control flow chooses which statements run. Exceptions separate an expected failure path from the successful path.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of this lesson, you can:</p>
+<ul>
+<li>write mutually exclusive <code>if</code>/<code>elif</code>/<code>else</code> branches;</li>
+<li>iterate with <code>for</code> and repeat conditionally with <code>while</code>;</li>
+<li>catch only the exceptions you can handle; and</li>
+<li>define and raise a domain-specific exception with a useful message.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Complete Day 2 (<code>python-02</code>): types, conversions, comparisons, and truthiness.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<ol>
+<li>Confirm the course environment before changing it:</li>
+</ol>
+<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
+   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+   <span class="syntax-punctuation">}</span>
+   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
+   .venv/bin/python scripts/course.py doctor</code></pre>
+<ol>
+<li>Read <code>python/ds-60day/companion-guides/day03_control_flow_exceptions.md</code>, then open <code>python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
+<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
+<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
+<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+</ol>
+<p><strong>Lesson outcome:</strong> use day 3; control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
+<p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
+<p>Exceptions separate a normal return path from a failure path. A <code>try</code> block should contain only the operation expected to fail, while <code>except</code> names the failure the current layer can interpret. Catching every exception hides programming bugs. <code>else</code> runs after a successful <code>try</code>; <code>finally</code> runs whether success or failure occurred.</p>
+<h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>condition:</strong> an expression evaluated for truthiness.</li>
+<li><strong>branch:</strong> one possible block selected by a condition.</li>
+<li><strong>guard clause:</strong> an early check that rejects or handles an invalid case.</li>
+<li><strong>exception:</strong> an object representing a failure that interrupts normal flow.</li>
+<li><strong>raise:</strong> to deliberately signal an exception.</li>
+<li><strong>handler:</strong> an <code>except</code> block for a named exception type.</li>
+</ul>
+<h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<p>In <code>if score &gt;= 90:</code>, the colon ends the condition and starts an indented suite. Only code indented under that branch belongs to it. In <code>except ValueError as exc:</code>, <code>ValueError</code> is the narrow failure type and <code>exc</code> is the actual exception object. An exception handler is not a substitute for an ordinary condition that can be checked directly.</p>
+<h5 id="guide--worked-example-1-order-specific-branches-before-general-branches">Worked example 1: Order specific branches before general branches<a class="heading-anchor" href="#guide--worked-example-1-order-specific-branches-before-general-branches" aria-label="Link to this section">#</a></h5>
+<p>Classify a value after validating its domain. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> score <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">score must be between 0 and 100</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">90</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">60</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pass</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span>
+
+<span class="syntax-punctuation">[</span>classify_score<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-number">75</span><span class="syntax-punctuation">,</span> <span class="syntax-number">95</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected observation</strong></p>
+<pre class="highlighted-code"><code class="language-text">`[&#x27;fail&#x27;, &#x27;pass&#x27;, &#x27;distinction&#x27;]`. The guard rejects out-of-domain values before classification.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--worked-example-2-protect-only-the-fallible-conversion">Worked example 2: Protect only the fallible conversion<a class="heading-anchor" href="#guide--worked-example-2-protect-only-the-fallible-conversion" aria-label="Link to this section">#</a></h5>
+<p>Let unrelated programming errors remain visible. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_count</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        count <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> count
+
+<span class="syntax-punctuation">[</span>parse_count<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string"> 12 </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">twelve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected observation</strong></p>
+<pre class="highlighted-code"><code class="language-text">`[12, None]`. Only invalid integer text is converted into the chosen sentinel.</code></pre>
+<p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
+<h5 id="guide--a-debugging-routine-for-this-topic">A debugging routine for this topic<a class="heading-anchor" href="#guide--a-debugging-routine-for-this-topic" aria-label="Link to this section">#</a></h5>
+<p>When the output differs from your prediction, use this order:</p>
+<ol>
+<li>Trace conditions from top to bottom and mark the first one that becomes true.</li>
+<li>Move validation before classification when impossible values enter normal branches.</li>
+<li>Shrink a large <code>try</code> block until it contains only the operation with the expected failure.</li>
+<li>Replace bare <code>except:</code> or <code>except Exception:</code> with the narrow type you can recover from.</li>
+</ol>
+<h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
+<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
+<ol>
+<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
+<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
+<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
+<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
+<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
+</ol>
+<p><strong>Useful alternative:</strong> Return a sentinel only when absence is part of the function&#x27;s contract; otherwise raise a specific exception and let the caller decide.</p>
+<p><strong>Boundary to remember:</strong> Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.</p>
+<h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Branch:</strong> one possible route through a program.</li>
+<li><strong>Condition:</strong> an expression interpreted as true or false.</li>
+<li><strong>Loop invariant:</strong> a fact that remains true as a loop progresses.</li>
+<li><strong>Exception:</strong> an object that interrupts normal execution when an operation cannot satisfy its contract.</li>
+<li><strong>Raise:</strong> signal a failure; <strong>catch:</strong> handle a specific failure.</li>
+<li><strong><code>else</code>/<code>finally</code>:</strong> exception <code>else</code> runs only after success; <code>finally</code> runs whether the operation succeeds or fails.</li>
+</ul>
+<p>Treat exceptions as structured failure information, not as a substitute for all branching.</p>
+<h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_positive_int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        value <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> exc<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected an integer, received </span><span class="syntax-string">{</span>raw<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> exc
+
+    <span class="syntax-keyword">if</span> value <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">value must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> value</code></pre>
+<p>The conversion failure and domain-rule failure have different causes. The messages make both diagnosable.</p>
+<h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
+<ol>
+<li>Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</li>
+</ol>
+<ol>
+<li>Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. <strong>Constraints:</strong> put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. <strong>Verify:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</li>
+</ol>
+<ol>
+<li>Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. <strong>Verify:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</li>
+</ol>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. <strong>Progressive hint:</strong> Only the first true branch runs; test the most specific rule first. <strong>Verify:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</li>
+<li><strong>Tracing:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? <strong>Progressive hint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. <strong>Verify:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</li>
+<li><strong>Implementation:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. <strong>Progressive hint:</strong> Validate the domain before choosing a result branch. <strong>Verify:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</li>
+<li><strong>Debugging:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. <strong>Progressive hint:</strong> Keep only the conversion inside the protected block. <strong>Verify:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</li>
+<li><strong>Edge case and explanation:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. <strong>Progressive hint:</strong> A reusable library function usually should not invent a numeric result. <strong>Verify:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why does branch order matter in FizzBuzz?</li>
+<li>When should a loop use <code>break</code> versus a condition in <code>while</code>?</li>
+<li>Why is <code>except Exception:</code> usually too broad?</li>
+<li>What information is preserved by <code>raise NewError(...) from exc</code>?</li>
+</ul>
+<p>Expected behavior: FizzBuzz has exactly 30 outputs, invalid numeric text is reported without hiding unrelated bugs, and negative values raise the custom exception.</p>
+<h4 id="guide--common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#guide--common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>FizzBuzz never prints the combined case:</strong> inspect branch order.</li>
+<li><strong>An infinite <code>while</code> loop:</strong> identify which statement must change the loop condition; interrupt the notebook kernel if necessary.</li>
+<li><strong>Errors disappear silently:</strong> never use a bare <code>except: pass</code>; log, return a documented fallback, or re-raise.</li>
+<li><strong><code>UnboundLocalError</code> after <code>try</code>:</strong> a variable was assigned only on the success path. Return from each branch or initialize deliberately.</li>
+<li><strong>The wrong exception is caught:</strong> reproduce the smallest failing expression and inspect the traceback&#x27;s final line.</li>
+</ul>
+<h4 id="guide--continue">Continue<a class="heading-anchor" href="#guide--continue" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="python-03.html#learner">Open the learner notebook</a></li>
+<li><a href="python-03.html#solution-1">Check the separate solution</a></li>
+<li><a href="python-04.html#guide">Next: Day 4; Loops, comprehensions, and generators</a></li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-03`
+(Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
+I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
+Read `python/ds-60day/companion-guides/day03_control_flow_exceptions.md` and use the learner notebook
+`python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-3-control-flow-conditionals-truthiness-exceptions">Day 3 — Control flow: conditionals, truthiness, exceptions<a class="heading-anchor" href="#learner--cell-1--day-3-control-flow-conditionals-truthiness-exceptions" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>if/elif/else, while/for.</li>
+<li>try/except/else/finally.</li>
+<li>Define and raise custom exceptions.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-2--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-2--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>This is the editable learner artifact for <code>python-03</code>. Read <code>python/ds-60day/companion-guides/day03_control_flow_exceptions.md</code> first, then work here with the <strong>Python (ds60sqlpy)</strong> kernel. Restart the kernel and run from top to bottom so an earlier hidden value cannot make later code appear correct.</p>
+<p>For every example: (1) write a prediction, (2) run the cell, (3) compare the exact value, type, shape, rows, or side effect with the stated observation, and (4) explain one mismatch before moving on. For every exercise, use its dedicated work cell and include a real assertion or bounded inspection. The official solution stays closed until you have a tested attempt.</p>
+<p>The notebook is deliberately offline after course setup. Do not add <code>%pip</code>, credentials, absolute developer paths, or shell-specific setup here. If an import fails, use the repository doctor and the catalog from a terminal rather than changing only this kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="learner--cell-3--core-mental-model">Core mental model<a class="heading-anchor" href="#learner--cell-3--core-mental-model" aria-label="Link to this section">#</a></h4>
+<p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
+<p>Exceptions separate a normal return path from a failure path. A <code>try</code> block should contain only the operation expected to fail, while <code>except</code> names the failure the current layer can interpret. Catching every exception hides programming bugs. <code>else</code> runs after a successful <code>try</code>; <code>finally</code> runs whether success or failure occurred.</p>
+<h5 id="learner--cell-3--vocabulary">Vocabulary<a class="heading-anchor" href="#learner--cell-3--vocabulary" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>condition:</strong> an expression evaluated for truthiness.</li>
+<li><strong>branch:</strong> one possible block selected by a condition.</li>
+<li><strong>guard clause:</strong> an early check that rejects or handles an invalid case.</li>
+<li><strong>exception:</strong> an object representing a failure that interrupts normal flow.</li>
+<li><strong>raise:</strong> to deliberately signal an exception.</li>
+<li><strong>handler:</strong> an <code>except</code> block for a named exception type.</li>
+</ul></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="learner--cell-4--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#learner--cell-4--syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<p>In <code>if score &gt;= 90:</code>, the colon ends the condition and starts an indented suite. Only code indented under that branch belongs to it. In <code>except ValueError as exc:</code>, <code>ValueError</code> is the narrow failure type and <code>exc</code> is the actual exception object. An exception handler is not a substitute for an ordinary condition that can be checked directly.</p>
+<h5 id="learner--cell-4--worked-example-1-order-specific-branches-before-general-branches">Worked example 1 — Order specific branches before general branches<a class="heading-anchor" href="#learner--cell-4--worked-example-1-order-specific-branches-before-general-branches" aria-label="Link to this section">#</a></h5>
+<p>Classify a value after validating its domain. Before running the next cell, predict its final displayed value and identify the line responsible for every intermediate.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> score <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">score must be between 0 and 100</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">90</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">60</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pass</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-punctuation">[</span>classify_score<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-number">75</span><span class="syntax-punctuation">,</span> <span class="syntax-number">95</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><p><strong>Expected observation:</strong> <code>[&#x27;fail&#x27;, &#x27;pass&#x27;, &#x27;distinction&#x27;]</code>. The guard rejects out-of-domain values before classification.</p>
+<p>If your result differs, compare inputs and types before rerunning. Then explain the example from input to evidence in your own words.</p>
+<h5 id="learner--cell-6--worked-example-2-protect-only-the-fallible-conversion">Worked example 2 — Protect only the fallible conversion<a class="heading-anchor" href="#learner--cell-6--worked-example-2-protect-only-the-fallible-conversion" aria-label="Link to this section">#</a></h5>
+<p>Let unrelated programming errors remain visible. Predict first; then run the next cell.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_count</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        count <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> count</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-punctuation">[</span>parse_count<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> text <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string"> 12 </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">twelve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> <code>[12, None]</code>. Only invalid integer text is converted into the chosen sentinel.</p>
+<h4 id="learner--cell-8--debugging-clinic">Debugging clinic<a class="heading-anchor" href="#learner--cell-8--debugging-clinic" aria-label="Link to this section">#</a></h4>
+<p>When evidence differs from your prediction, use this order:</p>
+<ol>
+<li>Trace conditions from top to bottom and mark the first one that becomes true.</li>
+<li>Move validation before classification when impossible values enter normal branches.</li>
+<li>Shrink a large <code>try</code> block until it contains only the operation with the expected failure.</li>
+<li>Replace bare <code>except:</code> or <code>except Exception:</code> with the narrow type you can recover from.</li>
+</ol>
+<p><strong>Alternative to compare:</strong> Return a sentinel only when absence is part of the function&#x27;s contract; otherwise raise a specific exception and let the caller decide.</p>
+<p><strong>Boundary to test:</strong> Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.</p>
+<p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">safe_divide</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> b <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ZeroDivisionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">b must not be 0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> a <span class="syntax-operator">/</span> b</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    safe_divide<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">except</span> ZeroDivisionError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Caught:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--custom-exception">Custom exception<a class="heading-anchor" href="#learner--cell-10--custom-exception" aria-label="Link to this section">#</a></h4>
+<p>Create your own to signal domain-specific errors.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">InvalidEmailError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">pass</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_email</span><span class="syntax-punctuation">(</span>email<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">@</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> email<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> InvalidEmailError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Missing @ in email</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">for</span> e <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">user@example.com</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">bad-email</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        validate_email<span class="syntax-punctuation">(</span>e<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">ok:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> InvalidEmailError <span class="syntax-keyword">as</span> err<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">invalid:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> err<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-12--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#learner--cell-12--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
+<ol>
+<li>Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</li>
+</ol>
+<ol>
+<li>Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. <strong>Constraints:</strong> put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. <strong>Verify:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</li>
+</ol>
+<ol>
+<li>Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. <strong>Verify:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</li>
+</ol>
+<h5 id="learner--cell-12--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-12--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.</p>
+<p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
+<ol>
+<li><strong>Prediction:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. <strong>Progressive hint:</strong> Only the first true branch runs; test the most specific rule first. <strong>Verify:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</li>
+<li><strong>Tracing:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? <strong>Progressive hint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. <strong>Verify:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</li>
+<li><strong>Implementation:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. <strong>Progressive hint:</strong> Validate the domain before choosing a result branch. <strong>Verify:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</li>
+<li><strong>Debugging:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. <strong>Progressive hint:</strong> Keep only the conversion inside the protected block. <strong>Verify:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</li>
+<li><strong>Edge case and explanation:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. <strong>Progressive hint:</strong> A reusable library function usually should not invent a numeric result. <strong>Verify:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</li>
+</ol>
+<p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 9</div><h5 id="learner--cell-13--practice-1-prediction-attempt-and-evidence">Practice 1 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-13--practice-1-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 1 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Print FizzBuzz for every integer from 1 through 30 inclusive. multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h5 id="learner--cell-15--practice-2-prediction-attempt-and-evidence">Practice 2 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-15--practice-2-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. <strong>Constraints:</strong> put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. <strong>Verify:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 6</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 2 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. put only `int(text)` inside `try`; do not use...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 11</div><h5 id="learner--cell-17--practice-3-prediction-attempt-and-evidence">Practice 3 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-17--practice-3-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. <strong>Verify:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 7</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 3 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception fo...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 12</div><h5 id="learner--cell-19--practice-4-prediction-attempt-and-evidence">Practice 4 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-19--practice-4-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Prediction:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. <strong>Progressive hint:</strong> Only the first true branch runs; test the most specific rule first. <strong>Verify:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 8</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 4 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug. Only the first true branch runs; test the most speci...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 13</div><h5 id="learner--cell-21--practice-5-prediction-attempt-and-evidence">Practice 5 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-21--practice-5-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Tracing:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? <strong>Progressive hint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. <strong>Verify:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 9</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 5 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path? `else` follows success; `finally` runs in both cases. Use a...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 14</div><h5 id="learner--cell-23--practice-6-prediction-attempt-and-evidence">Practice 6 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-23--practice-6-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Implementation:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. <strong>Progressive hint:</strong> Validate the domain before choosing a result branch. <strong>Verify:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 10</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 6 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`. Validate the domain before choosing a result branch. Assert...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 15</div><h5 id="learner--cell-25--practice-7-prediction-attempt-and-evidence">Practice 7 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-25--practice-7-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Debugging:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. <strong>Progressive hint:</strong> Keep only the conversion inside the protected block. <strong>Verify:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 11</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 7 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. Keep only the conversion inside the prot...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 16</div><h5 id="learner--cell-27--practice-8-prediction-attempt-and-evidence">Practice 8 — prediction, attempt, and evidence<a class="heading-anchor" href="#learner--cell-27--practice-8-prediction-attempt-and-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Contract reminder:</strong> <strong>Edge case and explanation:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. <strong>Progressive hint:</strong> A reusable library function usually should not invent a numeric result. <strong>Verify:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</p>
+<p>In the next cell, record your prediction before the code. Keep the input tiny, implement only this contract, and finish with the requested assertion or bounded inspection. If it fails, retain the smallest failing input and write what the evidence changed about your hypothesis.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 12</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Practice 8 — your work</span></span>
+<span class="source-line"><span class="syntax-comment"># Short contract: Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it. A reusable library function usually sh...</span></span>
+<span class="source-line"><span class="syntax-comment"># Prediction:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Implementation:</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Verification (assert or inspect exactly what the prompt requires):</span></span>
+<span class="source-line"></span></code></pre>
+</article></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-03-solutions-control-flow-truthiness-and-exceptions">Day 03: Solutions: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#solution-1--day-03-solutions-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
+<h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
+<p>These worked answers demonstrate <strong>branch selection, loop decisions, and narrow exception boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
+<p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
+<p>Exceptions separate a normal return path from a failure path. A <code>try</code> block should contain only the operation expected to fail, while <code>except</code> names the failure the current layer can interpret. Catching every exception hides programming bugs. <code>else</code> runs after a successful <code>try</code>; <code>finally</code> runs whether success or failure occurred.</p>
+<h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong>condition:</strong> an expression evaluated for truthiness.</li>
+<li><strong>branch:</strong> one possible block selected by a condition.</li>
+<li><strong>guard clause:</strong> an early check that rejects or handles an invalid case.</li>
+<li><strong>exception:</strong> an object representing a failure that interrupts normal flow.</li>
+<li><strong>raise:</strong> to deliberately signal an exception.</li>
+<li><strong>handler:</strong> an <code>except</code> block for a named exception type.</li>
+</ul>
+<h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
+<p>For this lesson&#x27;s <strong>branch selection, loop decisions, and narrow exception boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Print FizzBuzz for every integer from 1 through 30 inclusive. Rules: multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. Constraints: use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
+<pre class="highlighted-code"><code class="language-python">output <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> number <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">31</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> number <span class="syntax-operator">%</span> <span class="syntax-number">15</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">elif</span> number <span class="syntax-operator">%</span> <span class="syntax-number">3</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Fizz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">elif</span> number <span class="syntax-operator">%</span> <span class="syntax-number">5</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Buzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        output<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>number<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>output<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">30</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>output<span class="syntax-punctuation">[</span>index <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> index <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">15</span><span class="syntax-punctuation">,</span> <span class="syntax-number">16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">Fizz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Buzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">16</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">FizzBuzz</span><span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">]</span></code></pre>
+<p>The combined rule comes first because an <code>elif</code> chain stops at the first true condition.</p>
+<p><strong>Verification evidence:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. <strong>Constraints:</strong> put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. <strong>Verify:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. Constraints: put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_age</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        value <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> value
+
+
+<span class="syntax-keyword">assert</span> parse_age<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">42</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">42</span>
+<span class="syntax-keyword">assert</span> parse_age<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string"> 7 </span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span>
+<span class="syntax-keyword">assert</span> parse_age<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">seven</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
+<p>Only conversion is protected; a later programming defect is not mislabeled as invalid user input.</p>
+<p><strong>Verification evidence:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</p>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. <strong>Verify:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">NegativeMeasurementError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Raised when a measurement is below zero.&quot;&quot;&quot;</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate_measurement</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> value <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> NegativeMeasurementError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">measurement must be non-negative</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> value
+
+
+<span class="syntax-keyword">assert</span> validate_measurement<span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span>
+<span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+    validate_measurement<span class="syntax-punctuation">(</span><span class="syntax-operator">-</span><span class="syntax-number">0.1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> NegativeMeasurementError <span class="syntax-keyword">as</span> error<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">non-negative</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>error<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative input should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Verification evidence:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</p>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. <strong>Progressive hint:</strong> Only the first true branch runs; test the most specific rule first. <strong>Verify:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</p>
+<p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. Progressive hint: Only the first true branch runs; test the most specific rule first. Then compare the prediction with this proof target: Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule. This makes branch selection, loop decisions, and narrow exception boundaries observable instead of relying on intuition.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? <strong>Progressive hint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. <strong>Verify:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? Progressive hint: <code>else</code> follows success; <code>finally</code> runs in both cases. Record the named value, shape, label, or iterator position needed to establish: Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules. The trace exposes branch selection, loop decisions, and narrow exception boundaries directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</p>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. <strong>Progressive hint:</strong> Validate the domain before choosing a result branch. <strong>Verify:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. Progressive hint: Validate the domain before choosing a result branch. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Debugging:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. <strong>Progressive hint:</strong> Keep only the conversion inside the protected block. <strong>Verify:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</p>
+<p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. Progressive hint: Keep only the conversion inside the protected block. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>. The diagnosis depends on branch selection, loop decisions, and narrow exception boundaries.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</p>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. <strong>Progressive hint:</strong> A reusable library function usually should not invent a numeric result. <strong>Verify:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. Progressive hint: A reusable library function usually should not invent a numeric result. Values below, at, and above the named boundary must produce the evidence Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through. Those cases show how branch selection, loop decisions, and narrow exception boundaries behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</p>
+<h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.</p>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces">Shared implementation for Exercises 4–5: Branch and exception traces<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces" aria-label="Link to this section">#</a></h5>
+<p>The combined-divisibility check must come first; otherwise values such as 12 are consumed by the even branch. On successful parsing, <code>else</code> and <code>finally</code> run. On <code>ValueError</code>, <code>except</code> and <code>finally</code> run.</p>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-explicit-contracts">Shared implementation for Exercises 6–8: Explicit contracts<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-explicit-contracts" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Classify a score whose valid domain is the closed interval 0..100.&quot;&quot;&quot;</span>
+
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> score <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">score must be between 0 and 100</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">80</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">60</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pass</span><span class="syntax-string">&quot;</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span>
+
+
+<span class="syntax-keyword">assert</span> classify_score<span class="syntax-punctuation">(</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span>  <span class="syntax-comment"># Boundary belongs to upper band.</span>
+<span class="syntax-keyword">assert</span> classify_score<span class="syntax-punctuation">(</span><span class="syntax-number">59.9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">parse_count</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return None only when text is not a valid integer.&quot;&quot;&quot;</span>
+
+    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-comment"># Keep the try block narrow: later calculations may reveal real bugs.</span>
+        value <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span>
+    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">return</span> value
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">safe_ratio</span><span class="syntax-punctuation">(</span>numerator<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> denominator<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-string">&quot;&quot;&quot;Return a ratio, rejecting an undefined zero-denominator operation.&quot;&quot;&quot;</span>
+
+    <span class="syntax-keyword">if</span> denominator <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ZeroDivisionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">denominator must be non-zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> numerator <span class="syntax-operator">/</span> denominator
+
+
+<span class="syntax-keyword">assert</span> parse_count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span>
+<span class="syntax-keyword">assert</span> parse_count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">twelve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span>
+<span class="syntax-keyword">assert</span> safe_ratio<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.75</span></code></pre>
+<p>Raising in <code>safe_ratio</code> preserves the fact that the result is undefined. A calling application can translate that exception into <code>None</code> or a user message if its own contract calls for one.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day03_control_flow_exceptions/day03_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-03-solutions-control-flow-truthiness-and-exceptions">Day 03 — Solutions: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#solution-2--cell-1--day-03-solutions-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
+<p>This notebook contains runnable versions of the key solutions.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 1 — FizzBuzz for 1..30</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">31</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> n <span class="syntax-operator">%</span> <span class="syntax-number">15</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fizzbuzz</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">elif</span> n <span class="syntax-operator">%</span> <span class="syntax-number">3</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fizz</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">elif</span> n <span class="syntax-operator">%</span> <span class="syntax-number">5</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">buzz</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 2 — Safe input parsing with try/except</span></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">read_int</span><span class="syntax-punctuation">(</span>prompt<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">Enter an integer: </span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">while</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        raw <span class="syntax-operator">=</span> <span class="syntax-builtin">input</span><span class="syntax-punctuation">(</span>prompt<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-keyword">return</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>raw<span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">            <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">That wasn</span><span class="syntax-string">&#x27;</span><span class="syntax-string">t an integer. Please try again.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Exercise 3 — Custom exception for negative numbers</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">NegativeNumberError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Raised when a negative number is encountered where it is not allowed.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">ensure_non_negative</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> x <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> NegativeNumberError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Negative value not allowed: </span><span class="syntax-string">{</span>x<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> x</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">for</span> val <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">OK:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> ensure_non_negative<span class="syntax-punctuation">(</span>val<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> NegativeNumberError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Error:</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> e<span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># More Practice — parse_int and robust JSON loader</span></span>
+<span class="source-line"><span class="syntax-keyword">class</span> <span class="syntax-class">ParseError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-operator">.</span><span class="syntax-operator">.</span><span class="syntax-operator">.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_int</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ParseError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Could not parse integer from </span><span class="syntax-string">{</span>s<span class="syntax-string">!r}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> e</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path</span>
+<span class="source-line"><span class="syntax-keyword">import</span> json</span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">load_json</span><span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span> <span class="syntax-operator">|</span> Path<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        text <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>path<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>read_text<span class="syntax-punctuation">(</span>encoding<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> json<span class="syntax-operator">.</span>loads<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> FileNotFoundError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> FileNotFoundError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">File not found: </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> PermissionError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> PermissionError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Permission denied reading: </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> json<span class="syntax-operator">.</span>JSONDecodeError <span class="syntax-keyword">as</span> e<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Invalid JSON in </span><span class="syntax-string">{</span>path<span class="syntax-string">}</span><span class="syntax-string">: line </span><span class="syntax-string">{</span>e<span class="syntax-operator">.</span>lineno<span class="syntax-string">}</span><span class="syntax-string">, col </span><span class="syntax-string">{</span>e<span class="syntax-operator">.</span>colno<span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">from</span> e</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><hr>
+<h4 id="solution-2--cell-6--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-2--cell-6--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
+<p>Every numbered learner exercise has a matching entry here. The original worked examples remain above; the expanded answers below add heavily commented code, explicit reasoning, and executable checks.</p>
+<h5 id="solution-2--cell-6--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-6--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Print FizzBuzz for 1 through 30. <strong>Hint:</strong> test the most specific case (divisible by both numbers) before either individual case.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-6--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-6--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Parse user input while handling <code>ValueError</code>. <strong>Hint:</strong> keep only the conversion inside <code>try</code>; code outside should not be accidentally swallowed.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-6--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-6--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Define an exception for negative inputs and raise it when encountered. <strong>Hint:</strong> subclass <code>ValueError</code> because the type is acceptable but its value violates the function&#x27;s contract.</p>
+<p>The earlier worked solution in this file is the reference answer. Trace it from inputs to output, then run its assertions or stated checks. The important review question is how that implementation applies the lesson contract rather than merely reproducing syntax.</p>
+<h5 id="solution-2--cell-6--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-2--cell-6--exercise-4-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug.</p>
+<p><strong>Reasoning checkpoint:</strong> Only the first true branch runs; test the most specific rule first. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-6--exercise-5-tracing">Exercise 5 — Tracing<a class="heading-anchor" href="#solution-2--cell-6--exercise-5-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path?</p>
+<p><strong>Reasoning checkpoint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-6--exercise-6-implementation">Exercise 6 — Implementation<a class="heading-anchor" href="#solution-2--cell-6--exercise-6-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>.</p>
+<p><strong>Reasoning checkpoint:</strong> Validate the domain before choosing a result branch. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-6--exercise-7-debugging">Exercise 7 — Debugging<a class="heading-anchor" href="#solution-2--cell-6--exercise-7-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface.</p>
+<p><strong>Reasoning checkpoint:</strong> Keep only the conversion inside the protected block. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h5 id="solution-2--cell-6--exercise-8-edge-case-and-explanation">Exercise 8 — Edge case and explanation<a class="heading-anchor" href="#solution-2--cell-6--exercise-8-edge-case-and-explanation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it.</p>
+<p><strong>Reasoning checkpoint:</strong> A reusable library function usually should not invent a numeric result. The detailed worked reasoning and commented implementation appear in the expanded solution immediately below.</p>
+<h4 id="solution-2--cell-6--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-2--cell-6--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
+<p>Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.</p>
+<p>Read the reasoning before the code. Inline comments explain ownership, boundary choices, and why each check exists; assertions turn the stated contract into executable evidence.</p>
+<h5 id="solution-2--cell-6--practices-1-2-branch-and-exception-traces">Practices 1–2 — Branch and exception traces<a class="heading-anchor" href="#solution-2--cell-6--practices-1-2-branch-and-exception-traces" aria-label="Link to this section">#</a></h5>
+<p>The combined-divisibility check must come first; otherwise values such as 12 are consumed by the even branch. On successful parsing, <code>else</code> and <code>finally</code> run. On <code>ValueError</code>, <code>except</code> and <code>finally</code> run.</p>
+<h5 id="solution-2--cell-6--practices-3-5-explicit-contracts">Practices 3–5 — Explicit contracts<a class="heading-anchor" href="#solution-2--cell-6--practices-3-5-explicit-contracts" aria-label="Link to this section">#</a></h5></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Classify a score whose valid domain is the closed interval 0..100.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> score <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">score must be between 0 and 100</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">80</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">60</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pass</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> classify_score<span class="syntax-punctuation">(</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">distinction</span><span class="syntax-string">&quot;</span>  <span class="syntax-comment"># Boundary belongs to upper band.</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> classify_score<span class="syntax-punctuation">(</span><span class="syntax-number">59.9</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_count</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return None only when text is not a valid integer.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-comment"># Keep the try block narrow: later calculations may reveal real bugs.</span></span>
+<span class="source-line">        value <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line">    <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">return</span> value</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">safe_ratio</span><span class="syntax-punctuation">(</span>numerator<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> denominator<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a ratio, rejecting an undefined zero-denominator operation.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">    <span class="syntax-keyword">if</span> denominator <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">        <span class="syntax-keyword">raise</span> ZeroDivisionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">denominator must be non-zero</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-keyword">return</span> numerator <span class="syntax-operator">/</span> denominator</span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> parse_count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">12</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> parse_count<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">twelve</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> safe_ratio<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.75</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><p>Raising in <code>safe_ratio</code> preserves the fact that the result is undefined. A calling application can translate that exception into <code>None</code> or a user message if its own contract calls for one.</p></article></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-03`
+(Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
+I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
+Read `python/ds-60day/companion-guides/day03_control_flow_exceptions.md` and use the learner notebook
+`python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb`. Do not open or quote anything under `solutions/` unless
+I explicitly ask after making an honest attempt. Use these visible phases:
+Explain, Predict, Attempt, Hint, Evidence, and Retrieval. First explain one
+concept in plain language, then ask me to predict a small example and wait
+for my attempt. Give only one progressive hint at a time. Help me run or
+inspect my actual notebook evidence, adapt commands to my operating system,
+and do not treat the rendered HTML preview as executable. Finish with 2-3
+retrieval questions and one next step. Done when I can explain the mental
+model without the guide, complete one independent exercise, and show the
+prompt&#x27;s verification evidence from my notebook.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-02.html"><small>Previous lesson</small><strong>python-02</strong><span>Basics Types</span></a>
+        <a class="nav-card next" href="python-foundations-02.html"><small>Next lesson</small><strong>python-foundations-02</strong><span>Debug from Evidence Instead of Guessing</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-03";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

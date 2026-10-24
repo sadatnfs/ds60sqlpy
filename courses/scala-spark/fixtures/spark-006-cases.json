@@ -1,0 +1,78 @@
+{
+  "lesson_id": "spark-006",
+  "scope": "Tiny deterministic local contracts; runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Keep identity independent of value",
+      "input_contract": "Return the event's identity for every domain state. Test two paid events with equal cents but different IDs and verify constructor rejection of a blank ID.",
+      "expected": "Paid(p1,100), Paid(p2,100), Voided(v1, duplicate), Refunded(r1,25) retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.",
+      "verification": "Assert the four IDs in input order and catch IllegalArgumentException for Paid(\"\",100L)."
+    },
+    {
+      "exercise": 2,
+      "title": "Match every defined state",
+      "input_contract": "Return paid, voided or refunded through an exhaustive pattern match. Include Refunded explicitly; do not use a catch-all branch that labels every unfamiliar state paid.",
+      "expected": "The four-event fixture yields paid, paid, voided, refunded. Adding another sealed-domain case requires reviewing this match and its tests.",
+      "verification": "Assert all four classifications. Temporarily inspect an omitted-refund match as a compiler-warning counterexample, then restore the complete implementation."
+    },
+    {
+      "exercise": 3,
+      "title": "Separate magnitude from signed contribution",
+      "input_contract": "Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.",
+      "expected": "The fixture contributes 100,100,0,-25. Refunded(r0,0) contributes 0 but remains refunded; Paid with-1 cents is rejected.",
+      "verification": "Assert exact signed contributions, zero-refund behavior and the constructor failure for a negative paid amount."
+    },
+    {
+      "exercise": 4,
+      "title": "Create a validated replacement value",
+      "input_contract": "Return a new Paid value with the same ID and a revised amount, leaving the original unchanged. Use copy and preserve constructor validation for an out-of-domain amount.",
+      "expected": "Paid(p1,100) revised to 125 becomes Paid(p1,125), while the original remains 100. Amount 1000001 is rejected.",
+      "verification": "Assert old/new amounts and equal IDs, then catch the out-of-domain constructor failure."
+    },
+    {
+      "exercise": 5,
+      "title": "Reduce signed events without dropping zero states",
+      "input_contract": "Compute the checked Long sum of signedCents for every event. Empty input returns 0. Preserve all domain states in the source even when their numerical contribution is zero.",
+      "expected": "The four-event fixture nets 175 cents. Paid(z,0) and Voided(v, reason) together net 0 while remaining two distinct events.",
+      "verification": "Assert 175, empty 0, and a two-event zero-total fixture without filtering either event."
+    },
+    {
+      "exercise": 6,
+      "title": "Reconcile identity, state and net value",
+      "input_contract": "Reject repeated event IDs, then return IDs in source order, net total, and counts for paid/voided/refunded including zero categories. Do not deduplicate equal monetary amounts.",
+      "expected": "The fixture returns IDs[p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.",
+      "verification": "Assert the full result and count sum 4, then demonstrate that two equal-ID Paid records fail instead of being silently collapsed."
+    }
+  ],
+  "golden": {
+    "events": [
+      [
+        "p1",
+        "paid",
+        100
+      ],
+      [
+        "p2",
+        "paid",
+        100
+      ],
+      [
+        "v1",
+        "voided",
+        null
+      ],
+      [
+        "r1",
+        "refunded",
+        25
+      ]
+    ],
+    "net_cents": 175,
+    "counts": {
+      "paid": 2,
+      "voided": 1,
+      "refunded": 1
+    }
+  }
+}

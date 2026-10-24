@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-036",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Distinguish phases",
+      "input_or_change": "Classify static_assert(square(4)==16) and square(runtime).",
+      "expected": "First compile-time requirement; second runtime-capable call."
+    },
+    {
+      "exercise": 2,
+      "task": "Add a lookup table",
+      "input_or_change": "Build squares for indices 0 through 4 with constexpr data.",
+      "expected": "[0,1,4,9,16]."
+    },
+    {
+      "exercise": 3,
+      "task": "Force constant evaluation",
+      "input_or_change": "Create a consteval limit function and call with constant input.",
+      "expected": "Build succeeds with a constant result."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose runtime argument",
+      "input_or_change": "Pass an input read at runtime to a consteval function.",
+      "expected": "Compilation fails; use constexpr when runtime calls are needed."
+    },
+    {
+      "exercise": 5,
+      "task": "Check a numeric boundary",
+      "input_or_change": "Limit table inputs so multiplication cannot overflow int.",
+      "expected": "Declared bound and safe result range documented."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer build budget",
+      "input_or_change": "Compare bounded table sizes 16 and 256 in an owned host build.",
+      "expected": "Record compile duration and artifact size without asserting a universal ratio."
+    }
+  ]
+}

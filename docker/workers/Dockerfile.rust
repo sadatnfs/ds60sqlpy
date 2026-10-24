@@ -1,0 +1,16 @@
+ARG DS60_RUST_IMAGE=rust:1.99.1-bookworm@sha256:48b7f435b8fc6378ce43b44f15e3a47fd8919b2825f835c39bd4bd3da50af5b8
+FROM ${DS60_RUST_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/* && install -d -m 0700 /run/ds60
+WORKDIR /opt/course-rust
+COPY docker/workers/rust/Cargo.toml docker/workers/rust/Cargo.lock ./
+COPY docker/workers/rust/src/ ./src/
+# Cargo.lock authenticates the selected crates. Network preparation happens
+# only at image build; every learner attempt uses readonly compiled libraries.
+RUN cargo build --release --locked --jobs 2 \
+    && python3 -c "from pathlib import Path; import shutil; p=list(Path('target/release/deps').glob('libarrow-*.rlib')); assert len(p)==1; shutil.copyfile(p[0], 'libarrow.rlib')" \
+    && chmod -R a+rX /opt/course-rust /usr/local/rustup
+WORKDIR /opt/worker
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py /opt/worker/src/ds60sqlpy/
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=rust-stable
+ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

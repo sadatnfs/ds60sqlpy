@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-059",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the effect of an empty egress list.",
+      "expected": "It contributes no allowed outgoing flows for selected Pods."
+    },
+    {
+      "exercise": 2,
+      "task": "Include DNS in a dependency map.",
+      "expected": "Resolver destination and UDP/TCP requirements are explicit."
+    },
+    {
+      "exercise": 3,
+      "task": "Design a minimal egress matrix.",
+      "expected": "Only named required internal or external flows are permitted."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose named-request failure with direct-IP success.",
+      "expected": "Inspect DNS egress and resolver behavior first."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why an IP block is not a hostname policy.",
+      "expected": "It matches addresses, which may not be stable or exclusive to one service."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan an egress qualification after NAT.",
+      "expected": "Record implementation, observed addresses and both allowed/denied cases."
+    }
+  ]
+}

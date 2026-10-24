@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "subject": "docker",
+  "execution": "explicit owned host only; no browser engine access",
+  "fixtures": [
+    {
+      "id": "compose-lab",
+      "path": "courses/docker/fixtures/compose-lab",
+      "project": "ds60-docker-study",
+      "host_binding": "127.0.0.1:18080",
+      "image": "ds60-docker-study:local",
+      "cases": [
+        "compose config validation",
+        "local image build",
+        "health endpoint",
+        "host browser message",
+        "peer service DNS request",
+        "POST increment and GET read",
+        "container replacement retains counter",
+        "independent stopped-writer backup and restore",
+        "non-root and read-only boundary",
+        "owned cleanup preserves primary study volume"
+      ],
+      "qualification": "requires actual local engine execution; inventory is not a receipt"
+    }
+  ]
+}

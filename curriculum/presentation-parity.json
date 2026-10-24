@@ -1,0 +1,406 @@
+{
+  "schema_version": 1,
+  "scope": "Presentation-only Markdown and descriptive metadata changes. Historical runtime receipts are unchanged. This record is not new execution evidence.",
+  "baseline_archive": "DS60LearningLab-0.3.0-One-Command-Classroom.zip",
+  "baseline_archive_sha256": "6b5a62f502d810dace0ceefb9ecbedfd2a5f850d52037fd55b439c98034a22cb",
+  "records": [
+    {
+      "path": "courses/llm-applied/lessons/llm-applied-021.md",
+      "historical_sha256": "ed3c052f887b3925cc69aedb95c7f5e417e55ee1b9afff985cdd65b6202e840a",
+      "presentation_sha256": "3e7fbd7dcb5a30bb57e02b69fccaf5490524a74f09a93cfac666b84f68380a3c",
+      "code_block_sha256": [],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-001_solutions.md",
+      "historical_sha256": "a2699deeb8238ef6db7e61fe3ecad12c4cfc4426ff7d87e86e27205c0fecf798",
+      "presentation_sha256": "7bad19151f1533c859f3c29e967119fc3710d159ba44bc77064718318f8e9a43",
+      "code_block_sha256": [
+        "73c7df38284377b81709dda31b0ad4414dc2bcf7b55ce6ba600171f9fe7929da",
+        "ec250f8e3a74c005fa35346d513f38923cbfd1ff79003f461464116b6c15955f",
+        "e36c884ebf4f5099e1476ad66ea04e9e15cd23621589fb7d58e8d582269b0ac9",
+        "26f220d44fdc120ab775a5fce7c2af672cc2172a1454e213d4d23dadaccf277f",
+        "5a1a9ad3490e6e23c8598087522e3cd4c86fd770d036ba39c7cdef2d58f66bb2",
+        "adaeec55a5eecd53aec201aac3dd93ea0202ba835b2e9524d306bffba43175e4"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-002_solutions.md",
+      "historical_sha256": "6613e175ab88dae0647278c27d82c8974821d545a80ad6e9740415c54be494d2",
+      "presentation_sha256": "b6299527683801c35c192ff541db500e063444b803bb2c9c29cb2765ed3a33fc",
+      "code_block_sha256": [
+        "0e97c1c47f5d6158b528fcf7cf32880e5afa16afc7972cec465c3202e0a79295",
+        "01e234b3d5bc31f663bdca0f58b20636016d9ad6237b262f457d565946533b91",
+        "c5031d803152b6629ab8c4ea0a82f7125fb72f52c98c625c3ae57d522bd3f3d1",
+        "101e53e412239c163536fe496594eb21760ec6dd2d501475b8275bfaa4c9e97c",
+        "20b1886cf91dc6297500bfa838e10be75fc0ba7ce1f360cb56e80e0edcfddba0",
+        "bfdaac16d188af6e38a63eb0c5691a1dfa27827f4d29a3c8bf10e6e9fc21344b"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-003_solutions.md",
+      "historical_sha256": "4e775351aa61698442c14aeac79dbee8217cc7f048371a691ff30cb33fb1f77d",
+      "presentation_sha256": "fb449a4cb64904ade99413b3235a5fd2fedfdafb6bd2ef72367ef8bcc4702c80",
+      "code_block_sha256": [
+        "a6120c26245c506326e6d6a59deac0f241455220a9f215c942925881fa253248",
+        "038aeffa108d9e12f1a667ab4c9c8a1901cd462150960b28e5c31984f7d5603e",
+        "52b9e9c85f53555e2047028217aec2602a23f917a6621ae7e2b02fecb99381b2",
+        "3251f36f5c5da1225c32186c2426489d3d01d435e5684ab37415d17589379882",
+        "980266e913a3cf254d438718f7b3f945239f9cfb631dfea8c5ba915b798c5261",
+        "0396683027755f6c29e41a53ff60db153f9edbd17fff654e4416adbf6bbc0610"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-004_solutions.md",
+      "historical_sha256": "27aea03ea15122ee974d75b60b9f44e0b93af7770afde49ea0df0e2d53c6d24d",
+      "presentation_sha256": "8fb9d041531fc083e7b5a03c797dff14123cb9830f7074c46ef203bf64ba4b3d",
+      "code_block_sha256": [
+        "885e8dfca3928dfec8a60bd4e71242cd5e59be3c1afb1f4fd971b50f2e95913b",
+        "56e9d900f1e58c13f68dab20ae77a5e0e4729d58f99e43522493a7dbc7ae8894",
+        "1963161e31751b61f2d238579c59cfe53adf5a55745ac520532f3540daa118c7",
+        "c611956391ea82777607ca2d82f7dcb6921faa2c80b862c0cf2c1024ff38efed",
+        "8c278d81613a0a19c36404e2b2a441c9c5f09378ee3c0c4808211e2d9e6214b8",
+        "d1feabfd4cd5dec06ce378ae73210ec2b02b11e721f3c5bde149f46ee57b8faf"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-005_solutions.md",
+      "historical_sha256": "8043016a017435fee8df5587edc42164bca52a5384274da0d6e2e84eb576ddb2",
+      "presentation_sha256": "eeb878dfd5de173dd0bc68b6ff7acf5a48ac5063e2ad879a6d40b3a2719dd4da",
+      "code_block_sha256": [
+        "73042edb559b5fcfe88fe0b848bf68c1f469802eaff3e603d98479c48e41095c",
+        "c80283a46143f05f649b6eb2e3f9557e63f5fc75b73c1a0c992ec924eddb307f",
+        "1ba1b56610b39a6e0e17ffae7c11dcb20b7486809602623d82ef8f4af94cd360",
+        "0c6d7b54e9012fc59da7a99f8e8834d8fa11fc88cb0f11a12253c7e58f0da345",
+        "49500b2bc9ccfe66ec4df739ac6e96bb046206ae86a559ec99ef848d02ce3ac8",
+        "4a0b954c61ca12f6a2957a6e2e8704aa96ee8bb989300bfef740746760202714"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-006_solutions.md",
+      "historical_sha256": "3bc9fb6dc1af3a85042534dfde562065915ceb13d1dfb7220891ae90f5775ee9",
+      "presentation_sha256": "2c58c0466ce9664bd3ba075a997a8c70962eba52949b4dcfe06baf0fb98678d1",
+      "code_block_sha256": [
+        "59747fac435563215b041d76bbc31f2eac00d5ed39a614f1238bd4d085be4320",
+        "83880d6c341bc06db8ea5830595bbe1bd2e98a1867ea6f8f0c828fb5b460caa8",
+        "ac4ae01c442abdec6c432989b1f53dcc61530b76e583683114b3f5a687572c91",
+        "eedfe8c59172d96db3e2daf7bce0d1f497c0336db3bc06b2253f050392b552fb",
+        "be8d96aacd21706eb4899a5576b36192480fac5003bf9a53b640d784236160fe",
+        "d1b87c2ee12f50896afcc428858157c54bf351a82d83013e1401604668056213"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-007_solutions.md",
+      "historical_sha256": "74bb98b2dadb398871f442d4956133e2eaac6f2bfe77a1352650da367b937978",
+      "presentation_sha256": "ef19fcab1034bf7a21fb6686168f97e521eb51ed1fcaeaaffe09f6027c144a64",
+      "code_block_sha256": [
+        "7a8f3ada73cd6bb987f1d0b1651c5dbb2692004c1decc8e96f0ce926f78f9c12",
+        "3677e56127857b02f6348340d20c62a956468fdabab9055315638d3d4b097fda",
+        "e135ae9fe4729148b39e4e8d66ec82a5465704cb4a4dddd27afa8fcdb2d11c36",
+        "b430f61ee876617131d344df936c02cb5f06dc4c11848ec8ce0bb93cda2eeb4c",
+        "dc7ec41dd671d79b0d3b52279eb5bedec12a2a1d476cd6313c61d938792b0296",
+        "a50754986bf3cb8aa410e4ba2dd2c9c1b81ca4f4f879cf8ef1a2cd4eceb7dd10"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-008_solutions.md",
+      "historical_sha256": "16407550ae5bbf155f443aad832cd4a4a0a864406d23ef0b8ef593dbfe1ab822",
+      "presentation_sha256": "06508f8218ff25fdd29bf3a1bebb5293d33f956a42f887eec7ef20d91b1c5834",
+      "code_block_sha256": [
+        "c05f961ac07f32aa768db79c5287a1f60615a94ca980424d84af8c4ef93647fb",
+        "2c10a09339246456f498ae1db7b593d7f4e93825e3e61efb7bdb6e457e8abf25",
+        "4ae32e5f29d26c9050579acaf7e0c2d6a8cbac98a1d6a25705a4e764c04140a9",
+        "ebf68635c0b6375450c34f5634a9930021e3e0fdaf0f5b37ffb4e88443ab0a15",
+        "b0bf3599c42a2b4db3642a0166d4eec985ce729af5593d8a3fdd6629d0072712",
+        "165e89a005f89a2e96339e696409793c7443c6ab3745b7a80f38b3ade64d3cf5"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-009_solutions.md",
+      "historical_sha256": "293189245aaf36efa650675734f5c829080c224524f44771666a4f8cf2c79ea4",
+      "presentation_sha256": "07c8fbbf8356a8e4dda5b69e2cd8edf55eebed47e8ea73f9a421637caa211e7a",
+      "code_block_sha256": [
+        "d8da8cc30416cd4649de45aa88a7d6b15470758fd9543f46847bf6093e60b1e6",
+        "22d76a43fda8f028dd5f27b34577966ddf6f1368d0eca47703ad9059bcb0cc5b",
+        "e89ae59dd164bd02414c5dcced0d886924e1b8e8186df42e61c986b984041a69",
+        "51ed5b9bc17bcf40daa4e3572725fd735279f0058d97f14d46a30bd888cd81ed",
+        "98babfdbee528b53d118e5b30bcf43bcdfb4b5e71134ce18e4c1f941ac765e79",
+        "5975ad35648591887c7cced5f9e420392a6be987a124d846161d3248c97a2bf7"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-010_solutions.md",
+      "historical_sha256": "5b206a251ba4b7aa3e8abd281e976ed182c4613dc1d7afd6bc51574758034e13",
+      "presentation_sha256": "1cd8731a17159b914d0e2dee7b8d61a7ccda6b539d0d39fc3eb0f71d0871241e",
+      "code_block_sha256": [
+        "6f373feee064bfb112d9e7430ca6ce9800f02e538e6c2bcd066e4b25c3e6a059",
+        "e37085d3aa263741477440227be7fa0b85b76ecc2014081e54ea7aafae28b082",
+        "60a0e511de46a78d4d58aabfa163f03ecb170da268be03fb6a6bcf3089e9598d",
+        "ad6a6948a67f6c16f78f3a956f55551192ac9178475d0570615d2e5c4cda3749",
+        "59c0768adc41d6bc77864a61d95fab6af92e481419a46c7aebc3aedfbd27d32a",
+        "fa237076343688f65a8ed42694e713a82ac531843d04ec7592af67387a0ba35b"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-011_solutions.md",
+      "historical_sha256": "5bd950dd7a82724983a4591dc84cb0ec035b1f5ad5860f87b5f3926a35be7b99",
+      "presentation_sha256": "435c69a378577553e618b2f972c92662466c1b6c4d9cb47bd37ae66eba96cffa",
+      "code_block_sha256": [
+        "153431f7757d1f007d3fb2d635a691aca3ed7824a9101706b9a4f3df31f6bb36",
+        "27e2542def7965a26f4b589de3bd858f7005c7e9fd94af91f74c852f5416418c",
+        "3c7090954bac0ae14ab2d2bb7aca62292ba4ebcf3ab8ac1a94cfeb09ac92ccbe",
+        "310570fd5d048909c6b5f211380c9a6faecbed0492a2ae56673e3993ed183196",
+        "ef7a39266e840235169820266ba6c4af8e7b264ab8c7a47ce721eb1e076e9548",
+        "cd73795a41b61883ef7bffc95ccec5883d05666b504a9cd323db5f3ef8edf7dd"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-012_solutions.md",
+      "historical_sha256": "ccca757ba8e40fecd6491a50d1acd5005ed33ab955d44b696156ed521910d925",
+      "presentation_sha256": "640548efbd96b6b139e9c9d3bfc40b7d7d3dde89d10f8687c2f41b60826ee24d",
+      "code_block_sha256": [
+        "dda600bdf1ca2894204bceac65656fd4cf7db50c53d9920508d385104a189b2d",
+        "7edc053d487b1be137bfd44bfb580eda5f9a1ac2155f79337f8dd99519e617ba",
+        "048520b6417288c91e9885af099a6522e556c8e0f5ab31dfc0c4aee7b6d3cba3",
+        "9dd066fa3725e0ff51206833ef0b7e9b8d12858c9dac6d6d449b13f1ad0f8002",
+        "24532cafd9b0e3a8fc77566376809acbe510eda5d1a34d4103b65645933667bc",
+        "3f4ec5888f7a58156fdb82b277dbffad6bf2a50431784c1cfd22f765cf550dd0"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-013_solutions.md",
+      "historical_sha256": "c36e3bd2a779bdf2d2ab641d33a199cfd9a3eae301fd53b4d8aff06a99b41826",
+      "presentation_sha256": "a6e39957f9a063690c6a9ab048262b57ad28c84c1185db9bf25d50b2d89cdd70",
+      "code_block_sha256": [
+        "c26f8d5ba6320078ed8ee7c98f286ecf913fec4afc0acc786ec6be50f5bde2d1",
+        "6a75f385498fd712684107828c142235ae15c921954911f6080c58f53f078426",
+        "a9a32376fec08a3701b26b10b70fe8f8ce86773efa4bb76d0ff84f696ad6ca73",
+        "342272af5534a71c422e563dcb3f0175e22c1669a0f7807fcc8f7903acb88520",
+        "317040d257eab980d4148d107d8da816839946c9c6f59064511592308f4de68f",
+        "f15de98de81a07c6700a592d5a241fb77a0de41be5f150f5c8ababb372004845"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-014_solutions.md",
+      "historical_sha256": "9772400a0eafae378f900f79e805db2ec5a0455bbd25aa0e0bdcc51fe558d6a3",
+      "presentation_sha256": "bdeda842e57c8823826451ffd6b0d46ec3518cc4cd511087fe6d8e26bb4d44e6",
+      "code_block_sha256": [
+        "f0e05f5e521d9707442c4cb584d830b5cea65f0ebda7347ee21cf67d856d9c51",
+        "c9e7963e11a3f08172b09107da0be9fd40f7902c2c3ecd5b558ba79542f7588f",
+        "ac837114a370371a46808fe2597658a7ef2eb13c660e52e849c1102e5013e440",
+        "9d7ab1b2b783a000fb76bd44e76a43fe9db54282dd86e304268920b01e95037f",
+        "5e85b28500bf663fd9b875e1e8f6e12be4a2ecdcf312b29ec674a613ad33a4ae",
+        "f92893e17cfcc16b0e148cf0572d431ca784028a672b37964aad8469463a00da"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-015_solutions.md",
+      "historical_sha256": "8b96e046876d195ddf9841777e0270226aa56eac1fe7f9b661d1919cb858084f",
+      "presentation_sha256": "c35776d15654b52696d0ee31b14f8126ac4c19dfc5f42430eb3dc15450f23d9d",
+      "code_block_sha256": [
+        "d3490ab00937b4efbf620e4d5277dfece4169abf650634d71cf0637fb23d2830",
+        "9c5c01960de1d2886152ade31f1aab484a3058c7068c28f712fa602603ed27c7",
+        "24e7d82106836b24ae6a37a49e873e9cc804cef3dbfc36d0ad9377cc06f1c688",
+        "c0403f1a2b098beb1dc9b21c6c310d78ed17badb5dd444a291cedc76d5156bdc",
+        "566c9bf542305a3683c4a61723d6e7e08d889e60fc01804fa66b6ef71d173539",
+        "5b4c395d2ccda917d1c772396500dce739fb1a39c5dd391940cc183861c7ea17"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-016_solutions.md",
+      "historical_sha256": "c9b8b8084b09924092fdbeb6c705d10b52a58c3e659766c6715836e6344c0a20",
+      "presentation_sha256": "e12489e7dbe0c45f42ea9986fdf882e294aa9124605ab3d93966b7cf3fbca609",
+      "code_block_sha256": [
+        "73b59c7ebe8bb232dd6a84d549d95b79e14378d8568e447d205c845b248f36b6",
+        "1fef23176c34c3895798d292fe14186b3012c407a1148d98b4bc0d665b290c65",
+        "550f3231c199cd653c236d2eb8c0cea3d98bdcb7c086d0afd60cc178983b6777",
+        "bc93ba71c297657f025505980178ce79d9277c634dfbbcf0867930492316cd8e",
+        "022685690b67f80d382946104f6d6b8ca98fb25e2455c8305ca7c223ce68282c",
+        "b935b4e4f400c0c621b156cd2dae924e9a3b523c313c6e26370c6f636a78a2ee"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-017_solutions.md",
+      "historical_sha256": "7bf5bdd4ccdcd66689972e4ea497b6a36547c7258edcbe9014360353e2a3b5c2",
+      "presentation_sha256": "0e75df2bbfa9fcc7208d120d1c18d312a4527b21355bb8e89b1377a455c6abc3",
+      "code_block_sha256": [
+        "378bf67d06b34c20b892739ea6d8c180dceb92c90ee4569ea3ba446411ae7a99",
+        "1e5fd03d25142cac72c0c84a7d5baa5cc9c065d887a43f51d6b35d5b17c09f1c",
+        "148d55d12be45b44c78de81b671896e3facd8eed9a24258dbdc74bbfafa35599",
+        "1f3a93f019664a75fb3ff059bd61fb8f0c8847bc3b45cb4741fa65e9e50f5e29",
+        "07647df1b654197402d0e3a1f4988f9f865ba26857929aa8a68dcc4dd141c2a0",
+        "58cd3f2df6874facfff8cd07463e8b1dd26ec13a40280c65afdef837f8fa9496"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-018_solutions.md",
+      "historical_sha256": "bef1629a2ef5a23474a9f78b9455854f7064ec11dde668a11093580acd4284bf",
+      "presentation_sha256": "5dc8c99f1464a83fcd5eaed9be1c6a15c82f976784596ae49fc5ef1904337676",
+      "code_block_sha256": [
+        "9a5160274ea20afae2f7d62cb7b7a8143fdb55929fe4ad3834d09bad897dad30",
+        "c61447b99b7360cb86e7e467c50146d8c7c8cce2a1646a1a36ce89498644ab87",
+        "ba15e752bd337200eabfd37f637ff2b347ecd4f20dee0a62bb49c9861eb1059d",
+        "e4112d7fe1943d8b6f98aba53e4734ece5927f264146323a3299f1c68bba6821",
+        "28dd23edc9a96ae96d486fd02d0a22d9fcdb03dcaad40415e7305e352991e4e4",
+        "62a5ffb67b0f00f05614c231201666ac1ba0988378cfb26ecc1e6604c8fa191b"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-019_solutions.md",
+      "historical_sha256": "b0f112eab7967fb4b238b41c99ab6c084332fdca033323c22237fa3e1073ab97",
+      "presentation_sha256": "30c62567bf1fd2d1030898806d3ea6c154b59433362747752da56ebcb85a3264",
+      "code_block_sha256": [
+        "62ce10639c86c5e4838f4416fb8fa68e71671e8f028b185294af4746d442efc8",
+        "517c5cad811e1a0e857a659b02e0c7f8bf7e42ac120f3789970f0709886d6033",
+        "5fa320d066c652d145feb83f0c65ffb097285c3ed7d819dafeefc738442ef370",
+        "0a0aed7ad4674eba00bef96adfc1360fde04bb7c0b787ad8f1e53b074da97759",
+        "3449b3979d1969d9fa17416d5db71247a418990aaab3bc85ee424ab79bb8b592",
+        "b66f66b92ba7de5cf83de42ff0e728ab93b5fe96e5e84c45e5154577de3ed00b"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-020_solutions.md",
+      "historical_sha256": "7a351cd30f8281e48ceeb15fe4d630a0c8ca4af4da82af80a3a600c414b5542a",
+      "presentation_sha256": "768ccc345c7069f6eb9d71408d700c2067f18b8096cd2952e0f695f12a2b47f2",
+      "code_block_sha256": [
+        "cf95ecb2210182d1412939188268ab372dd50911417f2f57207c923af7fd2552",
+        "ece34bdc353d6b76c3e8351f7b6aae5bd5c2445ff5992cd6d3b43d316048a7be",
+        "59f443d0c330ee322305e55812bf46aa24703c6a3d8ca0fc11ca631d873af5ff",
+        "17753b79abc8e6458cf7bde9167431f8da707f93916ef5f7a0b0f09b478426ad",
+        "e40a5f93eb9d71c5f56521448807f40cd89ef637e3316535faee3b2999eeb4a1",
+        "79ecca024b75e5542f7b8da8a7b564b3b97ae524a3d603145b7c52454577550a"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-021_solutions.md",
+      "historical_sha256": "af64d7d45f8d15353d1058b0fdbcde360363b2b589adc850e5d739307b955a76",
+      "presentation_sha256": "dcda0c011ddc19badb26a31bee1d6f20398e94fbf4bb046fd2f6611996da76da",
+      "code_block_sha256": [
+        "ab40654b9b11710a298ca63fa5273f012c6e918f5db5f7a97963af99b2b24a61",
+        "d9aad28352586e373fc9f8c45fe44660419945df4eee7c347a60e313867f0bc8",
+        "70707f79dddcfeb12cb3ace2a9d0aa677cc41d461e89f3747f9e53b7575541d7",
+        "1f6fef1fbfe7fed2894e5c5c60774c6e9262261968443ea2ff77fb7162171e41",
+        "2679b253a8821af67a0ad9c8f262a6a5a2dbdaa8859c013e2d4e307808dc59f6",
+        "7e00f6d435dc2b76283d35ad9bb3f24f3584621629dce2154a95f9d13274ec8d"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-022_solutions.md",
+      "historical_sha256": "1703504390d064eb4e0d1bf6f98f204e9d7a4c652bae1cd1aa89ee0606fecaf5",
+      "presentation_sha256": "078f57b22355b17b0b3bc3952be9ba2a536f574a9d03b551ac8675b15063cb91",
+      "code_block_sha256": [
+        "3a78e154c9a4e8da368da9fce5295cffdd7e2ba8ba089b2faa95a433d5710434",
+        "e326d8d4553c0f0599517a7bdccc5a6f1f396b083e0b0a7f5de899033cebc10c",
+        "9a1fc4004a3584ff2dd5df45ebb5c580a6e52de1ee49af9153c3a44b22aa8420",
+        "b9328f71d04608bea391c6c4d0105067cc0a2334a99982b6d8033b1c55c9051c",
+        "f209d1cf763ef5fef0f092a8c9bf96ec006d3cf5e471a6a4d94a37b30ba945c8",
+        "1fc3a4327dd66f37f6fcf5e755d9e8b354cc350011354c7d2ce795e68970ff06"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-023_solutions.md",
+      "historical_sha256": "a015b1cd349e1e190f40f918cb36f5ef393a89a95cee0ec45e6ec2bf3073f3e0",
+      "presentation_sha256": "81c719c77d3106b24249d39414857564215ee7f5f9dc1558f8750cbcc005c15b",
+      "code_block_sha256": [
+        "600538b7cccac126164640fbebc0398f851c80002daf38e83850a31a2ee08de2",
+        "7b9246b4fd277a6c6c40b11c36825bd5afb66cf40188c1fbcac66fb8b637cdbf",
+        "45acea7fa7bdb3e00f28bc281de40c30d253374ccd43b531e4423c335748e4ea",
+        "a3a5bbf3454074010595857def29211d6e103c0569f4d2e75165b4e5a50f4479",
+        "51b91be076798e39217a72a4fe4c2749922429499aa61d1b235374c7908fbb70",
+        "74e889c0d1727bae9d8af03d3921aad724634ff43b8349abea7a3cf938b0402a"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/solutions/llm-applied-024_solutions.md",
+      "historical_sha256": "f66d0b42a18fcbdbd9c849597efc0e077cc4692c74a470d214766c7c33f893d6",
+      "presentation_sha256": "4523d893083aee93a24bcff9568fcc10ccf21d49516ee1353899c0e961e93a8a",
+      "code_block_sha256": [
+        "77047dee51a75a689b4213c87b8331026215b2b0738443a1327f2292f32d4f42",
+        "462f043b49925626e1f54ca290970acff63c14a78f6a09d6c74aba4cbf764a29",
+        "12cb28ce16eb774baeeb610d777190dcfcfbd165e90e1accb897a9c63f96856e",
+        "f1f628e03898b08d5af04db6612daafd50c89892ac271a63d3bd914de16b91f1",
+        "08599d06ffcce55973fe054126fd7fb44ac74dcbddfb9eaddd37ac008a65c364",
+        "c052d28657c8f1f430d8393e595d1b0630f64352948d873d1019eb701ba7de64"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/deep-learning-pytorch/guides/torch-005.md",
+      "historical_sha256": "77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda",
+      "presentation_sha256": "44f32ef828adcb7b244e98ec78e412218609243b788814d7288fe32d1ee9fe89",
+      "code_block_sha256": [
+        "42202950e5ee8b65b1ce6b2d170a9ac2c66d1107b7ef6913042872e2e3b0917e",
+        "cfdfb3c950a49fc04d319b39bd86b61aaacadb8cc873b5ccd95800446fe12601",
+        "40da7d11627073bd8b702df41710d0b9beb0a4ce0bd4948c6a5f0018e12fa283",
+        "04f7e8ef0430716403965b4717360616b6a3631ce66e9a5a1740c8beb53b0ed5"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/deep-learning-pytorch/guides/torch-012.md",
+      "historical_sha256": "90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3",
+      "presentation_sha256": "2b264e07951966d76dbc031b7de6b604ae611de5823e21eba26d87504fcc7a0f",
+      "code_block_sha256": [
+        "d4c93b21a4b208f699d313c3c6205057b177b89b77d9822dc586c922dc683547",
+        "350a6ab02aa8ff72dd664de997d4207f5ae1ebc4c95e53b9ff6d66e2b91b74f8",
+        "614afcf43c1faa31d2ced6aace15073256a0986c3b0cd2d2aa77459669c8049d",
+        "12ee29c9ffd78fcb6063460b781bd9c883c2918747b64c7136cda685c5f83e4a"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/deep-learning-pytorch/guides/torch-016.md",
+      "historical_sha256": "208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b",
+      "presentation_sha256": "d3d3fd1b1db18e14d82690ca5be36a2ccb824ddb8ab81fdd3d927f055a77fc0e",
+      "code_block_sha256": [
+        "bcf36df2c10f62e86bba9526bfed4d33845ac5740d0696bb77ed8ca06c37edf7",
+        "d3437f49f12ddc5ae24a2190891c9031deea8a659e1d7bf14a95eac1f828bdbc",
+        "e4614691eff24d18cc8c1d7a345460704b5fb3e5a63db40da39b2c4744efc208",
+        "873f43f1cae851227c306d8127bc51e6e574db799688e5261b6f8a3771c7e5ba"
+      ],
+      "kind": "markdown"
+    },
+    {
+      "path": "courses/llm-applied/track.json",
+      "kind": "display_metadata",
+      "historical_sha256": "ff50a33b82c114aa48d9bb427893e570e06e3186146385fdb6ecc37a005d6041",
+      "presentation_sha256": "b006c84830213d0b4e91879cd6ee70e5e9b8d311bb45f5dd95b592c28f84655c",
+      "protected_metadata_sha256": "b7dcc4c22362fcac1451d673f2da3cee49224bd208805ca526ed760c73c3c270"
+    },
+    {
+      "path": "courses/deep-learning-pytorch/guides/torch-015.md",
+      "historical_sha256": "04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa",
+      "presentation_sha256": "ae229623997ef6934b27584b2ad9abcfc2e6e4c0f124c68e94af0c7a45de5ca3",
+      "code_block_sha256": [
+        "20c7b4e7e3a2c8f18cacff595e6bf582c6b4302e35e616408f19b1a98aab35f1",
+        "bd658da66120d46a6c8f7c5b62538eaef0d8e70584d714c57a36f773ff8294e0",
+        "b406c2b9b878c69fa5022f50a2ffa3a13d8a0acb9a621380a8bc2f50a288cdf7",
+        "2fa1afbdf6f5e4cabbf91e746abed673b8bea735e31c4ce15a5cbc364e9ad786"
+      ],
+      "kind": "markdown"
+    }
+  ]
+}

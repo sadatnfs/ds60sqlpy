@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>torch-007: Leaf tensors, detach, nograd and gradient accumulation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>torch-007: Leaf tensors, detach, nograd and gradient accumulation</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-007.md</code></p>
+    </header>
+    <article class="document"><h2 id="torch-007-leaf-tensors-detach-nograd-and-gradient-accumulation">torch-007: Leaf tensors, detach, no_grad and gradient accumulation<a class="heading-anchor" href="#torch-007-leaf-tensors-detach-nograd-and-gradient-accumulation" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 120 minutes. Direct prerequisites: <code>torch-006</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>PyTorch distinguishes graph tracking from gradient storage. The central investigation is concrete: Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum. The finish condition is w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>PyTorch distinguishes graph tracking from gradient storage. A leaf tensor is a graph input created by the user or a registered parameter, while intermediate tensors have operation history. backward accumulates gradients into leaf.grad by default. Calling backward twice on newly computed losses without clearing gradients adds the contributions. A nonleaf can retain its gradient when retain_grad is requested, but that is a diagnostic choice rather than the default storage policy.</p>
+<p>Detach removes a value from its current graph while sharing storage; clone copies storage while preserving a differentiable relationship. no_grad prevents recording operations in its scope. model.eval changes behavior of modules such as Dropout and BatchNorm, but does not disable autograd. These controls solve different problems and should not be used interchangeably.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Choose each control for its specific purpose. Use backward when the training algorithm accumulates contributions into parameter gradients. Clear those buffers between independent optimizer steps, while retaining them deliberately across correctly scaled microbatches. Use retain_grad only when an intermediate derivative is useful for a bounded diagnostic.</p>
+<p>Use detach to stop differentiation through a value, clone to establish independent storage, and their combination when an observation must have both properties. Use eval to select evaluation behavior of stateful or stochastic layers. Use no_grad or inference_mode separately when recording derivatives is unnecessary. These choices should remain explicit because gradient-based explanation can legitimately run a model in evaluation mode.</p>
+<h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
+<p>Compare <a href="../../deep-learning-tensorflow/guides/tf-007.md.html">tf-007</a> after deriving the shared numerical contract.</p>
+<p>TensorFlow tape.gradient normally returns derivative values rather than storing accumulated leaf.grad fields. PyTorch backward requires an explicit clearing policy. TensorFlow training argument and PyTorch train/eval control layer behavior; neither should be confused with the gradient-recording scope.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Leaf tensor:</strong> An input or parameter whose gradient is accumulated by backward.</p>
+<p><strong>Detach:</strong> Removing a value from an existing autograd graph without necessarily copying storage.</p>
+<p><strong>Gradient accumulation:</strong> Adding new backward contributions into an existing grad field.</p>
+<p><strong>Gradient mode:</strong> Whether new operations are recorded for differentiation.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-007/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-007.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-007.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Set requires_grad on floating-point inputs that need derivatives. Use backward for accumulated leaf gradients and zero_grad(set_to_none=True) between independent optimizer steps. detached=value.detach() does not allocate independent storage; use value.detach().clone() for an owned logging snapshot. Check is_leaf and grad_fn to understand the graph role rather than guessing from a variable name.</p>
+<h3 id="separate-four-kinds-of-state">Separate four kinds of state<a class="heading-anchor" href="#separate-four-kinds-of-state" aria-label="Link to this section">#</a></h3>
+<p>A tensor&#x27;s value, storage aliases, graph role and stored gradient are related but different facts. Module mode adds another independent control:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Control or observation</th>
+<th>What it changes or reports</th>
+<th>What it does not establish</th>
+</tr></thead><tbody>
+<tr>
+<td>requires_grad</td>
+<td>Whether relevant operations can be tracked for derivatives</td>
+<td>Independent storage or optimizer membership</td>
+</tr>
+<tr>
+<td>is_leaf and grad_fn</td>
+<td>Role in the recorded graph</td>
+<td>Whether the Python variable name sounds like a parameter</td>
+</tr>
+<tr>
+<td>backward</td>
+<td>Adds derivative contributions to eligible stored gradients</td>
+<td>A parameter update</td>
+</tr>
+<tr>
+<td>detach</td>
+<td>Removes the current differentiation connection</td>
+<td>A copy of storage</td>
+</tr>
+<tr>
+<td>clone</td>
+<td>Copies storage</td>
+<td>A detached gradient history</td>
+</tr>
+<tr>
+<td>no_grad</td>
+<td>Suppresses recording for ordinary operations in its scope</td>
+<td>Evaluation behavior of Dropout or BatchNorm</td>
+</tr>
+<tr>
+<td>eval</td>
+<td>Selects evaluation behavior of affected modules</td>
+<td>Disabled autograd or cleared gradients</td>
+</tr>
+</tbody></table></div>
+<p>For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as 2 w has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html">PyTorch 2.9 is_leaf</a>.</p>
+<p>The first fixture has <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math> and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate&#x27;s gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.</p>
+<p>Now reset w.grad to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.</p>
+<p>None and numeric zero have different meanings. None may indicate that no gradient has been stored, that a reset occurred, that the tensor was unused, or that an intermediate was not retained. A numeric zero can be the correct derivative of a connected path. Optimizers can also treat them differently: parameters with None gradients are commonly skipped, whereas zero gradients may still interact with momentum or weight decay. This distinction is documented for zero_grad rather than being merely a display detail. <a href="https://docs.pytorch.org/docs/2.9/generated/torch.optim.Optimizer.zero_grad.html">PyTorch 2.9 zero_grad</a>.</p>
+<p>The detach example changes shared storage. After detached=source.detach(), writing detached[0]=9 changes source[0] as well. The earlier source.detach().clone() snapshot remains one because it owns a copy. The snapshot is suitable for comparing later mutation, but detaching a value that the objective actually needs can break learning. Ownership and differentiation must both match the intended interface.</p>
+<p>Finally, model.eval() does not stop derivatives through a Linear layer. It changes a module&#x27;s training flag and the behavior of layers that consult it. no_grad affects ordinary operation recording while leaving the original tensor&#x27;s requires_grad flag unchanged; factory operations with an explicit requires_grad argument are a documented exception to treating the scope as a blanket flag rewrite. Keep mode, recording and gradient-buffer decisions separate in the surrounding training or inference function.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-inspect-leaf-and-nonleaf-state">Example A: Inspect leaf and nonleaf state<a class="heading-anchor" href="#example-a-inspect-leaf-and-nonleaf-state" aria-label="Link to this section">#</a></h4>
+<p>Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+
+w<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span>requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>w<span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">.</span>retain_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> intermediate<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>is_leaf <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> intermediate<span class="syntax-operator">.</span>is_leaf <span class="syntax-operator">and</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> intermediate<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">1</span></code></pre>
+<p><strong>Expected:</strong> w leaf True; intermediate False; gradients 2 and 1.</p>
+<h4 id="example-b-observe-accumulation-across-fresh-graphs">Example B: Observe accumulation across fresh graphs<a class="heading-anchor" href="#example-b-observe-accumulation-across-fresh-graphs" aria-label="Link to this section">#</a></h4>
+<p>The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.</p>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">4</span>
+<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">8</span></code></pre>
+<p><strong>Expected:</strong> after resetting first, grad -4 then -8.</p>
+<h4 id="example-c-clear-before-an-independent-step">Example C: Clear before an independent step<a class="heading-anchor" href="#example-c-clear-before-an-independent-step" aria-label="Link to this section">#</a></h4>
+<p>This is the intended reset for independent batches. Intentional microbatch accumulation needs a separate scaling and update policy.</p>
+<pre class="highlighted-code"><code class="language-python">w<span class="syntax-operator">.</span>grad<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w<span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> w<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-operator">-</span><span class="syntax-number">4</span></code></pre>
+<p><strong>Expected:</strong> grad returns to-4.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Inspect leaf and nonleaf state.</strong> Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum. <strong>Expected:</strong> w leaf True; intermediate False; gradients 2 and 1. <strong>Verify:</strong> Save the assertion results for exercise 1, including w leaf True; intermediate False; gradients 2 and 1.</li>
+</ol>
+<ol>
+<li><strong>Observe accumulation across fresh graphs.</strong> Compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w-2\right)}^{2}</annotation></semantics></math> twice at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math> without clearing grad. <strong>Expected:</strong> after resetting first, grad -4 then -8. <strong>Verify:</strong> Save the assertion results for exercise 2, including after resetting first, grad -4 then -8.</li>
+</ol>
+<ol>
+<li><strong>Clear before an independent step.</strong> Set grad None and backpropagate once more. <strong>Expected:</strong> grad returns to-4. <strong>Verify:</strong> Save the assertion results for exercise 3, including grad returns to-4.</li>
+</ol>
+<ol>
+<li><strong>Separate detach from ownership.</strong> Detach a tensor, mutate the detached view, and compare with a detached clone. <strong>Expected:</strong> shared original changes; owned clone stays unchanged. <strong>Verify:</strong> Save the assertion results for exercise 4, including shared original changes; owned clone stays unchanged.</li>
+</ol>
+<ol>
+<li><strong>Use no_grad for an observation.</strong> Multiply a requires_grad tensor inside and outside no_grad. <strong>Expected:</strong> tracked result requires_grad True; observed result False. <strong>Verify:</strong> Save the assertion results for exercise 5, including tracked result requires_grad True; observed result False.</li>
+</ol>
+<ol>
+<li><strong>Show eval is separate.</strong> Put a Linear module in eval mode, run a differentiable input, and inspect output tracking. <strong>Expected:</strong> output still requires_grad True. <strong>Verify:</strong> Save the assertion results for exercise 6, including output still requires_grad True.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If a gradient doubles across supposedly independent steps, check where zero_grad occurs and whether backward was called twice. If an intermediate&#x27;s grad is None, inspect is_leaf and whether retain_grad was requested before declaring the path disconnected. If a frozen or unused parameter moves, inspect optimizer state and the difference between a zero gradient and no gradient.</p>
+<p>If a saved observation changes later, look for shared storage through detach or a view. If a model in eval mode still creates a graph, that is expected unless gradient recording was separately disabled. If a logging detach unexpectedly stops training, trace whether the detached value was fed back into the loss. These diagnoses require inspecting values, graph connections, buffers and module mode independently rather than replacing every None with zero or adding no_grad around the whole loop.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Leaf tensor, Detach, Gradient accumulation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>torch-006</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/autograd.html">PyTorch2.9 autograd</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/pytorch-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
+<p><strong>Why does eval not disable gradients?</strong></p>
+<p>Evaluation behavior and differentiation are independent concerns. Gradient-based analysis may intentionally run a model in evaluation mode while differentiating its outputs.</p>
+<p><strong>When is detach().clone useful?</strong></p>
+<p>When a value should be disconnected from autograd and own storage that later mutations cannot change, such as an immutable comparison snapshot.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-007, Leaf tensors, detach, no_grad and gradient accumulation.
+Read courses/deep-learning-pytorch/guides/torch-007.md and courses/deep-learning-pytorch/lessons/torch-007.py. Direct prerequisites: `torch-006`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/deep-learning-pytorch/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

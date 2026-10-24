@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Contributing · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Contributing</h1>
+      <p class="source-path">Generated from <code>CONTRIBUTING.md</code></p>
+    </header>
+    <article class="document"><h2 id="contributing">Contributing<a class="heading-anchor" href="#contributing" aria-label="Link to this section">#</a></h2>
+<p>Help make DS60 accurate, teachable and reproducible. Small fixes are welcome. A curriculum change should keep its guide, learner artifact, reference, metadata and rendered pages consistent. A runtime change needs evidence from execution, including failure behavior, rather than only a successful build.</p>
+<h3 id="choose-your-setup">Choose your setup<a class="heading-anchor" href="#choose-your-setup" aria-label="Link to this section">#</a></h3>
+<p>To learn or inspect the running product, install a Linux-container engine with Compose and run <code>./classroom</code>. Windows uses WSL 2. The <a href="docs/one-command-classroom.md.html">one-command guide</a> covers installation, logs, profiles, storage and recovery. No host language toolchain is needed for the ordinary Docker route. The supported delivery target is Linux containers. Native Windows runtimes and native executable builds are not release gates; Windows contributors use the WSL 2 Linux environment.</p>
+<p>For application development or content generation, use Python 3.12 and the checked-in dependency lock. From the repository root, with <code>uv</code> installed:</p>
+<pre class="highlighted-code"><code class="language-bash">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/check_modules.py</code></pre>
+<p>Run these commands in Linux or WSL 2. <code>uv run --no-sync</code> uses the prepared environment without activating it. Node.js is needed for the UI behavior checker. Optional framework and compiler checks use their declared container profiles; do not install every large dependency for an unrelated docs edit. Retained native setup scripts are unsupported compatibility conveniences. See <a href="docs/dependency-profiles.md.html">dependency profiles</a> and <a href="docs/validation.md.html">validation</a>.</p>
+<h3 id="before-editing">Before editing<a class="heading-anchor" href="#before-editing" aria-label="Link to this section">#</a></h3>
+<p>Run <code>git status --short --branch</code>, preserve unrelated work, and read <a href="AGENTS.md.html">AGENTS.md</a> plus the closest subject <code>AGENTS.md</code>. Do not overwrite learner files or commit <code>.learning/</code>, <code>.classroom/</code>, credentials, caches or local logs. Use UTF-8, repository-relative paths and the checked-in editor settings.</p>
+<p>Find the durable source before changing a generated artifact:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Work</th>
+<th>Start here</th>
+</tr></thead><tbody>
+<tr>
+<td>Python, SQL or bridge lesson</td>
+<td>Subject <code>AGENTS.md</code>, catalog builder and lesson artifacts</td>
+</tr>
+<tr>
+<td>New module or language</td>
+<td><a href="docs/curriculum-extension-playbook.md.html">Extension playbook</a>, <a href="docs/implementation/ADDING_A_MODULE.md.html">module contract</a></td>
+</tr>
+<tr>
+<td>Existing generated subject</td>
+<td>Its <code>courses/&lt;subject&gt;/authoring/README.md</code></td>
+</tr>
+<tr>
+<td>Browser interface</td>
+<td><code>src/ds60sqlpy/assets/classroom.*</code> and <code>classroom.py</code></td>
+</tr>
+<tr>
+<td>Runtime adapter</td>
+<td><code>module_jobs.py</code>, <code>worker_operations.py</code>, profile Dockerfile and Compose</td>
+</tr>
+<tr>
+<td>Reader formatting</td>
+<td><code>lesson_reader.py</code>, <code>reader_math.py</code>, <code>reader_content.py</code></td>
+</tr>
+</tbody></table></div>
+<p>Python implementation filenames are under <code>src/ds60sqlpy/</code>. The repository add-learning-path skill provides a focused workflow for contributor agents. The learning skill is for tutoring.</p>
+<h3 id="choose-a-public-commit-identity">Choose a public commit identity<a class="heading-anchor" href="#choose-a-public-commit-identity" aria-label="Link to this section">#</a></h3>
+<p>Before committing, review the intended author and committer identity locally. The repository owner&#x27;s policy is to omit an email address from new commits. Configure this repository only, retaining your chosen public name:</p>
+<pre class="highlighted-code"><code class="language-bash">git config --local user.name <span class="syntax-string">&quot;Your public name&quot;</span>
+git config --local user.email <span class="syntax-string">&quot;&quot;</span>
+git config --local user.useConfigOnly true</code></pre>
+<p>Git records an empty email field for this policy. It does not remove the public name or commit contents. Other contributors may deliberately choose their own GitHub no-reply identity instead; obtain that exact address from their account settings rather than inventing one. Do not restore a personal or workplace email from global configuration or an environment override. Review the resulting author and committer fields before an authorized push.</p>
+<p>These settings apply to future commits. Cleaning tracked files or building a sanitized source ZIP does not remove names, emails or private content from existing Git history. History changes affect commit identities and shared branches, so they require a separate, explicitly authorized maintainer workflow. Keep committing, history editing and publication under the repository owner&#x27;s control. Do not change global Git configuration as part of project setup.</p>
+<h3 id="write-useful-learning-material">Write useful learning material<a class="heading-anchor" href="#write-useful-learning-material" aria-label="Link to this section">#</a></h3>
+<p>Define the problem, prerequisites and observable outcome. Explain vocabulary and syntax before using them. Include at least two focused worked examples, expected observations, common-error diagnosis and next steps. Practice should progress through prediction, modification, independent work, debugging and transfer, with separate explanatory solutions. Copying an answer or running a reference does not establish understanding.</p>
+<p>The <a href="docs/content-authoring.md.html">content contract</a> specifies the detailed rules. Legacy lessons retain immutable practice baselines; modules use their subject contracts. The statistics/ML tutorial deliberately has worked theory and code without exams, problem sets or hidden solutions. Do not impose practice rules on that book.</p>
+<p>Keep default examples small, deterministic and offline after preparation. Disclose optional models, datasets, networks, hardware and services. Cite sources and preserve required licenses. Use original explanations and public or synthetic fixtures, without workplace identifiers, private infrastructure or machine paths. Use explicit LaTeX for mathematics and tagged code fences for program examples. Never modify executable logic only to repair typography.</p>
+<h3 id="regenerate-and-validate">Regenerate and validate<a class="heading-anchor" href="#regenerate-and-validate" aria-label="Link to this section">#</a></h3>
+<p>Run the relevant subject authoring command first when one exists. Then refresh shared metadata and readers through Make or the equivalent individual commands:</p>
+<pre class="highlighted-code"><code class="language-bash">make generate</code></pre>
+<p><code>make generate</code> normalizes reviewed prose, rebuilds the legacy catalog and reports, and generates the static dashboard and readers. It does not rerun all subject authoring pipelines. Never hand-edit generated HTML. Review generated diffs alongside source changes and run the <code>--check</code> forms documented in <a href="docs/validation.md.html">validation</a>.</p>
+<p>Use focused tests while iterating. The full suite uses four grouped workers:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python -m pytest -n <span class="syntax-number">4</span> --dist loadgroup</code></pre>
+<p>Keep <code>--dist loadgroup</code>: live PostgreSQL tests share a disposable database and must remain in one scheduling group. Use <code>-n 0</code> for serial debugging or fewer workers on a constrained machine. Optional runtime skips are not successful runtime tests. Report which toolchains and databases actually ran.</p>
+<p>Common publication gates are:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/check_modules.py
+uv run --no-sync python scripts/normalize_lesson_prose.py
+uv run --no-sync python scripts/check_content_rendering.py
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/audit_practice.py
+uv run --no-sync python scripts/audit_lesson_depth.py
+uv run --no-sync python scripts/build_course_guide.py --check
+uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python scripts/check_published_links.py
+uv run --no-sync python -m ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
+uv run --no-sync python -m ruff format --check src scripts tests bridge python/professional docker/init_module_runtime.py
+uv run --no-sync python -m mypy
+uv run --no-sync python scripts/scan_secrets.py --history
+uv run --no-sync python scripts/check_public_release.py
+node scripts/check_classroom_ui.mjs
+git diff --check</code></pre>
+<p>A UI change also needs browser checks: subject switching, keyboard navigation, small screens, both appearances, code/output contrast, math rendering and saved-work restoration. A runtime change needs the actual prepared worker, compile or execution errors, cancellation, bounded output and retained drafts. Only use disposable project resources. Preserve learner volumes during cleanup. Release CI checks Ubuntu Python 3.11/3.12, Linux contributor setup, PostgreSQL, Linux-container runtimes and Chromium, the owned Linux Kubernetes adapter and the portable source ZIP. Scheduled/manual advanced imports also run on Linux. A native Windows ACL check or executable build is not part of this matrix.</p>
+<h3 id="database-and-dependency-changes">Database and dependency changes<a class="heading-anchor" href="#database-and-dependency-changes" aria-label="Link to this section">#</a></h3>
+<p>Use only the local disposable <code>advanced_sql_training</code> database for automated course SQL. <code>00_setup.sql</code> resets the course-owned <code>training</code> schema. Run with <code>psql -X -v ON_ERROR_STOP=1</code>, respect declared persistent sequences, and never redirect a test at a shared database. Bind SQL values and keep credentials out of source, command arguments, outputs and progress notes.</p>
+<p>Declare direct dependencies in the appropriate project group. Refresh <code>uv.lock</code> with <code>uv lock</code> and verify <code>uv lock --check</code>; do not hand-edit it. Worker-specific dependencies also have reviewed Docker locks and toolchain contracts. An installable lock is not proof that every runtime or architecture works. Document actual platform evidence separately from configuration.</p>
+<h3 id="optional-ci-skip-for-a-prose-only-push">Optional CI skip for a prose-only push<a class="heading-anchor" href="#optional-ci-skip-for-a-prose-only-push" aria-label="Link to this section">#</a></h3>
+<p>GitHub supports the native token <strong><code>[skip ci]</code></strong>, with a space. The spelling <code>[skip-ci]</code> is not supported by this feature. No custom workflow gate is needed. After local documentation checks, an authorized commit can use:</p>
+<pre class="highlighted-code"><code class="language-bash">git commit -m <span class="syntax-string">&quot;docs: clarify setup [skip ci]&quot;</span></code></pre>
+<p>Use this only when <strong>every change in the push is documentation prose or its regenerated readers</strong>. Do not mix unvalidated code, executable lesson examples, tests, runtime/configuration, dependencies or workflows into a push containing a skip marker. GitHub evaluates commit messages in the push, so a marked docs commit must not hide another implementation commit&#x27;s checks.</p>
+<p>Still regenerate readers and run the <a href="docs/validation.md.html#optional-documentation-only-ci-skip">local prose, rendering and link checks</a>. The marker skips automatic push/pull-request runs; scheduled and manual runs remain available, and jobs already running continue. Required PR checks can remain Pending and block merging. Use an unmarked follow-up commit, or a manual run only when repository policy accepts it. See <a href="https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs">GitHub&#x27;s skip documentation</a>.</p>
+<h3 id="submit-a-reviewable-change">Submit a reviewable change<a class="heading-anchor" href="#submit-a-reviewable-change" aria-label="Link to this section">#</a></h3>
+<p>Explain the learner or contributor problem, the resulting behavior, the exact checks run and any remaining limitations. Include reproduction steps for bugs without private data. Keep the change focused, preserve stable IDs and progress, and do not relax a verifier to conceal a failed example. Implementation changes require CI for the submitted revision; the prose-only exception above still requires local checks. Previous test counts do not establish current acceptance.</p>
+<p>Before submission, review the diff for unintended generated data, outputs, credentials, broken links and unrelated formatting. Follow repository review policy for commits and publication. Local image builds do not authorize pushing them to a registry.</p></article>
+  </main>
+</body>
+</html>

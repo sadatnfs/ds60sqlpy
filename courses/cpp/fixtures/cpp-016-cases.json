@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-016",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Contrast copy and move",
+      "input_or_change": "Copy a Batch and mutate the copy.",
+      "expected": "Original values unchanged."
+    },
+    {
+      "exercise": 2,
+      "task": "Inspect the receiver",
+      "input_or_change": "Move Batch([1,2,3]) into a new owner.",
+      "expected": "Receiver values exactly [1,2,3]."
+    },
+    {
+      "exercise": 3,
+      "task": "Reuse the source",
+      "input_or_change": "Assign Batch([4]) to the moved-from source.",
+      "expected": "Source is safely usable with value [4]."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair an invalid assumption",
+      "input_or_change": "Remove a test requiring every moved-from vector to be empty.",
+      "expected": "Test verifies receiver and source validity only."
+    },
+    {
+      "exercise": 5,
+      "task": "Keep rule of zero",
+      "input_or_change": "List special members needed for Batch.",
+      "expected": "No custom destructor/copy/move needed."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer to return values",
+      "input_or_change": "Return Batch from a factory and store it.",
+      "expected": "Correct owned vector after factory scope ends."
+    }
+  ]
+}

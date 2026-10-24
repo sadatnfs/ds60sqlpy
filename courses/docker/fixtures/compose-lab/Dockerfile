@@ -1,0 +1,9 @@
+ARG DS60_PYTHON_IMAGE=python:3.12-slim
+FROM ${DS60_PYTHON_IMAGE}
+WORKDIR /app
+COPY server.py /app/server.py
+RUN mkdir -p /data && chown 10001:10001 /data
+USER 10001:10001
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+EXPOSE 8080
+CMD ["python", "server.py"]

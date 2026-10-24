@@ -1,0 +1,273 @@
+name: Course validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "23 9 * * 1"
+
+permissions:
+  contents: read
+
+env:
+  # Repository text and Python subprocesses use the same UTF-8 contract.
+  PYTHONUTF8: "1"
+
+concurrency:
+  group: course-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core checks (Linux, Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # .python-version is the project default. CI must instead exercise the
+      # interpreter selected by each matrix leg.
+      UV_PYTHON: ${{ matrix.python-version }}
+      DS60_EXPECTED_PYTHON: ${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          # The credential guard scans every reachable blob, so this job needs
+          # the complete repository history instead of checkout's shallow clone.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24"
+      - name: Validate GitHub workflow syntax and embedded shell
+        if: matrix.python-version == '3.12'
+        shell: bash
+        run: |
+          lint_dir="$RUNNER_TEMP/ds60-actionlint"
+          mkdir -p "$lint_dir"
+          archive="$lint_dir/actionlint.tar.gz"
+          curl --fail --location --silent --show-error \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output "$archive"
+          printf '%s  %s\n' \
+            8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8 \
+            "$archive" | sha256sum --check --strict
+          tar -xzf "$archive" -C "$lint_dir" actionlint
+          "$lint_dir/actionlint" .github/workflows/*.yml
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Verify locked dependencies
+        run: uv lock --check
+      - name: Verify Linux optional dependency resolution
+        if: matrix.python-version == '3.12'
+        run: uv sync --quiet --frozen --all-extras --dry-run --python-platform x86_64-unknown-linux-gnu
+      - name: Install the locked core environment
+        run: >-
+          uv sync --frozen --extra notebooks --extra data --extra bridge
+          --extra quality --extra professional --extra sql-notebooks --extra mcp
+      - name: Verify the matrix interpreter
+        run: >-
+          uv run --no-sync python -c
+          "import os, sys;
+          expected = tuple(map(int, os.environ['DS60_EXPECTED_PYTHON'].split('.')));
+          actual = sys.version_info[:2];
+          assert actual == expected, f'Expected Python {expected}, got {actual}'"
+      - name: Regenerate catalog
+        run: uv run --no-sync python scripts/build_catalog.py
+      - name: Check catalog drift
+        run: git diff --exit-code -- curriculum/catalog.json
+      - name: Check practice coverage
+        run: uv run --no-sync python scripts/audit_practice.py --write-report
+      - name: Check practice report drift
+        run: git diff --exit-code -- docs/practice-coverage.md
+      - name: Check beginner lesson depth
+        run: uv run --no-sync python scripts/audit_lesson_depth.py --write-report
+      - name: Check lesson depth report drift
+        run: git diff --exit-code -- docs/lesson-depth-report.md
+      - name: Check reviewed prose and mathematical typesetting inputs
+        run: uv run --no-sync python scripts/normalize_lesson_prose.py
+      - name: Validate published mathematics and code rendering
+        run: uv run --no-sync python scripts/check_content_rendering.py
+      - name: Check generated learning portal drift
+        run: uv run --no-sync python scripts/build_course_guide.py --check
+      - name: Check generated lesson reader drift
+        run: uv run --no-sync python scripts/build_lesson_readers.py --check
+      - name: Validate published HTML links and heading anchors
+        run: uv run --no-sync python scripts/check_published_links.py
+      - name: Validate expansion designs and teaching preview
+        run: uv run --no-sync python scripts/build_journey_preview.py --check
+      - name: Validate authored module manifests
+        run: uv run --no-sync python scripts/check_modules.py
+      - name: Exercise unified classroom behavior
+        run: node scripts/check_classroom_ui.mjs
+      - name: Lint
+        run: uv run --no-sync ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
+      - name: Check formatting
+        run: >-
+          uv run --no-sync ruff format --check
+          src scripts tests bridge python/professional docker/init_module_runtime.py
+      - name: Scan repository for common credential material
+        run: uv run --no-sync python scripts/scan_secrets.py --history
+      - name: Check public release content boundaries
+        run: uv run --no-sync python scripts/check_public_release.py
+      - name: Type check
+        run: uv run --no-sync mypy
+      - name: Prepare test workspace
+        run: python -c "from pathlib import Path; Path('work/test-results').mkdir(parents=True, exist_ok=True)"
+      - name: Unit tests (four grouped workers)
+        run: >-
+          uv run --no-sync python -m pytest -n 4 --dist loadgroup
+          --basetemp=work/test-tmp --junitxml=work/test-results/core.xml --durations=15
+      - name: Retain test results
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: core-tests-linux-py${{ matrix.python-version }}
+          path: work/test-results/core.xml
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Structural course validation
+        run: uv run --no-sync python scripts/course.py validate
+      - name: Notebook validation
+        run: uv run --no-sync python scripts/validate_notebooks.py
+      - name: Register the course notebook kernel
+        if: matrix.python-version == '3.12'
+        run: >-
+          uv run --no-sync python -m ipykernel install --user
+          --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+      - name: Offline notebook smoke execution
+        if: matrix.python-version == '3.12'
+        run: uv run --no-sync python scripts/validate_notebooks.py --smoke
+
+  developer-bootstrap:
+    name: Linux contributor bootstrap (Python 3.12)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Install uv for the locked contributor setup
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Exercise Linux and WSL contributor environment setup
+        run: bash scripts/setup.sh --dependency-mode locked
+      - name: Check the prepared contributor interpreter
+        run: .venv/bin/python scripts/course.py doctor
+      - name: Execute the first notebook with the contributor interpreter
+        run: .venv/bin/python scripts/validate_notebooks.py --smoke --smoke-days 1
+      - name: Ensure setup generated no trackable files
+        run: >-
+          python -c "import subprocess;
+          result = subprocess.run(
+          ['git', 'status', '--porcelain', '--untracked-files=all'],
+          check=True, capture_output=True, text=True);
+          print(result.stdout, end='');
+          raise SystemExit(bool(result.stdout.strip()))"
+
+  postgres:
+    name: PostgreSQL 17 end-to-end
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: advanced_sql_training
+          POSTGRES_USER: ds60
+          POSTGRES_PASSWORD: ds60
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ds60 -d advanced_sql_training"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    env:
+      DS60_DATABASE_URL: postgresql://ds60:ds60@localhost:5432/advanced_sql_training
+      DS60_TEST_DATABASE_URL: postgresql://ds60:ds60@localhost:5432/advanced_sql_training
+      DS60_SQL_EXPANSION_TEST_URL: postgresql://ds60:ds60@localhost:5432/advanced_sql_training
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Install locked PostgreSQL validation dependencies
+        run: uv sync --frozen --extra notebooks --extra sql-notebooks --extra bridge --extra quality
+      - name: Run all SQL lessons
+        run: uv run --no-sync python scripts/course.py sql --quiet all --reset
+      - name: Run all executable SQL solutions
+        run: uv run --no-sync python scripts/course.py sql --quiet solutions --reset
+      - name: Exercise database privileges, transactions and expansion lessons
+        run: >-
+          uv run --no-sync python -m pytest -n 4 --dist loadgroup
+          tests/test_execution.py tests/test_sql_expansion_live.py
+          --junitxml=work/test-results/postgres.xml
+      - name: Retain PostgreSQL test results
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: postgres-tests
+          path: work/test-results/postgres.xml
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Register the course notebook kernel
+        run: >-
+          uv run --no-sync python -m ipykernel install --user
+          --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+      - name: Execute the PostgreSQL magic solution notebook
+        run: >-
+          uv run --no-sync python -m nbconvert --execute --to notebook
+          --output-dir /tmp
+          bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb
+
+  advanced-imports:
+    name: Advanced dependency imports (Linux, Python 3.12)
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      UV_PYTHON: "3.12"
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+        with:
+          version: "0.11.6"
+          enable-cache: true
+      - name: Verify locked dependencies
+        run: uv lock --check
+      - name: Install every optional lesson dependency
+        run: uv sync --frozen --all-extras
+      - name: Import advanced dependencies in isolated processes
+        run: uv run --no-sync python scripts/check_advanced_imports.py

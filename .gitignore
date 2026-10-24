@@ -1,0 +1,78 @@
+# Operating-system and removable-drive metadata
+.playwright-cli/
+.enrich_*.py
+.DS_Store
+._*
+.Spotlight-V100/
+.Trashes/
+Thumbs.db
+Desktop.ini
+
+# Python
+.venv/
+.app-build/
+work/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+htmlcov/
+build/
+dist/
+
+# Jupyter and course-generated files
+.ipynb_checkpoints/
+.learning/
+artifacts/
+mlruns/
+python/ds-60day/data/cache/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+.pgpass
+pgpass.conf
+.npmrc
+.pypirc
+credentials
+credentials.json
+id_dsa
+id_ecdsa
+id_ed25519
+id_rsa
+*.jks
+*.key
+*.p12
+*.pfx
+*.pem
+
+# Local launcher ports, URL and transient per-project lock.
+.classroom/
+
+# Assistant session notes stay local; maintained guidance lives in AGENTS.md.
+.serena/
+
+# Local coding-assistant account configuration.
+.codex/
+
+# Optional project-lab outputs. Keep authored source, manifests and lockfiles.
+# Scope these to real project roots rather than all directories named target/bin.
+courses/rust/fixtures/InventoryLab/target/
+docker/workers/rust/target/
+courses/swift/fixtures/JourneyCore/.build/
+courses/swift/fixtures/JourneyCore/.swiftpm/
+courses/csharp/fixtures/DomainLab/Domain/bin/
+courses/csharp/fixtures/DomainLab/Domain/obj/
+courses/csharp/fixtures/DomainLab/Checks/bin/
+courses/csharp/fixtures/DomainLab/Checks/obj/
+courses/csharp/fixtures/ApiLab/bin/
+courses/csharp/fixtures/ApiLab/obj/
+docker/workers/dotnet/bin/
+docker/workers/dotnet/obj/
+**/*.xcodeproj/**/xcuserdata/
+**/*.xcworkspace/**/xcuserdata/

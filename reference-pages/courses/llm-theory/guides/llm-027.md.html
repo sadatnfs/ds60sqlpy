@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-027: Calibration and comparable evaluation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-027: Calibration and comparable evaluation</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-027.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-027-calibration-and-comparable-evaluation">llm-027: Calibration and comparable evaluation<a class="heading-anchor" href="#llm-027-calibration-and-comparable-evaluation" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>llm-026</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Report predictive confidence under an explicit scoring and grouping policy. The central investigation is concrete: Compute token-weighted loss, a small calibration table and paired errors for fixed saved predictions; contrast a tokenizer change. The finish condition is Bins report counts, confidence and observed frequency; empty bins are explicit. Token losses across incompatible vocabularies are not directly ranked. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="make-confidence-loss-and-correctness-answer-the-same-declared-question">Make confidence, loss and correctness answer the same declared question<a class="heading-anchor" href="#make-confidence-loss-and-correctness-answer-the-same-declared-question" aria-label="Link to this section">#</a></h4>
+<p>A model can assign a valid probability distribution and still be wrong. It can also be accurate while expressing confidence that does not match observed success rates. Calibration connects a probability statement to repeated outcomes: among predictions assigned a given confidence, how often does the corresponding event occur? This is different from asking whether the most likely class was correct, and different again from measuring the log probability assigned to target tokens.</p>
+<p>Let c_i be the reported confidence for a declared event and a_i be 1 if that event occurs and 0 otherwise. For answer confidence, the event might be &quot;this answer satisfies the stated correctness rule.&quot; For a binary classifier, it might be &quot;the label is positive.&quot; These definitions are not interchangeable. A next-token maximum probability is not automatically the probability that a multi-sentence answer is supported by evidence. Define the event before calculating a calibration statistic.</p>
+<h5 id="start-with-the-four-record-fixture">Start with the four-record fixture<a class="heading-anchor" href="#start-with-the-four-record-fixture" aria-label="Link to this section">#</a></h5>
+<p>The supplied confidences are[.6,.8,.8,1.0] and observed correctness indicators are[1,1,0,1]. Mean confidence is .8 and observed accuracy is .75. Their difference is .05 for this one aggregated group. The sample is too small to establish a stable relationship across confidence levels, but it is enough to show that confidence and outcome are distinct columns.</p>
+<p>A confidence of 1.0 in the final row means the forecaster assigned certainty to that declared event. The observed success in this one row does not validate certainty for all similar rows. If a future row assigned confidence 1.0 fails, a binary log score for that event would be infinite. Practical systems sometimes clip probabilities for numerical reasons, but clipping changes the scored forecast and must be explicit. Confidence should not acquire a stronger interpretation merely because it is displayed with many decimal places.</p>
+<p>A calibration bin groups predictions with comparable confidence. Its record should include the lower/upper bounds, boundary convention, count, average confidence and observed event frequency. An empty bin has count 0 and no observed frequency. Writing accuracy 0 for an empty bin invents a failed observation where none exists; writing accuracy 1 invents a success. The reference uses None to retain this absence of evidence.</p>
+<h5 id="trace-how-binning-changes-a-summary">Trace how binning changes a summary<a class="heading-anchor" href="#trace-how-binning-changes-a-summary" aria-label="Link to this section">#</a></h5>
+<p>Use two bins: [.5,.8) and [.8,1]. The first contains only the .6 prediction, which succeeded. Its confidence is .6, accuracy 1 and absolute gap .4. The second contains .8,.8,1, with two successes. Its mean confidence is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>13</mn></mrow><mrow><mn>15</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{13}{15}</annotation></semantics></math>≈.8667 and accuracy <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>≈.6667, giving gap .2. An expected calibration error using sample-weighted absolute bin gaps is(1/4)<em>.4+(3/4)</em>.2=.25.</p>
+<p>If all four records are placed in a single bin, the same formula gives|.8-.75|=.05. Neither calculation changed any prediction. Combining the bins allowed overconfidence in one range and underconfidence in another to cancel before taking the absolute value. This is why bin count and boundary choice are part of the method, not harmless plotting options. A small ECE under one coarse partition is not a proof of well-calibrated probabilities everywhere.</p>
+<p>There is also a bias/variance tradeoff in the display. Many narrow bins can reveal local structure but have noisy frequencies when few records fall into each bin. Few wide bins stabilize counts while hiding variation. Equal-width and equal-count bins answer slightly different practical needs. Preserve the raw prediction/outcome records so a reader can inspect the chosen partition rather than relying solely on one final scalar.</p>
+<p>A bin-free score can provide complementary evidence. For this declared binary correctness event, the Brier score is the mean squared probability error, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mn>1</mn><mi>N</mi></mfrac><msub><mo>∑</mo><mi>i</mi></msub><mo stretchy="false">(</mo><msub><mi>c</mi><mi>i</mi></msub><mo>−</mo><msub><mi>a</mi><mi>i</mi></msub><msup><mo stretchy="false">)</mo><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\frac1N\sum_i(c_i-a_i)^2</annotation></semantics></math>. The four squared errors are .16,.04,.64,0, giving .21. It evaluates probabilistic forecasts directly, while an accuracy score would discard the confidence magnitudes. No single scalar fully describes discrimination, calibration, subgroup behavior and task costs, so choose a small set of metrics with clearly stated purposes.</p>
+<h5 id="loss-aggregation-is-another-weighting-decision">Loss aggregation is another weighting decision<a class="heading-anchor" href="#loss-aggregation-is-another-weighting-decision" aria-label="Link to this section">#</a></h5>
+<p>The first worked example supplies document means[1,3] and target counts[1,3]. Token-weighted mean loss is(1<em>1+3</em>3)/(1+3)=2.5, while equal-document mean is(1+3)/2=2. A long, difficult document contributes more token events under the first policy and the same document weight under the second. Neither arithmetic expression is wrong. The report becomes misleading when it switches policies without naming the unit.</p>
+<p>Suppose model A has lower loss on the longer document while model B has lower loss on several short documents. The ranking may change between token and document weighting. Decide which population or workload the summary should represent before examining which result makes a preferred model look better. Retain per-document losses and active-target counts so the aggregate can be independently reconstructed.</p>
+<p>Per-token perplexity adds a representation dependency. A tokenizer that splits a word into several targets changes the event count. Two systems can assign the same probability to a complete string and produce different per-token perplexities. Matching the label &quot;token&quot; in a report is insufficient when the tokenizers differ. A comparable evaluation needs aligned strings, context and stopping policies, and a justified common normalization unit. The lesson&#x27;s metadata comparison refuses to treat tokenizer v1 and v2 as automatically interchangeable.</p>
+<h5 id="compare-models-by-aligned-identities">Compare models by aligned identities<a class="heading-anchor" href="#compare-models-by-aligned-identities" aria-label="Link to this section">#</a></h5>
+<p>Model A&#x27;s saved errors are{q1:0,q2:1}; model B&#x27;s are{q2:0,q1:1}. The dictionaries list rows in different orders, but pairing by stable question ID gives differences[-1,1] and mean 0. Pairing by incidental storage order could incorrectly compare unrelated cases. IDs are part of the statistical design because they define which observations belong together.</p>
+<p>Even a zero mean difference can hide important exchanges. One model improves q1 and regresses q2. Inspect whether those questions belong to different families, severities or evidence conditions. If a rare severe case regresses, an unchanged average is not enough to satisfy a policy that forbids that failure. Paired summaries should preserve the individual differences and the grouping structure rather than only printing a win/loss count.</p>
+<h5 id="calibration-is-fitted-and-evaluated-under-a-population-contract">Calibration is fitted and evaluated under a population contract<a class="heading-anchor" href="#calibration-is-fitted-and-evaluated-under-a-population-contract" aria-label="Link to this section">#</a></h5>
+<p>A calibration method can transform scores using designated calibration data. Temperature scaling, for example, fits a positive temperature for logits under a chosen probabilistic objective. This can change confidence without changing the ranking of unequal class logits. It is not the same operation as choosing a generation temperature because a user prefers creative text, and it does not establish factual truth for arbitrary answers.</p>
+<p>If the calibration population changes, the relationship between confidence and correctness can change too. A document assistant may be evaluated on familiar policy questions and deployed on rare technical exceptions. The same score range can have different error rates. Report domain, task, time window, answerability and subgroup counts alongside the calibration method. Repeatedly retuning on the final test set turns it into development data.</p>
+<p>A useful diagnostic sequence asks: Are the event labels correct? Are predictions paired with the right IDs? Is the confidence attached to the event being scored? Are empty bins represented as unknown? Are denominators active targets, questions or families? Only after these contracts hold should a discrepancy be attributed to the model&#x27;s probability quality.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Calibration:</strong> Agreement between predicted confidence and observed frequency.</p>
+<p><strong>Bin count:</strong> Number of observations supporting a calibration summary.</p>
+<p><strong>Comparable unit:</strong> An event definition shared by the quantities being compared.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-027</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-027/</code> so the checked-in worksheet remains available.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Store per-event confidence and a boolean correctness outcome. Use explicit half-open bin boundaries, with the final bin including1. Compute each bin count, mean confidence and observed accuracy separately. For loss, retain sums and counts until the final division. Join model comparisons by stable event IDs rather than relying on array order.</p>
+<h3 id="metric-weighting-changes-the-question">Metric weighting changes the question<a class="heading-anchor" href="#metric-weighting-changes-the-question" aria-label="Link to this section">#</a></h3>
+<p>Document mean losses 1 and 3 with token counts 1 and 3 produce a token-weighted mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn><mo>·</mo><mn>1</mn><mo>+</mo><mn>3</mn><mo>·</mo><mn>3</mn></mrow><mrow><mn>4</mn></mrow></mfrac><mo>=</mo><mn>2.5</mn></mrow><annotation encoding="application/x-tex">\frac{1\cdot 1+3\cdot 3}{4}=2.5</annotation></semantics></math>. An equal-document mean is 2. Both are valid summaries of different units, but reporting one as the other changes the interpretation. Comparing language-model scores requires the same tokenizer and event definition; a token under vocabulary v1 need not represent the same amount or kind of text as a token under v2.</p>
+<p>For confidences [0.6, 0.8, 0.8, 1.0] and correctness [1, 1, 0, 1], one combined bin has mean confidence 0.8 and accuracy 0.75. Its absolute gap is 0.05. If the bins are [0.5, 0.8) and [0.8, 1], the first contains one correct event at confidence 0.6, while the second has average confidence about 0.8667 and accuracy <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{2}{3}</annotation></semantics></math>. Under the common count-weighted absolute-bin-gap definition, these bins give 0.25 rather than 0.05. The underlying predictions did not change; the binning changed the summary.</p>
+<p>This small example shows why calibration bin boundaries and event definitions should be fixed and reported. Empty bins have no observed accuracy and should remain explicitly empty, not be assigned a fabricated zero or one. A model token probability is also not automatically the probability that an entire cited answer is correct. Define the event being calibrated before assigning meaning to a confidence number.</p>
+<h3 id="pairing-preserves-information-hidden-by-equal-averages">Pairing preserves information hidden by equal averages<a class="heading-anchor" href="#pairing-preserves-information-hidden-by-equal-averages" aria-label="Link to this section">#</a></h3>
+<p>Model A&#x27;s errors are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{1}=0</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{2}=1</annotation></semantics></math>, while B&#x27;s are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{1}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{2}=0</annotation></semantics></math>. Correct ID alignment gives paired differences [-1, 1], with mean zero. Iterating their dictionaries in different orders can incorrectly pair [0, 1] with [0, 1], producing [0, 0]. The mean still happens to be zero, so an aggregate-only check misses the error, while the variability and per-question tradeoffs are destroyed.</p>
+<p>Keep stable IDs and relevant family/group membership when comparing systems. Confidence intervals or paired resampling depend on the actual observation unit, not merely the number of tokens printed by an evaluator. A similar average can conceal different failure types, so preserve the question-level outcomes as well as the overall metric.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-weight-token-losses">Example A: Weight token losses<a class="heading-anchor" href="#example-a-weight-token-losses" aria-label="Link to this section">#</a></h4>
+<p>The two statistics answer different questions. Neither should be labelled average loss without naming its weighting unit.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span></code></pre>
+<p><strong>Expected:</strong> token mean 2.5; document mean 2.</p>
+<h4 id="example-b-build-a-calibration-bin">Example B: Build a calibration bin<a class="heading-anchor" href="#example-b-build-a-calibration-bin" aria-label="Link to this section">#</a></h4>
+<p>The gap between confidence and frequency is observable for this small sample. Its sampling uncertainty remains large, so the bin is not a population guarantee.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+means<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">3.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>average<span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">,</span>weights<span class="syntax-operator">=</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2.5</span> <span class="syntax-operator">and</span> means<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">2</span>
+confidence<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.6</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> correct<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>confidence<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span><span class="syntax-punctuation">;</span> np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>confidence<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">.8</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> correct<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.75</span></code></pre>
+<p><strong>Expected:</strong> count4,mean confidence.8,accuracy.75.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Bins report counts, confidence and observed frequency; empty bins are explicit. Token losses across incompatible vocabularies are not directly ranked. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Weight token losses.</strong> Combine document mean losses1 and3 with token counts1 and3. <strong>Expected:</strong> token mean 2.5; document mean 2. <strong>Verify:</strong> Save the assertion results for exercise 1, including token mean 2.5; document mean 2.</li>
+</ol>
+<ol>
+<li><strong>Build a calibration bin.</strong> Use confidences.6,.8,.8,1 with correctness1,1,0,1 in a single bin. <strong>Expected:</strong> count4,mean confidence.8,accuracy.75. <strong>Verify:</strong> Save the assertion results for exercise 2, including count4,mean confidence.8,accuracy.75.</li>
+</ol>
+<ol>
+<li><strong>Represent an empty bin.</strong> Select confidence values below.5 and summarize without fabricating a rate. <strong>Expected:</strong> count0 and accuracyNone. <strong>Verify:</strong> Save the assertion results for exercise 3, including count0 and accuracyNone.</li>
+</ol>
+<ol>
+<li><strong>Check boundary membership.</strong> Use bins[.5,.8) and[.8,1] on the fixture. <strong>Expected:</strong> counts1 and3, total4. <strong>Verify:</strong> Save the assertion results for exercise 4, including counts1 and3, total4.</li>
+</ol>
+<ol>
+<li><strong>Align paired errors.</strong> Compare dictionariesA <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{1}=0</annotation></semantics></math>,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{2}=1</annotation></semantics></math> and B <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{2}=0</annotation></semantics></math>,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{1}=1</annotation></semantics></math> by IDs. <strong>Expected:</strong> differences[-1,1], mean0. <strong>Verify:</strong> Save the assertion results for exercise 5, including differences[-1,1], mean0.</li>
+</ol>
+<ol>
+<li><strong>Reject incompatible tokenizer scores.</strong> Compare evaluation metadata with tokenizer hashv1 versusv2. <strong>Expected:</strong> direct token-loss comparison marked incompatible. <strong>Verify:</strong> Save the assertion results for exercise 6, including direct token-loss comparison marked incompatible.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Name the averaging unit and tokenizer before comparing losses. Preserve empty calibration bins and fixed boundary conventions. Align paired outcomes by stable ID even when overall means happen to match; a mistaken pairing can leave the average unchanged while destroying the variance and failure interpretation.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Calibration, Bin count, Comparable unit using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>The next chapter combines training, a count baseline, held-out scoring and causal checks in one tiny decoder experiment. The lesson here supplies its reporting discipline: retain the actual target count, state the weighting policy, and avoid translating one favorable numeric score into a broad claim of model reliability.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/1706.04599">On Calibration of Modern Neural Networks</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-027, Calibration and comparable evaluation.
+Read courses/llm-theory/guides/llm-027.md and courses/llm-theory/lessons/llm-027.py. Direct prerequisites: `llm-026`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

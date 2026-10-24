@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-052",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict a LoadBalancer Service on an unsupported local cluster.",
+      "expected": "The requested external entrypoint may remain unprovisioned."
+    },
+    {
+      "exercise": 2,
+      "task": "Name the controller and infrastructure responsibilities.",
+      "expected": "Reconcile the request and provision actual routing resources."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw both node-backed and direct-Pod conceptual paths.",
+      "expected": "The implementation choice is explicit rather than assumed."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose assigned address with no successful requests.",
+      "expected": "Inspect listener, health checks, backend route and app behavior."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain load-balancer health versus Pod readiness.",
+      "expected": "Infrastructure health and Kubernetes endpoint eligibility can test different things."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan a local versus cloud qualification.",
+      "expected": "Named implementation, owned resources, cost/cleanup boundary and real request evidence."
+    }
+  ]
+}

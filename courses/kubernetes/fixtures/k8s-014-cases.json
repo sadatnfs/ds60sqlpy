@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-014",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "bounded contract-2 stateless-service capstone",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Explain the purpose and references of ConfigMap,Deployment and Service before Run.",
+      "expected": "Two replicas,matching app labels,fixed port chain and both message consumers are identified."
+    },
+    {
+      "exercise": 2,
+      "task": "Observe desired/updated/ready state and the Deployment-to-ReplicaSet-to-Pod UID chain.",
+      "expected": "Exactly two owned Ready Pod identities for the intended generation."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare ready endpoint UIDs and fresh client responses with the fixed contract.",
+      "expected": "UID sets match;version and both message values are exact."
+    },
+    {
+      "exercise": 4,
+      "task": "Predict and run one admitted selector/probe/task negative case.",
+      "expected": "The named check fails within budget and cleanup still targets only owned UIDs."
+    },
+    {
+      "exercise": 5,
+      "task": "Restore the relevant field and execute a new bounded operation.",
+      "expected": "The intended checks pass with new actual resource identities."
+    },
+    {
+      "exercise": 6,
+      "task": "Prepare the finite service packet for a second learner.",
+      "expected": "Source,nonsecret target identity,controller/backend/client/failure/cleanup evidence and unqualified surfaces are explicit."
+    }
+  ]
+}

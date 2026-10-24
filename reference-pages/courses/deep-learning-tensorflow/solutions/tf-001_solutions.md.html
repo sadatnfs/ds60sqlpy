@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-001: worked solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-001: worked solutions</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-001_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-001-worked-solutions">tf-001: worked solutions<a class="heading-anchor" href="#tf-001-worked-solutions" aria-label="Link to this section">#</a></h2>
+<p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-001.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
+<p>The <a href="tf-001_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
+<h3 id="exercise-1-name-the-units-and-roles">Exercise 1: Name the units and roles<a class="heading-anchor" href="#exercise-1-name-the-units-and-roles" aria-label="Link to this section">#</a></h3>
+<p>The three t-prefixed records are training examples and the four h-prefixed records are demonstration evaluation examples. The feature and target in one record belong together; treating every scalar as an independent sample would inflate the count. Label the group IDs explicitly. Their disjointness is part of the intended new-group claim, whereas the visible synthetic arithmetic is not an independent exam. An alternative table layout is acceptable when all seven identities and their roles remain inspectable.</p>
+<p><strong>Expected:</strong> Three training rows and four holdout rows; the row-ID and group-ID intersections are empty.</p>
+<p><strong>Verify:</strong> Inspect the row-count table and assert the two ID-set intersections are empty.</p>
+<h3 id="exercise-2-compare-a-fixed-baseline">Exercise 2: Compare a fixed baseline<a class="heading-anchor" href="#exercise-2-compare-a-fixed-baseline" aria-label="Link to this section">#</a></h3>
+<p>Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{3}</annotation></semantics></math>. Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.</p>
+<p><strong>Expected:</strong> The constant is 4, training MSE is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{3}</annotation></semantics></math> and holdout MSE is 54.</p>
+<p><strong>Verify:</strong> Record all seven residuals and compare their two separately labeled sums and denominators.</p>
+<h3 id="exercise-3-separate-a-sum-from-a-mean">Exercise 3: Separate a sum from a mean<a class="heading-anchor" href="#exercise-3-separate-a-sum-from-a-mean" aria-label="Link to this section">#</a></h3>
+<p>Subtract target from prediction for each pair, giving -1 and +1. Squaring removes the sign and produces two ones. Their sum is 2 and their mean is 1. The exact difference between these reductions is the denominator, not rounding. If the target were measured in meters, this squared quantity would be square meters. Comparing a sum from two rows with a mean from four rows obscures both the unit and the sample-size dependence.</p>
+<p><strong>Expected:</strong> Residuals [-1,1], squared-error sum 2 and MSE 1; squared target units.</p>
+<p><strong>Verify:</strong> Assert the sum equals twice the mean for these two records; do not compare 2 with another dataset mean.</p>
+<h3 id="exercise-4-find-a-grouped-leak">Exercise 4: Find a grouped leak<a class="heading-anchor" href="#exercise-4-find-a-grouped-leak" aria-label="Link to this section">#</a></h3>
+<p>After h1 is assigned t1&#x27;s source group, the row-ID intersection can still be empty while the group intersection contains that source. For an evaluation about new accounts, measurements from the same account can share information, so the split no longer supports that claim. Rename neither record to hide the overlap. The repair is a grouped partition created before fitting, followed by fresh selection under that partition. A different intended unit requires a separately stated policy.</p>
+<p><strong>Expected:</strong> Row IDs remain disjoint but one source group overlaps; a new-source-group claim is rejected.</p>
+<p><strong>Verify:</strong> Inspect both intersections separately and retain the named overlapping group in the report.</p>
+<h3 id="exercise-5-refuse-an-empty-score">Exercise 5: Refuse an empty score<a class="heading-anchor" href="#exercise-5-refuse-an-empty-score" aria-label="Link to this section">#</a></h3>
+<p>No arithmetic mean exists for an empty collection because its denominator is zero. Returning zero would confuse absence of evidence with perfect prediction. Raise ValueError with an empty-evaluation explanation before computing any score. The reference also rejects mismatched prediction/target lengths so accidental truncation by zip cannot conceal missing records. After the rejected call, recompute the valid four-row case: the expected 54 confirms that failure handling did not mutate the original fixture.</p>
+<p><strong>Expected:</strong> An empty evaluation set has no mean; the reference raises ValueError instead of reporting zero.</p>
+<p><strong>Verify:</strong> Capture the empty-input exception and confirm the original four-row evaluation still yields 54 afterward.</p>
+<h3 id="exercise-6-bound-the-conclusion">Exercise 6: Bound the conclusion<a class="heading-anchor" href="#exercise-6-bound-the-conclusion" aria-label="Link to this section">#</a></h3>
+<p>Zero error shows that <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>y</mi><mo>=</mo><mn>2</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">y=2\cdot x</annotation></semantics></math> matches these seven published feature/target pairs. The rule and labels are already visible, so this is an arithmetic demonstration and cannot establish unseen-population performance. A statement such as every future input is correct is unsupported. Choose new source groups or a later time period under a frozen protocol and state the intended use first. Report any revision made after inspecting those results as selection work rather than untouched testing.</p>
+<p><strong>Expected:</strong> The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported.</p>
+<p><strong>Verify:</strong> The evidence note names seven observations, the already visible rule, and a new source/time fixture that has not influenced selection.</p>
+<h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
+<p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
+
+TRAIN <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">t</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">train-</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> i<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+HOLDOUT <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">h</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">holdout-</span><span class="syntax-string">{</span>i<span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> i <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">y</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>i <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">]</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">mse</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    predictions<span class="syntax-punctuation">,</span> targets <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>targets<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> predictions <span class="syntax-operator">or</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty equal-length evaluation pairs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> pairs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite evaluation pairs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> pairs<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>pairs<span class="syntax-punctuation">)</span>
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate_split</span><span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> train <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> holdout<span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonempty train and holdout required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    ids <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> part<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> part <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    groups <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">group</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> part<span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> part <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>keys<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>part<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> keys<span class="syntax-punctuation">,</span> part <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>ids<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>train<span class="syntax-punctuation">,</span> holdout<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">duplicate row IDs</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> ids<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;</span> ids<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">row ID overlap</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> groups<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&amp;</span> groups<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source group overlap</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-keyword">True</span></code></pre>
+<h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
+<p>Close the table and explain why a holdout is a decision policy. Then change the training targets to [1,3] and the evaluation target to [5]. Derive the fixed training-mean prediction and its single squared error without looking at the reference.</p>
+<p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
+  </main>
+</body>
+</html>

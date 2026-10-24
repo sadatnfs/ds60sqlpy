@@ -1,0 +1,76 @@
+{
+  "lesson_id": "spark-041",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Capture the actual runtime tuple",
+      "input_contract": "Record Spark, Scala binary and patch, JDK major and patch, Python version and optional PyArrow distribution version without installing anything.",
+      "expected": "Spark 4.0.1, Scala 2.13 family, JDK 17;actual patch strings and explicit not-installed Arrow when absent.",
+      "verification": "Inspect actual values and reject a claimed target qualification based only on a proposed version string."
+    },
+    {
+      "exercise": 2,
+      "title": "Run a type, NULL and multiplicity golden suite",
+      "input_contract": "Evaluate the supplied four-row bag plus exact decimal and timezone expressions.",
+      "expected": "4 rows,3 known amounts, total 200,3 distinct IDs;decimal 12345678.90;instant 19:00UTC.",
+      "verification": "Compare exact metrics and rendered values under the UTC baseline."
+    },
+    {
+      "exercise": 3,
+      "title": "Preserve baseline state and reject incompatible reuse",
+      "input_contract": "Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint.",
+      "expected": "Baseline output 1:100,2:200;preflight rejects changed keys before starting a new query.",
+      "verification": "Compare owned-query count before/after the refusal and confirm the old checkpoint/output remain present and unchanged."
+    },
+    {
+      "exercise": 4,
+      "title": "Run the changed query in a separate candidate namespace",
+      "input_contract": "Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoint/output.",
+      "expected": "Candidate bag 1:100,1:999,2:200, which fails the baseline one-row-per-ID product gate.",
+      "verification": "Compare candidate and baseline exact bags and preserve old checkpoint/output."
+    },
+    {
+      "exercise": 5,
+      "title": "Rehearse rollback to the preserved compatible query",
+      "input_contract": "Resume the original ID-only query with its original checkpoint after the candidate is rejected.",
+      "expected": "The same baseline query ID resumes;the new occurrence of already-seen ID 1 does not add a row;baseline output stays 1:100,2:200.",
+      "verification": "Check query identity and exact sink bag without deleting either checkpoint."
+    },
+    {
+      "exercise": 6,
+      "title": "Gate a proposed runtime change on actual evidence",
+      "input_contract": "Require a qualified target profile, golden-suite pass, compatible recovery design and product acceptance before promotion.",
+      "expected": "The supplied unqualified target or failed candidate is rejected;all four true permits a proposal in this pure decision model.",
+      "verification": "Check missing-profile and wrong-product negatives, then record that no second runtime was provisioned."
+    }
+  ],
+  "golden": {
+    "golden_metrics": [
+      4,
+      3,
+      200,
+      3
+    ],
+    "decimal": "12345678.90",
+    "utc_instant": "2026-10-23 19:00:00",
+    "baseline_keys": [
+      "id"
+    ],
+    "candidate_keys": [
+      "id",
+      "cents"
+    ],
+    "baseline_rows": [
+      "1:100",
+      "2:200"
+    ],
+    "candidate_rows": [
+      "1:100",
+      "1:999",
+      "2:200"
+    ],
+    "target_profile": "unavailable;no second runtime executed",
+    "refusal_scope": "application compatibility preflight,not fabricated Spark exception"
+  }
+}

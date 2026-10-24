@@ -1,0 +1,64 @@
+{
+  "lesson_id": "spark-025",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Write and validate a compact partitioned round trip",
+      "input_contract": "Repartition source by day into 2 execution partitions, write Parquet with error-if-exists and partitionBy(day), then read it back. Compare field types and the complete duplicate-sensitive bag.",
+      "expected": "2000 rows and total 13993000 survive. Types remain id/amount bigints and day/payload strings;read nullability may differ.",
+      "verification": "Assert type mapping and exceptAll emptiness in both directions, plus row count and amount total."
+    },
+    {
+      "exercise": 2,
+      "title": "Read a narrow filtered projection with an independent oracle",
+      "input_contract": "Select only id and amount for day=even and id>=1990. Return the five ordered tuples.",
+      "expected": "(1990,13930),(1992,13944),(1994,13958),(1996,13972),(1998,13986). No payload column is requested.",
+      "verification": "Assert every projected identity and amount and exact two-column output schema."
+    },
+    {
+      "exercise": 3,
+      "title": "Locate partition, column and predicate evidence in the scan",
+      "input_contract": "Capture a FORMATTED plan for the selected query on the owned Parquet view. Extract ReadSchema, PartitionFilters and PushedFilters lines and interpret each scope.",
+      "expected": "ReadSchema has id and amount but not payload;PartitionFilters mentions day/even;PushedFilters includes the id lower bound.",
+      "verification": "Assert the relevant field/predicate markers and retain the exact five-row output oracle;do not claim bytes skipped from the plan alone."
+    },
+    {
+      "exercise": 4,
+      "title": "Compare a deliberately larger file count without changing data",
+      "input_contract": "Write the same source after repartition 12 using the same day directory partitioning. Inventory only.parquet data files and their actual byte sizes for both layouts.",
+      "expected": "Both round trips match the source bag. The many layout has more data files than compact;both byte totals are positive and below 32 MiB.",
+      "verification": "Assert bag parity, file-count inequality and measured data-byte bounds. Ignore checksum and success-marker files in data counts."
+    },
+    {
+      "exercise": 5,
+      "title": "Report storage partitions, files and scan partitions separately",
+      "input_contract": "Return a receipt with the number of day= directories, the data-file count and the read DataFrame execution-partition count for each layout.",
+      "expected": "Both layouts have 2 day directories. Data-file counts are the measured inventory values. Scan partitions are positive observed values and need not equal either other count.",
+      "verification": "Assert two directory partitions and independent file-count consistency;print actual scan partition counts without imposing equality."
+    },
+    {
+      "exercise": 6,
+      "title": "Reject an existing target and preserve its product",
+      "input_contract": "Attempt a second error-if-exists write to the already owned compact path. Require the expected analysis error, then read the original product and reconcile its bag.",
+      "expected": "The second write fails with an existing-path analysis exception;the original 2000-row product remains unchanged.",
+      "verification": "Assert the exception and full original bag after the failed write. Do not delete or overwrite the target to make the retry succeed."
+    }
+  ],
+  "golden": {
+    "rows": 2000,
+    "amount_total": 13993000,
+    "selected_ids": [
+      1990,
+      1992,
+      1994,
+      1996,
+      1998
+    ],
+    "directory_partitions": [
+      "even",
+      "odd"
+    ],
+    "scope": "Fresh owned root beneath current job with compact/many children;finally removes only that root."
+  }
+}

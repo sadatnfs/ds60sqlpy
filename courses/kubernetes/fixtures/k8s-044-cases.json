@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-044",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict Pod-IP membership in the fixture CIDR.",
+      "expected": "10.244.1.7 belongs to 10.244.0.0/16."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare/16 and/24 address set sizes.",
+      "expected": "The/24 is the smaller, more specific network."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a nonoverlapping synthetic address-plan table.",
+      "expected": "Node, Pod and Service ranges plus host/VPN ranges are compared."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a VPN route overlapping the Pod range.",
+      "expected": "The caller can select an unintended route before cluster delivery."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why 256 addresses do not guarantee 256 allocatable endpoints.",
+      "expected": "Reservation and implementation rules reduce or constrain allocation."
+    },
+    {
+      "exercise": 6,
+      "task": "Defend an address plan for a second local cluster.",
+      "expected": "Ranges and routes avoid collisions with the first cluster and host networks."
+    }
+  ]
+}

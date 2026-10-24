@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>torch-026: Custom modules, residual paths, buffers and autograd checks · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>torch-026: Custom modules, residual paths, buffers and autograd checks</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/guides/torch-026.md</code></p>
+    </header>
+    <article class="document"><h2 id="torch-026-custom-modules-residual-paths-buffers-and-autograd-checks">torch-026: Custom modules, residual paths, buffers and autograd checks<a class="heading-anchor" href="#torch-026-custom-modules-residual-paths-buffers-and-autograd-checks" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 120 minutes. Direct prerequisites: <code>torch-025</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Custom modules should make state ownership and differentiation explicit. The central investigation is concrete: Create a width 2 residual with zero kernel and scale buffer 1. The finish condition is output equals input; one parameter and one buffer. gradient 24. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.</p>
+<p>A custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch grad check uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use a custom module to express a reusable computation with a stable state inventory. Create persistent learned state once and validate the feature contract on later calls. Choose a residual connection when its identity path is part of the intended architecture, not simply because addition makes a shape mismatch disappear.</p>
+<p>Prefer ordinary differentiable PyTorch operations when they express the computation correctly. Write autograd.Function only when a concrete operation requires a custom rule, and then specify its input domain, upstream-gradient behavior and supported derivative orders. Numerical checks complement analytic and composition tests; they do not certify every branch automatically.</p>
+<h3 id="paired-tensorflow-comparison">Paired TensorFlow comparison<a class="heading-anchor" href="#paired-tensorflow-comparison" aria-label="Link to this section">#</a></h3>
+<p>Compare <a href="../../deep-learning-tensorflow/guides/tf-026.md.html">tf-026</a> after deriving the shared numerical contract.</p>
+<p>Keras custom layers often create weights in build and define call; PyTorch modules usually register state in <strong>init</strong> and define forward. TensorFlow custom-gradient mechanisms and PyTorch autograd.Function both require a correct local derivative multiplied by the incoming gradient.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Custom module:</strong> A reusable computation with explicitly registered state.</p>
+<p><strong>Buffer:</strong> Tracked tensor state outside the optimizer parameter set.</p>
+<p><strong>Grad check:</strong> A numerical comparison of a backward rule with finite differences.</p>
+<p><strong>Incoming gradient:</strong> The derivative from later operations supplied to a local backward rule.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/torch-026/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/deep-learning-pytorch/lessons/torch-026.py</code>. For macOS/Linux, use the interpreter explicitly selected for a separately prepared native PyTorch environment, and invoke that interpreter on <code>courses/deep-learning-pytorch/lessons/torch-026.py</code> from the repository root. The repository&#x27;s general <code>.venv</code> is not assumed to contain PyTorch; the prepared classroom profile is the default execution route.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Assign nn.Parameter in <strong>init</strong>, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3\cdot {x}^{2}</annotation></semantics></math> times the incoming gradient.</p>
+<h3 id="derive-residual-gradients-and-stable-module-identity">Derive residual gradients and stable module identity<a class="heading-anchor" href="#derive-residual-gradients-and-stable-module-identity" aria-label="Link to this section">#</a></h3>
+<p>For X shaped(B, D), a square kernel K shaped(D, D) and scalar scale s, the module computes <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>X</mi><mo>+</mo><mi>s</mi><mi>X</mi><mi>K</mi></mrow><annotation encoding="application/x-tex">Y=X+sXK</annotation></semantics></math>. Both terms have shape(B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.</p>
+<p>At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>K</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">K=0</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>s</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">s=1</annotation></semantics></math>, the forward map is exactly Y=X. That does not make the branch untrainable. For upstream <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>G</mi><mo>=</mo><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>Y</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">G=\frac{\partial L}{\partial Y}</annotation></semantics></math>, the matrix derivatives are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>X</mi></mrow></mfrac><mo>=</mo><mi>G</mi><mo>+</mo><msup><mrow><mi>s</mi><mi>G</mi><mi>K</mi></mrow><mrow><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial X}=G+{sGK}^{T}</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo>∂</mo><mi>L</mi></mrow><mrow><mo>∂</mo><mi>K</mi></mrow></mfrac><mo>=</mo><msup><mrow><mi>s</mi><mi>X</mi></mrow><mrow><mi>T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\frac{\partial L}{\partial K}={sX}^{T}</annotation></semantics></math> G. With the fixture X=[[1, 2], [3, 4]] and L equal to the sum of output entries, G is all ones, so dL/dK=[[4, 4], [6, 6]] even at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>K</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">K=0</annotation></semantics></math>. The input derivative is G because the zero branch adds no additional input sensitivity. The skip path preserves a direct derivative route while the branch can begin learning.</p>
+<p>Example C changes K to identity and s to 0.5. Its forward result is 1.5X. Under the same hypothetical summed loss, dL/dX=1.5G and dL/dK=[[2, 2], [3, 3]]. The paired TensorFlow residual has no scale buffer and therefore gives 2 X when its kernel is identity. That difference is an intentional mathematical configuration difference, not a framework disagreement. Match the scale before comparing corresponding derivatives.</p>
+<p>The module owns one Parameter object with four scalar entries and one scalar buffer. Counting objects and counting scalars answer different questions. Parameters participate in named_parameters and are candidates for optimizer membership. The registered scale buffer participates in module state and device/dtype movement but is not automatically passed to an optimizer. Its current construction does not request gradients. An ordinary tensor attribute would not automatically receive all of those registration behaviors.</p>
+<p>state_dict is not the complete program. It contains the registered kernel and persistent buffer, but reconstruction still needs the module class and width argument. Python configuration such as width is not made into serialized tensor state merely because it is an attribute. A release must preserve that construction contract alongside the tensors. Also, a state_dict mapping is not by itself an independent snapshot of every underlying tensor; clone the values when comparing against later in-place mutations.</p>
+<p>Stable object identity matters as much as a stable parameter count. Replacing a four-element Parameter with a fresh four-element Parameter inside forward keeps the scalar count unchanged while leaving an existing optimizer holding the old object. Gradients can then appear on the new parameter without an update from that optimizer. The unchanged exercise checks both identity and count to expose this failure. Keras build/add_weight and PyTorch <strong>init</strong>/Parameter use different construction idioms, but both need a persistent tracked object across calls.</p>
+<h3 id="treat-a-custom-backward-as-a-local-vector-jacobian-product">Treat a custom backward as a local vector-Jacobian product<a class="heading-anchor" href="#treat-a-custom-backward-as-a-local-vector-jacobian-product" aria-label="Link to this section">#</a></h3>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><msup><mi>x</mi><mn>3</mn></msup></mrow><annotation encoding="application/x-tex">f(x)=x^3</annotation></semantics></math>, the local derivative is 3 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{x}^{2}</annotation></semantics></math>. backward receives the derivative from later computation, so it must return <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">g</mi><mi mathvariant="normal">r</mi><mi mathvariant="normal">a</mi><mi mathvariant="normal">d</mi><mi mathvariant="normal">_</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">t</mi><mi mathvariant="normal">p</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">t</mi></mrow><mo>×</mo><mn>3</mn><msup><mi>x</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">\mathrm{grad\_output}\times3x^2</annotation></semantics></math>. At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">x=2</annotation></semantics></math>, the derivative of 2 f(x) is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mn>12</mn><mo>=</mo><mn>24</mn></mrow><annotation encoding="application/x-tex">2\cdot 12=24</annotation></semantics></math>. Returning only 3 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>x</mi></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{x}^{2}</annotation></semantics></math> would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.</p>
+<p>save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. <a href="https://docs.pytorch.org/docs/2.9/notes/extending.html">Extending PyTorch 2.9 autograd</a>.</p>
+<p>gradcheck perturbs real-valued inputs and compares numerical sensitivities with the backward rule. The supplied float64 points 0.2 and-0.7 avoid a nondifferentiable branch, and the analytic derivatives are 0.12 and 1.47. Finite precision, probe size and conditioning still matter. A forward implementation that changes branches at the probe point may not have the derivative the numerical test assumes. Overlapping storage can also invalidate an interpretation that perturbations affect one independent coordinate.</p>
+<p>A first-derivative check does not establish double backward, forward-mode support, arbitrary broadcasting or performance. Add the relevant contract tests when those features are actually required. The fixture&#x27;s cube is small enough to inspect symbolically, and the upstream-factor test catches a distinct error from the basic numerical comparison. None of these checks requires a compiled extension or an external package.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-build-an-identity-residual">Example A: Build an identity residual<a class="heading-anchor" href="#example-a-build-an-identity-residual" aria-label="Link to this section">#</a></h4>
+<p>A zero branch makes the initial residual an exact identity. The branch can still receive gradients because its input is nonzero.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">import</span> torch
+<span class="syntax-keyword">from</span> torch <span class="syntax-keyword">import</span> nn
+<span class="syntax-keyword">from</span> torch.nn <span class="syntax-keyword">import</span> functional <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">class</span> <span class="syntax-class">Residual</span><span class="syntax-punctuation">(</span>nn<span class="syntax-operator">.</span>Module<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-builtin">super</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span><span class="syntax-function">__init__</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-operator">=</span>width<span class="syntax-punctuation">;</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>kernel<span class="syntax-operator">=</span>nn<span class="syntax-operator">.</span>Parameter<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>width<span class="syntax-punctuation">,</span>width<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-builtin">self</span><span class="syntax-operator">.</span>register_buffer<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">scale</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">self</span><span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">if</span> x<span class="syntax-operator">.</span>ndim<span class="syntax-operator">!=</span><span class="syntax-number">2</span> <span class="syntax-operator">or</span> x<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>width<span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">feature width mismatch</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> x<span class="syntax-operator">+</span><span class="syntax-builtin">self</span><span class="syntax-operator">.</span>scale<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>x<span class="syntax-decorator">@self</span><span class="syntax-operator">.</span>kernel<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">class</span> <span class="syntax-class">Cube</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>autograd<span class="syntax-operator">.</span>Function<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-decorator">@staticmethod</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">forward</span><span class="syntax-punctuation">(</span>ctx<span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> ctx<span class="syntax-operator">.</span>save_for_backward<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> x<span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">3</span>
+    <span class="syntax-decorator">@staticmethod</span>
+    <span class="syntax-keyword">def</span> <span class="syntax-function">backward</span><span class="syntax-punctuation">(</span>ctx<span class="syntax-punctuation">,</span>grad_output<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span>ctx<span class="syntax-operator">.</span>saved_tensors<span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> grad_output<span class="syntax-operator">*</span><span class="syntax-number">3</span><span class="syntax-operator">*</span>x<span class="syntax-operator">*</span>x
+module<span class="syntax-operator">=</span>Residual<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> x<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">3.</span><span class="syntax-punctuation">,</span><span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>x<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>module<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">kernel</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>module<span class="syntax-operator">.</span>named_buffers<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">scale</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> output equals input; one parameter and one buffer.</p>
+<h4 id="example-b-keep-state-stable-across-calls">Example B: Keep state stable across calls<a class="heading-anchor" href="#example-b-keep-state-stable-across-calls" aria-label="Link to this section">#</a></h4>
+<p>Batch length changes transient activations, not the number of learned coefficients. Stable state is necessary for optimizer and checkpoint consistency.</p>
+<pre class="highlighted-code"><code class="language-python">identity<span class="syntax-operator">=</span><span class="syntax-builtin">id</span><span class="syntax-punctuation">(</span>module<span class="syntax-operator">.</span>kernel<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> module<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">id</span><span class="syntax-punctuation">(</span>module<span class="syntax-operator">.</span>kernel<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span>identity <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> module<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
+<p><strong>Expected:</strong> same kernel object and parameter count 4.</p>
+<h4 id="example-c-check-a-known-residual-transform">Example C: Check a known residual transform<a class="heading-anchor" href="#example-c-check-a-known-residual-transform" aria-label="Link to this section">#</a></h4>
+<p>The buffer changes forward behavior while remaining outside the trainable parameter list. It therefore belongs in the serialized state contract.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> module<span class="syntax-operator">.</span>kernel<span class="syntax-operator">.</span>copy_<span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> module<span class="syntax-operator">.</span>scale<span class="syntax-operator">.</span>fill_<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-punctuation">)</span>
+torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.5</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> output <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">1.5\cdot x</annotation></semantics></math>.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: output equals input; one parameter and one buffer. gradient 24. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Build an identity residual.</strong> Create a width 2 residual with zero kernel and scale buffer 1. <strong>Expected:</strong> output equals input; one parameter and one buffer. <strong>Verify:</strong> Save the assertion results for exercise 1, including output equals input; one parameter and one buffer.</li>
+</ol>
+<ol>
+<li><strong>Keep state stable across calls.</strong> Call the same module on a second batch with the same width. <strong>Expected:</strong> same kernel object and parameter count 4. <strong>Verify:</strong> Save the assertion results for exercise 2, including same kernel object and parameter count 4.</li>
+</ol>
+<ol>
+<li><strong>Check a known residual transform.</strong> Assign an identity kernel and scale.5. <strong>Expected:</strong> output <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">1.5\cdot x</annotation></semantics></math>. <strong>Verify:</strong> Save the assertion results for exercise 3, including output <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">1.5\cdot x</annotation></semantics></math>.</li>
+</ol>
+<ol>
+<li><strong>Reject incompatible feature width.</strong> Pass a width 3 row to the width 2 module. <strong>Expected:</strong> ValueError naming feature width. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError naming feature width.</li>
+</ol>
+<ol>
+<li><strong>Validate a custom cube derivative.</strong> Run grad check on Cube.apply at float64 values.2, -.7. <strong>Expected:</strong> grad check True. <strong>Verify:</strong> Save the assertion results for exercise 5, including grad check True.</li>
+</ol>
+<ol>
+<li><strong>Inspect the incoming-gradient factor.</strong> Differentiate the sum of 2*Cube(x) atx 2. <strong>Expected:</strong> gradient 24. <strong>Verify:</strong> Save the assertion results for exercise 6, including gradient 24.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If an identity residual receives no kernel gradient, inspect the branch input and graph before concluding that a zero forward branch cannot learn. If the parameter count stays fixed but training stops, compare object identities in the module and optimizer. If loading tensors produces a different function, check constructor width and buffer values as well as weights.</p>
+<p>If a custom backward passes only when the outer coefficient is one, multiply the output by a different upstream factor and inspect the vector-Jacobian product. If gradcheck fails near a kink or at float32 precision, choose a justified smooth float64 probe before loosening tolerances. If higher derivatives are required, test them explicitly rather than inferring them from a first-order pass. Preserve saved-tensor ownership instead of bypassing autograd checks with untracked mutation.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Custom module, Buffer, Grad check using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>torch-025</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.pytorch.org/docs/2.9/autograd.html">PyTorch2.9 autograd</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/pytorch-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="interview-reasoning-with-worked-answers">Interview reasoning with worked answers<a class="heading-anchor" href="#interview-reasoning-with-worked-answers" aria-label="Link to this section">#</a></h3>
+<p><strong>Why is a buffer not just an ordinary tensor attribute?</strong></p>
+<p>Buffers participate in state_dict and module device/dtype movement. An ordinary attribute can be omitted from those operations and cause inconsistent reconstruction.</p>
+<p><strong>What does grad check not establish?</strong></p>
+<p>It does not prove behavior on every branch, shape or nondifferentiable point. Add domain, boundary and composition tests alongside numerical derivative checks.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-026, Custom modules, residual paths, buffers and autograd checks.
+Read courses/deep-learning-pytorch/guides/torch-026.md and courses/deep-learning-pytorch/lessons/torch-026.py. Direct prerequisites: `torch-025`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/deep-learning-pytorch/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-057",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the DNS role of a headless Service.",
+      "expected": "Discovery can return individual backend addresses."
+    },
+    {
+      "exercise": 2,
+      "task": "Distinguish StatefulSet name and Pod UID.",
+      "expected": "A stable logical name can refer to a replacement instance."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw a stateful peer discovery sequence.",
+      "expected": "Resolve peer addresses, establish identity and run the application protocol."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose treating headless DNS as automatic load balancing.",
+      "expected": "The client owns address selection and connection behavior."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain publishNotReadyAddresses tradeoffs.",
+      "expected": "Discovery may include peers not ready for normal serving."
+    },
+    {
+      "exercise": 6,
+      "task": "Design a stateful replacement check.",
+      "expected": "Logical identity, new UID, intended volume and application-level data result."
+    }
+  ]
+}

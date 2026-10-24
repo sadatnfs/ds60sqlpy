@@ -1,0 +1,1375 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-38 · Tree Models Random Forest · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-38" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-38</p>
+        <h1>Tree Models Random Forest</h1>
+        <p class="hero-copy">Statistics and machine learning</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">105 minutes</span>
+          <span class="tag">data setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-37.html">python-37</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this notebook with the course kernel</h2>
+          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
+
+          <a class="button lab-only" href="../learn?lesson=python-38" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/ds-60day/companion-guides/day38_tree_models_random_forest.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day38_tree_models_random_forest.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--day-38-decision-trees-and-random-forests">Day 38: Decision Trees and Random Forests<a class="heading-anchor" href="#guide--day-38-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
+<p><strong>Lesson ID:</strong> <code>python-38</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
+<p>Decision trees divide feature space through a sequence of rules. Random forests average many randomized trees to reduce the instability of a single tree.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end of the lesson, you can:</p>
+<ul>
+<li>fit and compare a decision tree and random forest;</li>
+<li>identify underfitting and overfitting as depth changes;</li>
+<li>control tree complexity with depth and leaf-size settings;</li>
+<li>compare impurity-based and held-out permutation importance; and</li>
+<li>explain why feature importance is not causal importance.</li>
+</ul>
+<h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Complete <code>python-37</code> (regularized linear models).</li>
+<li>Be able to make a stratified split and interpret accuracy from <code>python-35</code>.</li>
+<li>Recall that validation choices must not use the final test set.</li>
+</ul>
+<h4 id="guide--vocabulary-and-mental-models">Vocabulary and mental models<a class="heading-anchor" href="#guide--vocabulary-and-mental-models" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Term</th>
+<th>Definition</th>
+</tr></thead><tbody>
+<tr>
+<td>Split</td>
+<td>Feature threshold that partitions observations at a node</td>
+</tr>
+<tr>
+<td>Impurity</td>
+<td>Measure of class mixing, such as Gini impurity</td>
+</tr>
+<tr>
+<td>Leaf</td>
+<td>Terminal node that produces a prediction</td>
+</tr>
+<tr>
+<td>Maximum depth</td>
+<td>Longest allowed root-to-leaf path</td>
+</tr>
+<tr>
+<td>Bootstrap sample</td>
+<td>Sample drawn with replacement</td>
+</tr>
+<tr>
+<td>Feature subsampling</td>
+<td>Considering only a random subset of features at a split</td>
+</tr>
+<tr>
+<td>Random forest</td>
+<td>Ensemble of decorrelated trees whose predictions are averaged or voted</td>
+</tr>
+<tr>
+<td>Permutation importance</td>
+<td>Score decrease after shuffling one feature in evaluation data</td>
+</tr>
+</tbody></table></div>
+<p>A deep tree can memorize small idiosyncrasies. A forest reduces variance through averaging, but it can still learn leakage, bias, and spurious correlations.</p>
+<h4 id="guide--worked-example-compare-training-and-held-out-behavior">Worked example: compare training and held-out behavior<a class="heading-anchor" href="#guide--worked-example-compare-training-and-held-out-behavior" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
+
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_test <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span>
+<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_test<span class="syntax-punctuation">,</span> y_test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The gap between training and held-out accuracy is one diagnostic, not a complete model-selection procedure. Choose complexity with validation or CV and report a separate test estimate.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<ol>
+<li>Open the Day 38 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
+<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
+<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
+<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
+</ol>
+<p>Windows PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyter lab</code></pre>
+<p>macOS/Linux:</p>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
+<h4 id="guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept deep dive: tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
+<p>A decision tree recursively partitions feature space. Each split asks a threshold question chosen to reduce impurity; each leaf stores a local prediction. Deep trees can represent fine interactions but also isolate noise. Depth, leaf size, and pruning control that capacity.</p>
+<p>A random forest trains many trees on bootstrapped rows while considering subsets of features. Averaging decorrelated trees reduces variance. Impurity importance describes split usage inside the fitted forest; held-out permutation importance measures score loss when one feature&#x27;s association is broken. Neither establishes causality.</p>
+<h5 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)</code>:</strong> sets capacity controls before fitting and exposes tree-specific train/validation gaps.</li>
+<li><strong><code>RandomForestClassifier(n_estimators=..., random_state=...)</code>:</strong> averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.</li>
+<li><strong><code>permutation_importance(model, X_valid, y_valid, ...)</code>:</strong> measures held-out score change under repeated feature shuffles.</li>
+</ul>
+<p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
+<h5 id="guide--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A: make the depth-versus-generalization gap visible<a class="heading-anchor" href="#guide--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
+<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
+
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span><span class="syntax-punctuation">)</span>
+    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+                  <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.</p>
+<p><strong>Assumption to name:</strong> The validation split represents future cases and was not used to choose unlimited alternatives.</p>
+<h5 id="guide--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B: test a deliberately useless noise feature<a class="heading-anchor" href="#guide--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
+<p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+<span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">3802</span><span class="syntax-punctuation">)</span>
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>X<span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span>X<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>
+    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span>
+<span class="syntax-punctuation">)</span>
+forest <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+forest<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span>
+importance <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>
+    forest<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">noise_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+       <span class="syntax-string">&quot;</span><span class="syntax-string">best_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> The random noise feature should have importance near zero, while at least one real feature matters more.</p>
+<p><strong>Assumption to name:</strong> The model&#x27;s held-out score is good enough that score perturbations are interpretable.</p>
+<h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>What to do</th>
+<th>Evidence to keep</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define tree splits, ensemble variance reduction, and held-out importance in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<h5 id="guide--common-mistake-and-debugging-path">Common mistake and debugging path<a class="heading-anchor" href="#guide--common-mistake-and-debugging-path" aria-label="Link to this section">#</a></h5>
+<p><strong>Mistake:</strong> Treating <code>feature_importances_</code> as causal effect or as reliable when correlated features can substitute for one another.</p>
+<p><strong>Debug it deliberately:</strong> Compare train/validation scores, tree depth/leaf counts, repeated permutation intervals, and a synthetic noise feature.</p>
+<p><strong>Stop condition:</strong> Do not interpret importance from a poorly performing model or from the same rows used to fit it.</p>
+<h4 id="guide--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#guide--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Plot tree depth versus accuracy.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
+<ol>
+<li>Inspect feature importances and discuss their reliability.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
+<h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Record training and validation accuracy for each depth. Treat <code>None</code> as an unbounded depth label rather than a numeric x-coordinate.</li>
+<li>Compare <code>feature_importances_</code> with <code>sklearn.inspection.permutation_importance</code> on held-out data. Preserve feature names from <code>load_breast_cancer().feature_names</code>.</li>
+</ol>
+<h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
+</ol>
+<p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
+<ol>
+<li><strong>Out-of-bag reasoning:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance. <strong>Progressive hint:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</li>
+</ol>
+<p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
+<ol>
+<li><strong>Imbalance debugging:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>. <strong>Progressive hint:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</li>
+</ol>
+<p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
+<ol>
+<li><strong>Correlated-importance edge case:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change. <strong>Progressive hint:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</li>
+</ol>
+<p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Why does a fully grown tree often have very high training accuracy?</li>
+<li>How do bootstrap sampling and feature subsampling decorrelate trees?</li>
+<li>Why can impurity importance favor continuous or high-cardinality features?</li>
+<li>What happens to permutation importance when two features carry redundant information?</li>
+</ul>
+<p>Expected behavior: very shallow trees underfit, a random forest is generally more stable than one tree, and the two importance rankings need not match.</p>
+<h4 id="guide--pitfalls-diagnostics-and-tradeoffs">Pitfalls, diagnostics, and tradeoffs<a class="heading-anchor" href="#guide--pitfalls-diagnostics-and-tradeoffs" aria-label="Link to this section">#</a></h4>
+<div class="table-wrap"><table><thead><tr>
+<th>Pitfall</th>
+<th>Consequence</th>
+<th>Better practice</th>
+</tr></thead><tbody>
+<tr>
+<td>Choosing depth on the test set</td>
+<td>Optimistic evaluation</td>
+<td>Tune in validation/CV</td>
+</tr>
+<tr>
+<td>Reporting only impurity importance</td>
+<td>Biased ranking</td>
+<td>Add held-out permutation importance</td>
+</tr>
+<tr>
+<td>Treating importance as direction</td>
+<td>Magnitude has no sign</td>
+<td>Use effect-oriented tools and domain analysis</td>
+</tr>
+<tr>
+<td>Leaving resource use unbounded</td>
+<td>Slow or memory-heavy fit</td>
+<td>Start with modest <code>n_estimators</code> and <code>n_jobs</code></td>
+</tr>
+<tr>
+<td>Assuming trees need no preprocessing ever</td>
+<td>Missing values/categories still require handling</td>
+<td>Use a reproducible preprocessing pipeline</td>
+</tr>
+</tbody></table></div>
+<p>More trees usually reduce Monte Carlo variation but cost CPU and memory. <code>min_samples_leaf</code> is often a more interpretable smoothness control than depth alone.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Work in the <a href="python-38.html#learner">Day 38 learner notebook</a>.</li>
+<li>Then consult the <a href="python-38.html#solution-1">Day 38 solution</a>.</li>
+<li>Continue to <a href="python-39.html#guide">Day 39; Gradient Boosting</a>.</li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<pre class="highlighted-code"><code class="language-text">Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day38_tree_models_random_forest.md`
+- learner artifact: `python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-37`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="learner--cell-1--day-38-tree-based-models-decision-trees-random-forests">Day 38 — Tree-based models: Decision Trees &amp; Random Forests<a class="heading-anchor" href="#learner--cell-1--day-38-tree-based-models-decision-trees-random-forests" aria-label="Link to this section">#</a></h3>
+<p>Objectives:</p>
+<ul>
+<li>Train tree and RF.</li>
+<li>Feature importances.</li>
+<li>Overfitting control (max_depth, min_samples_*).</li>
+</ul></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line">X<span class="syntax-punctuation">,</span>y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span>Xte<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">,</span>yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span>y<span class="syntax-punctuation">,</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span>ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span>yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="learner--cell-3--how-to-use-this-notebook">How to use this notebook<a class="heading-anchor" href="#learner--cell-3--how-to-use-this-notebook" aria-label="Link to this section">#</a></h4>
+<p>Select the <code>Python (ds60sqlpy)</code> kernel, start at the first cell, and write each prediction before execution. Keep attempts in the provided scratch cell or new cells. Restart the kernel and run from the top before calling the work reproducible.</p>
+<h4 id="learner--cell-3--concept-lab-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept lab — tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#learner--cell-3--concept-lab-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
+<h5 id="learner--cell-3--mental-model">Mental model<a class="heading-anchor" href="#learner--cell-3--mental-model" aria-label="Link to this section">#</a></h5>
+<p>A decision tree recursively partitions feature space. Each split asks a threshold question chosen to reduce impurity; each leaf stores a local prediction. Deep trees can represent fine interactions but also isolate noise. Depth, leaf size, and pruning control that capacity.</p>
+<p>A random forest trains many trees on bootstrapped rows while considering subsets of features. Averaging decorrelated trees reduces variance. Impurity importance describes split usage inside the fitted forest; held-out permutation importance measures score loss when one feature&#x27;s association is broken. Neither establishes causality.</p>
+<h5 id="learner--cell-3--read-the-api-before-running-it">Read the API before running it<a class="heading-anchor" href="#learner--cell-3--read-the-api-before-running-it" aria-label="Link to this section">#</a></h5>
+<ul>
+<li><strong><code>DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)</code>:</strong> sets capacity controls before fitting and exposes tree-specific train/validation gaps.</li>
+<li><strong><code>RandomForestClassifier(n_estimators=..., random_state=...)</code>:</strong> averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.</li>
+<li><strong><code>permutation_importance(model, X_valid, y_valid, ...)</code>:</strong> measures held-out score change under repeated feature shuffles.</li>
+</ul>
+<p>For every call, identify input data, learned state, returned value, and a check that can fail. That habit prevents a successful cell from being mistaken for a correct analysis.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h5 id="learner--cell-4--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A — make the depth-versus-generalization gap visible<a class="heading-anchor" href="#learner--cell-4--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
+<p><strong>Predict first:</strong> write down the expected shape, type, ordering, or direction of the result. Then run the next cell.</p>
+<p><strong>Assumption:</strong> The validation split represents future cases and was not used to choose unlimited alternatives.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> depth <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    tree <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>depth<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3801</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    tree<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">train</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">                  <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><p><strong>Expected observation:</strong> Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.</p>
+<p>Do not force exact equality for estimates based on samples. Record the seed, sample size, tolerance, and metric where they matter.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><h5 id="learner--cell-7--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B — test a deliberately useless noise feature<a class="heading-anchor" href="#learner--cell-7--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
+<p>This example changes one important condition. Predict how and why the result should differ from Example A.</p>
+<p><strong>Assumption:</strong> The model&#x27;s held-out score is good enough that score perturbations are interpretable.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">3802</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>X<span class="syntax-punctuation">,</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span>X<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">,</span> y_valid <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line">forest <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">80</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">forest<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span></span>
+<span class="source-line">importance <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span></span>
+<span class="source-line">    forest<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">3802</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span></span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">noise_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-string">&quot;</span><span class="syntax-string">best_importance</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> importance<span class="syntax-operator">.</span>importances_mean<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p><strong>Expected observation:</strong> The random noise feature should have importance near zero, while at least one real feature matters more.</p>
+<h5 id="learner--cell-9--debugging-and-practice-ramp">Debugging and practice ramp<a class="heading-anchor" href="#learner--cell-9--debugging-and-practice-ramp" aria-label="Link to this section">#</a></h5>
+<p><strong>Common mistake:</strong> Treating <code>feature_importances_</code> as causal effect or as reliable when correlated features can substitute for one another.</p>
+<p><strong>Diagnostic:</strong> Compare train/validation scores, tree depth/leaf counts, repeated permutation intervals, and a synthetic noise feature.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Stage</th>
+<th>Action</th>
+<th>Evidence</th>
+</tr></thead><tbody>
+<tr>
+<td>Recall</td>
+<td>Define tree splits, ensemble variance reduction, and held-out importance in your own words and identify its input and output.</td>
+<td>A definition that does not rely on the library name.</td>
+</tr>
+<tr>
+<td>Predict</td>
+<td>Predict the examples before execution, including shape and direction.</td>
+<td>A written prediction and an explanation of any mismatch.</td>
+</tr>
+<tr>
+<td>Implement</td>
+<td>Recreate one example with a changed but valid input.</td>
+<td>Code plus an assertion for the central invariant.</td>
+</tr>
+<tr>
+<td>Debug</td>
+<td>Trigger the named mistake or edge case intentionally.</td>
+<td>The observed symptom and the smallest diagnostic that isolates it.</td>
+</tr>
+<tr>
+<td>Transfer</td>
+<td>Apply the idea to a different local dataset or decision.</td>
+<td>A stated assumption, metric, and reason the method is suitable.</td>
+</tr>
+</tbody></table></div>
+<p><strong>Stop condition:</strong> Do not interpret importance from a poorly performing model or from the same rows used to fit it.</p>
+<p>Continue to the numbered practice only after you can explain both examples without rereading their code.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-10--learner-exercises-and-progressive-hints">Learner exercises and progressive hints<a class="heading-anchor" href="#learner--cell-10--learner-exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Plot tree depth versus accuracy.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
+<ol>
+<li>Inspect feature importances and discuss their reliability.</li>
+</ol>
+<p><strong>Verify:</strong> Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
+<h5 id="learner--cell-10--progressive-hints">Progressive hints<a class="heading-anchor" href="#learner--cell-10--progressive-hints" aria-label="Link to this section">#</a></h5>
+<ol>
+<li>Record training and validation accuracy for each depth. Treat <code>None</code> as an unbounded depth label rather than a numeric x-coordinate.</li>
+<li>Compare <code>feature_importances_</code> with <code>sklearn.inspection.permutation_importance</code> on held-out data. Preserve feature names from <code>load_breast_cancer().feature_names</code>.</li>
+</ol>
+<h5 id="learner--cell-10--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#learner--cell-10--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
+<p>Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.</p>
+<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
+<ol>
+<li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
+</ol>
+<p><strong>Verify:</strong> Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
+<ol>
+<li><strong>Out-of-bag reasoning:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance. <strong>Progressive hint:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</li>
+</ol>
+<p><strong>Verify:</strong> Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
+<ol>
+<li><strong>Imbalance debugging:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>. <strong>Progressive hint:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</li>
+</ol>
+<p><strong>Verify:</strong> Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
+<ol>
+<li><strong>Correlated-importance edge case:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change. <strong>Progressive hint:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</li>
+</ol>
+<p><strong>Verify:</strong> Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
+<p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-comment"># Expanded mastery lab scratch space</span></span>
+<span class="source-line"><span class="syntax-comment">#</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep the official solution closed until you have attempted each task.</span></span>
+<span class="source-line"><span class="syntax-comment"># Add small assertions, shape checks, or metric comparisons as evidence.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 3 — Pruning implementation</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 4 — Out-of-bag reasoning</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 5 — Imbalance debugging</span></span>
+<span class="source-line"></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Practice 6 — Correlated-importance edge case</span></span>
+<span class="source-line"></span></code></pre>
+</article></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--day-38-solutions-decision-trees-and-random-forests">Day 38: Solutions: Decision Trees and Random Forests<a class="heading-anchor" href="#solution-1--day-38-solutions-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
+<p>We train a shallow decision tree and a random forest, control overfitting with depth/leaf parameters, and compare feature importances (impurity vs permutation).</p>
+<p>Contents</p>
+<ul>
+<li>Exercise 1: Tree depth vs accuracy</li>
+<li>Exercise 2: Feature importances and their reliability</li>
+</ul>
+<hr>
+<p>Setup</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
+<span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
+<span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
+<span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier
+<span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
+Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Worked reference for Exercise 1; Depth vs accuracy</p>
+<pre class="highlighted-code"><code class="language-python">depths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span>
+accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> depths<span class="syntax-punctuation">:</span>
+    dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>d<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+    dt<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+    accs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>depths<span class="syntax-punctuation">,</span> accs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Interpretation</p>
+<ul>
+<li>Very shallow trees underfit; very deep trees may overfit; pick a sweet spot via validation</li>
+</ul>
+<p>Random forest baseline</p>
+<pre class="highlighted-code"><code class="language-python">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">300</span><span class="syntax-punctuation">,</span> min_samples_leaf<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
+rf<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
+rf_acc <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span>
+rf_acc</code></pre>
+<p>Worked reference for Exercise 2; Feature importances (impurity vs permutation)</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Impurity-based (built-in)</span>
+impurity_imp <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>feature_importances_
+
+<span class="syntax-comment"># Permutation-based (on held-out data)</span>
+perm <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+perm_imp <span class="syntax-operator">=</span> perm<span class="syntax-operator">.</span>importances_mean
+
+<span class="syntax-comment"># Compare top features</span>
+<span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+order_imp <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>impurity_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+order_perm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>perm_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span>
+order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
+<p>Notes</p>
+<ul>
+<li>Impurity importances can be biased toward high-cardinality/continuous features</li>
+<li>Prefer permutation importance on a validation set for model-agnostic insight</li>
+</ul>
+<p>Takeaways</p>
+<ul>
+<li>Use ensembles (RF) for stronger performance and robustness</li>
+<li>Control overfitting via max_depth/min_samples_leaf and validate choices</li>
+</ul>
+<hr>
+<p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
+<h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
+<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<ol>
+<li><strong><code>DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)</code>:</strong> sets capacity controls before fitting and exposes tree-specific train/validation gaps.</li>
+<li><strong><code>RandomForestClassifier(n_estimators=..., random_state=...)</code>:</strong> averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.</li>
+<li><strong><code>permutation_importance(model, X_valid, y_valid, ...)</code>:</strong> measures held-out score change under repeated feature shuffles.</li>
+<li><strong>Verification:</strong> Compare the result with an independent invariant, baseline, or failure case before interpreting it.</li>
+</ol>
+<p><strong>Why this approach is appropriate:</strong> Capacity diagnostics address overfitting first; held-out perturbation then asks how predictive information is distributed.</p>
+<p><strong>Useful alternative:</strong> Gradient boosting can reduce bias sequentially, while a pruned single tree may be easier to explain.</p>
+<p><strong>Trade-off:</strong> More trees improve stability at computation cost; deeper trees increase interaction capacity and overfitting risk.</p>
+<p><strong>Edge case to test:</strong> Tiny classes, duplicated/correlated features, missing values, and high-cardinality identifiers can distort splits and importance.</p>
+<p><strong>Evidence of correctness:</strong> Report train and held-out scores across capacity settings, set seeds and <code>n_jobs</code>, test a noise feature, and include variability for permutation importance.</p>
+<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
+<h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Plot tree depth versus accuracy.</p>
+<p><strong>How to reason about it:</strong> Plot training and validation accuracy together across depth. An unbounded tree is a distinct setting, and one split is not enough to separate true capacity effects from sampling noise.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Inspect feature importances and discuss their reliability.</p>
+<p><strong>How to reason about it:</strong> Impurity importance is fast but biased toward high-cardinality and frequently split features. Compare held-out permutation importance, retain names, and discuss correlated-feature masking.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<p><strong>Verify:</strong> Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
+<h5 id="solution-1--exercise-3-pruning-implementation">Exercise 3: Pruning implementation<a class="heading-anchor" href="#solution-1--exercise-3-pruning-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation.</p>
+<p><strong>Reasoning before implementation:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</p>
+<p>Call <code>cost_complexity_pruning_path</code> on the current training fold, fit a tree for a bounded subset of alphas, and compare mean plus spread of validation scores. Very small alpha retains a complex tree; sufficiently large alpha collapses it toward the root.</p>
+<p>If the path is computed once using the entire dataset before CV, the candidate set itself has seen validation rows. A nested search or a fixed, documented alpha grid provides the cleanest evaluation.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
+<h5 id="solution-1--exercise-4-out-of-bag-reasoning">Exercise 4: Out-of-bag reasoning<a class="heading-anchor" href="#solution-1--exercise-4-out-of-bag-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.</p>
+<p><strong>Reasoning before implementation:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</p>
+<p>OOB evaluation reuses training data efficiently and can support fast iteration, but it is not a final untouched test. Confirm that bootstrapping is enabled and use enough trees so each row receives many OOB votes.</p>
+<p>Large discrepancies between OOB and held-out results can reveal distribution shift, grouping leakage, time ordering, or insufficient forest size. Do not average them into one reassuring number; investigate the boundary mismatch.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
+<h5 id="solution-1--exercise-5-imbalance-debugging">Exercise 5: Imbalance debugging<a class="heading-anchor" href="#solution-1--exercise-5-imbalance-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>.</p>
+<p><strong>Reasoning before implementation:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</p>
+<p>Class weights change the fitting objective, not merely the report. They can improve minority recall while reducing precision or overall accuracy. Evaluate both classes and use the metric tied to the real error cost.</p>
+<p>If probability quality matters, assess calibration after weighting. Never oversample or compute weights using the final holdout labels.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
+<h5 id="solution-1--exercise-6-correlated-importance-edge-case">Exercise 6: Correlated-importance edge case<a class="heading-anchor" href="#solution-1--exercise-6-correlated-importance-edge-case" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.</p>
+<p><strong>Reasoning before implementation:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</p>
+<p>Correlated substitutes let the model recover from permuting only one column. Use domain-aware grouped permutation, conditional methods, or report the correlation cluster together. SHAP and impurity scores also require careful interpretation under dependence.</p>
+<p>An importance score answers how this fitted model used available inputs under a particular perturbation, not what would happen if the real-world feature were intervened upon.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Jupyter notebook</h2>
+            <p class="artifact-path"><code>python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.ipynb</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day38_tree_models_random_forest/day38_solutions.ipynb">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Jupyter notebook"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-38-solutions-decision-trees-random-forests">Day 38 — Solutions: Decision Trees &amp; Random Forests<a class="heading-anchor" href="#solution-2--cell-1--day-38-solutions-decision-trees-random-forests" aria-label="Link to this section">#</a></h3>
+<p>Depth vs accuracy and feature importances (impurity vs permutation).</p></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 1</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> RandomForestClassifier</span>
+<span class="source-line"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance</span>
+<span class="source-line"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np</span>
+<span class="source-line"></span>
+<span class="source-line">X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 2</div><h4 id="solution-2--cell-3--exercise-1-depth-vs-accuracy-decisiontree">Exercise 1 — Depth vs accuracy (DecisionTree)<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-depth-vs-accuracy-decisiontree" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 2</div><pre class="source-code language-python"><code><span class="source-line">depths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line"><span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> depths<span class="syntax-punctuation">:</span></span>
+<span class="source-line">    dt <span class="syntax-operator">=</span> DecisionTreeClassifier<span class="syntax-punctuation">(</span>max_depth<span class="syntax-operator">=</span>d<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">    dt<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">    accs<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>dt<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>depths<span class="syntax-punctuation">,</span> accs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 3</div><h4 id="solution-2--cell-5--randomforest-baseline">RandomForest baseline<a class="heading-anchor" href="#solution-2--cell-5--randomforest-baseline" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line">rf <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>n_estimators<span class="syntax-operator">=</span><span class="syntax-number">300</span><span class="syntax-punctuation">,</span> min_samples_leaf<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf_acc <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span></span>
+<span class="source-line">rf_acc</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 4</div><h4 id="solution-2--cell-7--exercise-2-feature-importances-impurity-vs-permutation">Exercise 2 — Feature importances (impurity vs permutation)<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-feature-importances-impurity-vs-permutation" aria-label="Link to this section">#</a></h4></article>
+<article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line">impurity_imp <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>feature_importances_</span>
+<span class="source-line">perm <span class="syntax-operator">=</span> permutation_importance<span class="syntax-punctuation">(</span>rf<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">,</span> n_repeats<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">perm_imp <span class="syntax-operator">=</span> perm<span class="syntax-operator">.</span>importances_mean</span>
+<span class="source-line">order_imp  <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>impurity_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">order_perm <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>argsort<span class="syntax-punctuation">(</span>perm_imp<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span></span>
+<span class="source-line">order_imp<span class="syntax-punctuation">,</span> order_perm</span></code></pre>
+</article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 5</div><hr>
+<h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
+<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
+<h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Plot tree depth versus accuracy.</p>
+<p><strong>How to reason about it:</strong> Plot training and validation accuracy together across depth. An unbounded tree is a distinct setting, and one split is not enough to separate true capacity effects from sampling noise.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Inspect feature importances and discuss their reliability.</p>
+<p><strong>How to reason about it:</strong> Impurity importance is fast but biased toward high-cardinality and frequently split features. Compare held-out permutation importance, retain names, and discuss correlated-feature masking.</p>
+<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
+<h5 id="solution-2--cell-9--exercise-3-pruning-implementation">Exercise 3 — Pruning implementation<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-pruning-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation.</p>
+<p><strong>Reasoning before implementation:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</p>
+<p>Call <code>cost_complexity_pruning_path</code> on the current training fold, fit a tree for a bounded subset of alphas, and compare mean plus spread of validation scores. Very small alpha retains a complex tree; sufficiently large alpha collapses it toward the root.</p>
+<p>If the path is computed once using the entire dataset before CV, the candidate set itself has seen validation rows. A nested search or a fixed, documented alpha grid provides the cleanest evaluation.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-9--exercise-4-out-of-bag-reasoning">Exercise 4 — Out-of-bag reasoning<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-out-of-bag-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.</p>
+<p><strong>Reasoning before implementation:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</p>
+<p>OOB evaluation reuses training data efficiently and can support fast iteration, but it is not a final untouched test. Confirm that bootstrapping is enabled and use enough trees so each row receives many OOB votes.</p>
+<p>Large discrepancies between OOB and held-out results can reveal distribution shift, grouping leakage, time ordering, or insufficient forest size. Do not average them into one reassuring number; investigate the boundary mismatch.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-9--exercise-5-imbalance-debugging">Exercise 5 — Imbalance debugging<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-imbalance-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>.</p>
+<p><strong>Reasoning before implementation:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</p>
+<p>Class weights change the fitting objective, not merely the report. They can improve minority recall while reducing precision or overall accuracy. Evaluate both classes and use the metric tied to the real error cost.</p>
+<p>If probability quality matters, assess calibration after weighting. Never oversample or compute weights using the final holdout labels.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
+<h5 id="solution-2--cell-9--exercise-6-correlated-importance-edge-case">Exercise 6 — Correlated-importance edge case<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-correlated-importance-edge-case" aria-label="Link to this section">#</a></h5>
+<p><strong>Prompt:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.</p>
+<p><strong>Reasoning before implementation:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</p>
+<p>Correlated substitutes let the model recover from permuting only one column. Use domain-aware grouped permutation, conditional methods, or report the correlation cluster together. SHAP and impurity scores also require careful interpretation under dependence.</p>
+<p>An importance score answers how this fitted model used available inputs under a particular perturbation—not what would happen if the real-world feature were intervened upon.</p>
+<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p></article></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+
+Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
+Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:
+- guide: `python/ds-60day/companion-guides/day38_tree_models_random_forest.md`
+- learner artifact: `python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb`
+
+Treat me as a beginner except for these direct catalog prerequisites:
+`python-37`. Do not assume knowledge beyond them or skip the
+guide&#x27;s declared setup boundary. Do not open or quote anything under
+`solutions/` unless I explicitly ask after an honest attempt. First
+explain one concept in plain language and show a tiny example. Then ask
+me to predict what happens before I run code.
+Give me one bounded task at a time and wait for my code, output, error,
+or written reasoning. If I am stuck, reveal only one rung of a
+progressive hint ladder at a time.
+
+Run or inspect my learner artifact when safe, distinguish observed
+evidence from inference, and help me diagnose tracebacks instead of
+replacing my work. Finish with two or three retrieval questions and
+one transfer task.
+
+Done when I can explain the core mechanism without notes, complete one
+fresh attempt without copied solution code, produce the guide&#x27;s stated
+verification evidence from a clean run, answer the retrieval questions,
+and explain how the transfer task changes the assumptions. A cell that
+merely ran is not evidence of mastery.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-37.html"><small>Previous lesson</small><strong>python-37</strong><span>Regularization Linear Models</span></a>
+        <a class="nav-card next" href="python-39.html"><small>Next lesson</small><strong>python-39</strong><span>Gradient Boosting XGBoost LightGBM</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-38";
+    const LEARNER_PATH = "python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

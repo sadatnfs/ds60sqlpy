@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-055",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict whether a matching IP is enough for a DNS certificate.",
+      "expected": "The requested name must satisfy certificate identity validation."
+    },
+    {
+      "exercise": 2,
+      "task": "Locate the TLS termination point.",
+      "expected": "The component that decrypts the client connection."
+    },
+    {
+      "exercise": 3,
+      "task": "Design a no-secret TLS evidence record.",
+      "expected": "Names, certificate metadata and status without private key bytes."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose certificate mismatch separately from 404.",
+      "expected": "Identity validation versus HTTP routing/content."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why base64 Secret data is not encrypted protection.",
+      "expected": "Encoding is reversible representation, not confidentiality."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan a two-hop trust policy.",
+      "expected": "Client-facing identity and upstream identity are both explicit."
+    }
+  ]
+}

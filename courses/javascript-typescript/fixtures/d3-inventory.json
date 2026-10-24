@@ -1,0 +1,247 @@
+{
+  "schema_version": 1,
+  "library": "D3 7.9.0",
+  "capability": "actual browser preview; no backend verifier claim",
+  "references": [
+    {
+      "id": "js-043",
+      "source": "courses/javascript-typescript/lessons/js-043.js",
+      "reference": "courses/javascript-typescript/solutions/js-043_solution.js",
+      "marker": "js-043 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "40, 100 and 160 units."
+    },
+    {
+      "id": "js-044",
+      "source": "courses/javascript-typescript/lessons/js-044.js",
+      "reference": "courses/javascript-typescript/solutions/js-044_solution.js",
+      "marker": "js-044 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Two circles after changing three records to two."
+    },
+    {
+      "id": "js-045",
+      "source": "courses/javascript-typescript/lessons/js-045.js",
+      "reference": "courses/javascript-typescript/solutions/js-045_solution.js",
+      "marker": "js-045 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "The node for A remains the same object."
+    },
+    {
+      "id": "js-046",
+      "source": "courses/javascript-typescript/lessons/js-046.js",
+      "reference": "courses/javascript-typescript/solutions/js-046_solution.js",
+      "marker": "js-046 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "0 maps to 40, 5 to 320 and 10 to 600."
+    },
+    {
+      "id": "js-047",
+      "source": "courses/javascript-typescript/lessons/js-047.js",
+      "reference": "courses/javascript-typescript/solutions/js-047_solution.js",
+      "marker": "js-047 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "40%."
+    },
+    {
+      "id": "js-048",
+      "source": "courses/javascript-typescript/lessons/js-048.js",
+      "reference": "courses/javascript-typescript/solutions/js-048_solution.js",
+      "marker": "js-048 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Number of an empty string is 0, so prevalidation is required."
+    },
+    {
+      "id": "js-049",
+      "source": "courses/javascript-typescript/lessons/js-049.js",
+      "reference": "courses/javascript-typescript/solutions/js-049_solution.js",
+      "marker": "js-049 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Chronological order by numeric instant."
+    },
+    {
+      "id": "js-050",
+      "source": "courses/javascript-typescript/lessons/js-050.js",
+      "reference": "courses/javascript-typescript/solutions/js-050_solution.js",
+      "marker": "js-050 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "10 and 20 under the stated square-root scale."
+    },
+    {
+      "id": "js-051",
+      "source": "courses/javascript-typescript/lessons/js-051.js",
+      "reference": "courses/javascript-typescript/solutions/js-051_solution.js",
+      "marker": "js-051 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "It enters the bin whose lower edge is 2."
+    },
+    {
+      "id": "js-052",
+      "source": "courses/javascript-typescript/lessons/js-052.js",
+      "reference": "courses/javascript-typescript/solutions/js-052_solution.js",
+      "marker": "js-052 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "2, 3, 4 for the stated five-value sample."
+    },
+    {
+      "id": "js-053",
+      "source": "courses/javascript-typescript/lessons/js-053.js",
+      "reference": "courses/javascript-typescript/solutions/js-053_solution.js",
+      "marker": "js-053 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "First segment 0..2, second 2..5."
+    },
+    {
+      "id": "js-054",
+      "source": "courses/javascript-typescript/lessons/js-054.js",
+      "reference": "courses/javascript-typescript/solutions/js-054_solution.js",
+      "marker": "js-054 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "It equals current record count, not the sum of all prior counts."
+    },
+    {
+      "id": "js-055",
+      "source": "courses/javascript-typescript/lessons/js-055.js",
+      "reference": "courses/javascript-typescript/solutions/js-055_solution.js",
+      "marker": "js-055 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "It can still be the initial or intermediate value."
+    },
+    {
+      "id": "js-056",
+      "source": "courses/javascript-typescript/lessons/js-056.js",
+      "reference": "courses/javascript-typescript/solutions/js-056_solution.js",
+      "marker": "js-056 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "It remains text instead of becoming executable HTML."
+    },
+    {
+      "id": "js-057",
+      "source": "courses/javascript-typescript/lessons/js-057.js",
+      "reference": "courses/javascript-typescript/solutions/js-057_solution.js",
+      "marker": "js-057 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Values 2, 3, 4 under inclusive bounds."
+    },
+    {
+      "id": "js-058",
+      "source": "courses/javascript-typescript/lessons/js-058.js",
+      "reference": "courses/javascript-typescript/solutions/js-058_solution.js",
+      "marker": "js-058 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "100 under translation-100 and scale 2."
+    },
+    {
+      "id": "js-059",
+      "source": "courses/javascript-typescript/lessons/js-059.js",
+      "reference": "courses/javascript-typescript/solutions/js-059_solution.js",
+      "marker": "js-059 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Three nodes and two links in the small example."
+    },
+    {
+      "id": "js-060",
+      "source": "courses/javascript-typescript/lessons/js-060.js",
+      "reference": "courses/javascript-typescript/solutions/js-060_solution.js",
+      "marker": "js-060 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "5 from leaf values 2 and 3."
+    },
+    {
+      "id": "js-061",
+      "source": "courses/javascript-typescript/lessons/js-061.js",
+      "reference": "courses/javascript-typescript/solutions/js-061_solution.js",
+      "marker": "js-061 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Edges are data; force positions are a chosen visual arrangement."
+    },
+    {
+      "id": "js-062",
+      "source": "courses/javascript-typescript/lessons/js-062.js",
+      "reference": "courses/javascript-typescript/solutions/js-062_solution.js",
+      "marker": "js-062 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "The first coordinate is longitude and the second latitude."
+    },
+    {
+      "id": "js-063",
+      "source": "courses/javascript-typescript/lessons/js-063.js",
+      "reference": "courses/javascript-typescript/solutions/js-063_solution.js",
+      "marker": "js-063 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "0.1 and 0.2 with an explicit common denominator meaning."
+    },
+    {
+      "id": "js-064",
+      "source": "courses/javascript-typescript/lessons/js-064.js",
+      "reference": "courses/javascript-typescript/solutions/js-064_solution.js",
+      "marker": "js-064 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "One Canvas can draw many points without one DOM node per point."
+    },
+    {
+      "id": "js-065",
+      "source": "courses/javascript-typescript/lessons/js-065.js",
+      "reference": "courses/javascript-typescript/solutions/js-065_solution.js",
+      "marker": "js-065 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "Only records whose group isA remain."
+    },
+    {
+      "id": "js-066",
+      "source": "courses/javascript-typescript/lessons/js-066.js",
+      "reference": "courses/javascript-typescript/solutions/js-066_solution.js",
+      "marker": "js-066 D3 complete",
+      "runtime": "javascript-browser",
+      "input": "inline synthetic",
+      "no_network": true,
+      "expected": "All records total 20; groupA totals 8."
+    }
+  ]
+}

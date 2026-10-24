@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Extend the curriculum · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Extend the curriculum</h1>
+      <p class="source-path">Generated from <code>docs/curriculum-extension-playbook.md</code></p>
+    </header>
+    <article class="document"><h2 id="extend-the-curriculum">Extend the curriculum<a class="heading-anchor" href="#extend-the-curriculum" aria-label="Link to this section">#</a></h2>
+<p>A subject is a learning sequence. A runtime is the tool that executes its code. A lesson can reuse a runtime or be reading-only. All subjects join the same <code>/classroom</code> home, workspace, navigation and saved-work experience.</p>
+<p>Start with the learner&#x27;s goal and a real gap, then choose the existing content contract. Do not register empty lessons just to reach a desired count. The add-learning-path skill turns this playbook into a reusable contributor-agent workflow.</p>
+<h3 id="choose-the-correct-registration-route">Choose the correct registration route<a class="heading-anchor" href="#choose-the-correct-registration-route" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Change</th>
+<th>Durable registration</th>
+<th>Validation</th>
+</tr></thead><tbody>
+<tr>
+<td>Extend existing Python, SQL or bridge material</td>
+<td>Existing artifacts and <code>catalog_builder.py</code>; additive legacy manifests when appropriate</td>
+<td>Legacy catalog, practice and depth gates</td>
+</tr>
+<tr>
+<td>Add a new subject to the classroom</td>
+<td><code>courses/&lt;subject&gt;/track.json</code> and <code>lessons.json</code></td>
+<td><code>ModuleCatalog</code>, subject tests and browser/runtime checks</td>
+</tr>
+<tr>
+<td>Extend one of the original five module subjects</td>
+<td>Existing plan under <code>docs/expansion/plans/</code> and its <code>courses/&lt;subject&gt;/lessons.json</code></td>
+<td>Same module gates, existing design checks</td>
+</tr>
+<tr>
+<td>Extend the statistics tutorial</td>
+<td><code>courses/statistics-ml/manifest.json</code>, chapters, examples and coverage</td>
+<td>Tutorial coverage, numerical examples and rendering</td>
+</tr>
+<tr>
+<td>Add a new execution language or external operation</td>
+<td>Reviewed backend adapter, profile and image in addition to content</td>
+<td>Actual runtime success, failure, cleanup and persistence evidence</td>
+</tr>
+</tbody></table></div>
+<p>The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark. Their plans supply live route metadata; authored admission still comes from <code>lessons.json</code>. Additive subjects use <code>track.json</code>. Do not migrate an existing subject between these contracts as an incidental edit.</p>
+<p>The statistics loader is currently specific to that book. A different tutorial book requires a deliberate loader/schema extension and tests, or a proposal kept outside active registration until supported. Do not assume any arbitrary <code>manifest.json</code> is automatically discovered.</p>
+<h3 id="design-a-useful-progression">Design a useful progression<a class="heading-anchor" href="#design-a-useful-progression" aria-label="Link to this section">#</a></h3>
+<p>Define the starting knowledge, observable independent project and prerequisites. Build the shortest sequence that teaches the mechanisms needed for that project:</p>
+<ol>
+<li>Orient the learner: where code lives, what Run does, where output appears, and how to read an ordinary error.</li>
+<li>Teach values, representations, control flow or query composition with small traces and exact observations.</li>
+<li>Introduce abstraction, data structures, contracts, state and error handling.</li>
+<li>Connect multiple pieces through tests, debugging, files or bounded data.</li>
+<li>Explain performance, concurrency, ownership or distributed semantics where they matter to the subject.</li>
+<li>Finish with an independently designed project and explicit tradeoffs, limitations and recovery behavior.</li>
+</ol>
+<p>A beginner does not need every advanced topic immediately. Cross-subject prerequisites should name stable IDs, not hide a whole language inside a single introductory lesson. See the skill&#x27;s progression reference for Python, SQL, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript, D3, Scala/Spark, Docker and Kubernetes networking examples.</p>
+<h3 id="author-and-integrate-a-module">Author and integrate a module<a class="heading-anchor" href="#author-and-integrate-a-module" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="implementation/ADDING_A_MODULE.md.html">ADDING_A_MODULE.md</a> for exact route, manifest, variant and runtime boundaries. Inspect an existing subject and the loader instead of guessing fields. There is no universal scaffold command in this repository. Create only the files needed for the chosen subject and use an existing subject&#x27;s documented authoring command only for that subject.</p>
+<p>Write the self-contained guide, learner artifact, reference and explanatory solution under <code>courses/&lt;subject&gt;/</code>. Define vocabulary, show worked examples, include expected observations and misconceptions, and provide progressive practice. Reading-only practice uses reasoning and a separate explanation. The statistics tutorial has no exercise quota or hidden answer gate.</p>
+<p>Preserve IDs, variant aliases and state ownership. Add accessible subject colors and a text label to the existing UI; do not add another public page. Review the declared runtime before promising a Run action. A syntax lexer or file extension does not install a compiler.</p>
+<h3 id="legacy-catalog-extensions">Legacy catalog extensions<a class="heading-anchor" href="#legacy-catalog-extensions" aria-label="Link to this section">#</a></h3>
+<p>Use <code>curriculum/extensions/&lt;subject&gt;.json</code> only when deliberately extending the legacy catalog contract. <a href="examples/curriculum-extension.json.html">The inactive example</a> shows its schema. It is not a template for modern <code>track.json</code>/<code>lessons.json</code> module registration and does not assert that its referenced files exist.</p>
+<p>Legacy manifests use <code>schema_version: 1</code>, <code>tracks</code>, complete <code>lessons</code>, and optional <code>learning_paths</code>. Their runner and allowed suffixes come from <code>src/ds60sqlpy/curriculum_framework.py</code>. Preserve historical track/day pairs, IDs and the acyclic prerequisite graph. Add new legacy IDs to <code>curriculum/practice_expansion.json</code> with baseline zero and target six; do not change the historical baseline. Do not add module or tutorial IDs to that registry simply because they are new lessons.</p>
+<p>The legacy capability descriptors can differ from module workers. Existing C++ and Scala module execution does not imply that a legacy extension entry using the same language has its own adapter. Report the capability of the actual route, not the availability of a different route&#x27;s compiler.</p>
+<h3 id="verify-and-publish">Verify and publish<a class="heading-anchor" href="#verify-and-publish" aria-label="Link to this section">#</a></h3>
+<p>From a prepared development environment at the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/check_modules.py
+python scripts/normalize_lesson_prose.py --write
+make generate
+python scripts/normalize_lesson_prose.py
+python scripts/check_content_rendering.py
+python scripts/course.py validate
+python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
+node scripts/check_classroom_ui.mjs</code></pre>
+<p>Use the documented subject authoring command before this sequence where one exists. Review all generated changes. Test changed reference programs and misconceptions in the intended worker; use a disposable classroom project for writes. Verify guide rendering, source loading, explicit solution reveal, subject/variant switching, saved drafts, result history and fresh-container restoration. Check read-only tutor discovery when registration changes.</p>
+<p>Keep first-download preparation, offline execution and optional external resources distinct. Record exact checks and unresolved platform limits. <a href="validation.md.html">Validation</a> describes the grouped parallel suite and CI gates. A count check, build or reference execution alone does not establish a complete learning experience or independent learner competence.</p></article>
+  </main>
+</body>
+</html>

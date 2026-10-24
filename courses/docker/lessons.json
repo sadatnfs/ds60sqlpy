@@ -1,0 +1,510 @@
+{
+  "schema_version": 1,
+  "track_id": "docker",
+  "lessons": [
+    {
+      "id": "docker-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-001.md",
+      "source_path": "courses/docker/lessons/docker-001.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-002",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-002.md",
+      "source_path": "courses/docker/lessons/docker-002.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-003",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-003.md",
+      "source_path": "courses/docker/lessons/docker-003.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-004",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-004.md",
+      "source_path": "courses/docker/lessons/docker-004.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-005",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-005.md",
+      "source_path": "courses/docker/lessons/docker-005.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-006",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-006.md",
+      "source_path": "courses/docker/lessons/docker-006.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-007",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-007.md",
+      "source_path": "courses/docker/lessons/docker-007.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-008",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-008.md",
+      "source_path": "courses/docker/lessons/docker-008.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-009",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-009.md",
+      "source_path": "courses/docker/lessons/docker-009.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-010",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-010.md",
+      "source_path": "courses/docker/lessons/docker-010.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-011",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-011.md",
+      "source_path": "courses/docker/lessons/docker-011.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-012",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-012.md",
+      "source_path": "courses/docker/lessons/docker-012.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-013",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-013.md",
+      "source_path": "courses/docker/lessons/docker-013.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-014",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-014.md",
+      "source_path": "courses/docker/lessons/docker-014.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-015",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-015.md",
+      "source_path": "courses/docker/lessons/docker-015.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-016",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-016.md",
+      "source_path": "courses/docker/lessons/docker-016.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-017",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-017.md",
+      "source_path": "courses/docker/lessons/docker-017.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-018",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-018.md",
+      "source_path": "courses/docker/lessons/docker-018.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-019",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-019.md",
+      "source_path": "courses/docker/lessons/docker-019.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-020",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-020.md",
+      "source_path": "courses/docker/lessons/docker-020.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-021",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-021.md",
+      "source_path": "courses/docker/lessons/docker-021.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-022",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-022.md",
+      "source_path": "courses/docker/lessons/docker-022.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-023",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-023.md",
+      "source_path": "courses/docker/lessons/docker-023.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-024",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-024.md",
+      "source_path": "courses/docker/lessons/docker-024.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-025",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-025.md",
+      "source_path": "courses/docker/lessons/docker-025.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-026",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-026.md",
+      "source_path": "courses/docker/lessons/docker-026.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-027",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-027.md",
+      "source_path": "courses/docker/lessons/docker-027.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-028",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-028.md",
+      "source_path": "courses/docker/lessons/docker-028.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-029.md",
+      "source_path": "courses/docker/lessons/docker-029.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-030.md",
+      "source_path": "courses/docker/lessons/docker-030.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-031",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-031.md",
+      "source_path": "courses/docker/lessons/docker-031.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-032",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-032.md",
+      "source_path": "courses/docker/lessons/docker-032.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-033",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-033.md",
+      "source_path": "courses/docker/lessons/docker-033.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-034",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-034.md",
+      "source_path": "courses/docker/lessons/docker-034.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-035",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-035.md",
+      "source_path": "courses/docker/lessons/docker-035.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-036",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-036.md",
+      "source_path": "courses/docker/lessons/docker-036.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-037",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-037.md",
+      "source_path": "courses/docker/lessons/docker-037.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-038",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-038.md",
+      "source_path": "courses/docker/lessons/docker-038.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-039",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-039.md",
+      "source_path": "courses/docker/lessons/docker-039.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-040",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-040.md",
+      "source_path": "courses/docker/lessons/docker-040.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-041",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-041.md",
+      "source_path": "courses/docker/lessons/docker-041.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "docker-042",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/docker/guides/docker-042.md",
+      "source_path": "courses/docker/lessons/docker-042.md",
+      "solution_paths": [
+        "courses/docker/solutions/docker-042_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

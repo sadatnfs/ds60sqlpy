@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cpp-020: explanations and reference observations · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cpp-020: explanations and reference observations</h1>
+      <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-020_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="cpp-020-explanations-and-reference-observations">cpp-020: explanations and reference observations<a class="heading-anchor" href="#cpp-020-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
+<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
+<p>A template describes a family of functions parameterized by types. Deduction selects a type from arguments. A concept is a compile-time requirement that determines which template candidates are valid. A constraint improves the interface boundary, but it does not automatically prove arithmetic safety.</p>
+<h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Template deduction happens before any generated function runs. Equal int arguments select one specialization; int and long long arguments can produce conflicting deductions because this signature asks for one T. A concept rejects categories that lack the intended operations, often near the call site. It cannot make every admitted value safe. The overflow check in later lessons is still needed even though integral&lt;int&gt; is true.</p>
+<h3 id="templates-and-constraints-as-interface-documentation">Templates and constraints as interface documentation<a class="heading-anchor" href="#templates-and-constraints-as-interface-documentation" aria-label="Link to this section">#</a></h3>
+<p>A function template describes a family of functions parameterized by types or values. The compiler instantiates the needed specialization from a call. Generic syntax alone does not explain what operations are valid for a type, so constraints can make the intended domain visible before a deeply nested implementation error appears.</p>
+<p>The integral constraint says that the type belongs to the language/library concept for integral types. The complete program instantiates identity_sum for integers and checks2+3=5. The second program uses static_assert to establish that double is not integral. That assertion is checked during compilation and produces no runtime branch. The actual negative exercise attempts a constrained call with double and retains the compiler diagnostic.</p>
+<p>A syntactic constraint is not the whole semantic contract. Integral addition can still overflow for signed types, and mixing signed and unsigned arguments can affect deduction or conversions. A template constrained to integral types must still state supported value ranges and any overflow policy. Concepts should not be advertised as automatic arithmetic safety or proof of all algorithm assumptions.</p>
+<p>Template argument deduction also requires compatible inputs. A function taking two values of the same template parameter may reject an int and long combination even when a programmer considers both numbers. An explicit conversion can resolve the call, but it should be deliberate because narrowing or sign changes can lose meaning. Inspect the inferred types when a call does not match expectations.</p>
+<p>Good constraints describe the weakest capabilities the implementation actually needs. Requiring a random-access container for a one-pass accumulation unnecessarily excludes useful inputs. Conversely, accepting any type while relying on an undocumented operation shifts the error into the implementation. The aim is a readable contract and useful diagnostics, followed by ordinary value-boundary tests.</p>
+<h3 id="debugging-the-contract">Debugging the contract<a class="heading-anchor" href="#debugging-the-contract" aria-label="Link to this section">#</a></h3>
+<p>If template errors are long, find the first failed constraint or mismatched deduced type rather than the final cascade. If a valid type produces a wrong numeric result, inspect values and conversions: type constraints do not prevent overflow. If an interface rejects an input range unnecessarily, compare the declared capability with the operations actually used. Do not weaken every constraint to make one call compile without reviewing the algorithm assumptions.</p>
+<h3 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-cpp">assert<span class="syntax-punctuation">(</span>identity_sum<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-operator">=</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p>Expected: Deduction selects int and the result is 5.</p>
+<h3 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-cpp"><span class="syntax-keyword">static_assert</span><span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>std<span class="syntax-operator">:</span><span class="syntax-operator">:</span>integral<span class="syntax-operator">&lt;</span><span class="syntax-keyword">double</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p>Expected: double does not satisfy this integral-only interface.</p>
+<h3 id="exercise-1-read-deduction">Exercise 1: Read deduction<a class="heading-anchor" href="#exercise-1-read-deduction" aria-label="Link to this section">#</a></h3>
+<p>Call identity_sum with int values and long long values.</p>
+<p><strong>Expected:</strong> Result types int and long long respectively.</p>
+<p><strong>Reasoning:</strong> The argument types choose template instantiations.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<h3 id="exercise-2-reject-a-category">Exercise 2: Reject a category<a class="heading-anchor" href="#exercise-2-reject-a-category" aria-label="Link to this section">#</a></h3>
+<p>Try identity_sum with two strings in a scratch file.</p>
+<p><strong>Expected:</strong> Constraint-related compile failure.</p>
+<p><strong>Reasoning:</strong> Strings do not satisfy integral.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<h3 id="exercise-3-add-a-concept">Exercise 3: Add a concept<a class="heading-anchor" href="#exercise-3-add-a-concept" aria-label="Link to this section">#</a></h3>
+<p>Constrain a function to signed_integral.</p>
+<p><strong>Expected:</strong> int accepted; unsigned rejected.</p>
+<p><strong>Reasoning:</strong> A narrower category documents intent.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<h3 id="exercise-4-repair-mixed-deduction">Exercise 4: Repair mixed deduction<a class="heading-anchor" href="#exercise-4-repair-mixed-deduction" aria-label="Link to this section">#</a></h3>
+<p>Call identity_sum(2, 3LL), then choose a deliberate common type.</p>
+<p><strong>Expected:</strong> Mixed call fails deduction; explicit long long arguments succeed.</p>
+<p><strong>Reasoning:</strong> Conflicting deductions need a policy, not an accidental conversion.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<h3 id="exercise-5-inspect-numeric-boundary">Exercise 5: Inspect numeric boundary<a class="heading-anchor" href="#exercise-5-inspect-numeric-boundary" aria-label="Link to this section">#</a></h3>
+<p>Explain why INT_MAX+1 is still unsafe for integral T=int.</p>
+<p><strong>Expected:</strong> Concept accepts int but cannot make overflow valid.</p>
+<p><strong>Reasoning:</strong> Type eligibility is distinct from value validity.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p>
+<h3 id="exercise-6-transfer-a-generic-test">Exercise 6: Transfer a generic test<a class="heading-anchor" href="#exercise-6-transfer-a-generic-test" aria-label="Link to this section">#</a></h3>
+<p>Run zero-identity tests for int and long long.</p>
+<p><strong>Expected:</strong> sum(x, 0)==x for bounded x=7 in both types.</p>
+<p><strong>Reasoning:</strong> A reusable law should be checked across admitted types.</p>
+<p><strong>Verify:</strong> Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.</p></article>
+  </main>
+</body>
+</html>

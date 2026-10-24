@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Docker: from the first container to a recoverable application · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Docker: from the first container to a recoverable application</h1>
+      <p class="source-path">Generated from <code>courses/docker/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="docker-from-the-first-container-to-a-recoverable-application">Docker: from the first container to a recoverable application<a class="heading-anchor" href="#docker-from-the-first-container-to-a-recoverable-application" aria-label="Link to this section">#</a></h2>
+<p>Run <code>./classroom</code> from the repository root and choose Docker in the unified subject directory. All 42 lessons include a detailed guide, two worked examples, six progressive evidence tasks, an answer-free worksheet and separate solutions. The classroom saves reading notes and progress. It does not execute Docker engine commands or receive a Docker socket.</p>
+<p>Start with <a href="guides/docker-001.md.html">containers, images and processes</a>. Follow the beginner sequence through a visible local build, loopback browser request and volume-preserving replacement. Continue into BuildKit, multi-stage and multi-platform builds, networking, permissions, backup/restore, resource limits, security, registries, supply-chain evidence, CI, operations and architecture.</p>
+<p>The <a href="fixtures/compose-lab/README.md.html">maintained compose-lab project</a> is a small standard-library Python app with health, public message and persistent counter endpoints. Copy it into a new learner directory before optional host practice. Its README gives exact commands, expected observations, a peer-network check, independent restore experiment and cleanup scoped to that disposable project. The first build needs the base image; prepared runs stay local and never push. Use Bash on Linux/macOS or Ubuntu inside WSL 2 on Windows.</p>
+<h3 id="lesson-route">Lesson route<a class="heading-anchor" href="#lesson-route" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Topic</th>
+<th>Stage</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/docker-001.md.html">docker-001</a></td>
+<td>Containers, images and the process model</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-002.md.html">docker-002</a></td>
+<td>The Linux engine, WSL 2 and your first inspection</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-003.md.html">docker-003</a></td>
+<td>The filesystem, writable layers and container lifetime</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-004.md.html">docker-004</a></td>
+<td>Processes, PID 1, signals and graceful shutdown</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-005.md.html">docker-005</a></td>
+<td>Dockerfile instructions and the first reproducible image</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-006.md.html">docker-006</a></td>
+<td>Build context, .dockerignore and accidental data exposure</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-007.md.html">docker-007</a></td>
+<td>Layers, cache invalidation and efficient rebuilds</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-008.md.html">docker-008</a></td>
+<td>Environment variables, command arguments and configuration</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-009.md.html">docker-009</a></td>
+<td>Ports, loopback and the first browser request</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-010.md.html">docker-010</a></td>
+<td>Logs, exit status and observation before repair</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-011.md.html">docker-011</a></td>
+<td>Compose services, projects and a complete application</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-012.md.html">docker-012</a></td>
+<td>Health checks, startup order and real readiness</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-013.md.html">docker-013</a></td>
+<td>Named volumes, bind mounts and persistence experiments</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-014.md.html">docker-014</a></td>
+<td>First capstone: build, serve, replace and explain</td>
+<td>beginner</td>
+</tr>
+<tr>
+<td><a href="guides/docker-015.md.html">docker-015</a></td>
+<td>BuildKit, cache mounts and build secrets</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-016.md.html">docker-016</a></td>
+<td>Multi-stage builds and runtime dependency boundaries</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-017.md.html">docker-017</a></td>
+<td>CPU architectures, image indexes and cross-platform builds</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-018.md.html">docker-018</a></td>
+<td>Bridge networks, service DNS and container-to-container traffic</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-019.md.html">docker-019</a></td>
+<td>Network isolation, gateways and outbound connectivity</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-020.md.html">docker-020</a></td>
+<td>Users, UID ownership and writable data paths</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-021.md.html">docker-021</a></td>
+<td>Backups, restores and proving data recovery</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-022.md.html">docker-022</a></td>
+<td>Resource limits, contention and honest performance experiments</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-023.md.html">docker-023</a></td>
+<td>Read-only filesystems, capabilities and least privilege</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-024.md.html">docker-024</a></td>
+<td>Rootless engines, user namespaces and host trust</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-025.md.html">docker-025</a></td>
+<td>Image names, digests and an offline transfer</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-026.md.html">docker-026</a></td>
+<td>Compose overrides, profiles and configuration review</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-027.md.html">docker-027</a></td>
+<td>Intermediate capstone: a recoverable two-tier teaching system</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-028.md.html">docker-028</a></td>
+<td>Registries, tags, digests and deliberate publication</td>
+<td>intermediate</td>
+</tr>
+<tr>
+<td><a href="guides/docker-029.md.html">docker-029</a></td>
+<td>Software bills of materials and image provenance</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-030.md.html">docker-030</a></td>
+<td>Vulnerability findings, patching and dependency updates</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-031.md.html">docker-031</a></td>
+<td>CI builds, test layers and artifact promotion</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-032.md.html">docker-032</a></td>
+<td>Debugging minimal images without changing the contract</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-033.md.html">docker-033</a></td>
+<td>Restart policies, failure loops and idempotent startup</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-034.md.html">docker-034</a></td>
+<td>Application migrations and durable state versioning</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-035.md.html">docker-035</a></td>
+<td>Image size, startup latency and measurement</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-036.md.html">docker-036</a></td>
+<td>Compose on one host and the limits of orchestration</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-037.md.html">docker-037</a></td>
+<td>TLS, reverse proxies and publishing responsibly</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-038.md.html">docker-038</a></td>
+<td>Incident response, disk pressure and scoped cleanup</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-039.md.html">docker-039</a></td>
+<td>Namespaces, cgroups, OCI and the runtime beneath Docker</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-040.md.html">docker-040</a></td>
+<td>Runtime secrets, configuration files and controlled disclosure</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-041.md.html">docker-041</a></td>
+<td>Scaling replicas, shared state and concurrency traps</td>
+<td>advanced</td>
+</tr>
+<tr>
+<td><a href="guides/docker-042.md.html">docker-042</a></td>
+<td>Advanced capstone: a release, recovery and teaching handoff</td>
+<td>advanced</td>
+</tr>
+</tbody></table></div>
+<h3 id="evidence-and-authoring">Evidence and authoring<a class="heading-anchor" href="#evidence-and-authoring" aria-label="Link to this section">#</a></h3>
+<p>A parsed Compose file, a successful image build, an actual HTTP response and a verified restore are different observations. Record what you actually performed. The fixture inventory lists intended cases and does not manufacture runtime acceptance. Its process-local counter lock is intentionally not a replicated database design; the scaling chapter explains that limit.</p>
+<p><a href="authoring/README.md.html">Authoring instructions</a> describe regeneration from the original chapter specifications. Preserve stable IDs, host ownership and named volumes. The course never uses a global prune as routine learner cleanup.</p></article>
+  </main>
+</body>
+</html>

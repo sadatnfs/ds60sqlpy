@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-037",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "two separately owned pinned stacks with API/controller/storage compatibility receipts",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Name server,node image,client,controller and storage/network versions needed in a receipt.",
+      "expected": "A concrete pinned stack rather than a generic latest label."
+    },
+    {
+      "exercise": 2,
+      "task": "Extract apiVersion and kind from the reviewed manifests and identify destination checks.",
+      "expected": "Every used API/feature has a server acceptance row."
+    },
+    {
+      "exercise": 3,
+      "task": "Read B with API pass but controller unavailable.",
+      "expected": "Destination not accepted; controller capability remains missing."
+    },
+    {
+      "exercise": 4,
+      "task": "Check destination marker against the independently captured source hash.",
+      "expected": "Mismatch blocks promotion even when /version succeeds."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain when source can be released and what new destination writes would change.",
+      "expected": "Source retained through the stated window; mutable-data rollback is outside this immutable fixture."
+    },
+    {
+      "exercise": 6,
+      "task": "Distinguish replacement rehearsal from in-place upgrade and production HA.",
+      "expected": "Only the exact tested stack and synthetic workload gates are claimed."
+    }
+  ]
+}

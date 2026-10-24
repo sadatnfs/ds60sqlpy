@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-033: Stateful deduplication and event identity · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-033: Stateful deduplication and event identity</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-033.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-033-stateful-deduplication-and-event-identity">spark-033: Stateful deduplication and event identity<a class="heading-anchor" href="#spark-033-stateful-deduplication-and-event-identity" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 120 minutes. Direct design prerequisites: <code>spark-032</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-033</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-033.scala.html">Scala learner</a> and <a href="../lessons/spark-033.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-033_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-033_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-033_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Bound deduplication state while distinguishing duplicate delivery from legitimate equal-valued events.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Delivery identity:</strong> The identifier of one arrival occurrence, which can differ for two deliveries of the same business event.</li>
+</ul>
+<ul>
+<li><strong>Business event identity:</strong> The key stating which logical event a delivery represents; equal measured values do not establish equal identity.</li>
+</ul>
+<ul>
+<li><strong>Watermarked deduplication:</strong> Stateful suppression of repeated keys within a declared event-time retention policy rather than an unlimited historical uniqueness index.</li>
+</ul>
+<ul>
+<li><strong>NULL-key quarantine:</strong> A separate result retaining records whose missing identity prevents trustworthy attribution or deduplication.</li>
+</ul>
+<ul>
+<li><strong>State removal evidence:</strong> Observed state-operator counters showing that entries were evicted; this limits any claim of perpetual duplicate memory.</li>
+</ul>
+<ul>
+<li><strong>Branch input accounting:</strong> The distinction between source deliveries and processing counts from multiple queries reading the same input.</li>
+</ul>
+<p>The fixture distinguishes deliveries from events. Delivery 1 represents evente 1, delivery 2 represents e2, and delivery 4 is a replay ofe 1 with the same amount and event time. Delivery 5 representse 3. All three business events happen to have amount 10. A correct event-ID deduplication keeps e1, e2, e3, for a business total of 30; deduplicating only by amount would collapse distinct events and produce an incorrect total 10.</p>
+<p>Delivery 3 has a NULL event ID and amount 99. It cannot be confidently attributed to a business event, so it enters a quarantine output with reason missing_event_id. Treating every NULL ID as one shared entity would merge unrelated unknown records. Generating a new arbitrary ID would hide the missing-identity defect. The original delivery ID remains available so the quarantine row can be reconciled with the source occurrence.</p>
+<p>The accepted branch applies a five-minute watermark to event_time and dropDuplicatesWithinWatermark on event_id. The replay arrives in a second controlled phase while the first event state is still retained. That sequencing makes the expected retained delivery explicit: the first phase has already committed e1 before the second delivers its replay. The lesson does not claim an arbitrary duplicate survivor policy when conflicting rows with the same ID arrive together in one unordered batch.</p>
+<p>Deduplication by ID also does not decide which conflicting payload is authoritative. This fixture replays the same amount and timestamp. A real event ID reused with a different amount or meaning requires a conflict/version policy, not an assumption that whichever record survives is correct. Stable identity and idempotency are data contracts in addition to the stateful operator choice.</p>
+<p>Two finite file queries read the same source. The accepted query writes watermarked deduplicated records to one Parquet sink and checkpoint. The quarantine query writes missing-ID records to its own sink and checkpoint. In the preparedSpark 4.0.1 execution, their progress input metrics count records after the respective branch filters: the first phase reports 2 for accepted identities and 1 for quarantine, not 3 for each raw file scan. The accepted metric still includes an in-horizon replay before deduplication removes it. The final ledger therefore reads the source once as a bounded batch to establish six delivery identities independently of engine metric placement. Adding metrics from arbitrary queries is not a general source-population rule; this fixture has disjoint exhaustive branches and explicit reconciliation.</p>
+<p>The third phase publishes an administrative event at 00:20. It remains in the accepted sink with amount 0 so it can advance event-time progress through the stateful operator. Filtering it out before watermarking would remove the evidence needed for that advancement. After the finite run, the business view excludes the explicit administrative ID, but the source and accepted-output ledgers continue to account for it.</p>
+<p>Actual state-operator progress must show removal of the older e1, e2, e3 entries after the watermark advances. This makes the retention boundary observable. The system no longer promises to remember every historical event ID forever. Repeated keys outside the retained horizon require a separate durable identity policy if the business needs perpetual uniqueness. The lesson deliberately does not fabricate such a guarantee from the word deduplication.</p>
+<p>The final source has six deliveries: four known-ID business deliveries including one replay, oneNULL-ID quarantine delivery, and one advancer. The accepted sink has four rows: three business events plus the advancer. The quarantine sink has one row. The difference of one known-ID delivery is explained by the in-horizon replay. The business sum is 30, while the rejected 99 never contributes. These counts make the decision ledger auditable.</p>
+<p>All source files are atomically published under fresh owned scratch, each phase finishes before the next file appears, and both queries stop in finally. The query definitions and checkpoint paths remain stable across phases. No sleeps, sockets or Kafka service are used. The output and state evidence describe this bounded retention policy and fixture, not an unlimited exactly-once guarantee for every possible source or sink.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQueryProgress</span><span class="syntax-punctuation">,</span><span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span><span class="syntax-class">Path</span><span class="syntax-punctuation">,</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>jdk<span class="syntax-punctuation">.</span><span class="syntax-class">CollectionConverters</span><span class="syntax-punctuation">.</span>_
+
+spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.streaming.stopTimeout&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;10000&quot;</span><span class="syntax-punctuation">)</span>
+ownedRoot <span class="syntax-operator">=</span> <span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createTempDirectory<span class="syntax-punctuation">(</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toAbsolutePath<span class="syntax-punctuation">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;.ds60-spark-033-&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createDirectory<span class="syntax-punctuation">(</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;input&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createDirectory<span class="syntax-punctuation">(</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;staging&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> batches <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>
+ <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:1,&quot;event_id&quot;:&quot;e1&quot;,&quot;amount&quot;:10,&quot;event_time&quot;:&quot;2024-01-01T00:01:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:2,&quot;event_id&quot;:&quot;e2&quot;,&quot;amount&quot;:10,&quot;event_time&quot;:&quot;2024-01-01T00:02:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:3,&quot;event_id&quot;:null,&quot;amount&quot;:99,&quot;event_time&quot;:&quot;2024-01-01T00:02:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:4,&quot;event_id&quot;:&quot;e1&quot;,&quot;amount&quot;:10,&quot;event_time&quot;:&quot;2024-01-01T00:01:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:5,&quot;event_id&quot;:&quot;e3&quot;,&quot;amount&quot;:10,&quot;event_time&quot;:&quot;2024-01-01T00:03:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery_id&quot;:6,&quot;event_id&quot;:&quot;__advance__&quot;,&quot;amount&quot;:0,&quot;event_time&quot;:&quot;2024-01-01T00:20:00Z&quot;}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">import</span> shutil
+<span class="syntax-keyword">import</span> os
+<span class="syntax-keyword">import</span> uuid
+
+spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.streaming.stopTimeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">10000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+owned_root <span class="syntax-operator">=</span> Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">.ds60-spark-033-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">(</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-punctuation">(</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">staging</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+batches <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
+ <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:1,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">e1</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:01:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">e2</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:02:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:3,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:null,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:99,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:02:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:4,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">e1</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:01:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:5,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">e3</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:03:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:6,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">__advance__</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-string">:0,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">2024-01-01T00:20:00Z</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span></code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> occurrences <span class="syntax-operator">=</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;e1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;e2&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;e1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;e3&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>occurrences<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>distinct<span class="syntax-punctuation">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> occurrences<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>distinct<span class="syntax-punctuation">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Equal amounts are not equal event identities&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">occurrences <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">e1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">e2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">e1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">e3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>event <span class="syntax-keyword">for</span> event<span class="syntax-punctuation">,</span>_ <span class="syntax-operator">in</span> occurrences<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>amount <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span>amount <span class="syntax-operator">in</span> occurrences<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Equal amounts are not equal event identities</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The independent collection example isolates the key choice. Event identity yields three logical events, whereas value deduplication would erase legitimate equal-valued events. A total that looks plausible is not enough to validate that identity decision.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala">assert<span class="syntax-punctuation">(</span>batches<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>_<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> batches<span class="syntax-punctuation">.</span>flatten<span class="syntax-punctuation">.</span>size <span class="syntax-operator">==</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Six source deliveries feed two independently checkpointed branches&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> batch <span class="syntax-operator">in</span> batches<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">,</span>batches<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Six source deliveries feed two independently checkpointed branches</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The prepared execution reports branch-filtered scan counts, which differ from the raw source population. Across the three phases the accepted branch reports 5 and quarantine reports 1. Their values are interpreted using the declared filters and checked against an independent six-delivery source ledger, not treated as an automatic generic accounting identity.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-classify-missing-event-identity-before-deduplication">Exercise 1: Classify missing event identity before deduplication<a class="heading-anchor" href="#exercise-1-classify-missing-event-identity-before-deduplication" aria-label="Link to this section">#</a></h4>
+<p>Add reason missing_event_id for NULL event_id and accepted otherwise, retaining delivery_id, amount and event_time.</p>
+<p><strong>Expected result/shape:</strong> Delivery 3 is quarantined; known IDs are eligible for the separate deduplication policy.</p>
+<p><strong>Verify:</strong> Construct the first streaming classification with all declared fields and verify the exact quarantine row after the first phase.</p>
+<p><strong>Progressive hint:</strong> NULL is not a shared business identity and must not be filled with an invented event ID.</p>
+<h4 id="exercise-2-define-a-bounded-event-id-stateful-operator">Exercise 2: Define a bounded event-ID stateful operator<a class="heading-anchor" href="#exercise-2-define-a-bounded-event-id-stateful-operator" aria-label="Link to this section">#</a></h4>
+<p>Filter accepted identities, drop the reason field, attach a five-minute watermark to event_time, and deduplicate within that watermark on event_id only.</p>
+<p><strong>Expected result/shape:</strong> The result remains streaming and retains delivery_id, event_id, amount, event_time. Equal amounts across distinct IDs remain distinct.</p>
+<p><strong>Verify:</strong> Assert output shape and use the explicit event_id key, then validate all retained identities through later sink checks.</p>
+<p><strong>Progressive hint:</strong> Including delivery_id in the deduplication key would prevent replay suppression.</p>
+<h4 id="exercise-3-execute-accepted-and-quarantine-branches-with-separate-checkpoints">Exercise 3: Execute accepted and quarantine branches with separate checkpoints<a class="heading-anchor" href="#exercise-3-execute-accepted-and-quarantine-branches-with-separate-checkpoints" aria-label="Link to this section">#</a></h4>
+<p>Run both first-phase branches with AvailableNow: deduplicated records to accepted-output and missing-ID records to quarantine-output. Use distinct checkpoints and bounded await/stop scopes.</p>
+<p><strong>Expected result/shape:</strong> Accepted(e1, delivery 1,10),(e2, delivery 2,10); quarantine(delivery 3, NULL, missing_event_id). The raw source has 3 rows; prepared branch input metrics report 2 accepted-eligible rows and 1 quarantine row.</p>
+<p><strong>Verify:</strong> Assert both exact output populations, branch metrics 2/1 and an independent raw batch-source count 3.</p>
+<p><strong>Progressive hint:</strong> Two queries reading one source need separate progress identities and checkpoints.</p>
+<h4 id="exercise-4-suppress-a-replay-while-retaining-distinct-equal-valued-events">Exercise 4: Suppress a replay while retaining distinct equal-valued events<a class="heading-anchor" href="#exercise-4-suppress-a-replay-while-retaining-distinct-equal-valued-events" aria-label="Link to this section">#</a></h4>
+<p>Publish the second file after the first phase terminates and run both compatible branches again. Compare the accepted business identities and their total.</p>
+<p><strong>Expected result/shape:</strong> Accepted(e1, delivery 1,10),(e2, delivery 2,10),(e3, delivery 5,10); delivery 4 replay contributes no additional row. Business total 30.</p>
+<p><strong>Verify:</strong> Assert all retained event/delivery pairs, sum 30, raw source total 5 and prepared branch metrics 2 accepted-eligible inputs versus 0 quarantined inputs for this phase.</p>
+<p><strong>Progressive hint:</strong> The first e1 delivery is already committed before its replay arrives, so survivor identity is controlled in this fixture.</p>
+<h4 id="exercise-5-observe-state-removal-and-state-the-retention-limit">Exercise 5: Observe state removal and state the retention limit<a class="heading-anchor" href="#exercise-5-observe-state-removal-and-state-the-retention-limit" aria-label="Link to this section">#</a></h4>
+<p>Publish the 00:20 advancer and run both branches. Sum actual numRowsRemoved state metrics from the accepted branch and inspect remaining state.</p>
+<p><strong>Expected result/shape:</strong> The three old business-key states are removed under the observed watermark progression; accepted output still retains their committed rows plus the advancer.</p>
+<p><strong>Verify:</strong> Assert removed state rows at least 3, unchanged business rows and one advancer output. Print actual state metrics without promising perpetual deduplication.</p>
+<p><strong>Progressive hint:</strong> State eviction removes future duplicate memory, not previously committed sink rows.</p>
+<h4 id="exercise-6-reconcile-deliveries-quarantine-replay-suppression-and-business-totals">Exercise 6: Reconcile deliveries, quarantine, replay suppression and business totals<a class="heading-anchor" href="#exercise-6-reconcile-deliveries-quarantine-replay-suppression-and-business-totals" aria-label="Link to this section">#</a></h4>
+<p>Read the six source deliveries once as a bounded batch and compare them with both sinks. Return source deliveries, known-ID deliveries, quarantine rows, accepted rows including advancer, and business total.</p>
+<p><strong>Expected result/shape:</strong> Ledger(6,5,1,4,30). One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain.</p>
+<p><strong>Verify:</strong> Assert the complete ledger and six unique delivery IDs; confirm no active queries remain before cleanup.</p>
+<p><strong>Progressive hint:</strong> Do not sum the input metrics of two branches into a unique source count.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not deduplicate by amount when identity is the contract. Do not merge all NULL IDs into one event or manufacture replacement IDs silently. A conflicting payload under one ID needs an explicit policy. Do not claim that stateful watermarked deduplication remembers every ID forever. Keep source delivery counts separate from per-query branch processing counts, and stop every owned query before removing its checkpoint or sink.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>classify</code> / <code>classify</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.dropDuplicatesWithinWatermark.html">Spark 4.0.1 dropDuplicatesWithinWatermark</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html">Spark 4.0.1 streaming deduplication,watermarks and progress</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-033: Stateful deduplication and event identity.
+Read courses/scala-spark/guides/spark-033.md and courses/scala-spark/lessons/spark-033.py;the paired sources are courses/scala-spark/lessons/spark-033.scala and courses/scala-spark/lessons/spark-033.py.
+Direct prerequisites: spark-032. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

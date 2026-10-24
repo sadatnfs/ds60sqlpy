@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-063",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Match each signal to a diagnostic question.",
+      "expected": "Events for lifecycle, logs for messages, metrics for trends, traces for request paths."
+    },
+    {
+      "exercise": 2,
+      "task": "Define a bounded incident time window.",
+      "expected": "Relevant timestamps and retained identities are explicit."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a correlated synthetic request packet.",
+      "expected": "Request ID, service, status, duration and resource revision are related carefully."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a latency metric without assuming app CPU is the cause.",
+      "expected": "Break down DNS, connection, queueing and handler phases."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain high-cardinality label risk.",
+      "expected": "Unbounded unique label values expand metric state and cost."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan privacy-aware observability for a teaching service.",
+      "expected": "No credentials or private payloads, bounded retention and useful correlation fields."
+    }
+  ]
+}

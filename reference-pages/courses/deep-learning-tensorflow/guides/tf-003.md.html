@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-003: Linear neurons and matrix contracts · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-003: Linear neurons and matrix contracts</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/guides/tf-003.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-003-linear-neurons-and-matrix-contracts">tf-003: Linear neurons and matrix contracts<a class="heading-anchor" href="#tf-003-linear-neurons-and-matrix-contracts" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 90 minutes. Direct prerequisite: <code>tf-002</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Relate a scalar slope to a batched affine layer and verify dimensions. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A linear neuron combines input features with weights. An affine neuron also adds a bias, a fixed offset shared across observations. Rather than hiding this calculation inside a neural-network layer, we will perform it directly as a matrix product. The row axis will represent observations, the middle dimension will represent input features, and the final axis will represent output coordinates.</p>
+<p>The expression X @ W + b is compact but carries several contracts. The number of columns in X must match the number of rows in W. The bias must describe output coordinates rather than input features or observation IDs. A result with a convenient shape is not enough: the first output should be recoverable from its individual multiplications and addition.</p>
+<p>This is also a model interface. A caller who changes feature order or units has changed the meaning of X without necessarily changing its shape. We will use fixed numeric fixtures so you can diagnose the difference between a dimension error that raises immediately and a semantic error that quietly returns numbers. No TensorFlow layer, optimizer or training dataset is required yet.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Feature matrix:</strong> a two-dimensional array with one observation per row and one measured feature per column.</p>
+<p><strong>Weight matrix:</strong> a map from input-feature coordinates to output coordinates, with one row per input feature.</p>
+<p><strong>Bias:</strong> an offset per output coordinate that is added to every observation; it is not one free value per input record.</p>
+<p><strong>Affine map:</strong> a matrix product plus a bias, in contrast to a purely linear map with zero offset.</p>
+<p><strong>Batch:</strong> the observations processed together; changing batch size does not create new feature coordinates.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>For X shaped (batch,features) and W shaped (features,outputs), the @ operator sums products over the shared features axis. The resulting shape is (batch,outputs). A scalar bias is suitable for one shared scalar offset. A vector bias of length outputs adds the corresponding offset to each output column. A feature-length vector is generally not the right bias.</p>
+<p>For this helper, require two nonempty matrices, matching input widths, a scalar or output-length bias, and finite values. These checks do not establish feature order or units; keep those as a separate declared schema. In a one-output model, the (batch,1) result is intentionally a column. Do not confuse that correct layer layout with the paired rank-one residual policy from the previous lesson. Each function must state its own boundary.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, select <strong>Journeys</strong>, and choose <code>tf-003</code>. Use the <code>python-core</code> worker from the <a href="../../../docs/docker-classroom.md.html">Docker classroom guide</a>. Its prepared packages run inside Docker, so the host needs no Python or TensorFlow install. Save your current attempt before putting a worked example in the coding pad. Run the complete example sequence in a fresh process, as specified below. The classroom console shows output and failures; all data here are local literals, with no downloads or service calls.</p>
+<p>The checked-in learner source remains a reusable worksheet. For optional native study, follow the <a href="../../../docs/setup/first-success.md.html">setup guide</a> and save your edited copy under <code>.learning/expansion/tf-003/</code>. The chosen interpreter must provide the lesson&#x27;s declared profile. A missing dependency is a runtime setup issue, not an invitation to install packages inside a lesson.</p>
+<h3 id="count-parameters-separately-from-observations">Count parameters separately from observations<a class="heading-anchor" href="#count-parameters-separately-from-observations" aria-label="Link to this section">#</a></h3>
+<p>With D input features and O outputs, a dense affine map has D times O kernel parameters plus O bias parameters. Processing more observations changes the number of output rows, not the number of learned parameters. In the worked three-feature, one-output case, that count is four regardless of batch size. A separate bias for each observation would instead make the model depend on record position and would not define the same reusable prediction rule.</p>
+<p>Parameter units must compensate for feature units. A coefficient of 2 per meter becomes 0.02 per centimeter: multiplying 1 meter by 2 and 100 centimeters by 0.02 gives the same contribution. Changing only the input unit without changing the corresponding coefficient changes the function. Standardization similarly belongs to the fitted prediction pipeline, not an optional display choice.</p>
+<p>For multiple outputs, derive one output column at a time from the matching weight column and bias entry. A square feature/output shape is a weak orientation fixture because a wrong transpose can still fit. Keep at least one rectangular example and manually recover a selected scalar output.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
+<h4 id="example-a-recover-a-scalar-output-by-hand">Example A: Recover a scalar output by hand<a class="heading-anchor" href="#example-a-recover-a-scalar-output-by-hand" aria-label="Link to this section">#</a></h4>
+<p>Use the fixed two-record feature matrix and one-output weight. Calculate the first row before executing.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+X <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+W <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>float64<span class="syntax-punctuation">)</span>
+result <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> W <span class="syntax-operator">+</span> <span class="syntax-number">2</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The first row is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">1\cdot 1</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">2\cdot 0</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot (-1)</annotation></semantics></math> + 2 = 0. The second is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\cdot 1</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>·</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">1\cdot 0</annotation></semantics></math> + <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>·</mo><mo stretchy="false">(</mo><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">0\cdot (-1)</annotation></semantics></math> + 2 = 2. Two observations produce two rows, each with one output.</p>
+<h4 id="example-b-a-bias-can-create-a-plausible-wrong-shape">Example B: A bias can create a plausible wrong shape<a class="heading-anchor" href="#example-b-a-bias-can-create-a-plausible-wrong-shape" aria-label="Link to this section">#</a></h4>
+<p>Change only the bias to an input-feature-length vector. Observe what plain broadcasting permits.</p>
+<pre class="highlighted-code"><code class="language-python">wrong <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> W <span class="syntax-operator">+</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> wrong<span class="syntax-operator">.</span>shape <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>wrong<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The matrix product is still (2,1), but adding (3,) broadcasts into three output columns. A declared one-output interface should reject this bias before addition.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace the product.</strong> Write all multiply/add terms for both rows of the first example, then execute it. <strong>Expected:</strong> Result [[0],[2]] with shape (2,1). <strong>Verify:</strong> Assert both output values and recover the first zero from four written terms.</li>
+</ol>
+<ol>
+<li><strong>Add an observation.</strong> Append row [3,0,0] to X without changing W or the bias. <strong>Expected:</strong> The result is [[0],[2],[5]] with shape (3,1). <strong>Verify:</strong> Compare the original two output rows unchanged and assert the new scalar is 5.</li>
+</ol>
+<ol>
+<li><strong>Reject incompatible features.</strong> Implement affine(X,W,bias), then pass a (2,3) X with a (2,1) W. <strong>Expected:</strong> A ValueError explains the input-feature mismatch before a matrix product is attempted. <strong>Verify:</strong> Capture the mismatch exception and inspect the accepted (2,3) @ (3,1) result afterward.</li>
+</ol>
+<ol>
+<li><strong>Guard the bias axis.</strong> Reject bias [2,3,4] for the one-output model while accepting scalar 2 and output vector [2]. <strong>Expected:</strong> Scalar and length-one vector biases give the same [[0],[2]]; feature-length bias raises ValueError. <strong>Verify:</strong> Assert equality of the two accepted outputs and capture the rejected bias case independently.</li>
+</ol>
+<ol>
+<li><strong>Extend to two outputs.</strong> Use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>0</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>0</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mo>−</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[1,0],[0,1],[-1,1]]</annotation></semantics></math> and bias [2,-1] on the original X. <strong>Expected:</strong> The result is [[0,4],[2,0]] with shape (2,2). <strong>Verify:</strong> Check each output column by hand and assert the complete matrix, not just its shape.</li>
+</ol>
+<ol>
+<li><strong>Preserve a prediction under unit conversion.</strong> For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>100</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>200</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">X=[[100],[200]]</annotation></semantics></math> centimeters, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>0.02</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[0.02]]</annotation></semantics></math> and bias 1, convert X to meters and choose the corresponding new W. <strong>Expected:</strong> The centimeter model and meter model with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>W</mi><mo>=</mo><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>2</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">W=[[2]]</annotation></semantics></math> both predict [[3],[5]]. <strong>Verify:</strong> Assert both predictions agree and explain why changing X alone while retaining 0.02 would alter the model.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> Write batch, features and outputs beside the three axes before using @.</li>
+<li><strong>Hint 2:</strong> Calculate one output as a dot product plus one bias; this catches mistakes a shape-only test cannot.</li>
+<li><strong>Hint 3:</strong> Bias length follows outputs, while a unit conversion may require an inverse change in the corresponding weight.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If @ raises a dimension mismatch, write the two shape tuples and circle the shared feature dimension before transposing anything. Blind transposes can make dimensions compatible while moving the observation axis. If an addition unexpectedly creates extra columns, print the bias shape and compare it with the output width. If the shape is correct but a prediction changes after a data export, inspect feature order and units.</p>
+<p>A single number called bias is shared across records, not fitted separately to each held-out target. Adding one target-specific offset per record would leak the answer into the prediction. Reject empty and nonfinite requests explicitly; the absence of an exception from NumPy does not establish the model&#x27;s domain contract.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Close the code and state the three matrix dimensions in words. Then choose a two-feature, two-output fixture of your own and derive its first row. Explain why a correctly shaped matrix can still use the wrong feature order.</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>tf-004</code> when its authored file and readiness are available. Use <a href="../README.md.html">the course README</a> and <a href="../../../docs/implementation/ml-content-status.md.html">implementation checkpoint</a> to distinguish implemented work from later design units. Keep this lesson&#x27;s smallest counterexample as a regression when later abstractions appear.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for tf-003,
+Linear neurons and matrix contracts. Read courses/deep-learning-tensorflow/guides/tf-003.md
+and courses/deep-learning-tensorflow/lessons/tf-003.py. Respect direct prerequisites
+tf-002 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/deep-learning-tensorflow/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>

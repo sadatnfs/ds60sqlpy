@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-005: Cross entropy, perplexity and denominator traps · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-005: Cross entropy, perplexity and denominator traps</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-005.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-005-cross-entropy-perplexity-and-denominator-traps">llm-005: Cross entropy, perplexity and denominator traps<a class="heading-anchor" href="#llm-005-cross-entropy-perplexity-and-denominator-traps" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner within this subject; estimated time: 105 minutes. Direct prerequisite: <code>llm-004</code>. The entry Python course supplies basic functions, lists, dictionaries, testing and NumPy arrays. This unit introduces its subject terms explicitly; it requires no service account, model weights, GPU or database.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Compute token loss and compare models only under compatible tokenization and scoring units. By the end, you can produce the exact observations below, explain one plausible wrong result and transfer the reasoning to a new fixed fixture without copying a solution. Keep your first prediction alongside the actual evidence so a changed conclusion remains visible.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="turn-probability-assignments-into-an-interpretable-loss">Turn probability assignments into an interpretable loss<a class="heading-anchor" href="#turn-probability-assignments-into-an-interpretable-loss" aria-label="Link to this section">#</a></h4>
+<p>A prediction system should pay a larger penalty for assigning very little probability to the event that occurs. Negative log probability does this smoothly: an observed target with probability 1 has loss zero, probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math> has loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>, and probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math> has loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(4)</annotation></semantics></math>. Halving the probability adds <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> to the loss. This additive structure connects directly to the sequence likelihood from the previous chapter, where products of conditional probabilities became sums of losses.</p>
+<p>For one observation with target token y, let p_y be the model&#x27;s probability of that token. Its loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>log</mi><mo stretchy="false">(</mo><msub><mi>p</mi><mrow><mi>y</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-\log(p_{y})</annotation></semantics></math>. This can also be written as cross entropy between the model distribution p and a one-hot target distribution q: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>q</mi><mi>i</mi></msub><mi>log</mi><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">-\sum_iq_i\log p_i</annotation></semantics></math>. Every q entry is zero except the target&#x27;s entry, which is one, so only <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mi>log</mi><mo stretchy="false">(</mo><msub><mi>p</mi><mrow><mi>y</mi></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">-\log(p_{y})</annotation></semantics></math> remains. The notation is useful because it makes the two roles explicit: q specifies what is being scored, while p is the model&#x27;s prediction. The model should not choose its own reference target after seeing its answer.</p>
+<p>In Example A, the two target probabilities are 0.5 and 0.25. Their losses are <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">2\cdot \log(2)</annotation></semantics></math>, so the total is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot \log(2)</annotation></semantics></math>, about 2.079442. Dividing by the two scored targets gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1.5\cdot \log(2)</annotation></semantics></math>, about 1.039721. Exponentiating that mean gives perplexity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{\frac{3}{2}}</annotation></semantics></math>, about 2.828427. The total, mean and perplexity describe the same observations under different transformations; none is interchangeable with the number of correct top-ranked predictions.</p>
+<p>One useful interpretation of perplexity comes from a uniform prediction over K choices. Each observed choice then receives probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>K</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{K}</annotation></semantics></math>, so its loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mi>K</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(K)</annotation></semantics></math> and perplexity is K. For a nonuniform model, perplexity is the exponential of its average log penalty, not a literal count of equally plausible alternatives on every row. Here it is also the reciprocal geometric mean of the two assigned probabilities: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><msqrt><mrow><mn>0.5</mn><mo>·</mo><mn>0.25</mn></mrow></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{\sqrt{0.5\cdot 0.25}}</annotation></semantics></math>. Using the arithmetic mean probability would produce a different statistic.</p>
+<p>The denominator is part of the experiment. An ignored padding slot is not a third observation with a conveniently perfect prediction. Dividing the same total by three instead of two produces <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math>, and its perplexity falls to 2. The model did not change; only an invalid denominator made the report look better. The same issue appears when comparing documents of different lengths, averaging batches of different sizes, or training only on answer tokens. Always retain the active count alongside a reduced loss.</p>
+<p>Cross entropy is useful because it evaluates the whole probability assigned to the observed event and supplies a differentiable training objective. A model can improve it without changing its argmax, by becoming better calibrated on those targets. Conversely, a system can improve a particular task&#x27;s decision accuracy without winning every likelihood comparison. Keep tokenizer, target definition, conditioning context, mask and reduction fixed when interpreting a difference. Token-level perplexity is especially sensitive to the token unit, which motivates the next two chapters.</p>
+<h3 id="read-cross-entropy-as-a-weighted-expectation">Read cross entropy as a weighted expectation<a class="heading-anchor" href="#read-cross-entropy-as-a-weighted-expectation" aria-label="Link to this section">#</a></h3>
+<p>For active target probabilities p_1 through p_N, the empirical mean cross entropy is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>H</mi><mo>=</mo><mo>−</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><msub><mo>∑</mo><mi>i</mi></msub><mi>log</mi><msub><mi>p</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">H=-\frac1N\sum_i\log p_i</annotation></semantics></math>. Perplexity is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mi>H</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(H)</annotation></semantics></math>, so algebra gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">L</mi></mrow><mo>=</mo><msup><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><msub><mo>∏</mo><mi>i</mi></msub><mfrac><mn>1</mn><mrow><msub><mi>p</mi><mi>i</mi></msub></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow><mrow><mn>1</mn><mo>/</mo><mi>N</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\mathrm{PPL}=\left(\prod_i\frac1{p_i}\right)^{1/N}</annotation></semantics></math>. It is the inverse geometric mean of the observed target probabilities. It is not the arithmetic mean of their reciprocals. For [.5,.25], the inverse probabilities are 2 and 4, whose geometric mean is sqrt8≈2.828; their arithmetic mean is 3. The latter is a different statistic.</p>
+<p>A helpful special case is a uniform predictor over K candidates. Every observed target has probability1/K, giving H=log K and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mrow><mi mathvariant="normal">P</mi><mi mathvariant="normal">P</mi><mi mathvariant="normal">L</mi></mrow><mo>=</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">\mathrm{PPL}=K</annotation></semantics></math>. This motivates the rough interpretation of perplexity as an effective number of equally plausible choices. Real distributions are not uniform and their candidate sets may be constrained differently at each position, so this interpretation must not be turned into a literal count of alternatives considered by the model.</p>
+<p>Cross entropy includes the uncertainty present in the data as well as mismatch between predictor and target distribution. For a fixed discrete true distribution q and model p on compatible support, H(q,p)=H(q)+KL(q||p). The entropy H(q) is not something a model can reduce by guessing better; the nonnegative KL term describes mismatch. In the lesson we observe a finite set of target events rather than know q exactly, so the empirical loss is an estimate under its stated sampling/weighting policy. This distinction matters when one dataset is intrinsically less predictable than another.</p>
+<p>Write masking into both numerator and denominator: <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>H</mi><mo>=</mo><mo>−</mo><mfrac><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>m</mi><mi>i</mi></msub><mi>log</mi><msub><mi>p</mi><mi>i</mi></msub></mrow><mrow><msub><mo>∑</mo><mi>i</mi></msub><msub><mi>m</mi><mi>i</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">H=-\frac{\sum_i m_i\log p_i}{\sum_i m_i}</annotation></semantics></math>, with m_i in{0,1}. An ignored event contributes neither a term nor a count. In implementation, selecting active targets before evaluating problematic logs avoids expressions such as0*infinity producing NaN. An all-ignored batch has no empirical mean. The correct response is a defined no-target policy or explicit refusal, not a fabricated zero loss that looks like perfect prediction.</p>
+<p>Unequal document lengths expose a second denominator choice. Document A has one target of probability 0.5; document B has three targets of probability.25. The combined sum is 7log2 over four targets, so token-weighted mean is 7log2/4 and perplexity is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mfrac><mrow><mn>7</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{\frac{7}{4}}</annotation></semantics></math>, about 3.364. Equal-document averaging first forms means log 2 and 2log2, then averages to 1.5log2 and perplexity sqrt8. Averaging document perplexities directly gives(2+4)/2=3, which agrees with neither policy. Aggregate losses and counts under the intended unit before exponentiating.</p>
+<p>A low mean can hide a catastrophic rare failure. Compare target probabilities [.99,.99,.01] with [.5,.5,.5]. The first predictor is very confident and correct on two observations but assigns only.01 to the third. Its loss contributions are about.01005,.01005,4.60517, so the mean is about 1.54176 and perplexity about 4.673. The uniform two-choice predictor has mean log 2 and perplexity2. The log score strongly penalizes assigning very little mass to an event that actually occurs. An accuracy metric using only top choices would tell a different part of the story.</p>
+<p>Tokenization and inclusion rules must remain compatible. If one model uses a single token for a string while another uses three, equal string probability can coexist with different per-token loss: probability1/8 gives NLL3log2, yielding PPL8 for one target or PPL2 for three targets. A byte-normalized score can provide a common unit only after defining which bytes, boundaries and conditional events correspond to the exact same evaluated strings. It is not enough to divide arbitrary losses by a convenient byte count while changing prompt or EOS treatment.</p>
+<p><strong>Interview reasoning:</strong> &quot;Can a new model have lower perplexity but worse answers?&quot; Yes. Perplexity measures assigned target-token probabilities under a specific representation and dataset. Answer correctness, citation support, refusal behavior and task utility have different acceptance rules. Use perplexity to assess the defined prediction objective, then evaluate the behaviors required by the application separately.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Cross entropy here:</strong> the empirical average negative log probability of the supplied target tokens under a declared weighting.</p>
+<p><strong>Perplexity:</strong> <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mo stretchy="false">(</mo><mtext>mean negative log likelihood</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\exp(\text{mean negative log likelihood})</annotation></semantics></math> when natural logarithms are used.</p>
+<p><strong>Active target:</strong> a target included in both the loss sum and denominator after an explicit mask.</p>
+<p><strong>Token weighting:</strong> equal contribution per active target position, not necessarily per document.</p>
+<p><strong>Comparable score:</strong> a measure whose target representation, inclusion rule and evaluation unit are compatible across the systems being compared.</p>
+<h3 id="syntax-or-reasoning-anatomy">Syntax or reasoning anatomy<a class="heading-anchor" href="#syntax-or-reasoning-anatomy" aria-label="Link to this section">#</a></h3>
+<p>Add the negative logs for active targets, divide by their count, then exponentiate if perplexity is useful. Mask by selection before counting. A zero-probability active target has infinite loss under the declared distribution; an ignored target contributes neither a loss nor a denominator term. An all-ignored row has no defined empirical mean and should fail explicitly.</p>
+<p>The helper exposes total_nll, active_targets, mean_nll and perplexity as separate fields. This makes a denominator error observable without inspecting printed prose. Equal-document weighting first computes each document mean and then averages documents, so a long document no longer contributes proportionally more targets. Choose the aggregation unit before comparing outcomes, and retain that choice with saved predictions.</p>
+<h3 id="how-to-run">How to run<a class="heading-anchor" href="#how-to-run" aria-label="Link to this section">#</a></h3>
+<p>Open the <a href="../../../docs/docker-classroom.md.html">Docker classroom</a>, return to the classroom home and choose the LLM theory path and select <code>llm-005</code> with its <code>python-core</code> worker. Use the saved learner pad for your complete scratch program and keep the sequential A+B example contract below. The worker supplies Python and NumPy; no host installation is required. The native interpreter commands below are an optional alternative for an already prepared environment.</p>
+<p>Open <a href="../lessons/llm-005.py.html">the learner source</a>. Save an owned copy beneath <code>.learning/expansion/llm-005/practice.py</code> before editing. Use the application&#x27;s declared <code>python-core</code> profile only when its readiness notice confirms its dependencies; source viewing and notes remain available otherwise. The native alternative uses the prepared interpreter for this lesson&#x27;s declared python-core profile, without installing anything in a lesson. Run from the repository root. Output appears in the console; assertions and named failures below provide evidence, not exact printed-string matching.</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell: selected interpreter from the course setup.</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>expansion<span class="syntax-punctuation">\</span>llm<span class="syntax-punctuation">-</span>005<span class="syntax-punctuation">\</span>practice<span class="syntax-punctuation">.</span>py</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux: selected course interpreter path from setup.</span>
+<span class="syntax-string">&quot;</span>$DS60_COURSE_PYTHON<span class="syntax-string">&quot;</span> .learning/expansion/llm-005/practice.py</code></pre>
+<p>If the interpreter path is unset or a declared package cannot be imported, inspect runtime readiness and keep the error. Do not run pip, download data or silently change the interpreter inside the lesson. All supplied inputs are tiny local literals.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<p>Run Examples A and B in order in one scratch file, then run that complete file in a fresh process. Example B may reuse the imports, helpers and fixture state established in Example A. Do not treat an isolated later block as a standalone program.</p>
+<h4 id="example-a-two-target-probabilities">Example A: Two target probabilities<a class="heading-anchor" href="#example-a-two-target-probabilities" aria-label="Link to this section">#</a></h4>
+<p>Use the same conditional probabilities for both the loss and perplexity calculation.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
+
+probabilities <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.25</span><span class="syntax-punctuation">]</span>
+total <span class="syntax-operator">=</span> <span class="syntax-operator">-</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> probabilities<span class="syntax-punctuation">)</span>
+mean <span class="syntax-operator">=</span> total <span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+perplexity <span class="syntax-operator">=</span> math<span class="syntax-operator">.</span>exp<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>mean<span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span> <span class="syntax-operator">*</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>perplexity<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>total<span class="syntax-punctuation">,</span> mean<span class="syntax-punctuation">,</span> perplexity<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The three values are related but not interchangeable. Perplexity counts uncertainty in this particular token unit, not factual accuracy.</p>
+<h4 id="example-b-ignored-padding-cannot-improve-a-mean">Example B: Ignored padding cannot improve a mean<a class="heading-anchor" href="#example-b-ignored-padding-cannot-improve-a-mean" aria-label="Link to this section">#</a></h4>
+<p>Append an ignored position and compare its correct denominator with a broken zero-loss average.</p>
+<pre class="highlighted-code"><code class="language-python">active_losses <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">0.25</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+correct <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>active_losses<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">2</span>
+wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>active_losses<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span>
+<span class="syntax-keyword">assert</span> math<span class="syntax-operator">.</span>isclose<span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span> <span class="syntax-operator">*</span> math<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> rel_tol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> abs_tol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> wrong <span class="syntax-operator">&lt;</span> correct
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>correct<span class="syntax-punctuation">,</span> wrong<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The wrong mean looks better solely because a padding slot was counted as another observation. No model prediction improved.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Before executing or calculating, write the result you expect from the normal fixture and which changed condition would invalidate it. Save that prediction. Afterward, name the first observation that supported or contradicted it rather than rewriting your original answer to match the reference.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Trace a perplexity.</strong> Calculate total NLL, active count, mean NLL and perplexity for [0.5,0.25]. <strong>Expected:</strong> Total <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">3\cdot \log(2)</annotation></semantics></math>, count 2, mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1.5</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">1.5\cdot \log(2)</annotation></semantics></math>, perplexity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mn>2</mn></mrow><mrow><mn>1.5</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{2}^{1.5}</annotation></semantics></math>. <strong>Verify:</strong> Assert all four fields with explicit tolerances rather than comparing one unlabeled number.</li>
+</ol>
+<ol>
+<li><strong>Construct a masked score.</strong> Implement score_targets; append probability 1 as ignored padding using mask [True,True,False]. <strong>Expected:</strong> The padded fixture retains active count 2 and exactly the original mean/perplexity. <strong>Verify:</strong> Compare the complete returned metrics and the active count against the unpadded result.</li>
+</ol>
+<ol>
+<li><strong>Compare document weighting.</strong> Score document <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>=</mo><mo stretchy="false">[</mo><mn>0.5</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">A=[0.5]</annotation></semantics></math> and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>B</mi><mo>=</mo><mo stretchy="false">[</mo><mn>0.25</mn><mo>,</mo><mn>0.25</mn><mo>,</mo><mn>0.25</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">B=[0.25,0.25,0.25]</annotation></semantics></math>. <strong>Expected:</strong> Token-weighted mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>7</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{7\cdot \log(2)}{4}</annotation></semantics></math>, while equal-document mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{3\cdot \log(2)}{2}</annotation></semantics></math>. <strong>Verify:</strong> Record both the four-target denominator and two-document denominator in a labeled table.</li>
+</ol>
+<ol>
+<li><strong>Handle zero probability.</strong> Score [0.5,0] with both targets active, then ignore the zero-probability slot. <strong>Expected:</strong> Active zero gives infinite mean and perplexity; ignoring it leaves mean <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(2)</annotation></semantics></math> and perplexity 2. <strong>Verify:</strong> Use math.isinf for the first case and assert active count 1 in the second.</li>
+</ol>
+<ol>
+<li><strong>Reject an absent or invalid score.</strong> Try an all-false mask, an empty list, probability 1.1 and an integer mask. <strong>Expected:</strong> The first three raise ValueError; integer mask raises TypeError. <strong>Verify:</strong> Capture each exception independently and confirm the original two-target result still passes.</li>
+</ol>
+<ol>
+<li><strong>Challenge a tokenizer ranking.</strong> The same string cat is one token with probability 0.25 under A, or three character targets each probability 0.5 under B. Compare raw token perplexity and whole-string likelihood. <strong>Expected:</strong> A perplexity 4 with string probability 0.25; B perplexity 2 with string probability 0.125. <strong>Verify:</strong> Assert both scores and explain why the smaller raw perplexity cannot directly rank these incompatible token units.</li>
+</ol>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hint 1:</strong> Write the sum, active count and mean as three separate quantities.</li>
+<li><strong>Hint 2:</strong> Select active positions before counting them; zeroing an ignored loss is not enough.</li>
+<li><strong>Hint 3:</strong> For tokenizer comparisons, distinguish a complete-string probability from a per-token average.</li>
+</ul>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If padding lowers a reported mean loss, inspect the active-target count before changing weights or a learning rate. If perplexity is infinite, determine whether an active probability was zero or exponentiation exceeded the available numeric range. Keep a finite log score even when its exponential cannot be represented.</p>
+<p>If a tokenizer changes, start a new experiment and label its target units. A lower per-token perplexity across incompatible vocabularies is not a direct quality ranking. A loss score also does not count correct answers or supported citations. Use an answer-level metric when that is the intended claim, with its own held-out question and family policy.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Without formulas in view, derive the mean loss and perplexity for probabilities [1,0.5]. Then explain why adding an ignored padding target should change neither the loss nor the active-target count.</p>
+<h3 id="evidence-review">Evidence review<a class="heading-anchor" href="#evidence-review" aria-label="Link to this section">#</a></h3>
+<p>Use a 0, 1 or 2 score for each of five dimensions: the declared data/observation contract, a correct normal-case derivation, diagnosis of the changed fixture, explicit handling of the invalid case, and a fresh explanation of the evidence boundary. Normally seek <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>8</mn></mrow><mrow><mn>10</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{8}{10}</annotation></semantics></math> with no zero for the contract or claim boundary, then require a new transfer example. This is a human learning rubric, not an automatic certification or completion awarded by a single successful Run.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p><a href="llm-006.md.html">llm-006</a> asks what the text consists of before it reaches the probability model: displayed characters, Unicode code points and bytes are different units. After that, <a href="llm-007.md.html">llm-007</a> builds a tokenizer. These representation choices determine which prediction events contribute to the denominator you just learned to audit.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning workflow for llm-005,
+Cross entropy, perplexity and denominator traps. Read courses/llm-theory/guides/llm-005.md
+and courses/llm-theory/lessons/llm-005.py. Respect direct prerequisites
+llm-004 and beginner depth. Explain the actual fixture&#x27;s
+units, axes or evaluation denominator before new abstractions. Ask for a saved
+prediction, inspect my own attempt, give one hint at a time, then review the
+specific expected values or named failure. Keep courses/llm-theory/solutions/
+closed until I request comparison or show an honest attempt. Ask me to explain
+one counterexample and solve a fresh retrieval case without copying. Done when I can provide working evidence and explain a fresh case in my own
+words without copying, not merely check a box. No service call,
+model/data download, package installation or database is involved. Use reading
+notes when no execution is required and report missing runtime readiness honestly.</code></pre></article>
+  </main>
+</body>
+</html>

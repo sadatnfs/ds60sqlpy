@@ -1,0 +1,184 @@
+{
+  "lesson_id": "spark-042",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Validate and canonicalize each raw microbatch",
+      "input_contract": "Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON.",
+      "expected": "BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.",
+      "verification": "Compare decoded delivery IDs 1..4 and the NULL marker;reject a12-row union."
+    },
+    {
+      "exercise": 2,
+      "title": "Implement the explicit state and lateness policy",
+      "input_contract": "Freeze cutoff at previous committed max_event_second minus 10. Validate domain, then classify existing equal ID payload as duplicate, conflicting payload as invalid, new old event as late, and remaining event as accepted.",
+      "expected": "AfterA:accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.",
+      "verification": "Assert exact state and an invalid future control;preserve the original state value."
+    },
+    {
+      "exercise": 3,
+      "title": "Inject failure after publication but before query completion",
+      "input_contract": "Run the actual foreachBatch query with one injected exception after the atomic commit file becomes visible.",
+      "expected": "The query fails with injected_after_publication;commit 0 is readable and contains the correct first-state ledger.",
+      "verification": "Inspect the expected streaming exception, attempt 0 and unchanged source/checkpoint ownership."
+    },
+    {
+      "exercise": 4,
+      "title": "Replay the committed batch without applying it twice",
+      "input_contract": "Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.",
+      "expected": "Attempts 0,0 and callback rows 4,4;commit 0 bytes and logical state remain unchanged.",
+      "verification": "Compare query/run identities, exact bytes and all first-state counters."
+    },
+    {
+      "exercise": 5,
+      "title": "Process late, boundary, duplicate and conflicting events",
+      "input_contract": "PublishBatchB thenBatchC as separate immutable files and run each finite invocation against the same checkpoint.",
+      "expected": "Final accepted IDsA, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valuedD and cutoff-boundaryF remain accepted.",
+      "verification": "Compare intermediateB counts and the final literal state;the high-timeE must not make same-batchD late."
+    },
+    {
+      "exercise": 6,
+      "title": "Hand off correctness, recovery and resource evidence",
+      "input_contract": "Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.",
+      "expected": "Literal golden state matches;attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.",
+      "verification": "Compare the complete state JSON and namespace-refusal negative;state the single-writer/local-filesystem limitations."
+    }
+  ],
+  "golden": {
+    "batches": [
+      [
+        {
+          "delivery": 1,
+          "id": "A",
+          "event_second": 100,
+          "cents": 10
+        },
+        {
+          "delivery": 2,
+          "id": "B",
+          "event_second": 105,
+          "cents": 20
+        },
+        {
+          "delivery": 3,
+          "id": "A",
+          "event_second": 100,
+          "cents": 10
+        },
+        {
+          "delivery": 4,
+          "id": null,
+          "event_second": 106,
+          "cents": 30
+        }
+      ],
+      [
+        {
+          "delivery": 5,
+          "id": "E",
+          "event_second": 120,
+          "cents": 40
+        },
+        {
+          "delivery": 6,
+          "id": "D",
+          "event_second": 95,
+          "cents": 0
+        },
+        {
+          "delivery": 7,
+          "id": "C",
+          "event_second": 94,
+          "cents": 7
+        },
+        {
+          "delivery": 8,
+          "id": "B",
+          "event_second": 105,
+          "cents": 20
+        }
+      ],
+      [
+        {
+          "delivery": 9,
+          "id": "B",
+          "event_second": 105,
+          "cents": 999
+        },
+        {
+          "delivery": 10,
+          "id": "F",
+          "event_second": 110,
+          "cents": 5
+        }
+      ]
+    ],
+    "golden_state": {
+      "accepted": [
+        {
+          "id": "A",
+          "event_second": 100,
+          "cents": 10
+        },
+        {
+          "id": "B",
+          "event_second": 105,
+          "cents": 20
+        },
+        {
+          "id": "D",
+          "event_second": 95,
+          "cents": 0
+        },
+        {
+          "id": "E",
+          "event_second": 120,
+          "cents": 40
+        },
+        {
+          "id": "F",
+          "event_second": 110,
+          "cents": 5
+        }
+      ],
+      "deliveries": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "duplicates": 2,
+      "late": 1,
+      "invalid": 2,
+      "max_event_second": 120,
+      "total_cents": 75
+    },
+    "golden_state_json": "{\"accepted\":[{\"cents\":10,\"event_second\":100,\"id\":\"A\"},{\"cents\":20,\"event_second\":105,\"id\":\"B\"},{\"cents\":0,\"event_second\":95,\"id\":\"D\"},{\"cents\":40,\"event_second\":120,\"id\":\"E\"},{\"cents\":5,\"event_second\":110,\"id\":\"F\"}],\"deliveries\":[1,2,3,4,5,6,7,8,9,10],\"duplicates\":2,\"invalid\":2,\"late\":1,\"max_event_second\":120,\"total_cents\":75}",
+    "attempt_batch_ids": [
+      0,
+      0,
+      1,
+      2
+    ],
+    "callback_rows": [
+      4,
+      4,
+      4,
+      2
+    ],
+    "logical_occurrences": 10,
+    "physical_callback_rows": 14,
+    "policy": "domain invalid;known equal duplicate;known conflicting invalid;new older than frozen previous_max-10 late;otherwise accepted",
+    "state_scope": "bounded application-managed state,not native Spark watermark/state eviction",
+    "failure_point": "after atomic publication before Spark completion",
+    "maximum_microbatch_rows": 8,
+    "maximum_product_rows": 12
+  }
+}

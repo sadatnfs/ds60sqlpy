@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-058",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the AND selector result for a wrong namespace.",
+      "expected": "It does not match even if the Pod role is tester."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare separate peers with a combined peer.",
+      "expected": "Separate entries create alternatives; combined selectors narrow one peer."
+    },
+    {
+      "exercise": 3,
+      "task": "Build an allowed/denied flow matrix.",
+      "expected": "Caller namespace, Pod labels, target port and expected result are explicit."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a policy object with unrestricted actual traffic.",
+      "expected": "The implementation may not enforce policy or another allow rule may apply."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain additive allow semantics.",
+      "expected": "Multiple policies can broaden the union of permitted flows."
+    },
+    {
+      "exercise": 6,
+      "task": "Design real isolation acceptance.",
+      "expected": "One allowed and one denied owned flow under a named enforcing CNI."
+    }
+  ]
+}

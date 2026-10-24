@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>rust-038: Arrow nulls, validity and NaN semantics · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>rust-038: Arrow nulls, validity and NaN semantics</h1>
+      <p class="source-path">Generated from <code>courses/rust/guides/rust-038.md</code></p>
+    </header>
+    <article class="document"><h2 id="rust-038-arrow-nulls-validity-and-nan-semantics">rust-038: Arrow nulls, validity and NaN semantics<a class="heading-anchor" href="#rust-038-arrow-nulls-validity-and-nan-semantics" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced, approximately 120 minutes. Prerequisites: <code>rust-037</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Write a summary returning valid, null and finite counts. Then define missingness and non-finite policies for a sensor dataset before calculating a mean.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A null means the logical value is absent under the dataset&#x27;s policy. The physical value buffer can still contain bytes at that position, but those bytes are not a valid observation. Always consult validity or use an iterator returning Option. Reading value at a null position and treating its physical contents as data can silently corrupt an analysis.</p>
+<p>NaN is a floating-point value category, not an Arrow null. It can represent an undefined numerical result while remaining logically present. A pipeline must decide separately how to handle missing and non-finite measurements. Conflating them changes counts, means and validation outcomes.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Null bitmap:</strong> The validity representation marking absent logical values.</p>
+<p><strong>NaN:</strong> A present floating-point value representing not-a-number.</p>
+<p><strong>Logical value:</strong> The value after applying type and validity semantics.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>The Linux Docker classroom compiles the saved pad as <code>main.rs</code> with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. <code>assert!</code> and <code>assert_eq!</code> remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns <code>Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt;</code> so later examples can propagate errors with <code>?</code>; the final <code>Ok(())</code> means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.</p>
+<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>Array::is_null and is_valid inspect validity. Int32Array::iter yields Option&lt;i32&gt;. Float64Array can contain both Some(NaN) and None. null_count counts absence, not non-finite values.</p>
+<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-preserve-null-versus-zero">Example A: Preserve null versus zero<a class="heading-anchor" href="#example-a-preserve-null-versus-zero" aria-label="Link to this section">#</a></h4>
+<p>Optional iteration respects validity rather than exposing meaningless physical contents at null positions.</p>
+<pre class="highlighted-code"><code class="language-rust">
+
+<span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">use</span> arrow<span class="syntax-punctuation">::</span>array<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">{</span>Array<span class="syntax-punctuation">,</span> Int32Array<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">let</span> values <span class="syntax-operator">=</span> Int32Array<span class="syntax-punctuation">::</span>from<span class="syntax-punctuation">(</span><span class="syntax-function">vec!</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">None</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>null_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>is_valid<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> values<span class="syntax-punctuation">.</span>is_null<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>iter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>collect<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">&lt;</span><span class="syntax-builtin">Vec</span><span class="syntax-operator">&lt;</span>_<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-function">vec!</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">None</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-function">println!</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rust-038: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> A valid zero and a null remain distinct positions.</p>
+<h4 id="example-b-keep-nan-separate-from-null">Example B: Keep NaN separate from null<a class="heading-anchor" href="#example-b-keep-nan-separate-from-null" aria-label="Link to this section">#</a></h4>
+<p>A finite-value policy is an additional analytical rule, not a synonym for Arrow validity.</p>
+<pre class="highlighted-code"><code class="language-rust">
+
+<span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">{</span>
+        <span class="syntax-keyword">use</span> arrow<span class="syntax-punctuation">::</span>array<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">{</span>Array<span class="syntax-punctuation">,</span> Float64Array<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-keyword">let</span> values <span class="syntax-operator">=</span> Float64Array<span class="syntax-punctuation">::</span>from<span class="syntax-punctuation">(</span><span class="syntax-function">vec!</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">f64</span><span class="syntax-punctuation">::</span>NAN<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">None</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Some</span><span class="syntax-punctuation">(</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>null_count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>is_valid<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> values<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>is_nan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+        <span class="syntax-function">assert_eq!</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>iter<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>flatten<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span><span class="syntax-operator">|</span>value<span class="syntax-operator">|</span> value<span class="syntax-punctuation">.</span>is_finite<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+    <span class="syntax-function">println!</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">rust-038: passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-builtin">Ok</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Observe:</strong> The column contains one null, one present NaN and one finite value.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Predict and explain.</strong> Classify zero, null and NaN separately.</li>
+</ol>
+<ol>
+<li><strong>Guided modification.</strong> Add a present infinity and update finite-value accounting.</li>
+</ol>
+<ol>
+<li><strong>Independent construction.</strong> Write a summary returning valid, null and finite counts.</li>
+</ol>
+<ol>
+<li><strong>Diagnose a defect.</strong> Diagnose summing physical values without applying validity.</li>
+</ol>
+<ol>
+<li><strong>Boundary evidence.</strong> Test all-null, empty and no-null columns.</li>
+</ol>
+<ol>
+<li><strong>Transfer and justify.</strong> Define missingness and non-finite policies for a sensor dataset before calculating a mean.</li>
+</ol>
+<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. Use the separate solution after attempting the task, then close it and reconstruct one boundary case.</p>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Null positions can contain arbitrary physical values. NaN is not equal to itself under ordinary floating equality. Do not replace every null with zero without a domain justification.</p>
+<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<ol>
+<li>Name the input, output and invariant using the vocabulary above. Reproduce Example A before changing two things at once.</li>
+<li>Compare the changed condition in Example B. Identify the first line whose behavior differs and state why.</li>
+<li>Reduce your independent task to a normal case, an empty or boundary case, and an invalid case. Write expected observations before inspecting the reference.</li>
+</ol>
+<h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
+<p>Explain Null bitmap, NaN, Logical value without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
+<p><a href="https://arrow.apache.org/docs/format/Columnar.html">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Runtime qualification is recorded separately by the repository validation workflow. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for rust-038: Arrow nulls, validity and NaN semantics.
+Read courses/rust/guides/rust-038.md and courses/rust/lessons/rust-038.rs. Prerequisites: rust-037.
+Teach the vocabulary and trace one example. Ask for my prediction before running.
+Give one progressive hint about my first incorrect assumption. Review compiler
+or runtime evidence and ask a fresh transfer question. Keep courses/rust/solutions/rust-038_solution.rs and
+courses/rust/solutions/rust-038_solutions.md closed until I request comparison or show an attempt.
+Use rust-stable for portable code. Separately labeled project labs keep their own
+platform and preparation requirements. Completion requires explaining the
+mechanism and all six task outcomes, not merely copying the success marker.</code></pre></article>
+  </main>
+</body>
+</html>

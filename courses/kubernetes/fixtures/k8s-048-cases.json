@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-048",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict a short-name lookup from another namespace.",
+      "expected": "It may search that namespace rather than the intended study service."
+    },
+    {
+      "exercise": 2,
+      "task": "State the configurable part of the FQDN.",
+      "expected": "The cluster domain is not universally cluster.local."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw resolution and connection as separate phases.",
+      "expected": "DNS record, transport connection and application response have distinct evidence."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose direct-IP success with name failure.",
+      "expected": "Investigate resolver configuration, DNS reachability and policy."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain stale behavior after endpoint changes.",
+      "expected": "Caching or existing connections can delay fresh destination use."
+    },
+    {
+      "exercise": 6,
+      "task": "Design robust service discovery for a client.",
+      "expected": "Known namespace/domain, bounded resolution/connection and safe reconnect behavior."
+    }
+  ]
+}

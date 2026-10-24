@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-007",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Calculate DF for the three sorted terms from the two-document corpus.",
+      "expected": "[1,2,1] for [coffee,cup,tea]."
+    },
+    {
+      "exercise": 2,
+      "task": "Implement the stated smoothed IDF and compare with vectorizer.idf_.",
+      "expected": "[log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order."
+    },
+    {
+      "exercise": 3,
+      "task": "Construct both weighted rows manually and normalize each nonzero row.",
+      "expected": "Manual dense oracle matches the 2-by-3 sparse result within tolerance."
+    },
+    {
+      "exercise": 4,
+      "task": "Transform query tea and multiply X by its transpose.",
+      "expected": "First score 2a/sqrt(1+4a^2); second score zero."
+    },
+    {
+      "exercise": 5,
+      "task": "Transform matcha and empty text, then compare the vocabulary before/after.",
+      "expected": "Zero nonzero entries and unchanged vocabulary; record an explicit no-known-terms outcome."
+    },
+    {
+      "exercise": 6,
+      "task": "Enable sublinear_tf without normalization and inspect the tea weight.",
+      "expected": "Tea weight becomes (1+log(2))*a, distinct from 2a."
+    }
+  ]
+}

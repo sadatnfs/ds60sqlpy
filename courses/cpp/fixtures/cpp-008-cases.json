@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-008",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Draw owners",
+      "input_or_change": "Draw input, copied output and borrowed parameter.",
+      "expected": "Two owners and one temporary borrow, no extra owner for the reference."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict mutation",
+      "input_or_change": "Change output[0] to 99 after doubled([2,4]).",
+      "expected": "Input first value 2; output first value 99."
+    },
+    {
+      "exercise": 3,
+      "task": "Write a const observer",
+      "input_or_change": "Write size_of(const vector<int>&) without mutation.",
+      "expected": "[2,4] gives 2; empty gives 0."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose const assignment",
+      "input_or_change": "Attempt xs[0]=9 through const vector<int>& in a scratch file.",
+      "expected": "Compilation fails; remove mutation to repair."
+    },
+    {
+      "exercise": 5,
+      "task": "Identify a lifetime bug",
+      "input_or_change": "Review a function returning const vector<int>& to its local result.",
+      "expected": "Reject the reference return; return vector<int> by value."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a safe result",
+      "input_or_change": "Call doubled with temporary [5] and retain the result.",
+      "expected": "Stored result remains [10] after the full expression."
+    }
+  ]
+}

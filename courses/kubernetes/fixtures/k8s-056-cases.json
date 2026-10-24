@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-056",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Distinguish DNAT and SNAT.",
+      "expected": "Destination rewrite versus source rewrite."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict backend peer identity after SNAT.",
+      "expected": "It can be a node or proxy address rather than the original client."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw a five-tuple path through one translation.",
+      "expected": "Source/destination addresses and ports are named before and after."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose missing traffic on a node with Local policy and no endpoint.",
+      "expected": "Endpoint locality and upstream health selection matter."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why arbitrary forwarded headers are untrusted.",
+      "expected": "Clients can supply them unless the trusted proxy boundary sanitizes them."
+    },
+    {
+      "exercise": 6,
+      "task": "Design a source-IP acceptance test.",
+      "expected": "Known caller, documented path, transport peer and trusted-header evidence."
+    }
+  ]
+}

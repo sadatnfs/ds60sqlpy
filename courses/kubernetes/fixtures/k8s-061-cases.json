@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-061",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict per-endpoint load under equal local client demand.",
+      "expected": "ZoneB can place twice the load on its single endpoint."
+    },
+    {
+      "exercise": 2,
+      "task": "Distinguish placement and traffic policy.",
+      "expected": "Scheduling location versus request destination choice."
+    },
+    {
+      "exercise": 3,
+      "task": "Design a two-zone failure scenario.",
+      "expected": "State which endpoints remain and whether routing can fail over."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose local preference with insufficient nearby capacity.",
+      "expected": "Inspect endpoint distribution and actual load, not only total replicas."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain version-dependent topology behavior.",
+      "expected": "Use the actual API/controller/data-plane support matrix."
+    },
+    {
+      "exercise": 6,
+      "task": "Defend a locality tradeoff.",
+      "expected": "Latency/cost benefits are balanced against capacity and failure behavior."
+    }
+  ]
+}

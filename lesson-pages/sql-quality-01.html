@@ -1,0 +1,1261 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>sql-quality-01 · Bag Reconciliation and Join Fanout · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=sql-quality-01" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">sql · lesson sql-quality-01</p>
+        <h1>Bag Reconciliation and Join Fanout</h1>
+        <p class="hero-copy">Advanced correctness labs</p>
+        <div class="meta">
+          <span class="tag">advanced</span>
+          <span class="tag">180 minutes</span>
+          <span class="tag">postgres setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="sql-06.html">sql-06</a> <a class="tag" href="sql-23.html">sql-23</a> <a class="tag" href="sql-test-01.html">sql-test-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Open your guided SQL workspace</h2>
+          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <div class="static-help">
+            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="sql/professional/lessons/sql_quality_01_bags_and_fanout.sql">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
+          <a class="button lab-only" href="../learn?lesson=sql-quality-01" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+        <p class="eyebrow">SQL beginner path</p>
+        <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
+        <p>
+          The browser explains the lesson; PostgreSQL executes it. The private
+          course portal connects the two safely by creating your own ignored
+          workspace at <code>.learning/sql/sql-quality-01/lesson/</code>.
+        </p>
+        <ol class="run-steps">
+          <li>
+            <strong>Start guided mode.</strong>
+            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
+            terminal open. On macOS/Linux, run
+            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
+          </li>
+          <li>
+            <strong>Check the database boundary.</strong>
+            <span>The readiness check must identify local PostgreSQL and only the
+            disposable <code>advanced_sql_training</code> database. Never substitute a
+            workplace, shared, or valuable database.</span>
+          </li>
+          <li>
+            <strong>Create the lesson workspace.</strong>
+            <span>Return to this lesson over <code>127.0.0.1</code> and click
+            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
+            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
+          </li>
+          <li>
+            <strong>Read, predict, edit, then run.</strong>
+            <span>Run the readiness cells first. Open the linked editable
+            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
+            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
+          </li>
+          <li>
+            <strong>Inspect evidence.</strong>
+            <span>Results and errors appear in the notebook transcript. Success means
+            the command exits cleanly, the course verification cell passes, and you
+            can explain the result's columns, row grain, and ordering.</span>
+          </li>
+        </ol>
+        <details>
+          <summary><strong>If something fails, start with the first message</strong></summary>
+          <dl class="error-map">
+            <dt><code>psql was not found</code></dt>
+            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
+            discovered, then reopen the notebook from that same portal session.</dd>
+            <dt><code>connection refused</code></dt>
+            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
+            <dt><code>database "advanced_sql_training" does not exist</code></dt>
+            <dd>Return to setup and create only the disposable course database.</dd>
+            <dt><code>relation "training.…" does not exist</code></dt>
+            <dd>Read the reset warning, set the notebook's confirmation value to
+            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
+            <dt><code>ERROR … at line …</code></dt>
+            <dd>Fix the first reported error in the editable SQL copy, save the file,
+            and run the lesson cell again. Later errors can be consequences of the first.</dd>
+          </dl>
+        </details>
+      </section>
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--sql-quality-01-bag-reconciliation-and-join-fanout">SQL-QUALITY-01: Bag Reconciliation and Join Fanout<a class="heading-anchor" href="#guide--sql-quality-01-bag-reconciliation-and-join-fanout" aria-label="Link to this section">#</a></h3>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<p>Use only the local disposable <code>advanced_sql_training</code> database on PostgreSQL 16 or newer. The lesson page is a readable preview. In the private course portal, choose <strong>Create/open guided SQL notebook</strong>, run readiness, acknowledge only the explicitly offered course reset if needed, and edit the notebook&#x27;s ignored <code>.learning/sql/sql-quality-01/</code> SQL copy. Its exact path is <code>.learning/sql/sql-quality-01/lesson/workspace/sql/professional/lessons/sql_quality_01_bags_and_fanout.sql</code>. Save the copy and run its complete-script cell. Output appears below that cell as a full <code>psql</code> transcript. A successful run ends in <code>ROLLBACK</code>, exits 0, and has the example identities stated below. The setup uses temporary tables and no external data or extension.</p>
+<p>If using VS Code directly, run from the repository root. These fallbacks work in terminals after PostgreSQL setup:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql/professional/lessons/sql_quality_01_bags_and_fanout.sql</span><span class="syntax-string">&quot;</span></code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
+psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/professional/lessons/sql_quality_01_bags_and_fanout.sql</code></pre>
+<p>Keep <code>-X</code> to ignore personal client startup changes and <code>ON_ERROR_STOP</code> to stop at the first unexpected error. If <code>psql</code> is missing, return to the operating-system setup and <code>scripts/course.py doctor</code>. An authentication failure needs the local setup workflow, never a password pasted into a lesson. If the database-name guard rejects the run, inspect your target instead of removing the guard. After an unexpected transaction error, fix that first error and rerun the whole file in a fresh connection. To try an exercise, put its SQL before the final <code>ROLLBACK</code> in your private copy; temporary tables exist only in that connection and transaction. Running this official learner file demonstrates the examples; exercises remain answer-free until you add an attempt. Do not edit the separate official solutions while studying.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Level:</strong> advanced</li>
+<li><strong>Direct catalog prerequisites:</strong> <a href="sql-06.html#guide"><code>sql-06</code></a>, <a href="sql-23.html#guide"><code>sql-23</code></a>, <a href="sql-test-01.html#guide"><code>sql-test-01</code></a></li>
+<li><strong>Artifacts:</strong> <a href="sql-quality-01.html#learner">learner SQL</a>, <a href="sql-quality-01.html#solution-1">solution reasoning</a>, <a href="sql-quality-01.html#solution-2">executable solution</a>.</li>
+</ul>
+<p>Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Expose mismatches hidden by equal counts and totals.</li>
+<li>Reconcile both directions while preserving duplicate multiplicity and NULL state.</li>
+<li>Aggregate independent child relations at the parent key before joining them.</li>
+</ul>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<p>&quot;The totals match&quot; is a useful control and a weak equality claim. Two invoice extracts can have the same number of rows and the same grand total while disagreeing on individual invoices. One underpayment can cancel another overpayment. A duplicate delivery can replace another duplicate without changing the distinct value set. This module turns those counterexamples into explicit diagnostic queries instead of adding more generic aggregate checks.</p>
+<ul>
+<li><strong>Bag:</strong> A bag, also called a multiset, is a collection in which a row can occur more than once.</li>
+</ul>
+<ul>
+<li><strong>Set:</strong> A set ignores repeated occurrences. </li>
+</ul>
+<ul>
+<li><strong>Multiplicity:</strong> Multiplicity is the number of occurrences of a particular row value.</li>
+</ul>
+<ul>
+<li><strong>Reconciliation:</strong> Reconciliation is comparing two representations under a declared equality contract and reporting differences.</li>
+</ul>
+<ul>
+<li><strong>Fanout:</strong> Fanout is row multiplication caused by matching a parent row to several children.</li>
+</ul>
+<ul>
+<li><strong>Control total:</strong> A control total is a summary used to detect certain failures; it is evidence about that summary, not proof of all row contents.</li>
+</ul>
+<p>There are two different equality questions. Keyed equality assumes one row per invoice_id and compares attributes for that key. Bag equality compares every projected value and its multiplicity, even when no unique source key is available. Do not casually switch between these questions. A FULL OUTER JOIN is useful for valid unique keys, but duplicate keys can turn its diagnostic into a many-to-many join. EXCEPT ALL answers a bag-difference question without requiring unique identities. Its output grain is one unmatched occurrence, so repeated output tuples are legitimate evidence, not a formatting error.</p>
+<h4 id="guide--syntax-anatomy-and-query-reasoning">Syntax anatomy and query reasoning<a class="heading-anchor" href="#guide--syntax-anatomy-and-query-reasoning" aria-label="Link to this section">#</a></h4>
+<p>Start by stating the comparison columns, currency, units, time boundary, missingness policy, and grain. Here amounts are exact numeric values in one declared currency, with no floating-point tolerance and no conversion. The two invoice snapshots each have one row per invoice_id. The separate delivery fixtures intentionally allow duplicate rows. Do not deduplicate them before comparing, because multiplicity is the fact under investigation.</p>
+<p>For keyed comparison, FULL OUTER JOIN retains source-only and target-only identities as well as matched keys. Test key presence using non-NULL primary keys, not amount: a present invoice may legitimately have an unknown amount. <code>IS DISTINCT FROM</code> catches both unequal known amounts and a known-to-unknown transition. With ordinary <code>&lt;&gt;</code>, an unknown operand can hide the difference. Classify missing identities separately from changed attributes.</p>
+<p>For bag comparison, <code>(source EXCEPT ALL target)</code> reports source excesses. Reverse the operands to report target excesses. UNION ALL appends the labeled diagnostics without removing repetitions. Ordinary EXCEPT removes duplicate result rows and can report no difference for bags with different counts. Compare compatible types and the same ordered projection on both sides.</p>
+<p>Independent child collections require another precaution. An order with two lines and two payment attempts produces four joined pairs. Summing a line amount after that join counts each line twice. Summing attempts counts each attempt twice too. Aggregate lines by order_id, aggregate attempts separately by order_id, then join those one-row-per-order results to orders. DISTINCT on money cannot repair this: two legitimate lines may have equal amounts.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<p>Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.</p>
+<h5 id="guide--example-1-equal-summaries-conceal-changed-identities">Example 1: Equal summaries conceal changed identities<a class="heading-anchor" href="#guide--example-1-equal-summaries-conceal-changed-identities" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total
+<span class="syntax-keyword">FROM</span> quality_source
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">FROM</span> quality_target
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin<span class="syntax-punctuation">;</span></code></pre>
+<p>Each branch collapses four invoice rows into one summary row. Both branches report 4 and 230. The source includes invoice 4, the target includes invoice 5, and invoice 2 has changed. The matching grand totals are real but insufficient. No claim about individual invoice equality follows from this summary. Keep this control because it catches other failures, then add more discriminating evidence.</p>
+<p><strong>Expected:</strong> Two summary rows keyed by origin, columns origin, row_count, amount_total. Both totals equal 230 and both counts equal 4.</p>
+<h5 id="guide--example-2-aggregate-separate-children-before-joining">Example 2: Aggregate separate children before joining<a class="heading-anchor" href="#guide--example-2-aggregate-separate-children-before-joining" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total <span class="syntax-keyword">FROM</span> quality_lines <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id
+<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
+  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total <span class="syntax-keyword">FROM</span> quality_attempts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>attempted_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total
+<span class="syntax-keyword">FROM</span> quality_orders <span class="syntax-keyword">AS</span> o
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>order_id<span class="syntax-operator">=</span>o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id<span class="syntax-operator">=</span>o<span class="syntax-punctuation">.</span>order_id
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<p>The CTEs each reduce a child collection to one row per order_id before they meet. Their LEFT joins therefore preserve the three parent identities. An order without children receives zero under this lesson&#x27;s explicit empty-child policy. Attempted payment total is not revenue: a retry is a separate attempt. Here the source amounts are NOT inferred from one another, so the two metrics remain independently meaningful.</p>
+<p><strong>Expected:</strong> Three order rows; columns order_id, line_total, attempted_total: (1,100,200),(2,50,50),(3,0,0).</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<p>Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.</p>
+<ol>
+<li><strong>Disprove summary equality.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 1, Compare quality_source and quality_target using one row per origin with origin, row_count, amount_total. Explain one concrete mismatch the summary cannot reveal.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 1, Two summary rows keyed by origin, columns origin, row_count, amount_total; final ORDER BY origin. Both counts are 4 and totals are 230 despite differing invoice contents.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 1, Inspect changed invoice 2 and the replacement of identity 4 by 5 while confirming both summaries still report four rows and amount_total 230.</p>
+<p><strong>Progressive hint:</strong> Keep the aggregate as a control, then inspect invoice 2 and identities 4 and 5.</p>
+<ol>
+<li><strong>Report keyed mismatches in both directions.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 2, Use FULL OUTER JOIN on invoice_id and NULL-safe amount comparison. Return invoice_id, source_amount, target_amount, difference_kind with missing_target, missing_source, or changed.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.</p>
+<p><strong>Progressive hint:</strong> Use key presence to classify an absent row before comparing its amount.</p>
+<ol>
+<li><strong>Preserve duplicate multiplicity.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 3, Compare quality_sent and quality_received as bags on invoice_id, amount using two EXCEPT ALL branches labeled sent_only and received_only. Explain why ordinary EXCEPT would miss this difference.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 3, Two unmatched occurrence rows, columns direction, invoice_id, amount; final ORDER BY direction, invoice_id, amount: received_only (2,50), sent_only (1,100). An occurrence has no independent ID; (direction,invoice_id,amount) is a value tuple and may repeat in larger bags.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 3, Count one sent-only occurrence (1,100) and one received-only occurrence (2,50). Repeat with ordinary EXCEPT and explain why its empty difference hides the changed multiplicities.</p>
+<p><strong>Progressive hint:</strong> Run both directions before adding UNION ALL; do not insert DISTINCT.</p>
+<ol>
+<li><strong>Repair independent-child fanout.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 4, Return order_id, line_total, attempted_total for all quality_orders. Aggregate quality_lines and quality_attempts separately before joining. Diagnose the raw two-child join on order 1.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 4, Three order rows, columns order_id, line_total, attempted_total; final ORDER BY order_id: (1,100,200),(2,50,50),(3,0,0). The raw order-1 join has four pairs and incorrectly sums lines to 200.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 4, Check all three order_id values survive, reconcile each metric with a separate child-only sum, and expose the raw order-1 join with four pairs and incorrect line sum 200.</p>
+<p><strong>Progressive hint:</strong> A parent with two rows in each independent child has 2 x 2 matched pairs.</p>
+<ol>
+<li><strong>Detect a missingness transition.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 5, Compare a source invoice (6,NULL::numeric) with target invoice (6,0::numeric). Return invoice_id, source_amount, target_amount only when the amounts differ under a missingness-sensitive contract.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 5, One invoice row keyed by invoice_id, columns invoice_id, source_amount, target_amount; final ORDER BY invoice_id: (6,NULL,0). The keyed row exists on both sides.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 5, Inspect the one row with NULL source and known zero target. Coalescing both sides to zero hides the mismatch, while ordinary inequality fails to qualify it.</p>
+<p><strong>Progressive hint:</strong> Replacing both values with zero before comparison destroys this diagnostic.</p>
+<ol>
+<li><strong>Gate a keyed comparison on valid identity.</strong></li>
+</ol>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 6, For quality_sent, return invoice_id, occurrences only for duplicate keys. Explain why a keyed reconciliation must stop before joining this fixture to another nonunique extract.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 6, One diagnostic row keyed by invoice_id, columns invoice_id, occurrences; final ORDER BY invoice_id: (1,2). No amount is used as an identity.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 6, Require exactly duplicate-key diagnostic (invoice_id=1,occurrences=2). This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.</p>
+<p><strong>Progressive hint:</strong> Validate the key at the incoming extract grain before validating its attributes.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Which equality claim can matching count and sum support?</li>
+<li>When does EXCEPT ALL teach something that EXCEPT cannot?</li>
+<li>Why is SUM(DISTINCT amount) an unsafe repair for independent-child fanout?</li>
+</ul>
+<p>Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>If totals agree but customer invoices disagree, inspect keyed FULL OUTER JOIN diagnostics before celebrating a passing grand total.</li>
+</ul>
+<ul>
+<li>If a reconciliation suddenly contains many rows per key, validate input key uniqueness; DISTINCT on the output hides the cause.</li>
+</ul>
+<ul>
+<li>If an order total doubles after adding a new child join, count child combinations and aggregate each collection independently.</li>
+</ul>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Use <code>sql-scale-01</code> to preserve correctness while traversing large changing inputs.</p>
+<p>Concrete next target: <a href="sql-scale-01.html#guide">Cursor pagination and bounded batches</a>.</p>
+<h4 id="guide--reference">Reference<a class="heading-anchor" href="#guide--reference" aria-label="Link to this section">#</a></h4>
+<p>The course works offline after setup. These optional official references describe the PostgreSQL semantics used here:</p>
+<ul>
+<li><a href="https://www.postgresql.org/docs/16/queries-union.html">PostgreSQL 16 documentation</a></li>
+</ul>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>
+<pre class="highlighted-code"><code class="language-text">Tutor me through sql-quality-01: Bag Reconciliation and Join Fanout using the checked-in $guide-ds60sqlpy-learning skill.
+Guide: sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md
+Answer-free learner: sql/professional/lessons/sql_quality_01_bags_and_fanout.sql
+Direct prerequisite boundary: sql-06, sql-23, sql-test-01.
+Teach at the advanced level, defining each new term before relying on it.
+Focus on Expose mismatches hidden by equal counts and totals. Reconcile both directions while preserving duplicate multiplicity and NULL state.
+Use the guide -&gt; explain -&gt; predict -&gt; my attempt -&gt; one hint at a time -&gt; evidence review -&gt; retrieval loop.
+Keep solutions/ closed until I ask after an honest attempt. Do not read, quote,
+or summarize the official solution before that boundary.
+Prefer Create/open guided SQL notebook and its ignored .learning/sql/sql-quality-01/ working copy.
+Run live SQL only against the local disposable advanced_sql_training database.
+Never request a password or point a reset at shared or valuable data.
+Ask for my actual SQL and complete psql transcript, compare identities and values
+with each Expected contract, and explain the first discrepancy before editing.
+Done when my attempted exercises have inspectable matching evidence and I can
+answer the guide&#x27;s retrieval questions and a small transfer question in my own words.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/lessons/sql_quality_01_bags_and_fanout.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/lessons/sql_quality_01_bags_and_fanout.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-QUALITY-01: Bag Reconciliation and Join Fanout</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Guide: sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Use Create/open guided SQL notebook and the ignored learner copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Run the complete file with psql -X -v ON_ERROR_STOP=1.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Only the local disposable advanced_sql_training database is permitted.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Setup is supplied. Write attempts before the final ROLLBACK.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_source <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_target <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_source <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_target <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_sent <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_received <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_sent <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_received <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_orders <span class="syntax-punctuation">(</span>order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_lines <span class="syntax-punctuation">(</span>line_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_attempts <span class="syntax-punctuation">(</span>attempt_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_orders <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_lines <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_attempts <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">102</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 1: Equal summaries conceal changed identities</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Two summary rows keyed by origin, columns origin, row_count, amount_total. Both totals equal 230 and both counts equal 4.</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_source</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_target</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Example 2: Aggregate separate children before joining</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected: Three order rows; columns order_id, line_total, attempted_total: (1,100,200),(2,50,50),(3,0,0).</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total <span class="syntax-keyword">FROM</span> quality_lines <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line">  <span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total <span class="syntax-keyword">FROM</span> quality_attempts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id</span>
+<span class="source-line"><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>attempted_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_orders <span class="syntax-keyword">AS</span> o</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">ON</span> l<span class="syntax-punctuation">.</span>order_id<span class="syntax-operator">=</span>o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">ON</span> a<span class="syntax-punctuation">.</span>order_id<span class="syntax-operator">=</span>o<span class="syntax-punctuation">.</span>order_id</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises</span></span>
+<span class="source-line"><span class="syntax-comment">-- Keep predictions and attempts in your own working copy.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Disprove summary equality.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 1, Compare quality_source and quality_target using one row per origin with origin, row_count, amount_total. Explain one concrete mismatch the summary cannot reveal.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 1, Two summary rows keyed by origin, columns origin, row_count, amount_total; final ORDER BY origin. Both counts are 4 and totals are 230 despite differing invoice contents.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 1, Inspect changed invoice 2 and the replacement of identity 4 by 5 while confirming both summaries still report four rows and amount_total 230.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Keep the aggregate as a control, then inspect invoice 2 and identities 4 and 5.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Report keyed mismatches in both directions.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 2, Use FULL OUTER JOIN on invoice_id and NULL-safe amount comparison. Return invoice_id, source_amount, target_amount, difference_kind with missing_target, missing_source, or changed.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Use key presence to classify an absent row before comparing its amount.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Preserve duplicate multiplicity.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 3, Compare quality_sent and quality_received as bags on invoice_id, amount using two EXCEPT ALL branches labeled sent_only and received_only. Explain why ordinary EXCEPT would miss this difference.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 3, Two unmatched occurrence rows, columns direction, invoice_id, amount; final ORDER BY direction, invoice_id, amount: received_only (2,50), sent_only (1,100). An occurrence has no independent ID; (direction,invoice_id,amount) is a value tuple and may repeat in larger bags.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 3, Count one sent-only occurrence (1,100) and one received-only occurrence (2,50). Repeat with ordinary EXCEPT and explain why its empty difference hides the changed multiplicities.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Run both directions before adding UNION ALL; do not insert DISTINCT.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Repair independent-child fanout.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 4, Return order_id, line_total, attempted_total for all quality_orders. Aggregate quality_lines and quality_attempts separately before joining. Diagnose the raw two-child join on order 1.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 4, Three order rows, columns order_id, line_total, attempted_total; final ORDER BY order_id: (1,100,200),(2,50,50),(3,0,0). The raw order-1 join has four pairs and incorrectly sums lines to 200.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 4, Check all three order_id values survive, reconcile each metric with a separate child-only sum, and expose the raw order-1 join with four pairs and incorrect line sum 200.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: A parent with two rows in each independent child has 2 x 2 matched pairs.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Detect a missingness transition.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 5, Compare a source invoice (6,NULL::numeric) with target invoice (6,0::numeric). Return invoice_id, source_amount, target_amount only when the amounts differ under a missingness-sensitive contract.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 5, One invoice row keyed by invoice_id, columns invoice_id, source_amount, target_amount; final ORDER BY invoice_id: (6,NULL,0). The keyed row exists on both sides.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 5, Inspect the one row with NULL source and known zero target. Coalescing both sides to zero hides the mismatch, while ordinary inequality fails to qualify it.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Replacing both values with zero before comparison destroys this diagnostic.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Gate a keyed comparison on valid identity.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Inputs/evidence: For sql-quality-01 Exercise 6, For quality_sent, return invoice_id, occurrences only for duplicate keys. Explain why a keyed reconciliation must stop before joining this fixture to another nonunique extract.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Expected result/shape: For sql-quality-01 Exercise 6, One diagnostic row keyed by invoice_id, columns invoice_id, occurrences; final ORDER BY invoice_id: (1,2). No amount is used as an identity.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Verify: For sql-quality-01 Exercise 6, Require exactly duplicate-key diagnostic (invoice_id=1,occurrences=2). This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.</span></span>
+<span class="source-line"><span class="syntax-comment">-- Hint: Validate the key at the incoming extract grain before validating its attributes.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--sql-quality-01-solution-reasoning">SQL-QUALITY-01: solution reasoning<a class="heading-anchor" href="#solution-1--sql-quality-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Use this after an honest attempt at the <a href="sql-quality-01.html#guide">guide</a> and <a href="sql-quality-01.html#learner">learner script</a>. The separate <a href="sql-quality-01.html#solution-2">executable solution</a> runs all six answers and independent fail-fast checks with <code>psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql</code>. It uses only temporary fixtures, starts a transaction, and ends in rollback. It must exit 0 with no contract failures. Each answer has a savepoint so an experiment cannot silently change a later exercise&#x27;s starting conditions. The assertion helper treats false and unknown as failures, rather than allowing a NULL assertion to pass accidentally. Keep the original fixture unchanged when comparing your work so the stated identities remain a reliable oracle.</p>
+<p>The code below is the answer for each numbered prompt, followed by its reasoning. Inspect the first discrepancy in your own transcript before reading a different answer. A solution is one defensible implementation of this contract; an alternative is valid if its identities, values, missingness, ordering, and transaction behavior match. Tests constrain the actual returned relation, rather than assuming a familiar-looking query must be right.</p>
+<h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-disprove-summary-equality">Exercise 1: Disprove summary equality<a class="heading-anchor" href="#solution-1--exercise-1-disprove-summary-equality" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total <span class="syntax-keyword">FROM</span> quality_source
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> quality_target <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin<span class="syntax-punctuation">;</span></code></pre>
+<p>Each input has a valid unique invoice key and four rows. The summary loses invoice identity and attribute distribution, so it cannot distinguish the target&#x27;s ten-unit reduction on invoice 2 from its larger replacement invoice. This is a deliberate negative control for the idea that one matching number proves correctness. The assertion checks that the deceptive equality actually exists; a counterexample with different totals would not demonstrate this failure mode. Retain the summary in a real test suite because it is cheap and useful, but phrase its conclusion narrowly: counts and aggregate amounts match. The next exercise adds row-level evidence needed for a stronger statement.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 1, Compare quality_source and quality_target using one row per origin with origin, row_count, amount_total. Explain one concrete mismatch the summary cannot reveal.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 1, Two summary rows keyed by origin, columns origin, row_count, amount_total; final ORDER BY origin. Both counts are 4 and totals are 230 despite differing invoice contents.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 1, Inspect changed invoice 2 and the replacement of identity 4 by 5 while confirming both summaries still report four rows and amount_total 230.</p>
+<h4 id="solution-1--exercise-2-report-keyed-mismatches-in-both-directions">Exercise 2: Report keyed mismatches in both directions<a class="heading-anchor" href="#solution-1--exercise-2-report-keyed-mismatches-in-both-directions" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span>
+       s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount<span class="syntax-punctuation">,</span>
+       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_source&#x27;</span>
+            <span class="syntax-keyword">WHEN</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_target&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;changed&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> difference_kind
+<span class="syntax-keyword">FROM</span> quality_source <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> quality_target <span class="syntax-keyword">AS</span> t <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></code></pre>
+<p>FULL OUTER JOIN retains all keys, so neither missing side disappears before diagnosis. COALESCE chooses the available identity for the output without replacing a measurement. The CASE tests source and target key presence first because a present amount could be NULL. Only matched keys reach the changed classification. The WHERE condition includes missing keys and NULL-safe attribute differences. The assertion checks both the three identities and their classification order, so a query that notices only changed invoice 2 cannot pass. This keyed method depends on the declared primary keys; if an upstream staging extract lacks that guarantee, validate uniqueness before interpreting its join as one diagnostic row per invoice.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 2, Use FULL OUTER JOIN on invoice_id and NULL-safe amount comparison. Return invoice_id, source_amount, target_amount, difference_kind with missing_target, missing_source, or changed.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.</p>
+<h4 id="solution-1--exercise-3-preserve-duplicate-multiplicity">Exercise 3: Preserve duplicate multiplicity<a class="heading-anchor" href="#solution-1--exercise-3-preserve-duplicate-multiplicity" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing
+<span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span>
+<span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;received_only&#x27;</span><span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span>
+ <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent
+<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> extra
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> direction<span class="syntax-punctuation">,</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">;</span></code></pre>
+<p>The sent bag contains two occurrences of invoice 1 and one of invoice 2; the received bag has the opposite multiplicities. Their distinct sets are equal, but one invoice-1 occurrence is missing and one invoice-2 occurrence is extra. EXCEPT ALL subtracts occurrence counts while ordinary EXCEPT would collapse them. Labeling direction prevents a reader from confusing missing with extra. UNION ALL preserves every diagnostic occurrence. The assertion verifies two total rows and one of each precise value and direction. Do not claim the output tuple is a unique event identity: repeated unmatched occurrences can legitimately share every selected value. Real occurrence identity requires a separately supplied delivery key.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 3, Compare quality_sent and quality_received as bags on invoice_id, amount using two EXCEPT ALL branches labeled sent_only and received_only. Explain why ordinary EXCEPT would miss this difference.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 3, Two unmatched occurrence rows, columns direction, invoice_id, amount; final ORDER BY direction, invoice_id, amount: received_only (2,50), sent_only (1,100). An occurrence has no independent ID; (direction,invoice_id,amount) is a value tuple and may repeat in larger bags.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 3, Count one sent-only occurrence (1,100) and one received-only occurrence (2,50). Repeat with ordinary EXCEPT and explain why its empty difference hides the changed multiplicities.</p>
+<h4 id="solution-1--exercise-4-repair-independent-child-fanout">Exercise 4: Repair independent-child fanout<a class="heading-anchor" href="#solution-1--exercise-4-repair-independent-child-fanout" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total <span class="syntax-keyword">FROM</span> quality_lines <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total <span class="syntax-keyword">FROM</span> quality_attempts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>attempted_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total
+<span class="syntax-keyword">FROM</span> quality_orders <span class="syntax-keyword">AS</span> o <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></code></pre>
+<p>Each CTE establishes uniqueness by order_id before the join. LEFT joins retain order 3, whose lack of child rows is explicitly displayed as zero for these additive metrics. Order 1 has 100 in lines and 200 in attempts because two attempts are separate facts, not a duplicated order value. A naive joined sum repeats each line once per attempt. SUM(DISTINCT amount) is not a valid generic repair because separate legitimate lines can share a price. The assertion tests all parent identities and both independent totals, making a plausible-looking single metric insufficient. Add source child sums as independent controls when transferring the pattern to more child collections.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 4, Return order_id, line_total, attempted_total for all quality_orders. Aggregate quality_lines and quality_attempts separately before joining. Diagnose the raw two-child join on order 1.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 4, Three order rows, columns order_id, line_total, attempted_total; final ORDER BY order_id: (1,100,200),(2,50,50),(3,0,0). The raw order-1 join has four pairs and incorrectly sums lines to 200.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 4, Check all three order_id values survive, reconcile each metric with a separate child-only sum, and expose the raw order-1 join with four pairs and incorrect line sum 200.</p>
+<h4 id="solution-1--exercise-5-detect-a-missingness-transition">Exercise 5: Detect a missingness transition<a class="heading-anchor" href="#solution-1--exercise-5-detect-a-missingness-transition" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> s<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount
+<span class="syntax-keyword">FROM</span> s <span class="syntax-keyword">JOIN</span> t <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">;</span></code></pre>
+<p>The identity matches, so the difference concerns the value&#x27;s state rather than a missing invoice. IS DISTINCT FROM treats unknown and known zero as different, while ordinary inequality would yield unknown and fail the filter. COALESCE(amount,0) on both sides would incorrectly make the rows equal. The assertion explicitly requires a NULL source amount and zero target amount, which protects the diagnostic semantics. Financial or measurement reconciliation must declare whether missingness matters instead of inheriting a display fallback from another report. This example does not assert that every domain should reject such a transition; it demonstrates the equality policy the exercise explicitly chose.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 5, Compare a source invoice (6,NULL::numeric) with target invoice (6,0::numeric). Return invoice_id, source_amount, target_amount only when the amounts differ under a missingness-sensitive contract.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 5, One invoice row keyed by invoice_id, columns invoice_id, source_amount, target_amount; final ORDER BY invoice_id: (6,NULL,0). The keyed row exists on both sides.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 5, Inspect the one row with NULL source and known zero target. Coalescing both sides to zero hides the mismatch, while ordinary inequality fails to qualify it.</p>
+<h4 id="solution-1--exercise-6-gate-a-keyed-comparison-on-valid-identity">Exercise 6: Gate a keyed comparison on valid identity<a class="heading-anchor" href="#solution-1--exercise-6-gate-a-keyed-comparison-on-valid-identity" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> invoice_id <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></code></pre>
+<p>GROUP BY collects occurrences by the proposed key and HAVING retains keys with more than one occurrence. This diagnostic has one row per invalid invoice key, even though its input bag intentionally has no uniqueness guarantee. Finding invoice 1 twice invalidates the premise needed for a one-to-one keyed comparison. Stop that comparison and either repair upstream data under an approved rule or choose a bag contract when repeated records are meaningful. Blind DISTINCT would decide the policy without evidence. The assertion verifies exactly invoice 1 with multiplicity two. A useful publication gate requires this diagnostic to be empty before applying keyed equality, then checks both missing keys and attribute differences.</p>
+<p><strong>Inputs/evidence:</strong> For sql-quality-01 Exercise 6, For quality_sent, return invoice_id, occurrences only for duplicate keys. Explain why a keyed reconciliation must stop before joining this fixture to another nonunique extract.</p>
+<p><strong>Expected result/shape:</strong> For sql-quality-01 Exercise 6, One diagnostic row keyed by invoice_id, columns invoice_id, occurrences; final ORDER BY invoice_id: (1,2). No amount is used as an identity.</p>
+<p><strong>Verify:</strong> For sql-quality-01 Exercise 6, Require exactly duplicate-key diagnostic (invoice_id=1,occurrences=2). This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.</p>
+<h4 id="solution-1--cleanup-and-evidence-boundary">Cleanup and evidence boundary<a class="heading-anchor" href="#solution-1--cleanup-and-evidence-boundary" aria-label="Link to this section">#</a></h4>
+<p>The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>PostgreSQL script</h2>
+            <p class="artifact-path"><code>sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="PostgreSQL script"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-sql"><code><span class="source-line"><span class="syntax-comment">-- SQL-QUALITY-01: executable solutions and fail-fast checks</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">DO</span> $course_target$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-string">&#x27;advanced_sql_training&#x27;</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Use only the disposable advanced_sql_training database&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$course_target$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> <span class="syntax-keyword">TIME</span> <span class="syntax-keyword">ZONE</span> <span class="syntax-string">&#x27;UTC&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SET</span> <span class="syntax-keyword">LOCAL</span> statement_timeout <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;15s&#x27;</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_source <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_target <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_source <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">80</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_target <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">90</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_sent <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_received <span class="syntax-punctuation">(</span>invoice_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_sent <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_received <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_orders <span class="syntax-punctuation">(</span>order_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_lines <span class="syntax-punctuation">(</span>line_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> quality_attempts <span class="syntax-punctuation">(</span>attempt_id <span class="syntax-builtin">integer</span> <span class="syntax-keyword">PRIMARY</span> <span class="syntax-keyword">KEY</span><span class="syntax-punctuation">,</span> order_id <span class="syntax-builtin">integer</span><span class="syntax-punctuation">,</span> amount <span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_orders <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_lines <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">60</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">21</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">INSERT</span> <span class="syntax-keyword">INTO</span> quality_attempts <span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">101</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">102</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">FUNCTION</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span>ok <span class="syntax-builtin">boolean</span><span class="syntax-punctuation">,</span> message <span class="syntax-builtin">text</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">RETURNS</span> void <span class="syntax-keyword">LANGUAGE</span> plpgsql <span class="syntax-keyword">AS</span> $assert$</span>
+<span class="source-line"><span class="syntax-keyword">BEGIN</span></span>
+<span class="source-line">  <span class="syntax-keyword">IF</span> ok <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> <span class="syntax-keyword">true</span> <span class="syntax-keyword">THEN</span></span>
+<span class="source-line">    RAISE <span class="syntax-keyword">EXCEPTION</span> <span class="syntax-string">&#x27;Contract failed: %&#x27;</span><span class="syntax-punctuation">,</span> message<span class="syntax-punctuation">;</span></span>
+<span class="source-line">  <span class="syntax-keyword">END</span> <span class="syntax-keyword">IF</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">END</span></span>
+<span class="source-line">$assert$<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- Exercises: one isolated answer and verification per prompt.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 1. Disprove summary equality</span></span>
+<span class="source-line">SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total <span class="syntax-keyword">FROM</span> quality_source</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> quality_target <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_1 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;source&#x27;</span> <span class="syntax-keyword">AS</span> origin<span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-keyword">row_count</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> amount_total <span class="syntax-keyword">FROM</span> quality_source</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;target&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> quality_target <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> origin<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">4</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">row_count</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">4</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">230</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">max</span><span class="syntax-punctuation">(</span>amount_total<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">230</span> <span class="syntax-keyword">FROM</span> solution_answer_1<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 1&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_1<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 2. Report keyed mismatches in both directions</span></span>
+<span class="source-line">SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_source&#x27;</span></span>
+<span class="source-line">            <span class="syntax-keyword">WHEN</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_target&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;changed&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> difference_kind</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_source <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> quality_target <span class="syntax-keyword">AS</span> t <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_2 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> invoice_id<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount<span class="syntax-punctuation">,</span></span>
+<span class="source-line">       <span class="syntax-keyword">CASE</span> <span class="syntax-keyword">WHEN</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_source&#x27;</span></span>
+<span class="source-line">            <span class="syntax-keyword">WHEN</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">THEN</span> <span class="syntax-string">&#x27;missing_target&#x27;</span> <span class="syntax-keyword">ELSE</span> <span class="syntax-string">&#x27;changed&#x27;</span> <span class="syntax-keyword">END</span> <span class="syntax-keyword">AS</span> difference_kind</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_source <span class="syntax-keyword">AS</span> s <span class="syntax-keyword">FULL</span> <span class="syntax-keyword">OUTER</span> <span class="syntax-keyword">JOIN</span> quality_target <span class="syntax-keyword">AS</span> t <span class="syntax-keyword">USING</span> <span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> t<span class="syntax-punctuation">.</span>invoice_id <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">OR</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>invoice_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>difference_kind <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;changed&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;missing_target&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;missing_source&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_2<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 2&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_2<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 3. Preserve duplicate multiplicity</span></span>
+<span class="source-line">SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;received_only&#x27;</span><span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> extra</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> direction<span class="syntax-punctuation">,</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_3 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AS</span> direction<span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> missing</span>
+<span class="source-line"><span class="syntax-keyword">UNION</span> <span class="syntax-keyword">ALL</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> <span class="syntax-string">&#x27;received_only&#x27;</span><span class="syntax-punctuation">,</span> invoice_id<span class="syntax-punctuation">,</span> amount <span class="syntax-keyword">FROM</span> <span class="syntax-punctuation">(</span></span>
+<span class="source-line"> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_received <span class="syntax-keyword">EXCEPT</span> <span class="syntax-keyword">ALL</span> <span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span>amount <span class="syntax-keyword">FROM</span> quality_sent</span>
+<span class="source-line"><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> extra</span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> direction<span class="syntax-punctuation">,</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_3<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_3 <span class="syntax-keyword">WHERE</span> direction<span class="syntax-operator">=</span><span class="syntax-string">&#x27;sent_only&#x27;</span> <span class="syntax-keyword">AND</span> invoice_id<span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> amount<span class="syntax-operator">=</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_3 <span class="syntax-keyword">WHERE</span> direction<span class="syntax-operator">=</span><span class="syntax-string">&#x27;received_only&#x27;</span> <span class="syntax-keyword">AND</span> invoice_id<span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">AND</span> amount<span class="syntax-operator">=</span><span class="syntax-number">50</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 3&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_3<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 4. Repair independent-child fanout</span></span>
+<span class="source-line">SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total <span class="syntax-keyword">FROM</span> quality_lines <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total <span class="syntax-keyword">FROM</span> quality_attempts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>attempted_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_orders <span class="syntax-keyword">AS</span> o <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_4 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> lines <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total <span class="syntax-keyword">FROM</span> quality_lines <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span></span>
+<span class="source-line">attempts <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total <span class="syntax-keyword">FROM</span> quality_attempts <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>l<span class="syntax-punctuation">.</span>line_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> line_total<span class="syntax-punctuation">,</span><span class="syntax-keyword">COALESCE</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">.</span>attempted_total<span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> attempted_total</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> quality_orders <span class="syntax-keyword">AS</span> o <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> lines <span class="syntax-keyword">AS</span> l <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">LEFT</span> <span class="syntax-keyword">JOIN</span> attempts <span class="syntax-keyword">AS</span> a <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>order_id<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> o<span class="syntax-punctuation">.</span>order_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> array_agg<span class="syntax-punctuation">(</span>order_id <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>line_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">AND</span> array_agg<span class="syntax-punctuation">(</span>attempted_total <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> order_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-builtin">ARRAY</span><span class="syntax-punctuation">[</span><span class="syntax-number">200</span><span class="syntax-punctuation">,</span><span class="syntax-number">50</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">FROM</span> solution_answer_4<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 4&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_4<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 5. Detect a missingness transition</span></span>
+<span class="source-line">SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> s<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> s <span class="syntax-keyword">JOIN</span> t <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_5 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">WITH</span> s<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">NULL</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> t<span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">VALUES</span> <span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">numeric</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">,</span>s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> source_amount<span class="syntax-punctuation">,</span>t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">AS</span> target_amount</span>
+<span class="source-line"><span class="syntax-keyword">FROM</span> s <span class="syntax-keyword">JOIN</span> t <span class="syntax-keyword">USING</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span> <span class="syntax-keyword">WHERE</span> s<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-keyword">FROM</span> t<span class="syntax-punctuation">.</span>amount <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> s<span class="syntax-punctuation">.</span>invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">6</span> <span class="syntax-keyword">AND</span> bool_and<span class="syntax-punctuation">(</span>source_amount <span class="syntax-keyword">IS</span> <span class="syntax-keyword">NULL</span> <span class="syntax-keyword">AND</span> target_amount<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">FROM</span> solution_answer_5<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 5&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_5<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment">-- 6. Gate a keyed comparison on valid identity</span></span>
+<span class="source-line">SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> invoice_id <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">CREATE</span> TEMP <span class="syntax-keyword">TABLE</span> solution_answer_6 <span class="syntax-keyword">ON</span> <span class="syntax-keyword">COMMIT</span> <span class="syntax-keyword">DROP</span> <span class="syntax-keyword">AS</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> invoice_id<span class="syntax-punctuation">,</span><span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> occurrences <span class="syntax-keyword">FROM</span> quality_sent <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span> invoice_id <span class="syntax-keyword">HAVING</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">1</span> <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> invoice_id<span class="syntax-punctuation">;</span></span>
+<span class="source-line"><span class="syntax-keyword">SELECT</span> pg_temp<span class="syntax-punctuation">.</span>assert_true<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">count</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>invoice_id<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">1</span> <span class="syntax-keyword">AND</span> <span class="syntax-keyword">min</span><span class="syntax-punctuation">(</span>occurrences<span class="syntax-punctuation">)</span><span class="syntax-operator">=</span><span class="syntax-number">2</span> <span class="syntax-keyword">FROM</span> solution_answer_6<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;sql-quality-01 exercise 6&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span> <span class="syntax-keyword">TO</span> SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line">RELEASE SAVEPOINT exercise_6<span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-quality-01: Bag Reconciliation and Join Fanout using the checked-in $guide-ds60sqlpy-learning skill.
+Guide: sql/professional/companion-guides/sql_quality_01_bags_and_fanout.md
+Answer-free learner: sql/professional/lessons/sql_quality_01_bags_and_fanout.sql
+Direct prerequisite boundary: sql-06, sql-23, sql-test-01.
+Teach at the advanced level, defining each new term before relying on it.
+Focus on Expose mismatches hidden by equal counts and totals. Reconcile both directions while preserving duplicate multiplicity and NULL state.
+Use the guide -&gt; explain -&gt; predict -&gt; my attempt -&gt; one hint at a time -&gt; evidence review -&gt; retrieval loop.
+Keep solutions/ closed until I ask after an honest attempt. Do not read, quote,
+or summarize the official solution before that boundary.
+Prefer Create/open guided SQL notebook and its ignored .learning/sql/sql-quality-01/ working copy.
+Run live SQL only against the local disposable advanced_sql_training database.
+Never request a password or point a reset at shared or valuable data.
+Ask for my actual SQL and complete psql transcript, compare identities and values
+with each Expected contract, and explain the first discrepancy before editing.
+Done when my attempted exercises have inspectable matching evidence and I can
+answer the guide&#x27;s retrieval questions and a small transfer question in my own words.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="sql-temporal-01.html"><small>Previous lesson</small><strong>sql-temporal-01</strong><span>Temporal and Domain Modelling</span></a>
+        <a class="nav-card next" href="sql-scale-01.html"><small>Next lesson</small><strong>sql-scale-01</strong><span>Cursor Pagination and Bounded Batches</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "sql-quality-01";
+    const LEARNER_PATH = "sql/professional/lessons/sql_quality_01_bags_and_fanout.sql";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

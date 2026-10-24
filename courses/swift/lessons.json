@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "track_id": "swift",
+  "lessons": [
+    {
+      "id": "swift-001",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-001.md",
+      "source_path": "courses/swift/lessons/swift-001.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-001_solution.swift",
+        "courses/swift/solutions/swift-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-002",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-002.md",
+      "source_path": "courses/swift/lessons/swift-002.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-002_solution.swift",
+        "courses/swift/solutions/swift-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-003",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-003.md",
+      "source_path": "courses/swift/lessons/swift-003.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-003_solution.swift",
+        "courses/swift/solutions/swift-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-004",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-004.md",
+      "source_path": "courses/swift/lessons/swift-004.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-004_solution.swift",
+        "courses/swift/solutions/swift-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-005",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-005.md",
+      "source_path": "courses/swift/lessons/swift-005.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-005_solution.swift",
+        "courses/swift/solutions/swift-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-006",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-006.md",
+      "source_path": "courses/swift/lessons/swift-006.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-006_solution.swift",
+        "courses/swift/solutions/swift-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-007",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-007.md",
+      "source_path": "courses/swift/lessons/swift-007.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-007_solution.swift",
+        "courses/swift/solutions/swift-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-008",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-008.md",
+      "source_path": "courses/swift/lessons/swift-008.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-008_solution.swift",
+        "courses/swift/solutions/swift-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-009",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-009.md",
+      "source_path": "courses/swift/lessons/swift-009.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-009_solution.swift",
+        "courses/swift/solutions/swift-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-010",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-010.md",
+      "source_path": "courses/swift/lessons/swift-010.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-010_solution.swift",
+        "courses/swift/solutions/swift-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-011",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-011.md",
+      "source_path": "courses/swift/lessons/swift-011.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-011_solution.swift",
+        "courses/swift/solutions/swift-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-012",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-012.md",
+      "source_path": "courses/swift/lessons/swift-012.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-012_solution.swift",
+        "courses/swift/solutions/swift-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-013",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-013.md",
+      "source_path": "courses/swift/lessons/swift-013.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-013_solution.swift",
+        "courses/swift/solutions/swift-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-014",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-014.md",
+      "source_path": "courses/swift/lessons/swift-014.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-014_solution.swift",
+        "courses/swift/solutions/swift-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-015",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-015.md",
+      "source_path": "courses/swift/lessons/swift-015.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-015_solution.swift",
+        "courses/swift/solutions/swift-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-016",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-016.md",
+      "source_path": "courses/swift/lessons/swift-016.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-016_solution.swift",
+        "courses/swift/solutions/swift-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-017",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-017.md",
+      "source_path": "courses/swift/lessons/swift-017.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-017_solution.swift",
+        "courses/swift/solutions/swift-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-018",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-018.md",
+      "source_path": "courses/swift/lessons/swift-018.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-018_solution.swift",
+        "courses/swift/solutions/swift-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-019",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-019.md",
+      "source_path": "courses/swift/lessons/swift-019.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-019_solution.swift",
+        "courses/swift/solutions/swift-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-020",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-020.md",
+      "source_path": "courses/swift/lessons/swift-020.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-020_solution.swift",
+        "courses/swift/solutions/swift-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-021",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-021.md",
+      "source_path": "courses/swift/lessons/swift-021.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-021_solution.swift",
+        "courses/swift/solutions/swift-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-022",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-022.md",
+      "source_path": "courses/swift/lessons/swift-022.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-022_solution.swift",
+        "courses/swift/solutions/swift-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-023",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-023.md",
+      "source_path": "courses/swift/lessons/swift-023.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-023_solution.swift",
+        "courses/swift/solutions/swift-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-024",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-024.md",
+      "source_path": "courses/swift/lessons/swift-024.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-024_solution.swift",
+        "courses/swift/solutions/swift-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-025",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-025.md",
+      "source_path": "courses/swift/lessons/swift-025.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-025_solution.swift",
+        "courses/swift/solutions/swift-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-026",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-026.md",
+      "source_path": "courses/swift/lessons/swift-026.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-026_solution.swift",
+        "courses/swift/solutions/swift-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-027",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-027.md",
+      "source_path": "courses/swift/lessons/swift-027.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-027_solution.swift",
+        "courses/swift/solutions/swift-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-028",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-028.md",
+      "source_path": "courses/swift/lessons/swift-028.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-028_solution.swift",
+        "courses/swift/solutions/swift-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-029",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-029.md",
+      "source_path": "courses/swift/lessons/swift-029.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-029_solution.swift",
+        "courses/swift/solutions/swift-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-030",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-030.md",
+      "source_path": "courses/swift/lessons/swift-030.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-030_solution.swift",
+        "courses/swift/solutions/swift-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-031",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-031.md",
+      "source_path": "courses/swift/lessons/swift-031.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-031_solution.swift",
+        "courses/swift/solutions/swift-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-032",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-032.md",
+      "source_path": "courses/swift/lessons/swift-032.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-032_solution.swift",
+        "courses/swift/solutions/swift-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-033",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-033.md",
+      "source_path": "courses/swift/lessons/swift-033.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-033_solution.swift",
+        "courses/swift/solutions/swift-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-034",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-034.md",
+      "source_path": "courses/swift/lessons/swift-034.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-034_solution.swift",
+        "courses/swift/solutions/swift-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-035",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-035.md",
+      "source_path": "courses/swift/lessons/swift-035.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-035_solution.swift",
+        "courses/swift/solutions/swift-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-036",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-036.md",
+      "source_path": "courses/swift/lessons/swift-036.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-036_solution.swift",
+        "courses/swift/solutions/swift-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-037",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-037.md",
+      "source_path": "courses/swift/lessons/swift-037.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-037_solution.swift",
+        "courses/swift/solutions/swift-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-038",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-038.md",
+      "source_path": "courses/swift/lessons/swift-038.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-038_solution.swift",
+        "courses/swift/solutions/swift-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-039",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-039.md",
+      "source_path": "courses/swift/lessons/swift-039.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-039_solution.swift",
+        "courses/swift/solutions/swift-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-040",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-040.md",
+      "source_path": "courses/swift/lessons/swift-040.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-040_solution.swift",
+        "courses/swift/solutions/swift-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-041",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-041.md",
+      "source_path": "courses/swift/lessons/swift-041.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-041_solution.swift",
+        "courses/swift/solutions/swift-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-042",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-042.md",
+      "source_path": "courses/swift/lessons/swift-042.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-042_solution.swift",
+        "courses/swift/solutions/swift-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-043",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-043.md",
+      "source_path": "courses/swift/lessons/swift-043.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-043_solution.swift",
+        "courses/swift/solutions/swift-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-044",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-044.md",
+      "source_path": "courses/swift/lessons/swift-044.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-044_solution.swift",
+        "courses/swift/solutions/swift-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-045",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-045.md",
+      "source_path": "courses/swift/lessons/swift-045.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-045_solution.swift",
+        "courses/swift/solutions/swift-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-046",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-046.md",
+      "source_path": "courses/swift/lessons/swift-046.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-046_solution.swift",
+        "courses/swift/solutions/swift-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-047",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-047.md",
+      "source_path": "courses/swift/lessons/swift-047.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-047_solution.swift",
+        "courses/swift/solutions/swift-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "swift-048",
+      "status": "authored",
+      "language": "swift",
+      "runtime_profile": "swift-linux",
+      "guide_path": "courses/swift/guides/swift-048.md",
+      "source_path": "courses/swift/lessons/swift-048.swift",
+      "solution_paths": [
+        "courses/swift/solutions/swift-048_solution.swift",
+        "courses/swift/solutions/swift-048_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

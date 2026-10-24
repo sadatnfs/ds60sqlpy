@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: network-study-ingress
+  labels: {course-fixture: deep-networking}
+spec:
+  ingressClassName: study-controller
+  rules:
+    - host: study.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: network-study
+                port: {number: 80}

@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>go-041: explained solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>go-041: explained solutions</h1>
+      <p class="source-path">Generated from <code>courses/go/solutions/go-041_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="go-041-explained-solutions">go-041: explained solutions<a class="heading-anchor" href="#go-041-explained-solutions" aria-label="Link to this section">#</a></h2>
+<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
+<p>client-go provides typed Kubernetes clients, discovery, watches, caches and work queues. It is a dependency project, not part of the Go standard library. Keep k8s.io/api, apimachinery and client-go on compatible release lines and review the documented compatibility matrix for the target cluster. Configuration carries authority: a kubeconfig can name a cluster, credentials and executable authentication plugins. Do not discover an ambient configuration for a teaching program that is supposed to use a disposable target. The ordinary pad below validates a deliberately constrained connection description and constructs a request without sending it. A separately prepared project fixture shows the actual typed client and explicit-context loading.</p>
+<p>The prepared project uses clientcmd loading rules with one explicit kubeconfig path and a named context override, then kubernetes.NewForConfig. CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{Limit:...}) invokes a typed resource client. Context and request timeout bound work; pagination must be handled rather than assuming one list is complete. The project is read-only and still requires exact disposable target identification, minimal RBAC and deliberate execution.</p>
+<h3 id="1-accept-explicit-secure-configuration">1. Accept explicit secure configuration<a class="heading-anchor" href="#1-accept-explicit-secure-configuration" aria-label="Link to this section">#</a></h3>
+<p>Validate an HTTPS endpoint, lesson namespace and explicit context name.</p>
+<pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;https://cluster.invalid:6443&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned-lesson&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;target&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The configuration is accepted.</p>
+<p>The hostname is a nonresolving fixture and no request is sent. Real target ownership requires stronger runtime evidence than these syntax checks.</p>
+<h3 id="2-reject-insecure-transport">2. Reject insecure transport<a class="heading-anchor" href="#2-reject-insecure-transport" aria-label="Link to this section">#</a></h3>
+<p>Validate an HTTP endpoint.</p>
+<pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;http://cluster.invalid&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned-lesson&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;TLS&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The configuration is rejected.</p>
+<p>TLS policy protects transport identity. Disabling certificate verification is not a reasonable response to a configuration error.</p>
+<h3 id="3-reject-ambient-context-selection">3. Reject ambient context selection<a class="heading-anchor" href="#3-reject-ambient-context-selection" aria-label="Link to this section">#</a></h3>
+<p>Omit the context name.</p>
+<pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;https://cluster.invalid&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;explicit context&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Validation rejects the configuration.</p>
+<p>An explicit context prevents silently inheriting whichever cluster happens to be current in a developer configuration.</p>
+<h3 id="4-constrain-a-namespace">4. Constrain a namespace<a class="heading-anchor" href="#4-constrain-a-namespace" aria-label="Link to this section">#</a></h3>
+<p>Attempt a namespace containing a slash.</p>
+<pre class="highlighted-code"><code class="language-go">check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;https://cluster.invalid&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson/other&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;namespace&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> Validation rejects it.</p>
+<p>This small validator is deliberately conservative. Real Kubernetes names have a documented grammar and should use the appropriate library validation.</p>
+<h3 id="5-construct-a-bounded-request">5. Construct a bounded request<a class="heading-anchor" href="#5-construct-a-bounded-request" aria-label="Link to this section">#</a></h3>
+<p>Build an HTTPS list request with a live context without sending it.</p>
+<pre class="highlighted-code"><code class="language-go">req<span class="syntax-punctuation">,</span> err <span class="syntax-operator">:=</span> http<span class="syntax-punctuation">.</span>NewRequestWithContext<span class="syntax-punctuation">(</span>context<span class="syntax-punctuation">.</span>Background<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;GET&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;https://cluster.invalid/api/v1/namespaces/lesson/pods?limit=20&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">)</span>
+check<span class="syntax-punctuation">(</span>err <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> req<span class="syntax-punctuation">.</span>Method <span class="syntax-operator">==</span> <span class="syntax-string">&quot;GET&quot;</span> <span class="syntax-operator">&amp;&amp;</span> req<span class="syntax-punctuation">.</span>URL<span class="syntax-punctuation">.</span>Path <span class="syntax-operator">==</span> <span class="syntax-string">&quot;/api/v1/namespaces/lesson/pods&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;request&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The method and URL path are correct.</p>
+<p>Constructing a request proves neither authentication nor authorization nor API availability. It is useful local boundary evidence only.</p>
+<h3 id="6-transfer-userinfo-rejection">6. Transfer userinfo rejection<a class="heading-anchor" href="#6-transfer-userinfo-rejection" aria-label="Link to this section">#</a></h3>
+<p>Reject an endpoint embedding userinfo.</p>
+<pre class="highlighted-code"><code class="language-go">target <span class="syntax-operator">:=</span> url<span class="syntax-punctuation">.</span>URL<span class="syntax-punctuation">{</span>Scheme<span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;https&quot;</span><span class="syntax-punctuation">,</span> Host<span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;cluster.invalid&quot;</span><span class="syntax-punctuation">,</span> User<span class="syntax-punctuation">:</span> url<span class="syntax-punctuation">.</span>UserPassword<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;sample-user&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;sample-value&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+check<span class="syntax-punctuation">(</span>validateTarget<span class="syntax-punctuation">(</span>target<span class="syntax-punctuation">.</span>String<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;lesson&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;owned&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;userinfo&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> The embedded credential form is rejected.</p>
+<p>Credentials should not be hidden in endpoint strings that might be logged. The real client handles credentials through an explicit reviewed configuration path.</p>
+<h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+  </main>
+</body>
+</html>

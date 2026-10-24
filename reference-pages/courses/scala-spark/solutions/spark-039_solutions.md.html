@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-039: Explained paired reference solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-039: Explained paired reference solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-039_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-039-explained-paired-reference-solutions">spark-039: Explained paired reference solutions<a class="heading-anchor" href="#spark-039-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
+<p>Read the <a href="../guides/spark-039.md.html">guide</a> and attempt one language first. The <a href="spark-039_solution.scala.html">Scala reference</a> and <a href="spark-039_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations;matching two implementations alone would not rule out a shared mistake.</p>
+<h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-validate-the-generated-skewed-fixture">Exercise 1: Validate the generated skewed fixture<a class="heading-anchor" href="#exercise-1-validate-the-generated-skewed-fixture" aria-label="Link to this section">#</a></h4>
+<p>Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.</p>
+<p><strong>Expected:</strong> Exact population tuple 20000,20000,100,199990000;key 0 count 16040, other keys 40.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">fixtureMetrics</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">val</span> r<span class="syntax-operator">=</span>source<span class="syntax-punctuation">.</span>agg<span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">(</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;key&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;id&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+  <span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>r<span class="syntax-punctuation">.</span>getLong<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fixture_metrics</span><span class="syntax-punctuation">(</span>source<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">tuple</span><span class="syntax-punctuation">(</span>source<span class="syntax-operator">.</span>agg<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>lit<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>countDistinct<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">key</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>F<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>first<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The source formula supplies an independent expected distribution before any configuration comparison. A hot key is deliberate, so the experiment can show why adding partitions does not divide one unsalted key arbitrarily. Schema and population are fixed;no external large table is collected.</p>
+<p><strong>Verification evidence:</strong> Compare aggregate counts and the independent formula 16000+4000/100.</p>
+<h4 id="exercise-2-measure-the-two-partition-configuration">Exercise 2: Measure the two-partition configuration<a class="heading-anchor" href="#exercise-2-measure-the-two-partition-configuration" aria-label="Link to this section">#</a></h4>
+<p>Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.</p>
+<p><strong>Expected:</strong> 100 exact key/count pairs, total 20000;nonempty retained stage evidence;one or two data files.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">measureTwo</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">BudgetReport</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">measure_two</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span></code></pre>
+<p>The report combines actual query metrics, retained scheduler stage counters and a separate physical partition-row observation. Timing covers the grouped collect only;the extra diagnostic scan and file write are outside that interval and are stated explicitly. The persisted readback ensures the measured transformation still produces the intended product.</p>
+<p><strong>Verification evidence:</strong> Compare all rows with the literal formula before accepting any work/time report.</p>
+<h4 id="exercise-3-compare-four-partitions-without-assuming-a-speedup">Exercise 3: Compare four partitions without assuming a speedup<a class="heading-anchor" href="#exercise-3-compare-four-partitions-without-assuming-a-speedup" aria-label="Link to this section">#</a></h4>
+<p>Repeat with 4 partitions and a separate output directory.</p>
+<p><strong>Expected:</strong> All 100 result tuples match the same oracle;four buckets sum 20000 and one to four files are observed.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">measureFour</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">:</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">:</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">:</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">BudgetReport</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">measure_four</span><span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> measured<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">,</span>source<span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span>root<span class="syntax-punctuation">)</span></code></pre>
+<p>Increasing partitions changes task granularity and output-file opportunities, not the configured local CPU thread count. It may add scheduling overhead while leaving the dominant key together. A valid comparison preserves the full row contract and reports measurements rather than asserting that more partitions must be faster.</p>
+<p><strong>Verification evidence:</strong> Assert parity and print actual elapsed time/file/metric values without an ordering claim.</p>
+<h4 id="exercise-4-interpret-work-imbalance-and-spill-honestly">Exercise 4: Interpret work imbalance and spill honestly<a class="heading-anchor" href="#exercise-4-interpret-work-imbalance-and-spill-honestly" aria-label="Link to this section">#</a></h4>
+<p>Compute maximum bucket rows divided by mean bucket rows;report available dataSize, shuffleBytesWritten and spillSize metrics without inventing missing values.</p>
+<p><strong>Expected:</strong> Both observed work ratios exceed 1;unavailable metrics remain None/None-equivalent.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">imbalance</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">:</span> <span class="syntax-class">Seq</span><span class="syntax-punctuation">[</span><span class="syntax-class">Long</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">.</span>nonEmpty <span class="syntax-operator">&amp;&amp;</span> counts<span class="syntax-punctuation">.</span>forall<span class="syntax-punctuation">(</span>_&gt;=<span class="syntax-number">0L</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> counts<span class="syntax-punctuation">.</span>sum<span class="syntax-operator">&gt;</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
+  counts<span class="syntax-punctuation">.</span>max<span class="syntax-punctuation">.</span>toDouble<span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">.</span>sum<span class="syntax-punctuation">.</span>toDouble<span class="syntax-operator">/</span>counts<span class="syntax-punctuation">.</span>size<span class="syntax-punctuation">)</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">imbalance</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> counts <span class="syntax-operator">or</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>value<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> counts<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Positive bounded work counts required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>SQL metric names are retained because serialized dataSize is not automatically remote-network bytes. spillSize is the reported operator metric, not invented disk I/O when absent. A tiny run may legitimately spill zero. Partition row counts reveal the work distribution, but per-task timing would require additional actual task metrics;the ratio is labeled accordingly.</p>
+<p><strong>Verification evidence:</strong> Assert row conservation and positive ratio, then print exact available metric maps and stage receipts.</p>
+<h4 id="exercise-5-compute-a-separate-hypothetical-cost-model">Exercise 5: Compute a separate hypothetical cost model<a class="heading-anchor" href="#exercise-5-compute-a-separate-hypothetical-cost-model" aria-label="Link to this section">#</a></h4>
+<p>Use a hypothetical rate 0.05 currency units per vCPU-hour and 0.02 per GiB-month. Evaluate 2 vCPUs for 1 hour plus 2 GiB retained for 30 days under a30-day month.</p>
+<p><strong>Expected:</strong> Estimated 0.14 currency units, not an actual cloud bill or a price recommendation.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">estimatedCost</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Double</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  require<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>forall<span class="syntax-punctuation">(</span>x <span class="syntax-operator">=&gt;</span> x<span class="syntax-operator">&gt;=</span><span class="syntax-number">0.0</span> <span class="syntax-operator">&amp;&amp;</span> x<span class="syntax-punctuation">.</span>isFinite<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+  vcpu<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>seconds<span class="syntax-operator">/</span><span class="syntax-number">3600.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.05</span> <span class="syntax-operator">+</span> gib<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>days<span class="syntax-operator">/</span><span class="syntax-number">30.0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">0.02</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">estimated_cost</span><span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">import</span> math
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> value<span class="syntax-operator">&lt;</span><span class="syntax-number">0</span> <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span>vcpu<span class="syntax-punctuation">,</span>seconds<span class="syntax-punctuation">,</span>gib<span class="syntax-punctuation">,</span>days<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Finite nonnegative model inputs required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> vcpu<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>seconds<span class="syntax-operator">/</span><span class="syntax-number">3600</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.05</span><span class="syntax-operator">+</span>gib<span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>days<span class="syntax-operator">/</span><span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-number">.02</span></code></pre>
+<p>The model exposes its units and intentionally hypothetical prices. It omits billing minimums, network, requests, replication and operational overhead. Feeding a small local elapsed time into it would not turn the estimate into a measured production bill. Correct unit arithmetic is necessary but not sufficient for a real cost forecast.</p>
+<p><strong>Verification evidence:</strong> Check each unit conversion and reject negative durations/resources.</p>
+<h4 id="exercise-6-enforce-the-stop-budget-before-scaling-data">Exercise 6: Enforce the stop budget before scaling data<a class="heading-anchor" href="#exercise-6-enforce-the-stop-budget-before-scaling-data" aria-label="Link to this section">#</a></h4>
+<p>Accept only row counts 1..20000 and partition counts 1..8 for this local exercise. Reject an attempted larger fixture before constructing it.</p>
+<p><strong>Expected:</strong> 20000/4 accepted;20001/4 and 20000/9 rejected.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">withinBudget</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">:</span> <span class="syntax-class">Long</span><span class="syntax-punctuation">,</span>partitions<span class="syntax-punctuation">:</span> <span class="syntax-class">Int</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">Boolean</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
+  rows<span class="syntax-operator">&gt;=</span><span class="syntax-number">1L</span> <span class="syntax-operator">&amp;&amp;</span> rows<span class="syntax-operator">&lt;=</span><span class="syntax-number">20000L</span> <span class="syntax-operator">&amp;&amp;</span> partitions<span class="syntax-operator">&gt;=</span><span class="syntax-number">1</span> <span class="syntax-operator">&amp;&amp;</span> partitions<span class="syntax-operator">&lt;=</span><span class="syntax-number">8</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">within_budget</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">,</span>partitions<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>partitions<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">and</span> <span class="syntax-number">1</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>rows<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">20000</span> <span class="syntax-operator">and</span> <span class="syntax-number">1</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>partitions<span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span><span class="syntax-number">8</span></code></pre>
+<p>The limit is a declared teaching workload budget, not a universal safe size for Spark. Requiring an explicit review before expanding it prevents a casual performance experiment from becoming an unbounded resource request. Temporary SQL configuration is restored in finally and only the newly created product root is removed.</p>
+<p><strong>Verification evidence:</strong> Assert both refusals and confirm the session shuffle setting restored to 2.</p>
+<h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference in its prepared fixed worker. The small fixture is constructed inside the program,so opening a lesson does not fetch data. A final success line is printed only after the reference assertions complete. Plan observations,partition evidence and resource measurements apply to the actual local configuration;they do not establish cluster-scale performance. Session cleanup is explicit,and any additional owned file/query lifecycle is described in the lesson.</p></article>
+  </main>
+</body>
+</html>

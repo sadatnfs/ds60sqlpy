@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-026",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Reproduce first",
+      "input_or_change": "Write the expected sum of [2,4,6].",
+      "expected": "12 from three values."
+    },
+    {
+      "exercise": 2,
+      "task": "Inspect a stack",
+      "input_or_change": "Use an already available debugger on a -g host build and break in total.",
+      "expected": "Call stack includes main and total; xs has three values."
+    },
+    {
+      "exercise": 3,
+      "task": "Measure a bounded workload",
+      "input_or_change": "Run 1000 totals and record steady_clock duration.",
+      "expected": "Checksum 12000 and nonnegative measured duration with units."
+    },
+    {
+      "exercise": 4,
+      "task": "Reject a false benchmark",
+      "input_or_change": "Explain why one observed faster run proves little.",
+      "expected": "Build mode, workload, repetitions and variability listed."
+    },
+    {
+      "exercise": 5,
+      "task": "Test an empty case",
+      "input_or_change": "Inspect total({}) with debugger or assertions.",
+      "expected": "0 and no element access."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a hypothesis",
+      "input_or_change": "Replace a linear scan with a map lookup and state a measurable hypothesis.",
+      "expected": "Same exact results, operation counts and bounded measurements compared."
+    }
+  ]
+}

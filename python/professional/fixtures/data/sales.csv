@@ -1,0 +1,7 @@
+order_id,event_date,region,category,units,unit_price,note
+1001,2026-01-02,north,book,2,12.50,first order
+1002,2026-01-02,south,pen,5,1.20,
+1003,2026-01-03,north,pen,3,1.20,repeat
+1004,2026-01-04,west,book,1,18.00,
+1005,2026-01-04,south,book,4,12.50,bulk
+1006,2026-01-05,west,pen,10,1.20,

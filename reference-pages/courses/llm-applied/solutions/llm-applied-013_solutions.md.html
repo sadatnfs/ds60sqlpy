@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-013: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-013: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-013_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-013-explanatory-solutions">llm-applied-013: explanatory solutions<a class="heading-anchor" href="#llm-applied-013-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Reliability comparisons require an explicit unit of independence. Ten paraphrases of one question are not ten independent domains. Pair candidate systems on the same question IDs, then preserve related questions within a family when estimating uncertainty. A family-weighted mean gives each authored task family equal weight; a row-weighted mean gives frequently repeated families more influence. Neither is automatically correct, but the choice must match the intended deployment population.</p>
+<p>A bootstrap resamples observed units with replacement. It can describe variability under its assumptions, but cannot repair a biased or tiny evaluation set. A confidence interval excluding zero is not a release decision by itself: severe unsupported claims, access leaks or unacceptable coverage can still block the system. This lesson uses saved binary error differences and explicit abstention counts. It keeps statistical computation deterministic and separate from any generated narrative interpreting the result.</p>
+<p><strong>Paired evaluation:</strong> Comparing systems on the same identified cases.</p>
+<p><strong>Family unit:</strong> A group of related questions treated together for uncertainty.</p>
+<p><strong>Bootstrap estimate:</strong> A statistic calculated on a resampled set of observed units.</p>
+<p><strong>Selective accuracy:</strong> Accuracy among answered cases, reported beside coverage.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Join system error tables by question ID and reject unequal key sets. Compute errorA-errorB for each pair, aggregate within family, then sample family indices with one seeded NumPy generator. The same sampled family applies to both systems because the difference is already paired. Report the number of independent families, not only the number of paraphrases. Calculate answered accuracy and coverage with separate denominators.</p>
+<h3 id="derive-the-paired-and-family-level-comparison">Derive the paired and family-level comparison<a class="heading-anchor" href="#derive-the-paired-and-family-level-comparison" aria-label="Link to this section">#</a></h3>
+<p>System A has errors[0, 0, 1] on q1, q2, q3; system B has[1, 1, 0] on the same IDs. Subtracting A minus B gives[-1, -1, 1], where negative favors A because smaller error is better. Sorting dictionary keys aligns identities. Pairing by insertion order would compare different questions and produce a statistic with no intended case-level meaning.</p>
+<p>The row-weighted mean is(-1-1+1)/3=-1/3. If q1 and q2 are related variants of family F and q3 is family G, the family means are[-1, +1], whose equally weighted average is zero. This is not a disagreement between arithmetic implementations. The row estimand gives family F twice the weight, while the family estimand gives F and G equal weight.</p>
+<p>The bootstrap draws two family indices with replacement. There are four equally likely ordered samples from the empirical family distribution:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Resampled families</th>
+<th>Mean difference</th>
+<th>Probability</th>
+</tr></thead><tbody>
+<tr>
+<td>F, F</td>
+<td>-1</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math></td>
+</tr>
+<tr>
+<td>F, G</td>
+<td>0</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math></td>
+</tr>
+<tr>
+<td>G, F</td>
+<td>0</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math></td>
+</tr>
+<tr>
+<td>G, G</td>
+<td>+1</td>
+<td><math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math></td>
+</tr>
+</tbody></table></div>
+<p>The exact bootstrap mean is zero and variance is1/2. Its standard deviation is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\frac{1}{2}}</annotation></semantics></math>, about0.7071. The2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.</p>
+<p>Pairing preserves the relationship between candidate errors. The variance identity <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>Var</mo><mo stretchy="false">(</mo><mi>A</mi><mo>−</mo><mi>B</mi><mo stretchy="false">)</mo><mo>=</mo><mo>Var</mo><mo stretchy="false">(</mo><mi>A</mi><mo stretchy="false">)</mo><mo>+</mo><mo>Var</mo><mo stretchy="false">(</mo><mi>B</mi><mo stretchy="false">)</mo><mo>−</mo><mn>2</mn><mo>Cov</mo><mo stretchy="false">(</mo><mi>A</mi><mo>,</mo><mi>B</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\operatorname{Var}(A-B)=\operatorname{Var}(A)+\operatorname{Var}(B)-2\operatorname{Cov}(A,B)</annotation></semantics></math> explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.</p>
+<p>Selective answering introduces more denominators. With ten questions, six answers and five correct answers, coverage is6/10=0.6 and accuracy among answers is5/6. Correct answers per all requests is5/10. A system that answers only the easiest one correctly has conditional accuracy one but coverage0.1. It may or may not be useful under the task&#x27;s costs. Always retain how many refusals were appropriate and how many answerable cases were declined.</p>
+<p>The saved errors here are teaching data. Their bootstrap computation is real arithmetic, but the arrays are not receipts from running a named model. A real comparison should preserve question IDs, predictions, rubric decisions, candidate configuration and family labels. Review label disagreements, because uncertainty over sampled questions does not automatically account for systematic rubric error.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why can more paraphrases make an interval look falsely precise?</strong> Treating correlated variants as independent rows can overstate the effective evidence. Resampling at the relevant family level preserves that dependence under the chosen empirical design.</p>
+<p><strong>Does a confidence interval establish why one candidate improved?</strong> No. It describes variability of a statistic under assumptions. Attributing improvement to a changed component needs a controlled comparison or suitable causal design.</p>
+<p><strong>Can a severe failure be averaged away?</strong> Arithmetic can dilute it, but the acceptance contract need not permit that. A zero-access-leak requirement is a separate gate whose observed violation blocks release even if an average metric improves.</p>
+<h3 id="exercise-1-align-paired-errors">Exercise 1: Align paired errors<a class="heading-anchor" href="#exercise-1-align-paired-errors" aria-label="Link to this section">#</a></h3>
+<p>The question is: Use system A errors <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{1}=0</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{2}=0</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>3</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{3}=1</annotation></semantics></math> and B <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>1</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{1}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>2</mn></mrow></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">q_{2}=1</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msub><mi>q</mi><mrow><mn>3</mn></mrow></msub><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">q_{3}=0</annotation></semantics></math>.</p>
+<p>Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favorsA because the metric is error.</p>
+<pre class="highlighted-code"><code class="language-python">a<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q3</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> b<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q3</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q1</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">q2</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> ids<span class="syntax-operator">=</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> difference<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-operator">-</span>b<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> ids<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>difference<span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> differences[-1, -1, 1] by sortedID.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with differences[-1, -1, 1] by sortedID.</p>
+<h3 id="exercise-2-aggregate-by-family">Exercise 2: Aggregate by family<a class="heading-anchor" href="#exercise-2-aggregate-by-family" aria-label="Link to this section">#</a></h3>
+<p>The question is: Assignq1, q2 tofamilyF andq3 toG; compare row mean with family mean.</p>
+<p>The repeated family changes the row-weighted conclusion. This is a design choice about the evaluation population, not a numerical bug.</p>
+<pre class="highlighted-code"><code class="language-python">families<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> family_values<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>difference<span class="syntax-punctuation">[</span>families<span class="syntax-operator">==</span>f<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> f <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">F</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">G</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>difference<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> family_values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">0</span></code></pre>
+<p><strong>Expected:</strong> row mean-1/3; family mean0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with row mean-1/3; family mean0.</p>
+<h3 id="exercise-3-resample-paired-families">Exercise 3: Resample paired families<a class="heading-anchor" href="#exercise-3-resample-paired-families" aria-label="Link to this section">#</a></h3>
+<p>The question is: Draw2000 bootstrap samples of the two family differences withseed17.</p>
+<p>Two families produce a coarse empirical distribution. A large number of bootstrap draws does not create additional independent evidence.</p>
+<pre class="highlighted-code"><code class="language-python">indices<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">17</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>integers<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> estimates<span class="syntax-operator">=</span>family_values<span class="syntax-punctuation">[</span>indices<span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>unique<span class="syntax-punctuation">(</span>estimates<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-operator">-</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span><span class="syntax-number">0.</span><span class="syntax-punctuation">,</span><span class="syntax-number">1.</span><span class="syntax-punctuation">}</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>indices<span class="syntax-punctuation">,</span>np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">17</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>integers<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span><span class="syntax-number">2000</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> all estimates are-1, 0 or1; repeatable with same seed.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with all estimates are-1, 0 or1; repeatable with same seed.</p>
+<h3 id="exercise-4-report-coverage-and-answered-accuracy">Exercise 4: Report coverage and answered accuracy<a class="heading-anchor" href="#exercise-4-report-coverage-and-answered-accuracy" aria-label="Link to this section">#</a></h3>
+<p>The question is: For10 questions, answer6 with 5 correct and abstain on4.</p>
+<p>A system can improve answered accuracy by refusing difficult cases. Coverage exposes that tradeoff instead of presenting a selective score as overall success.</p>
+<pre class="highlighted-code"><code class="language-python">total<span class="syntax-punctuation">,</span>answered<span class="syntax-punctuation">,</span>correct<span class="syntax-operator">=</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span>
+<span class="syntax-keyword">assert</span> answered<span class="syntax-operator">/</span>total<span class="syntax-operator">==</span><span class="syntax-number">.6</span> <span class="syntax-operator">and</span> correct<span class="syntax-operator">/</span>answered<span class="syntax-operator">==</span><span class="syntax-number">5</span><span class="syntax-operator">/</span><span class="syntax-number">6</span> <span class="syntax-operator">and</span> total<span class="syntax-operator">-</span>answered<span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
+<p><strong>Expected:</strong> coverage.6; answered accuracy5/6; overall correct answers5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with coverage.6; answered accuracy5/6; overall correct answers5.</p>
+<h3 id="exercise-5-block-a-severe-boundary-failure">Exercise 5: Block a severe boundary failure<a class="heading-anchor" href="#exercise-5-block-a-severe-boundary-failure" aria-label="Link to this section">#</a></h3>
+<p>The question is: Combine a favorable mean comparison with one access leak and apply a zero-access-leak gate.</p>
+<p>An average quality improvement does not compensate for a required authorization failure. The gate should be declared before inspecting results.</p>
+<pre class="highlighted-code"><code class="language-python">mean_gain<span class="syntax-operator">=</span><span class="syntax-number">.1</span><span class="syntax-punctuation">;</span> access_leaks<span class="syntax-operator">=</span><span class="syntax-number">1</span>
+release<span class="syntax-operator">=</span>mean_gain<span class="syntax-operator">&gt;</span><span class="syntax-number">0</span> <span class="syntax-operator">and</span> access_leaks<span class="syntax-operator">==</span><span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> release</code></pre>
+<p><strong>Expected:</strong> release decisionFalse.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with release decisionFalse.</p>
+<h3 id="exercise-6-keep-final-tests-out-of-selection">Exercise 6: Keep final tests out of selection<a class="heading-anchor" href="#exercise-6-keep-final-tests-out-of-selection" aria-label="Link to this section">#</a></h3>
+<p>The question is: Record retriever selection on validation and final scoring on test; flag a test-based parameter change.</p>
+<p>Once the test influences a configuration choice, it is part of selection. A new untouched assessment is needed for a fresh final claim.</p>
+<pre class="highlighted-code"><code class="language-python">ledger<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose_k</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">score_final</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>part<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span> <span class="syntax-keyword">for</span> action<span class="syntax-punctuation">,</span>part <span class="syntax-operator">in</span> ledger <span class="syntax-keyword">if</span> action<span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose_k</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">choose_k</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">test</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">validation</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> test-based selection rejected.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with test-based selection rejected.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

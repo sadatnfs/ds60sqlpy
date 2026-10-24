@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-047",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict client and backend ports.",
+      "expected": "Client 80 and backend 8080."
+    },
+    {
+      "exercise": 2,
+      "task": "Change only the Service selector in a synthetic record.",
+      "expected": "The matching endpoint set becomes empty."
+    },
+    {
+      "exercise": 3,
+      "task": "Trace a fresh TCP request through the Service.",
+      "expected": "Caller, virtual destination, chosen endpoint and listener are named."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a ClusterIP with no ready endpoints.",
+      "expected": "Inspect selector matches and readiness before external routing."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why HTTP path routing is not provided by this Service.",
+      "expected": "Layer 4 connection selection does not interpret URL paths."
+    },
+    {
+      "exercise": 6,
+      "task": "Design a stable endpoint for replacing Pods.",
+      "expected": "Clients use Service discovery while backend identities can change."
+    }
+  ]
+}

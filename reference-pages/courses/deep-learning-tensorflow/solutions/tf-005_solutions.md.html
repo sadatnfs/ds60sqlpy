@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-005: worked solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-005: worked solutions</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-005_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-005-worked-solutions">tf-005: worked solutions<a class="heading-anchor" href="#tf-005-worked-solutions" aria-label="Link to this section">#</a></h2>
+<p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-005.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
+<p>The <a href="tf-005_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
+<h3 id="exercise-1-label-slope-and-state">Exercise 1: Label slope and state<a class="heading-anchor" href="#exercise-1-label-slope-and-state" aria-label="Link to this section">#</a></h3>
+<p>At zero the loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mn>0</mn><mo>−</mo><mn>2</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">{\left(0-2\right)}^{2}=4</annotation></semantics></math> and the derivative is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mo stretchy="false">(</mo><mn>0</mn><mo>−</mo><mn>2</mn><mo stretchy="false">)</mo><mo>=</mo><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">2\cdot (0-2)=-4</annotation></semantics></math>. The rate-0.1 subtraction gives 0.4, then recomputing the function gives 2.56. The derivative is evaluated at the old state; it is not the updated state or the post-update loss. Keep each number labeled. This example supports the arithmetic of one small update and does not promise that every finite gradient step improves every objective.</p>
+<p><strong>Expected:</strong> Loss 4, derivative -4, new w 0.4 and new loss 2.56.</p>
+<p><strong>Verify:</strong> Assert each named quantity separately; do not label -4 as the updated parameter.</p>
+<h3 id="exercise-2-construct-central-probes">Exercise 2: Construct central probes<a class="heading-anchor" href="#exercise-2-construct-central-probes" aria-label="Link to this section">#</a></h3>
+<p>The central formula uses both sides and divides by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mi>h</mi></mrow><annotation encoding="application/x-tex">2\cdot h</annotation></semantics></math>. At zero for a quadratic, the h-squared terms cancel symmetrically, leaving -4 apart from binary rounding. All three supplied sizes meet the stated absolute tolerance. Retain the scale/value table rather than merely printing one number that happened to match. For a nonquadratic function the approximation generally has truncation error, so agreement at every h is not a universal property of the method.</p>
+<p><strong>Expected:</strong> Every central approximation matches -4 within 1e-10.</p>
+<p><strong>Verify:</strong> Keep the three h/value pairs and compare them with the analytic derivative using an explicit absolute tolerance.</p>
+<h3 id="exercise-3-expose-a-one-sided-bias">Exercise 3: Expose a one-sided bias<a class="heading-anchor" href="#exercise-3-expose-a-one-sided-bias" aria-label="Link to this section">#</a></h3>
+<p>Expanding f(h)-f(0) gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>−</mo><mn>4</mn><mo>·</mo><mi>h</mi><mo>+</mo><mi>h</mi><mo>·</mo><mi>h</mi></mrow><annotation encoding="application/x-tex">-4\cdot h+h\cdot h</annotation></semantics></math>. Division by h produces -4+h, yielding the three stated forward differences. Their errors are exactly h in real arithmetic, which demonstrates finite-step bias without a framework. Smaller h reduces that bias until rounding and cancellation become relevant. The symmetric quadratic check avoids this term, but the lesson is about knowing the approximation contract, not declaring forward differences invalid for every use.</p>
+<p><strong>Expected:</strong> Values are -3.9, -3.99 and -3.999, differing from -4 by h.</p>
+<p><strong>Verify:</strong> Assert the three errors against their h values and compare with the central-probe table.</p>
+<h3 id="exercise-4-move-from-the-other-side">Exercise 4: Move from the other side<a class="heading-anchor" href="#exercise-4-move-from-the-other-side" aria-label="Link to this section">#</a></h3>
+<p>At <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">w=3</annotation></semantics></math>, the derivative is 2. Subtracting one tenth of it changes the parameter to 2.8. Its distance from the optimum is 0.8, so the new squared loss is 0.64. The update decreases the parameter because the derivative is positive on this side of the optimum. Recompute the loss at the new point instead of reusing the old value 1; a correct update followed by a stale printed loss would be misleading evidence.</p>
+<p><strong>Expected:</strong> Derivative 2, new w 2.8 and new loss 0.64.</p>
+<p><strong>Verify:</strong> Assert all three values within 1e-12 and explain why the update now decreases the parameter.</p>
+<h3 id="exercise-5-diagnose-an-invalid-derivative-claim">Exercise 5: Diagnose an invalid derivative claim<a class="heading-anchor" href="#exercise-5-diagnose-an-invalid-derivative-claim" aria-label="Link to this section">#</a></h3>
+<p>For absolute value at zero, a left slope of -1 and a right slope of +1 show that no ordinary two-sided derivative exists. The symmetric calculation returns 0 because its numerator cancels, not because the kink disappeared. Reject <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>h</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">h=0</annotation></semantics></math> to avoid division by zero and reject NaN because nearby comparisons would be uninterpretable. A framework may choose a subgradient convention at the kink; label that separately from a unique classical derivative.</p>
+<p><strong>Expected:</strong> One-sided slopes -1 and +1 contradict differentiability; central is 0. Invalid h/point cases raise ValueError.</p>
+<p><strong>Verify:</strong> Record the three slopes and capture both input-validation exceptions; do not call central zero a unique derivative.</p>
+<h3 id="exercise-6-transfer-to-a-scaled-objective">Exercise 6: Transfer to a scaled objective<a class="heading-anchor" href="#exercise-6-transfer-to-a-scaled-objective" aria-label="Link to this section">#</a></h3>
+<p>The derivative of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>−</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">3\cdot {\left(w-1\right)}^{2}</annotation></semantics></math> is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>6</mn><mo>·</mo><mo stretchy="false">(</mo><mi>w</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">6\cdot (w-1)</annotation></semantics></math>, giving 6 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>w</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">w=2</annotation></semantics></math>. A rate-0.1 step reaches 1.4 and its loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>3</mn><mo>·</mo><msup><mrow><mn>0.4</mn></mrow><mrow><mn>2</mn></mrow></msup><mo>=</mo><mn>0.48</mn></mrow><annotation encoding="application/x-tex">3\cdot {0.4}^{2}=0.48</annotation></semantics></math>. This fresh objective confirms that the learner can transfer the mechanism rather than memorize -4. A direct symbolic derivative and a central finite difference are complementary checks. Neither removes the need to inspect which actual computation a later automatic-differentiation tape records.</p>
+<p><strong>Expected:</strong> Gradient 6, new w 1.4 and new loss 0.48.</p>
+<p><strong>Verify:</strong> Compare a fresh central probe with 6, then assert the new parameter and recomputed loss.</p>
+<h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
+<p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
+<span class="syntax-keyword">import</span> math
+
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">central_difference</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">,</span> point<span class="syntax-punctuation">,</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    point<span class="syntax-punctuation">,</span> h <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>point<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>point<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>h<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> h <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite point and positive finite h required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    high<span class="syntax-punctuation">,</span> low <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">(</span>point <span class="syntax-operator">+</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>function<span class="syntax-punctuation">(</span>point <span class="syntax-operator">-</span> h<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>high<span class="syntax-punctuation">)</span> <span class="syntax-operator">or</span> <span class="syntax-operator">not</span> math<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>low<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">finite probe values required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-punctuation">(</span>high <span class="syntax-operator">-</span> low<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> h<span class="syntax-punctuation">)</span></code></pre>
+<h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
+<p>Derive the slope of <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>w</mi><mo>+</mo><mn>1</mn><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">{\left(w+1\right)}^{2}</annotation></semantics></math> at zero without a framework. Then explain why h and a learning rate play different roles even though both may be written as small decimal numbers.</p>
+<p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
+  </main>
+</body>
+</html>

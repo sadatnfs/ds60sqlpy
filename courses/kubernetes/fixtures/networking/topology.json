@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "provenance": "synthetic offline topology, never live target addresses",
+  "namespace": "study-example",
+  "cluster_domain": "cluster.local",
+  "pod_cidr": "10.244.0.0/16",
+  "service_cidr": "10.96.0.0/16",
+  "nodes": [
+    {
+      "id": "node-a",
+      "ip": "192.0.2.10",
+      "zone": "zone-a"
+    },
+    {
+      "id": "node-b",
+      "ip": "192.0.2.11",
+      "zone": "zone-b"
+    }
+  ],
+  "service": {
+    "name": "network-study",
+    "ip": "10.96.0.20",
+    "port": 80,
+    "target_port_name": "http",
+    "target_port": 8080,
+    "selector": {
+      "app": "network-study"
+    }
+  },
+  "pods": [
+    {
+      "uid": "pod-a",
+      "ip": "10.244.1.7",
+      "node": "node-a",
+      "labels": {
+        "app": "network-study"
+      },
+      "ready": true,
+      "ports": {
+        "http": 8080
+      }
+    },
+    {
+      "uid": "pod-b",
+      "ip": "10.244.2.9",
+      "node": "node-b",
+      "labels": {
+        "app": "network-study"
+      },
+      "ready": false,
+      "ports": {
+        "http": 8080
+      }
+    }
+  ],
+  "client_cases": [
+    {
+      "name": "allowed",
+      "namespace_labels": {
+        "study-role": "client"
+      },
+      "pod_labels": {
+        "role": "tester"
+      },
+      "expected": true,
+      "source_egress_allowed": true
+    },
+    {
+      "name": "wrong-namespace",
+      "namespace_labels": {
+        "study-role": "other"
+      },
+      "pod_labels": {
+        "role": "tester"
+      },
+      "expected": false,
+      "source_egress_allowed": true
+    },
+    {
+      "name": "wrong-pod",
+      "namespace_labels": {
+        "study-role": "client"
+      },
+      "pod_labels": {
+        "role": "other"
+      },
+      "expected": false,
+      "source_egress_allowed": true
+    },
+    {
+      "name": "egress-blocked",
+      "namespace_labels": {
+        "study-role": "client"
+      },
+      "pod_labels": {
+        "role": "tester"
+      },
+      "source_egress_allowed": false,
+      "expected": false
+    }
+  ],
+  "application_listener_family": "IPv4 only in the supplied course fixture; IPv6 requires a separate reviewed listener"
+}

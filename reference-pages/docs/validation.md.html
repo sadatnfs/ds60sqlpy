@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Validation and release readiness · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Validation and release readiness</h1>
+      <p class="source-path">Generated from <code>docs/validation.md</code></p>
+    </header>
+    <article class="document"><h2 id="validation-and-release-readiness">Validation and release readiness<a class="heading-anchor" href="#validation-and-release-readiness" aria-label="Link to this section">#</a></h2>
+<p>Validate the exact revision being shipped. Configuration, structural checks, unit tests, real runtime execution and browser behavior answer different questions. A passing parser does not prove a lesson runs, and a configured workflow does not prove that its hosted jobs passed.</p>
+<p>Run commands from the repository root. Keep learner projects and their Docker volumes separate from disposable validation projects. Use the current workflow run and its artifacts as evidence for that revision, rather than copying old machine timings or test counts into documentation.</p>
+<h3 id="prepare-a-development-environment">Prepare a development environment<a class="heading-anchor" href="#prepare-a-development-environment" aria-label="Link to this section">#</a></h3>
+<p>The supported product is the Linux-container Docker classroom. Windows runs through WSL 2; macOS uses its engine&#x27;s Linux environment. Native Windows backends and native executable bundles are outside the release support matrix.</p>
+<p>Maintainers running contributor checks on Linux or WSL 2 also need Python 3.12, the locked development dependencies and Node.js. The workflow uses Node 24 for the framework-free UI checks. Python 3.11 remains a supported core validation target; inspect <code>.github/workflows/ci.yml</code> for the exact matrix.</p>
+<p>With <code>uv</code> installed:</p>
+<pre class="highlighted-code"><code class="language-text">uv lock --check
+uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks --extra mcp
+uv run --no-sync python scripts/course.py doctor</code></pre>
+<p>Prefix the Python commands below with <code>uv run --no-sync</code>, or use the interpreter inside this checkout&#x27;s <code>.venv</code>. On Windows, WSL 2 provides the same Bash, Linux Python environment and Docker workflow. Historical native setup recipes are unsupported compatibility references, not alternate release requirements.</p>
+<p>Core setup does not install every heavy learning dependency. A test that needs an optional compiler, framework, SQL service or model asset must either run in its prepared environment or report that boundary explicitly.</p>
+<h3 id="fast-checks-during-development">Fast checks during development<a class="heading-anchor" href="#fast-checks-during-development" aria-label="Link to this section">#</a></h3>
+<p>Run the narrow tests for the changed area first, then verify the maintained source and generated views:</p>
+<pre class="highlighted-code"><code class="language-text">python scripts/build_catalog.py
+python scripts/course.py validate
+python scripts/audit_practice.py
+python scripts/audit_lesson_depth.py
+python scripts/normalize_lesson_prose.py
+python scripts/check_content_rendering.py
+python scripts/build_course_guide.py --check
+python scripts/build_lesson_readers.py --check
+python scripts/build_journey_preview.py --check
+python scripts/check_modules.py
+python scripts/validate_notebooks.py
+node scripts/check_classroom_ui.mjs
+python -m ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
+python -m ruff format --check src scripts tests bridge python/professional docker/init_module_runtime.py
+python -m mypy
+python scripts/scan_secrets.py --history
+git diff --check</code></pre>
+<p><code>normalize_lesson_prose.py</code> is a dry check by default. When deliberately refreshing reviewed prose, run it with <code>--write</code> after authoring generators and before HTML generation. <code>check_content_rendering.py</code> renders the actual published Markdown and notebooks, checking mathematics and code blocks through the production reader. A generic Markdown parser is not a substitute.</p>
+<p>After an intentional content change, regenerate the catalog, reports and readers with <code>make generate</code>, or run that target&#x27;s listed Python commands when Make is unavailable. Review the generated diff. Never hand-edit maintained HTML to hide source drift. The journey preview is a developer design archive; the live <code>/classroom</code>, <code>/learn</code> and <code>/journeys</code> URLs use one shared interface.</p>
+<p>The secret scanner reports categories and locations without copying suspected credentials into logs. It checks the current tree and reachable Git history. Keep private progress, work directories, caches and environment files out of source control and release archives. Source cleanup does not remove material already published in Git history; historical findings require a separate reviewed response.</p>
+<h3 id="run-tests-in-parallel">Run tests in parallel<a class="heading-anchor" href="#run-tests-in-parallel" aria-label="Link to this section">#</a></h3>
+<p>Use four grouped workers by default:</p>
+<pre class="highlighted-code"><code class="language-text">python -m pytest -n 4 --dist loadgroup</code></pre>
+<p>The equivalent Make targets are:</p>
+<pre class="highlighted-code"><code class="language-text">make test
+make test TEST_WORKERS=2
+make test-serial</code></pre>
+<p>Keep <code>--dist loadgroup</code>. Tests that use the same disposable PostgreSQL fixtures belong to the <code>shared-postgres</code> group and run serially within that group. The suite rejects unsafe distribution when those shared fixtures are enabled. Changing the scheduler can cause destructive fixture races even if individual tests pass. Use <code>-n 0</code> for focused serial diagnosis, and reduce worker count on machines with little memory. More workers do not guarantee shorter runtimes.</p>
+<p>Record the passed, failed and skipped totals from the actual run. Explain skips by surface, such as an optional framework, a live database or historical native-platform compatibility tests outside the supported matrix. Do not describe a skipped platform as validated.</p>
+<h3 id="what-hosted-workflows-check">What hosted workflows check<a class="heading-anchor" href="#what-hosted-workflows-check" aria-label="Link to this section">#</a></h3>
+<p>The workflow files are the executable source of truth. They use read-only repository permissions, pinned action revisions and local image builds. They do not publish Docker images. Linux core jobs use UTF-8 and create their test workspace before starting four grouped pytest workers. Native Windows ACLs, PowerShell backend diagnostics and native executable bundles are not release gates. Windows Docker wrappers remain supported entrypoints into WSL 2.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Workflow and job</th>
+<th>Trigger and scope</th>
+<th>What a pass establishes</th>
+</tr></thead><tbody>
+<tr>
+<td>Course validation: Core checks</td>
+<td>Push, pull request, manual dispatch and weekly schedule; Ubuntu Python 3.11/3.12</td>
+<td>Lock, generated artifacts, content contracts, UI behavior, lint, typing, grouped tests and selected notebook execution</td>
+</tr>
+<tr>
+<td>Course validation: Contributor bootstrap</td>
+<td>Same triggers; Ubuntu Python 3.12</td>
+<td>Fresh Linux contributor environment and diagnostics, also used by the WSL development route</td>
+</tr>
+<tr>
+<td>Course validation: PostgreSQL 17 end-to-end</td>
+<td>Same triggers; disposable Linux PostgreSQL service</td>
+<td>All cataloged SQL learner/reference sequences, live database tests and the PostgreSQL magic notebook against the course database</td>
+</tr>
+<tr>
+<td>Course validation: Advanced imports</td>
+<td>Manual dispatch and weekly schedule; Ubuntu Python 3.12</td>
+<td>Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training</td>
+</tr>
+<tr>
+<td>Application builds: Portable Docker classroom starter</td>
+<td>Push, pull request and manual dispatch; Ubuntu</td>
+<td>A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners</td>
+</tr>
+<tr>
+<td>Application builds: Docker classroom</td>
+<td>Same triggers; isolated Linux groups covering all ordinary profiles</td>
+<td>Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked</td>
+</tr>
+<tr>
+<td>Application builds: Chromium acceptance</td>
+<td>Python Core Docker group, after container replacement</td>
+<td>Real browser navigation, isolated pads/results, saved progress, output and prose contrast, mathematical rendering, the three original browser JavaScript fixtures and all 24 D3 classroom references work</td>
+</tr>
+<tr>
+<td>Owned Kubernetes runtime</td>
+<td>Manual dispatch and weekly schedule; disposable Linux kind cluster</td>
+<td>Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup</td>
+</tr>
+</tbody></table></div>
+<p>The Docker groups cover Python Core, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript, Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book, NLP and compatible LLM examples once; the framework groups execute their own TensorFlow, PyTorch and LLM references. PySpark and tutorial example variants are discovered from the same catalog used by the classroom. There is no second hand-maintained lesson list. Reading/manual lessons and owned-cluster operations appear as explicit exclusions from the ordinary corpus, never successful runs.</p>
+<p>Each group owns a disposable project. At most two Docker groups run together, and each worker executes one reference at a time. The corpus records failures, source hashes, actual exit status and typed checks where registered. An overall time budget leaves unexecuted cases visibly pending and fails the job. Artifact JSON distinguishes reference execution from independent typed verification. Negative probes restore the previous source and notes, and container replacement checks read the original successful receipts without replay.</p>
+<p>Chromium runs only in a separate CI browser environment with hash-locked packages. It is absent from the production image. Browser reports contain check results and screenshots, without session credentials or network traces. The separate Kubernetes workflow prepares checksum-verified host tools and a short-lived owned cluster, checks all supported reference manifests and cleanup behavior, then releases only its recorded resources. Optional pretrained-model downloads and external services remain outside these offline qualification paths.</p>
+<p>A Linux hosted Docker result does not establish Windows WSL installation, macOS engine setup, another CPU architecture, GPU support or every rootless engine configuration. Check the actual matrix architecture and receipt before making a release claim. Historical native-platform results do not add supported product targets or create release requirements.</p>
+<p>To run the workflows manually, open the repository&#x27;s <strong>Actions</strong> tab, select <strong>Course validation</strong>, <strong>Application builds</strong> or <strong>Owned Kubernetes runtime</strong>, choose <strong>Run workflow</strong>, and select the revision to validate. With an authenticated GitHub CLI:</p>
+<pre class="highlighted-code"><code class="language-text">gh workflow run ci.yml --ref BRANCH_NAME
+gh workflow run app-build.yml --ref BRANCH_NAME
+gh workflow run kubernetes.yml --ref BRANCH_NAME</code></pre>
+<p>The manual Course validation run includes the Linux advanced-imports job. Keep its evidence attached to the same revision as the Docker and source-ZIP checks. Repository settings can disable workflows for private fork pull requests; a <code>pull_request</code> trigger does not override that access policy.</p>
+<p>Read failed job logs and uploaded test results. A workflow syntax check is useful before pushing, but only a hosted run can establish hosted acceptance.</p>
+<h3 id="optional-documentation-only-ci-skip">Optional documentation-only CI skip<a class="heading-anchor" href="#optional-documentation-only-ci-skip" aria-label="Link to this section">#</a></h3>
+<p>For a push containing only prose and its regenerated readers, the native <code>[skip ci]</code> commit-message token skips <code>push</code> and <code>pull_request</code> workflows. Use the space; <code>[skip-ci]</code> is not a supported native token. No YAML gate or custom alias is required. Follow <a href="../CONTRIBUTING.md.html#optional-ci-skip-for-a-prose-only-push">the commit example and push boundary</a>.</p>
+<p>Before that commit, use the prepared contributor environment to regenerate and check the documentation locally:</p>
+<pre class="highlighted-code"><code class="language-bash">make generate
+python scripts/normalize_lesson_prose.py
+python scripts/check_content_rendering.py
+python scripts/check_published_links.py
+git diff --check</code></pre>
+<p>Review the whole push: executable lesson examples, tests, runtime code, configuration, dependencies and workflows require normal CI. Never hide an unvalidated implementation commit behind a marked documentation commit. Scheduled/manual runs are unaffected; existing runs are not cancelled. Required PR checks may remain Pending and prevent merging. Trigger normal checks with an unmarked follow-up commit, or use a manual run only if the repository&#x27;s required-check policy accepts it. A skipped run is not passing CI evidence. <a href="https://docs.github.com/en/actions/how-tos/manage-workflow-runs/skip-workflow-runs">GitHub documents the event and required-check behavior</a>.</p>
+<h3 id="exercise-the-docker-product-on-disposable-data">Exercise the Docker product on disposable data<a class="heading-anchor" href="#exercise-the-docker-product-on-disposable-data" aria-label="Link to this section">#</a></h3>
+<p>Create a new project name that has never held learner work. For example, on macOS, Linux or Windows through WSL 2:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --rebuild --all --project ds60-release-check --no-browser</code></pre>
+<p>The explicit <code>--rebuild</code> qualifies current source rather than silently resuming an older image with the same tag. <code>--all</code> selects the full ordinary worker set even if this disposable project previously saved a smaller selection. For a focused check, replace <code>--all</code> with the required <code>--profile</code> options. Source updates do not take effect merely because a default resume succeeds.</p>
+<p>Use the exact URL printed by that launcher, or read <code>.classroom/ds60-release-check/classroom.url</code>. The following commands write test pads and reset the course SQL fixture, so replace <code>CLASSROOM_URL</code> only with that disposable project&#x27;s loopback URL:</p>
+<pre class="highlighted-code"><code class="language-text">python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --reset-sql
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles &quot;python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux&quot; --report work/release-runtime-receipts.json</code></pre>
+<p>To run the complete admitted module corpus for selected prepared profiles:</p>
+<pre class="highlighted-code"><code class="language-text">python scripts/check_module_references.py --url CLASSROOM_URL --confirm-disposable --profiles &quot;python-core cpp20&quot; --report work/module-reference-results.json
+python scripts/check_classroom_failures.py --url CLASSROOM_URL --confirm-disposable --profiles &quot;python-core cpp20&quot; --check-timeout --report work/runtime-failures.json</code></pre>
+<p>The first command executes every selected module reference, including applicable book examples and variants. The second deliberately submits invalid code and a real 15-second Python timeout, checks diagnostics and recovery, and restores the prior source. These commands still need disposable state. <code>--list-only</code> on the corpus checker produces the inventory report without HTTP or execution; omit <code>--url</code> and <code>--confirm-disposable</code> in that mode.</p>
+<p>The profile checker runs cataloged reference source through the authenticated classroom and records source-bound results. It does not declare every lesson execution-verified from one representative program. For changed runtime or lesson code, also run the relevant full reference corpus and its boundary/failure cases. Compile errors, runtime errors, timeouts and successful execution must remain distinct results.</p>
+<p>Replace the disposable project&#x27;s containers while retaining its volumes, then run both checks in persistence mode against the newly printed URL:</p>
+<pre class="highlighted-code"><code class="language-text">python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --check-persistence
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles &quot;python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux&quot; --report work/release-runtime-receipts.json --check-persistence</code></pre>
+<p>Persistence verification must read the original receipt rather than rerun code to recreate the expected result. A saved result belongs to its source, lesson, language and SQL mode. Receipt-storage failure after successful execution must not trigger an automatic replay.</p>
+<p>After validation, stop only the test project with:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop --project ds60-release-check</code></pre>
+<p>Removing named volumes is a separate destructive action. Never use a global volume prune as part of a learner-facing cleanup procedure.</p>
+<h3 id="browser-acceptance">Browser acceptance<a class="heading-anchor" href="#browser-acceptance" aria-label="Link to this section">#</a></h3>
+<p>The Python Core Docker job runs <code>scripts/check_classroom_browser.py</code> against its actual classroom after persistence checks. For a prepared Linux x86_64 Python 3.12 browser environment, install <code>requirements/ci-browser.lock</code>, install Chromium with <code>python -m playwright install --with-deps chromium</code>, then run:</p>
+<pre class="highlighted-code"><code class="language-text">python scripts/check_classroom_browser.py --url CLASSROOM_URL --confirm-disposable --report work/browser-receipts.json</code></pre>
+<p>Use <code>--fixtures-only --report work/browser-fixtures.json</code> to execute just the isolated JavaScript browser references. A unit test of the probe&#x27;s helpers is not a substitute for this real Chromium run. The browser probe writes its own disposable pads and progress; do not point it at a learner workspace.</p>
+<p>Use a separate browser profile and disposable classroom state for checks that edit code or notes. Inspect the actual running page at desktop and narrow widths, in light and dark modes, using keyboard navigation as well as a mouse.</p>
+<p>Check these user journeys:</p>
+<ul>
+<li>Open the common home, search for a subject, choose a lesson and switch subjects.</li>
+<li>Follow guide/reference links, render equations and code, and avoid raw source pages or broken anchors.</li>
+<li>Edit a Python pad, run it, see readable stdout and a plot, then return after a page reload and verify the source, notes and saved result.</li>
+<li>Run both SQL snippet and whole-lesson modes against the disposable database; preserve their separate drafts and result histories.</li>
+<li>Compile and run a C++ or Java example and a TypeScript example. Deliberately introduce a small compiler error and verify that the diagnostic is truthful.</li>
+<li>Open an older result without replacing the current pad. Switch lessons while a result loads and verify that late responses stay in their original context.</li>
+<li>Confirm a reading-only lesson explains its capability and does not advertise execution. Tutorial read markers must not imply tested mastery.</li>
+<li>Confirm focus, contrast, navigation labels, mobile layout and local asset loading. No runtime CDN should be needed for math or highlighting.</li>
+</ul>
+<p>Also inspect <code>START_HERE.html</code> as a separate static reading mode. Static browser progress and server-backed classroom progress have different storage boundaries. Unit and DOM tests supplement this review; they do not replace it.</p>
+<h3 id="notebook-sql-and-optional-runtime-boundaries">Notebook, SQL and optional-runtime boundaries<a class="heading-anchor" href="#notebook-sql-and-optional-runtime-boundaries" aria-label="Link to this section">#</a></h3>
+<p><code>python scripts/validate_notebooks.py</code> checks structure. Add <code>--smoke</code> for the selected dependency-light execution set. Heavy training, external assets and SQL magic cells require their own declared environments. Keep executed copies under ignored <code>artifacts/</code>, and keep source notebooks free of incidental output.</p>
+<p>Live SQL tests require the exact local disposable <code>advanced_sql_training</code> database. The environment opt-ins are documented in the fixtures and hosted PostgreSQL job. Never aim reset commands at a production or shared database. Use <code>psql -X -v ON_ERROR_STOP=1</code>; the Day 52 to 54 warehouse sequence is the explicit stateful exception to otherwise independent rollback-safe lessons.</p>
+<p>The optional MCP tests use the actual stdio protocol and read-only defaults. They verify discovery, bounded content reads, explicit solution reveal and opt-in progress behavior. They do not call a hosted model or measure teaching quality. See <a href="mcp-tutor.md.html">MCP tutoring</a>.</p>
+<p>Compiler/framework reference tests must identify the prepared profile, actual source and observed result. A Dockerfile, installed dependency, parse-only check or old image hash is not current execution evidence. Preserve truthful historical receipts, but attach fresh evidence when executable source changes.</p>
+<h3 id="release-decision">Release decision<a class="heading-anchor" href="#release-decision" aria-label="Link to this section">#</a></h3>
+<p>Before shipping, record the exact revision, generation drift result, quality checks, test totals and skipped surfaces, runtime receipts, browser observations, archive contents and supported-platform evidence. Verify no learner state or private configuration entered the package. Explain unresolved failures before publishing; do not rename them as expected skips.</p>
+<p>Useful result labels are <strong>structure validated</strong>, <strong>representative behavior executed</strong>, <strong>complete artifact executed</strong>, <strong>offline verified after setup</strong>, and <strong>not validated on this platform</strong>. Use the narrowest label supported by the evidence. No finite test suite establishes that software has no bugs.</p>
+<h3 id="d3-and-new-systems-language-qualification">D3 and new systems-language qualification<a class="heading-anchor" href="#d3-and-new-systems-language-qualification" aria-label="Link to this section">#</a></h3>
+<p>The ordinary reference corpus discovers C17, Go, C#, Rust and Swift programs from their manifests and runs them in their packaged Linux workers. The profile smoke gate uses an actual catalog reference and its observed completion marker; the failure gate requires the real staged filename and compiler diagnostic. Rust Arrow dependencies are prepared in the image. Ad hoc Cargo, NuGet or Go module downloads are not part of a lesson Run. Swift Apple UI projects remain explicitly outside the Linux compiler contract.</p>
+<p>D3 uses a separate browser runtime and is excluded from ordinary worker corpus execution. In the prepared browser environment, run:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/check_d3_browser.py --url CLASSROOM_URL --confirm-disposable --report work/d3-browser-receipts.json</code></pre>
+<p>The checker submits all 24 references through the real classroom pad and Run button. It verifies chart output, source-bound saved client observations, keyboard controls, actual pointer brushing and wheel zoom, filtering, fresh browser-session persistence, history without rerun, failure/recovery, opaque origin/CSP isolation and stale-frame navigation. These results remain browser observations with <code>verified: false</code>, no process return code and no worker checks. The checker does not relabel browser output as independent server verification. The Python Core Docker CI group executes it after container replacement.</p>
+<p>The Docker study subject is reading/manual practice. Its optional fixture uses an explicitly owned host project; it never mounts the engine socket into the classroom. Deep Kubernetes networking fixtures are also reading/manual unless the exact advanced capability was separately prepared and qualified. Run <code>python courses/kubernetes/fixtures/networking/check_fixtures.py</code> for offline consistency only. An offline pass does not prove NetworkPolicy enforcement, load-balancer provisioning, Gateway routing or dual-stack traffic.</p>
+<p>After the D3 execution report is complete, replace the same disposable Core project&#x27;s containers while retaining volumes, then use the newly printed URL:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/check_d3_browser.py --url CLASSROOM_URL --confirm-disposable --report work/d3-browser-receipts.json --check-persistence</code></pre>
+<p>This phase reads the original observation IDs and compares complete-record, source and output hashes, plus the final saved source/note hashes for every D3 lesson. It does not launch a browser, rerun code or write learner state. The report retains the original execution evidence and appends the readback result. The invoker must actually perform container replacement; a second read against the same process alone does not prove replacement durability. The Python Core CI job supplies that explicit down/up boundary after its D3 run.</p></article>
+  </main>
+</body>
+</html>

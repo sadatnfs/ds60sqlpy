@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-001: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-001: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-001_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-001-explanatory-solutions">llm-applied-001: explanatory solutions<a class="heading-anchor" href="#llm-applied-001-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A subject assistant is a system that helps someone perform a bounded task using a defined body of knowledge. It is not created merely by adding “you are an expert” to a prompt. Begin with the prediction or decision unit: extracting a study design field, finding a current metric definition, explaining a calculation, or deciding whether evidence supports a claim. Each task needs a measurable output contract and a failure policy. Prompting changes instructions and examples presented at inference. Retrieval supplies selected external evidence without changing model weights. Supervised fine-tuning changes weights using examples of desired behavior. These mechanisms can be combined, but they address different deficiencies.</p>
+<p>For a data-science assistant, a current metric definition belongs in versioned retrieval because it may change and needs a source. A repeated formatting failure may justify prompt improvement or fine-tuning after a baseline is measured. Exact aggregation belongs in deterministic code with a validated input schema. Causal interpretation still requires a defensible study design; a model can help inspect that design but cannot make an observational comparison causal by describing it confidently. This lesson builds an explicit decision policy over task characteristics, not an artificial intelligence model.</p>
+<p><strong>Subject assistant:</strong> A bounded task system with domain sources, tools and evaluation.</p>
+<p><strong>RAG:</strong> Retrieval-augmented generation: external evidence supplied during answering.</p>
+<p><strong>SFT:</strong> Supervised fine-tuning: weight updates from target output examples.</p>
+<p><strong>Task contract:</strong> Accepted inputs, output schema, metric and failure behavior.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Represent a task as named fields rather than one free-form paragraph. A route decision should expose its reason and required evidence. Check exact-computation needs before choosing a text-generation strategy. Check freshness and citation needs before considering weight updates. Fine-tuning requires a stable behavioral target, sufficient governed examples and a held-out evaluation. A missing prerequisite produces a “measure baseline first” decision, not an automatic training job.</p>
+<h3 id="trace-a-subject-assistant-request-through-its-evidence-requirements">Trace a subject-assistant request through its evidence requirements<a class="heading-anchor" href="#trace-a-subject-assistant-request-through-its-evidence-requirements" aria-label="Link to this section">#</a></h3>
+<p>Consider: “What is our current account conversion rate, and did the new checkout cause it to improve?” This contains several distinct claims. The word current requires the correct effective definition and data period. Account requires a denominator and grouping unit. Conversion rate requires validated counts and arithmetic. Cause requires treatment assignment or defensible identification assumptions. One well-formed generated sentence cannot establish all four.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Subtask</th>
+<th>Required input</th>
+<th>Inspectable output</th>
+<th>Failure that belongs here</th>
+</tr></thead><tbody>
+<tr>
+<td>Find the definition</td>
+<td>Authorized, effective source version</td>
+<td>Source ID and supported formula</td>
+<td>Wrong version or missing source</td>
+</tr>
+<tr>
+<td>Extract fields</td>
+<td>Source text or structured observations</td>
+<td>Typed fields with provenance</td>
+<td>Unsupported count or wrong unit</td>
+</tr>
+<tr>
+<td>Calculate</td>
+<td>Accepted inputs and declared formula</td>
+<td>Reproducible numeric artifact</td>
+<td>Wrong denominator or arithmetic</td>
+</tr>
+<tr>
+<td>Interpret</td>
+<td>Population and study design</td>
+<td>Bounded claim with assumptions</td>
+<td>Unsupported causal conclusion</td>
+</tr>
+</tbody></table></div>
+<p>A trained model can participate in the first two interfaces or explain the last two, but its fluency does not replace their evidence. The routing helper returns one primary route, while the composed architecture may contain several stages. In particular, exact_computation takes precedence in the helper. That priority is a teaching decision about one requested operation; it does not mean a numerical tool can discover an unknown business definition on its own.</p>
+<p>A simple probability decomposition explains why adding components is not automatically an improvement. Let R mean sufficient admissible evidence reached the answer stage, A mean the answer is correct and supported given that evidence, and V mean the result meets the required validation contract. The success probability for this complete path is P(R) times P(A given R) times P(V given A and R). These conditional factors do not require an independence assumption. In an illustrative calculation, 0.9 times0.8 times0.95 is 0.684. Those values are invented for arithmetic explanation, not measured model performance. Improving the last factor alone cannot recover all failures from missing evidence.</p>
+<p>Use controlled comparisons to choose an intervention. A prompt baseline can reveal whether the task is already expressible without training. An oracle-context control can show whether answer behavior improves when relevant evidence is supplied directly. A retrieval intervention holds the answering configuration fixed while changing evidence selection. An adaptation comparison holds evaluation families and access conditions fixed while changing learned behavior. If all of those change together, an improved score does not identify the useful component.</p>
+<p>Retrieval changes the inference evidence available to a model; adaptation changes the model&#x27;s parameterized behavior. The original RAG work combined parametric generation with explicit retrieved memory, but this course&#x27;s first route selector performs neither learned retrieval nor generation. Its role is to make decisions and prerequisites inspectable. <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation</a>.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why not fine-tune current policy documents directly into the model?</strong> Updates, source attribution and per-request access remain separate problems. A memorized fact does not expose which version supports it or whether the current principal may see it. Adaptation may still improve a stable response behavior, while retrieved evidence supplies current facts.</p>
+<p><strong>When is a deterministic tool the right answer?</strong> When the task requires an exact operation over validated inputs and a declared formula. The tool&#x27;s correctness does not establish that the extracted inputs or chosen denominator were appropriate; retain those upstream contracts too.</p>
+<p><strong>What makes an adaptation experiment informative?</strong> A measured behavior gap, governed examples, a frozen comparison policy, independent evaluation families and real outputs from both candidates. A training loss by itself measures fit to training targets, not domain-assistant utility.</p>
+<h3 id="exercise-1-route-a-changing-definition">Exercise 1: Route a changing definition<a class="heading-anchor" href="#exercise-1-route-a-changing-definition" aria-label="Link to this section">#</a></h3>
+<p>The question is: Describe a request for the current conversion-rate definition requiring a citation.</p>
+<p>A definition can change after training, so its identity and version should remain inspectable outside model weights. Retrieval is a way to supply that evidence, not a guarantee the answer will use it faithfully.</p>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">retrieval</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">current cited evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> route retrieval; reason current cited evidence.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with route retrieval; reason current cited evidence.</p>
+<h3 id="exercise-2-route-an-exact-calculation">Exercise 2: Route an exact calculation<a class="heading-anchor" href="#exercise-2-route-an-exact-calculation" aria-label="Link to this section">#</a></h3>
+<p>The question is: Describe a request to sum validated purchase amounts and return an integer-cent total.</p>
+<p>The assistant may explain the result, but the arithmetic should be performed by a bounded deterministic function. A fluent estimate is not an acceptable substitute for an exact total.</p>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">deterministic_tool</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> route deterministic_tool; reason exact computation.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with route deterministic_tool; reason exact computation.</p>
+<h3 id="exercise-3-require-evidence-before-fine-tuning">Exercise 3: Require evidence before fine-tuning<a class="heading-anchor" href="#exercise-3-require-evidence-before-fine-tuning" aria-label="Link to this section">#</a></h3>
+<p>The question is: Describe a stable schema-formatting gap with zero governed examples, then with 120 reviewed examples.</p>
+<p>The example count 120 exceeds the helper&#x27;s teaching admission threshold100; neither number is a universal sample-size recommendation. A real decision needs learning curves, label quality and held-out task evidence.</p>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">measure_baseline</span><span class="syntax-string">&#x27;</span>
+task<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-number">120</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adaptation_candidate</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> first measure_baseline; then adaptation_candidate.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with first measure_baseline; then adaptation_candidate.</p>
+<h3 id="exercise-4-keep-mechanisms-composable">Exercise 4: Keep mechanisms composable<a class="heading-anchor" href="#exercise-4-keep-mechanisms-composable" aria-label="Link to this section">#</a></h3>
+<p>The question is: A task needs current policy citations and a stable response schema; state which stage retrieves evidence and which might be adapted.</p>
+<p>Fine-tuning a response style does not remove the need for current evidence. Separate stage metrics make it possible to diagnose a retrieval failure independently of a formatting failure.</p>
+<pre class="highlighted-code"><code class="language-python">task<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact_computation</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fresh_evidence</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">citation_required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">stable_behavior_gap</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">governed_examples</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">120</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> choose<span class="syntax-punctuation">(</span>task<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">retrieval</span><span class="syntax-string">&#x27;</span>
+architecture<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">knowledge</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">versioned retrieval</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">format</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">prompt baseline, then measured adapter if needed</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> architecture<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">knowledge</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">versioned retrieval</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> retrieval remains required; format adaptation is separate.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with retrieval remains required; format adaptation is separate.</p>
+<h3 id="exercise-5-avoid-training-on-secrets-as-an-access-mechanism">Exercise 5: Avoid training on secrets as an access mechanism<a class="heading-anchor" href="#exercise-5-avoid-training-on-secrets-as-an-access-mechanism" aria-label="Link to this section">#</a></h3>
+<p>The question is: Mark restricted facts as requiring an access policy and reject the idea that a fine-tuned model enforces per-user authorization.</p>
+<p>Model weights are not a record-level permission system. Per-user access decisions must happen before evidence reaches the answer context and must also govern caches and logs.</p>
+<pre class="highlighted-code"><code class="language-python">policy<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">access_control</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">external pre-retrieval filter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weights_are_acl</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> policy<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">weights_are_acl</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">pre-retrieval</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">in</span> policy<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">access_control</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> authorization remains an external gate.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with authorization remains an external gate.</p>
+<h3 id="exercise-6-write-a-measurable-subject-assistant-contract">Exercise 6: Write a measurable subject-assistant contract<a class="heading-anchor" href="#exercise-6-write-a-measurable-subject-assistant-contract" aria-label="Link to this section">#</a></h3>
+<p>The question is: Define an assistant for study-design extraction with fields assignment_unit, outcome and unknown status; name a held-out family split.</p>
+<p>A task contract turns “expert assistant” into something testable. The unsupported-field rate catches confident invented values that a schema-validity metric alone would miss.</p>
+<pre class="highlighted-code"><code class="language-python">contract<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">fields</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">outcome</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">status</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unknown_policy</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">explicit unknown</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">split_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">study family</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">field exact match plus unsupported-field rate</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> contract<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">split_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">study family</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">unsupported</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">in</span> contract<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">metric</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> contract has exact fields, an abstention policy and a family split.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with contract has exact fields, an abstention policy and a family split.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

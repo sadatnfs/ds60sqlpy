@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-064",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Order the request ladder.",
+      "expected": "DNS, route, transport, optional TLS, proxy/application route and body."
+    },
+    {
+      "exercise": 2,
+      "task": "Interpret connection refused versus timeout.",
+      "expected": "Refusal narrows listener/connectivity behavior; timeout remains broader."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a three-hypothesis table for Service failure.",
+      "expected": "Selector, targetPort and data-plane hypotheses each have distinct evidence."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose internal success with external failure.",
+      "expected": "Inspect the added external listener/routing/TLS layers."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why a stale successful receipt is insufficient.",
+      "expected": "It may belong to another revision, namespace or caller path."
+    },
+    {
+      "exercise": 6,
+      "task": "Perform a single-fault incident walkthrough.",
+      "expected": "One controlled fault, preserved failure, targeted repair and rechecked invariant."
+    }
+  ]
+}

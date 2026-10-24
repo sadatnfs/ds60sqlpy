@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-018: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-018: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-018_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-018-explanatory-solutions">llm-applied-018: explanatory solutions<a class="heading-anchor" href="#llm-applied-018-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks. Full SFT can change every parameter; an output-head LoRA adapter changes only a constrained set. Different trainable counts are expected, but they do not by themselves establish quality, speed or memory superiority. Keep optimization budgets and learning-rate policies explicit, and avoid selecting a winner from training loss alone.</p>
+<p>This chapter trains two real tiny decoders on the same literal answer task. One updates the whole model; the other freezes the base and adds rank 2 adaptation to its vocabulary output projection. That placement is intentionally narrow and is not claimed to match a production LoRA configuration across attention and feed-forward modules. Both run20 updates. We compare held-out losses without requiring a particular winner, verify frozen-base bytes and prove that an unmodified adapter initially preserves base predictions. A useful result includes limitations and failure cases, not only a ranking.</p>
+<p><strong>Controlled adaptation comparison:</strong> Candidates sharing base state,data and evaluation contract.</p>
+<p><strong>Target module:</strong> The specific layer receiving an adapter update.</p>
+<p><strong>Frozen-state proof:</strong> Exact comparison of parameters required to remain unchanged.</p>
+<p><strong>Task transfer metric:</strong> Held-out behavior measured after adaptation under a fixed rubric.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Create one base model, copy itsstate_dict into two new instances, and snapshot the initial logits. Freeze every parameter in the adapter candidate before replacing its output projection with LoRAHead. Optimize only parameters withrequires_gradTrue. Keep the full and adapter optimizers separate. Evaluate both with the same held-out labels underno_grad. The output head has input width32 and vocabulary16, so rank 2 adds96 trainable entries.</p>
+<h3 id="trace-the-two-candidate-models-from-one-base">Trace the two candidate models from one base<a class="heading-anchor" href="#trace-the-two-candidate-models-from-one-base" aria-label="Link to this section">#</a></h3>
+<p>The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for64+32=96 trainable entries. The trainable ratio is96/10464=1/109, about0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.</p>
+<p>The output-head function is base_output(H)+(HAB)*(<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>α</mi></mrow><mrow><mi>r</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\alpha}{r}</annotation></semantics></math>), with hidden states H shaped[B, T, 32]. In this fixture <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>=</mo><mi>r</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\alpha=r=2</annotation></semantics></math>, so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.</p>
+<p>Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.</p>
+<p>The rank-two update has at most rank two, but its numerical rank can be smaller. For one hidden vector, many different factor pairs produce the same output adjustment. A parameter count does not identify a unique learned mechanism. Keep module placement, scale and actual singular-value or behavior checks separate from the configured rank label.</p>
+<p>The full optimizer uses learning rate 0.01 and the adapter optimizer0.03, each for20 updates. These are fixed fixture settings rather than held-out selections, but they are not the same optimizer policy. A claim that one update method is inherently better cannot be isolated from those settings with this single run. A more informative study might allocate a declared tuning budget to each method using development data, then compare frozen choices on untouched families.</p>
+<p>The frozen-state check snapshots every nontrainable adapted parameter and compares it exactly afterward. That can catch explicit accidental assignments even if requires_grad remains False. It does not prove the full absence of mutable nonparameter state in arbitrary architectures; models with BatchNorm or other buffers need those state objects checked too. This decoder uses LayerNorm and no running-batch-statistic buffers.</p>
+<p>The held-out record again changes a prefix token while preserving a known second prompt token and answer. Both candidates are evaluated using teacher-forced active-target loss, without requiring a particular winner. A meaningful report should preserve those actual values, question identity and mask. It should not turn one finite loss comparison into evidence of natural-language generation, domain knowledge or source-grounded correctness.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why copy one state_dict instead of merely using one seed?</strong> Model construction consumes random draws. Creating multiple models after one seed can yield different initial weights; copying the same state explicitly establishes the intended starting point.</p>
+<p><strong>Does freezing the base guarantee no gradient is needed through it?</strong> Not universally. If trainable modules precede a frozen block, derivatives may need to pass through that block to reach them. Here the only added trainable module is the output head, so the specific dependency structure is narrower.</p>
+<p><strong>What does the 96-parameter result establish?</strong> The trainable size of this output-head adapter. It does not measure peak memory, latency or the quality of adapting attention projections in a different architecture.</p>
+<h3 id="exercise-1-clone-one-base-into-two-candidates">Exercise 1: Clone one base into two candidates<a class="heading-anchor" href="#exercise-1-clone-one-base-into-two-candidates" aria-label="Link to this section">#</a></h3>
+<p>The question is: Create a seed 31 decoder and copy its state into full and adapted candidates.</p>
+<p>Independent model objects prevent one optimizer from changing the other candidate. Equal initial state is stronger than merely reusing the same architecture name.</p>
+<pre class="highlighted-code"><code class="language-python">torch<span class="syntax-operator">.</span>manual_seed<span class="syntax-punctuation">(</span><span class="syntax-number">31</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> base<span class="syntax-operator">=</span>TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> full<span class="syntax-operator">=</span>TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> adapted<span class="syntax-operator">=</span>TinyDecoder<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> full<span class="syntax-operator">.</span>load_state_dict<span class="syntax-punctuation">(</span>base<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> adapted<span class="syntax-operator">.</span>load_state_dict<span class="syntax-punctuation">(</span>base<span class="syntax-operator">.</span>state_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span>b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>full<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>adapted<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> all initial base parameters equal.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with all initial base parameters equal.</p>
+<h3 id="exercise-2-install-an-output-head-adapter">Exercise 2: Install an output-head adapter<a class="heading-anchor" href="#exercise-2-install-an-output-head-adapter" aria-label="Link to this section">#</a></h3>
+<p>The question is: Freeze the adapted model, replace its output layer withrank2LoRA, and compare initial logits.</p>
+<p>ZeroB preserves the original function. The trainable count follows32<em>2+2</em>16, which is specific to this output-head placement.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> adapted<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> p<span class="syntax-operator">.</span>requires_grad_<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span>
+adapted<span class="syntax-operator">.</span>output<span class="syntax-operator">=</span>LoRAHead<span class="syntax-punctuation">(</span>adapted<span class="syntax-operator">.</span>output<span class="syntax-punctuation">,</span>rank<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span>alpha<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+sequence<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> inputs<span class="syntax-operator">=</span>sequence<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> labels<span class="syntax-operator">=</span>sequence<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> labels<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> adapted<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">96</span>
+<span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    a<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>base<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> b<span class="syntax-punctuation">,</span>_<span class="syntax-operator">=</span>adapted<span class="syntax-punctuation">(</span>inputs<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-6</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> 96 trainable adapter entries; initial logits match base.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with 96 trainable adapter entries; initial logits match base.</p>
+<h3 id="exercise-3-train-both-candidates-under-fixed-budgets">Exercise 3: Train both candidates under fixed budgets<a class="heading-anchor" href="#exercise-3-train-both-candidates-under-fixed-budgets" aria-label="Link to this section">#</a></h3>
+<p>The question is: Run20 full-SFT updates at.01 and20 adapter updates at.03 on the same masked batch.</p>
+<p>The rates are declared fixture settings, not tuned on the holdout. Equal step counts do not imply equal compute or equal optimization difficulty, so resource claims require measurement.</p>
+<pre class="highlighted-code"><code class="language-python">frozen<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span>p<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span>p <span class="syntax-operator">in</span> adapted<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span> curves<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span>model<span class="syntax-punctuation">,</span>rate <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>full<span class="syntax-punctuation">,</span><span class="syntax-number">.01</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>adapted<span class="syntax-punctuation">,</span><span class="syntax-number">.03</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    opt<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>optim<span class="syntax-operator">.</span>Adam<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>p <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> model<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> p<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>lr<span class="syntax-operator">=</span>rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> curve<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        opt<span class="syntax-operator">.</span>zero_grad<span class="syntax-punctuation">(</span>set_to_none<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">=</span>objective<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span>inputs<span class="syntax-punctuation">,</span>labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> curve<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> loss<span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> opt<span class="syntax-operator">.</span>step<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    curves<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>curve
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span>curve<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> curve<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span>curve<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
+<p><strong>Expected:</strong> both training losses decrease; all logged values finite.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with both training losses decrease; all logged values finite.</p>
+<h3 id="exercise-4-prove-base-preservation">Exercise 4: Prove base preservation<a class="heading-anchor" href="#exercise-4-prove-base-preservation" aria-label="Link to this section">#</a></h3>
+<p>The question is: Compare every frozen adapted-model parameter against its saved copy.</p>
+<p>The check covers embeddings, attention, feed-forward and the base output weight. Inspecting onlyrequires_grad flags would miss an accidental explicit assignment.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span>torch<span class="syntax-operator">.</span>equal<span class="syntax-punctuation">(</span>parameter<span class="syntax-operator">.</span>detach<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>frozen<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span>parameter <span class="syntax-operator">in</span> adapted<span class="syntax-operator">.</span>named_parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> parameter<span class="syntax-operator">.</span>requires_grad<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> all frozen tensors exactly equal.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with all frozen tensors exactly equal.</p>
+<h3 id="exercise-5-compare-a-frozen-held-out-task">Exercise 5: Compare a frozen held-out task<a class="heading-anchor" href="#exercise-5-compare-a-frozen-held-out-task" aria-label="Link to this section">#</a></h3>
+<p>The question is: Evaluate prompt[7, 2] with answer[5, 3] for both candidates using the same mask.</p>
+<p>A held-out comparison is an observation, not a test that must favor the adapter. One literal prompt remains too little evidence for a broad domain-assistant decision.</p>
+<pre class="highlighted-code"><code class="language-python">held<span class="syntax-operator">=</span>torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> held_labels<span class="syntax-operator">=</span>held<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>clone<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> held_labels<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">=</span><span class="syntax-operator">-</span><span class="syntax-number">100</span><span class="syntax-punctuation">;</span> results<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span>model <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>full<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>adapted<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    model<span class="syntax-operator">.</span>eval<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">with</span> torch<span class="syntax-operator">.</span>no_grad<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> results<span class="syntax-punctuation">[</span>name<span class="syntax-punctuation">]</span><span class="syntax-operator">=</span>objective<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">,</span>held<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>held_labels<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>results<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">and</span> np<span class="syntax-operator">.</span>isfinite<span class="syntax-punctuation">(</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>results<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> two finite held-out losses; no predetermined winner.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with two finite held-out losses; no predetermined winner.</p>
+<h3 id="exercise-6-record-comparison-limits">Exercise 6: Record comparison limits<a class="heading-anchor" href="#exercise-6-record-comparison-limits" aria-label="Link to this section">#</a></h3>
+<p>The question is: Build a report with trainable counts, update budgets, target module and task scope.</p>
+<p>The report makes the comparison reproducible and prevents a parameter-count result from being overstated as universal quality or memory evidence.</p>
+<pre class="highlighted-code"><code class="language-python">report<span class="syntax-operator">=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter_trainable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">96</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full_trainable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>numel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> full<span class="syntax-operator">.</span>parameters<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">target_module</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">output projection only</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">scope</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">literal-token teaching task</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">heldout</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>results<span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">assert</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full_trainable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&gt;</span>report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter_trainable</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> report<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">steps</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">full</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">adapter</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">20</span><span class="syntax-punctuation">}</span></code></pre>
+<p><strong>Expected:</strong> adapter 96 entries; 20 updates each; scope literal-token task.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with adapter 96 entries; 20 updates each; scope literal-token task.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

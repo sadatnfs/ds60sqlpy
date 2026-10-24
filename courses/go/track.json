@@ -1,0 +1,870 @@
+{
+  "schema_version": 1,
+  "id": "go",
+  "title": "Go: practical programs, concurrency and Kubernetes controllers",
+  "summary": "A complete Go learning path from your first compiled program to tested services and Kubernetes controller design. Small offline programs make language rules observable; prepared project chapters explain real integration boundaries.",
+  "lessons": [
+    {
+      "id": "go-001",
+      "title": "From source text to a checked Go program",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "go",
+      "concepts": [
+        "Package",
+        "Entrypoint",
+        "Assertion"
+      ],
+      "outcome": "Explain and implement from source text to a checked go program.",
+      "lab": "Bind greeting to Hello, Go and check its exact text.",
+      "verification": "greeting equals Hello, Go. The checked result is amount=24."
+    },
+    {
+      "id": "go-002",
+      "title": "Numeric types, constants and explicit conversions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-001"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Concrete type",
+        "Conversion",
+        "Truncation"
+      ],
+      "outcome": "Explain and implement numeric types, constants and explicit conversions.",
+      "lab": "Compute 7/2 and float64(7)/2.",
+      "verification": "The results are 3 and 3.5. The quotient is -3 and the remainder is -1."
+    },
+    {
+      "id": "go-003",
+      "title": "Decisions, loops and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-002"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Invariant",
+        "Short circuit",
+        "Half-open interval"
+      ],
+      "outcome": "Explain and implement decisions, loops and invariants.",
+      "lab": "Sum 2, 4 and 6 while checking every visited prefix.",
+      "verification": "The final sum is 12 and three elements were visited. Exactly 2 values satisfy the predicate."
+    },
+    {
+      "id": "go-004",
+      "title": "Functions and value-passing contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-003"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Parameter",
+        "Pure function",
+        "Precondition"
+      ],
+      "outcome": "Explain and implement functions and value-passing contracts.",
+      "lab": "Implement twice and check inputs 7 and 0.",
+      "verification": "The results are 14 and 0. The invalid domain is rejected before returning a usable area."
+    },
+    {
+      "id": "go-005",
+      "title": "Arrays, slices and backing-storage ownership",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-004"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Backing array",
+        "Capacity",
+        "Aliasing"
+      ],
+      "outcome": "Explain and implement arrays, slices and backing-storage ownership.",
+      "lab": "Take the first two elements of 1, 2, 3 and change the first through the slice.",
+      "verification": "The original first element becomes 9. The original array remains unchanged."
+    },
+    {
+      "id": "go-006",
+      "title": "Maps, presence and deterministic ordering",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-005"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Key",
+        "Presence bit",
+        "Deterministic order"
+      ],
+      "outcome": "Explain and implement maps, presence and deterministic ordering.",
+      "lab": "Read present key zero and absent key missing with comma-ok.",
+      "verification": "Both values are 0, but only zero is present. The value is 0 and presence is false."
+    },
+    {
+      "id": "go-007",
+      "title": "Strings, bytes, runes and Unicode boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-006"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Byte",
+        "Rune",
+        "UTF-8"
+      ],
+      "outcome": "Explain and implement strings, bytes, runes and unicode boundaries.",
+      "lab": "Inspect A followed by a smiling face.",
+      "verification": "There are 5 bytes and 2 runes. The result is blue sky."
+    },
+    {
+      "id": "go-008",
+      "title": "Structs and explicit domain models",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-007"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Struct",
+        "Keyed literal",
+        "Shallow copy"
+      ],
+      "outcome": "Explain and implement structs and explicit domain models.",
+      "lab": "Construct Point with X 2 and Y 3 and calculate Manhattan distance from the origin.",
+      "verification": "The distance is 5. The empty name is rejected; the valid name is retained."
+    },
+    {
+      "id": "go-009",
+      "title": "Pointers, mutation and allocation lifetimes",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-008"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Pointer",
+        "Dereference",
+        "Reachability"
+      ],
+      "outcome": "Explain and implement pointers, mutation and allocation lifetimes.",
+      "lab": "Create an integer 4 and increment it through a helper receiving its address.",
+      "verification": "The caller value becomes 5. The absent call returns false; the present value becomes 8."
+    },
+    {
+      "id": "go-010",
+      "title": "Methods, interfaces and the typed-nil trap",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-009"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Method set",
+        "Interface",
+        "Dynamic type"
+      ],
+      "outcome": "Explain and implement methods, interfaces and the typed-nil trap.",
+      "lab": "Store Counter with value 3 in a Valuer interface.",
+      "verification": "Calling Value returns 3. Both implementations can be read through one contract."
+    },
+    {
+      "id": "go-011",
+      "title": "Errors as values and preserving causal context",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-010"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Sentinel error",
+        "Wrapping",
+        "Recovery policy"
+      ],
+      "outcome": "Explain and implement errors as values and preserving causal context.",
+      "lab": "Wrap ErrMissing with a record-reading context.",
+      "verification": "errors.Is still recognizes ErrMissing. Both sentinels remain discoverable."
+    },
+    {
+      "id": "go-012",
+      "title": "Defer, cleanup and deliberate panic boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-011"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Deferred call",
+        "Stack unwind",
+        "Cleanup boundary"
+      ],
+      "outcome": "Explain and implement defer, cleanup and deliberate panic boundaries.",
+      "lab": "Register first and second cleanup markers and return.",
+      "verification": "The observed order is second then first. All three markers are present after the loop."
+    },
+    {
+      "id": "go-013",
+      "title": "Packages, modules and reproducible project boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-012"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Module",
+        "Exported name",
+        "Import path"
+      ],
+      "outcome": "Explain and implement packages, modules and reproducible project boundaries.",
+      "lab": "Join logical slash-separated path segments with path.Join.",
+      "verification": "The result is reports/daily.json. The resulting logical name is reports/day-3.json."
+    },
+    {
+      "id": "go-014",
+      "title": "Table-driven tests and useful counterexamples",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-013"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Test oracle",
+        "Boundary case",
+        "Regression case"
+      ],
+      "outcome": "Explain and implement table-driven tests and useful counterexamples.",
+      "lab": "Test clamp with values below, inside and above the range 0 to 10.",
+      "verification": "The outputs are 0, 4 and 10. The result is 10."
+    },
+    {
+      "id": "go-015",
+      "title": "Generics and constraints without losing semantics",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-014"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Type parameter",
+        "Constraint",
+        "Type inference"
+      ],
+      "outcome": "Explain and implement generics and constraints without losing semantics.",
+      "lab": "Call first with an integer slice and a string slice.",
+      "verification": "The results are 4 and red with presence true. Red and red remain distinct."
+    },
+    {
+      "id": "go-016",
+      "title": "Closures, callbacks and controlled iteration",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "go-015"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Closure",
+        "Callback",
+        "Early termination"
+      ],
+      "outcome": "Explain and implement closures, callbacks and controlled iteration.",
+      "lab": "Create a closure referring to factor, change factor, then call it.",
+      "verification": "The closure uses the new factor 3. The collected values are 2 and 4."
+    },
+    {
+      "id": "go-017",
+      "title": "Readers, writers and bounded streaming",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-016"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Reader",
+        "Short read",
+        "Input budget"
+      ],
+      "outcome": "Explain and implement readers, writers and bounded streaming.",
+      "lab": "Copy alpha from a strings.Reader into bytes.Buffer.",
+      "verification": "Five bytes are copied and output is alpha. The header is AB and payload is xyz."
+    },
+    {
+      "id": "go-018",
+      "title": "Filesystems, paths and owned cleanup",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-017"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Filesystem interface",
+        "Path confinement",
+        "Owned resource"
+      ],
+      "outcome": "Explain and implement filesystems, paths and owned cleanup.",
+      "lab": "Read data/input.txt containing red and a newline.",
+      "verification": "The bytes decode to red followed by a newline. item.txt is readable within the logical subtree."
+    },
+    {
+      "id": "go-019",
+      "title": "JSON schemas, strict decoding and unknown input",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-018"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Wire schema",
+        "Unknown field",
+        "Trailing value"
+      ],
+      "outcome": "Explain and implement json schemas, strict decoding and unknown input.",
+      "lab": "Decode a name and count into Config.",
+      "verification": "The fields become sample and 3. JSON syntax is valid but count validation fails."
+    },
+    {
+      "id": "go-020",
+      "title": "CSV, record shape and data-quality contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-019"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Record grain",
+        "Quoted field",
+        "Schema validation"
+      ],
+      "outcome": "Explain and implement csv, record shape and data-quality contracts.",
+      "lab": "Read name and city where the city is Springfield, West.",
+      "verification": "The record contains two fields. The schema order is name then count."
+    },
+    {
+      "id": "go-021",
+      "title": "Command-line contracts and configuration precedence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-020"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Precedence",
+        "Flag set",
+        "Validation boundary"
+      ],
+      "outcome": "Explain and implement command-line contracts and configuration precedence.",
+      "lab": "Parse -count=3 with a default of 1.",
+      "verification": "The resulting count is 3. The explicit setting wins."
+    },
+    {
+      "id": "go-022",
+      "title": "HTTP handlers and in-process service tests",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-021"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Handler",
+        "Status code",
+        "Response recorder"
+      ],
+      "outcome": "Explain and implement http handlers and in-process service tests.",
+      "lab": "Send GET /health to the handler.",
+      "verification": "The status is 200 and the body is ok plus a newline. The path still matches and returns 200."
+    },
+    {
+      "id": "go-023",
+      "title": "HTTP clients, cancellation and response ownership",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-022"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Transport error",
+        "Response ownership",
+        "Cancellation"
+      ],
+      "outcome": "Explain and implement http clients, cancellation and response ownership.",
+      "lab": "Use a fake transport returning status 200 and body ready.",
+      "verification": "The client helper returns ready without error. The transport helper returns an empty string successfully."
+    },
+    {
+      "id": "go-024",
+      "title": "Goroutines and explicit completion",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-023"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Goroutine",
+        "Join",
+        "Happens-before"
+      ],
+      "outcome": "Explain and implement goroutines and explicit completion.",
+      "lab": "Start a goroutine computing 6 times 7 and receive its result.",
+      "verification": "The received value is 42. The sum is 30."
+    },
+    {
+      "id": "go-025",
+      "title": "Channels, buffering and close ownership",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-024"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Backpressure",
+        "Channel closure",
+        "Directional channel"
+      ],
+      "outcome": "Explain and implement channels, buffering and close ownership.",
+      "lab": "Buffer 2 and 3, close and sum the channel.",
+      "verification": "Both values arrive and the sum is 5. The received copy stays 1."
+    },
+    {
+      "id": "go-026",
+      "title": "Select, contexts and cancellation trees",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-025"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Context tree",
+        "Deadline",
+        "Cooperation"
+      ],
+      "outcome": "Explain and implement select, contexts and cancellation trees.",
+      "lab": "Create a cancelable context and cancel it.",
+      "verification": "Err returns context.Canceled. It returns 8 without error."
+    },
+    {
+      "id": "go-027",
+      "title": "Mutexes, atomics and shared-state invariants",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-026"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Critical section",
+        "Compound invariant",
+        "Atomic operation"
+      ],
+      "outcome": "Explain and implement mutexes, atomics and shared-state invariants.",
+      "lab": "Run four workers doing 100 protected increments each.",
+      "verification": "The joined final count is 400. Both snapshots preserve total 10."
+    },
+    {
+      "id": "go-028",
+      "title": "Bounded worker pools and result ordering",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-027"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Concurrency bound",
+        "Task identity",
+        "Fan-in"
+      ],
+      "outcome": "Explain and implement bounded worker pools and result ordering.",
+      "lab": "Square 3, 1 and 2 with two workers.",
+      "verification": "The result is 9, 1, 4. One result equals 25 and all workers exit."
+    },
+    {
+      "id": "go-029",
+      "title": "The memory model, race diagnosis and publication",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-028"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Data race",
+        "Publication",
+        "Immutable snapshot"
+      ],
+      "outcome": "Explain and implement the memory model, race diagnosis and publication.",
+      "lab": "Send an initialized record from a goroutine.",
+      "verification": "The reader observes count 3 and ready true. The reader receives ready:3."
+    },
+    {
+      "id": "go-030",
+      "title": "Algorithms, benchmarks and allocation-aware design",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-029"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Complexity",
+        "Monotone predicate",
+        "Preallocation"
+      ],
+      "outcome": "Explain and implement algorithms, benchmarks and allocation-aware design.",
+      "lab": "Find the first value at least 5 in 2, 4, 6, 8.",
+      "verification": "The index is 2. The first duplicate has index 1."
+    },
+    {
+      "id": "go-031",
+      "title": "Structured logging and observable operations",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-030"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Structured attribute",
+        "Correlation ID",
+        "Redaction"
+      ],
+      "outcome": "Explain and implement structured logging and observable operations.",
+      "lab": "Log processed with count 3 and parse its JSON.",
+      "verification": "The record has message processed and numeric count 3. The parsed field remains numeric 12."
+    },
+    {
+      "id": "go-032",
+      "title": "Security boundaries, escaping and input budgets",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "go-031"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Trust boundary",
+        "Contextual escaping",
+        "Allowlist"
+      ],
+      "outcome": "Explain and implement security boundaries, escaping and input budgets.",
+      "lab": "Render script-like text with html/template.",
+      "verification": "Angle brackets become escaped text. read is accepted and exec is rejected."
+    },
+    {
+      "id": "go-033",
+      "title": "Repository interfaces and transaction failure policy",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-032"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Transaction",
+        "Repository boundary",
+        "Unknown outcome"
+      ],
+      "outcome": "Explain and implement repository interfaces and transaction failure policy.",
+      "lab": "Transfer 3 between balances 5 and 5 in a staged transaction.",
+      "verification": "The committed balances are 2 and 8. The state is preserved and the operation succeeds."
+    },
+    {
+      "id": "go-034",
+      "title": "Build targets, containers and graceful process design",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-033"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Build target",
+        "Multi-stage build",
+        "Graceful shutdown"
+      ],
+      "outcome": "Explain and implement build targets, containers and graceful process design.",
+      "lab": "Read runtime target identifiers.",
+      "verification": "Both identifiers are nonempty. The result is lesson/1.0 revision=abc123."
+    },
+    {
+      "id": "go-035",
+      "title": "Kubernetes objects, metadata, spec and status",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-034"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Desired state",
+        "Observed state",
+        "Object UID"
+      ],
+      "outcome": "Explain and implement kubernetes objects, metadata, spec and status.",
+      "lab": "Decode a fixture requesting 3 replicas with 2 ready.",
+      "verification": "Desired is 3 while ready is 2. Only the equal complete state satisfies this simplified predicate."
+    },
+    {
+      "id": "go-036",
+      "title": "Labels, selectors and service membership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-035"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Label",
+        "Selector",
+        "Endpoint readiness"
+      ],
+      "outcome": "Explain and implement labels, selectors and service membership.",
+      "lab": "Match app=web and tier=frontend against a Pod containing both.",
+      "verification": "The selector matches. Both versions match the stable app selector."
+    },
+    {
+      "id": "go-037",
+      "title": "Reconciliation as an idempotent control loop",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-036"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Reconciliation",
+        "Idempotence",
+        "Convergence"
+      ],
+      "outcome": "Explain and implement reconciliation as an idempotent control loop.",
+      "lab": "Observe no child for a desired replica count of 3.",
+      "verification": "The action is create. The planner requests update, then converges at zero."
+    },
+    {
+      "id": "go-038",
+      "title": "Resource versions and optimistic concurrency",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-037"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Optimistic concurrency",
+        "Conflict",
+        "Field ownership"
+      ],
+      "outcome": "Explain and implement resource versions and optimistic concurrency.",
+      "lab": "Update value 2 using its current token a.",
+      "verification": "The value changes and token becomes b. Both attempts conflict and neither changes state."
+    },
+    {
+      "id": "go-039",
+      "title": "List-watch continuity, bookmarks and expired history",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-038"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "List snapshot",
+        "Watch bookmark",
+        "Expired history"
+      ],
+      "outcome": "Explain and implement list-watch continuity, bookmarks and expired history.",
+      "lab": "Apply ADDED for demo with value 2.",
+      "verification": "The cache gains demo=2. An error is returned without accepting invented semantics."
+    },
+    {
+      "id": "go-040",
+      "title": "Work queues, retry budgets and error classification",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-039"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Coalescing",
+        "Backoff",
+        "Retry budget"
+      ],
+      "outcome": "Explain and implement work queues, retry budgets and error classification.",
+      "lab": "Inspect attempts 0, 1 and 2.",
+      "verification": "The delays are 1, 2 and 4 units. Exactly three attempts are admitted."
+    },
+    {
+      "id": "go-041",
+      "title": "A real client-go project and explicit cluster configuration",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-040"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Clientset",
+        "Kubeconfig context",
+        "Dependency pin"
+      ],
+      "outcome": "Explain and implement a real client-go project and explicit cluster configuration.",
+      "lab": "Validate an HTTPS endpoint, lesson namespace and explicit context name.",
+      "verification": "The configuration is accepted. The embedded credential form is rejected."
+    },
+    {
+      "id": "go-042",
+      "title": "Informer caches, stale reads and safe object copies",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-041"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Informer",
+        "Eventual consistency",
+        "Deep copy"
+      ],
+      "outcome": "Explain and implement informer caches, stale reads and safe object copies.",
+      "lab": "Copy a cached object and change its app label.",
+      "verification": "The cache still contains the original label. The original label count is unchanged."
+    },
+    {
+      "id": "go-043",
+      "title": "Finalizers, deletion and exact ownership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-042"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Finalizer",
+        "Deletion timestamp",
+        "Owned incarnation"
+      ],
+      "outcome": "Explain and implement finalizers, deletion and exact ownership.",
+      "lab": "Inspect a normal object without the controller finalizer.",
+      "verification": "The next action is add-finalizer. The unrelated entry remains."
+    },
+    {
+      "id": "go-044",
+      "title": "Service accounts, RBAC and least-authority controllers",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-043"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Authentication",
+        "Authorization",
+        "Least authority"
+      ],
+      "outcome": "Explain and implement service accounts, rbac and least-authority controllers.",
+      "lab": "Allow get on pods in the lesson namespace.",
+      "verification": "The request is admitted by the local rule model. Only list is admitted."
+    },
+    {
+      "id": "go-045",
+      "title": "Leader election, leases and fencing limits",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-044"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Lease",
+        "Split brain",
+        "Fencing"
+      ],
+      "outcome": "Explain and implement leader election, leases and fencing limits.",
+      "lab": "Let candidate a acquire at logical time 10 for five units.",
+      "verification": "Holder becomes a and expiry 15. No lease is acquired."
+    },
+    {
+      "id": "go-046",
+      "title": "Admission decisions, webhook contracts and failure policy",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-045"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Admission",
+        "Failure policy",
+        "Dry run"
+      ],
+      "outcome": "Explain and implement admission decisions, webhook contracts and failure policy.",
+      "lab": "Validate replica count 3 under maximum 5.",
+      "verification": "The decision allows the request. The decision is denied."
+    },
+    {
+      "id": "go-047",
+      "title": "Controller tests from pure functions to owned clusters",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-046"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Fake client",
+        "Integration evidence",
+        "Fault injection"
+      ],
+      "outcome": "Explain and implement controller tests from pure functions to owned clusters.",
+      "lab": "Run a fake client configured to return a value.",
+      "verification": "The result is retained and exactly one call occurs. Both identifiers survive comparison."
+    },
+    {
+      "id": "go-048",
+      "title": "Capstone: a reliable, resumable controller design",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "go-047"
+      ],
+      "runtime": "go",
+      "concepts": [
+        "Control-loop invariant",
+        "Resumability",
+        "Operational contract"
+      ],
+      "outcome": "Explain and implement capstone: a reliable, resumable controller design.",
+      "lab": "Reconcile owned UID u1 from count 1 to desired 3.",
+      "verification": "The count becomes 3 with one write. The restarted invocation makes no additional write."
+    }
+  ]
+}

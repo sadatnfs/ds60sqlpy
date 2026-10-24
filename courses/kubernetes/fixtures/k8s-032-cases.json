@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-032",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive multi-node lease and host-allowlisted owned-worker eviction/drain",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compare app=hello selector against two hello Pods and one unrelated Pod.",
+      "expected": "Exactly the two hello Pods contribute to this example."
+    },
+    {
+      "exercise": 2,
+      "task": "Evaluate healthy counts2,1 and0 with minimum1.",
+      "expected": "Potential disruptions1,0,0 in the simplified model."
+    },
+    {
+      "exercise": 3,
+      "task": "Use the host allowlisted operation when one selected Pod is healthy.",
+      "expected": "Denial is tied to the intended PDB and Pod UID."
+    },
+    {
+      "exercise": 4,
+      "task": "With the qualified two-replica state, request one bounded owned-worker maintenance operation.",
+      "expected": "Allowed disruption, replacement readiness and finite application success are recorded."
+    },
+    {
+      "exercise": 5,
+      "task": "Interpret Pending due to requests, affinity or volume placement.",
+      "expected": "A specific scheduling/storage cause is named without weakening unrelated policy."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare eviction with direct delete/node loss and restore host scheduling state.",
+      "expected": "Only the tested voluntary path is claimed; owned Node state is restored."
+    }
+  ]
+}

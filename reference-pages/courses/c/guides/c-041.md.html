@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>c-041: State-machine parsing and bounded input grammars · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>c-041: State-machine parsing and bounded input grammars</h1>
+      <p class="source-path">Generated from <code>courses/c/guides/c-041.md</code></p>
+    </header>
+    <article class="document"><h2 id="c-041-state-machine-parsing-and-bounded-input-grammars">c-041: State-machine parsing and bounded input grammars<a class="heading-anchor" href="#c-041-state-machine-parsing-and-bounded-input-grammars" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced, approximately 120 minutes plus a later retrieval session. Direct prerequisites: <code>c-040</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain grammar, parser state, staged output. Implement the six investigations with explicit checks, identify a plausible defect and defend a fresh boundary case before execution. Completing a reference is not evidence of independent mastery.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A parser should define the language it accepts before processing bytes. A small state machine makes separator, digit and termination rules visible. It is safer than repeatedly guessing with partial conversions and ignoring leftovers. This lesson parses a deliberately narrow grammar: one or more unsigned decimal integers separated by single commas, with no spaces, signs or quoted fields. It is not a general CSV parser. Each digit update checks for overflow before multiplying by ten, and the output count is bounded by caller capacity. Invalid input preserves the caller output by parsing into a bounded temporary array first.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Grammar:</strong> The exact forms of input a parser accepts.</li>
+<li><strong>Parser state:</strong> The information needed to interpret the next byte.</li>
+<li><strong>Staged output:</strong> Temporary results committed only after complete validation.</li>
+</ul>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>The parser alternates between expecting a digit and accepting further digits or a comma. A comma requires a completed number and another number afterward. End-of-input commits the last value only if a digit was seen. The accumulator bound uses value&gt;(UINT_MAX-digit)/10 before value*10+digit. A temporary staging array makes the final output update failure-atomic for the declared maximum of eight numbers.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the unified Docker classroom, choose C and save your own learner pad. The prepared Linux worker stages one <code>main.c</code>, compiles it as C17 with warnings and pthread support, and executes the result under bounded time and output. No host compiler is required. Windows uses WSL 2 and the same Linux containers.</p>
+<p>The complete reference has <code>int main(void)</code> and the required standard headers. Its <code>CHECK</code> helper is always active and evaluates its condition once. A false check terminates with a nonzero result; a passing check produces no output. Unlike the standard <code>assert</code> macro, this helper is not removed by <code>NDEBUG</code>. Required operations and input validation must never depend on optional assertions. The explanatory solution snippets belong inside main unless they declare a helper; supporting declarations go above main. <code>CHECK(expression)</code> is the always-on teaching check supplied by the complete reference. The separate reference assembles all six cases into one complete file.</p>
+<p>For an independently prepared Linux contributor environment, copy your own file to an ignored working directory and run:</p>
+<pre class="highlighted-code"><code class="language-bash">cc -std<span class="syntax-operator">=</span>c17 -Wall -Wextra -Wpedantic -pthread main.c -lm -o lesson
+./lesson</code></pre>
+<p>The pad does not accept arbitrary compiler flags, interactive input, a project archive, host files or external package installation. Files created by a reference are owned temporary fixtures, not saved learner progress. Multi-file builds and sanitizers are explicitly prepared contributor workflows when discussed below.</p>
+<p>Each worked example below is a complete C file. Copy one whole block into your saved pad. Example 2 includes the first case as well as the second, so its setup is complete. Supporting helper definitions are included. The separate reference adds the other four investigations.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-parse-a-valid-list">Worked example 1: Parse a valid list<a class="heading-anchor" href="#worked-example-1-parse-a-valid-list" aria-label="Link to this section">#</a></h4>
+<p>Parse 1,20,3 into capacity three.</p>
+<pre class="highlighted-code"><code class="language-c"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;assert.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;limits.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdbool.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stddef.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdint.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdlib.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string.h&gt;</span>
+
+<span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">lesson_check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">const</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>file<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> line<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    fprintf<span class="syntax-punctuation">(</span>stderr<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Check failed at %s:%d</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> file<span class="syntax-punctuation">,</span> line<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    abort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">define CHECK(condition) lesson_check((condition), __FILE__, __LINE__)</span>
+
+<span class="syntax-keyword">bool</span> <span class="syntax-function">parse_list</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>text<span class="syntax-punctuation">,</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-operator">*</span>out<span class="syntax-punctuation">,</span> <span class="syntax-keyword">size_t</span> capacity<span class="syntax-punctuation">,</span>
+                <span class="syntax-keyword">size_t</span> <span class="syntax-operator">*</span>count<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>text <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> out <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">unsigned</span> temporary<span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">size_t</span> used <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">unsigned</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">bool</span> digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>p <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>text<span class="syntax-punctuation">;</span><span class="syntax-punctuation">;</span> p<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> c <span class="syntax-operator">=</span> <span class="syntax-operator">*</span>p<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">0</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> c <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">9</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">unsigned</span> digit <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">unsigned</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>c <span class="syntax-operator">-</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">(</span>UINT_MAX <span class="syntax-operator">-</span> digit<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">10U</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+      value <span class="syntax-operator">=</span> value <span class="syntax-operator">*</span> <span class="syntax-number">10U</span> <span class="syntax-operator">+</span> digit<span class="syntax-punctuation">;</span>
+      digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">,</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>digit_seen <span class="syntax-operator">|</span><span class="syntax-operator">|</span> used <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">8</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> used <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> capacity<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+      temporary<span class="syntax-punctuation">[</span>used<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> value<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span>
+      value <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+      digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  memcpy<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">,</span> temporary<span class="syntax-punctuation">,</span> used <span class="syntax-operator">*</span> <span class="syntax-keyword">sizeof</span> temporary<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">*</span>count <span class="syntax-operator">=</span> used<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">/* Parse a valid list */</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">unsigned</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">size_t</span> count <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    CHECK<span class="syntax-punctuation">(</span>parse_list<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1,20,3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">&amp;</span>count<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span>
+          out<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+</code></pre>
+<p><strong>Observe:</strong> Three values are returned in order.</p>
+<p>The parser validates the entire grammar before publishing output.</p>
+<h4 id="worked-example-2-reject-an-empty-field">Worked example 2: Reject an empty field<a class="heading-anchor" href="#worked-example-2-reject-an-empty-field" aria-label="Link to this section">#</a></h4>
+<p>Parse 1,,3.</p>
+<pre class="highlighted-code"><code class="language-c"><span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;assert.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;limits.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdbool.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stddef.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdint.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdio.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;stdlib.h&gt;</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">include</span> <span class="syntax-comment">&lt;string.h&gt;</span>
+
+<span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">lesson_check</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">bool</span> condition<span class="syntax-punctuation">,</span> <span class="syntax-keyword">const</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>file<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> line<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>condition<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    fprintf<span class="syntax-punctuation">(</span>stderr<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Check failed at %s:%d</span><span class="syntax-string">\n</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> file<span class="syntax-punctuation">,</span> line<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+    abort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span>
+<span class="syntax-comment">#</span><span class="syntax-comment">define CHECK(condition) lesson_check((condition), __FILE__, __LINE__)</span>
+
+<span class="syntax-keyword">bool</span> <span class="syntax-function">parse_list</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>text<span class="syntax-punctuation">,</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-operator">*</span>out<span class="syntax-punctuation">,</span> <span class="syntax-keyword">size_t</span> capacity<span class="syntax-punctuation">,</span>
+                <span class="syntax-keyword">size_t</span> <span class="syntax-operator">*</span>count<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>text <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> out <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-builtin">NULL</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">unsigned</span> temporary<span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">size_t</span> used <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">unsigned</span> value <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">bool</span> digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">for</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span>p <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">const</span> <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">)</span>text<span class="syntax-punctuation">;</span><span class="syntax-punctuation">;</span> p<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">unsigned</span> <span class="syntax-keyword">char</span> c <span class="syntax-operator">=</span> <span class="syntax-operator">*</span>p<span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">0</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> c <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">9</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">unsigned</span> digit <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-keyword">unsigned</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">(</span>c <span class="syntax-operator">-</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">(</span>UINT_MAX <span class="syntax-operator">-</span> digit<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">10U</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+      value <span class="syntax-operator">=</span> value <span class="syntax-operator">*</span> <span class="syntax-number">10U</span> <span class="syntax-operator">+</span> digit<span class="syntax-punctuation">;</span>
+      digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">,</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>digit_seen <span class="syntax-operator">|</span><span class="syntax-operator">|</span> used <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">8</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> used <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> capacity<span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+      temporary<span class="syntax-punctuation">[</span>used<span class="syntax-operator">+</span><span class="syntax-operator">+</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> value<span class="syntax-punctuation">;</span>
+      <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>c <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">\0</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+        <span class="syntax-keyword">break</span><span class="syntax-punctuation">;</span>
+      value <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+      digit_seen <span class="syntax-operator">=</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+      <span class="syntax-keyword">return</span> <span class="syntax-builtin">false</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-punctuation">}</span>
+  <span class="syntax-punctuation">}</span>
+  memcpy<span class="syntax-punctuation">(</span>out<span class="syntax-punctuation">,</span> temporary<span class="syntax-punctuation">,</span> used <span class="syntax-operator">*</span> <span class="syntax-keyword">sizeof</span> temporary<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-operator">*</span>count <span class="syntax-operator">=</span> used<span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-builtin">true</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+
+<span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-comment">/* Parse a valid list */</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">unsigned</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">size_t</span> count <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+    CHECK<span class="syntax-punctuation">(</span>parse_list<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1,20,3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">&amp;</span>count<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span>
+          out<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+
+  <span class="syntax-comment">/* Reject an empty field */</span>
+  <span class="syntax-punctuation">{</span>
+    <span class="syntax-keyword">unsigned</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
+    <span class="syntax-keyword">size_t</span> count <span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">;</span>
+    CHECK<span class="syntax-punctuation">(</span><span class="syntax-operator">!</span>parse_list<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">1,,3</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">&amp;</span>count<span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> out<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">9</span> <span class="syntax-operator">&amp;</span><span class="syntax-operator">&amp;</span> count <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-punctuation">}</span>
+  puts<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Worked example checks passed.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">return</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-punctuation">}</span>
+</code></pre>
+<p><strong>Observe:</strong> The parse fails and prior output is unchanged.</p>
+<p>Two separators in a row violate the required-digit state.</p>
+<h3 id="prediction-before-execution">Prediction before execution<a class="heading-anchor" href="#prediction-before-execution" aria-label="Link to this section">#</a></h3>
+<p>Trace each object from initialization through its last valid use. Write down the size of every array, the capacity of every output buffer and the ownership of any allocated storage. Distinguish a compiler diagnostic from a valid runtime rejection and from undefined behavior. Never execute an out-of-bounds access, dangling-pointer read or data race simply to discover what value it happens to print.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-parse-a-valid-list">Exercise 1: Parse a valid list<a class="heading-anchor" href="#exercise-1-parse-a-valid-list" aria-label="Link to this section">#</a></h4>
+<p>Parse 1,20,3 into capacity three.</p>
+<p><strong>Expected:</strong> Three values are returned in order.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h4 id="exercise-2-reject-an-empty-field">Exercise 2: Reject an empty field<a class="heading-anchor" href="#exercise-2-reject-an-empty-field" aria-label="Link to this section">#</a></h4>
+<p>Parse 1,,3.</p>
+<p><strong>Expected:</strong> The parse fails and prior output is unchanged.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h4 id="exercise-3-reject-a-trailing-separator">Exercise 3: Reject a trailing separator<a class="heading-anchor" href="#exercise-3-reject-a-trailing-separator" aria-label="Link to this section">#</a></h4>
+<p>Parse 1,2,.</p>
+<p><strong>Expected:</strong> The parse fails.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h4 id="exercise-4-enforce-output-capacity">Exercise 4: Enforce output capacity<a class="heading-anchor" href="#exercise-4-enforce-output-capacity" aria-label="Link to this section">#</a></h4>
+<p>Parse three values into capacity two.</p>
+<p><strong>Expected:</strong> The operation fails without an overflow.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h4 id="exercise-5-reject-numeric-overflow">Exercise 5: Reject numeric overflow<a class="heading-anchor" href="#exercise-5-reject-numeric-overflow" aria-label="Link to this section">#</a></h4>
+<p>Parse a number with far too many digits.</p>
+<p><strong>Expected:</strong> The range check rejects it.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h4 id="exercise-6-transfer-exact-grammar-boundaries">Exercise 6: Transfer exact grammar boundaries<a class="heading-anchor" href="#exercise-6-transfer-exact-grammar-boundaries" aria-label="Link to this section">#</a></h4>
+<p>Parse zero successfully and reject leading whitespace.</p>
+<p><strong>Expected:</strong> Zero is valid; space-prefixed input is not.</p>
+<p><strong>Verify:</strong> Preserve an independent assertion for this result. Explain the valid input range, object lifetime and bounds required by every access.</p>
+<p><strong>Progressive hints:</strong> First identify the relevant invariant. Then trace the smallest input satisfying the stated case. Finally isolate the expression that would distinguish your implementation from a plausible wrong one.</p>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Begin with the first relevant compiler warning or error. A declaration mismatch can cause many later diagnostics, so fix one cause at a time. If a check fails, compare actual and expected values and identify the earliest state transition that differs from the intended invariant. A program that compiles can still contain undefined behavior. A program that ran once without crashing can still access invalid memory.</p>
+<p>For every pointer, identify its target object, bounds, alignment, lifetime and whether mutation is permitted. For every library call, inspect its return value before using output. For every owned resource, identify one release on each completed path. The worked examples and solutions explain the lesson-specific counterexamples; keep those distinctions rather than replacing a rejected input with a plausible default.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the reference and explain grammar using a tiny concrete trace. Reconstruct one normal case and one boundary case from a blank source file. State the assumptions that make every expression defined. Then change the data or ownership pattern and predict the result. Explain which observation would prove your interpretation wrong.</p>
+<h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
+<p>Save the source and its actual diagnostics with your learning notes. Move onward when you can explain all six outcomes and repair a changed case without copying an answer. Larger projects reuse these contracts; an unexplained pointer or unchecked size calculation becomes more dangerous when hidden behind an API.</p>
+<p><a href="https://www.gnu.org/software/libc/manual/html_node/index.html">Primary language, library or platform reference</a>, reviewed 2026-10-23. Teaching explanations and synthetic fixtures are original. Source review, successful compilation, executed checks, sanitizer results and Linux Docker receipts are different evidence layers. Runtime qualification is recorded by the repository validation tools.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for c-041: State-machine parsing and bounded input grammars.
+Read courses/c/guides/c-041.md and my saved attempt based on courses/c/lessons/c-041.c.
+Ask me to predict Three values are returned in order. and justify every memory access.
+Give one hint about my first incorrect assumption; request actual compiler or runtime evidence.
+Keep courses/c/solutions/c-041_solution.c and courses/c/solutions/c-041_solutions.md closed until I request a reveal or comparison.
+Distinguish C17 guarantees from POSIX or compiler-specific behavior.
+Finish with a fresh case about staged output.</code></pre></article>
+  </main>
+</body>
+</html>

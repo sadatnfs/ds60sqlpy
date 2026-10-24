@@ -1,0 +1,93 @@
+{
+  "apiVersion": "batch/v1",
+  "kind": "Job",
+  "metadata": {
+    "name": "marker-writer"
+  },
+  "spec": {
+    "backoffLimit": 0,
+    "activeDeadlineSeconds": 60,
+    "completions": 1,
+    "parallelism": 1,
+    "template": {
+      "metadata": {
+        "labels": {
+          "role": "marker-writer"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "runAsUser": 65532,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          },
+          "fsGroup": 65532
+        },
+        "containers": [
+          {
+            "name": "marker",
+            "image": "ds60sqlpy-k8s-fixture:0.2.0",
+            "imagePullPolicy": "Never",
+            "command": [
+              "python",
+              "-c",
+              "from pathlib import Path; import hashlib; p=Path('/data/marker'); value=b'persistent-demo\\n'; f=p.open('xb'); f.write(value); f.close(); print(hashlib.sha256(value).hexdigest())"
+            ],
+            "resources": {
+              "requests": {
+                "cpu": "10m",
+                "memory": "16Mi"
+              },
+              "limits": {
+                "cpu": "100m",
+                "memory": "64Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "volumeMounts": [
+              {
+                "name": "data",
+                "mountPath": "/data",
+                "readOnly": false
+              }
+            ]
+          }
+        ],
+        "restartPolicy": "Never",
+        "volumes": [
+          {
+            "name": "data",
+            "persistentVolumeClaim": {
+              "claimName": "data-store-0",
+              "readOnly": false
+            }
+          }
+        ],
+        "affinity": {
+          "podAffinity": {
+            "requiredDuringSchedulingIgnoredDuringExecution": [
+              {
+                "labelSelector": {
+                  "matchLabels": {
+                    "app": "store"
+                  }
+                },
+                "topologyKey": "kubernetes.io/hostname"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

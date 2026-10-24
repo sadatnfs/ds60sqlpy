@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>2. Mathematical Foundations · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>2. Mathematical Foundations</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/02-mathematical-foundations.md</code></p>
+    </header>
+    <article class="document"><h2 id="2-mathematical-foundations">2. Mathematical Foundations<a class="heading-anchor" href="#2-mathematical-foundations" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-002</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A dataset with n observations and p numerical features becomes a matrix X with n rows and p columns. A linear prediction is X beta: a weighted combination of feature columns. Least squares chooses the prediction vector closest to y in squared Euclidean distance. Geometry explains what software computes and why redundant columns create unstable coefficients.</p>
+<p>Mathematical foundations are useful when they diagnose a real failure: a nearly singular covariance, exploding gradients, invalid probability integrals or a convergence assumption that does not hold. Distinguish the mathematical problem from the numerical algorithm. A unique theoretical answer can still be impossible to calculate accurately from rounded inputs.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-02-01">Linear algebra<a class="heading-anchor" href="#stat-02-01" aria-label="Link to this section">#</a></h4>
+<p>Represent a linear transformation as matrix multiplication and track dimensions explicitly. If X is n by p, beta must have length p. Dimension checks catch many silent broadcasting errors before model interpretation begins.</p>
+<h4 id="stat-02-02">Vector spaces and projections<a class="heading-anchor" href="#stat-02-02" aria-label="Link to this section">#</a></h4>
+<p>Least-squares fitted values project y onto the column space of X. The residual is orthogonal to every fitted direction. This geometric property holds even when several coefficient vectors generate the same projection.</p>
+<h4 id="stat-02-03">Matrix rank<a class="heading-anchor" href="#stat-02-03" aria-label="Link to this section">#</a></h4>
+<p>Rank counts linearly independent columns or rows. Full column rank gives unique ordinary least-squares coefficients; duplicate categories plus an intercept violate it. Inspect singular values rather than trusting an optimizer&#x27;s success flag.</p>
+<h4 id="stat-02-04">Eigenvalues and eigenvectors<a class="heading-anchor" href="#stat-02-04" aria-label="Link to this section">#</a></h4>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mi>v</mi><mo>=</mo><mi>λ</mi><mi>v</mi></mrow><annotation encoding="application/x-tex">A v=\lambda v</annotation></semantics></math>, the direction v is preserved by A. Covariance eigenvectors define principal directions and eigenvalues their variances. Repeated eigenvalues make individual eigenvector orientations nonunique even when the subspace is meaningful.</p>
+<h4 id="stat-02-05">Singular value decomposition<a class="heading-anchor" href="#stat-02-05" aria-label="Link to this section">#</a></h4>
+<p>Write <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mi>U</mi><mi>Σ</mi><msup><mi>V</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">X=U\Sigma V^{\mathsf T}</annotation></semantics></math>, with nonnegative singular values. Small singular values reveal weakly identified directions; truncating them creates a lower-rank approximation. SVD-based least squares avoids explicitly inverting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math>.</p>
+<h4 id="stat-02-06">Positive definite matrices<a class="heading-anchor" href="#stat-02-06" aria-label="Link to this section">#</a></h4>
+<p>A symmetric matrix is positive definite when v-transpose A v is positive for every nonzero v. Covariances are at least semidefinite; duplicate variables can make them singular. Cholesky factorization requires stricter positivity.</p>
+<h4 id="stat-02-07">Matrix calculus<a class="heading-anchor" href="#stat-02-07" aria-label="Link to this section">#</a></h4>
+<p>For squared loss, the gradient is 2 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mo stretchy="false">(</mo><mi>X</mi><mi>β</mi><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">X^{\mathsf T}(X\beta-y)</annotation></semantics></math>. The transpose maps observation errors back into coefficient coordinates. Confirm shapes and finite-difference checks before implementing more elaborate gradient code.</p>
+<h4 id="stat-02-08">Differential calculus<a class="heading-anchor" href="#stat-02-08" aria-label="Link to this section">#</a></h4>
+<p>A derivative is a local slope, while a second derivative describes curvature. A zero derivative can indicate a minimum, maximum or saddle. Optimization requires checking the local geometry or stronger global assumptions.</p>
+<h4 id="stat-02-09">Integral calculus<a class="heading-anchor" href="#stat-02-09" aria-label="Link to this section">#</a></h4>
+<p>A continuous probability is an integral of density over a region, not the density at a point. Expectations integrate value times density. A density may exceed one while its total integral remains one.</p>
+<h4 id="stat-02-10">Multivariable calculus<a class="heading-anchor" href="#stat-02-10" aria-label="Link to this section">#</a></h4>
+<p>Partial derivatives change one coordinate while holding others fixed; gradients collect them. Cross-partials express interactions. Scaling coordinates changes gradient magnitudes and can strongly affect an iterative optimizer&#x27;s path.</p>
+<h4 id="stat-02-11">Taylor expansions<a class="heading-anchor" href="#stat-02-11" aria-label="Link to this section">#</a></h4>
+<p>A first-order expansion f(x+h) approximately equals f(x)+grad(f)-transpose h for small h. The delta method uses this local approximation for uncertainty. It can fail near boundaries or with large skewed uncertainty.</p>
+<h4 id="stat-02-12">Convex analysis<a class="heading-anchor" href="#stat-02-12" aria-label="Link to this section">#</a></h4>
+<p>A convex objective over a convex feasible set has no inferior local minima. Strict convexity can ensure uniqueness. Convexity simplifies optimization but does not certify that the model or loss reflects the scientific objective.</p>
+<h4 id="stat-02-13">Numerical conditioning<a class="heading-anchor" href="#stat-02-13" aria-label="Link to this section">#</a></h4>
+<p>Condition numbers describe sensitivity of the exact solution to perturbed inputs. Near-collinear predictors can produce enormous coefficient changes from tiny data changes while predictions remain similar within the training region.</p>
+<h4 id="stat-02-14">Numerical stability<a class="heading-anchor" href="#stat-02-14" aria-label="Link to this section">#</a></h4>
+<p>A stable algorithm controls additional errors introduced by arithmetic. Subtracting nearly equal large numbers loses precision; solving by QR/SVD is usually safer than forming an explicit matrix inverse.</p>
+<h4 id="stat-02-15">Real analysis fundamentals<a class="heading-anchor" href="#stat-02-15" aria-label="Link to this section">#</a></h4>
+<p>Convergence of functions, sums and integrals requires conditions. Pointwise convergence alone does not permit exchanging a limit and an integral. Dominated convergence supplies one sufficient condition used in asymptotic derivations.</p>
+<h4 id="stat-02-16">Measure-theoretic probability<a class="heading-anchor" href="#stat-02-16" aria-label="Link to this section">#</a></h4>
+<p>A probability space specifies outcomes, measurable events and a probability measure. Conditional expectation is an information-dependent random variable, generalizing familiar conditional averages even when conditioning on a probability-zero continuous value.</p>
+<h4 id="stat-02-17">Differential equations<a class="heading-anchor" href="#stat-02-17" aria-label="Link to this section">#</a></h4>
+<p>A differential equation specifies a rate of change, such as <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>N</mi></mrow><mrow><mi>d</mi><mi>t</mi></mrow></mfrac><mo>=</mo><mi>r</mi><mi>N</mi></mrow><annotation encoding="application/x-tex">\frac{dN}{dt}=rN</annotation></semantics></math>. Its solution requires an initial condition. Discrete numerical steps approximate the trajectory, and large steps can introduce artificial instability.</p>
+<h4 id="stat-02-18">Information theory<a class="heading-anchor" href="#stat-02-18" aria-label="Link to this section">#</a></h4>
+<p>Entropy averages negative log probabilities; KL divergence averages a log density ratio and is directional. Coding or predictive log loss provides an operational interpretation. Zero model probability for a possible event can make KL infinite.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-projections-connect-geometry-to-regression">Case study: projections connect geometry to regression<a class="heading-anchor" href="#case-study-projections-connect-geometry-to-regression" aria-label="Link to this section">#</a></h4>
+<p>A vector in <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>ℝ</mi><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">\mathbb{R}^n</annotation></semantics></math> can be understood as n numbers describing one quantity across observations. Each column of X is such a vector. The possible predictions X beta form the column space of X, a set closed under addition and scalar multiplication. Least squares finds the point in that space closest to y under squared Euclidean distance.</p>
+<p>At the closest point, any small movement along a feature column cannot improve squared distance. Differentiating in each column direction gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mo stretchy="false">(</mo><mi>y</mi><mo>−</mo><mi>X</mi><mi>β</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">X^{\mathsf T}(y-X\beta)=0</annotation></semantics></math>. This is why residuals are orthogonal to every fitted direction. If an intercept is present, the all-ones vector is one of those directions, so residuals sum to zero. Without an intercept, that property need not hold.</p>
+<p>When columns are redundant, the closest prediction can still be unique although coefficients are not. Adding a vector from the null space of X to beta leaves X beta unchanged. A pseudoinverse chooses one convention, often a minimum-norm coefficient solution, but that convention does not make separate redundant effects scientifically identified. Rank and null-space reasoning explain this before any software is run.</p>
+<h4 id="case-study-svd-explains-regularization-and-conditioning">Case study: SVD explains regularization and conditioning<a class="heading-anchor" href="#case-study-svd-explains-regularization-and-conditioning" aria-label="Link to this section">#</a></h4>
+<p>Write <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>X</mi><mo>=</mo><mi>U</mi><mi>Σ</mi><msup><mi>V</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">X=U\Sigma V^{\mathsf T}</annotation></semantics></math>. In a full-rank least-squares solution, coordinates of y along left singular directions are divided by the singular values. A tiny singular value therefore amplifies a small perturbation in the corresponding data direction into a large coefficient change. This is an information-sensitivity problem, not merely a bug in the solver.</p>
+<p>Ridge regression replaces the reciprocal singular-value factor <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mi>s</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{s}</annotation></semantics></math> with s/(s-squared+lambda). Large singular directions remain influential, while tiny directions are suppressed. Truncated SVD takes a harder approach by dropping directions below a threshold. Both stabilize the solution by changing the estimation problem and introducing bias relative to unpenalized coefficients.</p>
+<p>The condition number compares the largest and smallest relevant singular values. Forming <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math> squares this ratio, which can worsen numerical behavior. QR or SVD solves the least-squares problem without explicitly taking that path. Stable algorithms limit added arithmetic error, but they cannot recover information absent from nearly indistinguishable predictors.</p>
+<h4 id="case-study-gradients-curvature-and-step-size">Case study: gradients, curvature and step size<a class="heading-anchor" href="#case-study-gradients-curvature-and-step-size" aria-label="Link to this section">#</a></h4>
+<p>For <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>β</mi><mo stretchy="false">)</mo><mo>=</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo>‖</mo><mi>X</mi><mi>β</mi><mo>−</mo><mi>y</mi><msubsup><mo>‖</mo><mn>2</mn><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">f(\beta)=\frac12\lVert X\beta-y\rVert_2^2</annotation></semantics></math>, the gradient is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mo stretchy="false">(</mo><mi>X</mi><mi>β</mi><mo>−</mo><mi>y</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">X^{\mathsf T}(X\beta-y)</annotation></semantics></math> and the Hessian is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math>. The Hessian is positive semidefinite because <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>v</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi><mi>v</mi></mrow><annotation encoding="application/x-tex">v^{\mathsf T}X^{\mathsf T}Xv</annotation></semantics></math> equals <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo>‖</mo><mi>X</mi><mi>v</mi><msubsup><mo>‖</mo><mn>2</mn><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">\lVert Xv\rVert_2^2</annotation></semantics></math>, which cannot be negative. It is positive definite exactly when X has full column rank. Thus the objective is convex, and strict convexity determines coefficient uniqueness.</p>
+<p>Gradient descent updates beta by subtracting eta times the gradient. For a quadratic, a step size below two divided by the largest Hessian eigenvalue gives the usual stable convergence condition in the positive-definite case. If feature scales differ wildly, the Hessian eigenvalues can span a wide range, forcing small steps along steep directions and slow progress along shallow ones. Standardization or preconditioning changes that geometry.</p>
+<p>Newton&#x27;s method uses inverse curvature to rescale the gradient. It can solve an unconstrained full-rank quadratic in one exact step, but evaluating or solving with curvature can be expensive or unstable in more complex models. Quasi-Newton methods approximate curvature; stochastic gradients trade exactness for cheaper updates. These are computational choices layered on the statistical objective.</p>
+<h4 id="case-study-expectations-are-integrals-not-informal-averages">Case study: expectations are integrals, not informal averages<a class="heading-anchor" href="#case-study-expectations-are-integrals-not-informal-averages" aria-label="Link to this section">#</a></h4>
+<p>For a discrete variable, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><mi>g</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[g(X)]</annotation></semantics></math> sums <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo movablelimits="true">Pr</mo><mo stretchy="false">(</mo><mi>X</mi><mo>=</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">g(x)\Pr(X=x)</annotation></semantics></math>. For a continuous variable, it integrates g(x)f(x) over support. A probability density can exceed one because probability is area, not point height. For example, a uniform distribution on an interval of width .1 has density ten and total probability one.</p>
+<p>The law of the unconscious statistician allows computing <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><mi>g</mi><mo stretchy="false">(</mo><mi>X</mi><mo stretchy="false">)</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[g(X)]</annotation></semantics></math> from X&#x27;s distribution without first deriving g(X)&#x27;s density. This is useful for transformed outcomes, utility and moment calculations. But exchanging integrals, derivatives and limits requires conditions. A familiar algebraic manipulation can fail when tails are too heavy or convergence lacks an integrable bound.</p>
+<p>Measure-theoretic language formalizes which events and functions can be assigned probabilities and integrated. Conditional expectation is a projection onto available information in an appropriate function space. This connects abstract probability back to regression: a conditional mean is the squared-loss optimal prediction among functions of the observed information, even when no finite linear model represents it exactly.</p>
+<h4 id="case-study-information-and-nonlinear-transformation">Case study: information and nonlinear transformation<a class="heading-anchor" href="#case-study-information-and-nonlinear-transformation" aria-label="Link to this section">#</a></h4>
+<p>Entropy measures expected surprise under a distribution, and cross-entropy measures expected negative log probability assigned by another distribution. Their difference is KL divergence when the relevant densities exist. This gives log loss a practical interpretation: a model pays for assigning low probability to outcomes that actually occur.</p>
+<p>Jensen&#x27;s inequality explains why <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><msup><mi>e</mi><mi>X</mi></msup><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">\mathbb{E}[e^X]</annotation></semantics></math> is generally larger than <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>e</mi><mrow><mi>𝔼</mi><mo stretchy="false">[</mo><mi>X</mi><mo stretchy="false">]</mo></mrow></msup></mrow><annotation encoding="application/x-tex">e^{\mathbb{E}[X]}</annotation></semantics></math>. For a normal X with mean mu and variance sigma-squared, the exact lognormal mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>exp</mi><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mi>μ</mi><mo>+</mo><mfrac><mrow><msup><mi>σ</mi><mn>2</mn></msup></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\exp\!\left(\mu+\frac{\sigma^2}{2}\right)</annotation></semantics></math>. Back-transforming a fitted log mean without accounting for variability can therefore underestimate an arithmetic mean. The mathematical distinction becomes an operational bias in cost forecasts.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_02.py.html">chapter_02.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-text">python courses/statistics-ml/examples/chapter_02.py</code></pre>
+<h4 id="least-squares-is-a-projection">Least squares is a projection<a class="heading-anchor" href="#least-squares-is-a-projection" aria-label="Link to this section">#</a></h4>
+<p>The three observations do not lie exactly on a line. <code>lstsq</code> produces coefficients and a residual whose dot product with each feature column is numerically zero. Adding twice the slope column increases the number of columns but leaves rank at two. Thus extra stored features need not add identifiable information.</p>
+<h4 id="verify-a-derivative-before-trusting-optimization">Verify a derivative before trusting optimization<a class="heading-anchor" href="#verify-a-derivative-before-trusting-optimization" aria-label="Link to this section">#</a></h4>
+<p>Central finite differences perturb one coordinate at a time. Agreement with the analytic gradient validates the derivative at the chosen point, not global optimizer correctness. The KL calculation then shows why assigning probability 0.1 to a half-probability event incurs a predictive penalty.</p>
+<h4 id="curvature-determines-a-stable-step">Curvature determines a stable step<a class="heading-anchor" href="#curvature-determines-a-stable-step" aria-label="Link to this section">#</a></h4>
+<p>For one-half times the squared distance to three, curvature is one. A step size .5 decreases loss every iteration and approaches three. A step size 2.5 overshoots and diverges. The numerical assertion links the derivative to the stability condition, rather than treating learning rate as an unexplained tuning knob.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">projection_and_rank</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    y <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    beta <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>lstsq<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> rcond<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span>
+    residual <span class="syntax-operator">=</span> y <span class="syntax-operator">-</span> x <span class="syntax-operator">@</span> beta
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>x<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> residual<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">)</span>
+    redundant <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>column_stack<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>x<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>linalg<span class="syntax-operator">.</span>matrix_rank<span class="syntax-punctuation">(</span>redundant<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Coefficients:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> beta<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">rank with duplicate direction:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">gradients_and_information</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    y<span class="syntax-punctuation">,</span> beta <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    loss <span class="syntax-operator">=</span> <span class="syntax-keyword">lambda</span> b<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>x <span class="syntax-operator">@</span> b<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+    h <span class="syntax-operator">=</span> <span class="syntax-number">1e-6</span>
+    finite <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>loss<span class="syntax-punctuation">(</span>beta<span class="syntax-operator">+</span>h<span class="syntax-operator">*</span>e<span class="syntax-punctuation">)</span><span class="syntax-operator">-</span>loss<span class="syntax-punctuation">(</span>beta<span class="syntax-operator">-</span>h<span class="syntax-operator">*</span>e<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-operator">*</span>h<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> e <span class="syntax-operator">in</span> np<span class="syntax-operator">.</span>eye<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    analytic <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-operator">*</span>x<span class="syntax-operator">.</span>T <span class="syntax-operator">@</span> <span class="syntax-punctuation">(</span>x <span class="syntax-operator">@</span> beta<span class="syntax-operator">-</span>y<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>finite<span class="syntax-punctuation">,</span> analytic<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1e-7</span><span class="syntax-punctuation">)</span>
+    p<span class="syntax-punctuation">,</span> q <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">.9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">.1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+    kl <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>p<span class="syntax-operator">*</span>np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>p<span class="syntax-operator">/</span>q<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> kl <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Gradient:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> analytic<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">KL in nats:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>kl<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">curvature_and_steps</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-comment"># f(b)=0.5*(b-3)^2 has gradient b-3 and curvature one.</span>
+    b<span class="syntax-operator">=</span><span class="syntax-number">0.</span>
+    losses<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        losses<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">*</span><span class="syntax-operator">*</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+        b<span class="syntax-operator">-</span><span class="syntax-operator">=</span><span class="syntax-number">.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>diff<span class="syntax-punctuation">(</span>losses<span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>b<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&lt;</span><span class="syntax-number">.001</span>
+    unstable<span class="syntax-operator">=</span><span class="syntax-number">0.</span>
+    <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+        unstable<span class="syntax-operator">-</span><span class="syntax-operator">=</span><span class="syntax-number">2.5</span><span class="syntax-operator">*</span><span class="syntax-punctuation">(</span>unstable<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>unstable<span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-operator">&gt;</span><span class="syntax-number">3</span>
+    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stable gradient iterate:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">oversized-step iterate:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>unstable<span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    curvature_and_steps<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    projection_and_rank<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    gradients_and_information<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+<span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
+    main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Why avoid the inverse formula for regression?</strong> Forming <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math> squares the condition number, and explicit inversion adds unnecessary computation. QR or SVD solves the least-squares problem more reliably. Poor conditioning remains an information problem even with a stable algorithm.</p>
+<p><strong>Interview: Does a small singular value mean a feature should always be deleted?</strong> No. It identifies a poorly determined direction, which may combine several scientifically essential variables. Scaling, redesign, regularization or reporting uncertainty may be more appropriate than mechanically dropping one column.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html">NumPy least-squares API</a>.</li>
+</ul>
+<ul>
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html">NumPy singular-value decomposition API</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="01-problem-formulation-and-statistical-reasoning.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="03-probability-fundamentals-and-stochastic-processes.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

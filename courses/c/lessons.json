@@ -1,0 +1,552 @@
+{
+  "schema_version": 1,
+  "track_id": "c",
+  "lessons": [
+    {
+      "id": "c-001",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-001.md",
+      "source_path": "courses/c/lessons/c-001.c",
+      "solution_paths": [
+        "courses/c/solutions/c-001_solution.c",
+        "courses/c/solutions/c-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-002",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-002.md",
+      "source_path": "courses/c/lessons/c-002.c",
+      "solution_paths": [
+        "courses/c/solutions/c-002_solution.c",
+        "courses/c/solutions/c-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-003",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-003.md",
+      "source_path": "courses/c/lessons/c-003.c",
+      "solution_paths": [
+        "courses/c/solutions/c-003_solution.c",
+        "courses/c/solutions/c-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-004",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-004.md",
+      "source_path": "courses/c/lessons/c-004.c",
+      "solution_paths": [
+        "courses/c/solutions/c-004_solution.c",
+        "courses/c/solutions/c-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-005",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-005.md",
+      "source_path": "courses/c/lessons/c-005.c",
+      "solution_paths": [
+        "courses/c/solutions/c-005_solution.c",
+        "courses/c/solutions/c-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-006",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-006.md",
+      "source_path": "courses/c/lessons/c-006.c",
+      "solution_paths": [
+        "courses/c/solutions/c-006_solution.c",
+        "courses/c/solutions/c-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-007",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-007.md",
+      "source_path": "courses/c/lessons/c-007.c",
+      "solution_paths": [
+        "courses/c/solutions/c-007_solution.c",
+        "courses/c/solutions/c-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-008",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-008.md",
+      "source_path": "courses/c/lessons/c-008.c",
+      "solution_paths": [
+        "courses/c/solutions/c-008_solution.c",
+        "courses/c/solutions/c-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-009",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-009.md",
+      "source_path": "courses/c/lessons/c-009.c",
+      "solution_paths": [
+        "courses/c/solutions/c-009_solution.c",
+        "courses/c/solutions/c-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-010",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-010.md",
+      "source_path": "courses/c/lessons/c-010.c",
+      "solution_paths": [
+        "courses/c/solutions/c-010_solution.c",
+        "courses/c/solutions/c-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-011",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-011.md",
+      "source_path": "courses/c/lessons/c-011.c",
+      "solution_paths": [
+        "courses/c/solutions/c-011_solution.c",
+        "courses/c/solutions/c-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-012",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-012.md",
+      "source_path": "courses/c/lessons/c-012.c",
+      "solution_paths": [
+        "courses/c/solutions/c-012_solution.c",
+        "courses/c/solutions/c-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-013",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-013.md",
+      "source_path": "courses/c/lessons/c-013.c",
+      "solution_paths": [
+        "courses/c/solutions/c-013_solution.c",
+        "courses/c/solutions/c-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-014",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-014.md",
+      "source_path": "courses/c/lessons/c-014.c",
+      "solution_paths": [
+        "courses/c/solutions/c-014_solution.c",
+        "courses/c/solutions/c-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-015",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-015.md",
+      "source_path": "courses/c/lessons/c-015.c",
+      "solution_paths": [
+        "courses/c/solutions/c-015_solution.c",
+        "courses/c/solutions/c-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-016",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-016.md",
+      "source_path": "courses/c/lessons/c-016.c",
+      "solution_paths": [
+        "courses/c/solutions/c-016_solution.c",
+        "courses/c/solutions/c-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-017",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-017.md",
+      "source_path": "courses/c/lessons/c-017.c",
+      "solution_paths": [
+        "courses/c/solutions/c-017_solution.c",
+        "courses/c/solutions/c-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-018",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-018.md",
+      "source_path": "courses/c/lessons/c-018.c",
+      "solution_paths": [
+        "courses/c/solutions/c-018_solution.c",
+        "courses/c/solutions/c-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-019",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-019.md",
+      "source_path": "courses/c/lessons/c-019.c",
+      "solution_paths": [
+        "courses/c/solutions/c-019_solution.c",
+        "courses/c/solutions/c-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-020",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-020.md",
+      "source_path": "courses/c/lessons/c-020.c",
+      "solution_paths": [
+        "courses/c/solutions/c-020_solution.c",
+        "courses/c/solutions/c-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-021",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-021.md",
+      "source_path": "courses/c/lessons/c-021.c",
+      "solution_paths": [
+        "courses/c/solutions/c-021_solution.c",
+        "courses/c/solutions/c-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-022",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-022.md",
+      "source_path": "courses/c/lessons/c-022.c",
+      "solution_paths": [
+        "courses/c/solutions/c-022_solution.c",
+        "courses/c/solutions/c-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-023",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-023.md",
+      "source_path": "courses/c/lessons/c-023.c",
+      "solution_paths": [
+        "courses/c/solutions/c-023_solution.c",
+        "courses/c/solutions/c-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-024",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-024.md",
+      "source_path": "courses/c/lessons/c-024.c",
+      "solution_paths": [
+        "courses/c/solutions/c-024_solution.c",
+        "courses/c/solutions/c-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-025",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-025.md",
+      "source_path": "courses/c/lessons/c-025.c",
+      "solution_paths": [
+        "courses/c/solutions/c-025_solution.c",
+        "courses/c/solutions/c-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-026",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-026.md",
+      "source_path": "courses/c/lessons/c-026.c",
+      "solution_paths": [
+        "courses/c/solutions/c-026_solution.c",
+        "courses/c/solutions/c-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-027",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-027.md",
+      "source_path": "courses/c/lessons/c-027.c",
+      "solution_paths": [
+        "courses/c/solutions/c-027_solution.c",
+        "courses/c/solutions/c-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-028",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-028.md",
+      "source_path": "courses/c/lessons/c-028.c",
+      "solution_paths": [
+        "courses/c/solutions/c-028_solution.c",
+        "courses/c/solutions/c-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-029",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-029.md",
+      "source_path": "courses/c/lessons/c-029.c",
+      "solution_paths": [
+        "courses/c/solutions/c-029_solution.c",
+        "courses/c/solutions/c-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-030",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-030.md",
+      "source_path": "courses/c/lessons/c-030.c",
+      "solution_paths": [
+        "courses/c/solutions/c-030_solution.c",
+        "courses/c/solutions/c-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-031",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-031.md",
+      "source_path": "courses/c/lessons/c-031.c",
+      "solution_paths": [
+        "courses/c/solutions/c-031_solution.c",
+        "courses/c/solutions/c-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-032",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-032.md",
+      "source_path": "courses/c/lessons/c-032.c",
+      "solution_paths": [
+        "courses/c/solutions/c-032_solution.c",
+        "courses/c/solutions/c-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-033",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-033.md",
+      "source_path": "courses/c/lessons/c-033.c",
+      "solution_paths": [
+        "courses/c/solutions/c-033_solution.c",
+        "courses/c/solutions/c-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-034",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-034.md",
+      "source_path": "courses/c/lessons/c-034.c",
+      "solution_paths": [
+        "courses/c/solutions/c-034_solution.c",
+        "courses/c/solutions/c-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-035",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-035.md",
+      "source_path": "courses/c/lessons/c-035.c",
+      "solution_paths": [
+        "courses/c/solutions/c-035_solution.c",
+        "courses/c/solutions/c-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-036",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-036.md",
+      "source_path": "courses/c/lessons/c-036.c",
+      "solution_paths": [
+        "courses/c/solutions/c-036_solution.c",
+        "courses/c/solutions/c-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-037",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-037.md",
+      "source_path": "courses/c/lessons/c-037.c",
+      "solution_paths": [
+        "courses/c/solutions/c-037_solution.c",
+        "courses/c/solutions/c-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-038",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-038.md",
+      "source_path": "courses/c/lessons/c-038.c",
+      "solution_paths": [
+        "courses/c/solutions/c-038_solution.c",
+        "courses/c/solutions/c-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-039",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-039.md",
+      "source_path": "courses/c/lessons/c-039.c",
+      "solution_paths": [
+        "courses/c/solutions/c-039_solution.c",
+        "courses/c/solutions/c-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-040",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-040.md",
+      "source_path": "courses/c/lessons/c-040.c",
+      "solution_paths": [
+        "courses/c/solutions/c-040_solution.c",
+        "courses/c/solutions/c-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-041",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-041.md",
+      "source_path": "courses/c/lessons/c-041.c",
+      "solution_paths": [
+        "courses/c/solutions/c-041_solution.c",
+        "courses/c/solutions/c-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "c-042",
+      "status": "authored",
+      "language": "c",
+      "runtime_profile": "c17",
+      "guide_path": "courses/c/guides/c-042.md",
+      "source_path": "courses/c/lessons/c-042.c",
+      "solution_paths": [
+        "courses/c/solutions/c-042_solution.c",
+        "courses/c/solutions/c-042_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

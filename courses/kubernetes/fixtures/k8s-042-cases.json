@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-042",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "exclusive integrated platform/controller/policy/metrics/traffic/storage/recovery lease",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "List exact runtime capabilities,versions,source hashes and owned identities for the selected scenario.",
+      "expected": "Every requested live action has a qualified capability or an explicit unavailable row."
+    },
+    {
+      "exercise": 2,
+      "task": "Review the custom resource and capture permitted and policy-denied controls.",
+      "expected": "Schema,authorization and admission conclusions remain separate."
+    },
+    {
+      "exercise": 3,
+      "task": "Join parent generation,child ownership,readiness and finite application samples.",
+      "expected": "Current-generation owned resources serve the expected marker through the intended route."
+    },
+    {
+      "exercise": 4,
+      "task": "Record baseline,fault,symptom,hypotheses,minimal repair and post-repair response.",
+      "expected": "Timestamped causal explanation with exact target and cancellation/restore behavior."
+    },
+    {
+      "exercise": 5,
+      "task": "Apply the stated RTO/RPO definitions and missing-data negative control.",
+      "expected": "Independent service/data gates and recomputable source timestamps/hashes."
+    },
+    {
+      "exercise": 6,
+      "task": "Collect UID-aware cleanup/release receipts and defend each remaining claim.",
+      "expected": "No unrelated resources removed;missing or failed gates remain visible."
+    }
+  ]
+}

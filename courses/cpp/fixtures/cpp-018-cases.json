@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-018",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Identify ownership",
+      "input_or_change": "Draw vector storage and its span.",
+      "expected": "One owner and one non-owning view."
+    },
+    {
+      "exercise": 2,
+      "task": "Select a subrange",
+      "input_or_change": "Sum the final two values of [2,4,6].",
+      "expected": "10 with original vector unchanged."
+    },
+    {
+      "exercise": 3,
+      "task": "Write a bounds guard",
+      "input_or_change": "Validate offset=2,count=2 for size=3 before subspan.",
+      "expected": "Reject because only one value remains."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair invalidation",
+      "input_or_change": "Review span created before vector growth that reallocates.",
+      "expected": "Recreate span after growth; never dereference stale span."
+    },
+    {
+      "exercise": 5,
+      "task": "Test empty view",
+      "input_or_change": "Pass an empty span to sum_view.",
+      "expected": "0 without dereference."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer lifetime reasoning",
+      "input_or_change": "Review string_view returned from a local string.",
+      "expected": "Reject; return string ownership or borrow caller-owned text."
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-049",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the ready endpoint set.",
+      "expected": "Only the endpoint referencing pod-a."
+    },
+    {
+      "exercise": 2,
+      "task": "Aggregate endpoints across two slices.",
+      "expected": "The result includes every relevant slice without duplicate identities."
+    },
+    {
+      "exercise": 3,
+      "task": "Join eligible endpoint references to current Pod UIDs.",
+      "expected": "Every accepted backend belongs to the intended current workload."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose Running but no ready endpoints.",
+      "expected": "Inspect readiness and selector/controller observations."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain terminating and serving conditions carefully.",
+      "expected": "They inform draining behavior and are not identical Boolean synonyms."
+    },
+    {
+      "exercise": 6,
+      "task": "Prove a replacement backend is actually used.",
+      "expected": "New UID eligibility plus a fresh source-bound application response."
+    }
+  ]
+}

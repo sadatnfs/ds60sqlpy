@@ -1,0 +1,861 @@
+{
+  "schema_version": 1,
+  "track_id": "javascript-typescript",
+  "lessons": [
+    {
+      "id": "js-001",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-001.md",
+      "source_path": "courses/javascript-typescript/lessons/js-001.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-001_solution.mjs",
+        "courses/javascript-typescript/solutions/js-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-002",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-002.md",
+      "source_path": "courses/javascript-typescript/lessons/js-002.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-002_solution.mjs",
+        "courses/javascript-typescript/solutions/js-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-003",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-003.md",
+      "source_path": "courses/javascript-typescript/lessons/js-003.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-003_solution.mjs",
+        "courses/javascript-typescript/solutions/js-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-004",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-004.md",
+      "source_path": "courses/javascript-typescript/lessons/js-004.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-004_solution.mjs",
+        "courses/javascript-typescript/solutions/js-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-005",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-005.md",
+      "source_path": "courses/javascript-typescript/lessons/js-005.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-005_solution.mjs",
+        "courses/javascript-typescript/solutions/js-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-006",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-006.md",
+      "source_path": "courses/javascript-typescript/lessons/js-006.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-006_solution.mjs",
+        "courses/javascript-typescript/solutions/js-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-007",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-007.md",
+      "source_path": "courses/javascript-typescript/lessons/js-007.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-007_solution.mjs",
+        "courses/javascript-typescript/solutions/js-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-008",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-008.md",
+      "source_path": "courses/javascript-typescript/lessons/js-008.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-008_solution.mjs",
+        "courses/javascript-typescript/solutions/js-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-009",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-009.md",
+      "source_path": "courses/javascript-typescript/lessons/js-009.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-009_solution.mjs",
+        "courses/javascript-typescript/solutions/js-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-010",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-010.md",
+      "source_path": "courses/javascript-typescript/lessons/js-010.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-010_solution.mjs",
+        "courses/javascript-typescript/solutions/js-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-011",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-011.md",
+      "source_path": "courses/javascript-typescript/lessons/js-011.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-011_solution.mjs",
+        "courses/javascript-typescript/solutions/js-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-012",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-012.md",
+      "source_path": "courses/javascript-typescript/lessons/js-012.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-012_solution.mjs",
+        "courses/javascript-typescript/solutions/js-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-013",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-013.md",
+      "source_path": "courses/javascript-typescript/lessons/js-013.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-013_solution.mjs",
+        "courses/javascript-typescript/solutions/js-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-014",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-014.md",
+      "source_path": "courses/javascript-typescript/lessons/js-014.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-014_solution.mjs",
+        "courses/javascript-typescript/solutions/js-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-015",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-015.md",
+      "source_path": "courses/javascript-typescript/lessons/js-015.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-015_solution.mjs",
+        "courses/javascript-typescript/solutions/js-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-016",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-016.md",
+      "source_path": "courses/javascript-typescript/lessons/js-016.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-016_solution.mjs",
+        "courses/javascript-typescript/solutions/js-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-017",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-017.md",
+      "source_path": "courses/javascript-typescript/lessons/js-017.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-017_solution.mjs",
+        "courses/javascript-typescript/solutions/js-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-018",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-018.md",
+      "source_path": "courses/javascript-typescript/lessons/js-018.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-018_solution.mjs",
+        "courses/javascript-typescript/solutions/js-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-019",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-019.md",
+      "source_path": "courses/javascript-typescript/lessons/js-019.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-019_solution.mts",
+        "courses/javascript-typescript/solutions/js-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-020",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-020.md",
+      "source_path": "courses/javascript-typescript/lessons/js-020.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-020_solution.mts",
+        "courses/javascript-typescript/solutions/js-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-021",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-021.md",
+      "source_path": "courses/javascript-typescript/lessons/js-021.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-021_solution.mts",
+        "courses/javascript-typescript/solutions/js-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-022",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-022.md",
+      "source_path": "courses/javascript-typescript/lessons/js-022.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-022_solution.mts",
+        "courses/javascript-typescript/solutions/js-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-023",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-023.md",
+      "source_path": "courses/javascript-typescript/lessons/js-023.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-023_solution.mts",
+        "courses/javascript-typescript/solutions/js-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-024",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-024.md",
+      "source_path": "courses/javascript-typescript/lessons/js-024.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-024_solution.mts",
+        "courses/javascript-typescript/solutions/js-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-025",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-025.md",
+      "source_path": "courses/javascript-typescript/lessons/js-025.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-025_solution.mts",
+        "courses/javascript-typescript/solutions/js-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-026",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-026.md",
+      "source_path": "courses/javascript-typescript/lessons/js-026.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-026_solution.mts",
+        "courses/javascript-typescript/solutions/js-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-027",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-027.md",
+      "source_path": "courses/javascript-typescript/lessons/js-027.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-027_solution.mts",
+        "courses/javascript-typescript/solutions/js-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-028",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-028.md",
+      "source_path": "courses/javascript-typescript/lessons/js-028.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-028_solution.mts",
+        "courses/javascript-typescript/solutions/js-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/javascript-typescript/guides/js-029.md",
+      "source_path": "courses/javascript-typescript/lessons/js-029.md",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/javascript-typescript/guides/js-030.md",
+      "source_path": "courses/javascript-typescript/lessons/js-030.md",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-031",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/javascript-typescript/guides/js-031.md",
+      "source_path": "courses/javascript-typescript/lessons/js-031.md",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-032",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-032.md",
+      "source_path": "courses/javascript-typescript/lessons/js-032.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-032_solution.mjs",
+        "courses/javascript-typescript/solutions/js-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-033",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-033.md",
+      "source_path": "courses/javascript-typescript/lessons/js-033.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-033_solution.mjs",
+        "courses/javascript-typescript/solutions/js-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-034",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-034.md",
+      "source_path": "courses/javascript-typescript/lessons/js-034.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-034_solution.mjs",
+        "courses/javascript-typescript/solutions/js-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-035",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-035.md",
+      "source_path": "courses/javascript-typescript/lessons/js-035.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-035_solution.mjs",
+        "courses/javascript-typescript/solutions/js-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-036",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-036.md",
+      "source_path": "courses/javascript-typescript/lessons/js-036.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-036_solution.mjs",
+        "courses/javascript-typescript/solutions/js-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-037",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-037.md",
+      "source_path": "courses/javascript-typescript/lessons/js-037.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-037_solution.mjs",
+        "courses/javascript-typescript/solutions/js-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-038",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-038.md",
+      "source_path": "courses/javascript-typescript/lessons/js-038.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-038_solution.mts",
+        "courses/javascript-typescript/solutions/js-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-039",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-039.md",
+      "source_path": "courses/javascript-typescript/lessons/js-039.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-039_solution.mts",
+        "courses/javascript-typescript/solutions/js-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-040",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-040.md",
+      "source_path": "courses/javascript-typescript/lessons/js-040.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-040_solution.mjs",
+        "courses/javascript-typescript/solutions/js-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-041",
+      "status": "authored",
+      "language": "typescript",
+      "runtime_profile": "typescript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-041.md",
+      "source_path": "courses/javascript-typescript/lessons/js-041.mts",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-041_solution.mts",
+        "courses/javascript-typescript/solutions/js-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-042",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-node",
+      "guide_path": "courses/javascript-typescript/guides/js-042.md",
+      "source_path": "courses/javascript-typescript/lessons/js-042.mjs",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-042_solution.mjs",
+        "courses/javascript-typescript/solutions/js-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-043",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-043.md",
+      "source_path": "courses/javascript-typescript/lessons/js-043.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-043_solution.js",
+        "courses/javascript-typescript/solutions/js-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-044",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-044.md",
+      "source_path": "courses/javascript-typescript/lessons/js-044.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-044_solution.js",
+        "courses/javascript-typescript/solutions/js-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-045",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-045.md",
+      "source_path": "courses/javascript-typescript/lessons/js-045.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-045_solution.js",
+        "courses/javascript-typescript/solutions/js-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-046",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-046.md",
+      "source_path": "courses/javascript-typescript/lessons/js-046.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-046_solution.js",
+        "courses/javascript-typescript/solutions/js-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-047",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-047.md",
+      "source_path": "courses/javascript-typescript/lessons/js-047.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-047_solution.js",
+        "courses/javascript-typescript/solutions/js-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-048",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-048.md",
+      "source_path": "courses/javascript-typescript/lessons/js-048.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-048_solution.js",
+        "courses/javascript-typescript/solutions/js-048_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-049",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-049.md",
+      "source_path": "courses/javascript-typescript/lessons/js-049.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-049_solution.js",
+        "courses/javascript-typescript/solutions/js-049_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-050",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-050.md",
+      "source_path": "courses/javascript-typescript/lessons/js-050.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-050_solution.js",
+        "courses/javascript-typescript/solutions/js-050_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-051",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-051.md",
+      "source_path": "courses/javascript-typescript/lessons/js-051.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-051_solution.js",
+        "courses/javascript-typescript/solutions/js-051_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-052",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-052.md",
+      "source_path": "courses/javascript-typescript/lessons/js-052.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-052_solution.js",
+        "courses/javascript-typescript/solutions/js-052_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-053",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-053.md",
+      "source_path": "courses/javascript-typescript/lessons/js-053.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-053_solution.js",
+        "courses/javascript-typescript/solutions/js-053_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-054",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-054.md",
+      "source_path": "courses/javascript-typescript/lessons/js-054.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-054_solution.js",
+        "courses/javascript-typescript/solutions/js-054_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-055",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-055.md",
+      "source_path": "courses/javascript-typescript/lessons/js-055.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-055_solution.js",
+        "courses/javascript-typescript/solutions/js-055_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-056",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-056.md",
+      "source_path": "courses/javascript-typescript/lessons/js-056.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-056_solution.js",
+        "courses/javascript-typescript/solutions/js-056_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-057",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-057.md",
+      "source_path": "courses/javascript-typescript/lessons/js-057.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-057_solution.js",
+        "courses/javascript-typescript/solutions/js-057_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-058",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-058.md",
+      "source_path": "courses/javascript-typescript/lessons/js-058.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-058_solution.js",
+        "courses/javascript-typescript/solutions/js-058_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-059",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-059.md",
+      "source_path": "courses/javascript-typescript/lessons/js-059.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-059_solution.js",
+        "courses/javascript-typescript/solutions/js-059_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-060",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-060.md",
+      "source_path": "courses/javascript-typescript/lessons/js-060.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-060_solution.js",
+        "courses/javascript-typescript/solutions/js-060_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-061",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-061.md",
+      "source_path": "courses/javascript-typescript/lessons/js-061.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-061_solution.js",
+        "courses/javascript-typescript/solutions/js-061_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-062",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-062.md",
+      "source_path": "courses/javascript-typescript/lessons/js-062.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-062_solution.js",
+        "courses/javascript-typescript/solutions/js-062_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-063",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-063.md",
+      "source_path": "courses/javascript-typescript/lessons/js-063.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-063_solution.js",
+        "courses/javascript-typescript/solutions/js-063_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-064",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-064.md",
+      "source_path": "courses/javascript-typescript/lessons/js-064.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-064_solution.js",
+        "courses/javascript-typescript/solutions/js-064_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-065",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-065.md",
+      "source_path": "courses/javascript-typescript/lessons/js-065.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-065_solution.js",
+        "courses/javascript-typescript/solutions/js-065_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "js-066",
+      "status": "authored",
+      "language": "javascript",
+      "runtime_profile": "javascript-browser",
+      "guide_path": "courses/javascript-typescript/guides/js-066.md",
+      "source_path": "courses/javascript-typescript/lessons/js-066.js",
+      "solution_paths": [
+        "courses/javascript-typescript/solutions/js-066_solution.js",
+        "courses/javascript-typescript/solutions/js-066_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

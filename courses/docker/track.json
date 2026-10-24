@@ -1,0 +1,714 @@
+{
+  "schema_version": 1,
+  "id": "docker",
+  "title": "Docker: images, applications and operating containers",
+  "summary": "42 detailed lessons from the first container to reproducible builds, Compose, networking, durable data, security, delivery and recovery. Study offline and use clearly scoped optional host labs.",
+  "lessons": [
+    {
+      "id": "docker-001",
+      "title": "Containers, images and the process model",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [],
+      "runtime": "reading",
+      "concepts": [
+        "Containers",
+        "images and the process model"
+      ],
+      "outcome": "Explain what evidence proves a web application is serving.",
+      "lab": "Classify source code, image tag, container and volume.",
+      "verification": "A running process plus a bounded HTTP request and expected response."
+    },
+    {
+      "id": "docker-002",
+      "title": "The Linux engine, WSL 2 and your first inspection",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-001"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "The Linux engine",
+        "WSL 2 and your first inspection"
+      ],
+      "outcome": "Explain a safe response to discovering a remote context.",
+      "lab": "Produce a minimal setup checklist.",
+      "verification": "Stop before mutations and deliberately configure the owned local engine."
+    },
+    {
+      "id": "docker-003",
+      "title": "The filesystem, writable layers and container lifetime",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-002"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "The filesystem",
+        "writable layers and container lifetime"
+      ],
+      "outcome": "Choose storage for user progress and transient scratch data.",
+      "lab": "Make a restart-versus-recreate persistence table.",
+      "verification": "A named volume for progress and bounded temporary storage for scratch."
+    },
+    {
+      "id": "docker-004",
+      "title": "Processes, PID 1, signals and graceful shutdown",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-003"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Processes",
+        "PID 1",
+        "signals and graceful shutdown"
+      ],
+      "outcome": "Design a shutdown acceptance check for a writer.",
+      "lab": "Write a four-step graceful shutdown sequence.",
+      "verification": "Bounded stop, consistent persisted record and restart recovery."
+    },
+    {
+      "id": "docker-005",
+      "title": "Dockerfile instructions and the first reproducible image",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-004"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Dockerfile instructions and the first reproducible image"
+      ],
+      "outcome": "Define build and runtime acceptance separately.",
+      "lab": "Write a minimal Dockerfile for a single file app.",
+      "verification": "Build succeeds, then endpoint and writable data behavior pass."
+    },
+    {
+      "id": "docker-006",
+      "title": "Build context, .dockerignore and accidental data exposure",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-005"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Build context",
+        ".dockerignore and accidental data exposure"
+      ],
+      "outcome": "Describe source and image privacy acceptance.",
+      "lab": "Design a context inventory for the fixture.",
+      "verification": "Review inputs, build recipe and safe final file inventory."
+    },
+    {
+      "id": "docker-007",
+      "title": "Layers, cache invalidation and efficient rebuilds",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-006"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Layers",
+        "cache invalidation and efficient rebuilds"
+      ],
+      "outcome": "Design a build-performance experiment.",
+      "lab": "Reorder dependency metadata and app source conceptually.",
+      "verification": "Same engine and context, one controlled edit, named cache observations."
+    },
+    {
+      "id": "docker-008",
+      "title": "Environment variables, command arguments and configuration",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-007"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Environment variables",
+        "command arguments and configuration"
+      ],
+      "outcome": "Write a public configuration evidence record.",
+      "lab": "Design defaults and validation for a timeout variable.",
+      "verification": "Name, safe synthetic value, source of override and observed response."
+    },
+    {
+      "id": "docker-009",
+      "title": "Ports, loopback and the first browser request",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-008"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Ports",
+        "loopback and the first browser request"
+      ],
+      "outcome": "Choose public and internal endpoints for a two-service app.",
+      "lab": "Draw a host browser request path.",
+      "verification": "Only the user-facing service gets a deliberate published port."
+    },
+    {
+      "id": "docker-010",
+      "title": "Logs, exit status and observation before repair",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-009"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Logs",
+        "exit status and observation before repair"
+      ],
+      "outcome": "Design log content for a public teaching server.",
+      "lab": "Write an incident observation packet.",
+      "verification": "Useful request metadata without tokens, raw secrets or private payloads."
+    },
+    {
+      "id": "docker-011",
+      "title": "Compose services, projects and a complete application",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-010"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Compose services",
+        "projects and a complete application"
+      ],
+      "outcome": "Design a two-copy experiment without interference.",
+      "lab": "Write the project lifecycle command sequence.",
+      "verification": "Distinct project names and distinct published host ports."
+    },
+    {
+      "id": "docker-012",
+      "title": "Health checks, startup order and real readiness",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-011"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Health checks",
+        "startup order and real readiness"
+      ],
+      "outcome": "Write separate health and acceptance assertions.",
+      "lab": "Design a readiness endpoint for a file-backed teaching app.",
+      "verification": "Health endpoint succeeds; user-facing response and persistence also satisfy their contracts."
+    },
+    {
+      "id": "docker-013",
+      "title": "Named volumes, bind mounts and persistence experiments",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-012"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Named volumes",
+        "bind mounts and persistence experiments"
+      ],
+      "outcome": "Choose a safe cleanup policy for progress.",
+      "lab": "Build a persistence evidence table.",
+      "verification": "Stop containers routinely; delete data only after an explicit reset decision."
+    },
+    {
+      "id": "docker-014",
+      "title": "First capstone: build, serve, replace and explain",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-013"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "First capstone"
+      ],
+      "outcome": "Teach the project to a beginner without using hidden host state.",
+      "lab": "Produce the complete build-and-request evidence packet.",
+      "verification": "A fresh-copy procedure with prerequisites, expected outputs and scoped cleanup."
+    },
+    {
+      "id": "docker-015",
+      "title": "BuildKit, cache mounts and build secrets",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-014"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "BuildKit",
+        "cache mounts and build secrets"
+      ],
+      "outcome": "Describe a dependency acquisition policy.",
+      "lab": "Design a cold-build check.",
+      "verification": "Locked inputs, deliberate network access and no default private credentials."
+    },
+    {
+      "id": "docker-016",
+      "title": "Multi-stage builds and runtime dependency boundaries",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-015"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Multi-stage builds and runtime dependency boundaries"
+      ],
+      "outcome": "Specify final-image acceptance.",
+      "lab": "Design a builder-to-runtime artifact list.",
+      "verification": "Run the exact final image under intended user, mounts and network."
+    },
+    {
+      "id": "docker-017",
+      "title": "CPU architectures, image indexes and cross-platform builds",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-016"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "CPU architectures",
+        "image indexes and cross-platform builds"
+      ],
+      "outcome": "Write an honest portability claim.",
+      "lab": "Design a two-platform evidence matrix.",
+      "verification": "Name the tested platform and label other platforms unqualified."
+    },
+    {
+      "id": "docker-018",
+      "title": "Bridge networks, service DNS and container-to-container traffic",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-017"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Bridge networks",
+        "service DNS and container-to-container traffic"
+      ],
+      "outcome": "Design an internal-only database connection.",
+      "lab": "Draw the DNS-to-request sequence.",
+      "verification": "Use service DNS and container port without host publication."
+    },
+    {
+      "id": "docker-019",
+      "title": "Network isolation, gateways and outbound connectivity",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-018"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Network isolation",
+        "gateways and outbound connectivity"
+      ],
+      "outcome": "Define outbound acceptance for an offline worker.",
+      "lab": "Design a frontend/backend attachment table.",
+      "verification": "Prepared local computation succeeds and no external fetch is required."
+    },
+    {
+      "id": "docker-020",
+      "title": "Users, UID ownership and writable data paths",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-019"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Users",
+        "UID ownership and writable data paths"
+      ],
+      "outcome": "Write a permission acceptance check.",
+      "lab": "Design a non-root image setup sequence.",
+      "verification": "Non-root process can write data and cannot mutate packaged code."
+    },
+    {
+      "id": "docker-021",
+      "title": "Backups, restores and proving data recovery",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-020"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Backups",
+        "restores and proving data recovery"
+      ],
+      "outcome": "Produce a recovery evidence packet.",
+      "lab": "Design a separate restore target.",
+      "verification": "Source identity, export hash, restore target, parsed value and cleanup record."
+    },
+    {
+      "id": "docker-022",
+      "title": "Resource limits, contention and honest performance experiments",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-021"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Resource limits",
+        "contention and honest performance experiments"
+      ],
+      "outcome": "Define a safe resource stress boundary.",
+      "lab": "Design a controlled CPU comparison.",
+      "verification": "Small fixed workload, timeout and owned disposable target."
+    },
+    {
+      "id": "docker-023",
+      "title": "Read-only filesystems, capabilities and least privilege",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-022"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Read-only filesystems",
+        "capabilities and least privilege"
+      ],
+      "outcome": "Review a hardening change without overstating security.",
+      "lab": "Write a least-privilege acceptance pair.",
+      "verification": "State controls tested and the trusted-local-code boundary."
+    },
+    {
+      "id": "docker-024",
+      "title": "Rootless engines, user namespaces and host trust",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-023"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Rootless engines",
+        "user namespaces and host trust"
+      ],
+      "outcome": "State a support claim for a new rootless setup.",
+      "lab": "Draw the daemon-socket authority path.",
+      "verification": "Actual app build, network, storage and cleanup observations."
+    },
+    {
+      "id": "docker-025",
+      "title": "Image names, digests and an offline transfer",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-024"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Image names",
+        "digests and an offline transfer"
+      ],
+      "outcome": "Define offline acceptance for the study app.",
+      "lab": "Design an offline handoff record.",
+      "verification": "Imported image starts with local data and no required external services."
+    },
+    {
+      "id": "docker-026",
+      "title": "Compose overrides, profiles and configuration review",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-025"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Compose overrides",
+        "profiles and configuration review"
+      ],
+      "outcome": "Write a reviewable configuration launch record.",
+      "lab": "Create an override for a public message.",
+      "verification": "Ordered files, profiles, project name and safe resolved settings."
+    },
+    {
+      "id": "docker-027",
+      "title": "Intermediate capstone: a recoverable two-tier teaching system",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-026"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Intermediate capstone"
+      ],
+      "outcome": "Write a beginner operator handoff.",
+      "lab": "Build an independent restore demonstration.",
+      "verification": "Setup, evidence, failure diagnosis, backup/restore and scoped cleanup."
+    },
+    {
+      "id": "docker-028",
+      "title": "Registries, tags, digests and deliberate publication",
+      "level": "intermediate",
+      "minutes": 100,
+      "prerequisites": [
+        "docker-027"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Registries",
+        "tags",
+        "digests and deliberate publication"
+      ],
+      "outcome": "Describe a safe publication review without performing it.",
+      "lab": "Design a release identity record.",
+      "verification": "Explicit destination, visibility, immutable artifact and rollback plan."
+    },
+    {
+      "id": "docker-029",
+      "title": "Software bills of materials and image provenance",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-028"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Software bills of materials and image provenance"
+      ],
+      "outcome": "Write a supply-chain review for the fixture.",
+      "lab": "Design an evidence linkage table.",
+      "verification": "Known source, resolved base, component record and actual acceptance limits."
+    },
+    {
+      "id": "docker-030",
+      "title": "Vulnerability findings, patching and dependency updates",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-029"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Vulnerability findings",
+        "patching and dependency updates"
+      ],
+      "outcome": "Write a patch decision record.",
+      "lab": "Design a minimal base-image update.",
+      "verification": "Finding, affected artifact, chosen action, tests and residual risk."
+    },
+    {
+      "id": "docker-031",
+      "title": "CI builds, test layers and artifact promotion",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-030"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "CI builds",
+        "test layers and artifact promotion"
+      ],
+      "outcome": "Write a release gate with honest limitations.",
+      "lab": "Design a parallel test partition.",
+      "verification": "Named actual checks on exact artifacts, plus visible skipped surfaces."
+    },
+    {
+      "id": "docker-032",
+      "title": "Debugging minimal images without changing the contract",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-031"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Debugging minimal images without changing the contract"
+      ],
+      "outcome": "Write a repeatable minimal-image incident procedure.",
+      "lab": "Create a vantage-point diagnosis table.",
+      "verification": "Preserve artifact, inspect state, run bounded prepared probes and test a source repair."
+    },
+    {
+      "id": "docker-033",
+      "title": "Restart policies, failure loops and idempotent startup",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-032"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Restart policies",
+        "failure loops and idempotent startup"
+      ],
+      "outcome": "Define restart acceptance for a stateful app.",
+      "lab": "Design idempotent counter initialization.",
+      "verification": "Repeated starts preserve valid data and expose unrecoverable failures clearly."
+    },
+    {
+      "id": "docker-034",
+      "title": "Application migrations and durable state versioning",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-033"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Application migrations and durable state versioning"
+      ],
+      "outcome": "Write a migration release plan.",
+      "lab": "Design a v1-to-v2 synthetic record conversion.",
+      "verification": "Preconditions, backup, transition, validation, compatible rollback and cleanup."
+    },
+    {
+      "id": "docker-035",
+      "title": "Image size, startup latency and measurement",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-034"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Image size",
+        "startup latency and measurement"
+      ],
+      "outcome": "Write an optimization recommendation with evidence.",
+      "lab": "Design a readiness latency measurement.",
+      "verification": "Measured bottleneck, bounded change, correctness recheck and actual improvement."
+    },
+    {
+      "id": "docker-036",
+      "title": "Compose on one host and the limits of orchestration",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-035"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Compose on one host and the limits of orchestration"
+      ],
+      "outcome": "Choose an orchestration approach for a stated workload.",
+      "lab": "Build a failure-domain matrix.",
+      "verification": "A reasoned choice based on availability, scaling, operations and learning cost."
+    },
+    {
+      "id": "docker-037",
+      "title": "TLS, reverse proxies and publishing responsibly",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-036"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "TLS",
+        "reverse proxies and publishing responsibly"
+      ],
+      "outcome": "State what would be required before public exposure.",
+      "lab": "Draw proxy and upstream trust boundaries.",
+      "verification": "A separate deployment design covering access, TLS, limits, operations and data."
+    },
+    {
+      "id": "docker-038",
+      "title": "Incident response, disk pressure and scoped cleanup",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-037"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Incident response",
+        "disk pressure and scoped cleanup"
+      ],
+      "outcome": "Write a scoped recovery and cleanup plan.",
+      "lab": "Design an incident evidence packet.",
+      "verification": "Explicit targets, retained data, repair check and final ownership readback."
+    },
+    {
+      "id": "docker-039",
+      "title": "Namespaces, cgroups, OCI and the runtime beneath Docker",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-038"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Namespaces",
+        "cgroups",
+        "OCI and the runtime beneath Docker"
+      ],
+      "outcome": "Describe the shared-kernel security implication.",
+      "lab": "Draw the client-to-process runtime chain.",
+      "verification": "Least privilege and patching remain necessary parts of the trust model."
+    },
+    {
+      "id": "docker-040",
+      "title": "Runtime secrets, configuration files and controlled disclosure",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-039"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Runtime secrets",
+        "configuration files and controlled disclosure"
+      ],
+      "outcome": "Write a secret data-flow review.",
+      "lab": "Design a no-disclosure validation message.",
+      "verification": "Source, host protection, service grant, read path, logs, rotation and deletion."
+    },
+    {
+      "id": "docker-041",
+      "title": "Scaling replicas, shared state and concurrency traps",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-040"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Scaling replicas",
+        "shared state and concurrency traps"
+      ],
+      "outcome": "Propose a correct scaled counter architecture.",
+      "lab": "Design a replica-readiness checklist.",
+      "verification": "A transaction-capable shared store or explicit single-writer ownership."
+    },
+    {
+      "id": "docker-042",
+      "title": "Advanced capstone: a release, recovery and teaching handoff",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "docker-041"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Advanced capstone"
+      ],
+      "outcome": "Teach the full system and defend its limits.",
+      "lab": "Assemble a source-bound release packet.",
+      "verification": "A beginner can follow the handoff and identify what it does not guarantee."
+    }
+  ]
+}

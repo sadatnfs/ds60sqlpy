@@ -1,0 +1,1314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Comprehensive Data Science Methods and Methodology Reference · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Comprehensive Data Science Methods and Methodology Reference</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/source-outline.md</code></p>
+    </header>
+    <article class="document"><h2 id="comprehensive-data-science-methods-and-methodology-reference">Comprehensive Data Science Methods and Methodology Reference<a class="heading-anchor" href="#comprehensive-data-science-methods-and-methodology-reference" aria-label="Link to this section">#</a></h2>
+<p>For a staff, principal, distinguished, head of data science, or chief scientist role, the knowledge base extends beyond algorithms. You need to understand how to formulate questions, collect trustworthy data, identify effects, build models, quantify uncertainty, validate results, and turn evidence into decisions.</p>
+<p>This competency map includes methods, model families, theoretical concepts, study designs, diagnostics, and methodological pitfalls.</p>
+<p>You do not need research-level mastery of every specialty. For the areas relevant to your work, you should be able to explain:</p>
+<ul>
+<li>What problem the method solves.</li>
+<li>What assumptions make its results valid.</li>
+<li>What it estimates or predicts.</li>
+<li>How it can fail.</li>
+<li>How to evaluate it.</li>
+<li>Whether its output supports the intended decision.</li>
+</ul>
+<h3 id="1-problem-formulation-and-statistical-reasoning">1. Problem Formulation and Statistical Reasoning<a class="heading-anchor" href="#1-problem-formulation-and-statistical-reasoning" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Descriptive analysis:</strong> Summarizes what happened or what a population looks like.</li>
+<li><strong>Exploratory analysis:</strong> Searches for patterns, anomalies, relationships, and hypotheses without treating every discovery as confirmed.</li>
+<li><strong>Confirmatory analysis:</strong> Evaluates prespecified hypotheses using a defined analysis plan.</li>
+<li><strong>Predictive modeling:</strong> Estimates unknown or future outcomes from available information.</li>
+<li><strong>Causal inference:</strong> Estimates how outcomes would change under an intervention.</li>
+<li><strong>Prescriptive analytics:</strong> Recommends actions using predictions, causal effects, constraints, and objectives.</li>
+<li><strong>Statistical decision theory:</strong> Chooses actions by considering uncertainty, consequences, and losses.</li>
+<li><strong>Data-generating processes:</strong> Describes the mechanisms producing the observations you analyze.</li>
+<li><strong>Estimands:</strong> Defines precisely the quantity an analysis aims to estimate.</li>
+<li><strong>Target populations:</strong> Specifies the people, entities, or situations to which conclusions should apply.</li>
+<li><strong>Units of observation:</strong> Identifies what each recorded row or measurement represents.</li>
+<li><strong>Units of analysis:</strong> Identifies the entities over which statistical conclusions are drawn.</li>
+<li><strong>Units of assignment:</strong> Identifies what receives a randomized or assigned intervention.</li>
+<li><strong>Identification:</strong> Determines whether the desired quantity can be recovered from available data and assumptions.</li>
+<li><strong>Identifiability:</strong> Determines whether distinct parameter values imply distinguishable observable distributions.</li>
+<li><strong>Internal validity:</strong> Assesses whether a study supports its conclusions within the studied setting.</li>
+<li><strong>External validity:</strong> Assesses whether conclusions extend to other populations or settings.</li>
+<li><strong>Construct validity:</strong> Assesses whether measurements represent the concepts they are intended to capture.</li>
+<li><strong>Practical significance:</strong> Evaluates whether an effect is large enough to matter operationally.</li>
+<li><strong>Statistical versus substantive uncertainty:</strong> Separates sampling uncertainty from uncertainty about definitions, assumptions, and mechanisms.</li>
+<li><strong>Sensitivity analysis:</strong> Examines how conclusions change when assumptions or analytical choices change.</li>
+<li><strong>Triangulation:</strong> Compares evidence from different methods, datasets, or designs with different weaknesses.</li>
+</ul>
+<h3 id="2-mathematical-foundations">2. Mathematical Foundations<a class="heading-anchor" href="#2-mathematical-foundations" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Linear algebra:</strong> Provides the language for regression, transformations, embeddings, and multivariate models.</li>
+<li><strong>Vector spaces and projections:</strong> Explains approximation, least squares, orthogonality, and dimension reduction.</li>
+<li><strong>Matrix rank:</strong> Determines redundancy, solvability, and whether model parameters can be uniquely estimated.</li>
+<li><strong>Eigenvalues and eigenvectors:</strong> Characterizes transformations, variance directions, stability, and spectral methods.</li>
+<li><strong>Singular value decomposition:</strong> Factorizes matrices for dimensionality reduction, approximation, and numerical computation.</li>
+<li><strong>Positive definite matrices:</strong> Underpins covariance matrices, quadratic optimization, kernels, and Gaussian models.</li>
+<li><strong>Matrix calculus:</strong> Computes derivatives needed to optimize multivariate statistical models.</li>
+<li><strong>Differential calculus:</strong> Describes local change, gradients, curvature, and optimization conditions.</li>
+<li><strong>Integral calculus:</strong> Supports probability calculations, expectations, marginalization, and continuous distributions.</li>
+<li><strong>Multivariable calculus:</strong> Handles models with many interacting variables and parameters.</li>
+<li><strong>Taylor expansions:</strong> Approximates functions and derives asymptotic results and uncertainty estimates.</li>
+<li><strong>Convex analysis:</strong> Studies problems where local optima are global optima.</li>
+<li><strong>Numerical conditioning:</strong> Measures how sensitive computed solutions are to small input changes.</li>
+<li><strong>Numerical stability:</strong> Assesses whether algorithms amplify rounding and approximation errors.</li>
+<li><strong>Real analysis fundamentals:</strong> Supports rigorous understanding of convergence, continuity, and limiting arguments.</li>
+<li><strong>Measure-theoretic probability:</strong> Provides a general foundation for probability, integration, and conditional expectation.</li>
+<li><strong>Differential equations:</strong> Models systems evolving continuously over time.</li>
+<li><strong>Information theory:</strong> Quantifies information, uncertainty, compression, and differences between distributions.</li>
+</ul>
+<h3 id="3-probability-fundamentals-and-stochastic-processes">3. Probability Fundamentals and Stochastic Processes<a class="heading-anchor" href="#3-probability-fundamentals-and-stochastic-processes" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Conditional probability:</strong> Describes probabilities after accounting for observed information.</li>
+<li><strong>Bayes’ theorem:</strong> Updates probabilities using evidence and a prior distribution.</li>
+<li><strong>Independence:</strong> States that learning one variable does not change the distribution of another.</li>
+<li><strong>Conditional independence:</strong> States that variables become independent after conditioning on other variables.</li>
+<li><strong>Random variables:</strong> Represents uncertain quantities mathematically.</li>
+<li><strong>Joint distributions:</strong> Describes the combined behavior of multiple random variables.</li>
+<li><strong>Marginal distributions:</strong> Describes individual variables after integrating or summing over others.</li>
+<li><strong>Conditional distributions:</strong> Describes outcomes given values of other variables.</li>
+<li><strong>Expectation:</strong> Calculates a probability-weighted average.</li>
+<li><strong>Variance and covariance:</strong> Measures dispersion and joint linear variation.</li>
+<li><strong>Correlation:</strong> Standardizes association, usually to a scale between negative one and one.</li>
+<li><strong>Law of total expectation:</strong> Computes expectations by averaging conditional expectations.</li>
+<li><strong>Law of total variance:</strong> Decomposes variability into within-condition and between-condition components.</li>
+<li><strong>Law of large numbers:</strong> Establishes conditions under which averages approach their expected values.</li>
+<li><strong>Central limit theorem:</strong> Establishes conditions under which normalized sums approach a normal distribution.</li>
+<li><strong>Concentration inequalities:</strong> Bounds how far random quantities can deviate from their expectations.</li>
+<li><strong>Jensen’s inequality:</strong> Relates transformations of expectations to expectations of convex transformations.</li>
+<li><strong>Exchangeability:</strong> Describes observations whose joint distribution is unchanged by reordering.</li>
+<li><strong>Markov chains:</strong> Models systems whose next state depends on the current state.</li>
+<li><strong>Poisson processes:</strong> Models event arrivals under assumptions about independent increments and event rates.</li>
+<li><strong>Renewal processes:</strong> Models repeated events separated by random waiting times.</li>
+<li><strong>Martingales:</strong> Models processes whose conditional expected future value equals their current value.</li>
+<li><strong>Brownian motion:</strong> Models continuous random fluctuations and supports stochastic modeling.</li>
+<li><strong>Ergodicity:</strong> Describes conditions allowing long-run observations to represent distributional averages.</li>
+<li><strong>Copulas:</strong> Models dependence separately from individual variables’ marginal distributions.</li>
+</ul>
+<h3 id="4-probability-distributions-you-should-recognize">4. Probability Distributions You Should Recognize<a class="heading-anchor" href="#4-probability-distributions-you-should-recognize" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Bernoulli distribution:</strong> Models a single binary outcome.</li>
+<li><strong>Binomial distribution:</strong> Models success counts across a fixed number of independent trials with common success probability.</li>
+<li><strong>Beta-binomial distribution:</strong> Models binomial counts with additional variation in success probabilities.</li>
+<li><strong>Categorical distribution:</strong> Models a single outcome from multiple categories.</li>
+<li><strong>Multinomial distribution:</strong> Models category counts across repeated categorical observations.</li>
+<li><strong>Poisson distribution:</strong> Models nonnegative counts with equal mean and variance.</li>
+<li><strong>Negative binomial distribution:</strong> Models counts with more variation than a Poisson model allows.</li>
+<li><strong>Geometric distribution:</strong> Models waiting until the first success in repeated Bernoulli trials.</li>
+<li><strong>Hypergeometric distribution:</strong> Models successes when sampling without replacement from a finite population.</li>
+<li><strong>Normal distribution:</strong> Models symmetric continuous variation and appears in many approximation results.</li>
+<li><strong>Multivariate normal distribution:</strong> Models jointly Gaussian variables with a mean vector and covariance matrix.</li>
+<li><strong>Student’s t distribution:</strong> Provides heavier tails than the normal distribution and appears in mean inference.</li>
+<li><strong>Chi-square distribution:</strong> Describes sums of squared independent standard normal variables.</li>
+<li><strong>F distribution:</strong> Describes ratios of scaled independent chi-square variables.</li>
+<li><strong>Uniform distribution:</strong> Assigns equal density or probability across a bounded support.</li>
+<li><strong>Exponential distribution:</strong> Models memoryless positive waiting times.</li>
+<li><strong>Gamma distribution:</strong> Models positive quantities and sums of exponential waiting times.</li>
+<li><strong>Beta distribution:</strong> Models quantities restricted to the interval between zero and one.</li>
+<li><strong>Dirichlet distribution:</strong> Models vectors of probabilities that sum to one.</li>
+<li><strong>Lognormal distribution:</strong> Models positive quantities whose logarithms are normally distributed.</li>
+<li><strong>Weibull distribution:</strong> Models lifetimes with flexible increasing or decreasing hazard rates.</li>
+<li><strong>Pareto distribution:</strong> Models heavy-tailed quantities such as extreme wealth or event sizes.</li>
+<li><strong>Generalized extreme value distribution:</strong> Models normalized block maxima under suitable conditions.</li>
+<li><strong>Generalized Pareto distribution:</strong> Models exceedances above a sufficiently high threshold.</li>
+<li><strong>Mixture distributions:</strong> Represents a population as a weighted combination of component distributions.</li>
+<li><strong>Truncated distributions:</strong> Conditions a distribution on values lying within an observed range.</li>
+<li><strong>Zero-inflated distributions:</strong> Adds a separate source of zeros to a standard count distribution.</li>
+</ul>
+<h3 id="5-sampling-surveys-and-data-collection">5. Sampling, Surveys, and Data Collection<a class="heading-anchor" href="#5-sampling-surveys-and-data-collection" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Simple random sampling:</strong> Gives each eligible sample of a specified size equal selection probability.</li>
+<li><strong>Stratified sampling:</strong> Samples separately within defined population subgroups.</li>
+<li><strong>Cluster sampling:</strong> Samples groups of units rather than only individual units.</li>
+<li><strong>Multistage sampling:</strong> Selects samples through multiple hierarchical stages.</li>
+<li><strong>Systematic sampling:</strong> Selects observations at regular intervals after an initial starting point.</li>
+<li><strong>Probability-proportional-to-size sampling:</strong> Selects groups with probabilities related to their sizes.</li>
+<li><strong>Unequal-probability sampling:</strong> Allows different population members to have different selection probabilities.</li>
+<li><strong>Survey weights:</strong> Corrects for selection probabilities and sometimes nonresponse or population imbalances.</li>
+<li><strong>Horvitz–Thompson estimation:</strong> Estimates population totals using inverse inclusion probabilities.</li>
+<li><strong>Hájek estimation:</strong> Uses normalized weighting to estimate population quantities.</li>
+<li><strong>Poststratification:</strong> Adjusts sample estimates to known population subgroup totals.</li>
+<li><strong>Raking:</strong> Iteratively adjusts weights to match multiple population margins.</li>
+<li><strong>Calibration weighting:</strong> Adjusts weights to satisfy known auxiliary population constraints.</li>
+<li><strong>Design effects:</strong> Quantifies how a sampling design changes variance relative to simple random sampling.</li>
+<li><strong>Finite population correction:</strong> Adjusts uncertainty when sampling a substantial fraction of a finite population.</li>
+<li><strong>Coverage error:</strong> Occurs when the sampling frame misses or incorrectly includes population members.</li>
+<li><strong>Nonresponse bias:</strong> Occurs when respondents differ systematically from nonrespondents.</li>
+<li><strong>Convenience sampling:</strong> Uses readily available observations, often limiting representativeness.</li>
+<li><strong>Selection bias:</strong> Arises when inclusion mechanisms distort relationships or population representation.</li>
+<li><strong>Capture–recapture estimation:</strong> Estimates population size from overlap between partially observed samples.</li>
+<li><strong>Adaptive sampling:</strong> Changes data collection based on observations already collected.</li>
+<li><strong>Optimal allocation:</strong> Distributes sampling effort to improve precision under cost constraints.</li>
+<li><strong>Measurement study design:</strong> Plans how, when, and with what precision variables will be measured.</li>
+</ul>
+<h3 id="6-measurement-exploratory-analysis-and-data-quality">6. Measurement, Exploratory Analysis, and Data Quality<a class="heading-anchor" href="#6-measurement-exploratory-analysis-and-data-quality" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Measurement scales:</strong> Distinguishes nominal, ordinal, interval, and ratio measurements.</li>
+<li><strong>Operational definitions:</strong> Converts abstract concepts into reproducible measurement rules.</li>
+<li><strong>Data provenance:</strong> Records where data came from and how it was transformed.</li>
+<li><strong>Data grain:</strong> Defines the level of detail represented by each record.</li>
+<li><strong>Uniqueness and duplicate analysis:</strong> Detects repeated entities or events that could distort estimates.</li>
+<li><strong>Referential integrity:</strong> Checks whether relationships between datasets remain valid.</li>
+<li><strong>Join cardinality analysis:</strong> Detects accidental record multiplication or loss during joins.</li>
+<li><strong>Missingness profiling:</strong> Examines where data is absent and whether absence follows meaningful patterns.</li>
+<li><strong>Distribution profiling:</strong> Examines variable ranges, shapes, tails, and unusual values.</li>
+<li><strong>Quantiles and percentiles:</strong> Summarizes distributions using ordered positions.</li>
+<li><strong>Skewness and kurtosis:</strong> Describes asymmetry and aspects of tail behavior.</li>
+<li><strong>Empirical cumulative distribution functions:</strong> Displays the fraction of observations at or below each value.</li>
+<li><strong>Histograms and density estimates:</strong> Visualizes distribution shapes.</li>
+<li><strong>Box plots and violin plots:</strong> Compares location, spread, and distribution shape across groups.</li>
+<li><strong>Quantile–quantile plots:</strong> Compares observed quantiles with a reference distribution.</li>
+<li><strong>Scatterplots and conditional plots:</strong> Examines relationships, nonlinearities, and subgroup differences.</li>
+<li><strong>Correlation analysis:</strong> Measures association while requiring care about confounding and nonlinear relationships.</li>
+<li><strong>Partial correlation:</strong> Measures linear association after accounting for specified other variables.</li>
+<li><strong>Simpson’s paradox:</strong> Describes associations that reverse or change after aggregation or stratification.</li>
+<li><strong>Ecological fallacy:</strong> Mistakenly applies group-level relationships to individuals.</li>
+<li><strong>Aggregation bias:</strong> Arises when conclusions depend misleadingly on how observations are grouped.</li>
+<li><strong>Data leakage:</strong> Allows information unavailable at prediction or decision time to influence model development.</li>
+<li><strong>Measurement invariance:</strong> Tests whether a measurement system behaves comparably across groups or time.</li>
+<li><strong>Interrater reliability:</strong> Measures agreement between people producing labels or judgments.</li>
+<li><strong>Test–retest reliability:</strong> Measures consistency when the same construct is measured repeatedly.</li>
+</ul>
+<h3 id="7-missing-data-measurement-error-and-robust-statistics">7. Missing Data, Measurement Error, and Robust Statistics<a class="heading-anchor" href="#7-missing-data-measurement-error-and-robust-statistics" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Missing completely at random:</strong> Missingness is independent of observed and unobserved data values.</li>
+<li><strong>Missing at random:</strong> Missingness can depend on observed data but not missing values after conditioning.</li>
+<li><strong>Missing not at random:</strong> Missingness still depends on unobserved values after accounting for observed information.</li>
+<li><strong>Complete-case analysis:</strong> Uses only records with all required variables observed.</li>
+<li><strong>Single imputation:</strong> Replaces each missing value with one estimate, usually understating uncertainty if treated as observed.</li>
+<li><strong>Multiple imputation:</strong> Creates multiple completed datasets and combines analyses to reflect imputation uncertainty.</li>
+<li><strong>Chained-equations imputation:</strong> Iteratively imputes variables using conditional models.</li>
+<li><strong>Joint-model imputation:</strong> Imputes missing values from a model for their joint distribution.</li>
+<li><strong>Predictive mean matching:</strong> Imputes using observed donor values with similar predicted outcomes.</li>
+<li><strong>Inverse-probability weighting for missingness:</strong> Reweights observed cases to account for modeled observation probabilities.</li>
+<li><strong>Rubin’s rules:</strong> Combines estimates and uncertainty across multiply imputed datasets.</li>
+<li><strong>Pattern-mixture models:</strong> Models outcomes separately by missingness pattern.</li>
+<li><strong>Selection models:</strong> Jointly models outcomes and the mechanism determining observation.</li>
+<li><strong>Missingness sensitivity analysis:</strong> Evaluates conclusions under alternative assumptions about unobserved values.</li>
+<li><strong>Measurement error models:</strong> Accounts for noisy predictors or outcomes.</li>
+<li><strong>Errors-in-variables regression:</strong> Adjusts regression analysis when explanatory variables are measured with error.</li>
+<li><strong>Regression calibration:</strong> Uses validation information to approximate correction for measurement error.</li>
+<li><strong>SIMEX:</strong> Studies added measurement noise and extrapolates toward a hypothetical error-free setting.</li>
+<li><strong>Robust estimators:</strong> Reduces sensitivity to outliers or deviations from model assumptions.</li>
+<li><strong>M-estimation:</strong> Estimates parameters by optimizing a general objective or solving estimating equations.</li>
+<li><strong>Huber loss:</strong> Combines squared-error behavior near zero with less outlier-sensitive behavior in the tails.</li>
+<li><strong>Trimmed and Winsorized estimators:</strong> Limits extreme observations’ influence by removing or capping tail values.</li>
+<li><strong>Median absolute deviation:</strong> Provides a robust measure of dispersion around the median.</li>
+<li><strong>Influence functions:</strong> Describes how infinitesimal contamination affects an estimator.</li>
+<li><strong>Breakdown point:</strong> Measures how much contamination an estimator can withstand before becoming arbitrarily unreliable.</li>
+</ul>
+<h3 id="8-estimation-and-statistical-inference">8. Estimation and Statistical Inference<a class="heading-anchor" href="#8-estimation-and-statistical-inference" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Point estimation:</strong> Produces a single estimate of an unknown quantity.</li>
+<li><strong>Sampling distributions:</strong> Describes how an estimator varies across hypothetical repeated samples.</li>
+<li><strong>Standard errors:</strong> Quantifies an estimator’s sampling variability.</li>
+<li><strong>Bias:</strong> Measures systematic deviation of an estimator’s expectation from its target.</li>
+<li><strong>Consistency:</strong> Describes estimators approaching their targets as information increases.</li>
+<li><strong>Efficiency:</strong> Compares estimators’ uncertainty under specified conditions.</li>
+<li><strong>Mean squared error:</strong> Combines squared bias and variance into an estimation error criterion.</li>
+<li><strong>Maximum likelihood estimation:</strong> Chooses parameters that maximize the probability density or mass assigned to observed data.</li>
+<li><strong>Maximum a posteriori estimation:</strong> Maximizes a posterior density incorporating both likelihood and prior information.</li>
+<li><strong>Method of moments:</strong> Matches theoretical moments with observed sample moments.</li>
+<li><strong>Generalized method of moments:</strong> Estimates parameters using weighted moment conditions.</li>
+<li><strong>Estimating equations:</strong> Defines estimates as solutions to equations with suitable expectation properties.</li>
+<li><strong>Sufficient statistics:</strong> Retains all sample information about a parameter within a specified model.</li>
+<li><strong>Fisher information:</strong> Quantifies information about parameters contained in a likelihood.</li>
+<li><strong>Cramér–Rao bounds:</strong> Provides variance lower bounds for estimators under regularity conditions.</li>
+<li><strong>Asymptotic normality:</strong> Approximates an estimator’s distribution by a normal distribution in large samples.</li>
+<li><strong>Delta method:</strong> Approximates uncertainty for functions of asymptotically normal estimators.</li>
+<li><strong>Confidence intervals:</strong> Uses procedures designed to cover the target parameter at a stated repeated-sampling rate.</li>
+<li><strong>Prediction intervals:</strong> Gives ranges for future or otherwise unobserved outcomes.</li>
+<li><strong>Tolerance intervals:</strong> Aims to cover a specified population proportion with a stated confidence level.</li>
+<li><strong>Profile likelihood:</strong> Studies a target parameter while optimizing over nuisance parameters.</li>
+<li><strong>Sandwich variance estimation:</strong> Estimates uncertainty robustly to some forms of model misspecification.</li>
+<li><strong>Cluster-robust standard errors:</strong> Accounts for dependence within specified groups.</li>
+<li><strong>Heteroskedasticity-robust standard errors:</strong> Allows error variance to differ across observations.</li>
+<li><strong>Bootstrap:</strong> Approximates sampling behavior by repeatedly resampling observed data.</li>
+<li><strong>Jackknife:</strong> Assesses estimator variability or bias by systematically omitting observations or groups.</li>
+<li><strong>Parametric bootstrap:</strong> Simulates new datasets from an estimated probability model.</li>
+<li><strong>Block bootstrap:</strong> Resamples blocks to preserve aspects of temporal or spatial dependence.</li>
+<li><strong>Wild bootstrap:</strong> Resamples residuals using random multipliers, often for heteroskedastic settings.</li>
+</ul>
+<h3 id="9-hypothesis-tests-and-group-comparisons">9. Hypothesis Tests and Group Comparisons<a class="heading-anchor" href="#9-hypothesis-tests-and-group-comparisons" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Null and alternative hypotheses:</strong> Defines the competing claims being evaluated.</li>
+<li><strong>P-values:</strong> Measures incompatibility with a null model through outcomes at least as extreme as observed.</li>
+<li><strong>Type I error:</strong> Rejects a true null hypothesis.</li>
+<li><strong>Type II error:</strong> Fails to reject a false null hypothesis.</li>
+<li><strong>Statistical power:</strong> Measures the probability of detecting a specified alternative.</li>
+<li><strong>Minimum detectable effect:</strong> Specifies the effect size a study is designed to detect at chosen power.</li>
+<li><strong>One-sample t-test:</strong> Tests a population mean against a reference value under suitable assumptions.</li>
+<li><strong>Paired t-test:</strong> Tests the mean of within-pair differences.</li>
+<li><strong>Welch’s t-test:</strong> Compares two means while allowing unequal variances.</li>
+<li><strong>Proportion tests:</strong> Tests hypotheses about one or more population proportions.</li>
+<li><strong>Chi-square independence test:</strong> Tests association between categorical variables using contingency tables.</li>
+<li><strong>Fisher’s exact test:</strong> Tests contingency-table hypotheses using exact conditional probabilities.</li>
+<li><strong>McNemar’s test:</strong> Tests paired binary outcomes for differences in marginal probabilities.</li>
+<li><strong>Analysis of variance:</strong> Compares group means through a model-based variance decomposition.</li>
+<li><strong>Welch’s ANOVA:</strong> Compares means while allowing unequal group variances.</li>
+<li><strong>Analysis of covariance:</strong> Compares groups while adjusting for additional covariates.</li>
+<li><strong>Multivariate analysis of variance:</strong> Tests group differences across several outcomes jointly.</li>
+<li><strong>Mann–Whitney U test:</strong> Compares distributions or probabilistic ordering; a median interpretation requires additional assumptions.</li>
+<li><strong>Wilcoxon signed-rank test:</strong> Tests paired differences using ranks under symmetry assumptions.</li>
+<li><strong>Sign test:</strong> Tests whether positive and negative differences occur with equal probability.</li>
+<li><strong>Kruskal–Wallis test:</strong> Compares multiple independent groups using ranks.</li>
+<li><strong>Friedman test:</strong> Compares multiple conditions within matched blocks using ranks.</li>
+<li><strong>Kolmogorov–Smirnov test:</strong> Compares cumulative distributions using their largest discrepancy.</li>
+<li><strong>Anderson–Darling test:</strong> Tests distributional fit with particular sensitivity to tail discrepancies.</li>
+<li><strong>Shapiro–Wilk test:</strong> Tests compatibility with a normal distribution.</li>
+<li><strong>Levene’s and Brown–Forsythe tests:</strong> Tests equality of group variances.</li>
+<li><strong>Likelihood-ratio test:</strong> Compares nested models through their maximized likelihoods.</li>
+<li><strong>Wald test:</strong> Tests parameter restrictions using estimates and their covariance.</li>
+<li><strong>Score test:</strong> Tests restrictions using likelihood derivatives evaluated under the null.</li>
+<li><strong>Permutation tests:</strong> Uses rearrangements justified by the null hypothesis or assignment mechanism.</li>
+<li><strong>Randomization inference:</strong> Derives inference from the actual treatment assignment design.</li>
+<li><strong>Equivalence testing:</strong> Tests whether effects lie inside prespecified bounds of practical similarity.</li>
+<li><strong>Noninferiority testing:</strong> Tests whether a treatment is not worse than a comparator beyond an allowed margin.</li>
+</ul>
+<h3 id="10-multiple-testing-sequential-inference-and-selective-inference">10. Multiple Testing, Sequential Inference, and Selective Inference<a class="heading-anchor" href="#10-multiple-testing-sequential-inference-and-selective-inference" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Family-wise error rate:</strong> Measures the probability of at least one false rejection within a hypothesis family.</li>
+<li><strong>False discovery rate:</strong> Measures the expected proportion of false rejections among rejected hypotheses.</li>
+<li><strong>Bonferroni correction:</strong> Controls family-wise error using adjusted testing thresholds.</li>
+<li><strong>Holm’s procedure:</strong> Controls family-wise error through sequentially adjusted thresholds.</li>
+<li><strong>Benjamini–Hochberg procedure:</strong> Controls false discovery rate under appropriate dependence conditions.</li>
+<li><strong>Benjamini–Yekutieli procedure:</strong> Controls false discovery rate under more general dependence.</li>
+<li><strong>Adjusted p-values:</strong> Expresses multiplicity corrections on the p-value scale.</li>
+<li><strong>Simultaneous confidence intervals:</strong> Provides joint coverage for multiple parameters.</li>
+<li><strong>Hierarchical testing:</strong> Organizes hypotheses into families or trees with structured testing rules.</li>
+<li><strong>Gatekeeping procedures:</strong> Tests later hypotheses only after earlier requirements are satisfied.</li>
+<li><strong>Alpha spending:</strong> Allocates Type I error across interim analyses.</li>
+<li><strong>Group sequential designs:</strong> Permits planned interim decisions using calibrated stopping boundaries.</li>
+<li><strong>Sequential probability ratio tests:</strong> Compares accumulating likelihood ratios with decision boundaries.</li>
+<li><strong>Always-valid p-values:</strong> Remains valid under permitted continuous monitoring and stopping rules.</li>
+<li><strong>Confidence sequences:</strong> Provides intervals designed to cover a target simultaneously across time.</li>
+<li><strong>E-values and e-processes:</strong> Supplies evidence measures supporting certain forms of optional stopping and aggregation.</li>
+<li><strong>Online false discovery control:</strong> Controls false discoveries as hypotheses arrive sequentially.</li>
+<li><strong>Selective inference:</strong> Accounts for data-dependent selection before reporting inferential claims.</li>
+<li><strong>Post-selection inference:</strong> Adjusts uncertainty after selecting variables, models, or findings.</li>
+<li><strong>Knockoff methods:</strong> Uses synthetic comparison variables to control false discoveries in feature selection.</li>
+<li><strong>Winner’s curse:</strong> Describes upward bias among effects selected because they looked strongest.</li>
+<li><strong>Multiverse analysis:</strong> Repeats an analysis across reasonable specifications to assess dependence on analytical choices.</li>
+</ul>
+<h3 id="11-regression-and-generalized-linear-models">11. Regression and Generalized Linear Models<a class="heading-anchor" href="#11-regression-and-generalized-linear-models" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Ordinary least squares:</strong> Estimates linear conditional means by minimizing squared residuals.</li>
+<li><strong>Weighted least squares:</strong> Assigns different observation weights, often to handle known variance differences.</li>
+<li><strong>Generalized least squares:</strong> Accounts for a modeled residual covariance structure.</li>
+<li><strong>Polynomial regression:</strong> Represents curved relationships using polynomial terms.</li>
+<li><strong>Interaction models:</strong> Allows one predictor’s effect to depend on another predictor.</li>
+<li><strong>Spline regression:</strong> Fits flexible curves using joined polynomial segments.</li>
+<li><strong>Restricted cubic splines:</strong> Uses smooth cubic segments with constrained tail behavior.</li>
+<li><strong>Generalized additive models:</strong> Combines smooth predictor effects through an additive model.</li>
+<li><strong>Generalized linear models:</strong> Connects outcome distributions to predictors through a link function.</li>
+<li><strong>Logistic regression:</strong> Models binary outcome probabilities through log-odds.</li>
+<li><strong>Probit regression:</strong> Models binary probabilities using the standard normal cumulative distribution.</li>
+<li><strong>Multinomial logistic regression:</strong> Models outcomes with multiple unordered categories.</li>
+<li><strong>Ordinal regression:</strong> Models outcomes whose categories have a meaningful order.</li>
+<li><strong>Poisson regression:</strong> Models conditional count means, commonly using a log link.</li>
+<li><strong>Negative binomial regression:</strong> Models overdispersed counts.</li>
+<li><strong>Quasi-likelihood models:</strong> Specifies mean–variance relationships without requiring a full probability distribution.</li>
+<li><strong>Zero-inflated models:</strong> Combines a structural-zero process with a count model.</li>
+<li><strong>Hurdle models:</strong> Separately models zero versus positive outcomes and the positive outcome distribution.</li>
+<li><strong>Gamma regression:</strong> Models positive continuous outcomes with suitable mean–variance behavior.</li>
+<li><strong>Tweedie models:</strong> Models outcomes that can combine exact zeros and positive continuous values.</li>
+<li><strong>Beta regression:</strong> Models continuous outcomes within the open unit interval.</li>
+<li><strong>Fractional response models:</strong> Models fractional outcomes, including settings permitting zeros and ones.</li>
+<li><strong>Quantile regression:</strong> Models conditional quantiles rather than only conditional means.</li>
+<li><strong>Expectile regression:</strong> Models asymmetric squared-error summaries of a conditional distribution.</li>
+<li><strong>Nonlinear least squares:</strong> Fits mean functions nonlinear in their parameters.</li>
+<li><strong>Robust regression:</strong> Reduces sensitivity to outliers or specified model deviations.</li>
+<li><strong>Ridge regression:</strong> Shrinks coefficients using an L2 penalty.</li>
+<li><strong>Lasso regression:</strong> Uses an L1 penalty that can set coefficients exactly to zero.</li>
+<li><strong>Elastic net:</strong> Combines L1 and L2 penalties.</li>
+<li><strong>Group lasso:</strong> Selects or shrinks predefined groups of coefficients together.</li>
+<li><strong>Firth regression:</strong> Uses bias reduction that can address separation in logistic regression.</li>
+<li><strong>Generalized additive location, scale, and shape models:</strong> Models multiple distributional parameters as functions of predictors.</li>
+</ul>
+<h3 id="12-regression-diagnostics-multilevel-models-and-longitudinal-analysis">12. Regression Diagnostics, Multilevel Models, and Longitudinal Analysis<a class="heading-anchor" href="#12-regression-diagnostics-multilevel-models-and-longitudinal-analysis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Residual analysis:</strong> Checks systematic errors, variance patterns, dependence, and unusual observations.</li>
+<li><strong>Leverage:</strong> Measures how unusual an observation’s predictor configuration is.</li>
+<li><strong>Cook’s distance:</strong> Measures how much fitted regression results change when an observation is removed.</li>
+<li><strong>Multicollinearity diagnostics:</strong> Detects predictor redundancy that destabilizes coefficient estimates.</li>
+<li><strong>Variance inflation factors:</strong> Quantifies coefficient variance inflation associated with correlated predictors.</li>
+<li><strong>Heteroskedasticity diagnostics:</strong> Checks whether residual variability changes across observations.</li>
+<li><strong>Autocorrelation diagnostics:</strong> Checks whether residuals remain related across time or ordering.</li>
+<li><strong>Model specification tests:</strong> Looks for evidence that important functional structure has been omitted.</li>
+<li><strong>Linear mixed-effects models:</strong> Combines population-level effects with group-specific random effects.</li>
+<li><strong>Generalized linear mixed models:</strong> Extends mixed modeling to non-Gaussian outcomes.</li>
+<li><strong>Random intercept models:</strong> Allows groups to have different baseline levels.</li>
+<li><strong>Random slope models:</strong> Allows predictor relationships to vary across groups.</li>
+<li><strong>Partial pooling:</strong> Shares information across groups while allowing meaningful differences.</li>
+<li><strong>Intraclass correlation:</strong> Quantifies similarity among observations within the same group.</li>
+<li><strong>Cross-classified models:</strong> Handles observations belonging to intersecting group structures.</li>
+<li><strong>Nested models:</strong> Represents hierarchical membership, such as users within teams within organizations.</li>
+<li><strong>Generalized estimating equations:</strong> Estimates population-average relationships with correlated observations.</li>
+<li><strong>Repeated-measures models:</strong> Handles multiple measurements from the same units.</li>
+<li><strong>Growth curve models:</strong> Models individual trajectories over time.</li>
+<li><strong>Panel fixed-effects models:</strong> Controls for time-invariant unit characteristics through unit-specific effects.</li>
+<li><strong>Panel random-effects models:</strong> Models unit-specific variation under assumptions about its relationship to predictors.</li>
+<li><strong>Dynamic panel models:</strong> Includes lagged outcomes and addresses resulting estimation challenges.</li>
+<li><strong>Hausman tests:</strong> Compares estimators to assess certain specification assumptions.</li>
+<li><strong>Multilevel regression and poststratification:</strong> Combines hierarchical outcome models with population composition information.</li>
+</ul>
+<h3 id="13-classical-experimental-design">13. Classical Experimental Design<a class="heading-anchor" href="#13-classical-experimental-design" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Randomized controlled trials:</strong> Uses random assignment to identify intervention effects under the study design.</li>
+<li><strong>Complete randomization:</strong> Randomly assigns a fixed number of units to each condition.</li>
+<li><strong>Blocked randomization:</strong> Randomizes within groups formed from important pre-treatment characteristics.</li>
+<li><strong>Matched-pair randomization:</strong> Forms similar pairs and randomizes treatment within each pair.</li>
+<li><strong>Cluster randomized trials:</strong> Randomizes groups when individual assignment is impractical or creates spillovers.</li>
+<li><strong>Stratified randomization:</strong> Balances treatment assignment within prespecified strata.</li>
+<li><strong>Factorial designs:</strong> Tests combinations of factor levels to estimate main effects and interactions.</li>
+<li><strong>Fractional factorial designs:</strong> Uses selected combinations to reduce experimental cost.</li>
+<li><strong>Aliasing and confounding in designs:</strong> Describes effects that cannot be separately estimated from chosen experimental runs.</li>
+<li><strong>Split-plot designs:</strong> Handles factors randomized at different experimental levels.</li>
+<li><strong>Latin square designs:</strong> Controls two blocking dimensions while assigning treatments.</li>
+<li><strong>Crossover designs:</strong> Exposes the same units to different treatments across periods.</li>
+<li><strong>Washout periods:</strong> Allows prior treatment effects to diminish between experimental periods.</li>
+<li><strong>Carryover effects:</strong> Occurs when earlier treatments influence later outcomes.</li>
+<li><strong>Stepped-wedge designs:</strong> Introduces interventions across clusters at different scheduled times.</li>
+<li><strong>Response surface methodology:</strong> Models responses over experimental settings to locate favorable operating regions.</li>
+<li><strong>Central composite designs:</strong> Adds experimental points to estimate quadratic response surfaces.</li>
+<li><strong>Box–Behnken designs:</strong> Estimates quadratic surfaces using a structured set of factor combinations.</li>
+<li><strong>Optimal experimental design:</strong> Chooses observations or settings to maximize a statistical information criterion.</li>
+<li><strong>D-optimal design:</strong> Targets precision through the determinant of an information matrix.</li>
+<li><strong>A-optimal design:</strong> Targets average parameter variance.</li>
+<li><strong>Power and sample-size analysis:</strong> Determines how much experimental information is needed for a specified objective.</li>
+<li><strong>Simulation-based design:</strong> Evaluates proposed experiments under realistic data-generating scenarios.</li>
+<li><strong>Blinding:</strong> Reduces behavioral and measurement biases by withholding assignment information.</li>
+<li><strong>Preregistration and analysis plans:</strong> Specifies hypotheses, outcomes, exclusions, and methods before results are examined.</li>
+</ul>
+<h3 id="14-online-experimentation-and-a-b-testing">14. Online Experimentation and A/B Testing<a class="heading-anchor" href="#14-online-experimentation-and-a-b-testing" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>A/B testing:</strong> Compares randomized product or operational alternatives.</li>
+<li><strong>A/B/n testing:</strong> Compares a control with multiple treatment variants.</li>
+<li><strong>Randomization integrity checks:</strong> Verifies that assignment followed the intended mechanism.</li>
+<li><strong>Sample ratio mismatch:</strong> Detects unexpected treatment allocation counts that may indicate implementation problems.</li>
+<li><strong>A/A tests:</strong> Compares nominally identical experiences to evaluate experimental infrastructure.</li>
+<li><strong>Intent-to-treat analysis:</strong> Estimates effects of assignment, regardless of actual treatment uptake.</li>
+<li><strong>Treatment-on-the-treated effects:</strong> Targets effects among treated or induced-to-treat units under additional assumptions.</li>
+<li><strong>Exposure definitions:</strong> Specifies when users count as having encountered an experiment.</li>
+<li><strong>Triggered analysis:</strong> Restricts analysis to relevant opportunities using rules that preserve valid treatment comparisons.</li>
+<li><strong>Guardrail metrics:</strong> Tracks important adverse effects alongside the primary success metric.</li>
+<li><strong>Overall evaluation criteria:</strong> Defines the principal metric or decision rule used to assess an experiment.</li>
+<li><strong>Ratio metrics:</strong> Analyzes measures such as revenue per user or clicks per impression.</li>
+<li><strong>Delta-method ratio inference:</strong> Approximates uncertainty for ratios of estimated quantities.</li>
+<li><strong>CUPED:</strong> Reduces experimental variance using pre-experiment covariates.</li>
+<li><strong>Regression-adjusted experiment analysis:</strong> Uses baseline covariates to improve precision.</li>
+<li><strong>Unequal treatment allocation:</strong> Assigns different traffic shares to conditions while accounting for power implications.</li>
+<li><strong>Persistent holdouts:</strong> Maintains long-term controls to measure cumulative or delayed effects.</li>
+<li><strong>Novelty effects:</strong> Captures temporary responses to a new experience.</li>
+<li><strong>Primacy and learning effects:</strong> Captures behavior influenced by prior familiarity or adaptation.</li>
+<li><strong>Treatment effect dilution:</strong> Occurs when assignment affects only some analyzed observations.</li>
+<li><strong>Network interference:</strong> Occurs when one unit’s assignment influences another unit’s outcome.</li>
+<li><strong>Switchback experiments:</strong> Randomizes interventions across time blocks, often within locations or systems.</li>
+<li><strong>Geo experiments:</strong> Randomizes or compares geographic units to evaluate interventions.</li>
+<li><strong>Marketplace experiments:</strong> Accounts for interactions between buyers, sellers, prices, and shared supply.</li>
+<li><strong>Long-term effect estimation:</strong> Examines whether short-term outcomes represent persistent impacts.</li>
+<li><strong>Surrogate metrics:</strong> Uses intermediate outcomes to inform longer-term outcomes under explicit validation assumptions.</li>
+<li><strong>Experiment interaction analysis:</strong> Studies whether concurrent interventions alter each other’s effects.</li>
+<li><strong>Experiment portfolio governance:</strong> Coordinates overlapping studies, shared metrics, and decision standards.</li>
+</ul>
+<h3 id="15-causal-inference-foundations">15. Causal Inference Foundations<a class="heading-anchor" href="#15-causal-inference-foundations" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Potential outcomes:</strong> Defines the outcomes a unit would experience under alternative interventions.</li>
+<li><strong>Counterfactual reasoning:</strong> Compares observed outcomes with outcomes under unrealized alternatives.</li>
+<li><strong>Average treatment effect:</strong> Measures the average outcome difference under treatment versus control.</li>
+<li><strong>Average treatment effect on the treated:</strong> Measures the average effect for units that actually received treatment.</li>
+<li><strong>Conditional average treatment effect:</strong> Measures average effects within covariate-defined groups.</li>
+<li><strong>Consistency:</strong> Relates observed outcomes to the potential outcome for the intervention actually received.</li>
+<li><strong>Exchangeability and ignorability:</strong> Describes conditions under which treatment groups are comparable for causal estimation.</li>
+<li><strong>Positivity and overlap:</strong> Requires relevant treatment alternatives to occur within the populations being compared.</li>
+<li><strong>Stable unit treatment value assumptions:</strong> Addresses treatment versions and interference between units.</li>
+<li><strong>Directed acyclic graphs:</strong> Represents hypothesized causal relationships without directed cycles.</li>
+<li><strong>Structural causal models:</strong> Represents variables as functions of their causes and external disturbances.</li>
+<li><strong>Confounding:</strong> Occurs when common causes distort treatment–outcome comparisons.</li>
+<li><strong>Colliders:</strong> Variables caused by two other variables whose conditioning can induce association.</li>
+<li><strong>Mediators:</strong> Variables through which some of a treatment’s effect may operate.</li>
+<li><strong>Backdoor adjustment:</strong> Identifies covariate adjustment sets that block noncausal paths under a causal graph.</li>
+<li><strong>Front-door identification:</strong> Identifies certain effects through mediators under strong graphical assumptions.</li>
+<li><strong>Do-calculus:</strong> Provides rules for identifying interventional distributions from causal assumptions.</li>
+<li><strong>Selection diagrams:</strong> Represents differences between study selection mechanisms or populations.</li>
+<li><strong>Transportability:</strong> Studies whether causal knowledge transfers across settings.</li>
+<li><strong>Partial identification:</strong> Derives bounds when assumptions do not identify a single causal value.</li>
+<li><strong>Negative controls:</strong> Uses variables expected to lack particular causal relationships to detect bias.</li>
+<li><strong>Target trial emulation:</strong> Specifies an ideal randomized trial and designs an observational analysis to emulate it.</li>
+</ul>
+<h3 id="16-quasi-experiments-and-causal-study-designs">16. Quasi-Experiments and Causal Study Designs<a class="heading-anchor" href="#16-quasi-experiments-and-causal-study-designs" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Natural experiments:</strong> Uses externally generated variation that may approximate random treatment assignment.</li>
+<li><strong>Difference-in-differences:</strong> Compares outcome changes between treated and comparison groups.</li>
+<li><strong>Parallel trends:</strong> Assumes untreated outcome changes would have followed comparable patterns.</li>
+<li><strong>Event-study designs:</strong> Estimates effects relative to intervention timing and examines temporal patterns.</li>
+<li><strong>Staggered adoption designs:</strong> Handles interventions introduced at different times across groups.</li>
+<li><strong>Two-way fixed-effects limitations:</strong> Recognizes misleading comparisons or weights when effects vary across groups or time.</li>
+<li><strong>Triple differences:</strong> Adds another comparison dimension to a difference-in-differences design.</li>
+<li><strong>Synthetic control:</strong> Constructs a comparison unit from weighted untreated units.</li>
+<li><strong>Augmented synthetic control:</strong> Adds outcome modeling to improve synthetic-control estimation.</li>
+<li><strong>Synthetic difference-in-differences:</strong> Combines weighting and difference-in-differences ideas.</li>
+<li><strong>Interrupted time series:</strong> Estimates changes following an intervention while modeling prior temporal behavior.</li>
+<li><strong>Regression discontinuity:</strong> Uses a treatment assignment cutoff to identify local causal effects.</li>
+<li><strong>Sharp regression discontinuity:</strong> Applies when treatment status changes deterministically at a cutoff.</li>
+<li><strong>Fuzzy regression discontinuity:</strong> Uses a cutoff-induced change in treatment probability as an instrument.</li>
+<li><strong>Regression kink designs:</strong> Uses changes in assignment-rule slopes to identify certain local effects.</li>
+<li><strong>Instrumental variables:</strong> Uses a variable affecting treatment to identify causal effects under additional restrictions.</li>
+<li><strong>Two-stage least squares:</strong> Estimates linear instrumental-variable models.</li>
+<li><strong>Local average treatment effects:</strong> Identifies effects for units whose treatment changes because of an instrument.</li>
+<li><strong>Weak instrument diagnostics:</strong> Evaluates whether instruments provide enough treatment variation for reliable inference.</li>
+<li><strong>Exclusion restrictions:</strong> Requires an instrument to affect the outcome only through specified treatment pathways.</li>
+<li><strong>Encouragement designs:</strong> Randomizes an encouragement that influences treatment uptake.</li>
+<li><strong>Placebo and falsification tests:</strong> Checks implications that should hold if a causal interpretation is credible.</li>
+</ul>
+<h3 id="17-causal-estimation-heterogeneous-effects-and-policy-learning">17. Causal Estimation, Heterogeneous Effects, and Policy Learning<a class="heading-anchor" href="#17-causal-estimation-heterogeneous-effects-and-policy-learning" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Outcome regression:</strong> Models outcomes conditional on treatment and covariates to estimate causal contrasts.</li>
+<li><strong>G-computation:</strong> Calculates intervention outcomes by averaging predictions from a fitted causal outcome model.</li>
+<li><strong>Propensity scores:</strong> Models treatment assignment probabilities given observed covariates.</li>
+<li><strong>Propensity score matching:</strong> Forms treatment comparisons using similar estimated assignment probabilities.</li>
+<li><strong>Inverse-probability treatment weighting:</strong> Reweights observations to construct a target treatment comparison.</li>
+<li><strong>Overlap weighting:</strong> Emphasizes units with more comparable treatment assignment probabilities.</li>
+<li><strong>Entropy balancing:</strong> Constructs weights satisfying specified covariate balance constraints.</li>
+<li><strong>Covariate balance diagnostics:</strong> Evaluates whether adjusted treatment groups are comparable on observed variables.</li>
+<li><strong>Augmented inverse-probability weighting:</strong> Combines treatment and outcome models in a doubly robust estimator.</li>
+<li><strong>Doubly robust estimation:</strong> Can remain consistent if one of two nuisance models is correctly specified, given other assumptions.</li>
+<li><strong>Targeted maximum likelihood estimation:</strong> Updates an initial outcome model to target an estimand through a semiparametric procedure.</li>
+<li><strong>Double/debiased machine learning:</strong> Uses orthogonal estimating equations and cross-fitting to reduce nuisance-estimation bias under suitable conditions.</li>
+<li><strong>Cross-fitting:</strong> Estimates nuisance functions on separate folds from those used to evaluate estimating equations.</li>
+<li><strong>Marginal structural models:</strong> Uses weighting to estimate effects with time-varying treatment and confounding.</li>
+<li><strong>Structural nested models:</strong> Models treatment effects across time through nested counterfactual contrasts.</li>
+<li><strong>G-estimation:</strong> Estimates structural nested models using identifying restrictions.</li>
+<li><strong>Mediation analysis:</strong> Studies pathways through which interventions influence outcomes.</li>
+<li><strong>Direct and indirect effects:</strong> Separates effects through specified mediators from effects through other pathways.</li>
+<li><strong>Causal forests:</strong> Estimates heterogeneous treatment effects using specialized tree ensembles.</li>
+<li><strong>S-learners:</strong> Uses one outcome model containing treatment as an input to estimate treatment contrasts.</li>
+<li><strong>T-learners:</strong> Fits separate outcome models for treatment groups.</li>
+<li><strong>X-learners:</strong> Combines outcome models and imputed treatment effects, often useful with unequal group sizes.</li>
+<li><strong>R-learners:</strong> Estimates treatment heterogeneity after residualizing outcomes and treatments.</li>
+<li><strong>Uplift modeling:</strong> Predicts incremental intervention effects to guide targeting.</li>
+<li><strong>Qini and uplift curves:</strong> Evaluates treatment targeting under suitable randomized data or identification assumptions.</li>
+<li><strong>Policy learning:</strong> Learns intervention rules that optimize expected outcomes or utility.</li>
+<li><strong>Off-policy evaluation:</strong> Estimates the value of a policy using data generated under another policy.</li>
+<li><strong>Sensitivity to unmeasured confounding:</strong> Quantifies how hidden confounding could change causal conclusions.</li>
+<li><strong>Causal discovery:</strong> Infers candidate causal structures under strong assumptions about data and mechanisms.</li>
+</ul>
+<h3 id="18-bayesian-statistics-and-probabilistic-modeling">18. Bayesian Statistics and Probabilistic Modeling<a class="heading-anchor" href="#18-bayesian-statistics-and-probabilistic-modeling" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Prior distributions:</strong> Encodes uncertainty about parameters before incorporating current data.</li>
+<li><strong>Likelihoods:</strong> Describes how observed data depend on model parameters.</li>
+<li><strong>Posterior distributions:</strong> Combines prior information with observed data.</li>
+<li><strong>Conjugate models:</strong> Uses prior–likelihood combinations with analytically convenient posterior distributions.</li>
+<li><strong>Weakly informative priors:</strong> Regularizes estimates while allowing a broad range of plausible values.</li>
+<li><strong>Prior elicitation:</strong> Translates domain knowledge into probability distributions.</li>
+<li><strong>Prior predictive checks:</strong> Simulates data before fitting to assess the implications of chosen priors.</li>
+<li><strong>Posterior predictive distributions:</strong> Describes future observations after accounting for posterior uncertainty.</li>
+<li><strong>Posterior predictive checks:</strong> Compares simulated and observed data to diagnose model mismatch.</li>
+<li><strong>Hierarchical Bayesian models:</strong> Shares information across related groups through probability distributions.</li>
+<li><strong>Empirical Bayes:</strong> Estimates aspects of a prior distribution from observed data.</li>
+<li><strong>Bayesian shrinkage:</strong> Pulls unstable estimates toward shared structure using prior information.</li>
+<li><strong>Credible intervals:</strong> Describes parameter ranges containing specified posterior probability.</li>
+<li><strong>Bayesian decision analysis:</strong> Chooses actions using posterior expected utility or loss.</li>
+<li><strong>Bayes factors:</strong> Compares models through marginal likelihood ratios and can be sensitive to prior choices.</li>
+<li><strong>Bayesian model averaging:</strong> Averages predictions or quantities across models using posterior model weights.</li>
+<li><strong>Markov chain Monte Carlo:</strong> Generates dependent draws approximating a target probability distribution.</li>
+<li><strong>Metropolis–Hastings:</strong> Constructs a Markov chain through proposals and probabilistic acceptance.</li>
+<li><strong>Gibbs sampling:</strong> Iteratively samples from conditional distributions.</li>
+<li><strong>Hamiltonian Monte Carlo:</strong> Uses gradients and simulated dynamics to explore continuous distributions.</li>
+<li><strong>No-U-Turn sampling:</strong> Adaptively determines trajectory lengths within Hamiltonian Monte Carlo.</li>
+<li><strong>Variational inference:</strong> Approximates a probability distribution by solving an optimization problem.</li>
+<li><strong>Laplace approximation:</strong> Approximates a posterior locally using a Gaussian distribution.</li>
+<li><strong>Approximate Bayesian computation:</strong> Performs inference using simulations when likelihood evaluation is difficult.</li>
+<li><strong>Simulation-based inference:</strong> Learns parameter or likelihood approximations from simulated datasets.</li>
+<li><strong>MCMC diagnostics:</strong> Uses chain behavior, effective sample size, and convergence diagnostics to detect sampling problems.</li>
+<li><strong>Simulation-based calibration:</strong> Checks inference implementation using repeated simulations from the model.</li>
+<li><strong>Bayesian nonparametrics:</strong> Uses flexible priors whose effective complexity can grow with available data.</li>
+<li><strong>Dirichlet process models:</strong> Provides a flexible prior for distributions, commonly used in mixture modeling.</li>
+<li><strong>Gaussian processes:</strong> Defines distributions over functions for flexible regression, classification, and optimization.</li>
+</ul>
+<h3 id="19-statistical-learning-and-classical-supervised-models">19. Statistical Learning and Classical Supervised Models<a class="heading-anchor" href="#19-statistical-learning-and-classical-supervised-models" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Empirical risk minimization:</strong> Fits models by minimizing average training loss.</li>
+<li><strong>Regularized risk minimization:</strong> Balances training fit against a complexity penalty.</li>
+<li><strong>Bias–variance tradeoff:</strong> Describes competing sources of prediction error associated with model flexibility.</li>
+<li><strong>Overfitting:</strong> Learns sample-specific patterns that do not generalize.</li>
+<li><strong>Underfitting:</strong> Uses insufficient flexibility to capture relevant structure.</li>
+<li><strong>Nearest-neighbor methods:</strong> Predicts using nearby observations under a chosen distance measure.</li>
+<li><strong>Naive Bayes:</strong> Uses conditional-independence assumptions to construct a probabilistic classifier.</li>
+<li><strong>Linear discriminant analysis:</strong> Classifies using Gaussian class models with a shared covariance matrix.</li>
+<li><strong>Quadratic discriminant analysis:</strong> Allows different Gaussian covariance matrices across classes.</li>
+<li><strong>Decision trees:</strong> Partitions predictors into regions with simple local predictions.</li>
+<li><strong>Bagging:</strong> Averages models fitted to resampled datasets to reduce instability.</li>
+<li><strong>Random forests:</strong> Combines randomized trees to produce flexible predictions.</li>
+<li><strong>Extremely randomized trees:</strong> Adds stronger randomness to tree split construction.</li>
+<li><strong>Gradient boosting:</strong> Sequentially adds models that improve a specified loss.</li>
+<li><strong>Boosted decision trees:</strong> Uses trees as components in a gradient-boosted ensemble.</li>
+<li><strong>AdaBoost:</strong> Reweights observations to emphasize classification errors across successive learners.</li>
+<li><strong>Support vector machines:</strong> Fits margin-based decision rules, optionally using kernels.</li>
+<li><strong>Kernel methods:</strong> Expresses nonlinear relationships through similarities corresponding to feature-space operations.</li>
+<li><strong>Kernel ridge regression:</strong> Combines kernel representations with L2-regularized regression.</li>
+<li><strong>Gaussian process regression:</strong> Produces probabilistic function predictions using a kernel-defined prior.</li>
+<li><strong>Multilayer perceptrons:</strong> Uses layered nonlinear transformations for supervised learning.</li>
+<li><strong>Multitask learning:</strong> Shares information across related prediction problems.</li>
+<li><strong>Multioutput learning:</strong> Predicts multiple outcomes jointly.</li>
+<li><strong>Learning to rank:</strong> Learns orderings rather than only numeric values or classes.</li>
+<li><strong>Cost-sensitive learning:</strong> Accounts for unequal consequences of different prediction errors.</li>
+<li><strong>Positive–unlabeled learning:</strong> Learns from labeled positives and unlabeled examples under explicit labeling assumptions.</li>
+<li><strong>Semi-supervised learning:</strong> Uses both labeled and unlabeled data.</li>
+<li><strong>Active learning:</strong> Chooses which observations should receive labels next.</li>
+<li><strong>Transfer learning:</strong> Reuses learned representations or parameters across tasks.</li>
+<li><strong>Domain adaptation:</strong> Adjusts learning when source and deployment distributions differ.</li>
+</ul>
+<h3 id="20-feature-engineering-and-representation-learning">20. Feature Engineering and Representation Learning<a class="heading-anchor" href="#20-feature-engineering-and-representation-learning" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Scaling and standardization:</strong> Changes feature magnitudes to support model fitting and comparability.</li>
+<li><strong>Categorical encoding:</strong> Represents categories numerically for use in models.</li>
+<li><strong>Target encoding:</strong> Encodes categories using outcome summaries with safeguards against leakage.</li>
+<li><strong>Feature hashing:</strong> Maps high-cardinality inputs into a fixed-dimensional representation.</li>
+<li><strong>Interaction feature construction:</strong> Creates variables representing joint predictor effects.</li>
+<li><strong>Temporal feature engineering:</strong> Constructs lags, rolling summaries, recency, and seasonal features.</li>
+<li><strong>Feature selection:</strong> Chooses a subset of predictors.</li>
+<li><strong>Filter methods:</strong> Selects features using criteria computed separately from the final predictive model.</li>
+<li><strong>Wrapper methods:</strong> Evaluates feature subsets through repeated model fitting.</li>
+<li><strong>Embedded selection:</strong> Selects features as part of model optimization.</li>
+<li><strong>Mutual information:</strong> Measures general statistical dependence between variables.</li>
+<li><strong>Principal component analysis:</strong> Finds orthogonal directions capturing maximal variance.</li>
+<li><strong>Independent component analysis:</strong> Seeks statistically independent latent components.</li>
+<li><strong>Nonnegative matrix factorization:</strong> Produces additive nonnegative latent representations.</li>
+<li><strong>Sparse coding:</strong> Represents observations using a small number of learned components.</li>
+<li><strong>Dictionary learning:</strong> Learns reusable basis elements for representing data.</li>
+<li><strong>Autoencoders:</strong> Learns representations by reconstructing inputs through a constrained internal representation.</li>
+<li><strong>Contrastive learning:</strong> Learns representations by distinguishing related from unrelated examples.</li>
+<li><strong>Metric learning:</strong> Learns a distance or similarity function suited to a task.</li>
+<li><strong>Embeddings:</strong> Represents discrete or complex entities as vectors.</li>
+<li><strong>Feature stability analysis:</strong> Evaluates whether selected features persist across samples or conditions.</li>
+<li><strong>Representation leakage analysis:</strong> Detects unwanted target, identity, or future information in learned features.</li>
+</ul>
+<h3 id="21-unsupervised-learning-and-multivariate-analysis">21. Unsupervised Learning and Multivariate Analysis<a class="heading-anchor" href="#21-unsupervised-learning-and-multivariate-analysis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>K-means clustering:</strong> Groups observations around centroids using squared Euclidean distances.</li>
+<li><strong>K-medoids clustering:</strong> Uses representative observed points as cluster centers.</li>
+<li><strong>Hierarchical clustering:</strong> Builds nested groupings through merging or splitting.</li>
+<li><strong>DBSCAN:</strong> Finds dense regions and marks sufficiently isolated observations as noise.</li>
+<li><strong>HDBSCAN:</strong> Extends density clustering across varying density scales.</li>
+<li><strong>Gaussian mixture models:</strong> Represents a distribution as a mixture of Gaussian components.</li>
+<li><strong>Model-based clustering:</strong> Defines clusters through an explicit probabilistic model.</li>
+<li><strong>Spectral clustering:</strong> Uses graph or similarity-matrix eigenvectors to construct clusters.</li>
+<li><strong>Biclustering:</strong> Finds related subsets of rows and columns simultaneously.</li>
+<li><strong>Fuzzy clustering:</strong> Allows observations to have graded memberships across clusters.</li>
+<li><strong>Latent class analysis:</strong> Models discrete latent groups underlying observed categorical responses.</li>
+<li><strong>Latent profile analysis:</strong> Models latent groups characterized by continuous measurements.</li>
+<li><strong>Factor analysis:</strong> Explains covariance through lower-dimensional latent variables.</li>
+<li><strong>Exploratory factor analysis:</strong> Discovers possible latent factor structures.</li>
+<li><strong>Confirmatory factor analysis:</strong> Tests a specified latent measurement structure.</li>
+<li><strong>Canonical correlation analysis:</strong> Finds maximally related linear combinations from two variable sets.</li>
+<li><strong>Partial least squares:</strong> Learns components emphasizing relationships between predictors and outcomes.</li>
+<li><strong>Multidimensional scaling:</strong> Embeds observations to preserve specified dissimilarities.</li>
+<li><strong>t-SNE:</strong> Visualizes local similarity structure in a low-dimensional representation.</li>
+<li><strong>UMAP:</strong> Constructs low-dimensional representations using neighborhood-based structure.</li>
+<li><strong>Manifold learning:</strong> Seeks lower-dimensional structure in nonlinear data.</li>
+<li><strong>Correspondence analysis:</strong> Explores relationships in contingency tables.</li>
+<li><strong>Multiple correspondence analysis:</strong> Extends correspondence analysis to multiple categorical variables.</li>
+<li><strong>Cluster validation:</strong> Assesses separation, stability, usefulness, and agreement with external information.</li>
+<li><strong>Cluster stability analysis:</strong> Examines whether groupings persist under resampling or perturbations.</li>
+<li><strong>Consensus clustering:</strong> Combines multiple clustering results into a more stable grouping.</li>
+</ul>
+<h3 id="22-model-validation-and-predictive-performance">22. Model Validation and Predictive Performance<a class="heading-anchor" href="#22-model-validation-and-predictive-performance" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Training, validation, and test separation:</strong> Separates model fitting, development choices, and final evaluation.</li>
+<li><strong>K-fold cross-validation:</strong> Evaluates models using repeated held-out partitions.</li>
+<li><strong>Stratified cross-validation:</strong> Preserves relevant class proportions across folds.</li>
+<li><strong>Grouped cross-validation:</strong> Keeps related observations together to prevent leakage.</li>
+<li><strong>Nested cross-validation:</strong> Separates hyperparameter selection from performance estimation.</li>
+<li><strong>Temporal validation:</strong> Evaluates predictions on observations occurring after training data.</li>
+<li><strong>Rolling-origin evaluation:</strong> Repeatedly advances the forecasting origin to assess deployment-like performance.</li>
+<li><strong>Spatial cross-validation:</strong> Holds out geographic regions to test spatial generalization.</li>
+<li><strong>External validation:</strong> Evaluates performance using independently collected data.</li>
+<li><strong>Out-of-distribution evaluation:</strong> Tests behavior outside the training distribution.</li>
+<li><strong>Learning curves:</strong> Shows how performance changes with training sample size.</li>
+<li><strong>Validation curves:</strong> Shows how performance changes with model settings.</li>
+<li><strong>Ablation studies:</strong> Removes components to assess their contribution.</li>
+<li><strong>Baseline comparisons:</strong> Checks whether complexity improves meaningfully over simple alternatives.</li>
+<li><strong>Mean absolute error:</strong> Measures average absolute prediction error.</li>
+<li><strong>Mean squared error and RMSE:</strong> Penalizes large errors more heavily through squaring.</li>
+<li><strong>R-squared:</strong> Measures squared-error improvement relative to a specified mean baseline.</li>
+<li><strong>Log loss:</strong> Evaluates probabilistic classification by penalizing assigned probability to incorrect outcomes.</li>
+<li><strong>Brier score:</strong> Measures squared error of predicted probabilities.</li>
+<li><strong>Precision and recall:</strong> Measures positive prediction reliability and positive-case detection.</li>
+<li><strong>Specificity and sensitivity:</strong> Measures correct negative and positive identification rates.</li>
+<li><strong>F-scores:</strong> Combines precision and recall with a chosen relative weighting.</li>
+<li><strong>ROC curves and AUC:</strong> Summarizes ranking across false-positive and true-positive rates.</li>
+<li><strong>Precision–recall curves:</strong> Summarizes performance across positive prediction thresholds.</li>
+<li><strong>Calibration curves:</strong> Compares predicted probabilities with observed outcome frequencies.</li>
+<li><strong>Threshold optimization:</strong> Selects decision cutoffs using costs, benefits, or operational constraints.</li>
+<li><strong>Top-k and ranking metrics:</strong> Evaluates performance among the highest-ranked predictions.</li>
+<li><strong>Business utility evaluation:</strong> Converts prediction behavior into expected operational value.</li>
+<li><strong>Paired model comparisons:</strong> Uses matched evaluation observations to compare model performance.</li>
+<li><strong>Performance uncertainty:</strong> Quantifies how much measured performance could vary across samples or settings.</li>
+</ul>
+<h3 id="23-uncertainty-quantification-and-distribution-shift">23. Uncertainty Quantification and Distribution Shift<a class="heading-anchor" href="#23-uncertainty-quantification-and-distribution-shift" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Aleatoric uncertainty:</strong> Represents outcome variability that remains even with a known model.</li>
+<li><strong>Epistemic uncertainty:</strong> Represents uncertainty about the model or its parameters.</li>
+<li><strong>Uncertainty propagation:</strong> Carries uncertain inputs and parameters through downstream calculations.</li>
+<li><strong>Predictive distributions:</strong> Represents uncertainty over possible outcomes rather than only point predictions.</li>
+<li><strong>Quantile prediction:</strong> Estimates specified percentiles of the conditional outcome distribution.</li>
+<li><strong>Prediction set construction:</strong> Produces sets of possible outcomes with an intended coverage property.</li>
+<li><strong>Conformal prediction:</strong> Constructs prediction sets with finite-sample marginal coverage under conditions such as exchangeability.</li>
+<li><strong>Split conformal prediction:</strong> Uses separate model-fitting and calibration data to construct prediction sets.</li>
+<li><strong>Conformalized quantile regression:</strong> Calibrates quantile-model intervals using conformal methods.</li>
+<li><strong>Conditional versus marginal coverage:</strong> Distinguishes coverage within specific conditions from average population coverage.</li>
+<li><strong>Distribution-free inference:</strong> Derives guarantees without assuming a particular parametric distribution, while retaining other assumptions.</li>
+<li><strong>Deep ensembles:</strong> Uses variation across independently trained neural models to inform predictive uncertainty.</li>
+<li><strong>Bayesian neural networks:</strong> Places probability distributions over neural-network parameters or related model components.</li>
+<li><strong>Selective prediction:</strong> Allows a model to abstain when confidence or expected utility is insufficient.</li>
+<li><strong>Covariate shift:</strong> Changes predictor distributions while preserving the conditional outcome mechanism.</li>
+<li><strong>Label shift:</strong> Changes class prevalence while preserving class-conditional predictor distributions.</li>
+<li><strong>Concept drift:</strong> Changes the relationship between predictors and outcomes.</li>
+<li><strong>Importance weighting:</strong> Adjusts contributions to account for differences between source and target distributions.</li>
+<li><strong>Distributionally robust prediction:</strong> Optimizes performance against a defined neighborhood of possible distributions.</li>
+<li><strong>Out-of-distribution detection:</strong> Identifies inputs that differ materially from the model’s development data.</li>
+</ul>
+<h3 id="24-explainability-fairness-and-model-robustness">24. Explainability, Fairness, and Model Robustness<a class="heading-anchor" href="#24-explainability-fairness-and-model-robustness" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Global interpretability:</strong> Describes overall model behavior across the input space.</li>
+<li><strong>Local interpretability:</strong> Explains individual predictions or nearby behavior.</li>
+<li><strong>Permutation importance:</strong> Measures performance deterioration after disrupting a feature.</li>
+<li><strong>Partial dependence plots:</strong> Averages predictions over other features, potentially creating unrealistic feature combinations.</li>
+<li><strong>Individual conditional expectation:</strong> Shows how predictions change with one feature for individual observations.</li>
+<li><strong>Accumulated local effects:</strong> Summarizes local prediction changes while reducing some correlated-feature extrapolation.</li>
+<li><strong>SHAP values:</strong> Allocates prediction differences across features using a Shapley-value framework and a chosen reference construction.</li>
+<li><strong>LIME:</strong> Approximates model behavior locally using a simpler surrogate.</li>
+<li><strong>Counterfactual explanations:</strong> Finds input changes that would alter a model’s prediction.</li>
+<li><strong>Recourse analysis:</strong> Studies feasible actions people can take to change model-based decisions.</li>
+<li><strong>Monotonic models:</strong> Enforces specified directional relationships between predictors and predictions.</li>
+<li><strong>Adversarial robustness:</strong> Studies behavior under intentionally chosen input perturbations.</li>
+<li><strong>Stress testing:</strong> Evaluates models under extreme or adverse scenarios.</li>
+<li><strong>Subgroup performance analysis:</strong> Checks whether model quality differs across meaningful population groups.</li>
+<li><strong>Demographic parity:</strong> Compares positive prediction rates across groups.</li>
+<li><strong>Equalized odds:</strong> Compares error rates conditional on actual outcomes across groups.</li>
+<li><strong>Equal opportunity:</strong> Compares true-positive rates across groups.</li>
+<li><strong>Group calibration:</strong> Checks whether predicted probabilities have comparable meanings within groups.</li>
+<li><strong>Individual fairness:</strong> Seeks similar treatment for individuals considered similar under a specified definition.</li>
+<li><strong>Intersectional fairness:</strong> Examines groups defined by combinations of characteristics.</li>
+<li><strong>Fairness tradeoffs:</strong> Recognizes that desirable fairness criteria can conflict.</li>
+<li><strong>Proxy discrimination analysis:</strong> Examines whether apparently neutral features reproduce sensitive distinctions.</li>
+<li><strong>Causal fairness analysis:</strong> Uses causal assumptions to distinguish permitted and impermissible pathways.</li>
+</ul>
+<h3 id="25-time-series-foundations-and-diagnostics">25. Time-Series Foundations and Diagnostics<a class="heading-anchor" href="#25-time-series-foundations-and-diagnostics" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Temporal dependence:</strong> Recognizes that observations can depend on earlier observations.</li>
+<li><strong>Strict stationarity:</strong> Requires joint distributions to remain unchanged under time shifts.</li>
+<li><strong>Weak stationarity:</strong> Requires stable means and autocovariances depending only on lag.</li>
+<li><strong>Trend:</strong> Represents persistent changes in the level of a series.</li>
+<li><strong>Seasonality:</strong> Represents recurring patterns at known calendar frequencies.</li>
+<li><strong>Cycles:</strong> Represents fluctuations without a strictly fixed seasonal period.</li>
+<li><strong>Autocorrelation functions:</strong> Measures correlation between a series and its lagged values.</li>
+<li><strong>Partial autocorrelation functions:</strong> Measures lag relationships after accounting for intervening lags.</li>
+<li><strong>White noise:</strong> Represents uncorrelated disturbances with stable first and second moments.</li>
+<li><strong>Differencing:</strong> Transforms observations into changes to address certain nonstationary patterns.</li>
+<li><strong>Seasonal differencing:</strong> Removes differences relative to a previous seasonal period.</li>
+<li><strong>Unit roots:</strong> Describes a form of persistent nonstationarity.</li>
+<li><strong>Augmented Dickey–Fuller tests:</strong> Tests a unit-root null under specified time-series models.</li>
+<li><strong>KPSS tests:</strong> Tests stationarity around a level or trend.</li>
+<li><strong>Cointegration:</strong> Describes stationary combinations of individually nonstationary series.</li>
+<li><strong>Granger causality:</strong> Tests whether past values improve prediction beyond a specified information set; it does not establish intervention causality.</li>
+<li><strong>Cross-correlation analysis:</strong> Examines relationships between series across lags.</li>
+<li><strong>Spectral analysis:</strong> Studies how variation is distributed across frequencies.</li>
+<li><strong>Periodograms:</strong> Estimates frequency-domain power from observed data.</li>
+<li><strong>Fourier representations:</strong> Represents periodic behavior using sine and cosine components.</li>
+<li><strong>Wavelet analysis:</strong> Studies behavior localized in both time and frequency.</li>
+<li><strong>Time-series decomposition:</strong> Separates trend, seasonal, and residual components.</li>
+<li><strong>STL decomposition:</strong> Uses local regression to estimate seasonal and trend components.</li>
+<li><strong>Ljung–Box tests:</strong> Checks whether a collection of autocorrelations is jointly consistent with zero.</li>
+<li><strong>Structural breaks:</strong> Represents changes in a series’ underlying parameters or mechanisms.</li>
+</ul>
+<h3 id="26-classical-forecasting-methods">26. Classical Forecasting Methods<a class="heading-anchor" href="#26-classical-forecasting-methods" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Naive forecasts:</strong> Uses the most recent observation as a future forecast.</li>
+<li><strong>Seasonal naive forecasts:</strong> Uses the corresponding observation from a previous season.</li>
+<li><strong>Drift forecasts:</strong> Extrapolates an average historical rate of change.</li>
+<li><strong>Moving-average smoothing:</strong> Averages nearby observations to reduce short-term variation.</li>
+<li><strong>Simple exponential smoothing:</strong> Recursively updates a level estimate using exponentially decreasing weights.</li>
+<li><strong>Holt’s method:</strong> Adds a trend component to exponential smoothing.</li>
+<li><strong>Holt–Winters methods:</strong> Adds seasonal components to level-and-trend forecasting.</li>
+<li><strong>Damped-trend methods:</strong> Gradually reduces extrapolated trend growth over longer horizons.</li>
+<li><strong>ETS models:</strong> Provides a state-space framework for error, trend, and seasonal components.</li>
+<li><strong>Autoregressive models:</strong> Predicts using lagged values of the series.</li>
+<li><strong>Moving-average time-series models:</strong> Models dependence through lagged disturbances.</li>
+<li><strong>ARMA models:</strong> Combines autoregressive and moving-average components.</li>
+<li><strong>ARIMA models:</strong> Combines differencing with autoregressive and moving-average components.</li>
+<li><strong>Seasonal ARIMA:</strong> Extends ARIMA with seasonal dependence and differencing.</li>
+<li><strong>Dynamic regression:</strong> Combines explanatory predictors with time-series error structure.</li>
+<li><strong>Distributed-lag models:</strong> Represents predictors’ effects across multiple time lags.</li>
+<li><strong>Transfer-function models:</strong> Models dynamic responses from input series to output series.</li>
+<li><strong>Vector autoregression:</strong> Models several series using their joint lagged histories.</li>
+<li><strong>Vector error-correction models:</strong> Combines short-term dynamics with cointegrating relationships.</li>
+<li><strong>State-space models:</strong> Represents observed series through evolving latent states.</li>
+<li><strong>Kalman filtering:</strong> Updates latent-state estimates in linear Gaussian state-space models.</li>
+<li><strong>Kalman smoothing:</strong> Estimates historical states using observations from the full available period.</li>
+<li><strong>Structural time-series models:</strong> Explicitly represents components such as level, trend, and seasonality.</li>
+<li><strong>Bayesian structural time series:</strong> Estimates structural time-series models using Bayesian inference.</li>
+<li><strong>Dynamic linear models:</strong> Uses time-varying latent states in a linear state-space framework.</li>
+<li><strong>ARCH and GARCH:</strong> Models time-varying conditional volatility.</li>
+</ul>
+<h3 id="27-advanced-forecasting-and-forecast-evaluation">27. Advanced Forecasting and Forecast Evaluation<a class="heading-anchor" href="#27-advanced-forecasting-and-forecast-evaluation" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Hierarchical forecasting:</strong> Forecasts related series organized into aggregation hierarchies.</li>
+<li><strong>Grouped forecasting:</strong> Handles series aggregated across multiple intersecting dimensions.</li>
+<li><strong>Forecast reconciliation:</strong> Adjusts forecasts so they obey known aggregation constraints.</li>
+<li><strong>Minimum-trace reconciliation:</strong> Uses forecast error covariance information to improve coherent forecasts.</li>
+<li><strong>Intermittent demand forecasting:</strong> Handles series with many zero-demand periods.</li>
+<li><strong>Croston’s method:</strong> Separately smooths positive demand sizes and interarrival intervals.</li>
+<li><strong>Bias-corrected intermittent methods:</strong> Adjusts known biases in intermittent-demand forecasting.</li>
+<li><strong>Dynamic harmonic regression:</strong> Models complex seasonality with Fourier terms and time-series errors.</li>
+<li><strong>TBATS:</strong> Handles complex seasonal patterns using transformations, trigonometric seasonality, and state-space components.</li>
+<li><strong>Piecewise trend models:</strong> Allows trend slopes to change at estimated or specified changepoints.</li>
+<li><strong>Global forecasting models:</strong> Learns shared patterns across many related series.</li>
+<li><strong>Local forecasting models:</strong> Fits each series separately.</li>
+<li><strong>Machine-learning forecasting:</strong> Uses engineered temporal features with supervised learning models.</li>
+<li><strong>Recurrent neural forecasting:</strong> Models sequences through recurrent neural-network states.</li>
+<li><strong>Temporal convolutional forecasting:</strong> Uses convolutions over temporal sequences.</li>
+<li><strong>Transformer forecasting:</strong> Uses attention-based architectures to model temporal relationships.</li>
+<li><strong>Neural basis forecasting:</strong> Represents forecasts through learned basis expansions.</li>
+<li><strong>Probabilistic forecasting:</strong> Predicts outcome distributions or quantiles.</li>
+<li><strong>Forecast combinations:</strong> Combines multiple forecasting methods to improve accuracy or stability.</li>
+<li><strong>Direct multistep forecasting:</strong> Trains separate predictions for specified future horizons.</li>
+<li><strong>Recursive forecasting:</strong> Generates future steps using earlier predictions as subsequent inputs.</li>
+<li><strong>Multihorizon forecasting:</strong> Produces several future horizons jointly.</li>
+<li><strong>Scenario forecasting:</strong> Conditions forecasts on alternative assumptions about external drivers.</li>
+<li><strong>Cold-start forecasting:</strong> Forecasts new entities with limited or no individual history.</li>
+<li><strong>Censored demand estimation:</strong> Accounts for observed sales being limited by stockouts or capacity.</li>
+<li><strong>MASE and RMSSE:</strong> Scales forecast errors relative to a reference forecasting method.</li>
+<li><strong>Pinball loss:</strong> Evaluates quantile forecasts.</li>
+<li><strong>Continuous ranked probability score:</strong> Evaluates an entire univariate predictive distribution.</li>
+<li><strong>Prediction interval coverage and width:</strong> Assesses whether forecast intervals are reliable and useful.</li>
+<li><strong>Diebold–Mariano tests:</strong> Compares forecast losses while accounting for appropriate temporal dependence.</li>
+</ul>
+<h3 id="28-survival-analysis-duration-models-and-reliability">28. Survival Analysis, Duration Models, and Reliability<a class="heading-anchor" href="#28-survival-analysis-duration-models-and-reliability" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Time-to-event analysis:</strong> Models how long it takes for an event to occur.</li>
+<li><strong>Survival functions:</strong> Gives the probability that an event time exceeds a specified duration.</li>
+<li><strong>Hazard functions:</strong> Describes instantaneous event risk among units that have not yet experienced the event.</li>
+<li><strong>Right censoring:</strong> Observes that an event has not happened by the end of observation.</li>
+<li><strong>Left censoring:</strong> Knows an event occurred before a threshold without observing its exact time.</li>
+<li><strong>Interval censoring:</strong> Knows an event occurred within a time interval.</li>
+<li><strong>Left truncation:</strong> Includes units only if they survive or remain eligible until an entry time.</li>
+<li><strong>Kaplan–Meier estimation:</strong> Estimates survival curves from right-censored data.</li>
+<li><strong>Nelson–Aalen estimation:</strong> Estimates cumulative hazard.</li>
+<li><strong>Log-rank tests:</strong> Compares survival experiences across groups.</li>
+<li><strong>Cox proportional hazards models:</strong> Models relative hazards without specifying a baseline hazard shape.</li>
+<li><strong>Proportional-hazards diagnostics:</strong> Checks whether hazard ratios remain compatible with the model’s temporal assumptions.</li>
+<li><strong>Accelerated failure-time models:</strong> Models covariate effects as stretching or compressing event times.</li>
+<li><strong>Parametric survival models:</strong> Assumes a specific event-time distribution.</li>
+<li><strong>Time-varying covariates:</strong> Allows predictor values to change during follow-up.</li>
+<li><strong>Time-varying effects:</strong> Allows predictor relationships with event risk to change over time.</li>
+<li><strong>Frailty models:</strong> Adds latent random effects to capture unobserved risk heterogeneity.</li>
+<li><strong>Competing risks:</strong> Handles different events that prevent each other from occurring first.</li>
+<li><strong>Cause-specific hazard models:</strong> Models event-specific instantaneous risk among currently event-free units.</li>
+<li><strong>Cumulative incidence functions:</strong> Estimates the probability of a specific event in the presence of competing events.</li>
+<li><strong>Fine–Gray models:</strong> Models covariate relationships with the subdistribution hazard.</li>
+<li><strong>Recurrent-event models:</strong> Handles events that can happen repeatedly to the same unit.</li>
+<li><strong>Multistate models:</strong> Models transitions among multiple states.</li>
+<li><strong>Joint longitudinal–survival models:</strong> Combines repeated measurements with event-time outcomes.</li>
+<li><strong>Restricted mean survival time:</strong> Summarizes expected event-free time up to a specified horizon.</li>
+<li><strong>Reliability engineering:</strong> Studies component and system failure behavior.</li>
+<li><strong>Accelerated life testing:</strong> Infers operating-condition reliability from tests conducted under higher stress.</li>
+</ul>
+<h3 id="29-anomaly-detection-changepoints-and-statistical-process-control">29. Anomaly Detection, Changepoints, and Statistical Process Control<a class="heading-anchor" href="#29-anomaly-detection-changepoints-and-statistical-process-control" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Point anomalies:</strong> Identifies individual observations inconsistent with expected behavior.</li>
+<li><strong>Contextual anomalies:</strong> Identifies observations unusual for their particular circumstances.</li>
+<li><strong>Collective anomalies:</strong> Identifies unusual sequences or groups of observations.</li>
+<li><strong>Robust z-scores:</strong> Standardizes deviations using outlier-resistant location and scale estimates.</li>
+<li><strong>Mahalanobis distance:</strong> Measures multivariate deviation while accounting for covariance.</li>
+<li><strong>Local outlier factor:</strong> Detects points with unusually low density relative to their neighbors.</li>
+<li><strong>Isolation forests:</strong> Detects observations that are unusually easy to isolate through random partitioning.</li>
+<li><strong>One-class support vector machines:</strong> Learns a boundary around typical observations.</li>
+<li><strong>Reconstruction-based anomaly detection:</strong> Flags inputs that a learned representation reconstructs poorly.</li>
+<li><strong>Density-based anomaly detection:</strong> Flags observations assigned low density by a fitted model.</li>
+<li><strong>Extreme-value anomaly thresholds:</strong> Sets tail thresholds using extreme-value models.</li>
+<li><strong>Offline changepoint detection:</strong> Identifies historical changes after observing the full sequence.</li>
+<li><strong>Online changepoint detection:</strong> Detects changes as observations arrive.</li>
+<li><strong>CUSUM charts:</strong> Accumulates deviations to detect persistent process shifts.</li>
+<li><strong>EWMA charts:</strong> Uses exponentially weighted averages to detect process changes.</li>
+<li><strong>Shewhart charts:</strong> Monitors process statistics against calibrated control limits.</li>
+<li><strong>Multivariate control charts:</strong> Monitors several related process measurements jointly.</li>
+<li><strong>Process capability analysis:</strong> Compares a stable process distribution with specification limits.</li>
+<li><strong>Alert threshold calibration:</strong> Balances detection sensitivity against false alarms.</li>
+<li><strong>Detection delay analysis:</strong> Measures how quickly a monitoring system identifies a real change.</li>
+<li><strong>Root-cause localization:</strong> Identifies dimensions, components, or segments associated with detected deviations.</li>
+</ul>
+<h3 id="30-spatial-and-spatiotemporal-statistics">30. Spatial and Spatiotemporal Statistics<a class="heading-anchor" href="#30-spatial-and-spatiotemporal-statistics" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Spatial autocorrelation:</strong> Describes similarity or dependence associated with geographic proximity.</li>
+<li><strong>Moran’s I:</strong> Measures global spatial autocorrelation.</li>
+<li><strong>Geary’s C:</strong> Measures spatial autocorrelation using neighboring differences.</li>
+<li><strong>Local spatial association statistics:</strong> Identifies localized clusters and spatial outliers.</li>
+<li><strong>Variograms:</strong> Describes how variability changes with spatial separation.</li>
+<li><strong>Kriging:</strong> Predicts spatial quantities using a modeled covariance structure.</li>
+<li><strong>Gaussian random fields:</strong> Defines jointly Gaussian variables indexed over space.</li>
+<li><strong>Conditional autoregressive models:</strong> Models area-level spatial dependence through conditional relationships.</li>
+<li><strong>Simultaneous autoregressive models:</strong> Represents spatial dependence through systems of related observations.</li>
+<li><strong>Spatial lag models:</strong> Includes neighboring outcomes in a spatial dependence structure.</li>
+<li><strong>Spatial error models:</strong> Represents spatial dependence in unexplained variation.</li>
+<li><strong>Geographically weighted regression:</strong> Fits location-dependent regression relationships using local weighting.</li>
+<li><strong>Spatial point processes:</strong> Models the locations of events or objects.</li>
+<li><strong>Log-Gaussian Cox processes:</strong> Uses a latent Gaussian field to model spatially varying event intensity.</li>
+<li><strong>Spatial scan statistics:</strong> Searches for regions with unusual event rates.</li>
+<li><strong>Geostatistics:</strong> Studies prediction and uncertainty for spatially indexed measurements.</li>
+<li><strong>Small-area estimation:</strong> Combines local information and broader structure to estimate sparsely observed regions.</li>
+<li><strong>Spatiotemporal models:</strong> Models geographic and temporal dependence jointly.</li>
+<li><strong>Modifiable areal unit problem:</strong> Recognizes that findings can depend on geographic aggregation choices.</li>
+<li><strong>Spatial confounding:</strong> Occurs when spatially patterned omitted variables distort estimated relationships.</li>
+</ul>
+<h3 id="31-network-and-graph-analysis">31. Network and Graph Analysis<a class="heading-anchor" href="#31-network-and-graph-analysis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Graph representations:</strong> Describes entities as nodes and relationships as edges.</li>
+<li><strong>Degree distributions:</strong> Summarizes how many connections nodes have.</li>
+<li><strong>Centrality measures:</strong> Quantifies different forms of node importance.</li>
+<li><strong>PageRank:</strong> Measures importance through recursively weighted links.</li>
+<li><strong>Community detection:</strong> Finds groups with stronger internal connectivity.</li>
+<li><strong>Modularity:</strong> Measures a community partition relative to a specified network baseline.</li>
+<li><strong>Stochastic block models:</strong> Models connections through latent group memberships.</li>
+<li><strong>Degree-corrected block models:</strong> Adds flexibility for differing node connectivity within groups.</li>
+<li><strong>Latent-space network models:</strong> Models connections through unobserved positions or similarities.</li>
+<li><strong>Exponential random graph models:</strong> Represents network probabilities through structural statistics.</li>
+<li><strong>Link prediction:</strong> Predicts missing or future relationships.</li>
+<li><strong>Graph embeddings:</strong> Represents nodes or graphs as vectors.</li>
+<li><strong>Graph neural networks:</strong> Learns through aggregation along graph relationships.</li>
+<li><strong>Network diffusion models:</strong> Describes the spread of information, behavior, or disease.</li>
+<li><strong>Hawkes processes:</strong> Models event sequences in which previous events influence future event intensity.</li>
+<li><strong>Network interference models:</strong> Studies interventions when effects travel through relationships.</li>
+<li><strong>Graph sampling bias:</strong> Examines distortions caused by observing only part of a network.</li>
+</ul>
+<h3 id="32-recommendation-information-retrieval-and-ranking">32. Recommendation, Information Retrieval, and Ranking<a class="heading-anchor" href="#32-recommendation-information-retrieval-and-ranking" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Collaborative filtering:</strong> Recommends using patterns in users’ interactions with items.</li>
+<li><strong>Content-based recommendation:</strong> Recommends using item attributes and user preferences.</li>
+<li><strong>Matrix factorization:</strong> Represents user–item interactions using lower-dimensional latent factors.</li>
+<li><strong>Implicit-feedback models:</strong> Learns from behavior such as views or purchases rather than explicit ratings.</li>
+<li><strong>Factorization machines:</strong> Models interactions between sparse input features through shared latent representations.</li>
+<li><strong>Two-tower retrieval models:</strong> Learns separate query and candidate representations for efficient matching.</li>
+<li><strong>Nearest-neighbor retrieval:</strong> Retrieves candidates close to a query in a representation space.</li>
+<li><strong>Approximate nearest-neighbor search:</strong> Trades some retrieval exactness for speed and scalability.</li>
+<li><strong>Learning-to-rank objectives:</strong> Optimizes item ordering using pointwise, pairwise, or listwise losses.</li>
+<li><strong>Pairwise ranking:</strong> Learns which of two items should rank higher.</li>
+<li><strong>Listwise ranking:</strong> Optimizes properties of an entire ranked list.</li>
+<li><strong>NDCG:</strong> Evaluates ranking quality with graded relevance and position-dependent discounting.</li>
+<li><strong>Mean reciprocal rank:</strong> Measures how early the first relevant result appears.</li>
+<li><strong>Mean average precision:</strong> Summarizes precision at relevant positions across queries.</li>
+<li><strong>Position bias:</strong> Occurs when item placement affects observed engagement independently of relevance.</li>
+<li><strong>Counterfactual ranking evaluation:</strong> Adjusts logged interactions for exposure or assignment mechanisms.</li>
+<li><strong>Diversity-aware recommendation:</strong> Balances relevance with variety.</li>
+<li><strong>Novelty and serendipity:</strong> Evaluates whether recommendations introduce useful, less obvious items.</li>
+<li><strong>Cold-start recommendation:</strong> Handles users or items with limited interaction history.</li>
+<li><strong>Feedback-loop analysis:</strong> Studies how recommendations reshape the data used to train future recommendations.</li>
+</ul>
+<h3 id="33-deep-learning-language-and-generative-modeling">33. Deep Learning, Language, and Generative Modeling<a class="heading-anchor" href="#33-deep-learning-language-and-generative-modeling" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Backpropagation:</strong> Computes gradients through compositions of differentiable operations.</li>
+<li><strong>Convolutional neural networks:</strong> Learns local patterns using shared convolutional filters.</li>
+<li><strong>Recurrent neural networks:</strong> Maintains state while processing sequences.</li>
+<li><strong>LSTMs and gated recurrent units:</strong> Uses gating mechanisms to learn temporal dependencies.</li>
+<li><strong>Attention mechanisms:</strong> Weighs information according to relevance to a representation or prediction.</li>
+<li><strong>Transformers:</strong> Uses attention-based layers to model relationships within sequences or structured inputs.</li>
+<li><strong>Residual connections:</strong> Adds shortcut paths that facilitate optimization of deep networks.</li>
+<li><strong>Normalization methods:</strong> Stabilizes or reshapes activation and optimization behavior.</li>
+<li><strong>Dropout:</strong> Randomly removes components during training as a regularization technique.</li>
+<li><strong>Self-supervised learning:</strong> Creates learning objectives from the data itself.</li>
+<li><strong>Masked modeling:</strong> Learns by predicting deliberately hidden portions of inputs.</li>
+<li><strong>Autoregressive modeling:</strong> Predicts each element conditional on preceding elements.</li>
+<li><strong>Sequence-to-sequence modeling:</strong> Maps an input sequence to an output sequence.</li>
+<li><strong>Language modeling:</strong> Estimates probability distributions over text sequences.</li>
+<li><strong>Topic modeling:</strong> Discovers latent themes in collections of documents.</li>
+<li><strong>Latent Dirichlet allocation:</strong> Models documents as mixtures of latent word-distribution topics.</li>
+<li><strong>Variational autoencoders:</strong> Learns latent-variable generative models through variational inference.</li>
+<li><strong>Generative adversarial networks:</strong> Trains generators against discriminators.</li>
+<li><strong>Normalizing flows:</strong> Constructs flexible densities using invertible transformations.</li>
+<li><strong>Diffusion models:</strong> Learns generation by reversing a progressive noise-corruption process.</li>
+<li><strong>Energy-based models:</strong> Assigns relative compatibility scores rather than directly normalized probabilities.</li>
+<li><strong>Multimodal models:</strong> Learns from combinations such as text, images, audio, and structured data.</li>
+<li><strong>Fine-tuning:</strong> Adapts pretrained model parameters to a task or domain.</li>
+<li><strong>Parameter-efficient adaptation:</strong> Updates a limited subset or low-dimensional parameterization.</li>
+<li><strong>Knowledge distillation:</strong> Trains a smaller or different model using a teacher model’s behavior.</li>
+<li><strong>Retrieval-augmented generation:</strong> Supplies retrieved information as context for generation.</li>
+<li><strong>Preference optimization:</strong> Adjusts model behavior using comparisons or preferences over outputs.</li>
+</ul>
+<h3 id="34-generative-ai-and-language-model-evaluation">34. Generative AI and Language-Model Evaluation<a class="heading-anchor" href="#34-generative-ai-and-language-model-evaluation" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Task-specific evaluation:</strong> Measures whether generated outputs accomplish the intended task.</li>
+<li><strong>Reference-based evaluation:</strong> Compares outputs with one or more accepted answers.</li>
+<li><strong>Reference-free evaluation:</strong> Assesses quality without requiring a fixed target answer.</li>
+<li><strong>Human evaluation design:</strong> Defines sampling, rubrics, raters, and analysis for human judgments.</li>
+<li><strong>Pairwise preference testing:</strong> Compares alternative outputs through direct preference judgments.</li>
+<li><strong>Bradley–Terry models:</strong> Estimates relative strengths from pairwise comparison outcomes.</li>
+<li><strong>Interrater agreement analysis:</strong> Quantifies consistency among evaluators.</li>
+<li><strong>Judge-model validation:</strong> Checks whether automated evaluators agree with relevant human standards.</li>
+<li><strong>Position and verbosity bias:</strong> Detects evaluation preferences driven by presentation rather than actual quality.</li>
+<li><strong>Factuality evaluation:</strong> Measures whether generated claims are accurate.</li>
+<li><strong>Groundedness evaluation:</strong> Measures whether claims are supported by supplied evidence.</li>
+<li><strong>Retrieval evaluation:</strong> Measures whether the system retrieves useful and relevant information.</li>
+<li><strong>Citation quality evaluation:</strong> Checks whether cited material supports the associated claims.</li>
+<li><strong>Benchmark contamination analysis:</strong> Detects overlap between evaluation material and training or development data.</li>
+<li><strong>Prompt sensitivity analysis:</strong> Measures output variation across reasonable prompt formulations.</li>
+<li><strong>Robustness and adversarial evaluation:</strong> Tests failure under difficult, misleading, or manipulated inputs.</li>
+<li><strong>Agent trajectory evaluation:</strong> Assesses intermediate actions, tool choices, and final task completion.</li>
+<li><strong>Repeated-trial reliability:</strong> Estimates how consistently a system succeeds across repeated runs.</li>
+<li><strong>Cost–latency–quality analysis:</strong> Evaluates tradeoffs between output quality and operational resources.</li>
+<li><strong>End-to-end system evaluation:</strong> Measures the complete workflow rather than isolated model components.</li>
+</ul>
+<h3 id="35-bandits-reinforcement-learning-and-adaptive-decisions">35. Bandits, Reinforcement Learning, and Adaptive Decisions<a class="heading-anchor" href="#35-bandits-reinforcement-learning-and-adaptive-decisions" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Multi-armed bandits:</strong> Allocates repeated choices while learning their rewards.</li>
+<li><strong>Exploration–exploitation tradeoffs:</strong> Balances learning about alternatives against using currently promising options.</li>
+<li><strong>Epsilon-greedy policies:</strong> Randomizes some choices while otherwise choosing the estimated best action.</li>
+<li><strong>Upper confidence bound methods:</strong> Selects actions using estimates plus uncertainty bonuses.</li>
+<li><strong>Thompson sampling:</strong> Samples plausible reward models and acts optimally under the sampled model.</li>
+<li><strong>Contextual bandits:</strong> Chooses actions using current user or situation information.</li>
+<li><strong>Combinatorial bandits:</strong> Chooses sets or combinations of actions.</li>
+<li><strong>Nonstationary bandits:</strong> Adapts when action rewards change over time.</li>
+<li><strong>Regret analysis:</strong> Measures cumulative loss relative to an appropriate benchmark policy.</li>
+<li><strong>Markov decision processes:</strong> Models sequential decisions through states, actions, transitions, and rewards.</li>
+<li><strong>Partially observable decision processes:</strong> Handles decision-making when the underlying state is incompletely observed.</li>
+<li><strong>Bellman equations:</strong> Expresses relationships between present value and expected future value.</li>
+<li><strong>Dynamic programming:</strong> Solves sequential problems through recursive subproblems.</li>
+<li><strong>Q-learning:</strong> Learns action values from temporal-difference updates.</li>
+<li><strong>Policy gradients:</strong> Optimizes parameterized policies using reward-based gradients.</li>
+<li><strong>Actor–critic methods:</strong> Combines policy learning with value estimation.</li>
+<li><strong>Model-based reinforcement learning:</strong> Uses learned or specified environment dynamics.</li>
+<li><strong>Offline reinforcement learning:</strong> Learns policies from previously collected interaction data.</li>
+<li><strong>Importance-sampling policy evaluation:</strong> Reweights logged trajectories to evaluate another policy.</li>
+<li><strong>Doubly robust policy evaluation:</strong> Combines outcome modeling with assignment-probability adjustment.</li>
+<li><strong>Constrained reinforcement learning:</strong> Optimizes reward while respecting specified constraints.</li>
+<li><strong>Reward design:</strong> Defines incentives that represent the actual operational objective.</li>
+<li><strong>Reward hacking:</strong> Occurs when an agent exploits a reward definition without achieving the intended goal.</li>
+</ul>
+<h3 id="36-optimization-and-operations-research">36. Optimization and Operations Research<a class="heading-anchor" href="#36-optimization-and-operations-research" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Linear programming:</strong> Optimizes a linear objective under linear constraints.</li>
+<li><strong>Integer programming:</strong> Requires some or all decisions to take integer values.</li>
+<li><strong>Mixed-integer programming:</strong> Combines continuous and integer decision variables.</li>
+<li><strong>Quadratic programming:</strong> Optimizes a quadratic objective under specified constraints.</li>
+<li><strong>Convex optimization:</strong> Optimizes convex objectives over convex feasible sets.</li>
+<li><strong>Nonconvex optimization:</strong> Handles objectives or constraints with potentially many local optima.</li>
+<li><strong>Lagrange multipliers:</strong> Incorporates constraints into optimization conditions.</li>
+<li><strong>Karush–Kuhn–Tucker conditions:</strong> Characterizes candidate constrained optima under suitable assumptions.</li>
+<li><strong>Duality:</strong> Relates optimization problems to companion problems that provide bounds or alternative solutions.</li>
+<li><strong>Gradient descent:</strong> Updates parameters in the direction of decreasing objective value.</li>
+<li><strong>Stochastic gradient descent:</strong> Estimates update directions from subsets or random observations.</li>
+<li><strong>Newton and quasi-Newton methods:</strong> Uses curvature information or approximations to guide optimization.</li>
+<li><strong>Coordinate descent:</strong> Optimizes subsets of variables in turn.</li>
+<li><strong>Proximal optimization:</strong> Handles objectives containing difficult or nonsmooth penalty terms.</li>
+<li><strong>Constrained optimization:</strong> Finds solutions satisfying practical or mathematical restrictions.</li>
+<li><strong>Multiobjective optimization:</strong> Balances several potentially competing objectives.</li>
+<li><strong>Pareto frontiers:</strong> Identifies solutions where improving one objective requires worsening another.</li>
+<li><strong>Stochastic programming:</strong> Optimizes decisions while explicitly representing uncertain future outcomes.</li>
+<li><strong>Robust optimization:</strong> Optimizes against uncertainty sets rather than a single assumed scenario.</li>
+<li><strong>Distributionally robust optimization:</strong> Protects performance against a class of probability distributions.</li>
+<li><strong>Chance-constrained optimization:</strong> Requires constraints to hold with a specified probability.</li>
+<li><strong>Bayesian optimization:</strong> Uses a probabilistic surrogate to optimize expensive functions.</li>
+<li><strong>Optimal transport:</strong> Studies efficient transformations between distributions.</li>
+<li><strong>Assignment and matching optimization:</strong> Allocates entities to opportunities under objectives and constraints.</li>
+<li><strong>Scheduling and routing:</strong> Optimizes the timing and movement of resources.</li>
+<li><strong>Queueing theory:</strong> Studies waiting, congestion, service capacity, and system utilization.</li>
+<li><strong>Inventory optimization:</strong> Balances availability, holding cost, replenishment, and shortage risk.</li>
+</ul>
+<h3 id="37-simulation-and-computational-statistics">37. Simulation and Computational Statistics<a class="heading-anchor" href="#37-simulation-and-computational-statistics" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Monte Carlo simulation:</strong> Uses repeated random draws to approximate quantities.</li>
+<li><strong>Monte Carlo error analysis:</strong> Quantifies uncertainty caused by a finite simulation budget.</li>
+<li><strong>Importance sampling:</strong> Samples from an alternative distribution and reweights to estimate target quantities.</li>
+<li><strong>Rejection sampling:</strong> Generates target draws by accepting or rejecting proposal samples.</li>
+<li><strong>Sequential Monte Carlo:</strong> Updates weighted samples as information arrives.</li>
+<li><strong>Particle filtering:</strong> Estimates dynamic latent states using sequential weighted particles.</li>
+<li><strong>Quasi-Monte Carlo:</strong> Uses structured low-discrepancy sequences to improve some numerical integrations.</li>
+<li><strong>Control variates:</strong> Reduces simulation variance using quantities with known expectations.</li>
+<li><strong>Antithetic variates:</strong> Uses negatively related simulation draws to reduce variance.</li>
+<li><strong>Stratified Monte Carlo:</strong> Allocates simulation draws across defined regions.</li>
+<li><strong>Rare-event simulation:</strong> Estimates probabilities too small for straightforward simulation to handle efficiently.</li>
+<li><strong>Discrete-event simulation:</strong> Models systems through events that change system state.</li>
+<li><strong>Agent-based simulation:</strong> Models interacting entities with individual behavioral rules.</li>
+<li><strong>System dynamics:</strong> Models aggregate feedback loops, stocks, and flows.</li>
+<li><strong>Digital twins:</strong> Uses a computational representation of a real system to support analysis and decisions.</li>
+<li><strong>Simulation metamodels:</strong> Approximates expensive simulations with simpler predictive models.</li>
+<li><strong>Global sensitivity analysis:</strong> Measures how uncertain inputs contribute to output variation.</li>
+<li><strong>Sobol indices:</strong> Decomposes output variance into input and interaction contributions.</li>
+<li><strong>Value of information analysis:</strong> Estimates how much better decisions could become with additional information.</li>
+<li><strong>Simulation optimization:</strong> Uses simulation outputs to search for improved decisions.</li>
+</ul>
+<h3 id="38-product-customer-marketing-and-business-analytics">38. Product, Customer, Marketing, and Business Analytics<a class="heading-anchor" href="#38-product-customer-marketing-and-business-analytics" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Metric trees:</strong> Connects overall outcomes to their component drivers.</li>
+<li><strong>KPI design:</strong> Defines measurable indicators aligned with actual goals.</li>
+<li><strong>North-star metrics:</strong> Selects a central measure intended to represent sustained product value.</li>
+<li><strong>Funnel analysis:</strong> Studies progression and drop-off through sequential steps.</li>
+<li><strong>Cohort analysis:</strong> Compares entities grouped by a shared starting event or characteristic.</li>
+<li><strong>Retention analysis:</strong> Measures continued activity or relationship persistence over time.</li>
+<li><strong>Churn modeling:</strong> Predicts or explains customer departure.</li>
+<li><strong>Customer lifetime value:</strong> Estimates expected future customer contribution over a defined horizon.</li>
+<li><strong>RFM analysis:</strong> Segments customers using recency, frequency, and monetary value.</li>
+<li><strong>Customer segmentation:</strong> Groups customers to support differentiated decisions or strategies.</li>
+<li><strong>BG/NBD models:</strong> Models repeat transactions and latent customer inactivity under specific behavioral assumptions.</li>
+<li><strong>Pareto/NBD models:</strong> Models purchasing and dropout processes in noncontractual customer settings.</li>
+<li><strong>Purchase timing models:</strong> Estimates when customers will transact again.</li>
+<li><strong>Demand estimation:</strong> Models how purchases respond to prices and other drivers.</li>
+<li><strong>Price elasticity:</strong> Measures proportional demand changes associated with proportional price changes.</li>
+<li><strong>Cross-price elasticity:</strong> Measures how one product’s price relates to another product’s demand.</li>
+<li><strong>Discrete-choice models:</strong> Models selection among available alternatives.</li>
+<li><strong>Nested and mixed logit models:</strong> Adds structured substitution or preference heterogeneity to choice models.</li>
+<li><strong>Conjoint analysis:</strong> Estimates preferences from choices or evaluations of product attribute combinations.</li>
+<li><strong>Marketing mix modeling:</strong> Relates aggregate outcomes to marketing activity and other drivers.</li>
+<li><strong>Adstock models:</strong> Represents advertising effects that persist over time.</li>
+<li><strong>Saturation curves:</strong> Represents diminishing incremental response as exposure or spend increases.</li>
+<li><strong>Attribution modeling:</strong> Allocates observed conversions across touchpoints; allocation alone does not establish causal incrementality.</li>
+<li><strong>Incrementality measurement:</strong> Estimates outcomes caused by an intervention beyond what would have occurred otherwise.</li>
+<li><strong>Cannibalization analysis:</strong> Measures whether gains in one offering displace another.</li>
+<li><strong>Unit economics:</strong> Estimates contribution and costs at a meaningful operational unit.</li>
+<li><strong>Decomposition analysis:</strong> Separates aggregate changes into components such as volume, mix, rate, and price.</li>
+<li><strong>Oaxaca–Blinder decomposition:</strong> Decomposes group mean differences using modeled characteristics and coefficients.</li>
+<li><strong>Index-number methods:</strong> Separates changes in aggregate value into price and quantity components.</li>
+<li><strong>Seasonal adjustment:</strong> Removes estimated seasonal patterns to improve comparisons.</li>
+</ul>
+<h3 id="39-research-synthesis-and-specialized-statistical-methodologies">39. Research Synthesis and Specialized Statistical Methodologies<a class="heading-anchor" href="#39-research-synthesis-and-specialized-statistical-methodologies" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Systematic reviews:</strong> Uses explicit procedures to find, assess, and synthesize relevant research.</li>
+<li><strong>Meta-analysis:</strong> Combines estimates from multiple studies.</li>
+<li><strong>Fixed-effect meta-analysis:</strong> Estimates a common effect under a shared-effect model.</li>
+<li><strong>Random-effects meta-analysis:</strong> Models variation in underlying effects across studies.</li>
+<li><strong>Meta-regression:</strong> Explains between-study effect variation using study characteristics.</li>
+<li><strong>Network meta-analysis:</strong> Compares multiple interventions using direct and indirect evidence.</li>
+<li><strong>Publication bias assessment:</strong> Investigates whether available studies differ systematically from unreported studies.</li>
+<li><strong>Evidence grading:</strong> Evaluates confidence in a body of evidence.</li>
+<li><strong>Reproducibility:</strong> Asks whether the same data and procedures reproduce the same results.</li>
+<li><strong>Replicability:</strong> Asks whether new data support comparable findings.</li>
+<li><strong>Structural equation modeling:</strong> Represents systems of relationships, often including latent variables.</li>
+<li><strong>Path analysis:</strong> Models a specified system of relationships among observed variables.</li>
+<li><strong>Item response theory:</strong> Models responses as functions of latent traits and item characteristics.</li>
+<li><strong>Rasch models:</strong> Uses a constrained item-response framework for measurement.</li>
+<li><strong>Generalizability theory:</strong> Decomposes measurement error across multiple sources.</li>
+<li><strong>Psychometrics:</strong> Studies the measurement of latent attributes such as ability, attitudes, and preferences.</li>
+<li><strong>Compositional data analysis:</strong> Analyzes quantities constrained by a shared total using appropriate relative representations.</li>
+<li><strong>Log-ratio transformations:</strong> Represents compositions through ratios rather than unconstrained raw components.</li>
+<li><strong>Functional data analysis:</strong> Treats curves or functions as the observational objects.</li>
+<li><strong>Circular statistics:</strong> Analyzes angles, directions, and periodic positions.</li>
+<li><strong>Directional statistics:</strong> Extends statistical analysis to directions on circles or spheres.</li>
+<li><strong>Symbolic and interval-valued data analysis:</strong> Models observations represented by ranges or structured summaries.</li>
+<li><strong>High-dimensional inference:</strong> Performs estimation or testing when the number of variables is large relative to observations.</li>
+<li><strong>Sparse precision-matrix estimation:</strong> Estimates conditional dependency structures through inverse covariance matrices.</li>
+<li><strong>Graphical lasso:</strong> Uses penalization to estimate sparse Gaussian graphical models.</li>
+<li><strong>Tensor decomposition:</strong> Factorizes multidimensional arrays into lower-dimensional structures.</li>
+<li><strong>Topological data analysis:</strong> Studies data shape using connectivity and higher-order structure.</li>
+<li><strong>Persistent homology:</strong> Measures which topological features persist across scales.</li>
+<li><strong>Statistical disclosure control:</strong> Reduces the risk of exposing individuals through released statistics.</li>
+<li><strong>Differential privacy:</strong> Bounds how much a released result can reveal about any one participating individual.</li>
+</ul>
+<h3 id="40-production-methodology-governance-and-senior-scientific-judgment">40. Production Methodology, Governance, and Senior Scientific Judgment<a class="heading-anchor" href="#40-production-methodology-governance-and-senior-scientific-judgment" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Point-in-time correctness:</strong> Ensures features contain only information available when a prediction would have been made.</li>
+<li><strong>Training–serving consistency:</strong> Keeps production feature computation aligned with model development.</li>
+<li><strong>Data contracts:</strong> Defines expectations about schemas, meanings, quality, and update behavior.</li>
+<li><strong>Dataset versioning:</strong> Preserves the exact data used to produce a result.</li>
+<li><strong>Model versioning:</strong> Records model artifacts and their relationships to code, data, and settings.</li>
+<li><strong>Reproducible pipelines:</strong> Makes analyses rerunnable with controlled inputs and transformations.</li>
+<li><strong>Data drift monitoring:</strong> Detects changes in incoming data distributions.</li>
+<li><strong>Performance monitoring:</strong> Tracks whether deployed predictions remain useful.</li>
+<li><strong>Calibration monitoring:</strong> Checks whether predicted probabilities retain their interpretation.</li>
+<li><strong>Label-delay handling:</strong> Accounts for outcomes becoming available only after operational decisions.</li>
+<li><strong>Retraining policies:</strong> Defines when models should be updated and what evidence justifies updates.</li>
+<li><strong>Shadow deployment:</strong> Runs a model alongside production without using its outputs for live decisions.</li>
+<li><strong>Canary deployment:</strong> Introduces a model to a limited operational scope before broader release.</li>
+<li><strong>Champion–challenger evaluation:</strong> Compares an incumbent system with candidate replacements.</li>
+<li><strong>Rollback criteria:</strong> Defines conditions requiring a deployment to be reversed.</li>
+<li><strong>Human-in-the-loop systems:</strong> Integrates people into prediction, review, escalation, or decision processes.</li>
+<li><strong>Feedback-loop management:</strong> Accounts for deployed decisions changing future observations and labels.</li>
+<li><strong>Model risk management:</strong> Evaluates the consequences and controls associated with model failures.</li>
+<li><strong>Model documentation:</strong> Records purpose, assumptions, development data, evaluation, limitations, and intended use.</li>
+<li><strong>Independent validation:</strong> Uses separate review to challenge model design and supporting evidence.</li>
+<li><strong>Auditability:</strong> Preserves enough evidence to reconstruct how results and decisions were produced.</li>
+<li><strong>Decision thresholds and escalation rules:</strong> Translates model outputs into accountable operational actions.</li>
+<li><strong>Cost of false confidence:</strong> Assesses the consequences of acting as though uncertain evidence were definitive.</li>
+<li><strong>Scope control:</strong> Recognizes when available data cannot support the proposed claim.</li>
+<li><strong>Method selection:</strong> Chooses the simplest adequate approach given the estimand, data, assumptions, and stakes.</li>
+<li><strong>Scientific communication:</strong> Explains findings, uncertainty, assumptions, and implications clearly to different audiences.</li>
+<li><strong>Technical review:</strong> Challenges identification, leakage, validation, implementation, and interpretation.</li>
+<li><strong>Research prioritization:</strong> Allocates effort according to decision value and reducible uncertainty.</li>
+<li><strong>Experiment prioritization:</strong> Selects studies based on expected information, impact, cost, and feasibility.</li>
+<li><strong>Decision ownership:</strong> Makes clear who acts on evidence and who is accountable for consequences.</li>
+</ul>
+<h3 id="primary-references">Primary References<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://www.itl.nist.gov/div898/handbook/dtoc.htm">NIST/SEMATECH e-Handbook of Statistical Methods</a>: Exploratory analysis, estimation, experimental design, process control, and reliability.</li>
+<li><a href="https://www.statlearning.com/">An Introduction to Statistical Learning</a>: Regression, classification, resampling, regularization, trees, deep learning, survival analysis, and unsupervised learning.</li>
+<li><a href="https://miguelhernan.org/whatifbook">Causal Inference: What If</a>: Causal reasoning, adjustment, causal models, and longitudinal causal inference.</li>
+<li><a href="https://otexts.com/fpp3/">Forecasting: Principles and Practice</a>: Time-series exploration, decomposition, exponential smoothing, ARIMA, dynamic regression, and hierarchical forecasting.</li>
+<li><a href="https://mc-stan.org/docs/reference-manual/analysis.html">Stan: Posterior Analysis</a>: Bayesian computation, effective sample size, and posterior diagnostics.</li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan: Posterior and Prior Predictive Checks</a>: Simulation-based assessment of Bayesian model assumptions and fit.</li>
+<li><a href="https://arxiv.org/abs/2107.07511">A Gentle Introduction to Conformal Prediction and Distribution-Free Uncertainty Quantification</a>: Prediction sets, coverage guarantees, and uncertainty quantification.</li>
+<li><a href="https://arxiv.org/abs/1608.00060">Double/Debiased Machine Learning for Treatment and Causal Parameters</a>: Orthogonal estimation, cross-fitting, and causal parameter estimation with machine learning.</li>
+</ul></article>
+  </main>
+</body>
+</html>

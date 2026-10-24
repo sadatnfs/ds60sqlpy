@@ -1,0 +1,12 @@
+ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+FROM ${DS60_PYTHON_IMAGE}
+ARG TARGETARCH
+ENV TARGETARCH=${TARGETARCH}
+COPY docker/kubernetes/download_kubectl.py /tmp/download_kubectl.py
+RUN python /tmp/download_kubectl.py && rm /tmp/download_kubectl.py \
+    && python -m pip install --no-cache-dir PyYAML==6.0.3 \
+    && install -d -m 0700 /run/ds60
+WORKDIR /opt/worker
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/kubernetes_module.py /opt/worker/src/ds60sqlpy/
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=k8s-kind
+ENTRYPOINT ["python", "-m", "ds60sqlpy.kubernetes_module", "--host", "0.0.0.0", "--port", "8081"]

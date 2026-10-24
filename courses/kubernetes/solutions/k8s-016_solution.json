@@ -1,0 +1,121 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "Pod",
+      "metadata": {
+        "name": "init-demo",
+        "labels": {
+          "app": "init-demo"
+        }
+      },
+      "spec": {
+        "automountServiceAccountToken": false,
+        "securityContext": {
+          "runAsNonRoot": true,
+          "runAsUser": 65532,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          },
+          "fsGroup": 65532
+        },
+        "containers": [
+          {
+            "image": "ds60sqlpy-k8s-fixture:0.2.0",
+            "imagePullPolicy": "Never",
+            "resources": {
+              "requests": {
+                "cpu": "10m",
+                "memory": "16Mi"
+              },
+              "limits": {
+                "cpu": "100m",
+                "memory": "64Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "name": "read",
+            "command": [
+              "python",
+              "-c",
+              "from pathlib import Path; p=Path('/work/attempt'); print(Path('/work/marker').read_text(),flush=True); first=not p.exists(); p.write_text('seen'); raise SystemExit(2 if first else 0)"
+            ],
+            "volumeMounts": [
+              {
+                "name": "work",
+                "mountPath": "/work"
+              }
+            ]
+          }
+        ],
+        "restartPolicy": "OnFailure",
+        "activeDeadlineSeconds": 60,
+        "volumes": [
+          {
+            "name": "work",
+            "emptyDir": {
+              "sizeLimit": "1Mi"
+            }
+          }
+        ],
+        "initContainers": [
+          {
+            "image": "ds60sqlpy-k8s-fixture:0.2.0",
+            "imagePullPolicy": "Never",
+            "resources": {
+              "requests": {
+                "cpu": "10m",
+                "memory": "16Mi"
+              },
+              "limits": {
+                "cpu": "100m",
+                "memory": "64Mi"
+              }
+            },
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "readOnlyRootFilesystem": true,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              }
+            },
+            "name": "prepare",
+            "command": [
+              "python",
+              "-c",
+              "from pathlib import Path; import os; Path('/work/marker').write_text(os.environ['POD_UID'])"
+            ],
+            "env": [
+              {
+                "name": "POD_UID",
+                "valueFrom": {
+                  "fieldRef": {
+                    "fieldPath": "metadata.uid"
+                  }
+                }
+              }
+            ],
+            "volumeMounts": [
+              {
+                "name": "work",
+                "mountPath": "/work"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

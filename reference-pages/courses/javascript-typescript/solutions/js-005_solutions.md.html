@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-005: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-005: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-005_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-005-explanatory-solutions">js-005: explanatory solutions<a class="heading-anchor" href="#js-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Array operations differ in whether they mutate the container, return a new container or reuse referenced objects. map transforms values, filter selects them, and reduce combines them under an explicit accumulator contract. A new array does not necessarily contain new objects: shallow copies preserve nested references. sort mutates its array and uses string ordering by default, which can misorder numbers. toSorted returns a sorted copy in the prepared Node 24 runtime.</p>
+<p>An immutable transformation means preserving the prior value needed by the application, not merely using const. const prevents rebinding the variable but does not freeze its array. Choose mutation or copying based on ownership and history requirements. Test both returned results and the original input when preservation is part of the contract.</p>
+<p><strong>Transformation:</strong> A rule producing new values from existing elements.</p>
+<p><strong>Reduction:</strong> Combining elements into one accumulator result.</p>
+<p><strong>Shallow copy:</strong> A new container retaining references to nested objects.</p>
+<p><strong>Mutation:</strong> Changing the state of an existing object.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>map receives value, index and array; avoid passing a callback that unintentionally interprets the extra arguments. filter keeps elements whose predicate is truthy. reduce needs an identity for an empty input unless absence is handled separately. Use (a, b)=&gt;a-b for numeric ordering. Spread or slice copies the outer array only; copy nested records deliberately when they will be edited.</p>
+<h3 id="exercise-1-map-and-filter-without-changing-input">Exercise 1: Map and filter without changing input<a class="heading-anchor" href="#exercise-1-map-and-filter-without-changing-input" aria-label="Link to this section">#</a></h3>
+<p>Task: Double 1, 2, 3, 4 and keep results above 4.</p>
+<p>The pipeline returns new arrays while retaining the original numeric fixture. Object-valued elements would need an additional ownership analysis.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=&gt;</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>value <span class="syntax-punctuation">=&gt;</span> value <span class="syntax-operator">&gt;</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> 6, 8; original array unchanged.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-2-supply-a-reduction-identity">Exercise 2: Supply a reduction identity<a class="heading-anchor" href="#exercise-2-supply-a-reduction-identity" aria-label="Link to this section">#</a></h3>
+<p>Task: Sum an empty array and 1, 2, 3 using initial 0.</p>
+<p>The identity defines the empty case. Omitting it would make an empty array throw and change the callback&#x27;s initial state.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>reduce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> sum <span class="syntax-operator">+</span> value<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>reduce<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>sum<span class="syntax-punctuation">,</span> value<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> sum <span class="syntax-operator">+</span> value<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> 0 and 6.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-3-expose-default-sort-coercion">Exercise 3: Expose default sort coercion<a class="heading-anchor" href="#exercise-3-expose-default-sort-coercion" aria-label="Link to this section">#</a></h3>
+<p>Task: Sort 10, 2, 1 with default and numeric comparators.</p>
+<p>Default sort compares string representations. A valid array of numbers does not automatically select numeric order.</p>
+<pre class="highlighted-code"><code class="language-javascript">assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>sort<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> default 1, 10, 2; numeric 1, 2, 10.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-4-preserve-an-array-while-sorting">Exercise 4: Preserve an array while sorting<a class="heading-anchor" href="#exercise-4-preserve-an-array-while-sorting" aria-label="Link to this section">#</a></h3>
+<p>Task: Use toSorted on 3, 1, 2 and inspect both arrays.</p>
+<p>The prepared Node 24 runtime supplies toSorted. The contract is copying rather than mutating; this distinction matters when another component retains the old array.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> sorted <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>toSorted<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>sorted<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> sorted 1, 2, 3; original 3, 1, 2.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-5-expose-a-shallow-copy-alias">Exercise 5: Expose a shallow copy alias<a class="heading-anchor" href="#exercise-5-expose-a-shallow-copy-alias" aria-label="Link to this section">#</a></h3>
+<p>Task: Spread an array containing one object and mutate that object through the copy.</p>
+<p>The containers differ but their first elements share identity. A shallow copy cannot preserve historical nested state by itself.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> copy <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">...</span>original<span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>value <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>notEqual<span class="syntax-punctuation">(</span>copy<span class="syntax-punctuation">,</span> original<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> original nested value also changes.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-6-copy-records-for-a-specific-edit">Exercise 6: Copy records for a specific edit<a class="heading-anchor" href="#exercise-6-copy-records-for-a-specific-edit" aria-label="Link to this section">#</a></h3>
+<p>Task: Map records to new objects before changing one field.</p>
+<p>This copy is sufficient for the fixture&#x27;s flat record. Deeper mutable fields would need their own policy rather than a claim that spread is a universal deep clone.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span> value<span class="syntax-operator">:</span> <span class="syntax-number">1</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> copy <span class="syntax-operator">=</span> original<span class="syntax-punctuation">.</span>map<span class="syntax-punctuation">(</span>row <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> <span class="syntax-punctuation">...</span>row <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>value <span class="syntax-operator">=</span> <span class="syntax-number">9</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>copy<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> edited record changes; original record stays 1.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+  </main>
+</body>
+</html>

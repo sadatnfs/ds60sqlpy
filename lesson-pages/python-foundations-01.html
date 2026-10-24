@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-foundations-01 · Read a Program, Trace Its State, and Predict Its Output · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .tutor-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-foundations-01" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-foundations-01</p>
+        <h1>Read a Program, Trace Its State, and Predict Its Output</h1>
+        <p class="hero-copy">Python foundations and confidence</p>
+        <div class="meta">
+          <span class="tag">foundation</span>
+          <span class="tag">120 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-01.html">python-01</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p id="run-guidance">Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_foundations_01_read_trace_state.py</code>.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_foundations_01_read_trace_state.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+
+          <a class="button lab-only" href="../learn?lesson=python-foundations-01" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_foundations_01_read_trace_state.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_foundations_01_read_trace_state.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--read-a-program-trace-its-state-and-predict-its-output">Read a Program, Trace Its State, and Predict Its Output<a class="heading-anchor" href="#guide--read-a-program-trace-its-state-and-predict-its-output" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-foundations-01</code></p>
+<p><strong>Estimated time:</strong> 120 minutes, split across sessions as needed.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Foundation. Direct catalog prerequisites: <code>python-01</code>.</p>
+<p>You only need to open a Python file, run the course interpreter, and find its terminal output. This module introduces names, assignment, strings, numbers, and prediction before Day 2 adds more types. You do not need loops, functions, or a notebook.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<ul>
+<li>Distinguish source text, a running program, and terminal output.</li>
+<li>Trace the value attached to each name after every executed line.</li>
+<li>Separate a number from text that displays the same digits.</li>
+<li>Use tiny predictions and fresh runs to diagnose state mistakes.</li>
+</ul>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
+<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
+<p>Use the repository folder in VS Code. The rendered lesson page is a preview; edit the actual <a href="python-foundations-01.html#learner">learner script</a>. Copy it to an ignored folder under <code>.learning/</code> first if you want to keep your attempt across course updates. Use the interpreter from setup. These examples need only Python&#x27;s standard library, have no network calls, and use the same inputs on each run.</p>
+<p>Windows PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
+    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
+<span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> $CoursePython python<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>lessons<span class="syntax-punctuation">\</span>py_foundations_01_read_trace_state<span class="syntax-punctuation">.</span>py</code></pre>
+<p>macOS/Linux:</p>
+<pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_foundations_01_read_trace_state.py</code></pre>
+<p>The terminal shows a small worked example and the remaining TODO count. TODOs are the starting exercise state. Write predictions before changing code. Run after one change, save the observed value or exception, and compare with the exercise&#x27;s acceptance check. A successful example does not mean the unfinished exercises are complete. Keep the separate <a href="python-foundations-01.html#solution-1">explanatory solutions</a> and <a href="python-foundations-01.html#solution-2">runnable solution</a> closed until you have an attempt and evidence, or deliberately ask for a worked comparison.</p>
+<h4 id="guide--vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#guide--vocabulary-and-concepts" aria-label="Link to this section">#</a></h4>
+<p>A program is a list of instructions stored as text. Running the file asks an interpreter to perform those instructions. Reading a line does not execute it, and changing the file does not retroactively change a run that already ended. Imagine a desk with labeled notes: a name tells you which note to read, while assignment replaces the value that the label currently refers to. Keep a trace table on paper with one row per executed line. This is useful even when the program is too short to need a debugger.</p>
+<ul>
+<li><strong>Source code:</strong> the text instructions you edit and save in a <code>.py</code> file.</li>
+<li><strong>Value:</strong> a piece of data, such as the number <code>4</code> or the text <code>&quot;four&quot;</code>.</li>
+<li><strong>Name:</strong> a label, such as <code>quantity</code>, that currently refers to a value.</li>
+<li><strong>Assignment:</strong> an instruction using <code>=</code> that binds the left name to the evaluated right side. It is an action, not an algebraic equality claim.</li>
+<li><strong>Expression:</strong> source that evaluates to a value, such as <code>quantity + 2</code>.</li>
+<li><strong>Output:</strong> information a running program writes, commonly through <code>print</code>.</li>
+</ul>
+<p>Python normally performs these top-level statements from top to bottom. A blank line creates visual space. A line starting with <code>#</code> is a comment for a reader. A comment is not an instruction, so writing the expected answer in a comment cannot make an incorrect calculation pass. Choose descriptive names; <code>number_of_boxes</code> helps a future reader more than <code>x</code> when boxes are the topic.</p>
+<h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-a-replacement-does-not-update-earlier-calculations">Example A: replacement does not update earlier calculations<a class="heading-anchor" href="#guide--example-a-replacement-does-not-update-earlier-calculations" aria-label="Link to this section">#</a></h5>
+<p>Predict both printed numbers before running this complete example:</p>
+<pre class="highlighted-code"><code class="language-python">quantity <span class="syntax-operator">=</span> <span class="syntax-number">3</span>
+unit_price <span class="syntax-operator">=</span> <span class="syntax-number">4</span>
+subtotal <span class="syntax-operator">=</span> quantity <span class="syntax-operator">*</span> unit_price
+quantity <span class="syntax-operator">=</span> <span class="syntax-number">5</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>subtotal<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>quantity <span class="syntax-operator">*</span> unit_price<span class="syntax-punctuation">)</span></code></pre>
+<p>The right side of <code>subtotal = quantity * unit_price</code> is evaluated when that line runs. <code>*</code> multiplies two numbers. Python stores the resulting value under <code>subtotal</code>; it does not store an automatically updating spreadsheet formula. The later assignment changes <code>quantity</code> but does not re-execute the earlier line. <code>print(...)</code> calls a built-in display operation; parentheses surround the value to display. The expected output is <code>12</code> on one line, then <code>20</code>. Your trace should show <code>subtotal</code> staying at 12 after quantity changes.</p>
+<h5 id="guide--example-b-text-and-numbers-obey-different-operations">Example B: text and numbers obey different operations<a class="heading-anchor" href="#guide--example-b-text-and-numbers-obey-different-operations" aria-label="Link to this section">#</a></h5>
+<pre class="highlighted-code"><code class="language-python">number <span class="syntax-operator">=</span> <span class="syntax-number">4</span>
+text <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">4</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>number <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>text <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>number<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>__name__<span class="syntax-punctuation">)</span></code></pre>
+<p>Expected output is <code>6</code>, <code>42</code>, <code>int</code>, and <code>str</code>, in that order. Quotes create text; the quotes themselves are not part of the stored text. <code>+</code> adds numbers but joins strings. <code>type(value).__name__</code> asks the interpreter for a readable type label; treat it as an inspection tool for now. A type describes what operations a value supports. Removing quotes changes meaning, even if the terminal displays similar digits. Do not try to memorize every type today.</p>
+<h5 id="guide--a-reliable-trace-routine">A reliable trace routine<a class="heading-anchor" href="#guide--a-reliable-trace-routine" aria-label="Link to this section">#</a></h5>
+<p>Read a single statement, identify the names on its right side, substitute their current values, and calculate that expression. Only then update the left name. For a print, write an output row without changing other rows. If a name has never been assigned in the current run, stop: the interpreter cannot invent its intended value. A saved file run starts a new process with new top-level state. A notebook can keep old state between cells, so a fresh file run is a useful reference when cell results look surprising.</p>
+<p>Before each exercise, create two columns labeled prediction and observation. A disagreement is useful evidence. Locate the first line where the trace differs, rather than making several edits until an answer looks plausible. Re-running with identical input should produce identical output for every example here. If it does not, first check that you saved and ran the same file.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Trace a reassignment.</strong> Trace <code>apples = 2; pears = apples + 3; apples = 9</code> as three separate lines. Do not run until your trace is complete. State both final values.</li>
+</ol>
+<p><strong>Verify:</strong> <code>apples</code> equals 9 and <code>pears</code> equals 5; the trace records pears being calculated before apples changes.</p>
+<p><strong>Hint:</strong> A name stores the current result, not the history of its formula.</p>
+<ol>
+<li><strong>Separate calculation from display.</strong> Create <code>boxes = 4</code>, <code>items_per_box = 6</code>, and a calculated <code>items</code>. Display a human-readable label followed by the value. Repeat with zero boxes.</li>
+</ol>
+<p><strong>Verify:</strong> The terminal contains totals 24 and 0 in the two runs; changing the label does not change either calculated number.</p>
+<p><strong>Hint:</strong> Use <code>print(&quot;Items:&quot;, items)</code> to display a label and a value.</p>
+<ol>
+<li><strong>Predict text joining.</strong> Predict the output of <code>&quot;3&quot; + &quot;7&quot;</code> and of <code>3 + 7</code>. Explain how you can prove the difference if the output alone is confusing.</li>
+</ol>
+<p><strong>Verify:</strong> The first value equals the string <code>&quot;37&quot;</code>; the second equals integer 10. Inspection reports <code>str</code> and <code>int</code> respectively.</p>
+<p><strong>Hint:</strong> Quotes are part of the source language that creates a string.</p>
+<ol>
+<li><strong>Find the first invalid line.</strong> In a fresh script, put <code>print(balance)</code> before <code>balance = 10</code>. Capture the final exception line, then make the smallest ordering change that permits a run.</li>
+</ol>
+<p><strong>Verify:</strong> Before repair the exception class is <code>NameError</code>; after repair a fresh run prints 10 exactly once.</p>
+<p><strong>Hint:</strong> Walk through time, not the visual distance between lines.</p>
+<ol>
+<li><strong>Test a stale calculation.</strong> Calculate <code>total = 2 * 5</code>, change the quantity to 3 under a separate name, and compare the old total with a new calculation. Do not edit the expected values to hide a disagreement.</li>
+</ol>
+<p><strong>Verify:</strong> Your trace contains an old total of 10 and a recomputed total of 15, and identifies the line that recalculates the result.</p>
+<p><strong>Hint:</strong> Assign quantity before using it, then explicitly repeat the calculation.</p>
+<ol>
+<li><strong>Distinguish comments from actions.</strong> Add a comment that predicts a total of 100 beside code that actually calculates <code>4 * 5</code>. Run the file, then repair the comment while preserving correct code.</li>
+</ol>
+<p><strong>Verify:</strong> The output remains 20 before and after the comment repair; your observation names the multiplication as the executed operation.</p>
+<p><strong>Hint:</strong> A comment can be wrong without causing an exception.</p>
+<ol>
+<li><strong>Make a minimal reproduction.</strong> Copy just the three statements needed to show that <code>copied = original</code> for an integer keeps its old value after <code>original</code> is reassigned. Use original values 8 and 11.</li>
+</ol>
+<p><strong>Verify:</strong> The new script prints original 11 and copied 8, with no dependency on previous interactive commands.</p>
+<p><strong>Hint:</strong> Copied here is another name for the earlier integer value; mutable containers come later.</p>
+<ol>
+<li><strong>Transfer the trace to a receipt.</strong> Starting with three tickets at seven units each and a two-unit discount on the whole order, calculate the payable amount. Then test no tickets and no discount. Use clear names.</li>
+</ol>
+<p><strong>Verify:</strong> The normal payable value is 19; the empty-order value is 0. A written trace explains why the discount is applied once to the order.</p>
+<p><strong>Hint:</strong> Write the intended arithmetic in plain language before translating it.</p>
+<h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
+<p>Close the examples. Explain why changing a quantity does not update an earlier subtotal. Recreate a three-line trace using different numbers. Then describe what quotes, <code>=</code>, and parentheses contribute to the statements you typed. Read your prediction before running, rather than reconstructing it afterward.</p>
+<h4 id="guide--common-pitfalls">Common pitfalls<a class="heading-anchor" href="#guide--common-pitfalls" aria-label="Link to this section">#</a></h4>
+<p>If the output looks unchanged after editing, save the file and inspect the terminal command&#x27;s filename. If <code>NameError</code> appears, read the named identifier and find its first assignment in execution order. If text joins when you expected arithmetic, inspect the two operand types. If a notebook disagrees with a script, restart its kernel and run cells in order before modifying the calculation. These checks distinguish a state problem from a setup problem.</p>
+<h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
+<p>Continue with Day 2, where you add conversions, Boolean values, comparisons, and formatting. Keep the trace habit for branches and loops. It remains useful when a future program has many more lines.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-foundations-01.
+Read python/professional/companion-guides/py_foundations_01_read_trace_state.md and python/professional/lessons/py_foundations_01_read_trace_state.py.
+Check my direct prerequisites: python-01.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_foundations_01_read_trace_state.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_foundations_01_read_trace_state.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;python-foundations-01: Read a Program, Trace Its State, and Predict Its Output.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-string">Read ../companion-guides/py_foundations_01_read_trace_state.md before attempting the exercises.</span></span>
+<span class="source-line"><span class="syntax-string">The example runs. Complete the numbered experiments in your own working copy.</span></span>
+<span class="source-line"><span class="syntax-string">Keep solutions separate until you have attempted and checked the contract.</span></span>
+<span class="source-line"><span class="syntax-string">&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># A worked example: predict both lines before running.</span></span>
+<span class="source-line">boxes <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">items_per_box <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">items <span class="syntax-operator">=</span> boxes <span class="syntax-operator">*</span> items_per_box</span>
+<span class="source-line">boxes <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Stored items:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> items<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Recalculated items:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> boxes <span class="syntax-operator">*</span> items_per_box<span class="syntax-punctuation">)</span></span>
+<span class="source-line"><span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">TODO: complete the eight numbered exercises below in your working copy</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Add your predictions, traces, and runnable attempts below.</span></span>
+<span class="source-line"><span class="syntax-comment"># Keep each experiment small and run the file from a fresh process.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 1. Trace a reassignment</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Trace `apples = 2; pears = apples + 3; apples = 9` as three separate lines. Do not</span></span>
+<span class="source-line"><span class="syntax-comment"># run until your trace is complete. State both final values.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: `apples` equals 9 and `pears` equals 5; the trace records pears being calculated</span></span>
+<span class="source-line"><span class="syntax-comment"># before apples changes.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 2. Separate calculation from display</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Create `boxes = 4`, `items_per_box = 6`, and a calculated `items`. Display a</span></span>
+<span class="source-line"><span class="syntax-comment"># human-readable label followed by the value. Repeat with zero boxes.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The terminal contains totals 24 and 0 in the two runs; changing the label does not</span></span>
+<span class="source-line"><span class="syntax-comment"># change either calculated number.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 3. Predict text joining</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Predict the output of `&quot;3&quot; + &quot;7&quot;` and of `3 + 7`. Explain how you can prove the</span></span>
+<span class="source-line"><span class="syntax-comment"># difference if the output alone is confusing.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The first value equals the string `&quot;37&quot;`; the second equals integer 10. Inspection</span></span>
+<span class="source-line"><span class="syntax-comment"># reports `str` and `int` respectively.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 4. Find the first invalid line</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: In a fresh script, put `print(balance)` before `balance = 10`. Capture the final</span></span>
+<span class="source-line"><span class="syntax-comment"># exception line, then make the smallest ordering change that permits a run.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Before repair the exception class is `NameError`; after repair a fresh run prints 10</span></span>
+<span class="source-line"><span class="syntax-comment"># exactly once.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 5. Test a stale calculation</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Calculate `total = 2 * 5`, change the quantity to 3 under a separate name, and</span></span>
+<span class="source-line"><span class="syntax-comment"># compare the old total with a new calculation. Do not edit the expected values to hide a</span></span>
+<span class="source-line"><span class="syntax-comment"># disagreement.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: Your trace contains an old total of 10 and a recomputed total of 15, and identifies</span></span>
+<span class="source-line"><span class="syntax-comment"># the line that recalculates the result.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 6. Distinguish comments from actions</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Add a comment that predicts a total of 100 beside code that actually calculates `4 *</span></span>
+<span class="source-line"><span class="syntax-comment"># 5`. Run the file, then repair the comment while preserving correct code.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The output remains 20 before and after the comment repair; your observation names</span></span>
+<span class="source-line"><span class="syntax-comment"># the multiplication as the executed operation.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 7. Make a minimal reproduction</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Copy just the three statements needed to show that `copied = original` for an</span></span>
+<span class="source-line"><span class="syntax-comment"># integer keeps its old value after `original` is reassigned. Use original values 8 and 11.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The new script prints original 11 and copied 8, with no dependency on previous</span></span>
+<span class="source-line"><span class="syntax-comment"># interactive commands.</span></span>
+<span class="source-line"></span>
+<span class="source-line"><span class="syntax-comment"># Exercise 8. Transfer the trace to a receipt</span></span>
+<span class="source-line"><span class="syntax-comment"># Prompt: Starting with three tickets at seven units each and a two-unit discount on the whole</span></span>
+<span class="source-line"><span class="syntax-comment"># order, calculate the payable amount. Then test no tickets and no discount. Use clear names.</span></span>
+<span class="source-line"><span class="syntax-comment"># Verify: The normal payable value is 19; the empty-order value is 0. A written trace explains</span></span>
+<span class="source-line"><span class="syntax-comment"># why the discount is applied once to the order.</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_01_read_trace_state_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_01_read_trace_state_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--read-a-program-trace-its-state-and-predict-its-output-solution-reasoning">Read a Program, Trace Its State, and Predict Its Output: solution reasoning<a class="heading-anchor" href="#solution-1--read-a-program-trace-its-state-and-predict-its-output-solution-reasoning" aria-label="Link to this section">#</a></h3>
+<p>Stable ID: <code>python-foundations-01</code>.</p>
+<p>Read the <a href="python-foundations-01.html#guide">guide</a> and attempt the <a href="python-foundations-01.html#learner">learner artifact</a> first. The <a href="python-foundations-01.html#solution-2">executable solution</a> is a comparison implementation. It does not certify your changed program merely because its own demonstration succeeds. Copy the acceptance cases into your attempt, then change one input without changing the intended policy.</p>
+<p>The useful result of this lesson is an accurate model of execution order. Eight correct terminal values without an explanation would miss that goal. The runnable solution uses straight-line statements so it works before loops or user-defined functions have been introduced. Its assertions compare actual values with independent expected numbers. An assertion is a check that raises an error when its condition is false; the next lessons will explain its full testing role. Never change a correct expected value simply to silence it.</p>
+<pre class="highlighted-code"><code class="language-python">apples <span class="syntax-operator">=</span> <span class="syntax-number">2</span>
+pears <span class="syntax-operator">=</span> apples <span class="syntax-operator">+</span> <span class="syntax-number">3</span>
+apples <span class="syntax-operator">=</span> <span class="syntax-number">9</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>apples<span class="syntax-punctuation">,</span> pears<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></code></pre>
+<h4 id="solution-1--exercise-1-trace-a-reassignment">Exercise 1. Trace a reassignment<a class="heading-anchor" href="#solution-1--exercise-1-trace-a-reassignment" aria-label="Link to this section">#</a></h4>
+<p>After the first line, apples refers to 2. The second line reads that 2, adds 3, and binds pears to 5. The final line replaces apples with 9. Pears remains 5 because there is no later assignment to it. A common false trace writes pears as 12 by treating Python as a spreadsheet. Record the values at the time each statement executes. Compare the observed pair <code>(9, 5)</code> with your written prediction and explain the first disagreement rather than only copying the final pair.</p>
+<h4 id="solution-1--exercise-2-separate-calculation-from-display">Exercise 2. Separate calculation from display<a class="heading-anchor" href="#solution-1--exercise-2-separate-calculation-from-display" aria-label="Link to this section">#</a></h4>
+<p>Use meaningful names for both inputs and keep the calculation separate from its presentation. Four boxes with six items each gives 24; zero boxes gives 0 under the same multiplication rule. <code>print(&quot;Items:&quot;, items)</code> combines display arguments without converting the stored number into text. Replacing the label with another phrase cannot affect multiplication. A useful extra probe changes items per box to one. That distinguishes a real input-based formula from accidentally typing the expected result as a constant.</p>
+<h4 id="solution-1--exercise-3-predict-text-joining">Exercise 3. Predict text joining<a class="heading-anchor" href="#solution-1--exercise-3-predict-text-joining" aria-label="Link to this section">#</a></h4>
+<p>Quotes create the strings &quot;3&quot; and &quot;7&quot;. Joining them produces the two-character string &quot;37&quot;. The unquoted integers are added to produce 10. Inspecting type names verifies the operation domain independently of how the terminal renders digits. Do not use the visual appearance of a value as proof that it is numeric. Later, explicit conversion will turn suitable digit strings into numbers. For now, preserve the distinction and explain why adding an integer to a string would need a declared conversion decision.</p>
+<h4 id="solution-1--exercise-4-find-the-first-invalid-line">Exercise 4. Find the first invalid line<a class="heading-anchor" href="#solution-1--exercise-4-find-the-first-invalid-line" aria-label="Link to this section">#</a></h4>
+<p>A new script has no earlier balance assignment. The first <code>print(balance)</code> therefore raises NameError and stops execution before reaching the assignment below it. Move <code>balance = 10</code> above the print, then run the saved file again. The output is 10 once. Moving the print is also valid if it preserves the intended order. An interactive session that already contains balance can hide this defect; a fresh process is the important boundary check. Capture the exception class, not a machine-specific absolute filename.</p>
+<h4 id="solution-1--exercise-5-test-a-stale-calculation">Exercise 5. Test a stale calculation<a class="heading-anchor" href="#solution-1--exercise-5-test-a-stale-calculation" aria-label="Link to this section">#</a></h4>
+<p>The initial multiplication produces 10. Changing a quantity later changes only that name, so the stored total remains 10. A second multiplication using quantity three and unit price five produces 15. The reference explicitly performs that second calculation and verifies both totals. This behavior is useful when preserving an earlier snapshot, but surprising when expecting a live total. The fix is to decide which state you need and calculate at the correct time. Re-running only a display statement cannot recompute an earlier expression.</p>
+<h4 id="solution-1--exercise-6-distinguish-comments-from-actions">Exercise 6. Distinguish comments from actions<a class="heading-anchor" href="#solution-1--exercise-6-distinguish-comments-from-actions" aria-label="Link to this section">#</a></h4>
+<p>The interpreter ignores the comment. It multiplies four by five and displays 20 regardless of whether the nearby comment incorrectly predicts 100. Repair the explanation to match observed behavior without changing a correct formula. Comments help humans and can become stale independently from code. This exercise teaches two kinds of review: running a check proves what the program did on that input, while reading the explanation checks whether the prose accurately describes it. Neither kind of evidence completely replaces the other.</p>
+<h4 id="solution-1--exercise-7-make-a-minimal-reproduction">Exercise 7. Make a minimal reproduction<a class="heading-anchor" href="#solution-1--exercise-7-make-a-minimal-reproduction" aria-label="Link to this section">#</a></h4>
+<p>Assign original to 8, assign copied from original, and then reassign original to 11. Both assignments initially refer to the integer value 8; the final reassignment changes only original. The comparison result is <code>(11, 8)</code>. This is about immutable integer values and rebinding names. Do not generalize it into a claim that assignment deeply copies every Python object. Lists and other mutable containers can share state, a separate topic in the data-structure lessons. A minimal reproduction deliberately excludes irrelevant input or display code.</p>
+<h4 id="solution-1--exercise-8-transfer-the-trace-to-a-receipt">Exercise 8. Transfer the trace to a receipt<a class="heading-anchor" href="#solution-1--exercise-8-transfer-the-trace-to-a-receipt" aria-label="Link to this section">#</a></h4>
+<p>Three tickets at seven units each costs 21. Subtracting the whole-order discount once gives 19. A line-by-line trace should show a subtotal followed by a payable amount, rather than hiding both operations in an unexplained constant. For no tickets and no discount the same arithmetic gives zero. If a future business rule disallows negative totals, that becomes an explicit branch and boundary test. It is not implied here. State the current input assumptions and avoid adding policies that the exercise did not request.</p>
+<h4 id="solution-1--compare-and-transfer">Compare and transfer<a class="heading-anchor" href="#solution-1--compare-and-transfer" aria-label="Link to this section">#</a></h4>
+<p>Change the receipt to four tickets at five units with a three-unit order discount. Predict the subtotal 20 and payable amount 17 before running. Explain which earlier values remain unchanged if you later reassign ticket count. If your script and notebook disagree, use a fresh run as evidence and inspect execution history before changing arithmetic.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_foundations_01_read_trace_state_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_foundations_01_read_trace_state_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-string">&quot;&quot;&quot;Straight-line reference for python-foundations-01, with no hidden state.&quot;&quot;&quot;</span></span>
+<span class="source-line"></span>
+<span class="source-line">apples <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">pears <span class="syntax-operator">=</span> apples <span class="syntax-operator">+</span> <span class="syntax-number">3</span></span>
+<span class="source-line">apples <span class="syntax-operator">=</span> <span class="syntax-number">9</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>apples<span class="syntax-punctuation">,</span> pears<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">boxes <span class="syntax-operator">=</span> <span class="syntax-number">4</span></span>
+<span class="source-line">items_per_box <span class="syntax-operator">=</span> <span class="syntax-number">6</span></span>
+<span class="source-line">items <span class="syntax-operator">=</span> boxes <span class="syntax-operator">*</span> items_per_box</span>
+<span class="source-line"><span class="syntax-keyword">assert</span> items <span class="syntax-operator">==</span> <span class="syntax-number">24</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">0</span> <span class="syntax-operator">*</span> items_per_box <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">7</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">37</span><span class="syntax-string">&quot;</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">3</span> <span class="syntax-operator">+</span> <span class="syntax-number">7</span> <span class="syntax-operator">==</span> <span class="syntax-number">10</span></span>
+<span class="source-line"><span class="syntax-comment"># The failing print(balance) is intentionally not executed before assignment.</span></span>
+<span class="source-line">balance <span class="syntax-operator">=</span> <span class="syntax-number">10</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> balance <span class="syntax-operator">==</span> <span class="syntax-number">10</span></span>
+<span class="source-line">quantity <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">unit_price <span class="syntax-operator">=</span> <span class="syntax-number">5</span></span>
+<span class="source-line">total <span class="syntax-operator">=</span> quantity <span class="syntax-operator">*</span> unit_price</span>
+<span class="source-line">quantity <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> total <span class="syntax-operator">==</span> <span class="syntax-number">10</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> quantity <span class="syntax-operator">*</span> unit_price <span class="syntax-operator">==</span> <span class="syntax-number">15</span></span>
+<span class="source-line"><span class="syntax-comment"># Four times five is twenty. Comments do not change this calculation.</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">4</span> <span class="syntax-operator">*</span> <span class="syntax-number">5</span> <span class="syntax-operator">==</span> <span class="syntax-number">20</span></span>
+<span class="source-line">original <span class="syntax-operator">=</span> <span class="syntax-number">8</span></span>
+<span class="source-line">copied <span class="syntax-operator">=</span> original</span>
+<span class="source-line">original <span class="syntax-operator">=</span> <span class="syntax-number">11</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>original<span class="syntax-punctuation">,</span> copied<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line">tickets <span class="syntax-operator">=</span> <span class="syntax-number">3</span></span>
+<span class="source-line">ticket_price <span class="syntax-operator">=</span> <span class="syntax-number">7</span></span>
+<span class="source-line">order_discount <span class="syntax-operator">=</span> <span class="syntax-number">2</span></span>
+<span class="source-line">payable <span class="syntax-operator">=</span> tickets <span class="syntax-operator">*</span> ticket_price <span class="syntax-operator">-</span> order_discount</span>
+<span class="source-line"><span class="syntax-keyword">assert</span> payable <span class="syntax-operator">==</span> <span class="syntax-number">19</span></span>
+<span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-number">0</span> <span class="syntax-operator">*</span> ticket_price <span class="syntax-operator">-</span> <span class="syntax-number">0</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span></span>
+<span class="source-line"><span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">__main__</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span></span>
+<span class="source-line">    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Eight reference checks passed; compare your prediction traces as well.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span>
+<span class="source-line"></span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
+        <p>
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning for python-foundations-01.
+Read python/professional/companion-guides/py_foundations_01_read_trace_state.md and python/professional/lessons/py_foundations_01_read_trace_state.py.
+Check my direct prerequisites: python-01.
+Keep solutions/ closed unless I request comparison after an attempt.
+Explain the mental model, ask me to predict one result, let me attempt it,
+give one hint at a time, inspect my evidence, and ask a retrieval question.
+Done when I can independently reproduce the numbered acceptance checks,
+explain a failure case, and transfer the policy to a changed input.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-01.html"><small>Previous lesson</small><strong>python-01</strong><span>Setup and REPL</span></a>
+        <a class="nav-card next" href="python-02.html"><small>Next lesson</small><strong>python-02</strong><span>Basics Types</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-foundations-01";
+    const LEARNER_PATH = "python/professional/lessons/py_foundations_01_read_trace_state.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const tutorPrompt = document.querySelector("#tutor-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(tutorPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

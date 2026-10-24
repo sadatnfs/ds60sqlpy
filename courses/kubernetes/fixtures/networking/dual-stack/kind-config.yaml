@@ -1,0 +1,9 @@
+# Operator input only for a separately owned disposable cluster.
+# Do not apply to or reconfigure the ordinary classroom target.
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  ipFamily: dual
+  apiServerAddress: 127.0.0.1
+nodes:
+  - role: control-plane

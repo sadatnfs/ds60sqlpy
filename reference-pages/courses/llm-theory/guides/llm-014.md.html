@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-014: Capstone: a small language-model evidence notebook · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-014: Capstone: a small language-model evidence notebook</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-014.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-014-capstone-a-small-language-model-evidence-notebook">llm-014: Capstone: a small language-model evidence notebook<a class="heading-anchor" href="#llm-014-capstone-a-small-language-model-evidence-notebook" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 180 minutes. Direct prerequisites: <code>llm-013</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Present a count-based model and an independently tested attention mechanism with bounded claims. The central investigation is concrete: Fit a tiny bigram baseline from local text, freeze its tokenizer/split and produce causal-mask, loss and counterexample evidence. The finish condition is Conditional probabilities sum to 1, held-out units are declared, mask/prefix tests pass, and the report does not claim foundation-model competence. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="assemble-a-small-experiment-whose-result-can-be-reconstructed">Assemble a small experiment whose result can be reconstructed<a class="heading-anchor" href="#assemble-a-small-experiment-whose-result-can-be-reconstructed" aria-label="Link to this section">#</a></h4>
+<p>This capstone is the point where the earlier ideas become one auditable chain. Begin with a declared vocabulary and training documents. Fit a probability table using only their internal transitions. Freeze that table. Score a separate held-out sequence, retaining both its total loss and the number of targets. Finally, write a conclusion whose scope matches those observations. None of these steps requires a large model, but each will remain necessary when the fitted state contains thousands or billions of parameters.</p>
+<p>The training documents are ABAB and AC, encoded as [0,1,0,1] and [0,2] under vocabulary order [A,B,C]. The first contributes A to B twice and B to A once; the second contributes A to C once. The count total is four. Add-one smoothing yields A&#x27;s row <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>2</mn><mo stretchy="false">]</mo></mrow><mrow><mn>6</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[1,3,2]}{6}</annotation></semantics></math>, B&#x27;s row <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[2,1,1]}{4}</annotation></semantics></math> and C&#x27;s row <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo>,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{[1,1,1]}{3}</annotation></semantics></math>. Writing the denominators explicitly makes it possible to detect both missing observations and incorrectly added smoothing mass.</p>
+<p>The held-out sequence A,C,B supplies two conditional questions. The first, C after A, receives probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> from A&#x27;s fitted row. The second, B after C, also receives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> because C had no outgoing training observations and uses the predefined uniform smoothed row. The total loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>2</mn><mo>·</mo><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">2\cdot \log(3)</annotation></semantics></math>, the mean is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>, and perplexity is 3. This is a complete derivation of the reported scalar from the original documents. It also identifies the mechanism responsible for the second prediction: a smoothing fallback, not a learned observation of C followed by B.</p>
+<p>Saving the count matrix before evaluation and comparing it afterward checks that scoring did not update it. That does not prove that the holdout was never examined during an earlier design choice. The experiment therefore needs a written policy as well as state checks: what data selected the vocabulary and smoothing, what records were reserved, and what was changed after seeing results? A reproducible computation and an independent assessment are complementary properties.</p>
+<p>The causal-prefix exercise uses a different small mechanism, cumulative averaging of [2,4,8], producing <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo>,</mo><mfrac><mrow><mn>14</mn></mrow><mrow><mn>3</mn></mrow></mfrac><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[2,3,\frac{14}{3}]</annotation></semantics></math>. Recomputing each prefix should reproduce the corresponding early outputs. This validates the information boundary of that averaging operation. It does not establish that the count model uses attention or that the held-out loss proves causal correctness. The notebook deliberately keeps these observations separate instead of merging several passed checks into one vague success label.</p>
+<p>A useful final report can therefore contain both a positive result and a limitation: the count table and scoring rule produced mean loss <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math> on two held-out transitions, and the tested cumulative computation preserved its prefixes. Those are exact local observations. Two targets from one authored sequence do not establish broad predictive quality, and a three-token vocabulary does not resemble the range of ordinary language. The experiment is valuable because a reviewer can see what happened and choose the next informative comparison.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Bigram model:</strong> A next-token distribution conditioned only on the preceding token.</p>
+<p><strong>Smoothing:</strong> A declared rule assigning mass to unobserved events.</p>
+<p><strong>Token-weighted loss:</strong> Total negative log likelihood divided by active target count.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, return to the classroom home and choose the LLM theory path, and select <code>llm-014</code>. Start its <code>python-core</code> worker using the <a href="../../../docs/docker-classroom.md.html">Docker classroom instructions</a>, then edit the saved coding pad and choose <strong>Run</strong>. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository&#x27;s <a href="../../../docs/setup/first-success.md.html">native setup guide</a> and the same declared dependencies. Keep editable copies under ignored <code>.learning/expansion/llm-014/</code> so the checked-in worksheet remains available.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Initialize a square count matrix with zeros. For each document, update only adjacent pairs inside it. Add one to every cell and divide each row by its row sum plus vocabulary size. Index the probability table with held-out current/next token IDs, sum negative logs and divide by the number of transitions. Save counts before evaluation to demonstrate that assessment did not refit the model.</p>
+<h3 id="work-through-the-fitted-table">Work through the fitted table<a class="heading-anchor" href="#work-through-the-fitted-table" aria-label="Link to this section">#</a></h3>
+<p>The training documents ABAB and AC create four transitions: A to B twice, B to A once and A to C once. With vocabulary [A, B, C], the unsmoothed A row is [0, 2, 1], the B row [1, 0, 0], and the C row [0, 0, 0]. Add-one smoothing changes these to [1, 3, 2], [2, 1, 1] and [1, 1, 1], with denominators six, four and three. The resulting rows are [1/6, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>], [<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>2</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{2}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>4</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{4}</annotation></semantics></math>] and [<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>].</p>
+<p>The held-out sequence A, C, B contains two scored transitions. A to C has probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math> and C to B has probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>1</mn></mrow><mrow><mn>3</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{1}{3}</annotation></semantics></math>, so total negative log likelihood is 2 <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>, mean loss is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>3</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(3)</annotation></semantics></math>, and perplexity is 3. The unseen C context is handled by the predeclared uniform smoothed row. It must not be fitted from its held-out successor merely to avoid an unknown event.</p>
+<p>Smoothing is a modeling assumption that trades some probability mass from observed transitions to unobserved ones. Adding one to each numerator requires adding vocabulary size to the denominator. Changing vocabulary size or pseudocount strength changes the model and the score, even when observed counts stay fixed. Choose that policy before using the held-out result to judge the baseline.</p>
+<h3 id="what-the-evidence-notebook-should-preserve">What the evidence notebook should preserve<a class="heading-anchor" href="#what-the-evidence-notebook-should-preserve" aria-label="Link to this section">#</a></h3>
+<p>Store the count matrix, vocabulary order, document-boundary policy, active target count and evaluation sequence identity. A probability matrix without its vocabulary ordering is ambiguous: row two and column one have meaning only through the token mapping. Preserve counts before evaluation and compare afterward to demonstrate that assessment did not update the fitted state.</p>
+<p>The baseline&#x27;s transparency makes it useful for diagnosing later neural-model experiments. If a complex decoder cannot beat a simple count model under the same tokenization, split and scoring rule, investigate the task and training loop before attributing the result to model capacity. Conversely, beating this tiny baseline on two held-out transitions does not establish broad language capability. The denominator is too small to support a stable deployment conclusion, and one document cannot represent every relevant family.</p>
+<p>A successful capstone therefore includes a bounded claim and reproducible intermediate values, not only a final perplexity. The same structure will be reused when the model has learned weights: identify fitted state, freeze assessment conditions, count the actual prediction events, and show at least one controlled failure that would invalidate the conclusion.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-fit-a-tiny-baseline">Example A: Fit a tiny baseline<a class="heading-anchor" href="#example-a-fit-a-tiny-baseline" aria-label="Link to this section">#</a></h4>
+<p>The end of ABAB is not linked to the start of AC. Counts describe the specified training corpus, not all concatenations of its files.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+docs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> doc <span class="syntax-operator">in</span> docs<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span>b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>doc<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>doc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> counts<span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span></code></pre>
+<p><strong>Expected:</strong> AtoB2,BtoA1,AtoC1; total4.</p>
+<h4 id="example-b-normalize-smoothed-rows">Example B: Normalize smoothed rows<a class="heading-anchor" href="#example-b-normalize-smoothed-rows" aria-label="Link to this section">#</a></h4>
+<p>Smoothing adds three pseudocounts to each denominator because there are three possible next tokens. Adding one only to the numerator would create excess probability mass.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
+
+docs<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span> counts<span class="syntax-operator">=</span>np<span class="syntax-operator">.</span>zeros<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>dtype<span class="syntax-operator">=</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> doc <span class="syntax-operator">in</span> docs<span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span>b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>doc<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>doc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> counts<span class="syntax-punctuation">[</span>a<span class="syntax-punctuation">,</span>b<span class="syntax-punctuation">]</span><span class="syntax-operator">+</span><span class="syntax-operator">=</span><span class="syntax-number">1</span>
+<span class="syntax-keyword">assert</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">2</span> <span class="syntax-operator">and</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> counts<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">1</span> <span class="syntax-operator">and</span> counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">4</span>
+prob<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">+</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span><span class="syntax-punctuation">(</span>counts<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>keepdims<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-operator">+</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>prob<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
+np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_allclose<span class="syntax-punctuation">(</span>prob<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-operator">/</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-operator">*</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span>atol<span class="syntax-operator">=</span><span class="syntax-number">1e-12</span><span class="syntax-punctuation">,</span>rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> row sums1; unseen C context is uniform.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Conditional probabilities sum to 1, held-out units are declared, mask/prefix tests pass, and the report does not claim foundation-model competence. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Fit a tiny baseline.</strong> Use vocabularyA,B,C and documentsABAB,AC; count transitions within documents. <strong>Expected:</strong> AtoB2,BtoA1,AtoC1; total4. <strong>Verify:</strong> Save the assertion results for exercise 1, including AtoB2,BtoA1,AtoC1; total4.</li>
+</ol>
+<ol>
+<li><strong>Normalize smoothed rows.</strong> Apply add-one smoothing to the count matrix. <strong>Expected:</strong> row sums1; unseen C context is uniform. <strong>Verify:</strong> Save the assertion results for exercise 2, including row sums1; unseen C context is uniform.</li>
+</ol>
+<ol>
+<li><strong>Score held-out transitions.</strong> Evaluate held-out sequenceA,C,B using the frozen table. <strong>Expected:</strong> 2 targets; NLL log3+log3. <strong>Verify:</strong> Save the assertion results for exercise 3, including 2 targets; NLL log3+log3.</li>
+</ol>
+<ol>
+<li><strong>Prove no assessment update.</strong> Compare the count matrix before and after scoring. <strong>Expected:</strong> counts unchanged exactly. <strong>Verify:</strong> Save the assertion results for exercise 4, including counts unchanged exactly.</li>
+</ol>
+<ol>
+<li><strong>Verify a causal prefix oracle.</strong> For zero-score attention values2,4,8 calculate prefix means and independently recompute each prefix. <strong>Expected:</strong> outputs2,3,14/3. <strong>Verify:</strong> Save the assertion results for exercise 5, including outputs2,3,14/3.</li>
+</ol>
+<ol>
+<li><strong>Write the bounded comparison.</strong> Create a report with vocabulary size3,2 held-out targets and a limitation about unseen tasks. <strong>Expected:</strong> report includes finite meanNLL and no broad competence claim. <strong>Verify:</strong> Save the assertion results for exercise 6, including report includes finite meanNLL and no broad competence claim.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Inspect the count numerator, vocabulary order and smoothing denominator before interpreting perplexity. An unseen context should follow the frozen smoothing policy. Confirm the number of held-out transitions and compare the count matrix before and after scoring. A lower score under changed tokenization or a changed target denominator is not automatically a model improvement.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Bigram model, Smoothing, Token-weighted loss using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p><a href="llm-015.md.html">llm-015</a> introduces automatic differentiation, which replaces count updates with derivatives of a parameterized objective. Keep this capstone as a reference for experimental discipline. A neural model adds expressive functions and optimization state, but it does not remove the need to identify training data, freeze evaluation conditions and report the actual prediction denominator.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://numpy.org/doc/stable/reference/">NumPy reference</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-014, Capstone: a small language-model evidence notebook.
+Read courses/llm-theory/guides/llm-014.md and courses/llm-theory/lessons/llm-014.py. Direct prerequisites: `llm-013`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

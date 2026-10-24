@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>JourneyApp: a complete offline SwiftUI project lab · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>JourneyApp: a complete offline SwiftUI project lab</h1>
+      <p class="source-path">Generated from <code>courses/swift/fixtures/JourneyApp/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="journeyapp-a-complete-offline-swiftui-project-lab">JourneyApp: a complete offline SwiftUI project lab<a class="heading-anchor" href="#journeyapp-a-complete-offline-swiftui-project-lab" aria-label="Link to this section">#</a></h2>
+<p>This project supplies actual SwiftUI app source, an observable model, validated local-package domain code, navigation, editing, recoverable JSON persistence, UIKit/AppKit text bridges and an XCUITest smoke test. Its reviewed <code>project.yml</code> generates two real targets: JourneyMac and JourneyIOS. It is separate from the Linux classroom pad. Linux executes the portable chapter kernels and JourneyCore, not SwiftUI, UIKit, simulators or signing.</p>
+<h3 id="prepare-deliberately-on-macos">Prepare deliberately on macOS<a class="heading-anchor" href="#prepare-deliberately-on-macos" aria-label="Link to this section">#</a></h3>
+<p>Use a supported Xcode installation with Swift 6 support and an installed iOS simulator if following the iOS path. Open Xcode once to finish its required setup. XcodeGen 2.42 or newer generates the project from the checked-in specification. If you choose Homebrew as your existing package manager, preparation is:</p>
+<pre class="highlighted-code"><code class="language-bash">brew install xcodegen
+xcodebuild -version
+xcodegen --version</code></pre>
+<p>This installation needs network access during preparation. Reading the lesson or running the Linux pad does not install XcodeGen. Consult the <a href="https://github.com/yonaskolb/XcodeGen/blob/master/Docs/ProjectSpec.md">XcodeGen project specification</a> for generator behavior.</p>
+<p>Copy both <code>JourneyApp</code> and adjacent <code>JourneyCore</code> into your own ignored learning directory, preserving their relative locations. Work in your copy. First run <code>swift test</code> in JourneyCore, then from JourneyApp:</p>
+<pre class="highlighted-code"><code class="language-bash">xcodegen generate --spec project.yml
+xcodebuild -list -project JourneyApp.xcodeproj
+xcodebuild -showdestinations -project JourneyApp.xcodeproj -scheme JourneyMac
+xcodebuild -project JourneyApp.xcodeproj -scheme JourneyMac -destination <span class="syntax-string">&#x27;platform=macOS&#x27;</span> CODE_SIGNING_ALLOWED<span class="syntax-operator">=</span>NO build
+open JourneyApp.xcodeproj</code></pre>
+<p>The first compile intentionally disables signing for a local build check. In Xcode, select JourneyMac and My Mac, then Run. For iOS, select JourneyIOS and an installed simulator. Use <code>xcodebuild -showdestinations -project JourneyApp.xcodeproj -scheme JourneyIOS</code> to inspect actual destinations. Do not copy an invented simulator identifier from an unrelated machine.</p>
+<p>The project has no third-party package downloads: JourneyCore is a local dependency. XcodeGen is a preparation tool. Personal development teams, certificates and provisioning profiles are intentionally absent. Configure your own team locally only when device installation or distribution requires it. Do not commit that identity or signing assets.</p>
+<h3 id="what-to-inspect">What to inspect<a class="heading-anchor" href="#what-to-inspect" aria-label="Link to this section">#</a></h3>
+<ol>
+<li>Add a nonempty item and observe the progress count.</li>
+<li>Open it, edit its title, mark it complete and save. Identity remains stable.</li>
+<li>Open it again, modify the draft and cancel. The saved model remains unchanged.</li>
+<li>Quit and relaunch. The saved plan is restored from the app-owned application support directory.</li>
+<li>Open the app using keyboard navigation and VoiceOver. Each row speaks title and completion without relying on color. Check large text, long titles, reduced motion and both appearances.</li>
+<li>Inspect the selectable text adapter on each Apple platform you actually run. Conditional compilation is not evidence for an untested platform.</li>
+</ol>
+<p><code>PlanStore</code> saves only to <code>JourneyLearningFixture/plan.json</code> beneath the app&#x27;s application support directory. The exact container path depends on the platform. If decoding or validation fails, the original file is retained and automatic writes are blocked. The UI reports the failure. Back up the file before manually repairing or replacing it in an owned test environment. Do not use a learner&#x27;s only saved copy to test corruption.</p>
+<p>The app uses a small synchronous local save for clarity. A larger app should move heavy I/O to an owned adapter while preserving MainActor presentation state, request identity and failure accounting. Add networking behind a protocol; on Linux an actual URLSession implementation imports FoundationNetworking explicitly. Check HTTP status, bounded response size, decoding, domain validation and cancellation. No network request is part of the default app.</p>
+<h3 id="test-the-actual-apple-ui">Test the actual Apple UI<a class="heading-anchor" href="#test-the-actual-apple-ui" aria-label="Link to this section">#</a></h3>
+<p>The supplied UI test launches with <code>--ui-testing</code>, which gives it fixed fixture state and a separate temporary save directory. It never resets the normal application support file. On a prepared Mac with Xcode&#x27;s UI-testing permission enabled:</p>
+<pre class="highlighted-code"><code class="language-bash">xcodebuild -project JourneyApp.xcodeproj -scheme JourneyMac -destination <span class="syntax-string">&#x27;platform=macOS&#x27;</span> test</code></pre>
+<p>For iOS, use an actual installed simulator destination from <code>-showdestinations</code> and the JourneyIOS scheme. Record the Xcode version, scheme, destination, result and any signing or permission limitation. A simulator pass does not prove physical-device installation, accessibility inspection or App Store distribution.</p>
+<h3 id="extend-without-breaking-ownership">Extend without breaking ownership<a class="heading-anchor" href="#extend-without-breaking-ownership" aria-label="Link to this section">#</a></h3>
+<p>The deliberate flow is view action, model operation, validated candidate value, file write, then published state. A failed write leaves the previous in-memory plan intact. The editor has a temporary draft for explicit Save and Cancel semantics. A future live editor needs a different binding contract rather than silently changing that behavior.</p>
+<p>Try adding due dates, filtered views or a version-two schema. Write domain tests first, preserve old saved data through an explicit migration, and then add UI evidence. Keep a small table separating portable tests, package builds, macOS UI, iOS simulator, physical device and signing. Mark surfaces that have not actually run.</p></article>
+  </main>
+</body>
+</html>

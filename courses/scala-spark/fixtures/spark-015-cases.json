@@ -1,0 +1,117 @@
+{
+  "lesson_id": "spark-015",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Add an explicit tolerant parse column",
+      "input_contract": "Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS BIGINT). Preserve eight rows and distinguish this nullable parse result from a final validity decision.",
+      "expected": "Ordered parsed values are 100,0,25, NULL, NULL, NULL,-5,50. The output parsed type is bigint.",
+      "verification": "Compare all eight(event_id, parsed_amount) pairs and the field type with literals."
+    },
+    {
+      "exercise": 2,
+      "title": "Classify missing versus rejected tokens",
+      "input_contract": "Add parse_status with missing for source NULL, rejected for a nonnull source that parsed to NULL, and valid otherwise. Keep all original rows and parsed values.",
+      "expected": "IDs 1,2,3,7,8 are valid, ID 4 missing, and IDs 5,6 rejected. Counts are 5,1,2 and sum to 8.",
+      "verification": "Assert the ordered status list and the exact two rejected IDs."
+    },
+    {
+      "exercise": 3,
+      "title": "Project the six parse-accepted events",
+      "input_contract": "Retain valid and missing statuses, then return event_id and parsed_amount aliased as amount_cents. Reject only malformed/overflowing nonnull tokens at this stage.",
+      "expected": "IDs[1,2,3,4,7,8] remain with amounts[100,0,25, NULL,-5,50]. There are 6 rows,5 known values and total 170.",
+      "verification": "Assert the exact rows and independent count/known/sum metrics."
+    },
+    {
+      "exercise": 4,
+      "title": "Express the same parse contract in SQL",
+      "input_contract": "Register the raw frame as a session-local view and produce the same six event_id, amount_cents rows using a SQL parse CTE and explicit missing-or-success filter. Compare with literals rather than only with the DataFrame result.",
+      "expected": "The SQL ordered rows are exactly the six rows from Exercise 3, including the NULL amount and signed-5.",
+      "verification": "Assert the SQL result against the full literal row list and separately compare the DataFrame path to that list."
+    },
+    {
+      "exercise": 5,
+      "title": "Observe strict ANSI failure at evaluation",
+      "input_contract": "Return a strict trimmed BIGINT cast projection. Evaluate a valid subset successfully, then intentionally evaluate the bad token at ID 5 under ANSI mode and require a CAST_INVALID_INPUT diagnostic. Do not count an unrelated exception as success.",
+      "expected": "The valid subset has the same six rows. ID 5 fails when collected, and the reference records the expected failure code before continuing.",
+      "verification": "Assert ANSI readback true, valid-row results, and a caught diagnostic containing CAST_INVALID_INPUT."
+    },
+    {
+      "exercise": 6,
+      "title": "Apply a separate nonnegative domain policy",
+      "input_contract": "From parse-accepted rows, retain unknown amounts and known nonnegative amounts. Return event_id, amount_cents and report the separate negative-domain rejection at ID 7 in the checks.",
+      "expected": "Final IDs[1,2,3,4,8] have 5 rows,4 known values, total 175. The full source reconciles as 5 final accepted+2 parse rejected+1 negative-domain rejected.",
+      "verification": "Assert final rows/metrics, negative ID 7 and the 8-row conservation equation."
+    }
+  ],
+  "golden": {
+    "rows": [
+      [
+        1,
+        "100"
+      ],
+      [
+        2,
+        "0"
+      ],
+      [
+        3,
+        " 25 "
+      ],
+      [
+        4,
+        null
+      ],
+      [
+        5,
+        "bad"
+      ],
+      [
+        6,
+        "9223372036854775808"
+      ],
+      [
+        7,
+        "-5"
+      ],
+      [
+        8,
+        "50"
+      ]
+    ],
+    "parse_accepted_ids": [
+      1,
+      2,
+      3,
+      4,
+      7,
+      8
+    ],
+    "parse_rejected_ids": [
+      5,
+      6
+    ],
+    "missing_ids": [
+      4
+    ],
+    "parse_metrics": [
+      6,
+      5,
+      170
+    ],
+    "domain_ids": [
+      1,
+      2,
+      3,
+      4,
+      8
+    ],
+    "domain_metrics": [
+      5,
+      4,
+      175
+    ],
+    "strict_error": "CAST_INVALID_INPUT"
+  }
+}

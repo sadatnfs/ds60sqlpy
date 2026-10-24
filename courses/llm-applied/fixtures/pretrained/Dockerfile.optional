@@ -1,0 +1,14 @@
+# Build the local llm-torch-cpu classroom profile first. Its base supplies
+# CPU-only Torch and libgomp; the full lock fixes all optional dependencies.
+ARG DS60_TORCH_IMAGE=ds60sqlpy-worker-llm-torch-cpu:0.3.0
+FROM ${DS60_TORCH_IMAGE}
+WORKDIR /recipe
+ARG TARGETARCH
+COPY requirements.${TARGETARCH}.lock /recipe/requirements.lock
+RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /recipe/requirements.lock \
+    && python -m pip check
+COPY asset_contract.json train.jsonl eval.jsonl /recipe/
+COPY prepare_assets.py verify_assets.py train_local.py infer_local.py /recipe/
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1 \
+    HF_HOME=/tmp/huggingface OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 TOKENIZERS_PARALLELISM=false
+ENTRYPOINT ["python"]

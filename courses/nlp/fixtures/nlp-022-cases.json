@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-022",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Build the inverted index from the three documents.",
+      "expected": "router postings{d0,d1}; term frequency and document frequency remain distinct."
+    },
+    {
+      "exercise": 2,
+      "task": "Calculate d0's router reset score with the stated k1,b and IDF variant.",
+      "expected": "Implementation matches the explicit formula; d0>d1>d2=0."
+    },
+    {
+      "exercise": 3,
+      "task": "Score unseen and inspect the result semantics.",
+      "expected": "All numerical scores zero; the application should report no lexical evidence rather than a meaningful top result."
+    },
+    {
+      "exercise": 4,
+      "task": "Fuse the two supplied rankings with k=60.",
+      "expected": "b first with score1/62+1/61; duplicate IDs in one ranking rejected."
+    },
+    {
+      "exercise": 5,
+      "task": "Evaluate [d2,d0,d1] using the declared graded relevance.",
+      "expected": "MRR.5 and nDCG=(7/log2(3)+3/2)/(7+3/log2(3))."
+    },
+    {
+      "exercise": 6,
+      "task": "Restrict searchable documents to d0 before scoring.",
+      "expected": "Only d0 appears in results; a written handoff records source version and support limits."
+    }
+  ]
+}

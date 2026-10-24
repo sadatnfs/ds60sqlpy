@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-006: Case classes, pattern matching, and domain states · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-006: Case classes, pattern matching, and domain states</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-006.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-006-case-classes-pattern-matching-and-domain-states">spark-006: Case classes, pattern matching, and domain states<a class="heading-anchor" href="#spark-006-case-classes-pattern-matching-and-domain-states" aria-label="Link to this section">#</a></h2>
+<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 105 minutes. Direct design prerequisites: <code>spark-005</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The older design document proposed a different Spark/JDK tuple; use the current <a href="../execution-baseline.md.html">execution baseline</a> for this authored material.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-006</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-006.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-006_solution.scala.html">reference program</a> and <a href="../solutions/spark-006_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Model a small event domain with case classes and exhaustive pattern matching.</li>
+<li>Explain the result of both worked examples before running them.</li>
+<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Case class:</strong> A compact immutable record definition that supplies named fields, structural equality, pattern extraction and a copy method.</li>
+</ul>
+<ul>
+<li><strong>Sealed trait:</strong> A closed family whose direct implementations are declared in the same source file, allowing the compiler to reason about match coverage.</li>
+</ul>
+<ul>
+<li><strong>Pattern matching:</strong> Selecting behavior by the shape of a value and binding fields from the matched case.</li>
+</ul>
+<ul>
+<li><strong>Domain invariant:</strong> A rule valid objects must satisfy, such as a known event identity or a nonnegative bounded amount.</li>
+</ul>
+<p>A domain model makes valid states explicit. A Paid event carries cents, a Voided event carries a reason, and a Refunded event carries refund cents. A single record with status text and several nullable fields would allow combinations such as a paid event with no amount or an unknown status spelling. Separate case classes make those differences visible in types and pattern matches.</p>
+<p><code>sealed trait Event { def id: String }</code> says every event exposes an identity. <code>final case class Paid(id: String, cents: Long) extends Event</code> defines one allowed shape with immutable fields. Case-class equality compares every field, not only the monetary amount. Paid(&quot;p1&quot;,100L) and Paid(&quot;p2&quot;,100L) are distinct events despite equal values. Data-grain reasoning must therefore preserve the ID rather than deduplicate a projection of cents.</p>
+<p>A match expression returns a value. <code>event match { case Paid(_, amount) =&gt; amount ... }</code> extracts the amount from the Paid shape. The underscore deliberately ignores a field; it is not a missing value. A sealed family lets the compiler warn when a defined shape is omitted, but a warning does not automatically prevent execution in every compiler configuration. The final references cover every case explicitly and assertions include every state.</p>
+<p>The lesson&#x27;s monetary domain is 0 through 1000000 cents per amount. require checks constructor invariants and raises IllegalArgumentException if they fail. This is a deliberate object-creation boundary, not a replacement for a rejected-record ledger at an ingestion boundary. The next lesson will return validation reasons with Either instead of throwing for expected malformed input.</p>
+<p>Refunds contribute negative signed amounts even though their stored cents are nonnegative magnitudes. A void contributes zero to net value but remains an event with its own identity and reason. Equal numerical contribution therefore does not imply equal semantic state. An observed zero payment, a zero refund and a void can all contribute zero while requiring different reporting counts.</p>
+<p>copy creates a new case-class value rather than changing the original. Revising a payment amount preserves its ID and validates the new amount through the constructor. If both old and revised versions are placed in a ledger claiming unique event identity, the audit rejects that duplicate ID; a real versioned-event model would need an explicit version key or replacement policy.</p>
+<p>The final audit returns exact event IDs, net cents and state counts. Each part catches a different error: identity checks detect duplicate delivery, count checks preserve zero/void records, and signed totals distinguish refunds from payments. This is a bounded event model, not a complete payment accounting system or an implicit authorization to move money.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> first <span class="syntax-operator">=</span> <span class="syntax-class">Paid</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;p1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> second <span class="syntax-operator">=</span> <span class="syntax-class">Paid</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;p2&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">100L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>first <span class="syntax-operator">!=</span> second<span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>cents <span class="syntax-operator">==</span> second<span class="syntax-punctuation">.</span>cents<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> revised <span class="syntax-operator">=</span> first<span class="syntax-punctuation">.</span>copy<span class="syntax-punctuation">(</span>cents <span class="syntax-operator">=</span> <span class="syntax-number">125L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>cents <span class="syntax-operator">==</span> <span class="syntax-number">100L</span> <span class="syntax-operator">&amp;&amp;</span> revised<span class="syntax-punctuation">.</span>cents <span class="syntax-operator">==</span> <span class="syntax-number">125L</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">s&quot;</span><span class="syntax-string">original=</span><span class="syntax-string">$</span>first<span class="syntax-string"> revised=</span><span class="syntax-string">$</span>revised<span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Structural equality includes identity, so equal cents do not collapse two events. copy returns a new record and leaves the original unchanged. The named argument identifies which field changes and the constructor&#x27;s amount invariant still applies to the copy.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">def</span> <span class="syntax-function">describe</span><span class="syntax-punctuation">(</span>event<span class="syntax-punctuation">:</span> <span class="syntax-class">Event</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-class">String</span> <span class="syntax-operator">=</span> event <span class="syntax-keyword">match</span> <span class="syntax-punctuation">{</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-class">Paid</span><span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">s&quot;</span><span class="syntax-string">paid:</span><span class="syntax-string">$</span>id<span class="syntax-string">:</span><span class="syntax-string">$</span>amount<span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-class">Voided</span><span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">,</span>reason<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">s&quot;</span><span class="syntax-string">voided:</span><span class="syntax-string">$</span>id<span class="syntax-string">:</span><span class="syntax-string">$</span>reason<span class="syntax-string">&quot;</span>
+  <span class="syntax-keyword">case</span> <span class="syntax-class">Refunded</span><span class="syntax-punctuation">(</span>id<span class="syntax-punctuation">,</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> <span class="syntax-string">s&quot;</span><span class="syntax-string">refunded:</span><span class="syntax-string">$</span>id<span class="syntax-string">:</span><span class="syntax-string">$</span>amount<span class="syntax-string">&quot;</span>
+<span class="syntax-punctuation">}</span>
+assert<span class="syntax-punctuation">(</span>describe<span class="syntax-punctuation">(</span><span class="syntax-class">Refunded</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;r1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">25L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;refunded:r1:25&quot;</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>describe<span class="syntax-punctuation">(</span><span class="syntax-class">Voided</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;v1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;duplicate&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-string">&quot;voided:v1:duplicate&quot;</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span>describe<span class="syntax-punctuation">(</span><span class="syntax-class">Paid</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;p1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">0L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<p>Every case returns a String, so the match is itself a String-valued expression. Each pattern binds only fields available in that state. The refund and void assertions ensure that completeness is tested rather than inferred from a successful paid example.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-keep-identity-independent-of-value">Exercise 1: Keep identity independent of value<a class="heading-anchor" href="#exercise-1-keep-identity-independent-of-value" aria-label="Link to this section">#</a></h4>
+<p>Return the event&#x27;s identity for every domain state. Test two paid events with equal cents but different IDs and verify constructor rejection of a blank ID.</p>
+<p><strong>Expected result/shape:</strong> Paid(p1,100), Paid(p2,100), Voided(v1, duplicate), Refunded(r1,25) retain IDs p1, p2, v1, r1. A blank-ID Paid cannot be constructed.</p>
+<p><strong>Verify:</strong> Assert the four IDs in input order and catch IllegalArgumentException for Paid(&quot;&quot;,100L).</p>
+<p><strong>Progressive hint:</strong> The trait already declares the shared id contract.</p>
+<h4 id="exercise-2-match-every-defined-state">Exercise 2: Match every defined state<a class="heading-anchor" href="#exercise-2-match-every-defined-state" aria-label="Link to this section">#</a></h4>
+<p>Return paid, voided or refunded through an exhaustive pattern match. Include Refunded explicitly; do not use a catch-all branch that labels every unfamiliar state paid.</p>
+<p><strong>Expected result/shape:</strong> The four-event fixture yields paid, paid, voided, refunded. Adding another sealed-domain case requires reviewing this match and its tests.</p>
+<p><strong>Verify:</strong> Assert all four classifications. Temporarily inspect an omitted-refund match as a compiler-warning counterexample, then restore the complete implementation.</p>
+<p><strong>Progressive hint:</strong> Use one case branch per case class and ignore unused fields with underscores.</p>
+<h4 id="exercise-3-separate-magnitude-from-signed-contribution">Exercise 3: Separate magnitude from signed contribution<a class="heading-anchor" href="#exercise-3-separate-magnitude-from-signed-contribution" aria-label="Link to this section">#</a></h4>
+<p>Return positive cents for Paid, negative cents for Refunded, and zero for Voided. Stored payment/refund magnitudes must remain within constructor bounds. Test observed zero and a rejected negative magnitude.</p>
+<p><strong>Expected result/shape:</strong> The fixture contributes 100,100,0,-25. Refunded(r0,0) contributes 0 but remains refunded; Paid with-1 cents is rejected.</p>
+<p><strong>Verify:</strong> Assert exact signed contributions, zero-refund behavior and the constructor failure for a negative paid amount.</p>
+<p><strong>Progressive hint:</strong> Negate only the refund magnitude; do not infer the state from whether a value is zero.</p>
+<h4 id="exercise-4-create-a-validated-replacement-value">Exercise 4: Create a validated replacement value<a class="heading-anchor" href="#exercise-4-create-a-validated-replacement-value" aria-label="Link to this section">#</a></h4>
+<p>Return a new Paid value with the same ID and a revised amount, leaving the original unchanged. Use copy and preserve constructor validation for an out-of-domain amount.</p>
+<p><strong>Expected result/shape:</strong> Paid(p1,100) revised to 125 becomes Paid(p1,125), while the original remains 100. Amount 1000001 is rejected.</p>
+<p><strong>Verify:</strong> Assert old/new amounts and equal IDs, then catch the out-of-domain constructor failure.</p>
+<p><strong>Progressive hint:</strong> The case-class copy method accepts named field replacements.</p>
+<h4 id="exercise-5-reduce-signed-events-without-dropping-zero-states">Exercise 5: Reduce signed events without dropping zero states<a class="heading-anchor" href="#exercise-5-reduce-signed-events-without-dropping-zero-states" aria-label="Link to this section">#</a></h4>
+<p>Compute the checked Long sum of signedCents for every event. Empty input returns 0. Preserve all domain states in the source even when their numerical contribution is zero.</p>
+<p><strong>Expected result/shape:</strong> The four-event fixture nets 175 cents. Paid(z,0) and Voided(v, reason) together net 0 while remaining two distinct events.</p>
+<p><strong>Verify:</strong> Assert 175, empty 0, and a two-event zero-total fixture without filtering either event.</p>
+<p><strong>Progressive hint:</strong> Map the domain rule into a fold with Math.addExact and an explicit 0 L identity.</p>
+<h4 id="exercise-6-reconcile-identity-state-and-net-value">Exercise 6: Reconcile identity, state and net value<a class="heading-anchor" href="#exercise-6-reconcile-identity-state-and-net-value" aria-label="Link to this section">#</a></h4>
+<p>Reject repeated event IDs, then return IDs in source order, net total, and counts for paid/voided/refunded including zero categories. Do not deduplicate equal monetary amounts.</p>
+<p><strong>Expected result/shape:</strong> The fixture returns IDs[p1, p2, v1, r1], net 175 and counts paid 2, voided 1, refunded 1. Repeated ID same is rejected even if both amounts agree.</p>
+<p><strong>Verify:</strong> Assert the full result and count sum 4, then demonstrate that two equal-ID Paid records fail instead of being silently collapsed.</p>
+<p><strong>Progressive hint:</strong> Validate IDs before computing the report; initialize all state categories and fold through kind.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>If two equal payments collapse, inspect whether a projection or Set discarded their IDs. If a match throws MatchError after a domain extension, review every sealed-state branch and add a corresponding assertion. If copy appears to change the original, check whether a mutable field was introduced rather than assuming case-class structure deep-copies objects. If a zero total hides missing events, reconcile identities and state counts as well. Expected malformed raw data belongs in a validation ledger, the next lesson&#x27;s subject, not in an unhandled constructor exception.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.scala-lang.org/tour/case-classes.html">Scala 2 case classes</a>.</li>
+</ul>
+<ul>
+<li><a href="https://docs.scala-lang.org/tour/pattern-matching.html">Scala 2 pattern matching</a>.</li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-006: Case classes, pattern matching, and domain states.
+Read courses/scala-spark/guides/spark-006.md and courses/scala-spark/lessons/spark-006.scala. Direct prerequisites: spark-005.
+Explain the Scala 2.13 syntax and data contract, ask me to predict a concrete result, then inspect my attempt. Give one hint at a time, review exact assertion evidence and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt. Use only the prepared scala-jvm profile and preserve my saved work; do not install or download dependencies.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why an incorrect implementation fails.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ds60-tiny-greeter"
+version = "0.1.0"
+description = "Offline fixture package for the DS60 packaging lesson"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "DS60 curriculum"}]
+dependencies = []
+
+[project.scripts]
+ds60-greet = "ds60_tiny_greeter.cli:main"
+
+[project.optional-dependencies]
+pretty = ["colorama>=0.4.6; sys_platform == 'win32'"]
+
+[dependency-groups]
+test = ["pytest>=8; python_version >= '3.11'"]
+quality = ["ruff>=0.5; python_version >= '3.11'"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

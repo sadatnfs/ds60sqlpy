@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-021: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-021: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-021_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-021-explanatory-solutions">llm-applied-021: explanatory solutions<a class="heading-anchor" href="#llm-applied-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs. These are part of the experiment, not setup trivia. A model name pointing to a moving branch is not a reproducible identity. Pin an exact repository revision and record hashes of the downloaded files. Keep the acquisition step separate from local training so an offline run cannot silently fetch missing assets.</p>
+<p>The optional recipe targetsHuggingFaceTB/SmolLM2-135M-Instruct at revision12fd25f77366fa6b3b4b768ec3050bf629380bac, whose model card was checked asApache-2.0 during authoring. This is a small pretrained model for a bounded demonstration, not a recommended production assistant. The recipe pins direct package versions, uses a literal local prompt-completion dataset, checks chat-template prefix alignment and answer-only masks, and runs at most10CPU updates. The optional recipe has separate bounded Linux arm64 execution evidence for ten full-SFT and LoRA updates, while its generation probe produced an incorrect formula despite evidence. Learners must still explicitly prepare their own dependencies and assets; mechanics success does not establish subject expertise. No default lesson downloads a model or calls a paid service.</p>
+<p><strong>Pinned revision:</strong> An immutable model-repository commit identifying exact source artifacts.</p>
+<p><strong>Offline asset manifest:</strong> Local filenames,hashes,license note and revision used by a run.</p>
+<p><strong>Chat-template alignment:</strong> Agreement between rendered prompt prefix and full conversation tokens.</p>
+<p><strong>Completion-only loss:</strong> Supervision restricted to completion targets under the trainer contract.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>The prepared scripts live underfixtures/pretrained. prepare_assets.py requires an explicit network acknowledgement and downloads only the pinned model snapshot into a new learner-owned directory. It records SHA256 hashes. train_local.py useslocal_files_only=True andtrust_remote_code=False, checks the manifest and refuses a nonempty output directory. TRL SFTTrainer receives conversational prompt/completion records withcompletion_only_loss=True. Before training, the script inspects tokenized examples and a collated batch to ensure prompt labels are ignored and answer labels remain active. The model itself performs the causal label shift; do not shift labels twice.</p>
+<h3 id="read-the-qualified-recipe-as-several-independent-evidence-tiers">Read the qualified recipe as several independent evidence tiers<a class="heading-anchor" href="#read-the-qualified-recipe-as-several-independent-evidence-tiers" aria-label="Link to this section">#</a></h3>
+<p>The pinned revision identifies a particular repository state; the local manifest identifies the acquired files and their hashes. The lock identifies resolved dependency artifacts for a platform. The image identifies the executable environment. None of these identities alone establishes that training happened. A run receipt and saved artifact provide that next tier, followed by separate reload and task-quality observations.</p>
+<p>The existing recipe record reports13 acquired files and actual 10-update CPU runs for both full SFT and LoRA. Full SFT has134515008 trainable parameters; the rank-four q_proj/v_proj adapter path has230400. The recorded held-out losses changed from6.721148 to0.008058 for full SFT and from6.721148 to6.474194 for LoRA. These are observations from the qualified recipe, not reruns performed by this prose review. <a href="../fixtures/pretrained/README.md.html">Optional recipe evidence and workflow</a>.</p>
+<p>The evaluation dataset contains one held-out entity label, while the four training records share an assignment-unit extraction task and prompt template. Distinct family labels do not automatically produce independent business domains. The dramatic full-SFT loss drop therefore needs that narrow context. It does not establish that full SFT generally beats LoRA or that either model understands unrelated statistical questions.</p>
+<p>The generation probe is particularly informative because it tests a different boundary. It supplies the correct conversion definition as evidence, yet the saved adapter produced a fluent incorrect formula: eligible visits divided by eligible visits. That is a task-quality failure despite successful asset loading, masking, optimization, save and reload. The output also did not establish claim-level citation support. Preserve the failure rather than replacing it with a hypothetical correct answer.</p>
+<p>Mask alignment differs from the earlier manual tiny-token helper. In the TRL path, active labels equal the corresponding input token IDs and ignored prompt positions contain-100. The causal model shifts labels internally when calculating next-token loss. Manually shifting those labels again would train the wrong target. The processed completion mask and actual collated batch are inspected before training, and records longer than the declared 128-token limit are rejected rather than silently losing answers.</p>
+<p>Chat-template prefix equality is another concrete gate. The prompt rendered with a generation marker must be an exact token prefix of the full prompt-plus-completion rendering. This checks the specific template&#x27;s boundary, not a universal property of all templates. A different model or tokenizer may require a different valid construction. Preserve the actual tokenized example and prefix lengths in the receipt.</p>
+<p>Two LoRA runs in the same qualified image produced matching adapter hashes and evaluation loss after seeding before adapter construction. Setting a trainer seed later cannot retroactively recreate already sampled adapter matrices. That repeatability result is valuable but is limited to the tested environment and ordering. An amd64 dependency lock is preparation evidence; it is not an executed amd64 or Windows result.</p>
+<p>A successful local loader must not silently fall back to a remote model ID when a file is missing. The recipe&#x27;s explicit connected acquisition phase and later local-only, networking-disabled runs make those behaviors separable. Hash verification detects modified artifacts; it does not make a model&#x27;s generated claims true or establish approval for every downstream dataset and use.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>What does the pinned revision prove?</strong> It identifies the selected upstream artifact state. Actual local verification, execution and task quality need their own evidence.</p>
+<p><strong>Why can low held-out token loss coexist with a wrong generated formula?</strong> The evaluation record and teacher-forced objective can be narrow, while generation faces another task and its own rollout. The observed output must be scored under the intended domain contract.</p>
+<p><strong>Why inspect labels instead of trusting a completion-only flag?</strong> Configuration expresses intent. Processed examples and a real collated batch show whether the chosen trainer/template combination produced the intended active targets before optimization.</p>
+<h3 id="exercise-1-inspect-the-pinned-artifact-contract">Exercise 1: Inspect the pinned artifact contract<a class="heading-anchor" href="#exercise-1-inspect-the-pinned-artifact-contract" aria-label="Link to this section">#</a></h3>
+<p>The question is: Read the supplied model manifest and identify model ID, revision and license note before any download.</p>
+<p>A license field records the inspected artifact metadata; it does not replace reviewing the actual license and intended use. The revision prevents a future branch update from silently changing the model.</p>
+<pre class="highlighted-code"><code class="language-text">Model: HuggingFaceTB/SmolLM2-135M-Instruct
+Revision: 12fd25f77366fa6b3b4b768ec3050bf629380bac
+Card license checked: apache-2.0
+Default lesson action: no download
+Optional acquisition: explicit --acknowledge-network flag</code></pre>
+<p><strong>Expected:</strong> exact 40-character revision and Apache-2.0 card note are present.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with exact 40-character revision and Apache-2.0 card note are present.</p>
+<h3 id="exercise-2-separate-acquisition-from-execution">Exercise 2: Separate acquisition from execution<a class="heading-anchor" href="#exercise-2-separate-acquisition-from-execution" aria-label="Link to this section">#</a></h3>
+<p>The question is: Trace the optional workflow from dependency preparation to snapshot acquisition to offline training.</p>
+<p>Separating phases makes network behavior reviewable. A successful local run should not depend on an unnoticed cache hit from a different model revision.</p>
+<pre class="highlighted-code"><code class="language-text">1. Prepare a separate Python3.12 environment with pinned direct dependencies.
+2. Explicitly acquire the pinned snapshot and record local file hashes.
+3. Disconnect or enable offline flags.
+4. Run train_local.py with --model-dir pointing to the verified snapshot.
+5. Missing files cause a failure,not a download.</code></pre>
+<p><strong>Expected:</strong> training requires existing local assets and never falls back to a remote model ID.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with training requires existing local assets and never falls back to a remote model ID.</p>
+<h3 id="exercise-3-verify-chat-template-boundaries">Exercise 3: Verify chat-template boundaries<a class="heading-anchor" href="#exercise-3-verify-chat-template-boundaries" aria-label="Link to this section">#</a></h3>
+<p>The question is: For each local prompt/completion record, compare full conversation token IDs with the prompt rendered usingadd_generation_prompt=True.</p>
+<p>Template markers belong to the model interface. A mismatch should stop the run rather than produce a guessed mask based on character length or a hardcoded token count.</p>
+<pre class="highlighted-code"><code class="language-text">prompt_ids = tokenizer.apply_chat_template(prompt,tokenize=True,add_generation_prompt=True)
+full_ids = tokenizer.apply_chat_template(prompt+completion,tokenize=True,add_generation_prompt=False)
+assert full_ids[:len(prompt_ids)] == prompt_ids
+assert len(full_ids) &gt; len(prompt_ids)</code></pre>
+<p><strong>Expected:</strong> prompt IDs are an exact prefix; at least one completion token remains.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with prompt IDs are an exact prefix; at least one completion token remains.</p>
+<h3 id="exercise-4-inspect-trainer-labels-before-training">Exercise 4: Inspect trainer labels before training<a class="heading-anchor" href="#exercise-4-inspect-trainer-labels-before-training" aria-label="Link to this section">#</a></h3>
+<p>The question is: Read one collated batch and compare labels with the prompt/completion boundary.</p>
+<p>The trainer and model divide responsibilities:the collator marks ignored positions, and the causal model shifts internally. A second manual shift would train on the wrong targets.</p>
+<pre class="highlighted-code"><code class="language-text">batch = next(iter(trainer.get_train_dataloader()))
+active = batch[&#x27;labels&#x27;] != -100
+assert active.any()
+assert (batch[&#x27;labels&#x27;][active] == batch[&#x27;input_ids&#x27;][active]).all()
+# The script additionally verifies each processed completion mask and its prefix.</code></pre>
+<p><strong>Expected:</strong> prompt labels-100; active completion labels match their input token IDs.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with prompt labels-100; active completion labels match their input token IDs.</p>
+<h3 id="exercise-5-compare-full-and-adapter-configuration">Exercise 5: Compare full and adapter configuration<a class="heading-anchor" href="#exercise-5-compare-full-and-adapter-configuration" aria-label="Link to this section">#</a></h3>
+<p>The question is: Inspectmodefull versusmodelora, rank 4, alpha 8, target modulesq_proj/v_proj, with the same local data and 10-step cap.</p>
+<p>The recipe supports a controlled mechanism comparison, not an assertion that a ten-step run produces a useful assistant. Actual memory and time must be measured on the prepared environment.</p>
+<pre class="highlighted-code"><code class="language-text">Full: all model parameters trainable.
+LoRA: frozen base plus rank4 adapters on q_proj and v_proj.
+Both: max_steps10,max_length128,batch1,seed7,CPU,report_to=[];
+Evaluate the same held-out families and retain both receipts.</code></pre>
+<p><strong>Expected:</strong> mode and trainable-parameter count recorded; no automatic quality winner.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with mode and trainable-parameter count recorded; no automatic quality winner.</p>
+<h3 id="exercise-6-distinguish-an-unexecuted-learner-scenario">Exercise 6: Distinguish an unexecuted learner scenario<a class="heading-anchor" href="#exercise-6-distinguish-an-unexecuted-learner-scenario" aria-label="Link to this section">#</a></h3>
+<p>The question is: For a hypothetical new learner who has only reviewed scripts, write the status without overwriting the separately qualified maintainer recipe.</p>
+<p>An optional recipe remains valuable without pretending it has executed. The status must distinguish code review, asset preparation, training and task-quality acceptance.</p>
+<pre class="highlighted-code"><code class="language-text">Scenario: a new learner has only reviewed the recipe.
+Assets acquired for this learner run: no.
+Training executed for this learner run: no.
+Separate maintainer recipe: qualified mechanics with an observed generation-quality failure.
+Required next evidence: local asset verification,mask inspection,actual run receipt,held-out evaluation.</code></pre>
+<p><strong>Expected:</strong> pretrained execution unverified; no generated success receipt.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with pretrained execution unverified; no generated success receipt.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-002: Data-science task contracts and structured extraction · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-002: Data-science task contracts and structured extraction</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/guides/llm-applied-002.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-002-data-science-task-contracts-and-structured-extraction">llm-applied-002: Data-science task contracts and structured extraction<a class="heading-anchor" href="#llm-applied-002-data-science-task-contracts-and-structured-extraction" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; approximately 180 minutes. Direct prerequisites: <code>llm-applied-001</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Structured extraction is the bridge between language and analysis. This chapter follows an analyst&#x27;s source note through parsing, validation, provenance and aggregation, showing why a well-formed record can still be scientifically misleading.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Structured extraction turns text into typed records, but valid JSON is only the first boundary. A record can have all required keys and still contain a fabricated measurement, an impossible count or a unit mismatch. The task should distinguish unsupported fields from explicit missing values. This lesson extracts a small study record with visits, purchases and assignment_unit. The reference uses deterministic parsing of a tightly specified authored format so every accepted value can be traced to source text. It is an extraction baseline, not a language model. A future LLM proposal must pass the same validation before downstream analysis.</p>
+<p>For data science, preserving units and uncertainty is essential. Purchases cannot exceed visits under the stated one-purchase-per-visit fixture. A missing outcome is not zero. A study randomized by account cannot be analyzed as though every repeated visit were independently assigned. The schema therefore carries semantic assumptions alongside numeric fields. Once accepted, deterministic code calculates conversion rate; generated prose must cite that computed value rather than invent a second calculation.</p>
+<h3 id="from-a-source-note-to-a-defensible-data-row">From a source note to a defensible data row<a class="heading-anchor" href="#from-a-source-note-to-a-defensible-data-row" aria-label="Link to this section">#</a></h3>
+<p>The Methods Desk receives a study note containing counts, a description of eligibility and a statement about account-level randomization. A language model may be useful because the note is not always written in a fixed template. Before that flexibility can help, the application must decide what an accepted row means. Otherwise the model can produce neat JSON that downstream code interprets incorrectly.</p>
+<p>Consider the sentence “Three purchases were observed in ten eligible visits; assignment was by account.” There are at least three distinct pieces of information: a numerator count, a denominator count and a study-design unit. The phrase eligible visits depends on an eligibility definition. The phrase assignment by account identifies where treatment was assigned, not necessarily how a reported descriptive ratio was weighted. Preserving those distinctions is part of extraction, even before any statistical model is fitted.</p>
+<p>A useful interface separates the source observation from the proposed interpretation. The raw source and its version remain available. The proposal names fields and supporting spans. A validator checks the schema and domain constraints. A validated record can then be admitted to a particular calculation. The result is another artifact with its own inputs and method. If a reviewer later disputes the eligibility rule, the system can revisit that decision without pretending the original text contained a different fact.</p>
+<h3 id="a-schema-expresses-analytical-commitments">A schema expresses analytical commitments<a class="heading-anchor" href="#a-schema-expresses-analytical-commitments" aria-label="Link to this section">#</a></h3>
+<p>The runnable example&#x27;s counts assume at most one counted purchase per eligible visit. That is why purchases cannot exceed visits. In another application, a visit can contain multiple item purchases, so the same inequality would reject valid data. The correct repair would be to change the metric definition and schema deliberately, perhaps to items_per_visit, rather than loosening a validator while continuing to call the result a conversion probability.</p>
+<p>Units need similar care. A value of 12 can mean 12 visits,12 accounts,12 dollars or 12 percentage points. A schema that stores only value=12 cannot recover the distinction from the number. Dates can identify event time, reporting time or an effective policy date. Identifiers can contain leading zeros that must survive serialization. The choice of primitive type is therefore a modeling decision, not merely a programming convenience.</p>
+<p>Some ambiguity should remain explicit. If a source says “about ten visits,” converting it into an exact integer 10 may be inappropriate. If it says “no purchases were reported,” that can mean an observed zero or an absence of reporting. A production extraction schema may need separate value,status,unit and support fields. The narrow fixture intentionally rejects missing counts so the reader can see that unknown is not silently replaced by zero. Expanding the schema should preserve that distinction.</p>
+<p>Validation cannot prove that a plausible value was stated in the source. An invented count of three still satisfies <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>0</mn><mo>≤</mo><mn>3</mn><mo>≤</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">0\le 3\le 10</annotation></semantics></math>. Provenance is therefore a second contract: each accepted field needs a source span or another recorded evidence link. The span proves where the proposed value came from; interpreting that phrase correctly remains a semantic responsibility.</p>
+<h3 id="when-individually-correct-rows-produce-a-wrong-aggregate">When individually correct rows produce a wrong aggregate<a class="heading-anchor" href="#when-individually-correct-rows-produce-a-wrong-aggregate" aria-label="Link to this section">#</a></h3>
+<p>Suppose account A has one eligible visit and one purchase, while account B has nine eligible visits and two purchases. The visit-weighted rate is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>10</mn></mrow></mfrac><mo>=</mo><mn>0.3</mn></mrow><annotation encoding="application/x-tex">\frac{3}{10}=0.3</annotation></semantics></math>. The equally weighted account mean is(1+2/9)/2=11/18, about 0.6111. Neither number is an arithmetic error. The first weights each visit equally; the second weights each account equally and averages its within-account ratio.</p>
+<p>An assistant asked for “average account conversion” must resolve which quantity is intended. It cannot infer the estimand solely from the existence of an assignment_unit field. If randomization is by account, a treatment-effect analysis also needs the assignment and account identities, not just a pooled count ratio. Repeated visits from the same account can share behavior and treatment. Treating every visit as an independently randomized unit would create an unjustified uncertainty calculation.</p>
+<p>The distinction becomes especially important after extraction. A source may report one row per account, one row per visit or one summary row per study. Joining those rows to another table can duplicate observations. A correct extractor does not protect a later analysis from grain changes. Carry identifiers, counts and aggregation rules through the pipeline so the final statistic can be reconstructed from its actual observational units.</p>
+<h3 id="rejection-changes-the-analyzed-population">Rejection changes the analyzed population<a class="heading-anchor" href="#rejection-changes-the-analyzed-population" aria-label="Link to this section">#</a></h3>
+<p>Imagine 100 source notes. The extractor accepts 80 and rejects 20 because their outcome language is ambiguous. Among accepted notes, field accuracy is excellent. That result does not establish that the accepted 80 represent all 100. Perhaps unsuccessful studies describe outcomes less consistently, or older reports use a different format. Excluding them can change the estimated result even when every retained value is correct.</p>
+<p>The evaluation should therefore keep separate counts for all eligible sources, accepted records, rejected records and unsupported accepted fields. If 72 of 80 accepted records are entirely correct, accepted-record accuracy is 0.9 and acceptance coverage is 0.8. The count of fully correct accepted records per all eligible sources is 72/100=0.72. These describe different properties of the system. The intended workflow determines whether a rejected record goes to human review, a second parser, an explicit unknown state or a separately reported exclusion.</p>
+<p>Repeated correction can create its own leakage. If every final assessment error is turned into another prompt example, the assessment is now influencing system selection. Keep document families and annotation revisions traceable so a new model version is not evaluated only on patterns that motivated its development. Agreement with a schema is easy to score; trustworthy extraction requires representative sources and a support rubric.</p>
+<h3 id="connect-the-record-back-to-the-analyst-s-question">Connect the record back to the analyst&#x27;s question<a class="heading-anchor" href="#connect-the-record-back-to-the-analyst-s-question" aria-label="Link to this section">#</a></h3>
+<p>The practical result is a chain of named quantities. The source supplies a count claim. The extractor proposes a typed value and span. The validator admits it under declared units and rules. The calculation produces a ratio. The explanation can then say what the ratio describes and which stronger conclusions remain unsupported. This chain lets a data scientist localize a disagreement to extraction, eligibility, weighting or interpretation.</p>
+<p>The reference parser is deliberately narrower than an LLM. Its exact grammar supplies a reliable arithmetic and provenance baseline before a more flexible proposal stage is introduced. A language model earns value when it correctly handles useful variation while preserving the same acceptance contract. Flexibility that merely hides unsupported fields is not an improvement in the analytical system.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use a strict extraction boundary when downstream code depends on typed fields, especially counts, money, dates or identifiers. An LLM can propose fields from varied prose, but the acceptance policy should be independent of that model. Keep raw source, proposed record, validation result and corrected record as separate artifacts. A rejected record may require human review or a documented fallback; it should not disappear silently from the denominator.</p>
+<p>Do not ask an extraction model to invent a p-value or causal conclusion from a short narrative. Those outputs require actual data and a valid analysis design. If the source says “significant” without a test definition, preserve that as a quoted source claim rather than converting it into a verified statistical result. Measure exact-match accuracy, missing-field behavior and unsupported-field rates on held-out document families. Schema validity alone rewards well-formed hallucinations.</p>
+<p>Define the accepted record schema before asking a model to populate it. Keep source parsing, record validation and eligibility for a particular calculation as separate stages. This fixture permits a zero-visit/zero-purchase record structurally, but rate() rejects its zero denominator. That distinction lets a system preserve a real zero-activity observation without inventing a rate.</p>
+<p>When extraction is used before statistical analysis, retain rejected records and their reasons. An acceptance filter can change the analyzed population. A high accuracy among accepted records should therefore be accompanied by acceptance coverage and a review of which document families were excluded.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Schema validity:</strong> Structural and type conformance of a proposed record.</p>
+<p><strong>Semantic validity:</strong> Consistency with domain rules such as units and count bounds.</p>
+<p><strong>Provenance span:</strong> The source character interval supporting an extracted field.</p>
+<p><strong>Abstention:</strong> Returning an explicit unknown result when evidence is absent.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>python-core</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-applied-002/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. Use the Docker classroom as the default route and select the declared <code>python-core</code> profile. For a separately prepared native environment, invoke its explicitly selected interpreter on <code>courses/llm-applied/lessons/llm-applied-002.py</code> from the repository root. The general repository <code>.venv</code> is not assumed to include the heavy model dependencies.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the tolerance stated in each assertion. Many analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone does not determine a universal error bound. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Validate an already decoded dictionary, require exactly the allowed keys, and reject booleans where an integer count is required because Python bool is a subclass of int. Validate 0&lt;=purchases&lt;=visits and require a positive denominator before computing a rate. Use None only where the schema explicitly permits missingness. The extract helper recognizes the authored grammar and returns source spans so a field can be traced to the exact characters that supplied it.</p>
+<h3 id="follow-one-value-from-text-to-an-analysis-unit">Follow one value from text to an analysis unit<a class="heading-anchor" href="#follow-one-value-from-text-to-an-analysis-unit" aria-label="Link to this section">#</a></h3>
+<p>The helper extract recognizes a deliberately narrow source grammar. It uses a full-string regular expression and returns digit spans from the original string. The helper validate accepts an already decoded Python dictionary; it is not a JSON parser. A JSON response from a future language model would first need parsing and then the same independent acceptance checks. These interfaces should not be collapsed into the claim “the model returned valid data.”</p>
+<p>For the literal text <code>Visits: 10; Purchases: 3; Unit: account</code>, the visit digits occupy the half-open character interval[8, 10), the purchase digit[23, 24), and the unit[32, 39). Slicing the original string at those boundaries recovers 10, 3 and account. The integer conversion changes representation, while the stored span keeps its provenance. If preprocessing removes spaces before extracting offsets, those new offsets cannot be applied directly to the original string without a mapping.</p>
+<p>The record check accepts exactly three keys and requires type(value) to be int for both counts. Python&#x27;s Boolean subtype relationship makes this stricter than a plain isinstance(value, int) test. A True visit count would otherwise become one in arithmetic even though the source proposed a logical value. Extra fields are also rejected, so a model cannot quietly insert an unsupported p_value alongside otherwise valid counts.</p>
+<p>The domain constraint 0&lt;=purchases&lt;=visits assumes at most one counted purchase per eligible visit. It is not a universal business rule. If the real outcome counts multiple items purchased in a visit, the ratio may legitimately exceed one and needs a different name and contract. A validator should make that modeling choice explicit instead of treating every ratio as a probability.</p>
+<p>For the valid fixture, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>3</mn></mrow><mrow><mn>10</mn></mrow></mfrac><mo>=</mo><mn>0.3</mn></mrow><annotation encoding="application/x-tex">\frac{3}{10}=0.3</annotation></semantics></math> describes purchases per eligible visit. The assignment_unit field says the experimental assignment is by account. It does not transform the arithmetic denominator into accounts, nor does it make 10 visits independently randomized. Repeated observations within accounts require account identities and a suitable analysis design for uncertainty. The three extracted fields alone cannot recover that information.</p>
+<p>Aggregation adds another distinction. Suppose one account has 1 purchase in 1 visit and another has 1 purchase in 9 visits. The pooled visit rate is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mn>2</mn></mrow><mrow><mn>10</mn></mrow></mfrac><mo>=</mo><mn>0.2</mn></mrow><annotation encoding="application/x-tex">\frac{2}{10}=0.2</annotation></semantics></math>. The equally weighted mean of account-specific rates is(1+1/9)/2=5/9, about 0.556. Both calculations are valid for their declared estimands; they answer different questions. Calling both “average conversion” hides the weighting rule. The extraction schema should preserve enough units and identities to support the intended calculation.</p>
+<p>Missingness and invalidity need explicit statuses. purchases=None is rejected by this strict count schema; purchases=0 is a real observed zero. A broader system could carry a separate unknown record with a source reason. It should not coerce unknown to zero, nor remove every hard-to-parse study and then report the remaining sample as representative.</p>
+<h4 id="interview-reasoning-with-explanatory-answers">Interview reasoning with explanatory answers<a class="heading-anchor" href="#interview-reasoning-with-explanatory-answers" aria-label="Link to this section">#</a></h4>
+<p><strong>Why is schema validity insufficient?</strong> It establishes structure and primitive types. A fabricated purchase count can still be an integer within the allowed range. Source support and semantic interpretation need separate checks.</p>
+<p><strong>Can the parser prove a statistical result?</strong> It can recover the declared source fields under its grammar. A causal effect, standard error or p-value additionally needs actual analysis inputs and justified design assumptions. Preserve a source&#x27;s claim as a claim until that separate computation is validated.</p>
+<p><strong>How should an extraction comparison be scored?</strong> Align records and fields to held-out source families, count unsupported values and missing-field behavior, and report acceptance coverage beside accuracy. Otherwise a system can appear accurate by rejecting difficult documents or inventing easy defaults.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-validate-a-correct-proposal">Example A: Validate a correct proposal<a class="heading-anchor" href="#example-a-validate-a-correct-proposal" aria-label="Link to this section">#</a></h4>
+<p>The denominator and unit are known before division. This calculation is deterministic and does not depend on the wording of an explanation.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">isinstance</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">,</span><span class="syntax-builtin">dict</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">object required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-operator">!=</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">exact fields required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">type</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">[</span>k<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">int</span> <span class="syntax-keyword">for</span> k <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> TypeError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">integer counts required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span>value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">inconsistent counts</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> value<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">!=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account assignment required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">rate</span><span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">if</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-number">0</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">positive denominator required</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">/</span>record<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">extract</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
+    match<span class="syntax-operator">=</span>re<span class="syntax-operator">.</span>fullmatch<span class="syntax-punctuation">(</span><span class="syntax-string">r</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Visits: (</span><span class="syntax-string">\</span><span class="syntax-string">d+); Purchases: (</span><span class="syntax-string">\</span><span class="syntax-string">d+); Unit: (account)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span>text<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> match <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">unsupported source grammar</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
+    result<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>match<span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">return</span> result<span class="syntax-punctuation">,</span><span class="syntax-punctuation">{</span>name<span class="syntax-punctuation">:</span>match<span class="syntax-operator">.</span>span<span class="syntax-punctuation">(</span>i<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span>name <span class="syntax-operator">in</span> <span class="syntax-builtin">enumerate</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span>
+record<span class="syntax-operator">=</span>validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> rate<span class="syntax-punctuation">(</span>record<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">.3</span></code></pre>
+<p><strong>Expected:</strong> conversion rate 0.3.</p>
+<h4 id="example-b-reject-a-plausible-but-impossible-record">Example B: Reject a plausible but impossible record<a class="heading-anchor" href="#example-b-reject-a-plausible-but-impossible-record" aria-label="Link to this section">#</a></h4>
+<p>A JSON parser cannot detect this domain contradiction. The validation rule catches a semantically invalid proposal even though its keys and primitive types are correct.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span> validate<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">assignment_unit</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-string">&#x27;</span><span class="syntax-string">account</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">except</span> ValueError<span class="syntax-punctuation">:</span> <span class="syntax-keyword">pass</span>
+<span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">impossible counts accepted</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected:</strong> ValueError for inconsistent counts.</p>
+<h4 id="example-c-trace-extracted-values-to-text">Example C: Trace extracted values to text<a class="heading-anchor" href="#example-c-trace-extracted-values-to-text" aria-label="Link to this section">#</a></h4>
+<p>Offsets refer to the original source string. Normalizing text before saving offsets without a mapping would make citations point at the wrong characters.</p>
+<pre class="highlighted-code"><code class="language-python">text<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Visits: 10; Purchases: 3; Unit: account</span><span class="syntax-string">&#x27;</span>
+parsed<span class="syntax-punctuation">,</span>spans<span class="syntax-operator">=</span>extract<span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> parsed<span class="syntax-operator">==</span>record
+<span class="syntax-keyword">assert</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">visits</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">10</span><span class="syntax-string">&#x27;</span> <span class="syntax-operator">and</span> text<span class="syntax-punctuation">[</span><span class="syntax-builtin">slice</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>spans<span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">purchases</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-string">&#x27;</span><span class="syntax-string">3</span><span class="syntax-string">&#x27;</span></code></pre>
+<p><strong>Expected:</strong> values 10 and 3; each span slices the original digits.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: conversion rate 0.3. invalid unit rejected; account remains explicit. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Validate a correct proposal.</strong> Validate visits 10, purchases 3 and assignment_unit account. <strong>Expected:</strong> conversion rate 0.3. <strong>Verify:</strong> Save the assertion results for exercise 1, including conversion rate 0.3.</li>
+</ol>
+<ol>
+<li><strong>Reject a plausible but impossible record.</strong> Validate visits 2 and purchases 3 under the declared one-purchase-per-visit policy. <strong>Expected:</strong> ValueError for inconsistent counts. <strong>Verify:</strong> Save the assertion results for exercise 2, including ValueError for inconsistent counts.</li>
+</ol>
+<ol>
+<li><strong>Trace extracted values to text.</strong> Parse the source text Visits: 10; Purchases: 3; Unit: account and retain source spans. <strong>Expected:</strong> values 10 and 3; each span slices the original digits. <strong>Verify:</strong> Save the assertion results for exercise 3, including values 10 and 3; each span slices the original digits.</li>
+</ol>
+<ol>
+<li><strong>Distinguish missing from zero.</strong> Submit a record with purchases=None and compare it with a real zero-purchase record. <strong>Expected:</strong> None is rejected by this strict schema; zero is accepted with rate 0. <strong>Verify:</strong> Save the assertion results for exercise 4, including None is rejected by this strict schema; zero is accepted with rate 0.</li>
+</ol>
+<ol>
+<li><strong>Reject boolean and extra fields.</strong> Submit visits=True, then add an undeclared p_value field to a valid proposal. <strong>Expected:</strong> TypeError for a boolean count; ValueError for an extra field. <strong>Verify:</strong> Save the assertion results for exercise 5, including TypeError for a boolean count; ValueError for an extra field.</li>
+</ol>
+<ol>
+<li><strong>Preserve the assignment unit.</strong> Attempt to replace account with visit and explain why the independence assumption cannot be inferred from the count fields. <strong>Expected:</strong> invalid unit rejected; account remains explicit. <strong>Verify:</strong> Save the assertion results for exercise 6, including invalid unit rejected; account remains explicit.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>If a rate is wrong, inspect the exact source spans, parsed values, eligibility rule and denominator in that order. If zero-activity records vanish, distinguish a valid zero-count observation from an undefined zero-denominator rate. If a Boolean slips into counts, inspect exact types before coercion.</p>
+<p>If accepted records have excellent accuracy but aggregate findings change, inspect the rejected population and grouping units. If a causal conclusion appears despite having only counts and a unit label, locate the missing assignment and outcome data. If citations move after text cleanup, preserve the original version and an explicit coordinate mapping rather than widening a substring match.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Revisit the worked examples, then close them. Explain Schema validity, Semantic validity, Provenance span using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-applied-001</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.python.org/3.12/library/json.html">Python json documentation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-002, Data-science task contracts and structured extraction.
+Read courses/llm-applied/guides/llm-applied-002.md and courses/llm-applied/lessons/llm-applied-002.py. Direct prerequisites: `llm-applied-001`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-applied/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

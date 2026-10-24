@@ -1,0 +1,1516 @@
+{
+  "schema_version": 1,
+  "status": "planned",
+  "id": "kubernetes",
+  "title": "Kubernetes: from first object to platform reasoning",
+  "summary": "66 detailed Kubernetes lessons, including a dedicated 24-lesson networking and operations sequence covering Pod/Service/node addresses, CNI, DNS, routing, external load balancing, Gateway API, TLS, policy, dual-stack, topology and end-to-end diagnosis. Advanced host capabilities remain explicit.",
+  "north_star": "Declare an owned workload, prove desired state, ready traffic paths and data behavior, then diagnose and recover a bounded failure without touching another target.",
+  "entry_prerequisites": [],
+  "runtime_profiles": [
+    "reading",
+    "k8s-kind"
+  ],
+  "stages": [
+    {
+      "id": "beginner",
+      "title": "Build a reliable mental model",
+      "outcome": "Predict small examples, perform bounded changes and independently verify the first capstone."
+    },
+    {
+      "id": "intermediate",
+      "title": "Compose and debug real systems",
+      "outcome": "Combine the mechanisms with explicit ownership, tests, failure cases and repeatable delivery."
+    },
+    {
+      "id": "advanced",
+      "title": "Defend engineering decisions",
+      "outcome": "Reason about concurrency or distributed control, measure tradeoffs and present a reviewed recovery/release capstone."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "k8s-001",
+      "title": "Terminal, files and an owned lab receipt",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [],
+      "runtime": "reading",
+      "outcome": "Identify the file being edited and the exact disposable target before any cluster action.",
+      "lab": "Read an example host preparation receipt and trace command, context, namespace and output on a worksheet.",
+      "verification": "Reject an expired or mismatched receipt and explain why an ambient current-context is never a course target.",
+      "concepts": [
+        "terminal",
+        "file",
+        "context",
+        "ownership"
+      ]
+    },
+    {
+      "id": "k8s-002",
+      "title": "Processes, containers, images and ports",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-001"
+      ],
+      "runtime": "reading",
+      "outcome": "Distinguish an image from a running process and a container port from a host port.",
+      "lab": "Trace supplied offline container/network diagrams and an image-cache inventory.",
+      "verification": "Correctly locate a process, an image digest and both sides of one port mapping; no engine installation is implied.",
+      "concepts": [
+        "process",
+        "container",
+        "image",
+        "port"
+      ]
+    },
+    {
+      "id": "k8s-003",
+      "title": "Kubernetes objects and YAML anatomy",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-002"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Read apiVersion, kind, metadata and spec as an API request.",
+      "lab": "Validate and apply a tiny namespaced fixture through the prepared worker credential.",
+      "verification": "A deliberate indentation/type error is rejected; the accepted object's returned UID and namespace match the lease.",
+      "concepts": [
+        "API",
+        "YAML",
+        "metadata",
+        "spec"
+      ]
+    },
+    {
+      "id": "k8s-004",
+      "title": "Identity, namespaces and explicit targeting",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-003"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Demonstrate the difference between a namespace and permission to act in it.",
+      "lab": "Use the private worker kubeconfig to create one allowed object and attempt a denied cluster action.",
+      "verification": "The own-namespace action succeeds; namespace creation and cluster-role modification are forbidden; no credential is copied into progress.",
+      "concepts": [
+        "RBAC",
+        "namespace",
+        "identity",
+        "lease"
+      ]
+    },
+    {
+      "id": "k8s-005",
+      "title": "Pods, image locality and logs",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-004"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Explain Pod phase, container state and image availability separately.",
+      "lab": "Run a preloaded nonroot HTTP fixture, inspect its logs and compare a host-provided missing-image negative case.",
+      "verification": "The valid container starts offline; the negative case reports image absence without an automatic pull, and the learner distinguishes phase from readiness.",
+      "concepts": [
+        "Pod",
+        "imagePullPolicy",
+        "logs",
+        "container state"
+      ]
+    },
+    {
+      "id": "k8s-006",
+      "title": "Deployments and reconciliation",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-005"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Predict how a controller restores declared replica count.",
+      "lab": "Create a two-replica Deployment and delete one owned Pod by recorded UID.",
+      "verification": "A new Pod UID appears while Deployment UID stays fixed and observed generation/ready replica evidence converges.",
+      "concepts": [
+        "Deployment",
+        "ReplicaSet",
+        "reconciliation",
+        "desired state"
+      ]
+    },
+    {
+      "id": "k8s-007",
+      "title": "Labels, selectors and Services",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-006"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Connect a Service selector to a set of Pods rather than to an image name.",
+      "lab": "Create an internal Service and compare matching and nonmatching label fixtures.",
+      "verification": "The selector matches exactly the intended Pod UIDs and Service ports resolve to the documented container port.",
+      "concepts": [
+        "label",
+        "selector",
+        "Service",
+        "ClusterIP"
+      ]
+    },
+    {
+      "id": "k8s-008",
+      "title": "Readiness and eligible Service backends",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-007"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Diagnose why a running process can be ineligible for Service traffic.",
+      "lab": "Complete the pilot: observe two ready backends, break a readiness path and repair a selector mismatch.",
+      "verification": "Deployment/Pod state, ready EndpointSlice entries and an in-cluster HTTP client agree; port-forward alone is not accepted as routing proof.",
+      "concepts": [
+        "readiness",
+        "EndpointSlice",
+        "reconciliation",
+        "traffic"
+      ]
+    },
+    {
+      "id": "k8s-009",
+      "title": "ConfigMaps and configuration boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-008"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Separate configuration data from the immutable image and observe when an application reloads it.",
+      "lab": "Change a synthetic message through environment and mounted-file fixtures.",
+      "verification": "The expected process sees the correct value; a snapshot records which update required a rollout and which required application reload support.",
+      "concepts": [
+        "ConfigMap",
+        "environment",
+        "volume",
+        "configuration"
+      ]
+    },
+    {
+      "id": "k8s-010",
+      "title": "Requests, limits and namespace budgets",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-006"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Distinguish scheduling requests, enforcement limits and quota admission.",
+      "lab": "Compare a schedulable Pod with a quota-rejected and memory-limited fixture inside the lease.",
+      "verification": "Events distinguish FailedScheduling, admission rejection and OOMKilled; the learner does not label all three as a readiness error.",
+      "concepts": [
+        "request",
+        "limit",
+        "quota",
+        "scheduling"
+      ]
+    },
+    {
+      "id": "k8s-011",
+      "title": "Jobs and scheduled work",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "k8s-005"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Choose a completion-oriented workload instead of an endlessly restarted service.",
+      "lab": "Run a deterministic Job and inspect a preconfigured CronJob schedule/time-zone worksheet.",
+      "verification": "Succeeded/failed counts and bounded retry/deadline behavior match the fixture; suspension prevents further scheduled runs before cleanup.",
+      "concepts": [
+        "Job",
+        "CronJob",
+        "backoff",
+        "deadline"
+      ]
+    },
+    {
+      "id": "k8s-012",
+      "title": "Debug from conditions, events and logs",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-008",
+        "k8s-010",
+        "k8s-011"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Select evidence that distinguishes a configuration error from a runtime failure.",
+      "lab": "Triage three offline/live paired fixtures: missing config, wrong probe and failed Job.",
+      "verification": "Each diagnosis names a discriminating condition/event/log line and one minimal repair; unrelated resources remain unchanged.",
+      "concepts": [
+        "condition",
+        "event",
+        "log",
+        "hypothesis"
+      ]
+    },
+    {
+      "id": "k8s-013",
+      "title": "Rollouts, revisions and recovery",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-009",
+        "k8s-012"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Change declared state and verify rollout completion rather than trusting apply success.",
+      "lab": "Roll a two-replica fixture between preloaded versions, introduce a bad readiness configuration and revert the manifest.",
+      "verification": "Generation, updated/ready counts and response version agree after recovery; rollback evidence records the restored declarative file.",
+      "concepts": [
+        "rollout",
+        "revision",
+        "generation",
+        "recovery"
+      ]
+    },
+    {
+      "id": "k8s-014",
+      "title": "Capstone 1: observable stateless service",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "k8s-009",
+        "k8s-010",
+        "k8s-011",
+        "k8s-012",
+        "k8s-013"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Deliver a small service and prove both convergence and reachability.",
+      "lab": "Assemble Deployment, Service, ConfigMap and a bounded verifier Job, then repair one teacher-selected fault.",
+      "verification": "Two eligible backends, correct HTTP payload, observed desired state and owner-scoped cleanup all pass from a fresh namespace.",
+      "concepts": [
+        "capstone",
+        "reconciliation",
+        "verification",
+        "cleanup"
+      ]
+    },
+    {
+      "id": "k8s-015",
+      "title": "Startup, liveness and readiness are different",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-008",
+        "k8s-013"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Select a probe by the action Kubernetes should take after failure.",
+      "lab": "Compare a slow-start fixture with a temporarily unready fixture and a permanently unhealthy fixture.",
+      "verification": "Restart counts and endpoint readiness demonstrate the intended difference; thresholds are justified from fixture startup evidence.",
+      "concepts": [
+        "startup probe",
+        "liveness",
+        "readiness",
+        "restart"
+      ]
+    },
+    {
+      "id": "k8s-016",
+      "title": "Init containers and ephemeral shared files",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-005",
+        "k8s-009"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Explain container ordering and the lifetime of emptyDir data.",
+      "lab": "Use a finite init step and an application sharing a synthetic generated file.",
+      "verification": "The application starts after initialization; container restart versus Pod replacement produces the documented file lifetime.",
+      "concepts": [
+        "init container",
+        "emptyDir",
+        "lifecycle"
+      ]
+    },
+    {
+      "id": "k8s-017",
+      "title": "Nonroot workloads and Pod Security",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-010"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Relate a security context to admission and actual process identity.",
+      "lab": "Compare a restricted-compatible fixture with denied privilege/host-path variants supplied by the host.",
+      "verification": "Allowed workload identity is nonroot; forbidden host namespaces, privileged mode and unapproved mounts fail before execution.",
+      "concepts": [
+        "securityContext",
+        "Pod Security",
+        "least privilege"
+      ]
+    },
+    {
+      "id": "k8s-018",
+      "title": "ServiceAccounts and RBAC boundaries",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-004",
+        "k8s-017"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Prove a worker can perform its job without access to cluster administration.",
+      "lab": "Inspect the provided Role/RoleBinding explanation and run positive/negative authorization checks.",
+      "verification": "Own-object actions succeed while cross-namespace, Secret-reading and role-escalation actions are denied; workload tokens are not mounted by default.",
+      "concepts": [
+        "ServiceAccount",
+        "RBAC",
+        "TokenRequest",
+        "authorization"
+      ]
+    },
+    {
+      "id": "k8s-019",
+      "title": "Synthetic Secrets and reload semantics",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-009",
+        "k8s-018"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Explain why base64 is encoding and why access paths matter more than a field name.",
+      "lab": "Inspect offline fake-secret bytes and observe a host-provided synthetic Secret mount without collecting real credentials.",
+      "verification": "Decoded dummy value is exact; the evidence names who can obtain it and distinguishes a mounted update from application reload.",
+      "concepts": [
+        "Secret",
+        "encoding",
+        "exposure",
+        "reload"
+      ]
+    },
+    {
+      "id": "k8s-020",
+      "title": "DNS and layered network diagnosis",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-007",
+        "k8s-012"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Separate DNS resolution, Service backend selection and application response.",
+      "lab": "Use an in-cluster client to test a service name, a wrong port and an HTTP error endpoint.",
+      "verification": "The report identifies which layer failed using DNS/result/backend evidence, with bounded timeouts and no external network dependency.",
+      "concepts": [
+        "DNS",
+        "Service",
+        "port",
+        "HTTP"
+      ]
+    },
+    {
+      "id": "k8s-021",
+      "title": "NetworkPolicy with enforcement evidence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-018",
+        "k8s-020"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Prove a policy changes permitted connectivity on a policy-capable fixture.",
+      "lab": "In a dedicated policy-enabled lease, compare allowed and denied TCP client paths before and after default deny.",
+      "verification": "The intended connection changes from success to bounded failure while the permitted path remains good; the lab is unavailable on an unqualified CNI.",
+      "concepts": [
+        "NetworkPolicy",
+        "CNI",
+        "allow",
+        "deny"
+      ]
+    },
+    {
+      "id": "k8s-022",
+      "title": "Volumes, claims and stateful identity",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-010",
+        "k8s-016"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Distinguish Pod replacement, persistent data and a storage class's guarantees.",
+      "lab": "Use an owned synthetic PVC fixture and replace its application Pod without touching host personal directories.",
+      "verification": "The expected marker survives Pod replacement; deletion/reclaim behavior is verified separately and is not called a backup.",
+      "concepts": [
+        "PVC",
+        "StatefulSet",
+        "StorageClass",
+        "reclaim"
+      ]
+    },
+    {
+      "id": "k8s-023",
+      "title": "Gateway, Ingress and the external route",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-013",
+        "k8s-017",
+        "k8s-020"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Distinguish an internal Service from a host-facing HTTP route and the controller that implements it.",
+      "lab": "In a dedicated lease with host-installed Gateway API/controller fixtures, attach an owned HTTPRoute and compare a matching route, an unmatched path and a synthetic TLS termination case; contrast an Ingress fixture.",
+      "verification": "Gateway/Route Accepted and ResolvedRefs conditions plus the bounded client response agree; the host listener is loopback-only, the synthetic certificate is verified without bypassing TLS, and no external IP or controller installation is assumed.",
+      "concepts": [
+        "Gateway API",
+        "HTTPRoute",
+        "Ingress",
+        "TLS termination",
+        "controller"
+      ]
+    },
+    {
+      "id": "k8s-024",
+      "title": "Kustomize and field ownership",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "k8s-003",
+        "k8s-013"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Review the full rendered resource before applying an overlay.",
+      "lab": "Render dev/test overlays offline and inspect server-side apply ownership/conflict fixtures.",
+      "verification": "Only declared fields differ, no namespace escapes appear and a field-manager conflict is explained instead of force-overwritten.",
+      "concepts": [
+        "Kustomize",
+        "overlay",
+        "server-side apply",
+        "field manager"
+      ]
+    },
+    {
+      "id": "k8s-025",
+      "title": "Helm values without hidden side effects",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-019",
+        "k8s-024"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Treat a chart render as reviewable manifests rather than an opaque install.",
+      "lab": "Render a pinned vendored chart offline; review values, hooks and cluster-scoped objects before namespaced apply.",
+      "verification": "Rendered objects meet the allowlist; a fixture with a forbidden hook/CRD fails review without executing plugins or downloading a chart.",
+      "concepts": [
+        "Helm",
+        "values",
+        "template",
+        "review"
+      ]
+    },
+    {
+      "id": "k8s-026",
+      "title": "Placement and node-local DaemonSets",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-010",
+        "k8s-012"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Compare a replica-count workload with one Pod per eligible node and explain affinity/taint constraints.",
+      "lab": "Use host-supplied node facts to compare a Deployment with a restricted synthetic DaemonSet, then inspect affinity and taint/toleration negative fixtures without editing Nodes.",
+      "verification": "DaemonSet desiredNumberScheduled and numberReady match qualified eligible-node facts; Pod placement or Pending events explain constraints, and the worker never patches shared Nodes.",
+      "concepts": [
+        "DaemonSet",
+        "affinity",
+        "taint",
+        "toleration",
+        "scheduler"
+      ]
+    },
+    {
+      "id": "k8s-027",
+      "title": "Observability and service-level evidence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-012",
+        "k8s-015",
+        "k8s-020"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Define a meaningful availability/latency observation and connect it to a failure hypothesis.",
+      "lab": "Collect bounded synthetic request results and, where provisioned, namespace metrics.",
+      "verification": "Error counts and latency summaries match raw samples; missing metrics capability is reported explicitly and no monitoring stack is silently installed.",
+      "concepts": [
+        "SLI",
+        "metrics",
+        "logs",
+        "latency"
+      ]
+    },
+    {
+      "id": "k8s-028",
+      "title": "Capstone 2: stateful change with policy",
+      "level": "intermediate",
+      "minutes": 240,
+      "prerequisites": [
+        "k8s-017",
+        "k8s-018",
+        "k8s-021",
+        "k8s-022",
+        "k8s-023",
+        "k8s-025",
+        "k8s-027"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Release and recover an owned stateful fixture with explicit access and data boundaries.",
+      "lab": "Combine a small app, synthetic datastore, PVC, reviewed chart/overlay and policy-enabled clients.",
+      "verification": "Connectivity, stored marker hashes, limited authorization and failed-change recovery all pass; cleanup respects the declared data retention choice.",
+      "concepts": [
+        "capstone",
+        "state",
+        "policy",
+        "change"
+      ]
+    },
+    {
+      "id": "k8s-029",
+      "title": "Custom resources and structural schemas",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-028"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Distinguish a custom resource instance from cluster-scoped API registration.",
+      "lab": "In a dedicated advanced lease, request a reviewed host-provisioned CRD fixture and submit valid/invalid namespaced instances.",
+      "verification": "Invalid fields are rejected by the schema; worker credentials cannot create arbitrary CRDs or widen their own privileges.",
+      "concepts": [
+        "CRD",
+        "schema",
+        "custom resource",
+        "scope"
+      ]
+    },
+    {
+      "id": "k8s-030",
+      "title": "Operators and reconciliation contracts",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-006",
+        "k8s-029"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Explain an operator's idempotent reconcile loop and status conditions without assuming Go knowledge.",
+      "lab": "Drive a preloaded namespaced controller with repeated, changed and deleted custom resource fixtures.",
+      "verification": "Observed resources and conditions converge without duplicate side effects; a supplied reconciliation trace explains requeue/finalizer behavior.",
+      "concepts": [
+        "operator",
+        "idempotence",
+        "status",
+        "finalizer"
+      ]
+    },
+    {
+      "id": "k8s-031",
+      "title": "Admission policy and controlled denial",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-017",
+        "k8s-029"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Separate API validation, authorization and admission decisions.",
+      "lab": "Use a host-installed, lease-scoped policy fixture to deny an unsafe workload and allow its corrected form.",
+      "verification": "The denial reason matches the policy, an allowed request succeeds and no arbitrary webhook endpoint or cluster-wide policy is installed by the worker.",
+      "concepts": [
+        "admission",
+        "CEL",
+        "validation",
+        "policy"
+      ]
+    },
+    {
+      "id": "k8s-032",
+      "title": "Disruptions and availability budgets",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-026",
+        "k8s-028"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Predict what an eviction budget protects and what it cannot prevent.",
+      "lab": "Request an allowlisted drain of an owned worker node in an exclusive multi-node lease.",
+      "verification": "Eviction behavior respects the PDB, readiness recovers and the learner distinguishes voluntary eviction from node loss.",
+      "concepts": [
+        "PDB",
+        "eviction",
+        "drain",
+        "availability"
+      ]
+    },
+    {
+      "id": "k8s-033",
+      "title": "Autoscaling with a qualified metrics path",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-010",
+        "k8s-027",
+        "k8s-032"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Relate resource requests, measured load and stabilization to an HPA decision.",
+      "lab": "Drive a bounded local load fixture against a host-provisioned metrics-enabled service.",
+      "verification": "HPA status and replica movement fall within declared ranges and stabilize; no exact timing or production capacity claim is invented.",
+      "concepts": [
+        "HPA",
+        "metrics",
+        "stabilization",
+        "load"
+      ]
+    },
+    {
+      "id": "k8s-034",
+      "title": "Traffic changes and progressive delivery",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-013",
+        "k8s-021",
+        "k8s-027"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Design a release gate from application evidence instead of replica count alone.",
+      "lab": "Compare rolling and two-version Service-selection fixtures with a synthetic failing release.",
+      "verification": "Version/error samples meet the declared gate; a failed candidate is removed and finite samples are not claimed to prove an exact traffic ratio.",
+      "concepts": [
+        "canary",
+        "blue-green",
+        "traffic",
+        "release gate"
+      ]
+    },
+    {
+      "id": "k8s-035",
+      "title": "Watches and optimistic concurrency",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-003",
+        "k8s-018",
+        "k8s-030"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Handle resource-version conflicts and watch expiration without losing state.",
+      "lab": "Apply conditional edits to an owned object and replay a supplied expired-watch trace.",
+      "verification": "One stale update receives 409, relist/reconcile recovers and resourceVersion is not treated as a user-defined clock.",
+      "concepts": [
+        "watch",
+        "resourceVersion",
+        "conflict",
+        "relist"
+      ]
+    },
+    {
+      "id": "k8s-036",
+      "title": "Control-plane snapshots and data backups",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "k8s-018",
+        "k8s-022",
+        "k8s-028"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "State what an etcd snapshot includes and which workload data it does not back up.",
+      "lab": "In a dedicated synthetic cluster, request fixed host snapshot/restore operations and compare state with an independent PVC backup fixture.",
+      "verification": "Restored API objects and application marker hashes are checked separately; private snapshot material is never exported as portable progress.",
+      "concepts": [
+        "etcd",
+        "snapshot",
+        "backup",
+        "restore boundary"
+      ]
+    },
+    {
+      "id": "k8s-037",
+      "title": "Version skew and replacement-cluster rehearsal",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-024",
+        "k8s-028",
+        "k8s-029"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Test API compatibility across qualified versions without calling kind a production upgrade system.",
+      "lab": "Render/validate fixtures against two separately owned pinned kind clusters and migrate only synthetic manifests/data.",
+      "verification": "Compatibility differences are explained and the replacement cluster passes acceptance; no in-place production upgrade or HA proof is claimed.",
+      "concepts": [
+        "version skew",
+        "API compatibility",
+        "replacement",
+        "upgrade"
+      ]
+    },
+    {
+      "id": "k8s-038",
+      "title": "Image provenance and offline verification",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "k8s-017",
+        "k8s-025",
+        "k8s-031"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Distinguish content integrity from publisher provenance and policy enforcement.",
+      "lab": "Evaluate prewarmed digest/signature-bundle fixtures with a qualified offline verification tool.",
+      "verification": "Expected signed content is accepted, a tampered artifact is rejected and the report records trust inputs rather than equating a digest with authorship.",
+      "concepts": [
+        "digest",
+        "signature",
+        "provenance",
+        "offline trust"
+      ]
+    },
+    {
+      "id": "k8s-039",
+      "title": "Multitenancy and threat boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-018",
+        "k8s-021",
+        "k8s-031"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Explain why namespaces/RBAC alone are not an arbitrary-code isolation guarantee.",
+      "lab": "Analyze adversarial supplied manifests and compare them with admission/runtime/network controls in an exclusive fixture.",
+      "verification": "Each rejected behavior names its control; no learner can mount host paths, run privileged or obtain another lease's credentials.",
+      "concepts": [
+        "multitenancy",
+        "threat model",
+        "isolation",
+        "defense in depth"
+      ]
+    },
+    {
+      "id": "k8s-040",
+      "title": "Incident response and bounded fault injection",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "k8s-027",
+        "k8s-032",
+        "k8s-035"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Choose a reversible investigation from a specific symptom and preserve evidence.",
+      "lab": "Request one host-allowlisted synthetic fault, diagnose it and restore the last verified desired state.",
+      "verification": "A timestamped evidence timeline distinguishes cause from symptom; unrelated namespaces and cluster settings are unchanged.",
+      "concepts": [
+        "incident",
+        "fault injection",
+        "diagnosis",
+        "recovery"
+      ]
+    },
+    {
+      "id": "k8s-041",
+      "title": "Recovery objectives and reviewable runbooks",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "k8s-036",
+        "k8s-037",
+        "k8s-040"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Measure a recovery objective with both service and data evidence.",
+      "lab": "Execute a documented synthetic recovery drill with explicit start/finish definitions and missing-step negative control.",
+      "verification": "Observed recovery time and data-loss boundary are reported with source timestamps and marker hashes; a ready Pod alone is insufficient.",
+      "concepts": [
+        "RTO",
+        "RPO",
+        "runbook",
+        "evidence"
+      ]
+    },
+    {
+      "id": "k8s-042",
+      "title": "Capstone 3: platform release and incident review",
+      "level": "advanced",
+      "minutes": 300,
+      "prerequisites": [
+        "k8s-030",
+        "k8s-031",
+        "k8s-033",
+        "k8s-034",
+        "k8s-038",
+        "k8s-039",
+        "k8s-041"
+      ],
+      "runtime": "k8s-kind",
+      "outcome": "Defend an end-to-end Kubernetes change and recovery story within a bounded owned environment.",
+      "lab": "Release a policy-compliant custom-resource application, respond to a teacher-selected incident and perform a synthetic recovery drill.",
+      "verification": "Application/data/authorization gates pass, every privileged operation has a dedicated lease receipt and cleanup removes only owned disposable resources.",
+      "concepts": [
+        "capstone",
+        "platform",
+        "incident",
+        "review"
+      ]
+    },
+    {
+      "id": "k8s-043",
+      "title": "Three address spaces: Pod IP, node IP and Service IP",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-008",
+        "k8s-020"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Pod IP",
+        "node IP",
+        "ClusterIP",
+        "network namespace"
+      ],
+      "outcome": "Explain a successful request with a changed backend UID.",
+      "lab": "Draw the internal request path with both ports.",
+      "verification": "Service continuity and backend identity are separate observations."
+    },
+    {
+      "id": "k8s-044",
+      "title": "CIDRs, subnets, routing and address planning",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-043"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "CIDR",
+        "subnet",
+        "route",
+        "overlap"
+      ],
+      "outcome": "Defend an address plan for a second local cluster.",
+      "lab": "Build a nonoverlapping synthetic address-plan table.",
+      "verification": "Ranges and routes avoid collisions with the first cluster and host networks."
+    },
+    {
+      "id": "k8s-045",
+      "title": "Pod network namespaces, sidecars and localhost",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-044"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Pod network",
+        "loopback",
+        "sidecar",
+        "port collision"
+      ],
+      "outcome": "Defend whether a helper belongs in a sidecar or separate Deployment.",
+      "lab": "Draw a sidecar and app port allocation.",
+      "verification": "Consider shared lifecycle, scaling, networking and failure requirements."
+    },
+    {
+      "id": "k8s-046",
+      "title": "CNI, cross-node paths, overlays and MTU",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-045"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "CNI",
+        "routing",
+        "overlay",
+        "MTU"
+      ],
+      "outcome": "Plan a CNI-specific qualification without replacing the plugin.",
+      "lab": "Draw a two-node request path.",
+      "verification": "Read configuration, state the implementation and run only owned bounded probes."
+    },
+    {
+      "id": "k8s-047",
+      "title": "ClusterIP Services and Layer 4 routing",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-046"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "ClusterIP",
+        "Service selector",
+        "port",
+        "targetPort"
+      ],
+      "outcome": "Design a stable endpoint for replacing Pods.",
+      "lab": "Trace a fresh TCP request through the Service.",
+      "verification": "Clients use Service discovery while backend identities can change."
+    },
+    {
+      "id": "k8s-048",
+      "title": "Cluster DNS, search paths, caching and discovery",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-047"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "DNS",
+        "FQDN",
+        "search domain",
+        "cache"
+      ],
+      "outcome": "Design robust service discovery for a client.",
+      "lab": "Draw resolution and connection as separate phases.",
+      "verification": "Known namespace/domain, bounded resolution/connection and safe reconnect behavior."
+    },
+    {
+      "id": "k8s-049",
+      "title": "EndpointSlices, readiness and backend identity",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-048"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "EndpointSlice",
+        "ready",
+        "serving",
+        "terminating"
+      ],
+      "outcome": "Prove a replacement backend is actually used.",
+      "lab": "Join eligible endpoint references to current Pod UIDs.",
+      "verification": "New UID eligibility plus a fresh source-bound application response."
+    },
+    {
+      "id": "k8s-050",
+      "title": "Service data planes: iptables, IPVS, nftables and eBPF",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-049"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "kube-proxy",
+        "iptables",
+        "nftables",
+        "eBPF"
+      ],
+      "outcome": "Plan an implementation-specific incident review.",
+      "lab": "Draw the watch-to-packet sequence.",
+      "verification": "Record active mode, versions, owned probe results and permitted diagnostics."
+    },
+    {
+      "id": "k8s-051",
+      "title": "NodePort and the path through a node",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-050"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "NodePort",
+        "node address",
+        "service port",
+        "external reachability"
+      ],
+      "outcome": "Compare NodePort with a deliberate loopback port-forward.",
+      "lab": "Draw the local-engine NodePort path.",
+      "verification": "They have different scopes, lifetimes and routing mechanisms."
+    },
+    {
+      "id": "k8s-052",
+      "title": "LoadBalancer Services: cloud controllers and local limitations",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-051"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "LoadBalancer",
+        "cloud controller",
+        "health check",
+        "external address"
+      ],
+      "outcome": "Plan a local versus cloud qualification.",
+      "lab": "Draw both node-backed and direct-Pod conceptual paths.",
+      "verification": "Named implementation, owned resources, cost/cleanup boundary and real request evidence."
+    },
+    {
+      "id": "k8s-053",
+      "title": "Ingress, HTTP routing and controller ownership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-052"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Ingress",
+        "host rule",
+        "path rule",
+        "controller"
+      ],
+      "outcome": "Compare Ingress and a Layer 4 Service.",
+      "lab": "Draw the full Ingress-to-Pod request path.",
+      "verification": "Ingress interprets HTTP routing; the Service handles transport endpoint selection."
+    },
+    {
+      "id": "k8s-054",
+      "title": "Gateway API, routes and role-separated configuration",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-053"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "GatewayClass",
+        "Gateway",
+        "HTTPRoute",
+        "ReferenceGrant"
+      ],
+      "outcome": "Plan Gateway acceptance evidence.",
+      "lab": "Design a route attachment boundary.",
+      "verification": "API/controller support, conditions, listener reachability and expected app response."
+    },
+    {
+      "id": "k8s-055",
+      "title": "TLS termination, certificates and upstream identity",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-054"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "TLS",
+        "certificate",
+        "SNI",
+        "termination"
+      ],
+      "outcome": "Plan a two-hop trust policy.",
+      "lab": "Design a no-secret TLS evidence record.",
+      "verification": "Client-facing identity and upstream identity are both explicit."
+    },
+    {
+      "id": "k8s-056",
+      "title": "NAT, source IP and traffic policies",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-055"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "DNAT",
+        "SNAT",
+        "externalTrafficPolicy",
+        "connection tracking"
+      ],
+      "outcome": "Design a source-IP acceptance test.",
+      "lab": "Draw a five-tuple path through one translation.",
+      "verification": "Known caller, documented path, transport peer and trusted-header evidence."
+    },
+    {
+      "id": "k8s-057",
+      "title": "Headless Services and stateful peer discovery",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-056"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "headless Service",
+        "StatefulSet",
+        "stable identity",
+        "DNS records"
+      ],
+      "outcome": "Design a stateful replacement check.",
+      "lab": "Draw a stateful peer discovery sequence.",
+      "verification": "Logical identity, new UID, intended volume and application-level data result."
+    },
+    {
+      "id": "k8s-058",
+      "title": "NetworkPolicy ingress, selectors and additive rules",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "NetworkPolicy",
+        "ingress",
+        "podSelector",
+        "namespaceSelector"
+      ],
+      "outcome": "Design real isolation acceptance.",
+      "lab": "Build an allowed/denied flow matrix.",
+      "verification": "One allowed and one denied owned flow under a named enforcing CNI."
+    },
+    {
+      "id": "k8s-059",
+      "title": "Egress policy, DNS dependencies and external destinations",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-058"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "egress",
+        "DNS dependency",
+        "ipBlock",
+        "default deny"
+      ],
+      "outcome": "Plan an egress qualification after NAT.",
+      "lab": "Design a minimal egress matrix.",
+      "verification": "Record implementation, observed addresses and both allowed/denied cases."
+    },
+    {
+      "id": "k8s-060",
+      "title": "IPv4, IPv6 and dual-stack Services",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-059"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "IPv4",
+        "IPv6",
+        "dual stack",
+        "ipFamilyPolicy"
+      ],
+      "outcome": "Review dual-stack security coverage.",
+      "lab": "Build a family-specific acceptance table.",
+      "verification": "Intended allow/deny rules and observations cover both families."
+    },
+    {
+      "id": "k8s-061",
+      "title": "Topology, zones and locality-aware traffic",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-060"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "zone",
+        "topology",
+        "locality",
+        "failure domain"
+      ],
+      "outcome": "Defend a locality tradeoff.",
+      "lab": "Design a two-zone failure scenario.",
+      "verification": "Latency/cost benefits are balanced against capacity and failure behavior."
+    },
+    {
+      "id": "k8s-062",
+      "title": "Probes, graceful draining and rollout traffic continuity",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-061"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "startup probe",
+        "readiness probe",
+        "liveness probe",
+        "draining"
+      ],
+      "outcome": "Define rollout traffic-continuity acceptance.",
+      "lab": "Design a graceful shutdown timeline.",
+      "verification": "Current revision becomes ready, expected responses succeed and old resources drain/clean up."
+    },
+    {
+      "id": "k8s-063",
+      "title": "Observability: events, logs, metrics and traces",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-062"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "event",
+        "log",
+        "metric",
+        "trace"
+      ],
+      "outcome": "Plan privacy-aware observability for a teaching service.",
+      "lab": "Build a correlated synthetic request packet.",
+      "verification": "No credentials or private payloads, bounded retention and useful correlation fields."
+    },
+    {
+      "id": "k8s-064",
+      "title": "A packet-path troubleshooting method from DNS to response",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-063"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "failure localization",
+        "packet path",
+        "hypothesis",
+        "bounded probe"
+      ],
+      "outcome": "Perform a single-fault incident walkthrough.",
+      "lab": "Build a three-hypothesis table for Service failure.",
+      "verification": "One controlled fault, preserved failure, targeted repair and rechecked invariant."
+    },
+    {
+      "id": "k8s-065",
+      "title": "Service meshes, multi-cluster traffic and architectural limits",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-064"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "service mesh",
+        "mTLS",
+        "multi-cluster",
+        "failure domain"
+      ],
+      "outcome": "Defend whether a mesh is justified for a workload.",
+      "lab": "Draw a two-cluster request path.",
+      "verification": "Name required capabilities, operational cost and simpler alternatives."
+    },
+    {
+      "id": "k8s-066",
+      "title": "Networking capstone: publish, protect, trace and recover",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "k8s-065"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "architecture",
+        "acceptance",
+        "incident recovery",
+        "ownership"
+      ],
+      "outcome": "Teach the system and defend its evidence limits.",
+      "lab": "Produce a complete architecture and acceptance packet.",
+      "verification": "Explain mechanisms, current results, untested platforms and scoped cleanup."
+    }
+  ],
+  "capstones": [
+    {
+      "id": "k8s-capstone-01",
+      "level": "beginner",
+      "title": "Observable stateless service",
+      "brief": "k8s-014 combines namespace-scoped workload, configuration and verification from a fresh lease.",
+      "deliverables": [
+        "Deployment/Service/ConfigMap manifests",
+        "Desired-state, ready-endpoint and HTTP evidence",
+        "Minimal fault diagnosis and owner-scoped cleanup receipt"
+      ],
+      "acceptance": [
+        "Two eligible backend Pod UIDs agree with ready EndpointSlice entries.",
+        "An in-cluster client Job receives the expected payload.",
+        "A teacher-selected configuration fault is repaired and no outside resource is changed."
+      ]
+    },
+    {
+      "id": "k8s-capstone-02",
+      "level": "intermediate",
+      "title": "Stateful change with policy",
+      "brief": "k8s-028 combines controlled configuration, synthetic persistent data and policy-capable networking.",
+      "deliverables": [
+        "Reviewed vendored chart/overlay and resource inventory",
+        "Synthetic data marker/backup contract",
+        "Policy positive/negative tests and limited-identity evidence"
+      ],
+      "acceptance": [
+        "Data and service results survive the declared supported change.",
+        "Allowed/denied traffic proves actual CNI enforcement.",
+        "Failed change is recovered with explicit data retention and cleanup decisions."
+      ]
+    },
+    {
+      "id": "k8s-capstone-03",
+      "level": "advanced",
+      "title": "Platform release and incident review",
+      "brief": "k8s-042 uses an exclusive advanced lease for reviewed API/policy and recovery operations.",
+      "deliverables": [
+        "Custom-resource release and policy/provenance evidence",
+        "Incident timeline and measured synthetic recovery drill",
+        "Privileged-operation lease receipts and final cleanup inventory"
+      ],
+      "acceptance": [
+        "Application/data/authorization gates are independently inspectable.",
+        "Only the host provisioner performs reviewed cluster-level operations.",
+        "Recovery and cleanup prove the owned boundary; a kind lab is not presented as production HA acceptance."
+      ]
+    }
+  ],
+  "pilot": {
+    "lesson_id": "k8s-008",
+    "guide_path": "docs/expansion/samples/kubernetes-pilot.md",
+    "solution_path": "docs/expansion/samples/kubernetes-pilot-solutions.md",
+    "language": "yaml",
+    "code": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: echo\n  labels:\n    app: echo\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: echo\n  template:\n    metadata:\n      labels:\n        app: echo\n    spec:\n      automountServiceAccountToken: false\n      securityContext:\n        runAsNonRoot: true\n        runAsUser: 65532\n        seccompProfile:\n          type: RuntimeDefault\n      containers:\n        - name: echo\n          image: ds60-http-fixture:v1\n          imagePullPolicy: Never\n          args: [\"serve\", \"--port=8080\"]\n          ports:\n            - name: http\n              containerPort: 8080\n          readinessProbe:\n            httpGet:\n              path: /ready\n              port: http\n            periodSeconds: 2\n            failureThreshold: 2\n          resources:\n            requests: {cpu: 10m, memory: 16Mi}\n            limits: {cpu: 100m, memory: 64Mi}\n          securityContext:\n            allowPrivilegeEscalation: false\n            readOnlyRootFilesystem: true\n            capabilities:\n              drop: [\"ALL\"]\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: echo\nspec:\n  selector:\n    app: echo\n  ports:\n    - name: http\n      port: 8080\n      targetPort: http\n",
+    "concept": {
+      "title": "Running is not the same as ready for traffic",
+      "explanation": "The Deployment controller reconciles replica intent. A readiness probe controls whether a Pod is eligible for normal Service traffic. Service selectors and EndpointSlice ready conditions connect those separate mechanisms; apply success alone proves none of them.",
+      "worked_example": "Healthy replicas 2 yield two ready backend Pod UIDs. In a separate empty owned namespace, starting both replicas with probe /missing yields Running processes but zero eligible ready backends. A rolling change to an existing healthy Deployment can retain old Ready replicas and must be diagnosed by revision."
+    },
+    "prediction": {
+      "prompt": "In the controlled all-unready fixture, no old Ready Pods match the Service. Both HTTP processes run, but both readiness probes return404. What should normal Service verification observe with publishNotReadyAddresses unset?",
+      "choices": [
+        "Two healthy backends because Pod phase is Running.",
+        "Zero eligible ready backends; the containers need not restart.",
+        "The Deployment is automatically deleted."
+      ],
+      "correct_index": 1,
+      "explanation": "A readiness failure removes normal traffic eligibility. EndpointSlice objects may still contain unready addresses, so count ready conditions rather than object existence."
+    },
+    "hint_steps": [
+      "Inspect desired replicas, Pod Ready conditions and Service selector separately.",
+      "Match ready EndpointSlice targetRef UIDs to Ready Pods; do not count all endpoints or use port-forward as a Service-routing proof.",
+      "Change one cause at a time, restore /ready and app:echo, then require both convergence and a successful in-cluster client Job before cleanup."
+    ],
+    "transfer_prompt": "Design evidence for a second service named metrics whose Pods are Running but whose selector points at the wrong label, without changing the first service.",
+    "rubric": [
+      "Predict the distinction between Running, Ready and eligible backend correctly.",
+      "Use only the explicit lease target and worker credential; never copy credentials into evidence.",
+      "Verify controller convergence, endpoint UID membership and in-cluster HTTP results independently.",
+      "Diagnose selector and readiness failures without confusing them with a container restart.",
+      "Clean up only owned resources and record that the runtime/fixture matrix is still pending."
+    ]
+  },
+  "sources": [
+    {
+      "title": "kind Quick Start",
+      "url": "https://kind.sigs.k8s.io/docs/user/quick-start/",
+      "checked": "2026-10-22",
+      "supports": "Host preparation, platform binaries, owned cluster names and loading local images."
+    },
+    {
+      "title": "kind v0.33.0 release",
+      "url": "https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0",
+      "checked": "2026-10-22",
+      "supports": "Version qualification candidate and release-published node image digests."
+    },
+    {
+      "title": "kind Working Offline",
+      "url": "https://kind.sigs.k8s.io/docs/user/working-offline/",
+      "checked": "2026-10-22",
+      "supports": "Preload node/workload images and record exact content digests before disconnected study."
+    },
+    {
+      "title": "kind Using WSL 2",
+      "url": "https://kind.sigs.k8s.io/docs/user/using-wsl2/",
+      "checked": "2026-10-22",
+      "supports": "Windows Linux-container/WSL2 route; current engine prerequisites require separate verification."
+    },
+    {
+      "title": "Kubernetes supported releases",
+      "url": "https://kubernetes.io/releases/",
+      "checked": "2026-10-22",
+      "supports": "Recheck supported minor/patch versions at implementation;1.37/1.36/1.35 are listed at review."
+    },
+    {
+      "title": "Kubernetes Deployments",
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+      "checked": "2026-10-22",
+      "supports": "Desired/observed state, rollout generation and controller-managed Pods."
+    },
+    {
+      "title": "Kubernetes probes",
+      "url": "https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/",
+      "checked": "2026-10-22",
+      "supports": "Readiness traffic eligibility versus liveness/startup restart behavior."
+    },
+    {
+      "title": "Kubernetes EndpointSlices",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/",
+      "checked": "2026-10-22",
+      "supports": "Ready/serving/terminating endpoint conditions and UID-based backend checks."
+    },
+    {
+      "title": "Kubernetes RBAC good practices",
+      "url": "https://kubernetes.io/docs/concepts/security/rbac-good-practices/",
+      "checked": "2026-10-22",
+      "supports": "Least privilege, namespace escalation risks and separation of worker/admin identities."
+    },
+    {
+      "title": "Kubernetes ServiceAccounts",
+      "url": "https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/",
+      "checked": "2026-10-22",
+      "supports": "Bound short-lived tokens and credential lifecycle; requested duration is not a fabricated expiration guarantee."
+    },
+    {
+      "title": "Kubernetes NetworkPolicy",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+      "checked": "2026-10-22",
+      "supports": "A policy object does not prove enforcement without a capable networking implementation."
+    },
+    {
+      "title": "agnhost netexec source",
+      "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/master/test/images/agnhost/netexec/netexec.go",
+      "checked": "2026-10-22",
+      "supports": "The test server exposes shell/upload endpoints, motivating a smaller course-owned HTTP fixture instead."
+    },
+    {
+      "title": "Kubernetes Gateway API",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/gateway/",
+      "checked": "2026-10-22",
+      "supports": "Gateway/Route roles and the need for a separately qualified implementing controller."
+    },
+    {
+      "title": "Kubernetes Ingress",
+      "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "checked": "2026-10-22",
+      "supports": "Ingress is a stable but frozen API; compare existing deployments with the recommended Gateway direction."
+    },
+    {
+      "title": "Kubernetes DaemonSet",
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/",
+      "checked": "2026-10-22",
+      "supports": "One Pod per eligible node, node selection and DaemonSet scheduling/toleration semantics."
+    }
+  ]
+}

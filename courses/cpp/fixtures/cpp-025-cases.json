@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-025",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Classify the defect",
+      "input_or_change": "Explain index 2 into vector size 2.",
+      "expected": "Out of bounds; valid indices 0 and 1."
+    },
+    {
+      "exercise": 2,
+      "task": "Use checked access",
+      "input_or_change": "Compare at(2) with the contract of operator[2].",
+      "expected": "at throws; unchecked invalid access is undefined behavior."
+    },
+    {
+      "exercise": 3,
+      "task": "Prepare instrumented build",
+      "input_or_change": "Compile the safe reference with sanitizer flags on a supported host.",
+      "expected": "Compile/link/run statuses and compiler version recorded."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose a controlled failure",
+      "input_or_change": "In a separate instrumented scratch program introduce one heap out-of-bounds access.",
+      "expected": "Nonzero sanitizer report naming access and source location; never claim ordinary profile detection."
+    },
+    {
+      "exercise": 5,
+      "task": "Repair and rerun",
+      "input_or_change": "Replace invalid access with a valid index or explicit check.",
+      "expected": "Sanitizer report disappears on that test path; result is correct."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer signed arithmetic",
+      "input_or_change": "Review INT_MAX+1 and use pre-add range validation.",
+      "expected": "Input rejected before overflow."
+    }
+  ]
+}

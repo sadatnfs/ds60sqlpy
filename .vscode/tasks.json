@@ -1,0 +1,154 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Course: Guided start (Windows)",
+      "type": "process",
+      "command": "powershell.exe",
+      "args": [
+        "-NoLogo",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\start_ds60.ps1"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Guided coding lab",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/learning_lab.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Setup",
+      "type": "shell",
+      "command": "bash scripts/setup.sh",
+      "windows": {
+        "command": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_windows.ps1"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Learning portal",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/learning_portal.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Doctor",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/course.py",
+        "doctor"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Catalog",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/course.py",
+        "catalog"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Validate",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "scripts/course.py",
+        "validate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: JupyterLab",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "jupyterlab",
+        "python/ds-60day/notebooks"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: PostgreSQL Notebook",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "jupyterlab",
+        "bridge/professional/notebooks"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Bridge tests",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "pytest",
+        "bridge/tests"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Course: Professional tests",
+      "type": "process",
+      "command": "${command:python.interpreterPath}",
+      "args": [
+        "-m",
+        "pytest",
+        "python/professional/tests",
+        "bridge/professional/tests"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

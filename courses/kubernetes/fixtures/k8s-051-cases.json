@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-051",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Label port, targetPort and nodePort.",
+      "expected": "80, 8080 and 30080 serve distinct path positions."
+    },
+    {
+      "exercise": 2,
+      "task": "Predict whether a private node is publicly reachable.",
+      "expected": "No public route is implied by NodePort allocation."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw the local-engine NodePort path.",
+      "expected": "Include VM or node-container boundaries when present."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose timeout before traffic reaches the node.",
+      "expected": "Inspect host/VM route and mapping rather than Pod selectors first."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain the NodePort range as configurable.",
+      "expected": "The common default is not a guaranteed cluster setting."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare NodePort with a deliberate loopback port-forward.",
+      "expected": "They have different scopes, lifetimes and routing mechanisms."
+    }
+  ]
+}

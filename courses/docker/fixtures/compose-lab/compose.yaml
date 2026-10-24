@@ -1,0 +1,45 @@
+services:
+  app:
+    build: .
+    image: ds60-docker-study:local
+    pull_policy: never
+    init: true
+    environment:
+      APP_MESSAGE: hello from Docker study
+    ports:
+      - "127.0.0.1:18080:8080"
+    volumes:
+      - study-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=2).read()"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+  client:
+    image: ds60-docker-study:local
+    pull_policy: never
+    profiles: [tools]
+    depends_on:
+      app:
+        condition: service_healthy
+    entrypoint: ["python", "-c"]
+    command: ["import urllib.request; print(urllib.request.urlopen('http://app:8080/', timeout=3).read().decode().strip())"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    pids_limit: 32
+volumes:
+  study-data: {}

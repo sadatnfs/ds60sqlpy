@@ -1,0 +1,85 @@
+{
+  "lesson_id": "spark-020",
+  "scope": "Tiny paired local contracts;root-owned runtime qualification is separate.",
+  "cases": [
+    {
+      "exercise": 1,
+      "title": "Establish logical content independently of layout",
+      "input_contract": "Return the ordered list of(id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).",
+      "expected": "IDs 0..23 appear once, key=id%4, value=10*id. Metrics are 24,24,276,2760.",
+      "verification": "Assert every canonical tuple and all four aggregate values."
+    },
+    {
+      "exercise": 2,
+      "title": "Request keyed redistribution and test colocation",
+      "input_contract": "Return facts repartitioned to 6 partitions by key. Record its partition count and check that each logical key is observed in exactly one execution partition.",
+      "expected": "Six partitions requested;all 24 rows unchanged. Each of four keys has one observed partition ID;different keys may share one.",
+      "verification": "Assert partition metadata 6, canonical equality and per-key countDistinct(partition_id)=1."
+    },
+    {
+      "exercise": 3,
+      "title": "Reduce partitions without assuming balanced redistribution",
+      "input_contract": "Coalesce a six-partition input to 2 and return it. Separately request coalesce 10 on the original four-partition relation. Preserve canonical content in both cases.",
+      "expected": "The first has 2 partitions;the attempted increase remains 4. Both retain the 24-row bag and sum 2760.",
+      "verification": "Assert both partition counts and complete canonical equality."
+    },
+    {
+      "exercise": 4,
+      "title": "Reconcile an occupied-partition ledger",
+      "input_contract": "Return partition_id, row_count, id_total for occupied partitions of the supplied relation. Record total partition metadata separately and do not manufacture empty-partition rows.",
+      "expected": "Ledger row_count sums 24 and id_total sums 276;each recorded partition ID lies in[0, total_partitions). Occupied count may be lower than total.",
+      "verification": "Assert reconciliation and partition-ID bounds for both keyed 6 and coalesced 2 layouts."
+    },
+    {
+      "exercise": 5,
+      "title": "Verify ordering only within its promised scope",
+      "input_contract": "Return a relation sorted within each partition by key ascending, id ascending. Inspect the sequence of(key, id) pairs within each recorded partition and preserve the logical bag.",
+      "expected": "Every occupied partition sequence is sorted;the complete canonical relation is unchanged. No raw global collect sequence is required.",
+      "verification": "Assert per-partition sorted sequences and canonical equality without asserting that raw concatenation must be sorted or unsorted."
+    },
+    {
+      "exercise": 6,
+      "title": "Create a globally ordered bounded preview",
+      "input_contract": "Order key descending then event identity id ascending and return the first 5 rows. Repeat after several input layouts.",
+      "expected": "IDs[3,7,11,15,19], allkey 3 and values[30,70,110,150,190]. The final sixthkey 3 row is outside the limit.",
+      "verification": "Assert all five ordered tuples from original, keyed and coalesced inputs."
+    }
+  ],
+  "golden": {
+    "ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23
+    ],
+    "id_total": 276,
+    "value_total": 2760,
+    "preview": [
+      3,
+      7,
+      11,
+      15,
+      19
+    ]
+  }
+}

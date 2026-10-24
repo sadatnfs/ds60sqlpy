@@ -1,0 +1,31 @@
+{
+  "apiVersion": "networking.k8s.io/v1",
+  "kind": "Ingress",
+  "metadata": {
+    "name": "hello-ingress"
+  },
+  "spec": {
+    "ingressClassName": "lesson-ingress",
+    "rules": [
+      {
+        "host": "lesson.local",
+        "http": {
+          "paths": [
+            {
+              "path": "/version",
+              "pathType": "Prefix",
+              "backend": {
+                "service": {
+                  "name": "hello",
+                  "port": {
+                    "number": 8080
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

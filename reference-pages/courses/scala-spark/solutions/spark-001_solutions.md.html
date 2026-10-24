@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-001: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-001: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-001_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-001-explanatory-solutions">spark-001: explanatory solutions<a class="heading-anchor" href="#spark-001-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare after an attempt or an explicit reveal. The <a href="../guides/spark-001.md.html">guide</a> defines the learner contract. An authored reference is not a platform acceptance receipt.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>A source file is a description of work. A compiler checks Scala syntax and produces JVM bytecode; a JVM executes that bytecode. Spark is a separate data engine. PySpark lets a Python driver describe work that the Spark engine evaluates. Having Python alone does not establish a Spark installation. A version report is evidence about installed tools; a candidate compatibility tuple is a design choice until a real profile executes.</p>
+<p>The Scala-first route needs no Python prerequisite. The PySpark-first route uses existing Python functions, collections and testing skills, represented by python-10. Both eventually need the same row/schema concepts. The proposed Spark 4.2.0 / Scala 2.13.18 / JDK21 / Python3.12 tuple comes from <a href="https://spark.apache.org/docs/4.2.0/">Apache compatibility documentation</a> and the <a href="https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml">tagged Spark build</a>; the profile receipt, when available, must report the actual qualified versions.</p>
+<ul>
+<li><strong>JDK:</strong> the development kit including compiler/runtime tools for Java bytecode</li>
+<li><strong>JVM:</strong> the process executing compatible bytecode</li>
+<li><strong>binary line:</strong> a compatibility family such as Scala2.13, reflected by artifact suffix _2.13</li>
+<li><strong>driver:</strong> the program coordinating a Spark application</li>
+<li><strong>local[2]:</strong> a local Spark master using two worker threads, not two remote computers</li>
+</ul>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-trace-a-scala-program">Worked example 1: Trace a Scala program<a class="heading-anchor" href="#worked-example-1-trace-a-scala-program" aria-label="Link to this section">#</a></h4>
+<p>The arrows are different phases. A source edit does not retroactively modify a process that already ran.</p>
+<pre class="highlighted-code"><code class="language-text">Main.scala -&gt; Scala compiler -&gt; Main.class -&gt; JVM process -&gt; stdout: 42</code></pre>
+<p><strong>Expected:</strong> The editable input is Main.scala; 42 is an observation from the process.</p>
+<h4 id="worked-example-2-distinguish-a-candidate-from-a-receipt">Worked example 2: Distinguish a candidate from a receipt<a class="heading-anchor" href="#worked-example-2-distinguish-a-candidate-from-a-receipt" aria-label="Link to this section">#</a></h4>
+<p>A supported version range cannot prove that dependencies were downloaded, matched or executed on this machine.</p>
+<pre class="highlighted-code"><code class="language-text">candidate: Spark4.2.0 / Scala2.13.18 / JDK21
+receipt: profile absent; no executed probe</code></pre>
+<p><strong>Expected:</strong> Compatibility-informed, execution not established.</p>
+<h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-trace-artifacts">Exercise 1: Trace artifacts<a class="heading-anchor" href="#exercise-1-trace-artifacts" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 1, Main.scala, Main.class, stdout 42 and exit 0.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 1, source, compiled bytecode, observed output and process status are four different categories.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 1, label all four; do not call stdout a source file.</p>
+<p>Main.scala is the input; Main.class is generated bytecode; stdout is a stream; exit 0 reports normal process completion, not complete lesson mastery.</p>
+<h4 id="exercise-2-select-a-language-entry">Exercise 2: Select a language entry<a class="heading-anchor" href="#exercise-2-select-a-language-entry" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 2, Learner A has no prior language; B can write functions and pytest tests.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 2, A takes spark002-010; B takes spark011 after a python-10 competency check; both enter spark012.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 2, name both routes and explain why Scala-first needs no Python.</p>
+<p>The routes are alternatives, not an AND prerequisite. Schema1 cannot enforce that OR gate, so the visible diagnostic is required.</p>
+<h4 id="exercise-3-check-the-binary-suffix">Exercise 3: Check the binary suffix<a class="heading-anchor" href="#exercise-3-check-the-binary-suffix" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 3, spark-sql_2.13 at4.2.0 versus a proposed spark-sql_3 substitution.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 3, retain the documented Scala2.13 line; reject the unsupported Scala3 substitution for this profile.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 3, cite the binary suffix and actual profile receipt separately.</p>
+<p>A Scala3 language tutorial is not evidence that a Spark artifact compiled for another binary family can be substituted. Match documented artifacts and qualification evidence.</p>
+<h4 id="exercise-4-read-capability-truthfully">Exercise 4: Read capability truthfully<a class="heading-anchor" href="#exercise-4-read-capability-truthfully" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 4, candidate tuple; absent image; executed probe with digest and versions.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 4, candidate=proposed, absent=unavailable, executed matching receipt=qualified only for its tested platform.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 4, write all three labels without inventing an execution.</p>
+<p>Qualification is scoped to an actual image, architecture and probe. A green document table cannot qualify a missing worker.</p>
+<h4 id="exercise-5-reject-an-unintended-target">Exercise 5: Reject an unintended target<a class="heading-anchor" href="#exercise-5-reject-an-unintended-target" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 5, local[2] and spark://shared.example:7077.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 5, only the bounded local profile is eligible for this lesson; the remote master is outside its scope.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 5, identify the remote address and keep the saved attempt without connecting.</p>
+<p>The exercise needs seven inline rows. A shared cluster adds credentials, costs and cleanup responsibilities that this local contract does not authorize.</p>
+<h4 id="exercise-6-transfer-a-version-report">Exercise 6: Transfer a version report<a class="heading-anchor" href="#exercise-6-transfer-a-version-report" aria-label="Link to this section">#</a></h4>
+<p><strong>Inputs/evidence:</strong> For spark-001 Exercise 6, Python3.12 present; java unavailable; Spark profile absent.</p>
+<p><strong>Expected result/shape:</strong> For spark-001 Exercise 6, ordinary Python may run, but Scala/Spark is unavailable; no installation occurs on Run.</p>
+<p><strong>Verify:</strong> For spark-001 Exercise 6, name the missing layer and preserve your route/prediction notes.</p>
+<p>PySpark still needs an engine and its compatible execution environment. The next action is explicit profile preparation after review, not a hidden package install.</p>
+<h3 id="retrieval-review">Retrieval review<a class="heading-anchor" href="#retrieval-review" aria-label="Link to this section">#</a></h3>
+<p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
+<p>A complete review accounts for every named expected value and one deliberately incorrect alternative. A process exit by itself does not grade reasoning.</p></article>
+  </main>
+</body>
+</html>

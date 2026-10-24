@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>nlp-016: Sequence-to-sequence learning and summarization · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>nlp-016: Sequence-to-sequence learning and summarization</h1>
+      <p class="source-path">Generated from <code>courses/nlp/guides/nlp-016.md</code></p>
+    </header>
+    <article class="document"><h2 id="nlp-016-sequence-to-sequence-learning-and-summarization">nlp-016: Sequence-to-sequence learning and summarization<a class="heading-anchor" href="#nlp-016-sequence-to-sequence-learning-and-summarization" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; about 120 minutes plus discussion. Direct prerequisites: <code>nlp-015</code>. Read the preceding guide if its notation or information boundaries are unfamiliar.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Sequence-to-sequence learning predicts an output sequence conditioned on an input sequence. Translation, summarization and structured generation fit this pattern, but each has a different success contract. A translation should preserve meaning, a summary should preserve important claims and qualifications, and extraction should respect a schema and source evidence. Fluent output alone cannot establish any of those properties.</p>
+<p>An encoder represents the source, and a decoder predicts target tokens conditional on the source and prior target tokens. Cross-attention lets each decoder position consult source representations. During teacher-forced training, the decoder receives the correct earlier target tokens. During generation it receives its own earlier predictions, creating a mismatch when those predictions are wrong.</p>
+<p>This offline chapter implements exact cross-attention arithmetic, target shifting and bounded greedy/beam search over an authored probability table. It also provides an honestly labeled extractive summary baseline. It does not train a pretrained encoder-decoder or claim that a keyword-selected sentence is a generative summarizer.</p>
+<h3 id="separate-three-information-paths">Separate three information paths<a class="heading-anchor" href="#separate-three-information-paths" aria-label="Link to this section">#</a></h3>
+<p>Encoder self-attention combines source positions that are already observed. Decoder self-attention combines only earlier target positions under a causal mask. Cross-attention uses decoder queries with encoder keys and values, allowing generated positions to focus on relevant source content. These operations can share the same matrix formula but have different Q, K and V origins and different masks.</p>
+<p>If Q has target-length by hidden-dimension shape and K has source-length by hidden-dimension shape, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>Q</mi><mo>·</mo><msup><mi>K</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup></mrow><annotation encoding="application/x-tex">Q\cdot K^{\mathsf T}</annotation></semantics></math> yields target-length by source-length scores. Multiplying their normalized weights by source values returns a target-position representation. Mask source padding before softmax. A source attention mask does not replace the decoder&#x27;s causal target mask.</p>
+<p>The simple example uses one decoder query [1,0], two source keys [1,0] and [0,1], and values [10,0] and [0,20]. The weights depend on scaled key compatibility, while the values are what gets mixed. Confusing keys with values can yield plausible dimensions but a different computation.</p>
+<h3 id="teacher-forcing-and-output-alignment">Teacher forcing and output alignment<a class="heading-anchor" href="#teacher-forcing-and-output-alignment" aria-label="Link to this section">#</a></h3>
+<p>For raw target [repair], the decoder input is [BOS,repair] and the prediction targets are [repair,EOS]. At the first position the model sees BOS and predicts repair; at the second it sees the correct prefix repair and predicts ending. Feeding the unshifted target at the same position leaks the answer into its own input.</p>
+<p>For a masked-attention decoder such as a Transformer, teacher forcing lets target positions be computed in parallel during training because the correct shifted target sequence is available and the causal mask enforces prefix-only access. Teacher forcing does not remove the sequential hidden-state dependency of a recurrent decoder. At inference those correct prefixes do not exist yet. A wrong first token changes later conditioning and can lead to compounding errors. This is one reason low teacher-forced loss and good autoregressive task performance need separate evaluation.</p>
+<p>Padding and response masks determine which target positions contribute to loss. EOS is a meaningful supervised event, while padding is usually ignored. Empty raw output still needs an ending decision under the convention here. Record tokenizer and special-token identities; manually inserting a string called BOS is not equivalent to a pretrained model&#x27;s actual token ID and chat template.</p>
+<h3 id="decoding-searches-probabilities-not-truth">Decoding searches probabilities, not truth<a class="heading-anchor" href="#decoding-searches-probabilities-not-truth" aria-label="Link to this section">#</a></h3>
+<p>Greedy decoding chooses the largest next-token probability at each step. Beam search retains a bounded set of promising partial sequences and can find a higher-probability complete sequence, but it is still approximate and depends on width, stopping and scoring rules. Length normalization or penalties change the search objective and should be explicit.</p>
+<p>The authored table gives tea probability .6 and coffee .4 at the first step. Tea then ends with probability .5, so greedy tea-&gt;EOS has joint probability .3. Coffee ends with probability one, giving .4. A width-two beam retains coffee long enough to discover the better complete path. This is a search counterexample, not evidence that coffee is a better real-world answer.</p>
+<p>Higher model likelihood does not establish factual support or summary usefulness. A model can assign high probability to a common but incorrect statement. A production decoder needs bounded output and stop behavior, and a task evaluator must check meaning, evidence and required content separately from the search score.</p>
+<h3 id="summarization-and-provenance">Summarization and provenance<a class="heading-anchor" href="#summarization-and-provenance" aria-label="Link to this section">#</a></h3>
+<p>Extractive summarization selects source spans or sentences. Abstractive summarization generates new wording and can combine information across passages, which adds flexibility and risk of unsupported claims. The reference baseline selects a source sentence by query-word overlap and returns its original index and text. It abstains when there is no overlap.</p>
+<p>Selecting a sentence exactly avoids inventing new words but does not guarantee a good summary. It may omit a qualification in another sentence, choose an outdated statement or overemphasize repeated query terms. A generated summary can additionally reverse negation or imply causality absent from the source. Evaluate coverage, factual support and usefulness with representative documents and multiple valid references where appropriate.</p>
+<p>Preserve source identity, offsets and the selection/generation configuration. A later assistant should be able to show why a sentence or claim was included. Cross-attention weights are internal model computations, not a substitute for an external citation-support check.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-shift-one-target-correctly">Worked example 1: Shift one target correctly<a class="heading-anchor" href="#worked-example-1-shift-one-target-correctly" aria-label="Link to this section">#</a></h4>
+<p>Raw target [repair] becomes decoder input [BOS,repair] and targets [repair,EOS]. The two arrays have equal lengths but different content at every aligned prediction position. Empty raw output becomes one BOS input and one EOS target. These small checks catch a leakage bug before training any large model.</p>
+<h4 id="worked-example-2-calculate-cross-attention">Worked example 2: Calculate cross-attention<a class="heading-anchor" href="#worked-example-2-calculate-cross-attention" aria-label="Link to this section">#</a></h4>
+<p>The query/key dot products are one and zero, scaled by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>2</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{2}</annotation></semantics></math>. The first source receives probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mfrac><mrow><mn>1</mn></mrow><mrow><mn>1</mn><mo>+</mo><mi>exp</mi><mo stretchy="false">(</mo><mfrac><mrow><mo>−</mo><mn>1</mn></mrow><mrow><msqrt><mrow><mn>2</mn></mrow></msqrt></mrow></mfrac><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">p=\frac{1}{1+\exp(\frac{-1}{\sqrt{2}})}</annotation></semantics></math>, about 0.66976. The resulting value is [10p,20(1-p)]. If the second source is masked, the output becomes exactly [10,0].</p>
+<h4 id="worked-example-3-compare-search-and-a-grounded-baseline">Worked example 3: Compare search and a grounded baseline<a class="heading-anchor" href="#worked-example-3-compare-search-and-a-grounded-baseline" aria-label="Link to this section">#</a></h4>
+<p>Greedy search returns tea,EOS with probability .3, while beam width two returns coffee,EOS with .4. Separately, the extractive baseline answers query service with the exact source sentence The service is unavailable. It does not turn a scheduled repair into a claim that the service has recovered. The search and extraction examples establish different mechanisms.</p>
+<h4 id="executable-worked-traces">Executable worked traces<a class="heading-anchor" href="#executable-worked-traces" aria-label="Link to this section">#</a></h4>
+<p>Run these two small blocks in order. They reproduce the numerical or structural observations above; the full reference additionally checks the exercise changes and failure cases.</p>
+<pre class="highlighted-code"><code class="language-python">target<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">repair</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+decoder_input<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&lt;BOS&gt;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-operator">*</span>target<span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>prediction_target<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-operator">*</span>target<span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&lt;EOS&gt;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>decoder_input<span class="syntax-punctuation">,</span>prediction_target<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> decoder_input<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&lt;BOS&gt;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">repair</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">and</span> prediction_target<span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">repair</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">&lt;EOS&gt;</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">greedy_joint<span class="syntax-operator">=</span><span class="syntax-number">.6</span><span class="syntax-operator">*</span><span class="syntax-number">.5</span>
+alternative_joint<span class="syntax-operator">=</span><span class="syntax-number">.4</span><span class="syntax-operator">*</span><span class="syntax-number">1.</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>greedy_joint<span class="syntax-punctuation">,</span>alternative_joint<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> alternative_joint<span class="syntax-operator">&gt;</span>greedy_joint</code></pre>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the NLP module with the prepared <code>python-core</code> profile and save <code>courses/nlp/learners/nlp-016.py</code> in your learner pad. The learner file contains fixtures and incomplete work, not the official implementation. No download, model service or external corpus is required. The checked-in <a href="../fixtures/nlp-016-cases.json.html">fixture ledger</a> records the exercise contract. When using a prepared native environment, run <code>python courses/nlp/learners/nlp-016.py</code> from the repository root. A process exit does not automatically grade the exercises. Keep <a href="../solutions/nlp-016_solutions.md.html">solutions</a> closed until an attempt or explicit comparison.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-build-teacher-forced-inputs">Exercise 1: Build teacher-forced inputs<a class="heading-anchor" href="#exercise-1-build-teacher-forced-inputs" aria-label="Link to this section">#</a></h4>
+<p>Implement target shifting for [repair] and empty raw output.</p>
+<p><strong>Expected:</strong> [BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS].</p>
+<p><strong>Verify:</strong> [BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS]. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Current target must not appear at the same decoder-input position.</p>
+<h4 id="exercise-2-trace-cross-attention-dimensions">Exercise 2: Trace cross-attention dimensions<a class="heading-anchor" href="#exercise-2-trace-cross-attention-dimensions" aria-label="Link to this section">#</a></h4>
+<p>Compute the one-query, two-source weighted output.</p>
+<p><strong>Expected:</strong> Weights sum to one; output[10p,20(1-p)] with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mo>sigmoid</mo><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mn>1</mn><mrow><msqrt><mn>2</mn></msqrt></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p=\operatorname{sigmoid}\!\left(\frac1{\sqrt2}\right)</annotation></semantics></math>.</p>
+<p><strong>Verify:</strong> Weights sum to one; output[10p,20(1-p)] with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>p</mi><mo>=</mo><mo>sigmoid</mo><mspace width="negativethinmathspace"></mspace><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mn>1</mn><mrow><msqrt><mn>2</mn></msqrt></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">p=\operatorname{sigmoid}\!\left(\frac1{\sqrt2}\right)</annotation></semantics></math>. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Queries choose compatibility; values supply the mixed representation.</p>
+<h4 id="exercise-3-mask-source-padding">Exercise 3: Mask source padding<a class="heading-anchor" href="#exercise-3-mask-source-padding" aria-label="Link to this section">#</a></h4>
+<p>Mark the second source invalid and repeat the calculation.</p>
+<p><strong>Expected:</strong> Output exactly[10,0]; an all-invalid source raises.</p>
+<p><strong>Verify:</strong> Output exactly[10,0]; an all-invalid source raises. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Apply the mask to scores before softmax.</p>
+<h4 id="exercise-4-expose-greedy-search-failure">Exercise 4: Expose greedy search failure<a class="heading-anchor" href="#exercise-4-expose-greedy-search-failure" aria-label="Link to this section">#</a></h4>
+<p>Run width-one and width-two bounded search on the authored table.</p>
+<p><strong>Expected:</strong> Greedy tea,EOS probability.3; beam coffee,EOS probability.4.</p>
+<p><strong>Verify:</strong> Greedy tea,EOS probability.3; beam coffee,EOS probability.4. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Compare complete sequence probability, not only the first-token choice.</p>
+<h4 id="exercise-5-preserve-extractive-provenance">Exercise 5: Preserve extractive provenance<a class="heading-anchor" href="#exercise-5-preserve-extractive-provenance" aria-label="Link to this section">#</a></h4>
+<p>Select a sentence for service and test an unsupported refund query.</p>
+<p><strong>Expected:</strong> Return index0 and the unchanged unavailable sentence; refund returns None.</p>
+<p><strong>Verify:</strong> Return index0 and the unchanged unavailable sentence; refund returns None. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Keep the source list and tie rule explicit.</p>
+<h4 id="exercise-6-explain-generation-error-propagation">Exercise 6: Explain generation error propagation<a class="heading-anchor" href="#exercise-6-explain-generation-error-propagation" aria-label="Link to this section">#</a></h4>
+<p>Describe what changes after an incorrect first generated token and how a summary can reverse a qualification.</p>
+<p><strong>Expected:</strong> A concrete account separates teacher-forced loss, autoregressive rollout, search score and factual support.</p>
+<p><strong>Verify:</strong> A concrete account separates teacher-forced loss, autoregressive rollout, search score and factual support. Retain the actual values or failure evidence and explain the relevant input boundary.</p>
+<p><strong>Hints:</strong> Follow the next conditional distribution after the changed prefix.</p>
+<h3 id="interview-reasoning">Interview reasoning<a class="heading-anchor" href="#interview-reasoning" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Why is teacher forcing not the same as generation?</strong> Training conditions on correct previous targets, while generation conditions on model outputs. The mismatch can compound errors and requires separate rollout evaluation.</p>
+<p><strong>Interview: Does beam search guarantee a better summary?</strong> It optimizes an approximate model-score search under chosen penalties and budgets. Better probability is not necessarily better factuality, coverage or user utility.</p>
+<p><strong>Interview: Is an extractive summary automatically faithful?</strong> Its selected text is present in the source, but selection can omit qualifications or combine context misleadingly. Preserve provenance and assess the complete meaning.</p>
+<h3 id="retrieval-and-continuation">Retrieval and continuation<a class="heading-anchor" href="#retrieval-and-continuation" aria-label="Link to this section">#</a></h3>
+<p>Without the source, explain which mechanism produces the first worked result, which counterexample exposes its limitation, and which claim the tiny fixture cannot establish. Continue to <code>nlp-017</code>.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://aclanthology.org/D14-1179/">Cho and colleagues, encoder-decoder learning</a></li>
+</ul>
+<ul>
+<li><a href="https://proceedings.neurips.cc/paper/7181-attention-is-all-you-need">Vaswani and colleagues, attention architectures</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-016.
+Read courses/nlp/guides/nlp-016.md and courses/nlp/learners/nlp-016.py.
+Direct prerequisites: `nlp-015`.
+Explain the mechanism and notation, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/nlp/solutions/ closed until I attempt or explicitly request comparison.
+Check numerical, span or task-level outputs and a counterexample; do not equate a toy mechanism with pretrained-model quality.
+Do not download corpora or models or send text to an external service.</code></pre></article>
+  </main>
+</body>
+</html>

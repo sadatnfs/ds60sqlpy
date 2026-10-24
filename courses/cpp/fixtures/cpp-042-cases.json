@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-042",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Define budgets",
+      "input_or_change": "Declare at most 2 workers, 100 input rows and 16 characters per integer field.",
+      "expected": "Three limits plus rejection behavior documented."
+    },
+    {
+      "exercise": 2,
+      "task": "Prove serial parity",
+      "input_or_change": "Compare two-worker total on [1,2,3,4,5,6] with serial oracle.",
+      "expected": "Subtotals 6 and 15; total 21."
+    },
+    {
+      "exercise": 3,
+      "task": "Account for bad rows",
+      "input_or_change": "Add strings bad and 3x through the strict parser.",
+      "expected": "Six accepted, two rejected, accepted total 21."
+    },
+    {
+      "exercise": 4,
+      "task": "Inject worker failure",
+      "input_or_change": "Make one partition report an error before publication.",
+      "expected": "No successful combined report; error and completed/cancelled work accounted."
+    },
+    {
+      "exercise": 5,
+      "task": "Test empty and uneven work",
+      "input_or_change": "Check zero rows and five rows [1,2,3,4,5].",
+      "expected": "Totals 0 and 15 with no lost tail."
+    },
+    {
+      "exercise": 6,
+      "task": "Deliver reviewer packet",
+      "input_or_change": "Include source, fixtures, serial oracle, failure test, build/run receipts and limits.",
+      "expected": "A second learner reproduces normal, empty, invalid and failure cases."
+    }
+  ]
+}

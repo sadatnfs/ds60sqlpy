@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-config
+data:
+  message: reviewer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello
+  labels:
+    app: hello
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: hello
+        image: ds60sqlpy-k8s-fixture:0.2.0
+        imagePullPolicy: Never
+        command:
+        - python
+        - /fixture.py
+        - server
+        ports:
+        - name: http
+          containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          periodSeconds: 2
+          failureThreshold: 2
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+          limits:
+            cpu: 100m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        env:
+        - name: DS60_MESSAGE
+          valueFrom:
+            configMapKeyRef:
+              name: hello-config
+              key: message
+        volumeMounts:
+        - name: lesson-config
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: lesson-config
+        configMap:
+          name: hello-config
+          items:
+          - key: message
+            path: message
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello
+spec:
+  selector:
+    app: hello
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+
+# Exercise 1: Map names and keys. Trace hello-config/message through environment and volume fields. Expected: Both consumers reference the same namespaced key;mount path is read-only /config/message.
+# Exercise 2: Run the initial value contract. Use the configured hello source under a freshly qualified contract-2 lease. Expected: Fresh client verifies /version plus /message=reviewer and /file-message=reviewer,then owned cleanup.
+# Exercise 3: Predict an environment update. Keep the same process while a synthetic ConfigMap value changes from hello to reviewer. Expected: Existing environment remains hello until a new process starts.
+# Exercise 4: Observe file and reload stages. In an authorized stateful host lab,record API value,file bytes and application response separately. Expected: After observed projection,the file may be reviewer;application changes only if it rereads/reloads as designed.
+# Exercise 5: Reject unsupported injection. Try a Secret reference,hostPath,subPath or arbitrary environment variable in a scratch source. Expected: Broker rejection before API mutation;the approved fixed reference still parses.
+# Exercise 6: Explain a safe configuration release. Write a before/after record for a new message value with rollback and cleanup identities. Expected: Record includes ConfigMap version/UID,Pod generation/UID,observed routes and restored source if rollback is needed.

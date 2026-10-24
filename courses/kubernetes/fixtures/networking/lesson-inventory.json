@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "id": "k8s-043",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Service continuity and backend identity are separate observations."
+    },
+    {
+      "id": "k8s-044",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Ranges and routes avoid collisions with the first cluster and host networks."
+    },
+    {
+      "id": "k8s-045",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Consider shared lifecycle, scaling, networking and failure requirements."
+    },
+    {
+      "id": "k8s-046",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Read configuration, state the implementation and run only owned bounded probes."
+    },
+    {
+      "id": "k8s-047",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Clients use Service discovery while backend identities can change."
+    },
+    {
+      "id": "k8s-048",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Known namespace/domain, bounded resolution/connection and safe reconnect behavior."
+    },
+    {
+      "id": "k8s-049",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "New UID eligibility plus a fresh source-bound application response."
+    },
+    {
+      "id": "k8s-050",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Record active mode, versions, owned probe results and permitted diagnostics."
+    },
+    {
+      "id": "k8s-051",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "They have different scopes, lifetimes and routing mechanisms."
+    },
+    {
+      "id": "k8s-052",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Named implementation, owned resources, cost/cleanup boundary and real request evidence."
+    },
+    {
+      "id": "k8s-053",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Ingress interprets HTTP routing; the Service handles transport endpoint selection."
+    },
+    {
+      "id": "k8s-054",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "API/controller support, conditions, listener reachability and expected app response."
+    },
+    {
+      "id": "k8s-055",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Client-facing identity and upstream identity are both explicit."
+    },
+    {
+      "id": "k8s-056",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Known caller, documented path, transport peer and trusted-header evidence."
+    },
+    {
+      "id": "k8s-057",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Logical identity, new UID, intended volume and application-level data result."
+    },
+    {
+      "id": "k8s-058",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "One allowed and one denied owned flow under a named enforcing CNI."
+    },
+    {
+      "id": "k8s-059",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Record implementation, observed addresses and both allowed/denied cases."
+    },
+    {
+      "id": "k8s-060",
+      "runtime": "reading",
+      "capability": "separately prepared owned dual-stack cluster and dual-stack application/client fixture",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Intended allow/deny rules and observations cover both families."
+    },
+    {
+      "id": "k8s-061",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Latency/cost benefits are balanced against capacity and failure behavior."
+    },
+    {
+      "id": "k8s-062",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Current revision becomes ready, expected responses succeed and old resources drain/clean up."
+    },
+    {
+      "id": "k8s-063",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "No credentials or private payloads, bounded retention and useful correlation fields."
+    },
+    {
+      "id": "k8s-064",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "One controlled fault, preserved failure, targeted repair and rechecked invariant."
+    },
+    {
+      "id": "k8s-065",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Name required capabilities, operational cost and simpler alternatives."
+    },
+    {
+      "id": "k8s-066",
+      "runtime": "reading",
+      "capability": "separately prepared owned advanced host lab",
+      "fixture": "courses/kubernetes/fixtures/networking",
+      "expected": "Explain mechanisms, current results, untested platforms and scoped cleanup."
+    }
+  ],
+  "qualification": "static teaching fixtures only until actual owned runtime evidence is recorded"
+}

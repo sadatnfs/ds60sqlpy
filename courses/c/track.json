@@ -1,0 +1,762 @@
+{
+  "schema_version": 1,
+  "id": "c",
+  "title": "C: memory, systems and reliable native programs",
+  "summary": "A complete C17 route from first compilation through pointers, resource ownership, data structures, parsing, concurrency and maintainable systems projects. Safe counterexamples and checked programs make the language rules concrete.",
+  "lessons": [
+    {
+      "id": "c-001",
+      "title": "Source, compilation, linking and checked execution",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "c17",
+      "concepts": [
+        "Translation unit",
+        "Linker",
+        "Assertion"
+      ],
+      "outcome": "Explain and implement source, compilation, linking and checked execution.",
+      "lab": "Store 2 plus 3 in an int.",
+      "verification": "The stored value is 5. The checked amount is 24."
+    },
+    {
+      "id": "c-002",
+      "title": "Integer ranges, signedness and floating approximation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-001"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Range",
+        "Unsigned modular arithmetic",
+        "Undefined behavior"
+      ],
+      "outcome": "Explain and implement integer ranges, signedness and floating approximation.",
+      "lab": "Compute 7/2 and 7/2.0.",
+      "verification": "The results are 3 and 3.5. The quotient is -3 and remainder -1."
+    },
+    {
+      "id": "c-003",
+      "title": "Expressions, conversions and sequencing",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-002"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Precedence",
+        "Sequencing",
+        "Usual arithmetic conversions"
+      ],
+      "outcome": "Explain and implement expressions, conversions and sequencing.",
+      "lab": "Compare 2+3*4 with (2+3)*4.",
+      "verification": "The values are 14 and 20. The assignment changes the variable and equality tests it."
+    },
+    {
+      "id": "c-004",
+      "title": "Branches, loops and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-003"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Loop invariant",
+        "Half-open range",
+        "Fallthrough"
+      ],
+      "outcome": "Explain and implement branches, loops and invariants.",
+      "lab": "Sum 2, 4 and 6 with a length-bounded loop.",
+      "verification": "The result is 12. The reversed number is 321."
+    },
+    {
+      "id": "c-005",
+      "title": "Functions, prototypes and output parameters",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-004"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Prototype",
+        "Output parameter",
+        "Failure atomicity"
+      ],
+      "outcome": "Explain and implement functions, prototypes and output parameters.",
+      "lab": "Evaluate twice for 7 and 0.",
+      "verification": "The results are 14 and 0. The operation rejects it and preserves output."
+    },
+    {
+      "id": "c-006",
+      "title": "Arrays, bounds and element counts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-005"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Array extent",
+        "Array-to-pointer conversion",
+        "Logical length"
+      ],
+      "outcome": "Explain and implement arrays, bounds and element counts.",
+      "lab": "Create a three-element array and calculate its count with sizeof.",
+      "verification": "The count is 3. The original first element remains 1."
+    },
+    {
+      "id": "c-007",
+      "title": "Strings, null terminators and output capacities",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-006"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Null terminator",
+        "Capacity",
+        "Truncation"
+      ],
+      "outcome": "Explain and implement strings, null terminators and output capacities.",
+      "lab": "Create the writable string cat.",
+      "verification": "strlen is 3 while array size is 4. Its string length is zero."
+    },
+    {
+      "id": "c-008",
+      "title": "Pointers, addresses and explicit mutation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-007"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Pointer target",
+        "Dereference",
+        "Lifetime"
+      ],
+      "outcome": "Explain and implement pointers, addresses and explicit mutation.",
+      "lab": "Increment integer 4 through its address.",
+      "verification": "The caller value becomes 5. The values exchange positions."
+    },
+    {
+      "id": "c-009",
+      "title": "Pointer arithmetic and bounded array views",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-008"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "One-past pointer",
+        "Pointer difference",
+        "Borrowed view"
+      ],
+      "outcome": "Explain and implement pointer arithmetic and bounded array views.",
+      "lab": "Read the second element through both forms.",
+      "verification": "Both yield 4. The corresponding original element changes."
+    },
+    {
+      "id": "c-010",
+      "title": "Structs, enums and tagged domain values",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-009"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Struct",
+        "Discriminator",
+        "Padding"
+      ],
+      "outcome": "Explain and implement structs, enums and tagged domain values.",
+      "lab": "Construct Point with x 2 and y 3.",
+      "verification": "The field sum is 5. The validator rejects it."
+    },
+    {
+      "id": "c-011",
+      "title": "Scope, storage duration and object lifetime",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-010"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Scope",
+        "Storage duration",
+        "Reentrancy"
+      ],
+      "outcome": "Explain and implement scope, storage duration and object lifetime.",
+      "lab": "Declare an outer value 3 and a separate inner value 7.",
+      "verification": "After the inner block, the outer remains 3. The result is the defined zero identity."
+    },
+    {
+      "id": "c-012",
+      "title": "Const-correct views and mutation boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-011"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Const-qualified view",
+        "Const pointer",
+        "Deep immutability"
+      ],
+      "outcome": "Explain and implement const-correct views and mutation boundaries.",
+      "lab": "Observe a mutable integer through const int pointer.",
+      "verification": "The read yields 4. The snapshot remains 2 while the view reads 5."
+    },
+    {
+      "id": "c-013",
+      "title": "Preprocessing, macros and compile-time contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-012"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Macro expansion",
+        "Repeated evaluation",
+        "Compile-time assertion"
+      ],
+      "outcome": "Explain and implement preprocessing, macros and compile-time contracts.",
+      "lab": "Square the side-effect-free expression 2+3.",
+      "verification": "The result is 25. The results are 0 and 9."
+    },
+    {
+      "id": "c-014",
+      "title": "Parsing numbers with complete error evidence",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "c-013"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "End pointer",
+        "Range error",
+        "Whole-string contract"
+      ],
+      "outcome": "Explain and implement parsing numbers with complete error evidence.",
+      "lab": "Parse 42 into an output integer.",
+      "verification": "Success is true and output is 42. Leading whitespace is accepted; trailing whitespace is rejected."
+    },
+    {
+      "id": "c-015",
+      "title": "Dynamic allocation and single-owner release",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-014"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Allocation owner",
+        "Dangling pointer",
+        "Size overflow"
+      ],
+      "outcome": "Explain and implement dynamic allocation and single-owner release.",
+      "lab": "Allocate three ints, assign 2, 4, 6 and sum them.",
+      "verification": "The sum is 12 before release. The owner records absence afterward."
+    },
+    {
+      "id": "c-016",
+      "title": "Reallocation and a checked dynamic vector",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-015"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Length",
+        "Capacity",
+        "Reallocation"
+      ],
+      "outcome": "Explain and implement reallocation and a checked dynamic vector.",
+      "lab": "Push 3 and 5 into a zero-initialized vector.",
+      "verification": "Length is 2 and values are retained. The original value and length remain intact."
+    },
+    {
+      "id": "c-017",
+      "title": "Ownership APIs, borrowing and independent clones",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-016"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Borrow",
+        "Owned result",
+        "Clone"
+      ],
+      "outcome": "Explain and implement ownership apis, borrowing and independent clones.",
+      "lab": "Create an owner for alpha.",
+      "verification": "Length is 5 and content is alpha. Only the destination retains the allocation."
+    },
+    {
+      "id": "c-018",
+      "title": "File streams, short operations and reliable closure",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-017"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Stream state",
+        "Short read",
+        "EOF indicator"
+      ],
+      "outcome": "Explain and implement file streams, short operations and reliable closure.",
+      "lab": "Write abc, rewind and read three bytes.",
+      "verification": "Three bytes return and match abc. All three bytes survive, including the middle zero."
+    },
+    {
+      "id": "c-019",
+      "title": "Binary formats, byte order and representation boundaries",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-018"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Endianness",
+        "Wire format",
+        "Alignment"
+      ],
+      "outcome": "Explain and implement binary formats, byte order and representation boundaries.",
+      "lab": "Encode 0x12345678 in big-endian order.",
+      "verification": "The bytes are 12, 34, 56, 78 in hexadecimal. Version 1 and payload 7 are interpreted separately."
+    },
+    {
+      "id": "c-020",
+      "title": "Function pointers, callbacks and comparator contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-019"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Function pointer",
+        "Callback contract",
+        "Comparator"
+      ],
+      "outcome": "Explain and implement function pointers, callbacks and comparator contracts.",
+      "lab": "Assign a doubling function and call it with 4.",
+      "verification": "The result is 8. The result is zero and no element is accessed."
+    },
+    {
+      "id": "c-021",
+      "title": "Linked lists and mutation-safe traversal",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-020"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Node",
+        "Head pointer",
+        "Mutation invariant"
+      ],
+      "outcome": "Explain and implement linked lists and mutation-safe traversal.",
+      "lab": "Push 1 and then 2.",
+      "verification": "The list order is 2 then 1. Its original order is restored."
+    },
+    {
+      "id": "c-022",
+      "title": "Stacks, queues and ring-buffer invariants",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-021"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "FIFO",
+        "LIFO",
+        "Ring buffer"
+      ],
+      "outcome": "Explain and implement stacks, queues and ring-buffer invariants.",
+      "lab": "Enqueue 2 then 5 and dequeue twice.",
+      "verification": "The values arrive as 2 then 5. The popped value is 5."
+    },
+    {
+      "id": "c-023",
+      "title": "Hash tables, collisions and explicit occupancy",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-022"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Collision",
+        "Probe sequence",
+        "Load factor"
+      ],
+      "outcome": "Explain and implement hash tables, collisions and explicit occupancy.",
+      "lab": "Store key 1 with value 7.",
+      "verification": "Lookup succeeds with 7. Replacement still succeeds."
+    },
+    {
+      "id": "c-024",
+      "title": "Sorting, binary search and complexity evidence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-023"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Lower bound",
+        "Search invariant",
+        "Asymptotic growth"
+      ],
+      "outcome": "Explain and implement sorting, binary search and complexity evidence.",
+      "lab": "Search 2, 4, 6, 8 for target 5.",
+      "verification": "The lower-bound index is 2. The guarded membership test succeeds."
+    },
+    {
+      "id": "c-025",
+      "title": "Recursion, trees and depth budgets",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-024"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Base case",
+        "Progress measure",
+        "Depth budget"
+      ],
+      "outcome": "Explain and implement recursion, trees and depth budgets.",
+      "lab": "Sum a root 2 with children 1 and 3.",
+      "verification": "The total is 6. Depth is 1 and sum is 7."
+    },
+    {
+      "id": "c-026",
+      "title": "Bounded string builders and failure-atomic appends",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-025"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Builder invariant",
+        "Failure-atomic append",
+        "Overlap contract"
+      ],
+      "outcome": "Explain and implement bounded string builders and failure-atomic appends.",
+      "lab": "Append red then space sky.",
+      "verification": "The result is red sky with length 7. The exact result is a,b,c."
+    },
+    {
+      "id": "c-027",
+      "title": "Testing, injected allocation failure and useful oracles",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-026"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Fault injection",
+        "Test oracle",
+        "Failure-path coverage"
+      ],
+      "outcome": "Explain and implement testing, injected allocation failure and useful oracles.",
+      "lab": "Copy a tiny string using the working allocator.",
+      "verification": "The output owns an equal string. Red remains different from red."
+    },
+    {
+      "id": "c-028",
+      "title": "Headers, translation units and reproducible builds",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "c-027"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Declaration",
+        "Definition",
+        "Linkage"
+      ],
+      "outcome": "Explain and implement headers, translation units and reproducible builds.",
+      "lab": "Use the stats_sum prototype before its definition.",
+      "verification": "Summing 2, 4, 6 returns 12. Both results equal 6."
+    },
+    {
+      "id": "c-029",
+      "title": "Undefined behavior, aliasing and object representation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-028"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Effective type",
+        "Object representation",
+        "Strict aliasing"
+      ],
+      "outcome": "Explain and implement undefined behavior, aliasing and object representation.",
+      "lab": "Copy a float into bytes and back into a float object.",
+      "verification": "The restored value is 1.5. All bytes match exactly."
+    },
+    {
+      "id": "c-030",
+      "title": "Sanitizers, debugger evidence and safe regressions",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-029"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Instrumentation",
+        "Regression fixture",
+        "Diagnostic evidence"
+      ],
+      "outcome": "Explain and implement sanitizers, debugger evidence and safe regressions.",
+      "lab": "Use a checked accessor on the final valid index.",
+      "verification": "The value 6 is returned. Only zero is valid."
+    },
+    {
+      "id": "c-031",
+      "title": "Checked arithmetic and allocation-size contracts",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-030"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Precondition check",
+        "Checked arithmetic",
+        "Conversion boundary"
+      ],
+      "outcome": "Explain and implement checked arithmetic and allocation-size contracts.",
+      "lab": "Add 7 and 5 through the checked helper.",
+      "verification": "The result is 12. The checked mathematical result is zero."
+    },
+    {
+      "id": "c-032",
+      "title": "Generic byte APIs, alignment and element-size discipline",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-031"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Type erasure",
+        "Element size",
+        "Typed wrapper"
+      ],
+      "outcome": "Explain and implement generic byte apis, alignment and element-size discipline.",
+      "lab": "Exchange two ints using their exact object size.",
+      "verification": "The values become 7 and 2. Both semantic fields match."
+    },
+    {
+      "id": "c-033",
+      "title": "Flexible array members and single-allocation records",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-032"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Flexible array member",
+        "Header size",
+        "Contiguous ownership"
+      ],
+      "outcome": "Explain and implement flexible array members and single-allocation records.",
+      "lab": "Create a packet containing bytes 1, 2, 3.",
+      "verification": "Length and all three bytes are retained. The owned packet retains its copied value."
+    },
+    {
+      "id": "c-034",
+      "title": "POSIX descriptors, pipes and explicit endpoint closure",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-033"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "File descriptor",
+        "Pipe endpoint",
+        "Descriptor ownership"
+      ],
+      "outcome": "Explain and implement posix descriptors, pipes and explicit endpoint closure.",
+      "lab": "Write abc, close the writer and read the bytes.",
+      "verification": "Three bytes arrive unchanged. The tag is OK and one byte remains for the next read."
+    },
+    {
+      "id": "c-035",
+      "title": "Signals, interruption and minimal handlers",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-034"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Signal handler",
+        "Async-signal safety",
+        "sig_atomic_t"
+      ],
+      "outcome": "Explain and implement signals, interruption and minimal handlers.",
+      "lab": "Install the lesson handler for SIGINT and restore the previous disposition.",
+      "verification": "Both operations succeed. Admission stops and unfinished work remains visible."
+    },
+    {
+      "id": "c-036",
+      "title": "POSIX threads and joined object lifetimes",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-035"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Thread argument lifetime",
+        "Join",
+        "Disjoint result storage"
+      ],
+      "outcome": "Explain and implement posix threads and joined object lifetimes.",
+      "lab": "Start a thread squaring input 7 and join it.",
+      "verification": "The retained result is 49. The second input produces its own output 16."
+    },
+    {
+      "id": "c-037",
+      "title": "Mutexes, condition variables and predicate loops",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-036"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Predicate",
+        "Condition variable",
+        "Spurious wakeup"
+      ],
+      "outcome": "Explain and implement mutexes, condition variables and predicate loops.",
+      "lab": "Run four threads doing one hundred locked increments each.",
+      "verification": "The final count is 400. Both totals are 10."
+    },
+    {
+      "id": "c-038",
+      "title": "C11 atomics and release-acquire publication",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-037"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Atomic object",
+        "Memory order",
+        "Publication"
+      ],
+      "outcome": "Explain and implement c11 atomics and release-acquire publication.",
+      "lab": "Add 3 to an atomic integer initially 2.",
+      "verification": "The returned old value is 2 and current value is 5. The old state is false and the new state true."
+    },
+    {
+      "id": "c-039",
+      "title": "Data layout, locality and honest performance experiments",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-038"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Locality",
+        "Array of structs",
+        "Struct of arrays"
+      ],
+      "outcome": "Explain and implement data layout, locality and honest performance experiments.",
+      "lab": "Sum x fields from three Point records.",
+      "verification": "The result is 6. The total is 15 without a sixth access."
+    },
+    {
+      "id": "c-040",
+      "title": "C ABI boundaries and foreign-function ownership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-039"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "ABI",
+        "Calling convention",
+        "Allocator boundary"
+      ],
+      "outcome": "Explain and implement c abi boundaries and foreign-function ownership.",
+      "lab": "Copy hello into sufficient caller storage through a status API.",
+      "verification": "The output is complete and required length is 5. The API succeeds and stores a terminator."
+    },
+    {
+      "id": "c-041",
+      "title": "State-machine parsing and bounded input grammars",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-040"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Grammar",
+        "Parser state",
+        "Staged output"
+      ],
+      "outcome": "Explain and implement state-machine parsing and bounded input grammars.",
+      "lab": "Parse 1,20,3 into capacity three.",
+      "verification": "Three values are returned in order. Zero is valid; space-prefixed input is not."
+    },
+    {
+      "id": "c-042",
+      "title": "Capstone: a validated data pipeline with explicit ownership",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "c-041"
+      ],
+      "runtime": "c17",
+      "concepts": [
+        "Data contract",
+        "Batch atomicity",
+        "Operational evidence"
+      ],
+      "outcome": "Explain and implement capstone: a validated data pipeline with explicit ownership.",
+      "lab": "Process alpha,3 and beta,4.",
+      "verification": "Two rows produce total 7. Only the corrected complete batch publishes total 8."
+    }
+  ]
+}

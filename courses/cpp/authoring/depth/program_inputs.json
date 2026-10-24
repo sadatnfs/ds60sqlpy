@@ -1,0 +1,458 @@
+[
+  {
+    "number": 4,
+    "definitions": "int nonnegative_sum(const std::vector<int>& xs) { int total=0; for(int x:xs) { if(x>=0) total+=x; } return total; }",
+    "program_bodies": [
+      "assert(nonnegative_sum({4,-2,0,6})==10);",
+      "assert(nonnegative_sum({})==0);"
+    ],
+    "original_observations": [
+      "The running total is 4, 4, 4, 10.",
+      "The body runs zero times; the initial total is the result."
+    ]
+  },
+  {
+    "number": 5,
+    "definitions": "int clamp_reading(int x,int low,int high) { if(low>high) throw std::invalid_argument(\"reversed bounds\"); return std::max(low,std::min(x,high)); }",
+    "program_bodies": [
+      "assert(clamp_reading(12,0,10)==10);",
+      "bool rejected=false;\ntry { (void)clamp_reading(5,10,0); }\ncatch (const std::invalid_argument&) { rejected=true; }\nassert(rejected);"
+    ],
+    "original_observations": [
+      "12 is above the upper bound, so the function returns 10.",
+      "The reversed interval raises invalid_argument before computing a result."
+    ]
+  },
+  {
+    "number": 6,
+    "definitions": "std::optional<int> parse_int(std::string_view s) { int out=0; auto [ptr,ec]=std::from_chars(s.data(),s.data()+s.size(),out); if(ec!=std::errc{} || ptr!=s.data()+s.size()) return std::nullopt; return out; }",
+    "program_bodies": [
+      "assert(parse_int(\"42\")==42);",
+      "assert(!parse_int(\"12x\"));"
+    ],
+    "original_observations": [
+      "All two characters are consumed, yielding 42.",
+      "The x remains, so the field is rejected despite a valid numeric prefix."
+    ]
+  },
+  {
+    "number": 7,
+    "definitions": "",
+    "program_bodies": [
+      "std::vector<int> original{3,1,3,0};\nauto sorted=original;\nstd::sort(sorted.begin(),sorted.end());\nassert((sorted==std::vector<int>{0,1,3,3}));\nassert((original==std::vector<int>{3,1,3,0}));\nstd::cout << \"sorted:\";\nfor (int value:sorted) std::cout << \" \" << value;\nstd::cout << \"\\nsum=\" << std::accumulate(sorted.begin(),sorted.end(),0LL) << \"\\n\";",
+      "std::vector<int> xs;\nxs.reserve(4);\nassert(xs.size()==0 && xs.capacity()>=4);\nassert(xs.begin()==xs.end());\nassert(std::accumulate(xs.begin(),xs.end(),0LL)==0);\nxs.push_back(8);\nconst auto index=std::size_t{0};\nxs.reserve(xs.capacity()+1);\n// Any old element pointer or iterator is invalid after this reallocation.\nassert(xs[index]==8);\nstd::cout << \"size=\" << xs.size() << \" value=\" << xs[index] << \"\\n\";"
+    ],
+    "original_observations": [
+      "The sorted bag is [0,1,3,3], preserving both threes.",
+      "The empty sum is 0, and begin equals end."
+    ]
+  },
+  {
+    "number": 8,
+    "definitions": "std::vector<int> doubled(const std::vector<int>& xs) { auto out=xs; for(int& x:out) x*=2; return out; }",
+    "program_bodies": [
+      "auto out=doubled(std::vector<int>{2,4});\nassert((out==std::vector<int>{4,8}));",
+      "const std::vector<int> xs{2,4}; auto ys=xs; ys[0]=99;"
+    ],
+    "original_observations": [
+      "An owned result [4,8] survives the temporary argument.",
+      "xs stays [2,4]; ys becomes [99,4]."
+    ]
+  },
+  {
+    "number": 10,
+    "definitions": "enum class Status { pending, paid };\nstruct Payment { int id; int cents; Status status; };\nint settled(const Payment& p) { if(p.cents<0) throw std::invalid_argument(\"negative cents\"); return p.status==Status::paid?p.cents:0; }",
+    "program_bodies": [
+      "Payment p{7,200,Status::paid}; assert(settled(p)==200);",
+      "Payment p{8,200,Status::pending}; assert(settled(p)==0);"
+    ],
+    "original_observations": [
+      "A paid record contributes 200 cents.",
+      "Pending contributes zero to settled revenue while retaining its original amount."
+    ]
+  },
+  {
+    "number": 11,
+    "definitions": "std::vector<std::string> read_lines(std::istream& input) { std::vector<std::string> out; std::string line; while(std::getline(input,line)) out.push_back(line); if(input.bad()) throw std::runtime_error(\"read failed\"); return out; }",
+    "program_bodies": [
+      "std::istringstream input(\"10\\n20\\n\");\nauto lines=read_lines(input);\nassert(lines.size()==2);",
+      "std::istringstream input(\"30\");\nauto lines=read_lines(input);\nassert(lines.size()==1 && lines[0]==\"30\");"
+    ],
+    "original_observations": [
+      "Exactly two lines, with no extra stale third line.",
+      "The final line without newline is still read once."
+    ]
+  },
+  {
+    "number": 12,
+    "definitions": "int add(int,int);\nint add(int a,int b) { return a+b; }",
+    "program_bodies": [
+      "assert(add(2,3)==5);\nstd::cout << \"declaration and definition linked\\n\";",
+      "assert(add(0,0)==0);\nstd::cout << \"zero inputs link and run too\\n\";"
+    ],
+    "original_observations": [
+      "One declaration and one matching definition form a valid single-file demonstration.",
+      "A declared but undefined called symbol compiles to an object, then fails to link."
+    ]
+  },
+  {
+    "number": 13,
+    "definitions": "int twice(int x) { return x*2; }",
+    "program_bodies": [
+      "if(twice(3)!=6) return 1;\nstd::cout << \"always-active check passed\\n\";",
+      "int evaluations=0;\nassert(++evaluations==1);\n#ifdef NDEBUG\nif(evaluations!=0) return 1;\nstd::cout << \"assert removed: evaluations=0\\n\";\n#else\nif(evaluations!=1) return 1;\nstd::cout << \"assert active: evaluations=1\\n\";\n#endif"
+    ],
+    "original_observations": [
+      "The process returns nonzero if the result is wrong, including Release builds.",
+      "NDEBUG changes assertions, not ordinary if-based contract checks."
+    ]
+  },
+  {
+    "number": 14,
+    "definitions": "std::optional<int> parse_reading(std::string_view s) { int n=0;auto [p,e]=std::from_chars(s.data(),s.data()+s.size(),n);if(e!=std::errc{}||p!=s.data()+s.size()||n<0)return {};return n; }",
+    "program_bodies": [
+      "const std::vector<std::string> rows{\"10\",\"0\",\"bad\",\"-2\",\"25\"};\nint accepted=0,rejected=0;\nlong long total=0;\nfor (const auto& raw:rows) {\n    if(auto value=parse_reading(raw)) { ++accepted; total+=*value; }\n    else { ++rejected; }\n}\nassert(accepted==3 && rejected==2 && total==35);\nstd::cout << \"accepted=\" << accepted << \" rejected=\" << rejected << \" total=\" << total << \"\\n\";",
+      "assert(parse_reading(\"0\")==0); assert(!parse_reading(\"10x\"));"
+    ],
+    "original_observations": [
+      "Three accepted, two rejected, total 35.",
+      "Zero remains valid, while a numeric prefix with trailing junk is rejected."
+    ]
+  },
+  {
+    "number": 15,
+    "definitions": "struct Tracked { int* live; explicit Tracked(int& count):live(&count){++*live;} ~Tracked(){--*live;} Tracked(const Tracked&)=delete; Tracked& operator=(const Tracked&)=delete; };",
+    "program_bodies": [
+      "auto p=std::make_unique<int>(7);\nauto q=std::move(p);\nassert(!p && q && *q==7);",
+      "int live=0;\n{ auto owner=std::make_unique<Tracked>(live); assert(live==1); }\nassert(live==0);"
+    ],
+    "original_observations": [
+      "p is empty, q owns the integer 7.",
+      "live rises to 1 in scope and returns to 0 at destruction."
+    ]
+  },
+  {
+    "number": 16,
+    "definitions": "struct Batch { std::vector<int> values; std::string label; };",
+    "program_bodies": [
+      "Batch a{{1,2},\"A\"}; Batch b=a; b.values[0]=9;",
+      "Batch a{{1,2},\"A\"};\nBatch b=std::move(a);\nassert((b.values==std::vector<int>{1,2}));\na=Batch{{4},\"new\"};\nassert(a.values[0]==4);"
+    ],
+    "original_observations": [
+      "a remains [1,2]; b becomes [9,2].",
+      "b receives the old values; assigning a new valid value to a is safe."
+    ]
+  },
+  {
+    "number": 17,
+    "definitions": "struct ParseError { std::string reason; };\nusing Result=std::variant<int,ParseError>;\nResult positive(int x) { if(x<0)return ParseError{\"negative\"}; return x; }",
+    "program_bodies": [
+      "auto result=positive(0); assert(std::holds_alternative<int>(result));",
+      "auto result=positive(-1); assert(std::get<ParseError>(result).reason==\"negative\");"
+    ],
+    "original_observations": [
+      "Zero is a present successful integer.",
+      "The error alternative carries an inspectable reason."
+    ]
+  },
+  {
+    "number": 18,
+    "definitions": "int sum_view(std::span<const int> xs) { return std::accumulate(xs.begin(),xs.end(),0); }",
+    "program_bodies": [
+      "std::vector<int> xs{2,4,6}; assert(sum_view(std::span<const int>(xs).subspan(1,2))==10);",
+      "std::string text=\"alpha\";\nstd::string_view prefix(text.data(),2);\nassert(prefix==\"al\");\ntext[0]='A';\nassert(prefix==\"Al\");"
+    ],
+    "original_observations": [
+      "The view of positions 1 and 2 sums to 10.",
+      "The borrowed prefix is al while text remains alive and stable."
+    ]
+  },
+  {
+    "number": 19,
+    "definitions": "struct Score { int id; int points; };",
+    "program_bodies": [
+      "std::vector<int> xs{-1,0,3};\nauto view=xs|std::views::filter([](int x){return x>=0;});\nstd::vector<int> observed;\nfor(int value:view) observed.push_back(value);\nassert((observed==std::vector<int>{0,3}));",
+      "std::vector<Score> scores{{1,9},{2,4}};\nstd::ranges::sort(scores,{},&Score::points);\nassert(scores[0].id==2 && scores[1].id==1);"
+    ],
+    "original_observations": [
+      "For [-1,0,3], traversal yields 0 and 3.",
+      "Records order by points while carrying their original IDs."
+    ]
+  },
+  {
+    "number": 20,
+    "definitions": "#include <concepts>\ntemplate<std::integral T> T identity_sum(T a,T b) { return a+b; }",
+    "program_bodies": [
+      "assert(identity_sum(2,3)==5);",
+      "static_assert(!std::integral<double>);"
+    ],
+    "original_observations": [
+      "Deduction selects int and the result is 5.",
+      "double does not satisfy this integral-only interface."
+    ]
+  },
+  {
+    "number": 21,
+    "definitions": "struct Cents { long long value; bool operator==(const Cents&)const=default; };\nCents operator+(Cents a,Cents b){return Cents{a.value+b.value};}",
+    "program_bodies": [
+      "Cents price{125}; Cents discount{25}; assert((discount+Cents{100})==price);",
+      "assert((Cents{125}+Cents{0})==Cents{125});"
+    ],
+    "original_observations": [
+      "The API retains cents units and produces 125 cents.",
+      "Zero is the addition identity for this bounded domain."
+    ]
+  },
+  {
+    "number": 22,
+    "definitions": "std::string encode(int id,int cents){return \"v1,\"+std::to_string(id)+\",\"+std::to_string(cents);}",
+    "program_bodies": [
+      "assert(encode(7,125)==\"v1,7,125\");",
+      "auto path=std::filesystem::path(\"records\")/\"batch.csv\";\nassert(path.filename()==\"batch.csv\");\nassert(path.parent_path()==\"records\");"
+    ],
+    "original_observations": [
+      "The exact wire text is independent of struct padding.",
+      "The path joins components using platform rules; filename is batch.csv."
+    ]
+  },
+  {
+    "number": 23,
+    "definitions": "extern \"C\" int add_checked(int a,int b,int* out) noexcept { if(!out)return 1; if((b>0 && a>std::numeric_limits<int>::max()-b)||(b<0 && a<std::numeric_limits<int>::min()-b))return 2; *out=a+b;return 0; }",
+    "program_bodies": [
+      "int out=0; assert(add_checked(2,3,&out)==0 && out==5);",
+      "assert(add_checked(2,3,nullptr)==1);"
+    ],
+    "original_observations": [
+      "Status 0 publishes value 5 through the caller-owned pointer.",
+      "Null output pointer returns status 1 without dereferencing it."
+    ]
+  },
+  {
+    "number": 24,
+    "definitions": "std::vector<int> reversed(std::vector<int> xs){std::reverse(xs.begin(),xs.end());return xs;}",
+    "program_bodies": [
+      "assert((reversed({1,2,3})==std::vector<int>{3,2,1}));",
+      "assert(reversed(reversed(std::vector<int>{-1,2}))==std::vector<int>({-1,2}));"
+    ],
+    "original_observations": [
+      "The independent golden example fixes the intended meaning of reversal.",
+      "Applying reversal twice restores the original sequence."
+    ]
+  },
+  {
+    "number": 25,
+    "definitions": "int checked_at(const std::vector<int>& xs,std::size_t i){return xs.at(i);}",
+    "program_bodies": [
+      "assert(checked_at({2,4},1)==4);",
+      "bool caught=false;\ntry { (void)checked_at({2,4},2); }\ncatch(const std::out_of_range&) { caught=true; }\nassert(caught);"
+    ],
+    "original_observations": [
+      "Index 1 selects 4.",
+      "Checked access rejects index 2 instead of invoking unchecked access."
+    ]
+  },
+  {
+    "number": 26,
+    "definitions": "int total(const std::vector<int>& xs){return std::accumulate(xs.begin(),xs.end(),0);}",
+    "program_bodies": [
+      "assert(total({2,4,6})==12);",
+      "long long checksum=0;\nfor(int i=0;i<1000;++i) checksum+=total({2,4,6});\nassert(checksum==12000);\nstd::cout << \"checksum=\" << checksum << \"\\n\";"
+    ],
+    "original_observations": [
+      "Known input gives 12 before any measurement.",
+      "The checksum is 12000; elapsed nanoseconds vary by run."
+    ]
+  },
+  {
+    "number": 27,
+    "definitions": "namespace vendored { constexpr int api_version=1; constexpr int add(int a,int b){return a+b;} }",
+    "program_bodies": [
+      "static_assert(vendored::api_version==1);",
+      "assert(vendored::add(2,3)==5);"
+    ],
+    "original_observations": [
+      "The expected source API version is pinned at compilation.",
+      "A consumer still checks behavior instead of trusting a version label."
+    ]
+  },
+  {
+    "number": 28,
+    "definitions": "struct Record { int id; int cents; };\nstd::optional<Record> parse_record(std::string_view s){ auto cut=s.find(',');if(cut==s.npos)return {};int id=0,cents=0;auto [p,e]=std::from_chars(s.data(),s.data()+cut,id);auto [q,f]=std::from_chars(s.data()+cut+1,s.data()+s.size(),cents);if(e!=std::errc{}||f!=std::errc{}||p!=s.data()+cut||q!=s.data()+s.size()||id<0||cents<0)return {};return Record{id,cents};}",
+    "program_bodies": [
+      "auto r=parse_record(\"7,125\"); assert(r->id==7 && r->cents==125);",
+      "assert(!parse_record(\"7,125x\"));"
+    ],
+    "original_observations": [
+      "The library produces an owned record with exact fields.",
+      "A trailing suffix rejects the complete record."
+    ]
+  },
+  {
+    "number": 29,
+    "definitions": "",
+    "program_bodies": [
+      "int answer=0; std::thread t([&]{answer=42;}); t.join(); assert(answer==42);",
+      "std::atomic<bool> stop{false};\nstd::promise<void> ready;\nauto started=ready.get_future();\nstd::thread worker([&]{\n    ready.set_value();\n    while(!stop.load()) std::this_thread::yield();\n});\nstarted.get();\nstop.store(true);\nworker.join();\nassert(stop.load());"
+    ],
+    "original_observations": [
+      "After join the result is 42 and the borrowed local is still alive.",
+      "A stop flag requests cooperation; the owner still waits for termination."
+    ]
+  },
+  {
+    "number": 30,
+    "definitions": "",
+    "program_bodies": [
+      "std::mutex m;std::condition_variable cv;std::queue<int> q;bool closed=false;int total=0;\nstd::thread consumer([&]{std::unique_lock<std::mutex> lock(m);for(;;){cv.wait(lock,[&]{return !q.empty()||closed;});if(q.empty()&&closed)break;total+=q.front();q.pop();}});\n{std::lock_guard<std::mutex> lock(m);q.push(2);q.push(3);closed=true;}cv.notify_all();consumer.join();assert(total==5);",
+      "std::mutex mutex;\nstd::condition_variable cv;\nstd::queue<int> queue;\nbool closed=true;\nstd::unique_lock<std::mutex> lock(mutex);\ncv.wait(lock,[&]{return !queue.empty() || closed;});\nassert(queue.empty() && closed);"
+    ],
+    "original_observations": [
+      "The consumer proceeds only when work exists or shutdown has been published.",
+      "A closed empty queue ends consumption; closure does not discard queued work."
+    ]
+  },
+  {
+    "number": 31,
+    "definitions": "",
+    "program_bodies": [
+      "std::atomic<int> count{0};\nstd::thread a([&]{for(int i=0;i<1000;++i) count.fetch_add(1,std::memory_order_relaxed);});\nstd::thread b([&]{for(int i=0;i<1000;++i) count.fetch_add(1,std::memory_order_relaxed);});\na.join(); b.join();\nassert(count.load()==2000);",
+      "int payload=0;\nstd::atomic<bool> ready{false};\nstd::thread producer([&]{payload=7; ready.store(true,std::memory_order_release);});\nwhile(!ready.load(std::memory_order_acquire)) std::this_thread::yield();\nassert(payload==7);\nproducer.join();"
+    ],
+    "original_observations": [
+      "Each increment is indivisible; two workers making 1000 increments produce 2000 after join.",
+      "An acquire load observing this store can safely read the preceding payload write."
+    ]
+  },
+  {
+    "number": 32,
+    "definitions": "int checked_square(int x){if(x<0)throw std::invalid_argument(\"negative task\");return x*x;}",
+    "program_bodies": [
+      "auto f=std::async(std::launch::async,checked_square,3); assert(f.get()==9);",
+      "auto result=std::async(std::launch::async,checked_square,-1);\nbool rejected=false;\ntry { (void)result.get(); }\ncatch(const std::invalid_argument&) { rejected=true; }\nassert(rejected);"
+    ],
+    "original_observations": [
+      "The future yields 9 and waits for completion if necessary.",
+      "The worker failure is observed by the caller through get."
+    ]
+  },
+  {
+    "number": 33,
+    "definitions": "",
+    "program_bodies": [
+      "std::promise<void> ready;\nauto started=ready.get_future();\nint result=0;\nstd::thread worker([&]{result=42; ready.set_value();});\nstarted.get();\nassert(result==42);\nworker.join();",
+      "for(int trial=0;trial<20;++trial){std::atomic<int> count{0};std::promise<void> ready;auto started=ready.get_future();std::thread t([&]{ready.set_value();for(int i=0;i<100;++i)++count;});started.get();for(int i=0;i<100;++i)++count;t.join();assert(count==200);}"
+    ],
+    "original_observations": [
+      "The owner receives explicit evidence that the worker reached the named phase.",
+      "Two sets of 100 atomic increments must total 200 in each trial."
+    ]
+  },
+  {
+    "number": 34,
+    "definitions": "struct Sample { int id; int value; };",
+    "program_bodies": [
+      "std::vector<Sample> rows{{1,10},{2,20},{3,30}};\nint sum=0;\nfor(const auto& row:rows) sum+=row.value;\nassert(sum==60);",
+      "std::vector<int> values{10,20,30}; assert(std::accumulate(values.begin(),values.end(),0)==60);"
+    ],
+    "original_observations": [
+      "Three full records retain the relationship between identity and value.",
+      "The value-only representation yields the same total 60."
+    ]
+  },
+  {
+    "number": 35,
+    "definitions": "",
+    "program_bodies": [
+      "std::map<int,int> counts;\nfor(int x:std::vector<int>{2,3,2,4}) ++counts[x];\nassert(counts.at(2)==2 && counts.size()==3);",
+      "std::map<int,int> counts{{2,2},{3,1},{4,1}};\nconst auto before=counts.size();\nassert(counts.find(9)==counts.end());\nassert(counts.size()==before);\nassert(counts[9]==0 && counts.size()==before+1);"
+    ],
+    "original_observations": [
+      "The index holds 2->2, 3->1, 4->1.",
+      "A non-mutating lookup reports absence without inserting key 9."
+    ]
+  },
+  {
+    "number": 36,
+    "definitions": "constexpr int square(int x){return x*x;}\nconsteval int fixed_limit(){return 16;}",
+    "program_bodies": [
+      "static_assert(square(4)==16);",
+      "int runtime=5; assert(square(runtime)==25);"
+    ],
+    "original_observations": [
+      "The compiler validates the expression before an executable exists.",
+      "The same constexpr function may be evaluated during program execution."
+    ]
+  },
+  {
+    "number": 37,
+    "definitions": "template<std::ranges::input_range R> std::vector<int> keep_positive(R&& xs){std::vector<int> out;for(auto x:xs)if(x>0)out.push_back(x);return out;}",
+    "program_bodies": [
+      "auto out=keep_positive(std::vector<int>{-1,0,2,2});\nassert((out==std::vector<int>{2,2}));",
+      "assert(keep_positive(std::vector<int>{}).empty());"
+    ],
+    "original_observations": [
+      "The owned result is [2,2], retaining multiplicity after the temporary input dies.",
+      "An empty range produces an empty owned result."
+    ]
+  },
+  {
+    "number": 38,
+    "definitions": "std::optional<int> safe_add(int a,int b){if(a<0||b<0||a>std::numeric_limits<int>::max()-b)return {};return a+b;}",
+    "program_bodies": [
+      "assert(!safe_add(std::numeric_limits<int>::max(),1));",
+      "assert(std::abs((0.1+0.2)-0.3)<1e-12);"
+    ],
+    "original_observations": [
+      "The operation rejects the input before evaluating an overflowing sum.",
+      "The binary floating result is close within this declared absolute tolerance."
+    ]
+  },
+  {
+    "number": 39,
+    "definitions": "struct Analyzer { int total=0; };\nextern \"C\" Analyzer* analyzer_create() noexcept { try{return new Analyzer{};}catch(...){return nullptr;} }\nextern \"C\" void analyzer_destroy(Analyzer* p) noexcept { delete p; }\nextern \"C\" int analyzer_read(const Analyzer* p,int* out) noexcept {if(!p||!out)return 1;*out=p->total;return 0;}",
+    "program_bodies": [
+      "Analyzer* raw=analyzer_create();\nif(!raw) return 1;\nstd::unique_ptr<Analyzer,void(*)(Analyzer*)> owner(raw,analyzer_destroy);\nint value=-1;\nassert(analyzer_read(owner.get(),&value)==0 && value==0);",
+      "int out=-1;\nassert(analyzer_read(nullptr,&out)==1);\nassert(out==-1);"
+    ],
+    "original_observations": [
+      "One successful create has exactly one matching destroy; initial value is 0.",
+      "Null handle is rejected without dereferencing it."
+    ]
+  },
+  {
+    "number": 40,
+    "definitions": "bool safe_id(std::string_view s){if(s.empty()||s.size()>16)return false;for(unsigned char c:s)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'))return false;return true;}",
+    "program_bodies": [
+      "assert(safe_id(\"batch_7\"));",
+      "assert(!safe_id(\"../secret\"));"
+    ],
+    "original_observations": [
+      "The seven-character identifier uses only the allowed alphabet.",
+      "Dot and slash violate the narrow identifier grammar."
+    ]
+  },
+  {
+    "number": 41,
+    "definitions": "constexpr int release_schema=1;",
+    "program_bodies": [
+      "std::vector<int> fixture{1,2,3};\nif(std::accumulate(fixture.begin(),fixture.end(),0)!=6) return 1;",
+      "std::vector<int> fixture{1,2,3};\nconst int total=std::accumulate(fixture.begin(),fixture.end(),0);\nif(total!=6) return 1;\nstd::cout << \"schema=1 rows=\" << fixture.size() << \" total=\" << total << \"\\n\";"
+    ],
+    "original_observations": [
+      "The release check remains active even under NDEBUG.",
+      "The result names a schema version, input count and exact checksum."
+    ]
+  },
+  {
+    "number": 42,
+    "definitions": "long long serial_total(std::span<const int> xs){return std::accumulate(xs.begin(),xs.end(),0LL);}",
+    "program_bodies": [
+      "const std::vector<int> rows{1,2,3,4,5,6}; assert(serial_total(rows)==21);",
+      "const std::vector<int> rows{1,2,3,4,5,6};long long first=0,second=0;\nstd::thread a([&]{first=serial_total(std::span<const int>(rows).first(3));});std::thread b([&]{second=serial_total(std::span<const int>(rows).subspan(3));});a.join();b.join();assert(first==6 && second==15 && first+second==serial_total(rows));\nassert(serial_total(std::span<const int>{})==0);"
+    ],
+    "original_observations": [
+      "The independent serial oracle is exactly 21.",
+      "Two disjoint partitions combine to 21 after both workers finish."
+    ]
+  }
+]

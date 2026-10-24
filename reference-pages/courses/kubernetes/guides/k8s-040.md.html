@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>k8s-040: Incident response and bounded fault injection · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>k8s-040: Incident response and bounded fault injection</h1>
+      <p class="source-path">Generated from <code>courses/kubernetes/guides/k8s-040.md</code></p>
+    </header>
+    <article class="document"><h2 id="k8s-040-incident-response-and-bounded-fault-injection">k8s-040: Incident response and bounded fault injection<a class="heading-anchor" href="#k8s-040-incident-response-and-bounded-fault-injection" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 150 minutes plus review. Direct prerequisites: <code>k8s-027</code>, <code>k8s-032</code>, <code>k8s-035</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Choose a reversible investigation from a specific symptom and preserve evidence.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>An incident investigation turns a symptom into a testable explanation and a bounded repair. The first useful question is not which command might make the red status disappear, but which observation would distinguish the leading hypotheses. A Service timeout with healthy Pods can result from selectors, ports, network policy or the application path. Restarting every Pod changes evidence without necessarily testing any of those causes.</p>
+<p>This chapter injects one synthetic fault: a host-controlled change to the selector of the exact owned Service. The workload remains Ready, but the Service no longer selects it. The investigator records a baseline, the symptom, endpoint/selector evidence, a conditional repair and a post-repair application check. A separate teacher may reveal the chosen fault only after the learner has formed a hypothesis.</p>
+<p>The normal browser adapter can demonstrate bounded failures but does not offer an unrestricted fault-injection API or persistent arbitrary edits. The advanced exercise requires an exclusive lease and a fixed host action with a deadline, cancellation, exact target UID and restoration record. No unrelated namespace, Node or cluster setting is changed.</p>
+<h3 id="preserve-a-useful-timeline">Preserve a useful timeline<a class="heading-anchor" href="#preserve-a-useful-timeline" aria-label="Link to this section">#</a></h3>
+<p><a href="../fixtures/k8s-040-timeline.json.html">The synthetic timeline</a> uses elapsed seconds from one controlled start. It records Service UID, selector, Ready Pod count and application result. At second 10 the application request times out while one Pod remains Ready. At second 15 the selected endpoint count is zero. Those facts narrow the investigation toward the route rather than proving the application process crashed.</p>
+<p>Record observation time separately from event time when logs arrive late. Keep the request path, timeout and relevant object generation/version so that two readers can compare the same operation. Avoid copying tokens or unbounded logs. A small exact field extract often explains the failure better than a large undifferentiated dump.</p>
+<p>A good baseline includes a successful application response and the expected selection graph before the fault. Without that control, an after-fault timeout could be an old defect. The experiment should have one declared fault so the causal story is interpretable; if another failure appears, stop and report the confounding condition.</p>
+<h3 id="test-hypotheses-with-minimal-observations">Test hypotheses with minimal observations<a class="heading-anchor" href="#test-hypotheses-with-minimal-observations" aria-label="Link to this section">#</a></h3>
+<p>Hypothesis1: the application crashed. Inspect Ready state, termination/restart evidence and the fixed application observation path. Hypothesis2: the Service selects no intended Pods. Compare its selector with Pod labels and observed EndpointSlices. Hypothesis3: the selected backend port is wrong. Compare Service port/targetPort with the container named port. These are distinct checks, not a generic restart ritual.</p>
+<p>In the supplied trace, the selector became missing and endpoints fell to zero while Pod readiness remained healthy. Restoring the last verified selector is the minimal repair consistent with the evidence. Use the recorded UID and a current conditional update to avoid overwriting another actor&#x27;s changes or mutating a replacement object.</p>
+<p>After repair, observe endpoints and the ordinary Service response again. A successful API update only says the desired change was accepted. The end-to-end observation closes the incident, while the timeline supports the causal explanation. If the response remains wrong, preserve that result and continue from evidence instead of declaring victory from an update exit code.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-diagnose-healthy-pods-with-no-endpoints">Worked example 1: Diagnose healthy Pods with no endpoints<a class="heading-anchor" href="#worked-example-1-diagnose-healthy-pods-with-no-endpoints" aria-label="Link to this section">#</a></h4>
+<p>Before: selector app=hello, one ready Pod labeled app=hello, one endpoint, expected response. During: selector app=missing, same ready Pod, zero endpoints, timeout. Only the selector changed in the controlled experiment.</p>
+<p><strong>Expected:</strong> The evidence supports a selector mismatch; a Ready Pod does not guarantee Service reachability.</p>
+<h4 id="worked-example-2-close-the-repair-loop">Worked example 2: Close the repair loop<a class="heading-anchor" href="#worked-example-2-close-the-repair-loop" aria-label="Link to this section">#</a></h4>
+<p>Restore app=hello on Service UID svc-1 with a current version precondition. Then observe one selected endpoint and the expected payload through the Service at second 30. A replacement Service UID svc-2 would stop the operation instead.</p>
+<p><strong>Expected:</strong> The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly.</p>
+<h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
+<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>POSIX:</p>
+<pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
+kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get endpointslices -l kubernetes.io/service-name<span class="syntax-operator">=</span>hello -o json</code></pre>
+<p>PowerShell:</p>
+<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-operator">-not</span> $env:LAB_KUBECONFIG <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_CONTEXT <span class="syntax-operator">-or</span> <span class="syntax-operator">-not</span> $env:LAB_NAMESPACE<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;Owned receipt fields are required.&#x27;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">&amp;</span> kubectl <span class="syntax-punctuation">-</span>-kubeconfig $env:LAB_KUBECONFIG <span class="syntax-punctuation">-</span>-context $env:LAB_CONTEXT <span class="syntax-punctuation">-</span>-namespace $env:LAB_NAMESPACE get endpointslices -l kubernetes<span class="syntax-punctuation">.</span>io<span class="syntax-punctuation">/</span>service-name<span class="syntax-punctuation">=</span>hello -o json
+<span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>$LASTEXITCODE <span class="syntax-operator">-ne</span> 0<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">throw</span> <span class="syntax-string">&#x27;The scoped observation failed.&#x27;</span> <span class="syntax-punctuation">}</span></code></pre>
+<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
+<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-040.md</code>. The current browser adapter does not provide the full <strong>one fixed host fault with UID-bound restoration and timestamped application evidence</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
+<p>The <a href="../solutions/k8s-040_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-040_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-040_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-040-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-record-the-baseline">Exercise 1: Record the baseline<a class="heading-anchor" href="#exercise-1-record-the-baseline" aria-label="Link to this section">#</a></h4>
+<p>Capture selector, Pod label, endpoint count and fixed response before the fault.</p>
+<p><strong>Expected result/shape:</strong> A connected selection graph and successful application control.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A connected selection graph and successful application control.</p>
+<p><strong>Progressive hints:</strong> A later failure needs a known earlier working path.</p>
+<h4 id="exercise-2-form-competing-hypotheses">Exercise 2: Form competing hypotheses<a class="heading-anchor" href="#exercise-2-form-competing-hypotheses" aria-label="Link to this section">#</a></h4>
+<p>List crash, selector mismatch and target-port mismatch with a distinguishing observation for each.</p>
+<p><strong>Expected result/shape:</strong> Three specific evidence checks rather than a generic restart.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Three specific evidence checks rather than a generic restart.</p>
+<p><strong>Progressive hints:</strong> Ask what would be different if each cause were true.</p>
+<h4 id="exercise-3-interpret-the-supplied-timeline">Exercise 3: Interpret the supplied timeline<a class="heading-anchor" href="#exercise-3-interpret-the-supplied-timeline" aria-label="Link to this section">#</a></h4>
+<p>Find the field change and the earliest observation supporting its effect.</p>
+<p><strong>Expected result/shape:</strong> Selector changes at 10; zero endpoints observed at 15 while readiness remains1.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Selector changes at 10; zero endpoints observed at 15 while readiness remains1.</p>
+<p><strong>Progressive hints:</strong> Separate event time from observation time.</p>
+<h4 id="exercise-4-apply-the-minimal-bounded-repair">Exercise 4: Apply the minimal bounded repair<a class="heading-anchor" href="#exercise-4-apply-the-minimal-bounded-repair" aria-label="Link to this section">#</a></h4>
+<p>Restore the verified selector only if the Service UID and current update precondition match.</p>
+<p><strong>Expected result/shape:</strong> Owned svc-1 repaired; replacement UID causes refusal.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: Owned svc-1 repaired; replacement UID causes refusal.</p>
+<p><strong>Progressive hints:</strong> Read current state before writing.</p>
+<h4 id="exercise-5-verify-application-recovery">Exercise 5: Verify application recovery<a class="heading-anchor" href="#exercise-5-verify-application-recovery" aria-label="Link to this section">#</a></h4>
+<p>Read endpoint selection and the ordinary Service response after the repair.</p>
+<p><strong>Expected result/shape:</strong> One endpoint and expected payload, with actual timestamps if live.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: One endpoint and expected payload, with actual timestamps if live.</p>
+<p><strong>Progressive hints:</strong> API success is not the serving result.</p>
+<h4 id="exercise-6-write-the-review-and-stop-conditions">Exercise 6: Write the review and stop conditions<a class="heading-anchor" href="#exercise-6-write-the-review-and-stop-conditions" aria-label="Link to this section">#</a></h4>
+<p>Summarize cause, evidence, repair, unrelated-state preservation and remaining uncertainty.</p>
+<p><strong>Expected result/shape:</strong> A timestamped bounded incident packet with no unsupported broad resilience claim.</p>
+<p><strong>Verify:</strong> Retain the named field values, identities, counts, diagnostic or written comparison: A timestamped bounded incident packet with no unsupported broad resilience claim.</p>
+<p><strong>Progressive hints:</strong> Include cancellation and restoration behavior.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>The host operation must know how to restore its own change, including on cancellation or deadline. It should stop if the target UID changes or unrelated state would be affected. Do not broaden the fault into a node outage, policy deletion or credential change to make the lesson more dramatic.</p>
+<p>The post-incident review explains contributing conditions and detection gaps without inventing a root cause unsupported by the trace. A finite recovery can validate this selector-repair path; it does not prove resilience to every outage or that the failure will never recur.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the answer and reconstruct the reasoning for Exercise6, Write the review and stop conditions. Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue to <code>k8s-041</code> after preserving the six evidence records.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/">Debug Services</a></li>
+</ul>
+<ul>
+<li><a href="https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/">Debug running Pods</a></li>
+</ul>
+<h3 id="networking-depth-supplement">Networking depth supplement<a class="heading-anchor" href="#networking-depth-supplement" aria-label="Link to this section">#</a></h3>
+<p>Use a request ladder to locate the first failing layer: name resolution, route, transport connection, TLS identity when used, proxy rule, application handler and expected response. Preserve caller placement and current workload identity. A timeout is broader evidence than a refused connection or an HTTP status, so it should trigger a discriminating next observation rather than a generic restart.</p>
+<p>Compare paths that differ by one layer. If a permitted direct Pod request succeeds while ClusterIP traffic fails, inspect Service fields, endpoint eligibility and node data-plane state. If internal traffic succeeds while external traffic fails, examine the added listener, public routing and TLS layers. <code>k8s-064</code> formalizes this approach with falsifiable hypotheses.</p>
+<p>Observability signals have separate scopes. Events describe controller/lifecycle observations; logs describe emitted messages; metrics summarize trends; traces connect request spans. Correlate bounded time windows and identities without dumping all namespaces or private payloads. A later healthy response should not be rewritten as if it were evidence from the original failed interval.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for k8s-040.
+Read courses/kubernetes/guides/k8s-040.md and courses/kubernetes/lessons/k8s-040.md. Direct prerequisites: `k8s-027`, `k8s-032`, `k8s-035`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Keep courses/kubernetes/solutions/ closed until I attempt or explicitly ask for comparison.
+Distinguish source, synthetic fixtures, API acceptance, observed controllers, application/data results and cleanup.
+Use only an explicit owned lease and the stated capability; never select an ambient cluster or install a controller for me.</code></pre></article>
+  </main>
+</body>
+</html>

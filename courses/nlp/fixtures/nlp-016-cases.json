@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-016",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Implement target shifting for [repair] and empty raw output.",
+      "expected": "[BOS,repair] versus[repair,EOS]; empty becomes[BOS] versus[EOS]."
+    },
+    {
+      "exercise": 2,
+      "task": "Compute the one-query, two-source weighted output.",
+      "expected": "Weights sum to one; output[10p,20(1-p)] with p=sigmoid(1/sqrt2)."
+    },
+    {
+      "exercise": 3,
+      "task": "Mark the second source invalid and repeat the calculation.",
+      "expected": "Output exactly[10,0]; an all-invalid source raises."
+    },
+    {
+      "exercise": 4,
+      "task": "Run width-one and width-two bounded search on the authored table.",
+      "expected": "Greedy tea,EOS probability.3; beam coffee,EOS probability.4."
+    },
+    {
+      "exercise": 5,
+      "task": "Select a sentence for service and test an unsupported refund query.",
+      "expected": "Return index0 and the unchanged unavailable sentence; refund returns None."
+    },
+    {
+      "exercise": 6,
+      "task": "Describe what changes after an incorrect first generated token and how a summary can reverse a qualification.",
+      "expected": "A concrete account separates teacher-forced loss, autoregressive rollout, search score and factual support."
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[package]
+name = "ds60-arrow-runtime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+arrow = { version = "=60.0.0", default-features = false, features = ["csv", "ipc", "json"] }
+
+[profile.release]
+debug = false

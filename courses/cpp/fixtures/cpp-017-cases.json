@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-017",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Classify alternatives",
+      "input_or_change": "Evaluate positive for 0,5,-1.",
+      "expected": "Two success values 0,5 and one negative error."
+    },
+    {
+      "exercise": 2,
+      "task": "Write an observer",
+      "input_or_change": "Use get_if to print value or reason without throwing.",
+      "expected": "All three inputs produce a classified outcome."
+    },
+    {
+      "exercise": 3,
+      "task": "Preserve a missing value",
+      "input_or_change": "Distinguish optional<int>{0} from nullopt.",
+      "expected": "First present, second absent."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair bad access",
+      "input_or_change": "Call get<int> on the error in a scratch copy.",
+      "expected": "bad_variant_access; replace with checked dispatch."
+    },
+    {
+      "exercise": 5,
+      "task": "Choose a boundary",
+      "input_or_change": "Explain why a missing required file is fatal while one bad row can be recorded.",
+      "expected": "Separate process-level error from row-level rejection."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer richer reasons",
+      "input_or_change": "Add too_large for values above 100.",
+      "expected": "101 maps to too_large, -1 to negative, 100 succeeds."
+    }
+  ]
+}

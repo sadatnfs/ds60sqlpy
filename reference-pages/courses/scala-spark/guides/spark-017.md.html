@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-017: Nested records, JSON and explode row accounting · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-017: Nested records, JSON and explode row accounting</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-017.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-017-nested-records-json-and-explode-row-accounting">spark-017: Nested records, JSON and explode row accounting<a class="heading-anchor" href="#spark-017-nested-records-json-and-explode-row-accounting" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; approximately 120 minutes. Direct design prerequisites: <code>spark-016</code>. The prepared baseline is Spark 4.0.1,Scala binary2.13,JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>; a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-017</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-017.scala.html">Scala learner</a> and <a href="../lessons/spark-017.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-017_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-017_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-017_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Flatten nested data while preserving parent identity and accounting for empty or missing arrays.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Nested schema:</strong> A type tree that describes struct fields, array element types and nullable positions before parsing text.</li>
+</ul>
+<ul>
+<li><strong>Parse quarantine:</strong> A relation retaining source identity, raw evidence and a declared reason for rejected input.</li>
+</ul>
+<ul>
+<li><strong>Child grain:</strong> One output occurrence identified by parent identity and its array position; a repeated child value remains a separate occurrence.</li>
+</ul>
+<ul>
+<li><strong>Outer placeholder:</strong> The synthetic NULL child emitted for an empty or missing array by an outer generator; it is not an observed child.</li>
+</ul>
+<ul>
+<li><strong>Positional zip:</strong> An alignment of arrays by index that pads a shorter array with NULL; this is a different relationship from a Cartesian product.</li>
+</ul>
+<p>A nested record contains two grains at once. The parent has a stable identity, while an array contains ordered child occurrences. Flattening changes the grain: a parent with two items becomes two rows. The two items may even have identical SKU values. Deduplicating by parent and SKU would erase a real occurrence, so this fixture uses parent_id plus array position as child identity.</p>
+<p>The input has seven source records. Four satisfy the declared parse and parent-identity contract. Their arrays have lengths two, zero, unknown and one. A malformed JSON string, a syntactically valid object without parent_id, and a missing payload are retained as three different quarantine reasons. A null result field alone cannot distinguish all these cases. The parser schema therefore includes a corrupt-record field and the classification checks raw missingness, parser evidence, then domain identity in a deliberate order.</p>
+<p>The schema is a contract for interpreting text, not proof of business validity. A parsed long can still be an invalid business quantity, and a parsed parent ID can be duplicated across records. This lesson validates only the stated required identity and parse conditions. A production boundary would add domain ranges and parent uniqueness before joining other data. Unknown JSON fields are not automatically part of the declared schema; silently ignoring them may be acceptable for compatibility or unacceptable for a strict producer contract.</p>
+<p>An ordinary explode emits one row per actual element and emits none for an empty or null array. Here it yields three rows and loses parents 20 and 30 from the child relation. An outer explode retains those parents with a single null placeholder each, yielding five rows. That is useful for parent-preserving reporting, but COUNT(*) then measures child rows plus placeholders. COUNT(position) measures actual occurrences when the position is generated from the original array.</p>
+<p>Array state must be recorded before flattening. After an outer explode, both an empty array and a missing array can appear as a null child. They have different meanings: the empty array says the collection is known and has no elements, whereas null says the collection is unknown. Similarly, an actual element may itself have an unknown quantity. Parent 40 has one observed item and zero known quantities; its total is unknown, not an observed zero. Parent 10 has two observed items whose quantities sum to five.</p>
+<p>The examples use bounded collection only to compare tiny literal outputs. Parsing, projection and generation remain Spark expressions. The executable references use the same explicit schemas in Scala and Python, and compare against independent expected identities. Matching the two implementations would be insufficient if both forgot to count an outer placeholder separately.</p>
+<p>The final comparison separates two legitimate array relationships. Exploding an array of two SKUs and an independent array of three channels produces six pairs. Zipping them produces three positional rows with one missing SKU. Neither result is universally correct. The relationship between the arrays determines the operator, and a faster implementation of the wrong relationship is still incorrect.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+
+<span class="syntax-keyword">val</span> inputSchema <span class="syntax-operator">=</span> <span class="syntax-class">StructType</span><span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;source_id&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">LongType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">false</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">StructField</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;raw&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">StringType</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">true</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> raw <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>createDataFrame<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>sparkContext<span class="syntax-punctuation">.</span>parallelize<span class="syntax-punctuation">(</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span>
+ <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:10,&quot;items&quot;:[{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:2},{&quot;sku&quot;:&quot;a&quot;,&quot;qty&quot;:3}]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:20,&quot;items&quot;:[]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">3L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:30,&quot;items&quot;:null}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">4L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;parent_id&quot;:40,&quot;items&quot;:[{&quot;sku&quot;:&quot;b&quot;,&quot;qty&quot;:null}]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>
+ <span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;{bad&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">6L</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;items&quot;:[]}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-class">Row</span><span class="syntax-punctuation">(</span><span class="syntax-number">7L</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>inputSchema<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+
+input_schema <span class="syntax-operator">=</span> StructType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">source_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>LongType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>StructField<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">raw</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>StringType<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+raw <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>createDataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">parent_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10,</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-string">:[</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sku</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2},</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sku</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-string">:3}]}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">parent_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:20,</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-string">:[]}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">parent_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:30,</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-string">:null}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">parent_id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:40,</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-string">:[</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sku</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-string">:null}]}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">bad</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-string">:[]}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">,</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>schema<span class="syntax-operator">=</span>input_schema<span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> sample <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;SELECT array(10,20) AS values&quot;</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>posexplode<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;values&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2L</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;Two array occurrences become two child rows&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">sample <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT array(10,20) AS values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> sample<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>posexplode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Two array occurrences become two child rows</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The generator returns a zero-based position and the element. Position belongs to an occurrence, so equal values at different positions remain distinct. A stable parent identifier must accompany this position when several parent arrays are flattened together.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> sample <span class="syntax-operator">=</span> spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;SELECT CAST(array() AS ARRAY&lt;BIGINT&gt;) AS empty_items, CAST(NULL AS ARRAY&lt;BIGINT&gt;) AS unknown_items&quot;</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>explode<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;empty_items&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>sample<span class="syntax-punctuation">.</span>select<span class="syntax-punctuation">(</span>explode_outer<span class="syntax-punctuation">(</span>col<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;unknown_items&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1L</span><span class="syntax-punctuation">)</span>
+println<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;An outer row can be a placeholder, not an item&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">sample <span class="syntax-operator">=</span> spark<span class="syntax-operator">.</span>sql<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT CAST(array() AS ARRAY&lt;BIGINT&gt;) AS empty_items, CAST(NULL AS ARRAY&lt;BIGINT&gt;) AS unknown_items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">assert</span> sample<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>explode<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">empty_items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0</span>
+<span class="syntax-keyword">assert</span> sample<span class="syntax-operator">.</span>select<span class="syntax-punctuation">(</span>F<span class="syntax-operator">.</span>explode_outer<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unknown_items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>count<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">An outer row can be a placeholder, not an item</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<p>The typed empty array and typed null array are intentionally different inputs. Their output counts demonstrate the generator contract without reading an external file or depending on inferred element types. Preserve that distinction before an outer transformation merges their visible child representation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-parse-once-and-retain-rejection-evidence">Exercise 1: Parse once and retain rejection evidence<a class="heading-anchor" href="#exercise-1-parse-once-and-retain-rejection-evidence" aria-label="Link to this section">#</a></h4>
+<p>Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.</p>
+<p><strong>Expected result/shape:</strong> Sources 1-4 accepted;5 malformed_json;6 missing_parent;7 missing_payload. No source disappears and accepted count is 4.</p>
+<p><strong>Verify:</strong> Assert all seven ordered source/reason rows and reconcile accepted 4 plus rejected 3 with input 7.</p>
+<p><strong>Progressive hint:</strong> Include _corrupt_record in the schema; a required field being NULL does not by itself prove malformed JSON.</p>
+<h4 id="exercise-2-record-collection-state-before-changing-grain">Exercise 2: Record collection state before changing grain<a class="heading-anchor" href="#exercise-2-record-collection-state-before-changing-grain" aria-label="Link to this section">#</a></h4>
+<p>For accepted records return source_id, parent_id, items, array_state, with array_state unknown, empty or populated. Keep arrays typed and preserve the two repeated SKU occurrences.</p>
+<p><strong>Expected result/shape:</strong> Parent 10 populated,20 empty,30 unknown,40 populated. Parent 10 has size 2; parent 40 size 1.</p>
+<p><strong>Verify:</strong> Assert the four parent/state rows and item lengths independently of any later explode output.</p>
+<p><strong>Progressive hint:</strong> Check items IS NULL before checking size=0.</p>
+<h4 id="exercise-3-flatten-observed-child-occurrences">Exercise 3: Flatten observed child occurrences<a class="heading-anchor" href="#exercise-3-flatten-observed-child-occurrences" aria-label="Link to this section">#</a></h4>
+<p>Use posexplode to return parent_id, position, sku, qty for actual items. Order by parent_id and position, and retain repeated SKU a.</p>
+<p><strong>Expected result/shape:</strong> Rows(10,0, a,2),(10,1, a,3),(40,0, b, NULL). Exactly 3 children; parents 20 and 30 produce none.</p>
+<p><strong>Verify:</strong> Assert the entire three-row occurrence list and unique(parent_id, position) count 3.</p>
+<p><strong>Progressive hint:</strong> A child identity includes its position rather than only the SKU value.</p>
+<h4 id="exercise-4-preserve-parents-without-inventing-observed-children">Exercise 4: Preserve parents without inventing observed children<a class="heading-anchor" href="#exercise-4-preserve-parents-without-inventing-observed-children" aria-label="Link to this section">#</a></h4>
+<p>Use posexplode_outer, preserving parent_id and array_state along with position, sku, qty. Keep null placeholders for empty and unknown arrays.</p>
+<p><strong>Expected result/shape:</strong> Five rows: the three observed children plus(20, empty, NULL, NULL, NULL) and (30, unknown, NULL, NULL, NULL).</p>
+<p><strong>Verify:</strong> Assert five rows, four distinct parents and exactly three nonnull generated positions.</p>
+<p><strong>Progressive hint:</strong> Retain array_state before using the outer generator; distinguish a missing position from a child with missing qty.</p>
+<h4 id="exercise-5-reconcile-child-counts-and-nullable-measures">Exercise 5: Reconcile child counts and nullable measures<a class="heading-anchor" href="#exercise-5-reconcile-child-counts-and-nullable-measures" aria-label="Link to this section">#</a></h4>
+<p>Aggregate the outer relation to parent_id, array_state, child_count, known_qty_count, total_qty. Count positions for children and preserve SUM NULL when there are no known quantities.</p>
+<p><strong>Expected result/shape:</strong> Parent 10:(2,2,5);20:(0,0, NULL);30:(0,0, NULL);40:(1,0, NULL). Empty and unknown collection states remain visible.</p>
+<p><strong>Verify:</strong> Assert each parent count tuple and that summed child_count is 3 while known_qty_count is 2.</p>
+<p><strong>Progressive hint:</strong> COUNT(*) would count placeholders; COUNT(qty) answers a different completeness question from child count.</p>
+<h4 id="exercise-6-choose-cartesian-or-positional-array-semantics">Exercise 6: Choose Cartesian or positional array semantics<a class="heading-anchor" href="#exercise-6-choose-cartesian-or-positional-array-semantics" aria-label="Link to this section">#</a></h4>
+<p>For one parent with SKUs[a, b] and channels[web, shop, api], return both independent exploded pairs and arrays_zip positional rows. Explain the relationship required for each interpretation.</p>
+<p><strong>Expected result/shape:</strong> Independent generators produce 6 pairs; zip produces(a, web),(b, shop),(NULL, api), three rows.</p>
+<p><strong>Verify:</strong> Assert the complete Cartesian pair set and all three ordered zipped rows including the paddedNULL.</p>
+<p><strong>Progressive hint:</strong> Consecutive explodes multiply occurrence counts; arrays_zip aligns by position and pads the shorter side.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not use inferred JSON schema as a substitute for an explicit producer contract. Do not classify every null field as malformed input. Do not drop source identity at parsing, collapse repeated child occurrences with DISTINCT, or count an outer placeholder as an observed child. Preserve array state before flattening. If a null element is allowed inside an otherwise populated array, its nonnull generated position still identifies a real occurrence even when every nested field is null. Larger arrays can produce large outputs despite a small parent count; inspect length distributions before applying the same operation at scale.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>parseRecords</code> / <code>parse_records</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.functions.from_json.html">Apache Spark 4.0.1 from_json</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.functions.explode_outer.html">Apache Spark 4.0.1 explode_outer</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/sql-ref-functions-builtin.html">Apache Spark built-in functions</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-017: Nested records, JSON and explode row accounting.
+Read courses/scala-spark/guides/spark-017.md and courses/scala-spark/lessons/spark-017.py;the paired sources are courses/scala-spark/lessons/spark-017.scala and courses/scala-spark/lessons/spark-017.py.
+Direct prerequisites: spark-016. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# Docker authoring
+
+`python courses/docker/authoring/build.py` regenerates all 42 lesson bundles and metadata from `chapters.py`. It writes explicit UTF-8/LF and performs no engine operations, network requests or installation. Edit durable specifications, regenerate, then run shared normalization and module/render checks.
+
+`fixtures/compose-lab/` is maintained directly. Its standard-library app, Compose model, Dockerfile and README form the bounded optional host lab. Reading registration does not claim in-browser engine execution. The fixture inventory records expected observations, not invented qualification results.

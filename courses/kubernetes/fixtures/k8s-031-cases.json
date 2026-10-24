@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-031",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "host-installed namespace-selected admission policy and server denial capture",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Place authentication, authorization, validation/admission and persistence in the request story.",
+      "expected": "A rejected earlier boundary cannot prove a later policy ran."
+    },
+    {
+      "exercise": 2,
+      "task": "Identify matched API group, version, resource, operations and namespace binding.",
+      "expected": "apps/v1 Deployments on CREATE/UPDATE in the labeled owned namespace only."
+    },
+    {
+      "exercise": 3,
+      "task": "Compare approved-only with approved-plus-unapproved lists.",
+      "expected": "True for approved-only and false for the mixed list."
+    },
+    {
+      "exercise": 4,
+      "task": "In the qualified host test, change only the image and record the server response.",
+      "expected": "Policy-specific denial and no persisted rejected revision."
+    },
+    {
+      "exercise": 5,
+      "task": "Submit the approved source through the same scoped server path.",
+      "expected": "Allowed request accepted and its application observation recorded separately."
+    },
+    {
+      "exercise": 6,
+      "task": "Name uncovered fields and remove only the host-owned policy/binding.",
+      "expected": "No claim of signature verification or universal workload enforcement."
+    }
+  ]
+}

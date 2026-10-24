@@ -1,0 +1,704 @@
+{
+  "schema_version": 1,
+  "id": "java",
+  "title": "Java: from the first compile to reliable applications",
+  "summary": "36 lessons in Java, from first programs and objects to collections, concurrency, testing and practical services. Worked examples and separate solutions connect language rules with observable behavior.",
+  "lessons": [
+    {
+      "id": "java-001",
+      "title": "From source file to running JVM",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "java21",
+      "concepts": [
+        "source",
+        "bytecode",
+        "entry point",
+        "compiler diagnostics"
+      ],
+      "outcome": "A Java program begins as text.",
+      "lab": "Create a message variable containing Hello, Java and print it once.",
+      "verification": "one line Hello, Java. compiler result false and at least one ERROR diagnostic."
+    },
+    {
+      "id": "java-002",
+      "title": "Values, numeric types and conversion",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-001"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "primitives",
+        "overflow",
+        "casting",
+        "BigDecimal"
+      ],
+      "outcome": "A numeric type defines both a range and a set of operations.",
+      "lab": "Calculate integer division `7 / 2` and floating-point division `7 / 2.0`.",
+      "verification": "integer 3 and double 3.5. exact division throws; rounded result 0.33."
+    },
+    {
+      "id": "java-003",
+      "title": "Decisions, loops and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-002"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "boolean",
+        "short circuit",
+        "loop invariant",
+        "boundary"
+      ],
+      "outcome": "Control flow chooses which statements run and how often.",
+      "lab": "Use text null and test text!=null before calling isEmpty.",
+      "verification": "condition false with no NullPointerException. wrong loop raises ArrayIndexOutOfBoundsException."
+    },
+    {
+      "id": "java-004",
+      "title": "Methods and explicit contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-003"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "parameters",
+        "return",
+        "overloading",
+        "pass by value"
+      ],
+      "outcome": "A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input.",
+      "lab": "Implement doubleValue(int x) and evaluate 7 and 0.",
+      "verification": "14 and 0. int and long respectively."
+    },
+    {
+      "id": "java-005",
+      "title": "Arrays, strings and Unicode",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-004"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "array bounds",
+        "UTF-16",
+        "code points",
+        "immutability"
+      ],
+      "outcome": "An array is a fixed-length indexed container.",
+      "lab": "Copy array 1,2,3,mutate the copy and compare the original.",
+      "verification": "original starts 1; copy starts 9. ArrayIndexOutOfBoundsException."
+    },
+    {
+      "id": "java-006",
+      "title": "Lists, sets and maps",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-005"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "ArrayList",
+        "HashMap",
+        "HashSet",
+        "iteration"
+      ],
+      "outcome": "Lists preserve an ordered sequence and may contain duplicates.",
+      "lab": "Create a mutable list red,blue,red and append green.",
+      "verification": "size 4; red appears twice. UnsupportedOperationException."
+    },
+    {
+      "id": "java-007",
+      "title": "Classes and encapsulation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-006"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "object state",
+        "access modifiers",
+        "instance methods"
+      ],
+      "outcome": "An object combines state with operations that preserve its rules.",
+      "lab": "Construct accounts with 100 and 100 cents,deposit 50 into the first.",
+      "verification": "balances 150 and 100. ArithmeticException;original maximum balance preserved."
+    },
+    {
+      "id": "java-008",
+      "title": "Constructors, records and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-007"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "record",
+        "compact constructor",
+        "validation"
+      ],
+      "outcome": "A record is a concise carrier for a fixed set of components, with generated accessors, equality, hashing and a descriptive string.",
+      "lab": "Create an Order with ID \" A \" and item x.",
+      "verification": "ID A and items[x]. NullPointerException from the declared copy policy."
+    },
+    {
+      "id": "java-009",
+      "title": "Exceptions and resource lifetime",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-008"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "checked exception",
+        "try with resources",
+        "suppressed exception"
+      ],
+      "outcome": "Exceptions separate normal return values from failure.",
+      "lab": "Open a Probe resource, record body, then inspect closure order.",
+      "verification": "events body, close A. cause remains the original IOException."
+    },
+    {
+      "id": "java-010",
+      "title": "Interfaces and polymorphism",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-009"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "interface",
+        "substitution",
+        "composition",
+        "dispatch"
+      ],
+      "outcome": "An interface describes behavior a caller can rely on without depending on one implementation.",
+      "lab": "Use Pricing references to identity and half-price implementations on 100 cents.",
+      "verification": "100 and 50. negative fee IllegalArgumentException;null delegate NullPointerException."
+    },
+    {
+      "id": "java-011",
+      "title": "Equality, hashing and ordering",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-010"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "equals",
+        "hashCode",
+        "Comparator",
+        "mutable keys"
+      ],
+      "outcome": "Equality, hashing and ordering are related contracts with different roles.",
+      "lab": "Create two equal Point records and insert one into a map.",
+      "verification": "lookup with the other returns origin; hashes equal. display labels equal; points unequal."
+    },
+    {
+      "id": "java-012",
+      "title": "Generics and variance",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-011"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "type parameter",
+        "invariance",
+        "extends",
+        "super",
+        "type erasure"
+      ],
+      "outcome": "Generics express type relationships so many errors can be detected before execution.",
+      "lab": "Sum `List.of(1, 2, 3)` and `List.of(1.5, 2.5)` through List<?extends Number>.",
+      "verification": "sums 6.0 and 4.0. runtime classes equal; compile-time contracts remain distinct."
+    },
+    {
+      "id": "java-013",
+      "title": "Lambdas and functional interfaces",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-012"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "capture",
+        "effectively final",
+        "Predicate",
+        "Function"
+      ],
+      "outcome": "A lambda supplies the behavior of a functional interface, an interface with one abstract method.",
+      "lab": "Create a Predicate<Integer> accepting positive values and test 3,0,-1.",
+      "verification": "true, false, false. 7 accepted; blank rejected."
+    },
+    {
+      "id": "java-014",
+      "title": "Streams and collectors",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-013"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "lazy pipeline",
+        "reduce",
+        "groupingBy",
+        "parallel hazards"
+      ],
+      "outcome": "A stream is a single-use computation pipeline over a source.",
+      "lab": "Keep even values from 1,2,3,4 and sum their squares.",
+      "verification": "20. 5 versus 9; parallel sum 5050."
+    },
+    {
+      "id": "java-015",
+      "title": "Dates, time zones and formatting",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-014"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Instant",
+        "LocalDate",
+        "ZonedDateTime",
+        "DST"
+      ],
+      "outcome": "Time has several meanings.",
+      "lab": "Parse `2024-01-01T00:00:00Z` and view it in UTC and America/New_York.",
+      "verification": "same instant; New York local date 2023-12-31. start included; end excluded."
+    },
+    {
+      "id": "java-016",
+      "title": "Files, paths and character encoding",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-015"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Path",
+        "Files",
+        "UTF-8",
+        "atomic replacement"
+      ],
+      "outcome": "A path names a location; it is not the file contents or a guarantee that the location exists.",
+      "lab": "Write Café and an emoji to an owned temporary file,then read it with UTF-8.",
+      "verification": "exact text equality. original exception propagated; owned directory absent."
+    },
+    {
+      "id": "java-017",
+      "title": "Optional values and validation boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-016"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Optional",
+        "null",
+        "domain error",
+        "parse"
+      ],
+      "outcome": "Optional represents the presence or absence of a value in a return contract.",
+      "lab": "Look up known a and unknown b in a fixed map through Optional.",
+      "verification": "a present with 7; b empty. specific absence failure."
+    },
+    {
+      "id": "java-018",
+      "title": "Tests that detect broken behavior",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-017"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "assert",
+        "table driven tests",
+        "properties",
+        "mutation"
+      ],
+      "outcome": "A useful test distinguishes correct behavior from a plausible mistake.",
+      "lab": "Test clamp for values -2,0,3,9 under bounds 0..5.",
+      "verification": "outputs 0,0,3,5. all originals restored; input arrays unchanged."
+    },
+    {
+      "id": "java-019",
+      "title": "Data structures and complexity",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-018"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "hash table",
+        "deque",
+        "heap",
+        "Big O"
+      ],
+      "outcome": "A data structure is a set of operations with representation and cost tradeoffs.",
+      "lab": "Add a,b,c to an ArrayDeque and remove from the front.",
+      "verification": "a,b,c order. poll returns null; remove throws NoSuchElementException."
+    },
+    {
+      "id": "java-020",
+      "title": "Search, sorting and dynamic programming",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-019"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "binary search",
+        "stable sort",
+        "memoization",
+        "DP"
+      ],
+      "outcome": "Algorithms connect a problem contract to a sequence of operations and invariants.",
+      "lab": "Run lowerBound on 1,2,2,5 with target 2 and target 6.",
+      "verification": "indices 1 and 4. IllegalArgumentException for both."
+    },
+    {
+      "id": "java-021",
+      "title": "Threads and the memory model",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-020"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Thread",
+        "happens before",
+        "visibility",
+        "join"
+      ],
+      "outcome": "Threads can execute concurrently while sharing memory.",
+      "lab": "Start a worker that writes 42 into a shared holder, join it with a bound, and inspect the result.",
+      "verification": "worker terminated; result 42. interruption observed and worker terminated."
+    },
+    {
+      "id": "java-022",
+      "title": "Executors, futures and cancellation",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-021"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "ExecutorService",
+        "Future",
+        "timeout",
+        "cancellation"
+      ],
+      "outcome": "An ExecutorService owns task scheduling and worker lifetime.",
+      "lab": "Submit a callable returning 42 and get it within 2 seconds.",
+      "verification": "result 42. third submission rejected; admitted tasks finish after release."
+    },
+    {
+      "id": "java-023",
+      "title": "Locks, atomics and concurrent collections",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-022"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "synchronized",
+        "AtomicInteger",
+        "ConcurrentHashMap",
+        "deadlock"
+      ],
+      "outcome": "Synchronization protects a state transition,not merely a variable name.",
+      "lab": "Run two workers making 1000 synchronized increments each.",
+      "verification": "counter 2000. 2000 increments and no blocked worker after bounded joins."
+    },
+    {
+      "id": "java-024",
+      "title": "Virtual threads and blocking work",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-023"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "virtual thread",
+        "task lifetime",
+        "backpressure",
+        "pinning"
+      ],
+      "outcome": "Virtual threads are lightweight Java threads intended to make large numbers of blocking tasks easier to express.",
+      "lab": "Start a virtual thread that records isVirtual and join it.",
+      "verification": "true and terminated. caller can acquire the monitor while the worker is waiting."
+    },
+    {
+      "id": "java-025",
+      "title": "JVM memory, GC and allocation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-024"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "heap",
+        "stack",
+        "reachability",
+        "GC",
+        "allocation"
+      ],
+      "outcome": "The JVM manages heap memory through reachability,not by immediately freeing an object when a local variable changes.",
+      "lab": "Store a small byte array in a list and drop the local variable reference.",
+      "verification": "list still exposes the same array contents. nonnegative counters; max at least total; no claim of exact object size."
+    },
+    {
+      "id": "java-026",
+      "title": "Packages, classpaths and modules",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-025"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "package",
+        "classpath",
+        "module path",
+        "exports",
+        "requires"
+      ],
+      "outcome": "Packages organize class names and access boundaries.",
+      "lab": "Read `String.class` module and package names.",
+      "verification": "module `java.base`;package `java.lang`. nonzero compiler exit and captured diagnostic."
+    },
+    {
+      "id": "java-027",
+      "title": "Builds and dependency reproducibility",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-026"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "javac",
+        "jar",
+        "Maven",
+        "Gradle",
+        "locked dependencies"
+      ],
+      "outcome": "A build turns source and declared dependencies into an artifact.",
+      "lab": "Build a Hello class whose main prints build-ok.",
+      "verification": "compiler exit 0;Hello.class exists. exact version accepted; LATEST not treated as a pin."
+    },
+    {
+      "id": "java-028",
+      "title": "HTTP services and clients",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-027"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "HttpClient",
+        "HttpServer",
+        "status",
+        "timeout",
+        "resource closure"
+      ],
+      "outcome": "HTTP is a request/response protocol with method,path,status,headers and body.",
+      "lab": "Start the fixture and request `GET /health`.",
+      "verification": "status 200 and body ok. host 127.0.0.1;port positive; closed flag true."
+    },
+    {
+      "id": "java-029",
+      "title": "JDBC and transactions",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-028"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "prepared statement",
+        "connection",
+        "commit",
+        "rollback",
+        "isolation"
+      ],
+      "outcome": "JDBC is Java's database-access API.",
+      "lab": "Open the fixture,inspect product metadata and count the two account rows.",
+      "verification": "database product H2; 2 rows; auto-commit initially true. second session sees 100 before commit and 95 after commit."
+    },
+    {
+      "id": "java-030",
+      "title": "Serialization and schema evolution",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-029"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "data boundary",
+        "version",
+        "validation",
+        "deserialization"
+      ],
+      "outcome": "Serialization turns domain values into a representation that another process or version can read.",
+      "lab": "Encode account a1, balance 125, note Café with version 2 and decode.",
+      "verification": "equal domain record and exact Unicode note. trailing payload IOException; negative balance IllegalArgumentException."
+    },
+    {
+      "id": "java-031",
+      "title": "Reflection, annotations and service loading",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-030"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "reflection",
+        "annotation",
+        "ServiceLoader",
+        "encapsulation"
+      ],
+      "outcome": "Reflection inspects or invokes program elements through metadata rather than ordinary compile-time calls.",
+      "lab": "Read Version on the known Friendly provider.",
+      "verification": "version 2. version 2 accepted;version 3 rejected."
+    },
+    {
+      "id": "java-032",
+      "title": "Profiling and benchmark reasoning",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-031"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "JFR",
+        "warmup",
+        "JIT",
+        "measurement bias"
+      ],
+      "outcome": "Performance measurement starts with a correct,representative workload.",
+      "lab": "Sum 1..1000 with a loop and compare with n*(n+1)/2.",
+      "verification": "500500. metadata names 100 warmups and profiling false; universal claim false."
+    },
+    {
+      "id": "java-033",
+      "title": "Secure application boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-032"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "untrusted input",
+        "path traversal",
+        "resource limits",
+        "secrets"
+      ],
+      "outcome": "An application boundary converts untrusted input into a limited set of permitted operations.",
+      "lab": "Create `input.txt` inside an owned root and read at most 10 bytes.",
+      "verification": "content hello. diagnostic excludes both sensitive fields."
+    },
+    {
+      "id": "java-034",
+      "title": "Application design and dependency boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-033"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "dependency inversion",
+        "ports",
+        "adapters",
+        "pure core"
+      ],
+      "outcome": "Application design separates domain decisions from the mechanisms that supply data,time or side effects.",
+      "lab": "Compute 3 items at 125 cents and check the zero/negative quantity policy.",
+      "verification": "375 cents; nonpositive quantity rejected. ArithmeticException;audit sink unused."
+    },
+    {
+      "id": "java-035",
+      "title": "Build a tested local data service",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-034"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "domain model",
+        "storage",
+        "HTTP",
+        "contract tests"
+      ],
+      "outcome": "A small data service combines domain rules, storage and transport contracts.",
+      "lab": "Summarize group A over amounts 10,20 and group B over 5.",
+      "verification": "A count 2, total 30; B count 1, total 5. 3 unchanged records; closed flag true."
+    },
+    {
+      "id": "java-036",
+      "title": "Package, diagnose and maintain a release",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-035"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "jar",
+        "jlink",
+        "observability",
+        "compatibility",
+        "release checklist"
+      ],
+      "outcome": "A release is a reproducible artifact plus evidence about how it starts,what contracts it accepts and how failures are diagnosed.",
+      "lab": "Compile the fixture with --release 21 and inspect its class header.",
+      "verification": "magic CAFEBABE; major version 65. previous artifact v1 retained; custom_runtime_built False."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://dev.java/learn/",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/index.html",
+      "checked": "2026-10-22"
+    }
+  ]
+}

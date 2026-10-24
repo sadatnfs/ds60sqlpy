@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-046",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Distinguish CNI interface and network implementation.",
+      "expected": "A plugin contract versus a concrete routing/policy system."
+    },
+    {
+      "exercise": 2,
+      "task": "Label inner and outer addresses.",
+      "expected": "Pod endpoints inside, node transport endpoints outside in the overlay example."
+    },
+    {
+      "exercise": 3,
+      "task": "Draw a two-node request path.",
+      "expected": "Pod interfaces, node forwarding and underlay hops are explicit."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose small-request success with large-payload failure.",
+      "expected": "Investigate MTU and path behavior in addition to app limits."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why Ready does not prove cross-node reachability.",
+      "expected": "Readiness may be a local check with a narrower path."
+    },
+    {
+      "exercise": 6,
+      "task": "Plan a CNI-specific qualification without replacing the plugin.",
+      "expected": "Read configuration, state the implementation and run only owned bounded probes."
+    }
+  ]
+}

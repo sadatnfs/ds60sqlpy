@@ -1,0 +1,17 @@
+ARG DS60_NODE_IMAGE=node:24.22.1-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205
+ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+FROM ${DS60_NODE_IMAGE} AS node
+WORKDIR /opt/typescript
+COPY docker/workers/typescript/package*.json ./
+RUN npm ci --ignore-scripts --no-audit --no-fund
+FROM ${DS60_PYTHON_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /opt/typescript /opt/typescript
+RUN node --version && node /opt/typescript/node_modules/typescript/bin/tsc --version \
+    && install -d -m 0700 /run/ds60
+WORKDIR /opt/worker
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py /opt/worker/src/ds60sqlpy/
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=javascript-node
+ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

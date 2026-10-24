@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-022",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "qualified owned StorageClass/PVC/StatefulSet and finite marker writer/reader",
+  "browser_source": false,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Connect StatefulSet volumeClaimTemplates,data mount and StorageClass.",
+      "expected": "The data claim is mounted at /data and depends on a qualified lesson-local class."
+    },
+    {
+      "exercise": 2,
+      "task": "Use a bounded exclusive-create writer for a synthetic marker and retain its hash.",
+      "expected": "One initialization receipt,claim/PV identities and a known marker checksum."
+    },
+    {
+      "exercise": 3,
+      "task": "Use the host operation with the recorded Pod UID and observe its successor.",
+      "expected": "New Pod UID with the intended stable ordinal and same claim binding."
+    },
+    {
+      "exercise": 4,
+      "task": "Read the marker after replacement without running the writer.",
+      "expected": "Hash remains h1 in the synthetic trace;actual live bytes/hash are recorded separately."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare StatefulSet claim retention with PV reclaim policy and cluster release.",
+      "expected": "Each lifecycle boundary has its own policy;retention is not backup."
+    },
+    {
+      "exercise": 6,
+      "task": "Use supplied binding/events to propose a minimal class/capacity/topology check.",
+      "expected": "No destructive claim reset;the missing capability or binding condition is identified."
+    }
+  ]
+}

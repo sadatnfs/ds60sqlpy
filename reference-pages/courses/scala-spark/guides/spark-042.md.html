@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>spark-042: Capstone: a recoverable late-event data product · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>spark-042: Capstone: a recoverable late-event data product</h1>
+      <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-042.md</code></p>
+    </header>
+    <article class="document"><h2 id="spark-042-capstone-a-recoverable-late-event-data-product">spark-042: Capstone: a recoverable late-event data product<a class="heading-anchor" href="#spark-042-capstone-a-recoverable-late-event-data-product" aria-label="Link to this section">#</a></h2>
+<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny,local and deterministic. Runtime acceptance,logical correctness and learner understanding remain separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 180 minutes. Direct design prerequisites: <code>spark-041</code>. The prepared baseline is Spark4.0.1,Scala binary2.13,JDK17 and Python3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>;a proposed future tuple is not a runtime receipt.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open <code>spark-042</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile,save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own local[2] session,disables the UI,binds the driver to loopback and stops the session in finally. No external dataset,package download,JDBC connection or cloud service is requested.</p>
+<p>The <a href="../lessons/spark-042.scala.html">Scala learner</a> and <a href="../lessons/spark-042.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-042_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison;the <a href="../solutions/spark-042_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-042_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture;do not copy it onto an unbounded or large production table.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Deliver a bounded streaming product with credible correctness, recovery and operational evidence.</li>
+<li>State the input and output grain,schema,NULL policy and ordering before executing a transformation.</li>
+<li>Compare each language implementation with independent literal expectations,not only with the other implementation.</li>
+</ul>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><strong>Delivery identity:</strong> A unique occurrence number for source accounting, distinct from the business event ID used for duplicate detection.</li>
+</ul>
+<ul>
+<li><strong>Frozen cutoff:</strong> An admission threshold derived from the previously committed maximum and held fixed throughout one microbatch.</li>
+</ul>
+<ul>
+<li><strong>Conflicting duplicate:</strong> A repeated business ID with different event time or amount, classified invalid under this product contract.</li>
+</ul>
+<ul>
+<li><strong>Commit chain:</strong> A bounded sequence of published batch records linking prior bytes, input identity and derived product state.</li>
+</ul>
+<ul>
+<li><strong>Uncertain outcome:</strong> A failure after an external effect became visible but before the caller recorded successful completion.</li>
+</ul>
+<ul>
+<li><strong>Recovery packet:</strong> Exact data, state, attempt, version, resource and cleanup evidence supporting a narrowly stated recovery claim.</li>
+</ul>
+<p>This capstone delivers a bounded data product with actual Spark file streaming, an application-managed event policy, a local idempotent sink and a real injected restart. It combines late and duplicate events without using exactly once as a shortcut for explaining the protocol. The data product has one accepted value per business ID, while every raw source occurrence receives one accounting category.</p>
+<p>The source schema is delivery:bigint, id:string, event_second:bigint, cents:bigint, all nullable at the read boundary. A delivery number identifies a source occurrence and must be present, unique in its batch and within 1..12. The business fields can be invalid and are retained for classification. Each microbatch contains at most 8 rows and the complete product at most 12 occurrences. Only those checked tiny batches are collected to the driver for this teaching sink.</p>
+<h3 id="state-the-policy-before-running-the-stream">State the policy before running the stream<a class="heading-anchor" href="#state-the-policy-before-running-the-stream" aria-label="Link to this section">#</a></h3>
+<p>Accepted IDs are single uppercase letters, event seconds are integers 0..1000 and cents are integers 0..1000. Zero cents is valid. Domain-invalid rows are counted invalid and never advance event time. For a domain-valid row, an existing ID with the same event time and amount is a duplicate;an existing ID with different payload is invalid conflict. A new ID older than the frozen cutoff is late. All remaining new IDs are accepted.</p>
+<p>The cutoff for a batch is previous committed maximum accepted event_second minus 10. It is inclusive:an event exactly at the cutoff is accepted. The cutoff does not move after each row in the current batch. This prevents the processing order of one batch from deciding whether another row in the same batch is late. Accepted events update the maximum for the next committed batch.</p>
+<p>This is an explicit application policy implemented in the bounded sink state. It is not Spark&#x27;s native watermark or a demonstration of state-store eviction. The accepted-ID map retains all keys for the finite product. An unbounded deployment would need a different bounded state store, retention/conflict policy and transactional sink implementation. The course keeps that limitation visible instead of disguising a driver dictionary as a distributed state service.</p>
+<h3 id="work-the-three-immutable-input-batches">Work the three immutable input batches<a class="heading-anchor" href="#work-the-three-immutable-input-batches" aria-label="Link to this section">#</a></h3>
+<p>BatchA containsA(100,10), B(105,20), an equalA duplicate and a NULL business ID. It yields accepted 2, duplicate 1, invalid 1, late 0, total 30, max 105. The next cutoff is 95. BatchB deliberately presentsE(120,40) beforeD(95,0), thenC(94,7) and an equalB duplicate. D is accepted at the frozen 95 boundary even though E raises the next maximum to 120. C is late. The cumulative product becomes accepted 4, duplicate 2, late 1, invalid 1, total 70.</p>
+<p>BatchC uses cutoff 110. A changed B amount 999 is an invalid conflict, and F(110,5) is accepted exactly at the boundary. The final accepted IDs areA, B, D, E, F, total 75, with duplicate 2, late 1, invalid 2. The conservation equation is 5+2+1+2=10 raw occurrences. A total-only check would miss dropping the valid zero-valuedD, so the oracle includes every accepted identity and timestamp as well as counts and total.</p>
+<h3 id="publish-input-and-state-together">Publish input and state together<a class="heading-anchor" href="#publish-input-and-state-together" aria-label="Link to this section">#</a></h3>
+<p>Each callback canonicalizes all input occurrences into deterministic JSON, including invalid business fields. The commit file stores query identity, batch ID, input JSON and SHA256, previous commit digest and canonical derived state. The predecessor chain is bounded and validated when read. State is recomputed from the committed input ledger and compared with the recorded state, so a reader does not trust an unexplained summary counter.</p>
+<p>The file is staged beside its final batch-key path and atomically renamed under a single-writer local-filesystem assumption. Input, state and commit metadata share one visibility point. A repeated batch key must carry identical input and a valid existing chain;it returns the already committed logical state rather than applying the rows again. JSON integer fields are validated by numeric value and integral type, avoiding the JVM node-width round-trip mistake discussed in the sink lesson.</p>
+<p>This protocol provides the tested local visibility and replay behavior. It does not fsync a power-loss-durable transaction log, coordinate multiple distributed writers or prove object-store atomicity. Hashes identify bytes but do not authenticate an attacker-controlled publisher. Every file here is created inside the owned local job root;the example does not open a database or remote service.</p>
+<h3 id="fail-after-the-effect-exists">Fail after the effect exists<a class="heading-anchor" href="#fail-after-the-effect-exists" aria-label="Link to this section">#</a></h3>
+<p>The first actual foreachBatch callback publishesBatchA, then raises injected_after_publication before Spark records normal batch completion. The query fails, but the committed product is readable. That is an uncertain outcome from the caller&#x27;s perspective:the effect happened even though the call did not return success.</p>
+<p>Restarting the same compatible checkpoint deliversBatch 0 again. The sink validates the existing content and leaves its bytes and counters unchanged. Query identity persists while run identity changes. The attempt ledger is[0,0], but there is only one committed first-batch effect. This is replay-safe publication, not exactly-once callback computation.</p>
+<p>After the restart, the program publishesBatchB and BatchC in turn and waits for each finite query to finish. The final attempt IDs are[0,0,1,2], and callback row counts are[4,4,4,2]. Physical callback work therefore examines 14 row occurrences while the committed source ledger accounts for 10 logical occurrences. Keeping these numbers separate prevents a retry from being mistaken for extra business events or a cost-free recovery.</p>
+<h3 id="review-the-handoff-and-cleanup">Review the handoff and cleanup<a class="heading-anchor" href="#review-the-handoff-and-cleanup" aria-label="Link to this section">#</a></h3>
+<p>The final packet contains the literal full-state oracle, source batch definitions, query/run identities, attempt IDs, callback row work, three committed batch files and the declared bounds. A sink binding connects the application namespace to its source, checkpoint and policy version. An attempt to point that sink at another checkpoint is refused before a query starts.</p>
+<p>Every query has a 45-second await bound and a five-second stop timeout. Only queries created by this program are stopped. The owned root is removed only after those queries are inactive, and the session is stopped in finally. No existing checkpoint or learner directory is reset. Resource counts are local work evidence, not a cloud invoice or a throughput forecast.</p>
+<p>A reviewer should be able to explain the cutoff boundary, zero retention, conflicting-ID policy, after-publication failure and replay no-op without reading the implementation first. The two languages must independently match the literal product oracle. Their agreement alone would not rule out a shared policy error.</p>
+<h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
+<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Column</span><span class="syntax-punctuation">,</span> <span class="syntax-class">DataFrame</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Row</span><span class="syntax-punctuation">,</span> <span class="syntax-class">SparkSession</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span><span class="syntax-class">Path</span><span class="syntax-punctuation">,</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span><span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
+<span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>util<span class="syntax-punctuation">.</span><span class="syntax-class">UUID</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>jdk<span class="syntax-punctuation">.</span><span class="syntax-class">CollectionConverters</span><span class="syntax-punctuation">.</span>_
+<span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>streaming<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">StreamingQuery</span><span class="syntax-punctuation">,</span><span class="syntax-class">Trigger</span><span class="syntax-punctuation">}</span>
+<span class="syntax-keyword">import</span> scala<span class="syntax-punctuation">.</span>collection<span class="syntax-punctuation">.</span>mutable<span class="syntax-punctuation">.</span><span class="syntax-class">ArrayBuffer</span>
+
+require<span class="syntax-punctuation">(</span>spark<span class="syntax-punctuation">.</span>version <span class="syntax-operator">==</span> <span class="syntax-string">&quot;4.0.1&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;Prepared Spark4.0.1 required&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.streaming.stopTimeout&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;5000&quot;</span><span class="syntax-punctuation">)</span>
+ownedRoot<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createTempDirectory<span class="syntax-punctuation">(</span><span class="syntax-class">Paths</span><span class="syntax-punctuation">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;.&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>toAbsolutePath<span class="syntax-punctuation">.</span>normalize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;spark-042-&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> input<span class="syntax-operator">=</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;input&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">val</span> checkpoint<span class="syntax-operator">=</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;checkpoint&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">val</span> sink<span class="syntax-operator">=</span><span class="syntax-class">Files</span><span class="syntax-punctuation">.</span>createDirectory<span class="syntax-punctuation">(</span>ownedRoot<span class="syntax-punctuation">.</span>resolve<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;sink&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+publishFile<span class="syntax-punctuation">(</span>ownedRoot<span class="syntax-punctuation">,</span>input<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;batch-01.json&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery&quot;:1,&quot;id&quot;:&quot;A&quot;,&quot;event_second&quot;:100,&quot;cents&quot;:10}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery&quot;:2,&quot;id&quot;:&quot;B&quot;,&quot;event_second&quot;:105,&quot;cents&quot;:20}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery&quot;:3,&quot;id&quot;:&quot;A&quot;,&quot;event_second&quot;:100,&quot;cents&quot;:10}&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;&quot;&quot;{&quot;delivery&quot;:4,&quot;id&quot;:null,&quot;event_second&quot;:106,&quot;cents&quot;:30}&quot;&quot;&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> staticA<span class="syntax-operator">=</span>spark<span class="syntax-punctuation">.</span>read<span class="syntax-punctuation">.</span>schema<span class="syntax-punctuation">(</span>productSchema<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>json<span class="syntax-punctuation">(</span>input<span class="syntax-punctuation">.</span>toString<span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pyspark.sql <span class="syntax-keyword">import</span> SparkSession<span class="syntax-punctuation">,</span> functions <span class="syntax-keyword">as</span> F
+<span class="syntax-keyword">from</span> pyspark.sql.types <span class="syntax-keyword">import</span> StructType<span class="syntax-punctuation">,</span> StructField<span class="syntax-punctuation">,</span> LongType<span class="syntax-punctuation">,</span> IntegerType<span class="syntax-punctuation">,</span> StringType<span class="syntax-punctuation">,</span> DoubleType<span class="syntax-punctuation">,</span> BooleanType<span class="syntax-punctuation">,</span> ArrayType<span class="syntax-punctuation">,</span> MapType<span class="syntax-punctuation">,</span> TimestampType<span class="syntax-punctuation">,</span> DecimalType
+<span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
+<span class="syntax-keyword">import</span> tempfile
+<span class="syntax-keyword">import</span> shutil
+<span class="syntax-keyword">import</span> json
+<span class="syntax-keyword">import</span> uuid
+
+<span class="syntax-keyword">if</span> spark<span class="syntax-operator">.</span>version<span class="syntax-operator">!=</span><span class="syntax-string">&quot;</span><span class="syntax-string">4.0.1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span><span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Prepared Spark4.0.1 required</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+spark<span class="syntax-operator">.</span>conf<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark.sql.streaming.stopTimeout</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">5000</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+owned_root<span class="syntax-operator">=</span>Path<span class="syntax-punctuation">(</span>tempfile<span class="syntax-operator">.</span>mkdtemp<span class="syntax-punctuation">(</span>prefix<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">spark-042-</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-builtin">dir</span><span class="syntax-operator">=</span>Path<span class="syntax-operator">.</span>cwd<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+input_path<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">input</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>checkpoint<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">checkpoint</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>sink<span class="syntax-operator">=</span>owned_root<span class="syntax-operator">/</span><span class="syntax-string">&quot;</span><span class="syntax-string">sink</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">;</span>sink<span class="syntax-operator">.</span>mkdir<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+publish_file<span class="syntax-punctuation">(</span>owned_root<span class="syntax-punctuation">,</span>input_path<span class="syntax-punctuation">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">batch-01.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery</span><span class="syntax-string">&quot;</span><span class="syntax-string">:1,</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_second</span><span class="syntax-string">&quot;</span><span class="syntax-string">:100,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2,</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_second</span><span class="syntax-string">&quot;</span><span class="syntax-string">:105,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:20}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery</span><span class="syntax-string">&quot;</span><span class="syntax-string">:3,</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-string">,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_second</span><span class="syntax-string">&quot;</span><span class="syntax-string">:100,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:10}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">delivery</span><span class="syntax-string">&quot;</span><span class="syntax-string">:4,</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-string">:null,</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_second</span><span class="syntax-string">&quot;</span><span class="syntax-string">:106,</span><span class="syntax-string">&quot;</span><span class="syntax-string">cents</span><span class="syntax-string">&quot;</span><span class="syntax-string">:30}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
+static_a<span class="syntax-operator">=</span>spark<span class="syntax-operator">.</span>read<span class="syntax-operator">.</span>schema<span class="syntax-punctuation">(</span>PRODUCT_SCHEMA<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>json<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">(</span>input_path<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> previousMax<span class="syntax-operator">=</span><span class="syntax-number">105L</span><span class="syntax-punctuation">;</span><span class="syntax-keyword">val</span> cutoff<span class="syntax-operator">=</span>previousMax<span class="syntax-operator">-</span><span class="syntax-number">10L</span>
+<span class="syntax-keyword">val</span> orderedSeconds<span class="syntax-operator">=</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">120L</span><span class="syntax-punctuation">,</span><span class="syntax-number">95L</span><span class="syntax-punctuation">,</span><span class="syntax-number">94L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>orderedSeconds<span class="syntax-punctuation">.</span>filter<span class="syntax-punctuation">(</span>_ <span class="syntax-operator">&gt;=</span> cutoff<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">120L</span><span class="syntax-punctuation">,</span><span class="syntax-number">95L</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">previous_max<span class="syntax-operator">=</span><span class="syntax-number">105</span><span class="syntax-punctuation">;</span>cutoff<span class="syntax-operator">=</span>previous_max<span class="syntax-operator">-</span><span class="syntax-number">10</span>
+ordered_seconds<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">120</span><span class="syntax-punctuation">,</span><span class="syntax-number">95</span><span class="syntax-punctuation">,</span><span class="syntax-number">94</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>second <span class="syntax-keyword">for</span> second <span class="syntax-operator">in</span> ordered_seconds <span class="syntax-keyword">if</span> second<span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span>cutoff<span class="syntax-punctuation">]</span><span class="syntax-operator">==</span><span class="syntax-punctuation">[</span><span class="syntax-number">120</span><span class="syntax-punctuation">,</span><span class="syntax-number">95</span><span class="syntax-punctuation">]</span></code></pre>
+<p>The cutoff remains 95 for the whole microbatch. Advancing it immediately after 120 would incorrectly reject 95. This independent arithmetic trace fixes the intended policy before streaming execution.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">val</span> counts<span class="syntax-operator">=</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">5L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2L</span><span class="syntax-punctuation">,</span><span class="syntax-number">1L</span><span class="syntax-punctuation">,</span><span class="syntax-number">2L</span><span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">val</span> acceptedCents<span class="syntax-operator">=</span><span class="syntax-class">Seq</span><span class="syntax-punctuation">(</span><span class="syntax-number">10L</span><span class="syntax-punctuation">,</span><span class="syntax-number">20L</span><span class="syntax-punctuation">,</span><span class="syntax-number">0L</span><span class="syntax-punctuation">,</span><span class="syntax-number">40L</span><span class="syntax-punctuation">,</span><span class="syntax-number">5L</span><span class="syntax-punctuation">)</span>
+assert<span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">.</span>sum<span class="syntax-operator">==</span><span class="syntax-number">10L</span> <span class="syntax-operator">&amp;&amp;</span> acceptedCents<span class="syntax-punctuation">.</span>size<span class="syntax-operator">==</span><span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> acceptedCents<span class="syntax-punctuation">.</span>sum<span class="syntax-operator">==</span><span class="syntax-number">75L</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">counts<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>accepted_cents<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">20</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span><span class="syntax-number">40</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>counts<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">10</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>accepted_cents<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">5</span> <span class="syntax-operator">and</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>accepted_cents<span class="syntax-punctuation">)</span><span class="syntax-operator">==</span><span class="syntax-number">75</span></code></pre>
+<p>The independent final oracle checks both conservation and zero retention. The total alone cannot establish that all five accepted identities survived.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-validate-and-canonicalize-each-raw-microbatch">Exercise 1: Validate and canonicalize each raw microbatch<a class="heading-anchor" href="#exercise-1-validate-and-canonicalize-each-raw-microbatch" aria-label="Link to this section">#</a></h4>
+<p>Require the explicit four-field schema, at most 8 rows and unique delivery IDs 1..12. Preserve NULL/business-invalid fields for classification and emit deterministic JSON.</p>
+<p><strong>Expected result/shape:</strong> BatchA has four occurrences with IDsA, B, A, NULL;NULL is preserved in canonical input. An oversized batch is rejected before collection.</p>
+<p><strong>Verify:</strong> Compare decoded delivery IDs 1..4 and the NULL marker;reject a 12-row union.</p>
+<p><strong>Progressive hint:</strong> Structural delivery identity is required even when business data is invalid.</p>
+<h4 id="exercise-2-implement-the-explicit-state-and-lateness-policy">Exercise 2: Implement the explicit state and lateness policy<a class="heading-anchor" href="#exercise-2-implement-the-explicit-state-and-lateness-policy" aria-label="Link to this section">#</a></h4>
+<p>Freeze cutoff at previous committed max_event_second minus 10. Validate domain, then classify existing equal ID payload as duplicate, conflicting payload as invalid, new old event as late, and remaining event as accepted.</p>
+<p><strong>Expected result/shape:</strong> AfterA:accepted 2, duplicate 1, late 0, invalid 1, total 30, max 105. An invalid far-future row does not advance max time.</p>
+<p><strong>Verify:</strong> Assert exact state and an invalid future control;preserve the original state value.</p>
+<p><strong>Progressive hint:</strong> The cutoff is fixed for the microbatch, not recomputed after each row.</p>
+<h4 id="exercise-3-inject-failure-after-publication-but-before-query-completion">Exercise 3: Inject failure after publication but before query completion<a class="heading-anchor" href="#exercise-3-inject-failure-after-publication-but-before-query-completion" aria-label="Link to this section">#</a></h4>
+<p>Run the actual foreachBatch query with one injected exception after the atomic commit file becomes visible.</p>
+<p><strong>Expected result/shape:</strong> The query fails with injected_after_publication;commit 0 is readable and contains the correct first-state ledger.</p>
+<p><strong>Verify:</strong> Inspect the expected streaming exception, attempt 0 and unchanged source/checkpoint ownership.</p>
+<p><strong>Progressive hint:</strong> This failure point deliberately creates an uncertain callback outcome for Spark.</p>
+<h4 id="exercise-4-replay-the-committed-batch-without-applying-it-twice">Exercise 4: Replay the committed batch without applying it twice<a class="heading-anchor" href="#exercise-4-replay-the-committed-batch-without-applying-it-twice" aria-label="Link to this section">#</a></h4>
+<p>Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.</p>
+<p><strong>Expected result/shape:</strong> Attempts 0,0 and callback rows 4,4;commit 0 bytes and logical state remain unchanged.</p>
+<p><strong>Verify:</strong> Compare query/run identities, exact bytes and all first-state counters.</p>
+<p><strong>Progressive hint:</strong> Repeated computation is allowed;repeated logical publication is not.</p>
+<h4 id="exercise-5-process-late-boundary-duplicate-and-conflicting-events">Exercise 5: Process late, boundary, duplicate and conflicting events<a class="heading-anchor" href="#exercise-5-process-late-boundary-duplicate-and-conflicting-events" aria-label="Link to this section">#</a></h4>
+<p>PublishBatchB thenBatchC as separate immutable files and run each finite invocation against the same checkpoint.</p>
+<p><strong>Expected result/shape:</strong> Final accepted IDsA, B, D, E, F, total 75;duplicate 2, late 1, invalid 2;10 logical occurrences. Zero-valuedD and cutoff-boundaryF remain accepted.</p>
+<p><strong>Verify:</strong> Compare intermediateB counts and the final literal state;the high-timeE must not make same-batchD late.</p>
+<p><strong>Progressive hint:</strong> Freeze each cutoff from the previously committed state:95 for B and 110 for C.</p>
+<h4 id="exercise-6-hand-off-correctness-recovery-and-resource-evidence">Exercise 6: Hand off correctness, recovery and resource evidence<a class="heading-anchor" href="#exercise-6-hand-off-correctness-recovery-and-resource-evidence" aria-label="Link to this section">#</a></h4>
+<p>Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.</p>
+<p><strong>Expected result/shape:</strong> Literal golden state matches;attempt IDs 0,0,1,2;callback rows 4,4,4,2;only owned inactive queries are eligible for cleanup.</p>
+<p><strong>Verify:</strong> Compare the complete state JSON and namespace-refusal negative;state the single-writer/local-filesystem limitations.</p>
+<p><strong>Progressive hint:</strong> An evidence packet separates data effects, physical work, source identity and cleanup.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p>Do not call a repeated callback exactly-once computation, advance the cutoff within one batch, drop valid zero values, or silently choose a winner for conflicting IDs. Do not publish counters separately from their supporting batch state. Do not trust only a digest without the business oracle. The bounded local driver ledger is explicitly not a production distributed state store, power-loss proof or object-store transaction. Preserve the source/checkpoint/sink binding and stop owned queries before cleanup.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain the contract of <code>canonicalProductInput</code> / <code>canonical_product_input</code> without reading its solution. Trace the specified boundary case,then explain the final exercise&#x27;s evidence and limitation. Identify where a transformation builds a plan and where an action requests execution. Retain exact values or operator evidence rather than treating a successful process exit as proof of the whole learning objective.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. Keep runtime/profile receipts separate from any cluster-performance or production-recovery claim.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch">Spark4.0.1 foreachBatch and recovery</a></li>
+</ul>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#handling-late-data-and-watermarking">Spark4.0.1 event-time concepts</a></li>
+</ul>
+<ul>
+<li><a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/Files.html#move(java.nio.file.Path,java.nio.file.Path,java.nio.file.CopyOption...">Java17 atomic file publication</a>)</li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through spark-042: Capstone: a recoverable late-event data product.
+Read courses/scala-spark/guides/spark-042.md and courses/scala-spark/lessons/spark-042.scala;the paired sources are courses/scala-spark/lessons/spark-042.scala and courses/scala-spark/lessons/spark-042.py.
+Direct prerequisites: spark-041. Explain the schema,row grain and new Scala/Python/Spark syntax,ask me to predict a concrete result,then inspect my attempt. Give one hint at a time,review exact result and boundary evidence,and ask retrieval questions in my own words. Do not read solutions/ until I ask or have made an honest attempt.
+Use only the prepared local[2] worker profile and owned job scratch. Do not download dependencies,start a remote service,reset existing checkpoints or alter unrelated learner work.
+Done when all six contracts have inspected evidence and I can explain the stated assumptions and a meaningful failure case.</code></pre></article>
+  </main>
+</body>
+</html>

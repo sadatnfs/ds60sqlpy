@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Learning with an AI tutor · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Learning with an AI tutor</h1>
+      <p class="source-path">Generated from <code>docs/learning-with-an-ai-tutor.md</code></p>
+    </header>
+    <article class="document"><h2 id="learning-with-an-ai-tutor">Learning with an AI tutor<a class="heading-anchor" href="#learning-with-an-ai-tutor" aria-label="Link to this section">#</a></h2>
+<p>The Docker classroom is the main learning environment. An AI tutor is an optional companion for explanation, debugging, retrieval practice and planning. All lessons must remain usable without an account, a hosted model or an AI assistant. A tutor&#x27;s network and privacy requirements are separate from the course&#x27;s offline-after-setup behavior.</p>
+<h3 id="start-the-classroom">Start the classroom<a class="heading-anchor" href="#start-the-classroom" aria-label="Link to this section">#</a></h3>
+<p>From the repository root on macOS, Linux or Windows through WSL 2, run:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
+<p>The launcher builds the prepared runtimes, starts the services and prints the actual browser address. Open <code>/classroom</code>, choose any subject, and use its lesson list to follow a sequence or revisit a topic. The same interface serves Python, SQL, the engineering bridge, programming languages, Kubernetes, deep learning, NLP, LLMs and statistics. Prerequisites describe what a lesson assumes; they do not force every learner to study at the same pace.</p>
+<p>The guide, code pad, notes and results stay together. Follow the lesson&#x27;s runtime notice: an orientation or theory lesson may intentionally have no Run button. C++ and Java compile in their prepared workers; JavaScript and TypeScript use the documented Node runtime. Browser DOM examples have a separate browser workflow because Node does not provide a browser document.</p>
+<p>The launcher reuses local named Docker volumes. Returning to the same project restores progress and saved work. Keep that project name when restarting, and preserve its volumes. A progress JSON export is not a complete backup of pads, notes, database state, job history or saved run receipts. Read <a href="docker-classroom.md.html">the classroom guide</a> before moving a learner&#x27;s work.</p>
+<p>For static reading, open <a href="../../START_HERE.html"><code>START_HERE.html</code></a>. It includes rendered lesson and reference pages, math and syntax highlighting, but does not execute code. Its browser-local completion state is separate from Docker data. Prepared native editor and Jupyter workflows remain available under <a href="offline-app.md.html">the optional application modes</a>.</p>
+<h3 id="give-the-tutor-the-right-context">Give the tutor the right context<a class="heading-anchor" href="#give-the-tutor-the-right-context" aria-label="Link to this section">#</a></h3>
+<p>Open an AI coding assistant in the repository root, or connect a compatible MCP client using <a href="mcp-tutor.md.html">the optional course tutor adapter</a>. The local adapter reads the course and plans a path; it does not run learner code or bundle a language model.</p>
+<p>Ask the assistant to read:</p>
+<ul>
+<li>Root and subject-specific <code>AGENTS.md</code> instructions.</li>
+<li>The current catalog or module manifest, using stable lesson IDs.</li>
+<li>The exact guide and learner artifact for the chosen lesson.</li>
+<li>The repo-local <code>guide-ds60sqlpy-learning</code> skill.</li>
+<li>Your current attempt and the actual result you observed.</li>
+</ul>
+<p>If a client does not discover skills automatically, provide the path <code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>. Some clients support the <code>$guide-ds60sqlpy-learning</code> shorthand used in lesson prompts; others need the file to be opened explicitly. The learning sequence is independent of that client feature.</p>
+<p>Every ordinary programming guide ends with <strong>Ask an AI tutor about this lesson</strong>. Copy that lesson-specific prompt so the tutor receives the stable ID, paths, prerequisites and solution boundary. Read the lesson first. A tutor may adapt an explanation, but it must not compensate for missing curriculum.</p>
+<h3 id="use-the-learning-loop">Use the learning loop<a class="heading-anchor" href="#use-the-learning-loop" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Explain:</strong> read the guide and describe the objective in your own words.</li>
+<li><strong>Predict:</strong> state what a worked example will produce before running it.</li>
+<li><strong>Attempt:</strong> change the code or write your own solution in the correct pad.</li>
+<li><strong>Inspect:</strong> compare the actual output with the lesson&#x27;s expected behavior.</li>
+<li><strong>Ask for one hint:</strong> describe the mismatch and the smallest relevant code.</li>
+<li><strong>Compare:</strong> explicitly request the official solution when ready, then explain why it works and how it differs from your attempt.</li>
+<li><strong>Retrieve:</strong> close the example and explain or rebuild the key idea from memory.</li>
+</ol>
+<p>A successful process exit, copied reference or completion check is not proof of understanding. Save your reasoning as well as your output. For the statistics and machine learning tutorial book, use the worked examples and answered interview discussions. It has no exam or mandatory exercise submission; its read marker records reading rather than mastery.</p>
+<p>A useful starting prompt is:</p>
+<pre class="highlighted-code"><code class="language-text">Use the guide-ds60sqlpy-learning skill for the lesson I selected.
+Read its actual guide and learner artifact. Ask which prerequisite ideas I
+already understand. Explain one new idea, ask me to predict an example, then
+wait for my attempt. Give one hint at a time. Keep official solutions closed
+until I explicitly ask to compare them. Use my observed output as evidence,
+and ask me to explain the result from memory before marking completion.</code></pre>
+<h3 id="ask-for-help-without-losing-the-learning">Ask for help without losing the learning<a class="heading-anchor" href="#ask-for-help-without-losing-the-learning" aria-label="Link to this section">#</a></h3>
+<p>For an error:</p>
+<pre class="highlighted-code"><code class="language-text">Here is my lesson ID, the relevant code, the exact error and what I expected.
+Help me find the first mismatch between my mental model and the program.
+Explain unfamiliar error terms, then suggest one small diagnostic step.
+Do not replace the whole solution or automatically rerun a destructive step.</code></pre>
+<p>For SQL:</p>
+<pre class="highlighted-code"><code class="language-text">Help me reason about the starting row grain, joins, grouping, NULL behavior
+and final ordering. Ask me to predict the rows before proposing a query.
+Use only the disposable advanced_sql_training database. Explain whether a
+statement changes state before asking me to run it.</code></pre>
+<p>For a compiled language:</p>
+<pre class="highlighted-code"><code class="language-text">Explain the source filename, entry point, compile step and runtime step for
+this lesson&#x27;s prepared profile. Distinguish compiler errors from runtime
+errors. Use the first diagnostic and the documented language version to
+help me make one small correction, then inspect the new result.</code></pre>
+<p>For a theory chapter:</p>
+<pre class="highlighted-code"><code class="language-text">Define every symbol in this chapter&#x27;s main equation. Work through a small
+numerical example, explain the assumptions, then give a case where the
+method would be misleading. Connect the result to the accompanying Python
+example without treating a toy demonstration as a production model.</code></pre>
+<h3 id="protect-work-and-keep-evidence-honest">Protect work and keep evidence honest<a class="heading-anchor" href="#protect-work-and-keep-evidence-honest" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Keep pads, notes and saved results in the learner&#x27;s own project. Do not ask an assistant to overwrite another learner&#x27;s files or reset their progress.</li>
+<li>Paste only the smallest relevant example and output. Keep credentials, private datasets, connection strings and personal material out of tutor chats.</li>
+<li>Use the exact source and result from the same run. A past receipt must not be mistaken for output from a newly edited pad.</li>
+<li>A tutor should explain a proposed setup or reset action before running it. The SQL training database is disposable; another database is not a substitute.</li>
+<li>Installing an AI client is optional. Do not add hosted API dependencies to a lesson that is meant to run offline.</li>
+<li>Completion should reflect your own explanation and attempt. MCP progress writes are disabled by default and require an explicit server opt-in.</li>
+</ul>
+<p>For a blocked environment, record the missing dependency or runtime separately from the lesson&#x27;s correctness. A reading lesson still works without a compiler, while a compilation claim needs an actual compiler result.</p>
+<h3 id="plan-a-sustainable-route">Plan a sustainable route<a class="heading-anchor" href="#plan-a-sustainable-route" aria-label="Link to this section">#</a></h3>
+<p>Choose a weekly time budget and a concrete outcome, then ask the tutor to expand that outcome into prerequisites. Alternate new topics with retrieval of earlier ones. If a lesson feels too fast, return to its prerequisite and ask for a smaller example. If it feels familiar, demonstrate the concept on a new input before skipping ahead.</p>
+<p>The classroom supports switching subjects without mixing their pads or results. Use that freedom deliberately: Python and SQL reinforce data reasoning; C++, Java and JavaScript expose different runtime models; Scala and Spark introduce distributed data work. Statistics, deep learning and LLM chapters connect those implementation skills to assumptions, measurement and evaluation.</p>
+<h3 id="continue-without-an-ai-tutor">Continue without an AI tutor<a class="heading-anchor" href="#continue-without-an-ai-tutor" aria-label="Link to this section">#</a></h3>
+<p>Follow the guide, run the worked examples, attempt the exercises where present, and compare the separate explanations. Use the expected results and common mistakes to diagnose your work. Record questions for later, and review the linked primary references. The checked-in course is the source of truth.</p></article>
+  </main>
+</body>
+</html>

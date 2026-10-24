@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-024",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Write a golden case",
+      "input_or_change": "Reverse [1,2,3] against a literal expected vector.",
+      "expected": "[3,2,1]."
+    },
+    {
+      "exercise": 2,
+      "task": "Enumerate a property",
+      "input_or_change": "Test all pairs from integers -2 through 2.",
+      "expected": "25 cases satisfy double reversal."
+    },
+    {
+      "exercise": 3,
+      "task": "Add a boundary corpus",
+      "input_or_change": "Include empty, singleton and duplicate vectors.",
+      "expected": "[], [7], [2,2] preserved after double reversal."
+    },
+    {
+      "exercise": 4,
+      "task": "Expose a weak property",
+      "input_or_change": "Replace reversal with identity in a scratch copy.",
+      "expected": "Double-reverse property passes but golden reversal fails."
+    },
+    {
+      "exercise": 5,
+      "task": "Save a reproduction",
+      "input_or_change": "Break reversal to drop the first item.",
+      "expected": "Small failing vector and exact observed output retained."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer to a parser",
+      "input_or_change": "Design encode/decode properties and independent malformed inputs.",
+      "expected": "Round-trip valid records; reject suffix junk and wrong versions."
+    }
+  ]
+}

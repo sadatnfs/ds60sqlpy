@@ -1,0 +1,7 @@
+ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+FROM ${DS60_PYTHON_IMAGE}
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY docker/kubernetes/fixture.py /fixture.py
+USER 65532:65532
+ENTRYPOINT ["python", "/fixture.py"]
+CMD ["server"]

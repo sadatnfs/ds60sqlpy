@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-063: Choropleths, rate denominators and missing geographic joins · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-063: Choropleths, rate denominators and missing geographic joins</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/guides/js-063.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-063-choropleths-rate-denominators-and-missing-geographic-joins">js-063: Choropleths, rate denominators and missing geographic joins<a class="heading-anchor" href="#js-063-choropleths-rate-denominators-and-missing-geographic-joins" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; about 110 minutes plus independent practice. Direct prerequisites: <code>js-062</code>. This is the D3.js specialization within the JavaScript path. Use the original language and browser lessons whenever syntax or DOM behavior is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Build a stable-ID choropleth join. Explain ecological inference limits. Produce a chart whose data transformation, visual encoding and interaction can be explained and checked independently.</p>
+<h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A choropleth colors geographic regions according to a value. The map’s geometry and the statistical table usually come from different sources, so they must be joined by a stable identifier. A display name is often a weak key because spelling, language and boundary definitions can change.</p>
+<p>Raw counts often track population or exposure rather than the phenomenon of interest. A rate divides an event count by a relevant denominator, such as eligible people or observation time. The denominator must match the numerator’s geography, period and population. A beautiful map cannot repair a mismatched denominator.</p>
+<p>Missing data needs its own visual state. A region with no measurement is not equivalent to a measured zero. Keep an explicit missing color or pattern, a legend and a table. Be cautious about ecological inference: a region-level association does not necessarily describe individuals within that region.</p>
+<h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
+<p>Create a Map from stable region ID to validated data, then look up each feature’s ID. Validate duplicate statistical IDs and report unmatched features and rows. Compute rates only for positive valid denominators. Choose a sequential scale for nonnegative ordered rates and explain its domain.</p>
+<p>The reference uses synthetic planar regions with <code>geoIdentity</code>, so the lesson isolates join and rate logic without introducing a global projection. It includes one missing region deliberately. This is a map-like teaching fixture, not a real-world geographic claim.</p>
+<h3 id="browser-execution-and-offline-inputs">Browser execution and offline inputs<a class="heading-anchor" href="#browser-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
+<p>Use the classroom&#x27;s JavaScript browser preview. The prepared preview supplies D3 7.9.0 as the global <code>d3</code>, an empty <code>#chart</code> container and a <code>#output</code> text region. It supports top-level <code>await</code> through an asynchronous wrapper. These examples do not import modules, fetch datasets, use a CDN or contact an external service. All data is small, synthetic and present in the source. Node has no DOM and is not the execution host for these lessons.</p>
+<p>Save your own pad before editing. Run the learner source after implementing its tasks. A completed reference prints <code>js-063 D3 complete</code> only after its executable checks finish. A thrown Error signals a failed check; <code>console.assert</code> alone is not a reliable completion contract. A browser observation proves this source ran in this preview. It is not a trusted backend verifier or a guarantee of statistical correctness, accessibility or mastery.</p>
+<p>The visual output belongs inside <code>#chart</code>. Use <code>.text()</code> or <code>textContent</code> for untrusted labels, never HTML interpolation. The preview is recreated for a new run, so long-lived listeners and animations should still be bounded and cleaned up in reusable components. No reference needs cookies, credentials, host files or engine access.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-compute-an-explicit-rate">Worked example 1: Compute an explicit rate<a class="heading-anchor" href="#worked-example-1-compute-an-explicit-rate" aria-label="Link to this section">#</a></h4>
+<p>Numerator and denominator have the same scope.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> rate<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">,</span>population<span class="syntax-punctuation">)</span><span class="syntax-punctuation">=&gt;</span>population<span class="syntax-operator">&gt;</span><span class="syntax-number">0</span><span class="syntax-operator">?</span>events<span class="syntax-operator">/</span>population<span class="syntax-operator">:</span><span class="syntax-keyword">null</span><span class="syntax-punctuation">;</span>
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span>rate<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">100</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>rate<span class="syntax-punctuation">(</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected observation:</strong> 0.1 and null; zero denominator is not a valid rate.</p>
+<h4 id="worked-example-2-distinguish-missing-and-zero">Worked example 2: Distinguish missing and zero<a class="heading-anchor" href="#worked-example-2-distinguish-missing-and-zero" aria-label="Link to this section">#</a></h4>
+<p>Map membership is separate from a numeric value.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> values<span class="syntax-operator">=</span><span class="syntax-operator">new</span> <span class="syntax-builtin">Map</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">,</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+console<span class="syntax-punctuation">.</span>log<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">.</span>has<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;A&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span>values<span class="syntax-punctuation">.</span>has<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;B&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected observation:</strong> A is measured zero; B has no supplied record.</p>
+<h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-predict-rates-for-10-100-and-20-100">Exercise 1: Predict rates for 10/100 and 20/100.<a class="heading-anchor" href="#exercise-1-predict-rates-for-10-100-and-20-100" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> 0.1 and 0.2 with an explicit common denominator meaning.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h4 id="exercise-2-add-a-region-with-no-statistical-row">Exercise 2: Add a region with no statistical row.<a class="heading-anchor" href="#exercise-2-add-a-region-with-no-statistical-row" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> It receives the documented missing-data appearance.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h4 id="exercise-3-build-a-stable-id-choropleth-join">Exercise 3: Build a stable-ID choropleth join.<a class="heading-anchor" href="#exercise-3-build-a-stable-id-choropleth-join" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Every feature is matched or explicitly listed as missing.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h4 id="exercise-4-diagnose-a-map-of-raw-events-interpreted-as-risk">Exercise 4: Diagnose a map of raw events interpreted as risk.<a class="heading-anchor" href="#exercise-4-diagnose-a-map-of-raw-events-interpreted-as-risk" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Population or exposure may explain the count pattern.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h4 id="exercise-5-handle-a-zero-denominator">Exercise 5: Handle a zero denominator.<a class="heading-anchor" href="#exercise-5-handle-a-zero-denominator" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Reject or mark the rate undefined rather than divide to infinity.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h4 id="exercise-6-explain-ecological-inference-limits">Exercise 6: Explain ecological inference limits.<a class="heading-anchor" href="#exercise-6-explain-ecological-inference-limits" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Regional summaries do not automatically describe individuals.</p>
+<p><strong>Progressive hint:</strong> Inspect the input records, then the derived values, then the DOM or Canvas marks. Compare the first disagreement with the worked example before changing another layer.</p>
+<h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
+<p>Keep three checkpoints separate: the records after parsing, the domain and geometry after transformation, and the visible marks after rendering. A chart can look plausible while silently dropping records or assigning the wrong scale. Inspect counts, IDs, finite coordinates and meaningful expected values before adjusting colors. A missing mark may come from invalid input, a missing selection, an undefined scale result or clipping outside the viewBox.</p>
+<p>The controlled failure for this lesson is: Diagnose a map of raw events interpreted as risk. Its distinguishing evidence is Population or exposure may explain the count pattern. Preserve that failing case when repairing your program. Do not remove an assertion or broaden a scale merely to hide a wrong input. Explain whether a changed value should affect the data, an encoding, a layout or only presentation.</p>
+<h3 id="accessibility-and-interpretation">Accessibility and interpretation<a class="heading-anchor" href="#accessibility-and-interpretation" aria-label="Link to this section">#</a></h3>
+<p>Give the visualization a descriptive title and a short textual summary of the main result. Keep a table or list when exact values matter. Do not encode a critical category only through color; use labels, shapes or position as appropriate. Interactive controls need keyboard operation and clear focus, and motion should respect the user&#x27;s reduced-motion preference. Automated DOM checks support, but do not replace, a real keyboard and assistive-technology review.</p>
+<p>A data scientist must also defend the statistical meaning. State the population, units, aggregation, missing-value policy and uncertainty where relevant. Synthetic points illustrate a mechanism and do not establish a real-world finding. A beautiful visualization should make a valid claim easier to inspect, not make a weak claim appear certain.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain choropleth, rate, geographic join using a new small dataset. Reconstruct one example from a blank pad. Predict the effect of one missing value, empty input or reordered record before execution. Retain the source and observation separately from the explanation so a future reader can reproduce the case.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://d3js.org/d3-scale/sequential">D3 reference 1</a></li>
+<li><a href="https://d3js.org/d3-geo/path">D3 reference 2</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for js-063: Choropleths, rate denominators and missing geographic joins.
+Read courses/javascript-typescript/guides/js-063.md and courses/javascript-typescript/lessons/js-063.js. Direct prerequisites: `js-062`.
+Explain the data-to-mark mechanism, ask for a prediction, inspect my attempt and give one hint.
+Keep courses/javascript-typescript/solutions/ closed until I attempt or request comparison.
+Require real browser evidence for DOM interactions and a separate explanation of statistical meaning.
+Use only the offline D3 global and inline synthetic inputs; do not fetch packages or data.
+Finish with a fresh boundary case, keyboard review and a reconstruction from memory.</code></pre></article>
+  </main>
+</body>
+</html>

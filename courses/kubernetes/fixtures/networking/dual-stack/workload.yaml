@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dual-stack-study
+  labels: {course-fixture: dual-stack-study}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: dual-stack-study}
+  template:
+    metadata:
+      labels: {app: dual-stack-study, course-fixture: dual-stack-study}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: app
+          image: ds60sqlpy-k8s-dualstack-study:0.1.0
+          imagePullPolicy: Never
+          ports: [{name: http, containerPort: 8080}]
+          readinessProbe:
+            httpGet: {path: /ready, port: http}
+            periodSeconds: 2
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {cpu: 100m, memory: 64Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dual-stack-study
+  labels: {course-fixture: dual-stack-study}
+spec:
+  ipFamilyPolicy: RequireDualStack
+  ipFamilies: [IPv4, IPv6]
+  selector: {app: dual-stack-study}
+  ports: [{name: http, port: 80, targetPort: http}]

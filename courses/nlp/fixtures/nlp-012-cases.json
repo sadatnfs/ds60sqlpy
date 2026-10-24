@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-012",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Implement radius-one co-occurrence for the two-token vocabulary and cat pet cat.",
+      "expected": "Matrix [[0,2],[2,0]] with total four directed context events."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare one three-token document with separate one-token documents.",
+      "expected": "Separate documents yield zero context events; no cross-document pair is created."
+    },
+    {
+      "exercise": 3,
+      "task": "Compute PPMI for the supplied 3-by-3 counts and an all-zero matrix.",
+      "expected": "First cell log(80/49); all values finite/nonnegative; zero-count cells and empty matrix remain zero."
+    },
+    {
+      "exercise": 4,
+      "task": "Compare the first two PPMI rows, the first/third rows and a zero vector.",
+      "expected": "Positive first-pair similarity, zero cross-group similarity, None for a zero-norm comparison."
+    },
+    {
+      "exercise": 5,
+      "task": "Construct U_k times singular values and reconstruct with V_k transpose.",
+      "expected": "Positive reconstruction error smaller than the matrix norm; first two reduced rows have cosine one."
+    },
+    {
+      "exercise": 6,
+      "task": "Rotate both two-dimensional embeddings by the same orthogonal matrix and compare cosine.",
+      "expected": "Cosine unchanged; a written explanation rejects unique semantic meaning for one coordinate."
+    }
+  ]
+}

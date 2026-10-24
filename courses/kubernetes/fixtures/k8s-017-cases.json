@@ -1,0 +1,38 @@
+{
+  "lesson_id": "k8s-017",
+  "provenance": "synthetic teaching cases, not runtime observations",
+  "capability": "fixed restricted-compatible workload; separate host admission/runtime identity checks",
+  "browser_source": true,
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Explain UID,capabilities,privilege escalation,seccomp and root filesystem fields.",
+      "expected": "Each field is connected to its specific mechanism rather than one generic secure label."
+    },
+    {
+      "exercise": 2,
+      "task": "Use the fixed nonroot source in a qualified operation.",
+      "expected": "Accepted source,observed workload readiness and owned cleanup are recorded."
+    },
+    {
+      "exercise": 3,
+      "task": "Change allowPrivilegeEscalation or add privileged:true in a scratch source.",
+      "expected": "Parser refusal before cluster mutation."
+    },
+    {
+      "exercise": 4,
+      "task": "Review hostPath,hostNetwork and hostPID variants.",
+      "expected": "All are outside the admitted browser contract."
+    },
+    {
+      "exercise": 5,
+      "task": "With a policy-qualified host fixture,compare allowed and denied API requests.",
+      "expected": "Policy version,namespace UID and actual admission reason accompany the result."
+    },
+    {
+      "exercise": 6,
+      "task": "Describe what the fixed controls address and one remaining boundary requiring another control.",
+      "expected": "For example,RBAC controls API access while network policy or application auth addresses different paths."
+    }
+  ]
+}

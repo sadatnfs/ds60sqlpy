@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>js-037: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>js-037: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-037_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="js-037-explanatory-solutions">js-037: explanatory solutions<a class="heading-anchor" href="#js-037-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A retry is a new attempt after an uncertain or failed operation. It can improve resilience to transient failures, but it also multiplies load and may repeat side effects. Retrying every exception hides programming errors and permanent rejections. An operation needs a retry classification, maximum attempts, delay policy, cancellation behavior and a final failure result. A deadline limits waiting; it does not prove that a remote write did not occur.</p>
+<p>Exponential backoff grows the delay between attempts. Full jitter chooses a delay uniformly from zero to a capped exponential bound, spreading clients that would otherwise retry simultaneously. The examples inject the random source and waiting function so expected delays are deterministic. They test a retry policy around a controlled transport fixture, not a real network outage or production recovery claim.</p>
+<p>Idempotency associates repeated attempts with one intended operation. A key alone is insufficient if a caller reuses it with different request data. The fixture stores a canonical request representation and its completed result; matching retries reuse that result, while conflicting reuse rejects. Its Map is only in-memory and single-process. It does not survive crashes or solve distributed coordination; a durable service needs a transactionally enforced key/payload/result policy.</p>
+<p>Bounded concurrency limits simultaneous owned work. Promise.all over a huge input starts all mapped operations immediately unless scheduling is controlled. The provided worker-loop scheduler starts at most the configured limit and preserves result order. On failure it stops scheduling new work, awaits already started work, then rejects. That is cleanup discipline, not cancellation of external side effects already underway.</p>
+<p><strong>Retry classification:</strong> The policy selecting failures eligible for another attempt.</p>
+<p><strong>Backoff with jitter:</strong> A growing delay bound with randomized spacing inside it.</p>
+<p><strong>Idempotency key:</strong> An identifier linking retries to one intended operation and payload.</p>
+<p><strong>Bounded concurrency:</strong> A limit on simultaneously active owned operations.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>retry receives an operation, an injected wait, an injected random function and an AbortSignal. It checks cancellation before each attempt, retries only the explicit transient category and throws the final error on exhaustion. The delay bound is min(cap, base times 2 to the attempt index), and jitter scales it by a sample in [0,1). The bounded map shares a synchronous next-index counter across async workers; each takes an index before awaiting its operation, so no two workers claim the same item.</p>
+<h3 id="exercise-1-retry-transient-failures-with-deterministic-full-jitter">Exercise 1: Retry transient failures with deterministic full jitter<a class="heading-anchor" href="#exercise-1-retry-transient-failures-with-deterministic-full-jitter" aria-label="Link to this section">#</a></h3>
+<p>Task: Fail twice transiently, then succeed, using random value 0.5 and a recording wait.</p>
+<p>The injected wait records policy without sleeping. The result demonstrates classification and arithmetic, not elapsed network latency or a live outage recovery.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> attempts <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> waits <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> attempts <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>attempts <span class="syntax-operator">&lt;</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;temporary&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span><span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> wait<span class="syntax-operator">:</span> <span class="syntax-keyword">async</span> value <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> waits<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> random<span class="syntax-operator">:</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-number">0.5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;ready&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>waits<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">50</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> three attempts; delays 50 and 100; result ready.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-2-stop-on-permanent-failure-and-on-exhausted-attempts">Exercise 2: Stop on permanent failure and on exhausted attempts<a class="heading-anchor" href="#exercise-2-stop-on-permanent-failure-and-on-exhausted-attempts" aria-label="Link to this section">#</a></h3>
+<p>Task: Use one permanent failure, then an always-transient operation with a three-attempt budget.</p>
+<p>A retry policy must retain a bounded final failure. Converting exhaustion into a default success would erase the operation&#x27;s actual outcome.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> permanent <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> permanent <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;permanent&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/permanent/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>permanent<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> <span class="syntax-keyword">transient</span> <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span> <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">throw</span> <span class="syntax-builtin">Object</span><span class="syntax-punctuation">.</span>assign<span class="syntax-punctuation">(</span><span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;still unavailable&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">transient</span><span class="syntax-operator">:</span> <span class="syntax-keyword">true</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> wait<span class="syntax-operator">:</span> <span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/still unavailable/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span><span class="syntax-keyword">transient</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> permanent attempted once; transient attempted three times and still rejects.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-3-reuse-a-completed-idempotent-result">Exercise 3: Reuse a completed idempotent result<a class="heading-anchor" href="#exercise-3-reuse-a-completed-idempotent-result" aria-label="Link to this section">#</a></h3>
+<p>Task: Submit the same key and payload twice to the local store.</p>
+<p>A matching retry reads the stored result rather than repeating the side effect. The example is intentionally limited to completed operations in one process.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> store <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> IdempotentStore<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> first <span class="syntax-operator">=</span> store<span class="syntax-punctuation">.</span>apply<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> <span class="syntax-number">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> second <span class="syntax-operator">=</span> store<span class="syntax-punctuation">.</span>apply<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> <span class="syntax-number">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>second<span class="syntax-punctuation">,</span> first<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>store<span class="syntax-punctuation">.</span>effects<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> one side effect; identical returned receipt.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-4-reject-conflicting-reuse-of-an-idempotency-key">Exercise 4: Reject conflicting reuse of an idempotency key<a class="heading-anchor" href="#exercise-4-reject-conflicting-reuse-of-an-idempotency-key" aria-label="Link to this section">#</a></h3>
+<p>Task: Reuse one key for amounts 5 and 7.</p>
+<p>A key must identify an operation payload, not grant permission to replace its meaning. Accepting a changed payload could return an unrelated earlier result.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> store <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> IdempotentStore<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+store<span class="syntax-punctuation">.</span>apply<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> <span class="syntax-number">5</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span><span class="syntax-keyword">throws</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> store<span class="syntax-punctuation">.</span>apply<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;request-A&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> amount<span class="syntax-operator">:</span> <span class="syntax-number">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/key conflict/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>store<span class="syntax-punctuation">.</span>effects<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> conflict error; effects remains 1.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-5-bound-active-work-while-preserving-input-order">Exercise 5: Bound active work while preserving input order<a class="heading-anchor" href="#exercise-5-bound-active-work-while-preserving-input-order" aria-label="Link to this section">#</a></h3>
+<p>Task: Map four values with concurrency 2 and observe active-operation counts.</p>
+<p>The scheduler limits started operations, not merely the size of a Promise result array. Returning results by original index makes completion order independent of output order.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">let</span> active <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> peak <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> result <span class="syntax-operator">=</span> <span class="syntax-keyword">await</span> mapBounded<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> value <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  active <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> peak <span class="syntax-operator">=</span> <span class="syntax-builtin">Math</span><span class="syntax-punctuation">.</span>max<span class="syntax-punctuation">(</span>peak<span class="syntax-punctuation">,</span> active<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">await</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> active <span class="syntax-operator">-=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>ok<span class="syntax-punctuation">(</span>peak <span class="syntax-operator">&lt;=</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> peak <span class="syntax-operator">&gt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>active<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> started <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>mapBounded<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> value <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span>
+  started<span class="syntax-punctuation">.</span>push<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> active <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span>
+  <span class="syntax-keyword">try</span> <span class="syntax-punctuation">{</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span>value <span class="syntax-operator">===</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">throw</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;controlled failure&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">await</span> delay<span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> value<span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+  <span class="syntax-keyword">finally</span> <span class="syntax-punctuation">{</span> active <span class="syntax-operator">-=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
+<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">/controlled failure/u</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>started<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>active<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span><span class="syntax-keyword">await</span> mapBounded<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">async</span> value <span class="syntax-punctuation">=&gt;</span> value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> results 2,4,6,8; peak active at most 2; active returns to 0.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="exercise-6-honor-cancellation-before-the-first-attempt">Exercise 6: Honor cancellation before the first attempt<a class="heading-anchor" href="#exercise-6-honor-cancellation-before-the-first-attempt" aria-label="Link to this section">#</a></h3>
+<p>Task: Abort a signal before calling retry and track attempted work.</p>
+<p>The pre-check prevents starting known-cancelled work. Cancellation during an actual external operation also requires that operation&#x27;s own cooperative signal support.</p>
+<pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">const</span> controller <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> AbortController<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">const</span> reason <span class="syntax-operator">=</span> <span class="syntax-operator">new</span> Error<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;cancelled before start&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+controller<span class="syntax-punctuation">.</span>abort<span class="syntax-punctuation">(</span>reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">let</span> attempts <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
+<span class="syntax-keyword">await</span> assert<span class="syntax-punctuation">.</span>rejects<span class="syntax-punctuation">(</span>retry<span class="syntax-punctuation">(</span><span class="syntax-keyword">async</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">=&gt;</span> <span class="syntax-punctuation">{</span> attempts <span class="syntax-operator">+=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-keyword">return</span> <span class="syntax-number">1</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span> signal<span class="syntax-operator">:</span> controller<span class="syntax-punctuation">.</span>signal <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> error <span class="syntax-punctuation">=&gt;</span> error <span class="syntax-operator">===</span> reason<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
+assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>attempts<span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
+<p><strong>Expected:</strong> original reason rejects; attempts remain 0.</p>
+<p><strong>Verify:</strong> Compare the actual observation with this expectation. Keep the input that makes the check distinguish the intended mechanism from the tempting wrong approach.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+  </main>
+</body>
+</html>

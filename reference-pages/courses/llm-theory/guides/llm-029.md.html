@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-029: Scaling laws and the limits of a toy experiment · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-029: Scaling laws and the limits of a toy experiment</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-029.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-029-scaling-laws-and-the-limits-of-a-toy-experiment">llm-029: Scaling laws and the limits of a toy experiment<a class="heading-anchor" href="#llm-029-scaling-laws-and-the-limits-of-a-toy-experiment" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 105 minutes. Direct prerequisites: <code>llm-028</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Interpret a scaling claim without extrapolating a tiny classroom fit to frontier systems. The central investigation is concrete: Read a supplied small loss-versus-compute table and identify which constants, data distributions and budgets changed between runs. The finish condition is Every comparison controls or labels parameter count, data and steps. The report explicitly refuses a frontier-performance prediction from the toy table. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<h4 id="read-a-scaling-curve-as-an-experiment-not-a-law-of-nature">Read a scaling curve as an experiment, not a law of nature<a class="heading-anchor" href="#read-a-scaling-curve-as-an-experiment-not-a-law-of-nature" aria-label="Link to this section">#</a></h4>
+<p>The tiny capstone held its architecture, corpus and update budget fixed. A scaling study deliberately varies such quantities to understand how predictive loss changes as resources grow. The difficulty is not drawing a smooth curve. It is identifying which quantities changed, which remained controlled, and which conclusions the design can support. A trend measured within one model/data/training family is evidence about that family, not an unrestricted promise about every larger model.</p>
+<p>Use P for the number of model parameters, D for the amount of distinct corpus data, S for optimizer steps, N for the number of target tokens actually processed during training, and C for a declared compute measure. D and N are not necessarily equal. Revisiting the same thousand tokens for ten epochs processes ten thousand token events but does not create ten thousand distinct observations. Likewise, a step count is not a token count unless batch and sequence shapes are fixed.</p>
+<h5 id="separate-optimization-progress-from-model-scaling">Separate optimization progress from model scaling<a class="heading-anchor" href="#separate-optimization-progress-from-model-scaling" aria-label="Link to this section">#</a></h5>
+<p>The worksheet&#x27;s run A has P=1000,D=10000,S=100,<math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">C=1</annotation></semantics></math> and loss 2.0. Run B keeps P and D fixed, doubles S and C, and reports loss 1.8. This comparison is consistent with a benefit from additional optimization under those conditions. It does not isolate the effect of increasing parameter count because no parameter-count change occurred. The loss reduction is .2 in the stated unit, not a 20 percent reduction; relative to 2.0 it is 10 percent.</p>
+<p>A third row changes P,D,S and C together. If loss falls to 1.5, several explanations remain possible: a more expressive model, more varied data, more repeated processing, different optimization or interactions between them. Saying &quot;doubling parameters caused the gain&quot; would discard those alternatives. A controlled experiment varies one factor while holding the relevant others fixed, or uses a design rich enough to estimate their joint effects with explicit assumptions.</p>
+<p>This is particularly important when a published plot shows the best run achieved at each budget. Those points may represent different model sizes, data amounts and schedules selected by an optimization procedure. The curve is then an empirical compute frontier, not the learning curve of one fixed model. Read the axes and selection policy before interpreting its slope.</p>
+<h5 id="derive-what-a-power-law-fit-means">Derive what a power-law fit means<a class="heading-anchor" href="#derive-what-a-power-law-fit-means" aria-label="Link to this section">#</a></h5>
+<p>A simple illustrative form is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo stretchy="false">(</mo><mi>C</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>L</mi><mrow><mo>∞</mo></mrow></msub><mo>+</mo><mi>A</mi><msup><mi>C</mi><mrow><mo>−</mo><mi>α</mi></mrow></msup></mrow><annotation encoding="application/x-tex">L(C)=L_{\infty}+AC^{-\alpha}</annotation></semantics></math>, where L is loss, L_infinity is an asymptotic floor, A is a positive scale and alpha is a positive exponent. The decreasing term describes excess loss above the fitted floor. If the floor were known, taking logs gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mi>L</mi><mo>−</mo><msub><mi>L</mi><mrow><mo>∞</mo></mrow></msub><mo stretchy="false">)</mo><mo>=</mo><mi>log</mi><mi>A</mi><mo>−</mo><mi>α</mi><mi>log</mi><mi>C</mi></mrow><annotation encoding="application/x-tex">\log(L-L_{\infty})=\log A-\alpha\log C</annotation></semantics></math>. A straight line on those transformed axes would have slope-alpha.</p>
+<p>The floor matters. Suppose loss falls from 2.0 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">C=1</annotation></semantics></math> to 1.5 at <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">C=4</annotation></semantics></math>. Ignoring a floor gives a fitted exponent <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>1.5</mn></mrow></mfrac><mo stretchy="false">)</mo></mrow><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\log(\frac{2}{1.5})}{\log(4)}</annotation></semantics></math>, about .208. Assuming a floor of 1.0 instead compares excess losses 1.0 and .5, yielding exponent <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>2</mn><mo stretchy="false">)</mo></mrow><mrow><mi>log</mi><mo stretchy="false">(</mo><mn>4</mn><mo stretchy="false">)</mo></mrow></mfrac><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">\frac{\log(2)}{\log(4)}=0.5</annotation></semantics></math>. Both two-point calculations fit their respective formulas exactly, yet they imply different future behavior. Two observations cannot independently identify a floor, amplitude and exponent.</p>
+<p>Even with many points, uncertainty is not removed by taking logarithms. Measurement noise, shared evaluation examples, seed variation and model-selection choices affect the fit. The transformed residuals may have a different variance structure from the original losses. A credible study reports the fitting range, protocol and uncertainty, and checks whether withheld budget points behave as predicted. A visually straight segment does not establish that the same slope continues across several unobserved orders of magnitude.</p>
+<h5 id="a-fixed-compute-budget-creates-a-tradeoff">A fixed compute budget creates a tradeoff<a class="heading-anchor" href="#a-fixed-compute-budget-creates-a-tradeoff" aria-label="Link to this section">#</a></h5>
+<p>For an illustrative dense-transformer training calculation, suppose compute is approximated by <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mi>k</mi><mo>·</mo><mi>P</mi><mo>·</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">C=k\cdot P\cdot N</annotation></semantics></math>, where k summarizes the chosen operation-count convention and architecture assumptions. At fixed C, increasing P leaves fewer processed tokens N. A larger model can therefore receive fewer updates or less repeated exposure. Whether that allocation is better depends on the loss response to both size and data processing, not merely on capacity.</p>
+<p>Consider a toy excess-loss model <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>·</mo><msup><mrow><mi>P</mi></mrow><mrow><mo>−</mo><mi>α</mi></mrow></msup><mo>+</mo><mi>B</mi><mo>·</mo><msup><mrow><mi>N</mi></mrow><mrow><mo>−</mo><mi>β</mi></mrow></msup></mrow><annotation encoding="application/x-tex">A\cdot {P}^{-\alpha}+B\cdot {N}^{-\beta}</annotation></semantics></math>. Substituting <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>N</mi><mo>=</mo><mfrac><mrow><mi>C</mi></mrow><mrow><mi>k</mi><mi>P</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">N=\frac{C}{kP}</annotation></semantics></math> gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>·</mo><msup><mrow><mi>P</mi></mrow><mrow><mo>−</mo><mi>α</mi></mrow></msup><mo>+</mo><mi>B</mi><mo>·</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mrow><mi>k</mi><mi>P</mi></mrow><mrow><mi>C</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mi>β</mi></mrow></msup></mrow><annotation encoding="application/x-tex">A\cdot {P}^{-\alpha}+B\cdot {\left(\frac{kP}{C}\right)}^{\beta}</annotation></semantics></math>. The first term decreases as P grows; the second increases because the fixed budget allows fewer processed tokens. Setting the derivative with respect to P to zero gives <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>α</mi><mo>·</mo><mi>A</mi><mo>·</mo><msup><mrow><mi>P</mi></mrow><mrow><mo>−</mo><mi>α</mi></mrow></msup><mo>=</mo><mi>β</mi><mo>·</mo><mi>B</mi><mo>·</mo><msup><mrow><mrow><mo stretchy="true" fence="true" form="prefix">(</mo><mfrac><mrow><mi>k</mi><mi>P</mi></mrow><mrow><mi>C</mi></mrow></mfrac><mo stretchy="true" fence="true" form="postfix">)</mo></mrow></mrow><mrow><mi>β</mi></mrow></msup></mrow><annotation encoding="application/x-tex">\alpha\cdot A\cdot {P}^{-\alpha}=\beta\cdot B\cdot {\left(\frac{kP}{C}\right)}^{\beta}</annotation></semantics></math>. This condition balances the marginal penalties of the two constrained terms. It is a mathematical consequence of the assumed toy formula, not a fitted recommendation for this course&#x27;s decoder.</p>
+<p>Under that assumed form, P grows proportionally to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>C</mi></mrow><mrow><mfrac><mrow><mi>β</mi></mrow><mrow><mi>α</mi><mo>+</mo><mi>β</mi></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">{C}^{\frac{\beta}{\alpha+\beta}}</annotation></semantics></math> and N to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mrow><mi>C</mi></mrow><mrow><mfrac><mrow><mi>α</mi></mrow><mrow><mi>α</mi><mo>+</mo><mi>β</mi></mrow></mfrac></mrow></msup></mrow><annotation encoding="application/x-tex">{C}^{\frac{\alpha}{\alpha+\beta}}</annotation></semantics></math>, with constants depending on A,B,k,alpha,beta. Different fitted exponents or modeling assumptions produce different allocations. This explains why scaling recommendations must be tied to their measured regime. The <a href="https://arxiv.org/abs/2001.08361">early scaling-law study</a> and the later <a href="https://arxiv.org/abs/2203.15556">compute-optimal training study</a> are primary examples of empirical investigations, not interchangeable universal constants to paste into a tiny experiment.</p>
+<h5 id="training-optimal-and-deployment-optimal-are-different-objectives">Training-optimal and deployment-optimal are different objectives<a class="heading-anchor" href="#training-optimal-and-deployment-optimal-are-different-objectives" aria-label="Link to this section">#</a></h5>
+<p>A study may minimize pretraining loss for a fixed training budget. A product may instead need to minimize total cost over training and millions of inference requests, or satisfy a latency and memory constraint. A smaller model trained for longer could be attractive for repeated serving even if another allocation lies on a particular training-compute frontier. The objective has changed, so the appropriate optimum can change too.</p>
+<p>The memory chapter also showed that compute and memory are separate resources. A model can fit an arithmetic compute budget while exceeding parameter, optimizer-state or cache capacity. Context length changes attention work and the task information available to the model. Data quality, duplication and domain coverage can change what a counted token contributes. A resource table should not treat all token events as equally informative merely because their count is convenient.</p>
+<p>For a small local study, choose a narrow question. For example: with a fixed architecture and train-only corpus, what happens when the update budget doubles? Or, with a fixed parameter budget and target events, how do two architectures compare? Preserve source hashes, split identities, counts and actual losses. Run multiple seeds when the question requires stability, and reserve evaluation cases for the intended inference. These steps produce a bounded empirical claim without pretending to reproduce large-scale research.</p>
+<h5 id="diagnose-an-apparent-scaling-failure">Diagnose an apparent scaling failure<a class="heading-anchor" href="#diagnose-an-apparent-scaling-failure" aria-label="Link to this section">#</a></h5>
+<p>If a larger run performs worse, do not assume the scaling relationship was disproved immediately. Check whether it received enough optimization, whether the learning-rate schedule changed effectively, whether padding altered the active-token count, whether a data pipeline repeated rather than expanded the corpus, and whether evaluation used the same tokenizer and targets. Conversely, a favorable loss point does not prove the causal contribution of every changed factor.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Scaling relationship:</strong> An observed dependence within a declared experimental regime.</p>
+<p><strong>Confounder:</strong> Another changed factor that prevents attributing an effect to one cause.</p>
+<p><strong>Extrapolation:</strong> A prediction outside the range of observed conditions.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.</p>
+<p>Read both worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out loss L. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><msub><mi>L</mi><mrow><mn>2</mn></mrow></msub></mrow><mrow><msub><mi>L</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo stretchy="false">)</mo></mrow><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><msub><mi>C</mi><mrow><mn>2</mn></mrow></msub></mrow><mrow><msub><mi>C</mi><mrow><mn>1</mn></mrow></msub></mrow></mfrac><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\log(\frac{L_{2}}{L_{1}})}{\log(\frac{C_{2}}{C_{1}})}</annotation></semantics></math>, meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.</p>
+<h3 id="separate-corpus-size-tokens-processed-and-training-work">Separate corpus size, tokens processed and training work<a class="heading-anchor" href="#separate-corpus-size-tokens-processed-and-training-work" aria-label="Link to this section">#</a></h3>
+<p>In this table, interpret <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>D</mi><mo>=</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">D=10</annotation></semantics></math>, 000 as the size of the unique available corpus, not as the total number of token presentations made to the optimizer. Both runs can use the same corpus while run B takes twice as many steps. If each step consumes a fixed batch of b nonpadding target tokens, the processed-token count is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>b</mi><mo>·</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">b\cdot S</annotation></semantics></math>. Repeatedly visiting a document increases that count without increasing the unique corpus size. These quantities answer different questions about optimization work and information available for generalization.</p>
+<p>P is the trainable parameter count, S is the optimizer step count and C is the supplied relative compute budget. The table does not specify enough implementation details to derive C exactly from P, D and S. Multiplying all three can double-count repeated data. A real compute report should state the measured or estimated operation convention, batch size, sequence lengths, forward/backward work and exclusions. Equal wall time is yet another comparison because hardware and implementation affect elapsed time.</p>
+<h3 id="derive-a-slope-without-inventing-a-law">Derive a slope without inventing a law<a class="heading-anchor" href="#derive-a-slope-without-inventing-a-law" aria-label="Link to this section">#</a></h3>
+<p>The two hypothetical observations are (C, L)=(1, 2) and (2, 1.8). The log-log secant slope is <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>1.8</mn></mrow><mrow><mn>2</mn></mrow></mfrac><mo stretchy="false">)</mo></mrow><mrow><mi>log</mi><mo stretchy="false">(</mo><mfrac><mrow><mn>2</mn></mrow><mrow><mn>1</mn></mrow></mfrac><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{\log(\frac{1.8}{2})}{\log(\frac{2}{1})}</annotation></semantics></math>, approximately -0.152003. Under the additional assumption <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mi>A</mi><mo>·</mo><msup><mrow><mi>C</mi></mrow><mrow><mo>−</mo><mi>α</mi></mrow></msup></mrow><annotation encoding="application/x-tex">L=A\cdot {C}^{-\alpha}</annotation></semantics></math> with no irreducible floor, those two points give alpha about 0.152003 and <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>A</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">A=2</annotation></semantics></math>. Continuing that fitted expression to <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>C</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">C=4</annotation></semantics></math> predicts <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><mn>1.62</mn></mrow><annotation encoding="application/x-tex">L=1.62</annotation></semantics></math>. This is an extrapolation from an assumed functional form, not a third observation or a demonstrated universal exponent.</p>
+<p>A model with an unknown floor, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>L</mi><mo>=</mo><msub><mi>L</mi><mrow><mrow><mi mathvariant="normal">f</mi><mi mathvariant="normal">l</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">o</mi><mi mathvariant="normal">r</mi></mrow></mrow></msub><mo>+</mo><mi>A</mi><mo>·</mo><msup><mrow><mi>C</mi></mrow><mrow><mo>−</mo><mi>α</mi></mrow></msup></mrow><annotation encoding="application/x-tex">L=L_{\mathrm{floor}}+A\cdot {C}^{-\alpha}</annotation></semantics></math>, can agree at these two points while predicting a different continuation. In particular, <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mi>L</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(L)</annotation></semantics></math> is not generally linear in <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>log</mi><mo stretchy="false">(</mo><mi>C</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\log(C)</annotation></semantics></math> when the floor is material. Data quality, architecture, optimizer, evaluation distribution and the range of budgets also matter to interpreting a fit. A tiny fixture cannot establish the range over which a power law holds or identify the best allocation between model size and training tokens.</p>
+<p>The original <a href="https://arxiv.org/abs/2001.08361">scaling-law study</a> and the later <a href="https://arxiv.org/abs/2203.15556">compute-optimal training study</a> used broad empirical experiments to study budget allocation. Their conclusions motivate controlled measurements; they do not turn this two-row worksheet into a replication. When a larger model appears better, first ask what was held constant and what prediction unit the reported loss averages. A defensible next experiment varies a specified factor across several budgets, repeats relevant measurements and reserves independent evaluation data.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-read-a-controlled-comparison">Example A: Read a controlled comparison<a class="heading-anchor" href="#example-a-read-a-controlled-comparison" aria-label="Link to this section">#</a></h4>
+<p>The comparison is evidence about additional optimization under this setup. It is not a direct experiment on model size because parameter count stayed fixed.</p>
+<pre class="highlighted-code"><code class="language-text">Run P     D     S   C L
+A   1000  10000 100 1 2.0
+B   1000  10000 200 2 1.8
+Controlled: P,D,evaluation protocol. Changed: S,C.</code></pre>
+<p><strong>Expected:</strong> steps and compute doubled; parameters and data fixed; loss fell.2.</p>
+<h4 id="example-b-find-a-confounded-row">Example B: Find a confounded row<a class="heading-anchor" href="#example-b-find-a-confounded-row" aria-label="Link to this section">#</a></h4>
+<p>Several plausible mechanisms explain the difference. A larger model, more data and more updates each change the experiment, so the table does not isolate one effect.</p>
+<pre class="highlighted-code"><code class="language-text">A -&gt; C:
+P x2; D x2; S x2; C x8; L 2.0 -&gt; 1.5
+Attribution to P alone is unsupported.</code></pre>
+<p><strong>Expected:</strong> No;P,D,S,C all changed.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Every comparison controls or labels parameter count, data and steps. The report explicitly refuses a frontier-performance prediction from the toy table. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Read a controlled comparison.</strong> Inspect rowsA(P1000,D10000,S100,C1,L2.0) and B(P1000,D10000,S200,C2,L1.8). Identify what changed. <strong>Expected:</strong> steps and compute doubled; parameters and data fixed; loss fell.2. <strong>Verify:</strong> Save the reasoning table for exercise 1, including steps and compute doubled; parameters and data fixed; loss fell.2.</li>
+</ol>
+<ol>
+<li><strong>Find a confounded row.</strong> CompareA withC(P2000,D20000,S200,C8,L1.5). Can the gain be assigned only to parameters? <strong>Expected:</strong> No;P,D,S,C all changed. <strong>Verify:</strong> Save the reasoning table for exercise 2, including No;P,D,S,C all changed.</li>
+</ol>
+<ol>
+<li><strong>Calculate a local ratio.</strong> CalculateB/A loss ratio and percent decrease relative toA. <strong>Expected:</strong> ratio.9; decrease 10 percent. <strong>Verify:</strong> Save the reasoning table for exercise 3, including ratio.9; decrease 10 percent.</li>
+</ol>
+<ol>
+<li><strong>Reject an unsupported forecast.</strong> A reviewer predicts loss.1 at compute1000000 from rowsA,B. Evaluate the claim. <strong>Expected:</strong> unsupported extrapolation far outside compute1..2. <strong>Verify:</strong> Save the reasoning table for exercise 4, including unsupported extrapolation far outside compute1..2.</li>
+</ol>
+<ol>
+<li><strong>Design a discriminating next run.</strong> Propose a run testing parameter count while holding training data and update policy fixed. <strong>Expected:</strong> D10000,S100,declared largerP; compute measured separately. <strong>Verify:</strong> Save the reasoning table for exercise 5, including D10000,S100,declared largerP; compute measured separately.</li>
+</ol>
+<ol>
+<li><strong>Write a bounded conclusion.</strong> SummarizeA/B/C without calling a toy trend a frontier scaling law. <strong>Expected:</strong> conclusion names local fixture and confoundedC. <strong>Verify:</strong> Save the reasoning table for exercise 6, including conclusion names local fixture and confoundedC.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>Define unique corpus tokens separately from processed target tokens and optimizer steps. Treat relative compute as the supplied quantity unless an operation model is specified. A two-point log slope fits an assumed expression but cannot validate its range, floor or extrapolation. Keep hypothetical table values visibly separate from measured training runs.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Scaling relationship, Confounder, Extrapolation using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>The worksheet contains invented rows. They teach how to read controls and confounding, but they are not measured training receipts. Its correct conclusion is often that an attribution or extrapolation is unsupported. The next chapter examines the data side of this reasoning: before counting a corpus as D distinct usable tokens, we need to know where its documents came from, which transformations occurred, and whether evaluation information entered the training or selection path.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/2001.08361">Scaling Laws for Neural Language Models</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-029, Scaling laws and the limits of a toy experiment.
+Read courses/llm-theory/guides/llm-029.md and courses/llm-theory/lessons/llm-029.md. Direct prerequisites: `llm-028`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

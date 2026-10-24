@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>C++ from first compilation to complete projects · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>C++ from first compilation to complete projects</h1>
+      <p class="source-path">Generated from <code>courses/cpp/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="c-from-first-compilation-to-complete-projects">C++ from first compilation to complete projects<a class="heading-anchor" href="#c-from-first-compilation-to-complete-projects" aria-label="Link to this section">#</a></h2>
+<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>C++ from first compilation to complete projects</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
+<p>This 42-lesson journey begins with source files, the compiler, the linker and a running process. It develops values and control flow into ownership, standard containers, generic programming, error handling, concurrency and maintainable projects. Every lesson has a guide, a learner worksheet and separate solutions.</p>
+<p>Start with <a href="guides/cpp-001.md.html">cpp-001</a>, then open the course&#x27;s <strong>Journeys</strong> page and select the next lesson. The <code>cpp20</code> Docker worker compiles one C++20 source file with GCC and returns compiler diagnostics, standard output and exit status to the browser. No host C++ installation is required. Use the <a href="../../docs/docker-classroom.md.html">Docker classroom guide</a> to build and start it.</p>
+<p>For multiple source files, headers, CMake, CTest and installed libraries, follow <a href="compile-and-run.md.html">Compile, run and organize a C++ project</a>. Those complete project fixtures use explicit Docker commands and explain which directory is the source, which is the build tree, and which files are generated. The browser pad remains a single-source-file environment.</p>
+<p>Read the guide, predict a result, attempt the exercises and request a hint when needed. Inspect compiler messages before changing code. The app saves your pad, notes and job history in its learning volume. Reference programs remain separate and are revealed for comparison; a passing example does not establish mastery.</p>
+<h3 id="lesson-sequence">Lesson sequence<a class="heading-anchor" href="#lesson-sequence" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Level</th>
+<th>Runtime</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/cpp-001.md.html">cpp-001: Files, terminals and the compile-to-run journey</a></td>
+<td>Beginner</td>
+<td><code>reading</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-002.md.html">cpp-002: Your first C++20 target</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-003.md.html">cpp-003: Values, types and conversions</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-004.md.html">cpp-004: Branches, loops and state traces</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-005.md.html">cpp-005: Functions and parameter contracts</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-006.md.html">cpp-006: Strings and trustworthy integer input</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-007.md.html">cpp-007: Vectors and standard algorithms</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-008.md.html">cpp-008: Copies, const references and lifetimes</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-009.md.html">cpp-009: Vectors own; references borrow</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-010.md.html">cpp-010: Structs, enums and meaningful states</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-011.md.html">cpp-011: Files, streams and scoped resources</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-012.md.html">cpp-012: Headers, translation units and the linker</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-013.md.html">cpp-013: Warnings and CTest as feedback</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-014.md.html">cpp-014: Capstone 1: auditable readings CLI</a></td>
+<td>Beginner</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-015.md.html">cpp-015: RAII and unique ownership</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-016.md.html">cpp-016: Move semantics and the rule of zero</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-017.md.html">cpp-017: Errors as values and exceptions</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-018.md.html">cpp-018: Views, iterators and invalidation</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-019.md.html">cpp-019: Ranges and deliberate algorithms</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-020.md.html">cpp-020: Templates and concepts</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-021.md.html">cpp-021: Strong types and generic value APIs</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-022.md.html">cpp-022: Portable files and serialization</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-023.md.html">cpp-023: Library boundaries and ABI</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-024.md.html">cpp-024: Property tests and bounded fuzzing</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-025.md.html">cpp-025: Sanitizers and observable memory failures</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-026.md.html">cpp-026: Debugging and measurement tools</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-027.md.html">cpp-027: Reproducible dependencies and delivery</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-028.md.html">cpp-028: Capstone 2: reusable record library</a></td>
+<td>Intermediate</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-029.md.html">cpp-029: Threads, joining and cancellation</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-030.md.html">cpp-030: Mutexes, conditions and producer-consumer flow</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-031.md.html">cpp-031: Atomics and the memory model</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-032.md.html">cpp-032: Bounded parallel work and failure propagation</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-033.md.html">cpp-033: Testing concurrent code</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-034.md.html">cpp-034: Data layout, allocation and locality</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-035.md.html">cpp-035: Algorithmic and representation choices</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-036.md.html">cpp-036: Compile-time computation with a budget</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-037.md.html">cpp-037: Composing generic interfaces</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-038.md.html">cpp-038: Numerical and integer correctness</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-039.md.html">cpp-039: C interfaces and loading boundaries</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-040.md.html">cpp-040: Hardening parsers and execution boundaries</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-041.md.html">cpp-041: Portable release and performance evidence</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+<tr>
+<td><a href="guides/cpp-042.md.html">cpp-042: Capstone 3: bounded parallel analyzer</a></td>
+<td>Advanced</td>
+<td><code>cpp20</code></td>
+</tr>
+</tbody></table></div>
+<h3 id="validation-and-limits">Validation and limits<a class="heading-anchor" href="#validation-and-limits" aria-label="Link to this section">#</a></h3>
+<p>All runnable reference programs have successful local Linux arm64 Docker receipts for their current source bytes. The <a href="../../docs/implementation/CHECKPOINT.md.html">implementation checkpoint</a> records runtime, test and platform acceptance separately. Reading lessons use reasoning and written evidence. Windows/WSL2 and amd64 configuration support does not by itself establish an observed run on those systems.</p>
+<p>Both complete CMake projects and all 76 added worked programs also compiled and ran in the prepared GCC image. New source changes or another toolchain require appropriate new checks. Course fixtures use local authored inputs and do not install dependencies while a lesson runs.</p></article>
+  </main>
+</body>
+</html>

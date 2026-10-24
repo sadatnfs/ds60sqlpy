@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-062",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict a readiness failure consequence.",
+      "expected": "Ordinary new Service eligibility changes without necessarily restarting the container."
+    },
+    {
+      "exercise": 2,
+      "task": "Choose a startup allowance for a slow initializer.",
+      "expected": "A bounded measured initialization window with separate request deadlines."
+    },
+    {
+      "exercise": 3,
+      "task": "Design a graceful shutdown timeline.",
+      "expected": "Stop new work, drain bounded in-flight work and exit before forced termination."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose 200 responses during a failed new rollout.",
+      "expected": "Identify the serving revision and new-revision readiness separately."
+    },
+    {
+      "exercise": 5,
+      "task": "Explain why database-dependent liveness can be harmful.",
+      "expected": "It may restart healthy clients without fixing the unavailable dependency."
+    },
+    {
+      "exercise": 6,
+      "task": "Define rollout traffic-continuity acceptance.",
+      "expected": "Current revision becomes ready, expected responses succeed and old resources drain/clean up."
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+# Day 53: Solutions: MLOps with MLflow Experiment Tracking
+
+We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.
+
+Contents
+- Exercise 1: Track a grid search and compare runs
+- Exercise 2: Log best model and load it elsewhere
+- Exercise 3: Explore Model Registry concepts (notes)
+
+---
+
+Setup
+```python
+import mlflow, mlflow.sklearn
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+import numpy as np
+
+X, y = load_breast_cancer(return_X_y=True)
+Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, stratify=y)
+
+mlflow.set_experiment('rf-breast-cancer')
+```
+
+Worked reference for Exercise 1; Grid search with autologging
+```python
+mlflow.sklearn.autolog()
+
+param_grid = {'n_estimators':[100,300], 'max_depth':[None,5,10]}
+rf = RandomForestClassifier(random_state=0)
+cv = GridSearchCV(rf, param_grid=param_grid, scoring='roc_auc', cv=3, n_jobs=1, return_train_score=True)
+
+with mlflow.start_run(run_name='rf_grid'):
+    cv.fit(Xtr, ytr)
+    best_auc = cv.best_score_
+    mlflow.log_metric('cv_auc_mean', best_auc)
+    print('Best CV AUC:', best_auc)
+
+print('Best params:', cv.best_params_)
+```
+Explanation
+- autolog captures params, metrics, and model artifacts automatically
+- Start a run context so logs are grouped
+
+---
+
+Worked reference for Exercise 2; Log and load best model
+```python
+with mlflow.start_run(run_name='rf_best_model') as run:
+    best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
+    proba = best.predict_proba(Xte)[:,1]
+    test_auc = roc_auc_score(yte, proba)
+    mlflow.log_metric('test_auc', test_auc)
+    mlflow.sklearn.log_model(best, 'model')
+    run_id = run.info.run_id
+
+print('Logged under run:', run_id)
+
+# Load model later
+loaded = mlflow.sklearn.load_model(f'runs:/{run_id}/model')
+print('Loaded AUC:', roc_auc_score(yte, loaded.predict_proba(Xte)[:,1]))
+```
+Notes
+- Track the run_id to retrieve artifacts
+- Use mlflow ui to compare runs: `mlflow ui --port 5000`
+
+---
+
+Worked reference for Exercise 3; Model Registry (concepts)
+- Register models for stages: Staging → Production
+- Transition approvals and CI checks gate promotions
+- Versioned artifacts allow rollbacks and auditability
+
+---
+
+**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
+
+<!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Solution reasoning lens
+
+A strong solution is not merely code that produces one plausible
+output. It establishes a chain from input contract to operation to
+verification:
+
+1. **`with mlflow.start_run():`:** creates a bounded lifecycle so successful and failed runs receive terminal status.
+2. **`log_param` versus `log_metric`:** stores fixed configuration separately from numeric measurements that may evolve by step.
+3. **`log_artifact` / model logging:** copies output into the run's artifact store; verify reload and input contract rather than trusting existence.
+4. **Verification:** Compare the result with an independent invariant, baseline, or failure case before interpreting it.
+
+**Why this approach is appropriate:** The run lifecycle and evidence taxonomy make records inspectable, while reload and provenance checks connect tracking metadata to a usable artifact.
+
+**Useful alternative:** A versioned JSON manifest plus artifact directory can be sufficient locally; a shared tracking server adds collaboration with operational obligations.
+
+**Trade-off:** Automatic logging is convenient but may record too much, too little, or sensitive metadata; explicit logging is verbose but deliberate.
+
+**Edge case to test:** Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.
+
+**Evidence of correctness:** Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.
+
+When comparing your attempt with the reference, explain which of these
+decisions your code made explicitly. If the reference makes a different
+choice, compare the contracts and evidence before deciding that one
+version is universally better.
+
+<!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
+
+## Exercise-by-exercise reasoning map
+
+This map connects every learner prompt to a reasoning path. Read the
+explanation before copying code: the goal is to understand the assumptions,
+the evidence that validates the result, and the edge cases that can make an
+apparently correct implementation fail.
+
+### Exercise 1: Original lesson practice
+
+**Prompt:** Log additional parameters such as Logistic Regression `C` and compare runs.
+
+**How to reason about it:** Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+**Verify:** Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
+
+### Exercise 2: Original lesson practice
+
+**Prompt:** Save a confusion-matrix PNG and log it as an artifact.
+
+**How to reason about it:** Create the confusion matrix under ignored `artifacts/`, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run's numeric metrics.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+**Verify:** Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
+
+### Exercise 3: Original lesson practice
+
+**Prompt:** Try a different classifier, such as Random Forest, and compare ROC AUC.
+
+**How to reason about it:** Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.
+
+Use the worked reference earlier in this file, then change one boundary
+condition and rerun the stated checks. A copied output is not evidence
+unless you can explain why that output follows from the inputs.
+
+**Verify:** Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
+
+### Exercise 4: Failure-state handling
+
+**Prompt:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
+
+**Reasoning before implementation:** Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.
+
+Do not catch every exception and end the run as successful. If cleanup is
+needed, catch narrowly, log a redacted diagnostic or tag, and re-raise so the
+tracking status remains honest.
+
+Never put credentials, full environment variables, or sensitive records in
+tags/artifacts. Link to an approved local diagnostic ID when deeper incident
+evidence is restricted.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+**Verify:** Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
+
+### Exercise 5: Provenance manifest
+
+**Prompt:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
+
+**Reasoning before implementation:** Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.
+
+The manifest should make two similar-looking runs distinguishable. Include
+target/positive-label semantics and units/denominators for metrics. Record a
+dirty-worktree flag when applicable rather than falsely claiming the Git
+revision alone captures code state.
+
+A hash proves identity relative to the hashed bytes, not trust or data quality.
+Keep the source snapshot governed and reproducible.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+**Verify:** Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
+
+### Exercise 6: Reload and signature check
+
+**Prompt:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
+
+**Reasoning before implementation:** The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.
+
+Test missing/extra columns and dtypes as well as a valid prediction. The
+signature catches many integration errors but does not replace domain
+validation such as allowed ranges or category policy.
+
+Use the local file-backed tracking URI for the offline lesson. A production
+registry adds authentication and promotion policy, which should be documented
+as an extension rather than required for the portable course.
+
+**Why this matters:** The result should survive a fresh-kernel rerun and
+a deliberately chosen boundary case. If it does not, revisit the
+assumption or data boundary rather than hiding the failure.
+
+**Verify:** Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.

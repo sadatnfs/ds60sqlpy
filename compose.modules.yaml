@@ -1,0 +1,249 @@
+# Optional services only. The host launcher owns preparation and credentials.
+# Compose with: -f compose.yaml -f compose.modules.yaml
+x-worker: &worker
+  pull_policy: never
+  networks: [module-private]
+  init: true
+  read_only: true
+  user: "0:0"
+  cap_drop: [ALL]
+  cap_add: [CHOWN, SETUID, SETGID, DAC_OVERRIDE, KILL]
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 128
+  cpus: 2
+  mem_limit: 2g
+  tmpfs:
+    - /tmp:size=128m,mode=1777,exec
+  volumes:
+    - type: bind
+      source: ${DS60_MODULE_RUNTIME_DIR:-./.module-runtime-not-prepared}/worker-token
+      target: /run/ds60/worker-token
+      read_only: true
+      bind:
+        create_host_path: false
+  environment: &worker-env
+    DS60_WORKER_TOKEN_FILE: /run/ds60/worker-token
+  healthcheck:
+    test: ["CMD", "python3", "-c", "import json,os,urllib.request; t=open(os.environ['DS60_WORKER_TOKEN_FILE']).read().strip(); r=urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8081/health',headers={'X-DS60-Worker-Token':t}),timeout=3); assert json.load(r)['ready']"]
+    interval: 5s
+    timeout: 5s
+    retries: 24
+    start_period: 60s
+
+services:
+  postgres:
+    networks: [default, module-private]
+  lab:
+    environment:
+      DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token
+      DS60_MODULE_ENDPOINTS: "${DS60_MODULE_ENDPOINTS:-}"
+    volumes:
+      - type: bind
+        source: ${DS60_MODULE_RUNTIME_DIR:-./.module-runtime-not-prepared}/worker-token
+        target: /run/ds60/worker-token
+        read_only: true
+        bind:
+          create_host_path: false
+  python-core-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-python-core:0.3.0
+    profiles: [python-core]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.python-core
+      args:
+        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:0.3.0}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: python-core
+  cpp-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-cpp20:0.3.0
+    profiles: [cpp20]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cpp
+      args:
+        DS60_CPP_IMAGE: ${DS60_CPP_IMAGE:-gcc:14.3.0-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: cpp20
+  tensorflow-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-tensorflow-cpu:0.3.0
+    profiles: [tensorflow-cpu]
+    mem_limit: 3g
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.tensorflow
+      args:
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: tensorflow-cpu
+  llm-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-llm-torch-cpu:0.3.0
+    profiles: [llm-torch-cpu]
+    mem_limit: 3g
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.torch
+      args:
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: llm-torch-cpu
+  scala-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-scala-jvm:0.3.0
+    profiles: [scala-jvm]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: scala-jvm
+  spark-scala-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-spark-local-scala:0.3.0
+    profiles: [spark-local-scala]
+    mem_limit: 3g
+    pids_limit: 384
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: spark-local-scala
+  spark-python-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-spark-local-python:0.3.0
+    profiles: [spark-local-python]
+    mem_limit: 3g
+    pids_limit: 384
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.spark
+      args:
+        DS60_SPARK_IMAGE: ${DS60_SPARK_IMAGE:-spark:4.0.1-scala2.13-java17-python3-ubuntu}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: spark-local-python
+
+  java-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-java21:0.3.0
+    profiles: [java21]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.java
+      args:
+        DS60_JAVA_IMAGE: ${DS60_JAVA_IMAGE:-eclipse-temurin:21-jdk-jammy@sha256:742daacb9316be4b6fc60258f6e4ac2a11882f6c597373c92290a57bfad0d2e0}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: java21
+  javascript-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-javascript-node:0.3.0
+    profiles: [javascript-node]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.node
+      args:
+        DS60_NODE_IMAGE: ${DS60_NODE_IMAGE:-node:24.22.1-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: javascript-node
+  typescript-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-typescript-node:0.3.0
+    profiles: [typescript-node]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.node
+      args:
+        DS60_NODE_IMAGE: ${DS60_NODE_IMAGE:-node:24.22.1-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205}
+        DS60_PYTHON_IMAGE: ${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: typescript-node
+
+  c-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-c17:0.3.0
+    profiles: [c17]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.c
+      args:
+        DS60_C_IMAGE: ${DS60_C_IMAGE:-gcc:14.3.0-bookworm}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: c17
+
+  go-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-go:0.3.0
+    profiles: [go]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.go
+      args:
+        DS60_GO_IMAGE: ${DS60_GO_IMAGE:-golang:1.27.3-bookworm@sha256:972b4110ba0f47539a975c31e52c64765e1ff19f2d74469ae4a595c6676e80a5}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: go
+
+  csharp-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-csharp-dotnet:0.3.0
+    profiles: [csharp-dotnet]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.csharp
+      args:
+        DS60_DOTNET_IMAGE: ${DS60_DOTNET_IMAGE:-mcr.microsoft.com/dotnet/sdk:10.0@sha256:747cbade5bfd918a175ac32f8f1d931edec2c7d0d5397a3de72eaef1ac1f66d2}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: csharp-dotnet
+
+  rust-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-rust-stable:0.3.0
+    profiles: [rust-stable]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.rust
+      args:
+        DS60_RUST_IMAGE: ${DS60_RUST_IMAGE:-rust:1.99.1-bookworm@sha256:48b7f435b8fc6378ce43b44f15e3a47fd8919b2825f835c39bd4bd3da50af5b8}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: rust-stable
+
+  swift-worker:
+    <<: *worker
+    image: ds60sqlpy-worker-swift-linux:0.3.0
+    profiles: [swift-linux]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.swift
+      args:
+        DS60_SWIFT_IMAGE: ${DS60_SWIFT_IMAGE:-swift:6.3.3-noble@sha256:c2f3ac2eb806ce43f68859c3d52bd3bb1cfc88672fb3a948b76e136d98e39278}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: swift-linux
+
+networks:
+  default: {}
+  module-private:
+    internal: true

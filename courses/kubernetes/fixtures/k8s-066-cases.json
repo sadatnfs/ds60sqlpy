@@ -1,0 +1,36 @@
+{
+  "lesson_id": "k8s-066",
+  "provenance": "synthetic teaching cases; no runtime observations",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the entire request path with address and port roles.",
+      "expected": "Every hop names its caller, destination and responsible component."
+    },
+    {
+      "exercise": 2,
+      "task": "Classify available and unavailable lab capabilities.",
+      "expected": "Controllers, policy enforcement, dual-stack and external routing are explicit."
+    },
+    {
+      "exercise": 3,
+      "task": "Produce a complete architecture and acceptance packet.",
+      "expected": "Diagram, manifests, ownership ledger, checks and limitations align."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose and repair the single target-port fault.",
+      "expected": "The first incorrect mapping is found and a fresh request verifies repair."
+    },
+    {
+      "exercise": 5,
+      "task": "Verify isolation with both positive and negative flows.",
+      "expected": "Allowed traffic succeeds and the denied owned case fails under an enforcing CNI."
+    },
+    {
+      "exercise": 6,
+      "task": "Teach the system and defend its evidence limits.",
+      "expected": "Explain mechanisms, current results, untested platforms and scoped cleanup."
+    }
+  ]
+}

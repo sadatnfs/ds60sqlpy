@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "track_id": "rust",
+  "lessons": [
+    {
+      "id": "rust-001",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-001.md",
+      "source_path": "courses/rust/lessons/rust-001.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-001_solution.rs",
+        "courses/rust/solutions/rust-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-002",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-002.md",
+      "source_path": "courses/rust/lessons/rust-002.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-002_solution.rs",
+        "courses/rust/solutions/rust-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-003",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-003.md",
+      "source_path": "courses/rust/lessons/rust-003.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-003_solution.rs",
+        "courses/rust/solutions/rust-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-004",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-004.md",
+      "source_path": "courses/rust/lessons/rust-004.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-004_solution.rs",
+        "courses/rust/solutions/rust-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-005",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-005.md",
+      "source_path": "courses/rust/lessons/rust-005.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-005_solution.rs",
+        "courses/rust/solutions/rust-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-006",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-006.md",
+      "source_path": "courses/rust/lessons/rust-006.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-006_solution.rs",
+        "courses/rust/solutions/rust-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-007",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-007.md",
+      "source_path": "courses/rust/lessons/rust-007.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-007_solution.rs",
+        "courses/rust/solutions/rust-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-008",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-008.md",
+      "source_path": "courses/rust/lessons/rust-008.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-008_solution.rs",
+        "courses/rust/solutions/rust-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-009",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-009.md",
+      "source_path": "courses/rust/lessons/rust-009.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-009_solution.rs",
+        "courses/rust/solutions/rust-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-010",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-010.md",
+      "source_path": "courses/rust/lessons/rust-010.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-010_solution.rs",
+        "courses/rust/solutions/rust-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-011",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-011.md",
+      "source_path": "courses/rust/lessons/rust-011.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-011_solution.rs",
+        "courses/rust/solutions/rust-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-012",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-012.md",
+      "source_path": "courses/rust/lessons/rust-012.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-012_solution.rs",
+        "courses/rust/solutions/rust-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-013",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-013.md",
+      "source_path": "courses/rust/lessons/rust-013.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-013_solution.rs",
+        "courses/rust/solutions/rust-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-014",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-014.md",
+      "source_path": "courses/rust/lessons/rust-014.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-014_solution.rs",
+        "courses/rust/solutions/rust-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-015",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-015.md",
+      "source_path": "courses/rust/lessons/rust-015.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-015_solution.rs",
+        "courses/rust/solutions/rust-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-016",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-016.md",
+      "source_path": "courses/rust/lessons/rust-016.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-016_solution.rs",
+        "courses/rust/solutions/rust-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-017",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-017.md",
+      "source_path": "courses/rust/lessons/rust-017.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-017_solution.rs",
+        "courses/rust/solutions/rust-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-018",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-018.md",
+      "source_path": "courses/rust/lessons/rust-018.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-018_solution.rs",
+        "courses/rust/solutions/rust-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-019",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-019.md",
+      "source_path": "courses/rust/lessons/rust-019.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-019_solution.rs",
+        "courses/rust/solutions/rust-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-020",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-020.md",
+      "source_path": "courses/rust/lessons/rust-020.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-020_solution.rs",
+        "courses/rust/solutions/rust-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-021",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-021.md",
+      "source_path": "courses/rust/lessons/rust-021.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-021_solution.rs",
+        "courses/rust/solutions/rust-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-022",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-022.md",
+      "source_path": "courses/rust/lessons/rust-022.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-022_solution.rs",
+        "courses/rust/solutions/rust-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-023",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-023.md",
+      "source_path": "courses/rust/lessons/rust-023.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-023_solution.rs",
+        "courses/rust/solutions/rust-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-024",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-024.md",
+      "source_path": "courses/rust/lessons/rust-024.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-024_solution.rs",
+        "courses/rust/solutions/rust-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-025",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-025.md",
+      "source_path": "courses/rust/lessons/rust-025.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-025_solution.rs",
+        "courses/rust/solutions/rust-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-026",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-026.md",
+      "source_path": "courses/rust/lessons/rust-026.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-026_solution.rs",
+        "courses/rust/solutions/rust-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-027",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-027.md",
+      "source_path": "courses/rust/lessons/rust-027.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-027_solution.rs",
+        "courses/rust/solutions/rust-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-028",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-028.md",
+      "source_path": "courses/rust/lessons/rust-028.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-028_solution.rs",
+        "courses/rust/solutions/rust-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-029",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-029.md",
+      "source_path": "courses/rust/lessons/rust-029.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-029_solution.rs",
+        "courses/rust/solutions/rust-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-030",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-030.md",
+      "source_path": "courses/rust/lessons/rust-030.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-030_solution.rs",
+        "courses/rust/solutions/rust-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-031",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-031.md",
+      "source_path": "courses/rust/lessons/rust-031.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-031_solution.rs",
+        "courses/rust/solutions/rust-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-032",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-032.md",
+      "source_path": "courses/rust/lessons/rust-032.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-032_solution.rs",
+        "courses/rust/solutions/rust-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-033",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-033.md",
+      "source_path": "courses/rust/lessons/rust-033.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-033_solution.rs",
+        "courses/rust/solutions/rust-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-034",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-034.md",
+      "source_path": "courses/rust/lessons/rust-034.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-034_solution.rs",
+        "courses/rust/solutions/rust-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-035",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-035.md",
+      "source_path": "courses/rust/lessons/rust-035.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-035_solution.rs",
+        "courses/rust/solutions/rust-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-036",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-036.md",
+      "source_path": "courses/rust/lessons/rust-036.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-036_solution.rs",
+        "courses/rust/solutions/rust-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-037",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-037.md",
+      "source_path": "courses/rust/lessons/rust-037.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-037_solution.rs",
+        "courses/rust/solutions/rust-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-038",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-038.md",
+      "source_path": "courses/rust/lessons/rust-038.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-038_solution.rs",
+        "courses/rust/solutions/rust-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-039",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-039.md",
+      "source_path": "courses/rust/lessons/rust-039.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-039_solution.rs",
+        "courses/rust/solutions/rust-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-040",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-040.md",
+      "source_path": "courses/rust/lessons/rust-040.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-040_solution.rs",
+        "courses/rust/solutions/rust-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-041",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-041.md",
+      "source_path": "courses/rust/lessons/rust-041.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-041_solution.rs",
+        "courses/rust/solutions/rust-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-042",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-042.md",
+      "source_path": "courses/rust/lessons/rust-042.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-042_solution.rs",
+        "courses/rust/solutions/rust-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-043",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-043.md",
+      "source_path": "courses/rust/lessons/rust-043.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-043_solution.rs",
+        "courses/rust/solutions/rust-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-044",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-044.md",
+      "source_path": "courses/rust/lessons/rust-044.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-044_solution.rs",
+        "courses/rust/solutions/rust-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-045",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-045.md",
+      "source_path": "courses/rust/lessons/rust-045.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-045_solution.rs",
+        "courses/rust/solutions/rust-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-046",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-046.md",
+      "source_path": "courses/rust/lessons/rust-046.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-046_solution.rs",
+        "courses/rust/solutions/rust-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-047",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-047.md",
+      "source_path": "courses/rust/lessons/rust-047.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-047_solution.rs",
+        "courses/rust/solutions/rust-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "rust-048",
+      "status": "authored",
+      "language": "rust",
+      "runtime_profile": "rust-stable",
+      "guide_path": "courses/rust/guides/rust-048.md",
+      "source_path": "courses/rust/lessons/rust-048.rs",
+      "solution_paths": [
+        "courses/rust/solutions/rust-048_solution.rs",
+        "courses/rust/solutions/rust-048_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}
