@@ -192,3 +192,22 @@ def test_prepared_kustomize_renders_both_fixtures_without_api_calls() -> None:
         actual = yaml.safe_load(result.stdout)
         expected = json.loads((directory / f"expected-{name}.json").read_text())
         assert actual == expected and actual["spec"]["replicas"] == count
+
+
+def test_git_checkout_preserves_signed_fixtures_with_windows_line_endings() -> None:
+    # Exercise Git's actual checkout conversion, not a normalized text hash.
+    if shutil.which("git") is None:
+        pytest.skip("Git checkout conversion requires an existing Git installation")
+    relative = "courses/kubernetes/fixtures/provenance/publisher-public.txt"
+    result = subprocess.run(
+        ["git", "-c", "core.autocrlf=true", "cat-file", "--filters", f"HEAD:{relative}"],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+        timeout=10,
+    )
+    if result.returncode and not (ROOT / ".git").exists():
+        pytest.skip("Portable source archives have no Git checkout to verify")
+    assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
+    receipt = json.loads((BASE / "fixtures/provenance/receipt.json").read_text(encoding="utf-8"))
+    assert hashlib.sha256(result.stdout).hexdigest() == receipt["public_key_sha256"]

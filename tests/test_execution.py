@@ -86,7 +86,10 @@ def test_descendants_are_stopped_after_normal_parent_exit(course: Catalog) -> No
         "    if child.poll() is not None or time.monotonic() >= deadline:\n"
         "        raise RuntimeError('The owned child did not become ready.')\n"
         "    time.sleep(0.01)\n"
-        "print('parent finished with child', child.pid)\n"
+        # A Windows virtual-environment redirector can have a different PID
+        # from the executing child. The owned readiness file identifies the
+        # program whose continued execution the sentinel detects below.
+        "print('parent finished with child', ready.read_text(encoding='utf-8').strip())\n"
     )
     # A normal exit needs its ordinary run budget. The separate timeout test
     # retains the short deadline; startup contention cannot turn this proof
@@ -730,15 +733,24 @@ def test_live_sql_timeout_cancels_the_exact_session_after_application_name_chang
     assert active == 0
 
 
+@pytest.mark.parametrize("line_ending", [b"\n", b"\r\n"])
+@pytest.mark.parametrize("symbol", ["€", "😀"])
 def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
     course: Catalog,
+    line_ending: bytes,
+    symbol: str,
 ) -> None:
     from ds60sqlpy.execution import WORKER_GATE
 
     code = (
-        WORKER_GATE + "import sys\nprint('FIRST SENTINEL')\n"
-        "print('\\u20ac' * 100000)\n"
-        "print('FINAL ERROR SENTINEL', file=sys.stderr)\nraise SystemExit(7)"
+        WORKER_GATE + "import os\n"
+        "def emit(fd, data):\n"
+        "    while data:\n"
+        "        data = data[os.write(fd, data):]\n"
+        f"emit(1, b'FIRST SENTINEL' + {line_ending!r})\n"
+        f"emit(1, {symbol.encode('utf-8')!r} * 100000 + {line_ending!r})\n"
+        f"emit(2, b'FINAL ERROR SENTINEL' + {line_ending!r})\n"
+        "raise SystemExit(7)"
     )
     result = PadRunner(course)._execute(
         [sys.executable, "-u", "-c", code],
@@ -749,6 +761,7 @@ def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
     assert result.returncode == 7 and result.stopped is None
     assert result.output_truncated
     assert "FIRST SENTINEL" in result.output and "FINAL ERROR SENTINEL" in result.output
+    assert result.output.endswith("FINAL ERROR SENTINEL" + line_ending.decode("ascii"))
     assert len(result.output.encode()) <= MAX_OUTPUT_BYTES
 
 

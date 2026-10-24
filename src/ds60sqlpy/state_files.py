@@ -26,8 +26,30 @@ _GUARD = Lock()
 _THREAD_LOCKS: dict[Path, RLock] = {}
 
 
+def resolve_existing_ancestor(path: Path) -> Path:
+    """Resolve existing names strictly, then append the validated missing suffix.
+
+    On Windows, non-strict realpath can retain an extended-path prefix when
+    concurrent parent creation changes the missing-path error between probes.
+    Strict resolution of an existing ancestor avoids comparing different path
+    anchors for the same location. Other resolution failures remain failures.
+    This normalizes identity only; callers retain containment and reparse checks.
+    """
+    cursor = path
+    missing: list[str] = []
+    while True:
+        try:
+            resolved = cursor.resolve(strict=True)
+            return Path(os.path.normpath(resolved.joinpath(*reversed(missing))))
+        except FileNotFoundError:
+            if cursor.parent == cursor:
+                raise
+            missing.append(cursor.name)
+            cursor = cursor.parent
+
+
 def _thread_lock(path: Path) -> RLock:
-    identity = path.resolve()
+    identity = resolve_existing_ancestor(path)
     with _GUARD:
         return _THREAD_LOCKS.setdefault(identity, RLock())
 

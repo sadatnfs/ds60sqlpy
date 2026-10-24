@@ -69,3 +69,22 @@ def test_live_browser_gate_refuses_missing_disposable_authorization_without_impo
     with pytest.raises(SystemExit) as error:
         browser.main(["--url", "http://127.0.0.1:8765/classroom", "--report", "unused.json"])
     assert error.value.code == 2
+
+
+@pytest.mark.parametrize(
+    "identity,label,expected",
+    [
+        ("python-02", "python-02 · beginner · ~2 sessions", True),
+        ("python-02", "python-02 · Demonstrated · beginner", True),
+        ("python-02", "python-02", True),
+        ("python-02", "python-020 · beginner", False),
+        ("python-02", "python-02-extra · beginner", False),
+        ("python-02", "python-02@variant · beginner", False),
+        ("python-02", "A title mentioning python-02", False),
+        ("spark-013@pyspark", "spark-013@pyspark · intermediate", True),
+    ],
+)
+def test_lesson_metadata_selector_matches_only_a_complete_leading_id(
+    identity: str, label: str, expected: bool
+) -> None:
+    assert bool(browser.lesson_label_pattern(identity).search(label)) is expected

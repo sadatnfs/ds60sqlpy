@@ -223,6 +223,14 @@ def test_unified_http_shell_assets_and_authenticated_endpoint(
         ("x", []),
         ("x", "<script>"),
     ],
+    ids=[
+        "missing-source",
+        "oversized-ascii",
+        "oversized-unicode",
+        "path-language",
+        "list-language",
+        "html-language",
+    ],
 )
 def test_syntax_preview_rejects_unbounded_or_invalid_inputs(
     tmp_path: Path, source: object, language: object

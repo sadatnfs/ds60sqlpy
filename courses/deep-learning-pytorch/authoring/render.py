@@ -17,8 +17,8 @@ def polish(value):
 def write_all(only=None):
  for track in ['deep-learning-pytorch']:
   base=ROOT/'courses'/track
-  plan=json.loads((base/'track.json').read_text())
-  inventory=json.loads((base/'lessons.json').read_text())
+  plan=json.loads((base/'track.json').read_text(encoding="utf-8"))
+  inventory=json.loads((base/'lessons.json').read_text(encoding="utf-8"))
   existing={x['id'] for x in inventory['lessons']}
   for p in plan['lessons']:
    id=p['id']
@@ -168,21 +168,21 @@ The question is: {e['prompt']}
 '''
     blocks.append(f"    # Exercise {n}: {e['title']}\n"+textwrap.indent(e['code'],'    '))
    explanation_doc+='## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n'
-   (ROOT/guide).write_text(document)
-   (ROOT/explanation).write_text(explanation_doc)
+   (ROOT/guide).write_text(document, encoding="utf-8", newline="\n")
+   (ROOT/explanation).write_text(explanation_doc, encoding="utf-8", newline="\n")
    if reading:
-    (ROOT/learner).write_text(f'# {id}: {p["title"]}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n'+exercise_text+'\n')
+    (ROOT/learner).write_text(f'# {id}: {p["title"]}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n'+exercise_text+'\n', encoding="utf-8", newline="\n")
    else:
     source=f'"""{id}: {p["title"]}.\n\nAnswer-free learner worksheet. See the companion guide for worked examples.\nCopy to .learning before editing. Six independent attempts belong below.\n"""\n\n'
     for n,e in enumerate(s['exercises'],1):
      source+=f'# Exercise {n}: {e["title"]}\n'+ '\n'.join('# '+x for x in textwrap.wrap(e['prompt'],88))+'\n# Expected: '+e['expected']+'\n\n'
     source+='if __name__ == "__main__":\n    print("Read the guide and implement the six exercises in your saved copy.")\n'
-    (ROOT/learner).write_text(source)
+    (ROOT/learner).write_text(source, encoding="utf-8", newline="\n")
     code='"""'+id+': bounded local reference checks. No network or persistent data writes."""\n\n'+s['imports']+'\n\n'+s['helper']+'\n\n\ndef verify():\n'+'\n\n'.join(blocks)+'\n    return {"checks": 6, "status": "passed"}\n\n\nif __name__ == "__main__":\n    print(verify())\n'
-    (ROOT/solution).write_text(code)
+    (ROOT/solution).write_text(code, encoding="utf-8", newline="\n")
    if id not in existing:
     inventory['lessons'].append(dict(id=id,status='authored',language='markdown' if reading else 'python',runtime_profile=p['runtime'],guide_path=guide,source_path=learner,solution_paths=[explanation] if reading else [solution,explanation],verification_id=None))
   inventory['lessons'].sort(key=lambda x:x['id'])
-  (base/'lessons.json').write_text(json.dumps(inventory,indent=2)+'\n')
-  (base/'track.json').write_text(json.dumps(plan,indent=2)+'\n')
+  (base/'lessons.json').write_text(json.dumps(inventory,indent=2)+'\n', encoding="utf-8", newline="\n")
+  (base/'track.json').write_text(json.dumps(plan,indent=2)+'\n', encoding="utf-8", newline="\n")
  print('Authored',len(SPECS),'lesson bundles')

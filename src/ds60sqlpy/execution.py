@@ -773,7 +773,20 @@ class PadRunner:
             output_limit.set()
             if not truncate_output:
                 stopped = stopped or "output limit"
-            transcript = encoded[:MAX_OUTPUT_BYTES].decode("utf-8", errors="ignore")
+            if truncate_output:
+                # Replacement characters and credential redaction can expand the
+                # decoded byte count. Reduce the middle again, preserving final
+                # compiler/runtime diagnostics instead of clipping the tail.
+                marker = b"\n[... output truncated; keeping beginning and end ...]\n"
+                tail = 16_384
+                head = MAX_OUTPUT_BYTES - tail - len(marker)
+                transcript = (
+                    encoded[:head].decode("utf-8", errors="ignore")
+                    + marker.decode("ascii")
+                    + encoded[-tail:].decode("utf-8", errors="ignore")
+                )
+            else:
+                transcript = encoded[:MAX_OUTPUT_BYTES].decode("utf-8", errors="ignore")
         return PadResult(
             language,
             process.returncode,

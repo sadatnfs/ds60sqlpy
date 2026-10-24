@@ -91,6 +91,10 @@ output-size and filesystem checks. Native servers bind loopback; container
 ports publish to loopback. Manifests cannot supply shell commands, endpoints,
 compiler flags, cluster identities or host paths. Reviewed backend code owns
 runtime profiles and bounded execution.
+Use `http_server.py` for local and private-worker HTTP servers so startup does
+not depend on reverse DNS. Keep minimal worker Docker COPY lists aligned with
+shared imports. Repository text generators must write explicit UTF-8 and LF
+newlines so byte-level fixture and regeneration checks remain portable.
 
 A profile name, installed compiler, successful parse and executed lesson are
 different evidence. Report the actual capability and never enable Run based

@@ -12,13 +12,14 @@ import sys
 import webbrowser
 from dataclasses import asdict, dataclass
 from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path, PurePosixPath
 from typing import Any, cast
 from urllib.parse import unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog, Lesson
 from ds60sqlpy.doctor import diagnose
+from ds60sqlpy.http_server import LocalThreadingHTTPServer
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.sql_notebook import (
     SqlArtifactKind,
@@ -276,7 +277,7 @@ class PortalLauncher:
         )
 
 
-class PortalServer(ThreadingHTTPServer):
+class PortalServer(LocalThreadingHTTPServer):
     """HTTP server state shared with portal request handlers."""
 
     daemon_threads = True

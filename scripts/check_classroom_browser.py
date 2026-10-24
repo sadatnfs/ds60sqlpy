@@ -20,14 +20,17 @@ import shutil
 import sys
 import tempfile
 import threading
+import uuid
 from collections.abc import Iterator
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import SimpleHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
+from ds60sqlpy.http_server import LocalThreadingHTTPServer  # noqa: E402
 from scripts.check_classroom_profiles import classroom_origin  # noqa: E402
 
 SUBJECTS = {
@@ -46,9 +49,6 @@ SUBJECTS = {
     "llm-applied",
     "nlp",
 }
-PYTHON_SOURCE = 'print("BROWSER_PYTHON_42")\n'
-SQL_SOURCE = "SELECT 42 AS answer, 'BROWSER_SQL_42' AS label;\n"
-MODULE_SOURCE = 'print("BROWSER_MODULE_42")\n'
 NOTE = "Disposable browser acceptance note, not a learner mastery assessment."
 
 
@@ -82,7 +82,7 @@ def fixture_server(identity: str, root: Path = ROOT) -> Iterator[str]:
             if path.is_symlink() or not path.is_file():
                 raise ValueError("A browser reference must contain only regular local files.")
             shutil.copyfile(path, target / path.name)
-        server = ThreadingHTTPServer(
+        server = LocalThreadingHTTPServer(
             ("127.0.0.1", 0), functools.partial(QuietHandler, directory=temporary)
         )
         server.daemon_threads = True
@@ -163,6 +163,11 @@ class Audit:
         self.passed("No uncaught JavaScript exceptions, HTTP failures or external requests")
 
 
+def lesson_label_pattern(identity: str) -> re.Pattern[str]:
+    """Match the metadata child ID without accepting longer IDs or variants."""
+    return re.compile(r"^" + re.escape(identity) + r"(?=\s|$)")
+
+
 def choose_lesson(page: Any, subject: str, identity: str, expect: Any) -> None:
     title = page.locator(f'#subject-select option[value="{subject}"]').text_content()
     assert title, "The requested subject has no visible label."
@@ -172,9 +177,10 @@ def choose_lesson(page: Any, subject: str, identity: str, expect: Any) -> None:
     expect(page.locator("#subject-label")).to_have_text(title)
     expect(page.locator("#save-state")).to_contain_text("Loaded")
     page.locator("#lesson-query").fill(identity)
-    button = page.locator("#lessons button").filter(
-        has_text=re.compile(r"\b" + re.escape(identity) + r"\b")
-    )
+    # Title and <small> text concatenate without a DOM separator. The ID belongs
+    # to the metadata child, so inspect that child rather than the whole button.
+    metadata = page.locator("small").filter(has_text=lesson_label_pattern(identity))
+    button = page.locator("#lessons button").filter(has=metadata)
     expect(button).to_have_count(1)
     current_id = page.evaluate("new URLSearchParams(location.hash.slice(1)).get('lesson')")
     if current_id != identity:
@@ -183,6 +189,18 @@ def choose_lesson(page: Any, subject: str, identity: str, expect: Any) -> None:
         "id => new URLSearchParams(location.hash.slice(1)).get('lesson') === id", arg=identity
     )
     expect(page.locator("#authored")).to_be_visible()
+    expect(page.locator("#save-state")).to_contain_text("Loaded")
+
+
+def choose_sql_snippet(page: Any, expect: Any) -> None:
+    # Some SQL lessons open their whole-file workspace by default. Choose the
+    # snippet workspace explicitly and wait for the async context switch.
+    if page.locator("#pad-mode").input_value() != "snippet":
+        page.locator("#pad-mode").select_option("snippet")
+    page.wait_for_function(
+        "() => new URLSearchParams(location.hash.slice(1)).get('mode') === 'snippet'"
+    )
+    expect(page.locator("#pad-mode")).to_have_value("snippet")
     expect(page.locator("#save-state")).to_contain_text("Loaded")
 
 
@@ -206,6 +224,14 @@ def no_overflow(page: Any) -> None:
 
 
 def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> None:
+    # Each invocation must observe newly executed output, never a restored receipt.
+    nonce = uuid.uuid4().hex
+    python_marker = "BROWSER_PYTHON_42_" + nonce
+    sql_marker = "BROWSER_SQL_42_" + nonce
+    module_marker = "BROWSER_MODULE_42_" + nonce
+    python_source = f"print({python_marker!r})\n"
+    sql_source = f"SELECT 42 AS answer, '{sql_marker}' AS label;\n"
+    module_source = f"print({module_marker!r})\n"
     context = audit.context(browser, origin)
     try:
         page = context.new_page()
@@ -230,12 +256,12 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         audit.passed("All 14 subjects are selectable; home fits desktop and narrow viewports")
 
         choose_lesson(page, "python", "python-02", expect)
-        page.locator("#source").fill(PYTHON_SOURCE)
+        page.locator("#source").fill(python_source)
         page.locator("#phase-note").fill(NOTE)
         save(page, expect)
         page.locator("#run").click()
-        expect(page.locator("#job-status")).to_contain_text("Exit 0", timeout=90_000)
-        expect(page.locator("#output")).to_have_text("BROWSER_PYTHON_42\n")
+        expect(page.locator("#output")).to_have_text(python_marker, timeout=90_000)
+        expect(page.locator("#job-status")).to_contain_text("Exit 0")
         expect(page.locator("#run-storage-status")).to_contain_text("Saved run")
         for mode in ("light", "dark"):
             if page.locator("body").get_attribute("data-mode") != mode:
@@ -246,30 +272,43 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
             ratio = contrast_ratio(*colors)
             assert ratio >= 4.5, f"Console contrast in {mode} mode is {ratio:.2f}:1."
             expect(page.locator("#output")).to_be_visible()
+            body_colors = page.locator("body").evaluate(
+                "node => { const s=getComputedStyle(node); return [s.color,s.backgroundColor]; }"
+            )
+            assert contrast_ratio(*body_colors) >= 4.5, f"Body contrast fails in {mode} mode."
+            prose_colors = page.locator("#guide p").first.evaluate(
+                "node => [getComputedStyle(node).color, "
+                "getComputedStyle(node.closest('.reading-pane')).backgroundColor]"
+            )
+            assert contrast_ratio(*prose_colors) >= 4.5, (
+                f"Lesson prose contrast fails in {mode} mode."
+            )
         page.locator("#output").scroll_into_view_if_needed()
         audit.screenshot(page, "classroom-output-dark")
-        audit.passed("Python runs, saves its receipt and has readable output in both appearances")
+        audit.passed(
+            "Fresh Python execution and receipts; readable output and prose in both appearances"
+        )
 
         choose_lesson(page, "sql", "sql-start-02", expect)
-        expect(page.locator("#pad-mode")).to_have_value("snippet")
-        page.locator("#source").fill(SQL_SOURCE)
+        choose_sql_snippet(page, expect)
+        page.locator("#source").fill(sql_source)
         save(page, expect)
         page.locator("#run").click()
-        expect(page.locator("#job-status")).to_contain_text("Exit 0", timeout=90_000)
-        expect(page.locator("#sql-results")).to_contain_text("BROWSER_SQL_42")
+        expect(page.locator("#sql-results")).to_contain_text(sql_marker, timeout=90_000)
+        expect(page.locator("#job-status")).to_contain_text("Exit 0")
         expect(page.locator("#sql-results")).to_contain_text("42")
         choose_lesson(page, "llm-theory", "llm-002", expect)
         show_code_and_notes(page, expect)
-        page.locator("#source").fill(MODULE_SOURCE)
+        page.locator("#source").fill(module_source)
         page.locator("#explanation").fill(NOTE)
         save(page, expect)
         page.locator("#run").click()
+        expect(page.locator("#output")).to_have_text(module_marker, timeout=150_000)
         expect(page.locator("#job-status")).to_contain_text("succeeded", timeout=150_000)
-        expect(page.locator("#output")).to_have_text("BROWSER_MODULE_42\n")
         choose_lesson(page, "python", "python-02", expect)
-        expect(page.locator("#source")).to_have_value(PYTHON_SOURCE)
+        expect(page.locator("#source")).to_have_value(python_source)
         expect(page.locator("#phase-note")).to_have_value(NOTE)
-        expect(page.locator("#output")).to_have_text("BROWSER_PYTHON_42\n")
+        expect(page.locator("#output")).to_have_text(python_marker)
         audit.passed(
             "Python, SQL and module source, notes and results remain isolated across switching"
         )
@@ -304,16 +343,17 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         show_code_and_notes(page, expect)
         expect(page.locator("#explanation")).to_have_value(NOTE)
         choose_lesson(page, "python", "python-02", expect)
-        expect(page.locator("#source")).to_have_value(PYTHON_SOURCE)
+        expect(page.locator("#source")).to_have_value(python_source)
         expect(page.locator("#phase-note")).to_have_value(NOTE)
-        expect(page.locator("#output")).to_have_text("BROWSER_PYTHON_42\n")
+        expect(page.locator("#output")).to_have_text(python_marker)
         choose_lesson(page, "sql", "sql-start-02", expect)
-        expect(page.locator("#source")).to_have_value(SQL_SOURCE)
-        expect(page.locator("#sql-results")).to_contain_text("BROWSER_SQL_42")
+        choose_sql_snippet(page, expect)
+        expect(page.locator("#source")).to_have_value(sql_source)
+        expect(page.locator("#sql-results")).to_contain_text(sql_marker)
         choose_lesson(page, "llm-theory", "llm-002", expect)
-        expect(page.locator("#source")).to_have_value(MODULE_SOURCE)
+        expect(page.locator("#source")).to_have_value(module_source)
         expect(page.locator("#explanation")).to_have_value(NOTE)
-        expect(page.locator("#output")).to_have_text("BROWSER_MODULE_42\n")
+        expect(page.locator("#output")).to_have_text(module_marker)
         audit.passed("A fresh browser restores server-saved progress, notes, pads and run results")
     finally:
         context.close()
@@ -406,7 +446,7 @@ def fixture_checks(browser: Any, audit: Audit, expect: Any) -> None:
                             document.body.append(script);
                         }"""
                     )
-                    page.wait_for_function("window.cspBlocked === true")
+                    page.wait_for_function("() => window.cspBlocked === true")
                     assert page.evaluate("window.inlineExecuted") is None
                 audit.passed(
                     identity + " completed reference passes real browser interaction checks"
@@ -431,7 +471,9 @@ def main(argv: list[str] | None = None) -> int:
     browser_version = "unavailable"
     try:
         with api.sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
+            # Use the supported full Chromium headless mode for real rendering.
+            # https://playwright.dev/python/docs/browsers#chromium-new-headless-mode
+            browser = playwright.chromium.launch(headless=True, channel="chromium")
             browser_version = browser.version
             try:
                 if origin is not None and not args.fixtures_only:

@@ -530,3 +530,67 @@ def test_close_does_not_join_an_unstarted_monitor(authored: ModuleCatalog) -> No
     jobs.threads["5" * 32] = threading.Thread(target=lambda: None)
     jobs.close()
     assert jobs.closed.is_set() and client.submitted == 0
+
+
+@pytest.mark.parametrize(
+    "terminal", ["succeeded", "failed", "cancelled", "timed_out", "blocked", "interrupted"]
+)
+def test_get_reconciles_a_published_terminal_snapshot_before_returning(
+    authored: ModuleCatalog, monkeypatch: pytest.MonkeyPatch, terminal: str
+) -> None:
+    from ds60sqlpy.state_files import atomic_json_write, locked_update
+
+    client = FakeClient(hold=True)
+    jobs = ModuleJobs(authored, ModuleState(authored), client)
+    first, older = "1" * 32, "2" * 32
+    # Control publication explicitly instead of relying on monitor scheduling.
+    monkeypatch.setattr(jobs, "_monitor", lambda key: None)
+    publish = threading.Event()
+    published = threading.Event()
+    errors: list[Exception] = []
+    thread: threading.Thread | None = None
+    try:
+        jobs.start("cpp-009", "int main(){}", 60, first)
+        old = {**jobs._read(first), "job_id": older}
+        with locked_update(jobs._path(older)):
+            atomic_json_write(jobs._path(older), old)
+        client.jobs[older] = {**client.jobs[first], "job_id": older}
+        jobs._reserve(older)
+        original = jobs._read
+        first_snapshot = True
+
+        def read_before_publication(key: str) -> dict[str, Any]:
+            nonlocal first_snapshot
+            value = original(key)
+            if key == older and first_snapshot:
+                first_snapshot = False
+                publish.set()
+                assert published.wait(5), "The controlled publisher did not complete."
+                assert not errors
+            return value
+
+        def publisher() -> None:
+            try:
+                assert publish.wait(5), "No initial stale snapshot was observed."
+                jobs._update(
+                    older, {"status": terminal, "returncode": 0 if terminal == "succeeded" else 1}
+                )
+            except Exception as error:
+                errors.append(error)
+            finally:
+                published.set()
+
+        monkeypatch.setattr(jobs, "_read", read_before_publication)
+        thread = threading.Thread(target=publisher)
+        thread.start()
+        receipt = jobs.get(older)
+        assert receipt["status"] == terminal
+        expected = {first, older} if terminal == "interrupted" else {first}
+        assert jobs.pending == expected and jobs.active == first
+        assert client.submitted == 1
+    finally:
+        publish.set()
+        if thread is not None:
+            thread.join(timeout=5)
+            assert not thread.is_alive()
+        jobs.close()

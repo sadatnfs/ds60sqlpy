@@ -19,3 +19,7 @@
 *.parquet binary
 
 classroom text eol=lf
+
+# Signed public fixtures must retain their exact bytes on every checkout.
+courses/kubernetes/fixtures/provenance/publisher-public.txt text eol=lf
+courses/kubernetes/fixtures/provenance/*.sig binary

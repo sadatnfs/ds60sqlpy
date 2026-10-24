@@ -270,7 +270,7 @@ def test_real_http_runs_current_source_and_streams_partial_logs() -> None:
             }:
                 observed = True
             if snapshot["status"] == "succeeded":
-                assert snapshot["output"] == "PARTIAL\n42\n"
+                assert snapshot["output"].splitlines() == ["PARTIAL", "42"]
                 break
             time.sleep(0.02)
         else:

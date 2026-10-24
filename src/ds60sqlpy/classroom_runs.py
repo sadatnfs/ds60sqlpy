@@ -19,7 +19,13 @@ from typing import Any
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import IDENTIFIER, RUNNERS, is_content_link
 from ds60sqlpy.execution import MAX_CODE_BYTES, MAX_OUTPUT_BYTES
-from ds60sqlpy.state_files import atomic_json_write, locked_update
+from ds60sqlpy.state_files import (
+    atomic_json_write,
+    locked_update,
+)
+from ds60sqlpy.state_files import (
+    resolve_existing_ancestor as _resolve_existing_ancestor,
+)
 
 MAX_FIGURES = 4
 MAX_FIGURE_BYTES = 2_000_000
@@ -77,20 +83,25 @@ class ClassroomRunStore:
             raise ValueError("Run history directory must not contain parent traversal.")
         self.catalog = catalog
         self.directory = directory.absolute()
-        self.boundary = self.directory.parent.resolve()
+        self.boundary = _resolve_existing_ancestor(self.directory.parent)
 
     def _safe_path(self, path: Path) -> Path:
         relative = path.relative_to(self.directory)
         if ".." in relative.parts:
             raise ValueError("Run history path must not contain parent traversal.")
         cursor = self.directory
-        for part in (None, *relative.parts):
-            if part is not None:
-                cursor = cursor / part
-            if is_content_link(cursor):
-                raise ValueError("Run history must not follow symbolic links or junctions.")
-        if not path.resolve().is_relative_to(self.boundary):
+        components = [cursor]
+        for part in relative.parts:
+            cursor = cursor / part
+            components.append(cursor)
+        if any(is_content_link(component) for component in components):
+            raise ValueError("Run history must not follow symbolic links or junctions.")
+        if not _resolve_existing_ancestor(path).is_relative_to(self.boundary):
             raise ValueError("Run history escaped its configured learner directory.")
+        # A missing component may have appeared while its ancestor was resolved.
+        # Reject a newly introduced reparse point before returning the path.
+        if any(is_content_link(component) for component in components):
+            raise ValueError("Run history must not follow symbolic links or junctions.")
         if is_content_link(path.with_name(path.name + ".lock")):
             raise ValueError("Run history lock must not be a symbolic link or junction.")
         return path

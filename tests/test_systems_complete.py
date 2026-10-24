@@ -136,7 +136,7 @@ def test_cpp_multifile_link_success_and_missing_definition(tmp_path: Path) -> No
         timeout=30,
     )
     assert missing.returncode != 0
-    assert "add" in missing.stderr or "subtract" in missing.stderr
+    assert "add" in missing.stdout + missing.stderr or "subtract" in missing.stdout + missing.stderr
     complete = subprocess.run(
         [compiler(), "main.o", "math.o", "-o", "complete"],
         cwd=tmp_path,

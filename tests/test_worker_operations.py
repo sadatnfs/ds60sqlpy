@@ -36,7 +36,11 @@ def execute(
 
 def test_real_python_exit_errors_and_no_fabricated_checks(tmp_path: Path) -> None:
     result = execute(tmp_path / "ok", "print(42)\n")
-    assert result.status == "succeeded" and result.returncode == 0 and result.output == "42\n"
+    assert (
+        result.status == "succeeded"
+        and result.returncode == 0
+        and result.output.splitlines() == ["42"]
+    )
     assert result.checks == []
     failure = execute(tmp_path / "bad", "raise ValueError('fixture-error')\n")
     assert failure.status == "failed" and failure.returncode == 1
@@ -57,6 +61,94 @@ def test_output_head_tail_drains_without_hiding_exit(tmp_path: Path) -> None:
     invalid.append(b"\xff" * 90)
     assert len(invalid.snapshot()[0].encode()) <= 100
     assert invalid.snapshot()[1] is True
+
+
+def test_merged_capture_cannot_reorder_final_stderr_behind_buffered_stdout(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from ds60sqlpy import worker_operations
+
+    prefix_done, stderr_seen = threading.Event(), threading.Event()
+    prefix = b"HEAD\n" + b"x" * 100000 + b"PREFIX-DRAINED\n"
+    flood = b"x" * 100000
+
+    def chunks(value: bytes) -> list[bytes]:
+        return [value[index : index + 8192] for index in range(0, len(value), 8192)]
+
+    class Pipe:
+        def __init__(
+            self,
+            data: list[bytes],
+            *,
+            wait_before: int | None = None,
+            signal: threading.Event | None = None,
+        ) -> None:
+            self.data = data
+            self.position = 0
+            self.wait_before = wait_before
+            self.signal = signal
+            self.finished = False
+
+        def read1(self, size: int) -> bytes:
+            if self.position == self.wait_before:
+                assert self.signal is not None and self.signal.wait(2)
+            if self.position == len(self.data):
+                self.finished = True
+                return b""
+            value = self.data[self.position]
+            self.position += 1
+            assert len(value) <= size
+            return value
+
+        def close(self) -> None:
+            pass
+
+    class Process:
+        returncode: int | None = None
+        pid = 1234567
+
+        def __init__(self, merged: bool) -> None:
+            # Separate reader scheduling deterministically drains final stderr
+            # before the remaining stdout. A merged pipe retains write order.
+            self.stdout = (
+                Pipe(chunks(prefix) + chunks(flood) + [b"TAIL\n"])
+                if merged
+                else Pipe(
+                    chunks(prefix) + chunks(flood),
+                    wait_before=len(chunks(prefix)),
+                    signal=stderr_seen,
+                )
+            )
+            self.stderr = None if merged else Pipe([b"TAIL\n"], wait_before=0, signal=prefix_done)
+
+        def poll(self) -> int | None:
+            if self.stdout.finished and (self.stderr is None or self.stderr.finished):
+                self.returncode = 7
+            return self.returncode
+
+    def observe(text: str, _truncated: bool) -> None:
+        if "PREFIX-DRAINED" in text:
+            prefix_done.set()
+        if "TAIL" in text:
+            stderr_seen.set()
+
+    def start(_command: list[str], **options: Any) -> Process:
+        return Process(options["stderr"] == subprocess.STDOUT)
+
+    import subprocess
+
+    monkeypatch.setattr(subprocess, "Popen", start)
+    cleaned: list[bool] = []
+    monkeypatch.setattr(worker_operations, "_stop_tree", lambda *a, **kw: cleaned.append(True))
+    output = BoundedOutput(observer=observe)
+    code, interrupted = run_process(
+        ["synthetic-child"], tmp_path, {}, time.monotonic() + 5, threading.Event(), output
+    )
+    text, truncated = output.snapshot()
+    assert code == 7 and interrupted is None and cleaned == [True]
+    assert truncated and len(text.encode("utf-8")) <= MAX_OUTPUT_BYTES
+    assert text.startswith("HEAD\n") and text.endswith("TAIL\n")
 
 
 def test_child_environment_has_no_service_or_host_secrets(tmp_path: Path) -> None:
@@ -95,7 +187,7 @@ def test_cancel_and_timeout_reap_real_children(tmp_path: Path) -> None:
         startup_expired = threading.Event()
 
         def observe(text: str, _truncated: bool, ready: threading.Event = started) -> None:
-            if "started\n" in text:
+            if "started" in text.splitlines():
                 ready.set()
 
         def cancel_after_observed_start(
@@ -126,7 +218,7 @@ def test_cancel_and_timeout_reap_real_children(tmp_path: Path) -> None:
                 assert not startup_expired.is_set(), (
                     "Child startup was not observed before cancellation"
                 )
-                assert "started\n" in output.snapshot()[0]
+                assert "started" in output.snapshot()[0].splitlines()
             # The timeout still includes interpreter startup. Under contention
             # it may legitimately reap the child before any output is written.
         finally:

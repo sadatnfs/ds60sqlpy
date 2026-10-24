@@ -25,11 +25,12 @@ from collections import OrderedDict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from http import HTTPStatus
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
+from ds60sqlpy.http_server import LocalHTTPServer
 from ds60sqlpy.worker_operations import (
     MAX_SOURCE_BYTES,
     PROFILES,
@@ -336,7 +337,7 @@ class WorkerState:
             thread.join(timeout=8)
 
 
-class WorkerHTTPServer(HTTPServer):
+class WorkerHTTPServer(LocalHTTPServer):
     """Keep the control loop on its existing thread under child PID pressure.
 
     Jobs run in one background thread. Health/poll/cancel never need to create

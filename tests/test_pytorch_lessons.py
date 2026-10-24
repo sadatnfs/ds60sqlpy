@@ -248,7 +248,12 @@ def test_depth_reviews_cover_the_route_with_topic_specific_reasoning() -> None:
     assert len(set(diagnoses)) == len(ENTRIES)
 
 
-def test_portable_authoring_recreates_all_published_artifacts(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "windows_text_defaults", [False, True], ids=["native-text", "windows-text"]
+)
+def test_portable_authoring_recreates_all_published_artifacts(
+    tmp_path: Path, windows_text_defaults: bool
+) -> None:
     destination = tmp_path / "courses/deep-learning-pytorch"
     for directory in ["guides", "lessons", "solutions", "authoring"]:
         (destination / directory).mkdir(parents=True)
@@ -266,6 +271,18 @@ def test_portable_authoring_recreates_all_published_artifacts(tmp_path: Path) ->
         [
             "import sys",
             "from pathlib import Path",
+            "if sys.argv[3] == 'windows':",
+            "    import io",
+            "    io.text_encoding = lambda encoding, stacklevel=2: "
+            "'cp1252' if encoding in (None, 'locale') else encoding",
+            "    original_open = Path.open",
+            "    def windows_open(path, mode='r', buffering=-1, "
+            "encoding=None, errors=None, newline=None):",
+            "        if 'b' not in mode and any(flag in mode for flag in 'wax+') "
+            "and newline is None:",
+            "            newline = '\\r\\n'",
+            "        return original_open(path, mode, buffering, encoding, errors, newline)",
+            "    Path.open = windows_open",
             "sys.path.insert(0, sys.argv[1])",
             "import render",
             "import specs",
@@ -277,7 +294,15 @@ def test_portable_authoring_recreates_all_published_artifacts(tmp_path: Path) ->
         ]
     )
     completed = subprocess.run(
-        [sys.executable, "-B", "-c", program, str(BASE / "authoring"), str(tmp_path)],
+        [
+            sys.executable,
+            "-B",
+            "-c",
+            program,
+            str(BASE / "authoring"),
+            str(tmp_path),
+            "windows" if windows_text_defaults else "native",
+        ],
         capture_output=True,
         text=True,
         timeout=30,

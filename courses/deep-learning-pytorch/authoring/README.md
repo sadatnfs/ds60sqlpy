@@ -27,3 +27,7 @@ it does not change executable fences, notebook code or the supplied statistics
 outline. The public learner entrypoint is `/classroom`, shared by every subject.
 See [the content contract](../../../docs/content-authoring.md) for the rendering
 and subject-theme requirements.
+
+Generators read and write UTF-8 explicitly and publish LF newlines on every OS.
+The regeneration test also simulates Windows text defaults and compares exact
+artifact bytes; do not normalize away a mismatch in the assertion.

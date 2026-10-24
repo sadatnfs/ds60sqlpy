@@ -264,7 +264,8 @@ def test_lab_shutdown_waits_for_active_backend_cleanup(tmp_path: Path) -> None:
         client.join(timeout=3)
         serving.join(timeout=3)
         assert not errors
-        assert observed[0]["output"] == "clean exit\n"
+        output = observed[0]["output"]
+        assert isinstance(output, str) and output.splitlines() == ["clean exit"]
         assert not server.execution_lock.locked()
     finally:
         server.shutdown()

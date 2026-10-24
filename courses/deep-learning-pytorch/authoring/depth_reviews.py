@@ -556,8 +556,8 @@ def _readable(text: str) -> str:
 
 def write_review_matrix(root: Any) -> None:
     import json
-    plan = json.loads((root / "courses/deep-learning-pytorch/track.json").read_text())
-    evidence = json.loads((root / "courses/deep-learning-pytorch/authoring/review_runtime_evidence.json").read_text())["records"]
+    plan = json.loads((root / "courses/deep-learning-pytorch/track.json").read_text(encoding="utf-8"))
+    evidence = json.loads((root / "courses/deep-learning-pytorch/authoring/review_runtime_evidence.json").read_text(encoding="utf-8"))["records"]
     matrix = []
     for topic in plan["lessons"]:
         details = REVIEWS.get(topic["id"])
@@ -572,7 +572,9 @@ def write_review_matrix(root: Any) -> None:
             "review_runtime_evidence": [record for record in evidence if record["lesson_id"] == topic["id"]],
         })
     (root / "courses/deep-learning-pytorch/authoring/review_matrix.json").write_text(
-        json.dumps({"review_date": "2026-10-23", "chapters": matrix}, indent=2) + "\n"
+        json.dumps({"review_date": "2026-10-23", "chapters": matrix}, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
     )
 
 

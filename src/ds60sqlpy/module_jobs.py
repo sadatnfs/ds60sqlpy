@@ -470,13 +470,20 @@ class ModuleJobs:
                             },
                         )
         with self.lock:
+            # A monitor may have published a terminal receipt since the first
+            # read. Monitoring can also synchronously record an admission failure.
+            # Reconcile reservations against the same final snapshot we return.
+            receipt = self._read(identity)
+            if receipt["status"] not in TERMINAL and not self.closed.is_set():
+                self._reserve(identity)
+                if identity not in self.threads:
+                    self._monitor(identity)
+            receipt = self._read(identity)
             if receipt["status"] in TERMINAL - {"interrupted"}:
                 self._release(identity)
             elif not self.closed.is_set():
                 self._reserve(identity)
-                if receipt["status"] not in TERMINAL and identity not in self.threads:
-                    self._monitor(identity)
-        return self._read(identity)
+            return receipt
 
     def recover(self, key: object, confirmation: object) -> dict[str, Any]:
         receipt = self.get(key)

@@ -3,11 +3,14 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import ntpath
+import os
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -402,3 +405,107 @@ def test_configured_parent_traversal_is_rejected_without_creation(
     with pytest.raises(ValueError, match="parent traversal"):
         ClassroomRunStore(catalog, tmp_path / "a" / ".." / "runs")
     assert not list(tmp_path.iterdir())
+
+
+def test_missing_path_checks_resolve_only_existing_ancestors_without_creating_them(
+    tmp_path: Path, catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    missing = tmp_path / "absent"
+    original = Path.resolve
+    calls: list[tuple[Path, bool]] = []
+
+    def observed(path: Path, strict: bool = False) -> Path:
+        if path.is_relative_to(missing):
+            calls.append((path, strict))
+            assert strict, "Missing descendants must not use non-strict Windows resolution."
+        return original(path, strict=strict)
+
+    monkeypatch.setattr(Path, "resolve", observed)
+    store = ClassroomRunStore(catalog, missing / "runs")
+    target = store.directory / "python-01/python/snippet/.write"
+    assert store._safe_path(target) == target
+    assert calls and all(strict for _, strict in calls)
+    assert not missing.exists()
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Exercises Windows GetFinalPathName error transitions")
+def test_parent_creation_during_windows_resolution_does_not_change_containment_anchor(
+    tmp_path: Path, catalog: Catalog, result: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    directory = tmp_path / "runs"
+    context = directory / "python-01/python/snippet"
+    resolver = getattr(ntpath, "_getfinalpathname", None)
+    assert callable(resolver), "CPython Windows final-path resolution is unavailable."
+    original = cast(Callable[[str], str], resolver)
+    created = False
+
+    def create_parent_between_probes(path: str) -> str:
+        nonlocal created
+        if ntpath.normcase(path) == ntpath.normcase(str(context)) and not created:
+            try:
+                return original(path)
+            except FileNotFoundError as error:
+                assert (
+                    getattr(error, "winerror", None) == 3
+                )  # ERROR_PATH_NOT_FOUND before parent creation.
+                context.parent.mkdir(parents=True)
+                created = True
+                # A second probe now reports ERROR_FILE_NOT_FOUND (2), which can
+                # make non-strict realpath retain a different extended-path anchor.
+                with pytest.raises(FileNotFoundError) as next_probe:
+                    original(path)
+                assert getattr(next_probe.value, "winerror", None) == 2
+                raise
+        return original(path)
+
+    monkeypatch.setattr(ntpath, "_getfinalpathname", create_parent_between_probes)
+    store = ClassroomRunStore(catalog, directory)
+    saved = store.record("python-01", "python", "snippet", "print(42)", result)
+    assert created
+    assert store.get("python-01", "python", "snippet", saved["id"]) == saved
+
+
+def test_changed_parent_cannot_redirect_history_outside_its_original_boundary(
+    tmp_path: Path, catalog: Catalog, result: dict[str, Any]
+) -> None:
+    parent = tmp_path / "parent"
+    outside = tmp_path / "outside"
+    parent.mkdir()
+    outside.mkdir()
+    store = ClassroomRunStore(catalog, parent / "runs")
+    parent.rename(tmp_path / "retained-parent")
+    try:
+        parent.symlink_to(outside, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symbolic links are unavailable on this host")
+    with pytest.raises(ValueError, match="escaped"):
+        store.record("python-01", "python", "snippet", "print(42)", result)
+    assert list(outside.iterdir()) == []
+
+
+def test_link_created_during_resolution_is_rechecked_before_storage(
+    tmp_path: Path, catalog: Catalog, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy import classroom_runs
+    from ds60sqlpy.state_files import resolve_existing_ancestor
+
+    directory = tmp_path / "runs"
+    outside = tmp_path / "outside"
+    directory.mkdir()
+    outside.mkdir()
+    store = ClassroomRunStore(catalog, directory)
+    original = resolve_existing_ancestor
+    target = directory / "python-01/python/snippet/.write"
+
+    def introduce_link(path: Path) -> Path:
+        resolved = original(path)
+        try:
+            (directory / "python-01").symlink_to(outside, target_is_directory=True)
+        except OSError:
+            pytest.skip("Symbolic links are unavailable on this host")
+        return resolved
+
+    monkeypatch.setattr(classroom_runs, "_resolve_existing_ancestor", introduce_link)
+    with pytest.raises(ValueError, match="symbolic"):
+        store._safe_path(target)
+    assert list(outside.iterdir()) == []

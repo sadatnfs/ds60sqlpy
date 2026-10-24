@@ -140,12 +140,19 @@ jobs:
         run: >-
           uv run --no-sync python -m pytest -n 4 --dist loadgroup
           --basetemp=work/test-tmp --junitxml=work/test-results/core.xml --durations=15
+      - name: Exercise native Windows private runtime ACLs without parallel contention
+        if: (success() || failure()) && matrix.os == 'windows-latest'
+        run: >-
+          uv run --no-sync python scripts/check_windows_private_acl.py
+          --report work/test-results/windows-private-acl.json
       - name: Retain test results
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: core-tests-${{ matrix.os }}-py${{ matrix.python-version }}
-          path: work/test-results/core.xml
+          path: |
+            work/test-results/core.xml
+            work/test-results/windows-private-acl.json
           if-no-files-found: ignore
           retention-days: 14
       - name: Structural course validation

@@ -39,6 +39,36 @@ NAMESPACE = "ds60-lesson-" + OWNER[:12]
 SOURCE = ROOT / "courses/kubernetes/lessons/k8s-008.yaml"
 
 
+class PrivateAclModel:
+    """Model the external ACL boundary in fake-host tests, not native ACL proof."""
+
+    def __init__(self) -> None:
+        self.roots: set[Path] = set()
+        self.calls: list[tuple[Path, bool]] = []
+
+    def __call__(self, path: Path, *, establish: bool = False) -> bool:
+        resolved = path.resolve()
+        self.calls.append((resolved, establish))
+        if establish:
+            if not resolved.is_dir():
+                return False
+            self.roots.add(resolved)
+        return any(resolved == root or root in resolved.parents for root in self.roots)
+
+
+def model_private_acl(monkeypatch: pytest.MonkeyPatch) -> PrivateAclModel:
+    from ds60sqlpy import kubernetes_module
+
+    policy = PrivateAclModel()
+    monkeypatch.setattr(kubernetes_module, "_windows_private_acl", policy)
+    return policy
+
+
+@pytest.fixture
+def private_acl(monkeypatch: pytest.MonkeyPatch) -> PrivateAclModel:
+    return model_private_acl(monkeypatch)
+
+
 @pytest.fixture
 def lease() -> KubernetesLease:
     return KubernetesLease(
@@ -461,7 +491,10 @@ def test_expiry_and_cancellation_do_not_create_resources(
         )
 
 
-def test_private_lease_checks_ca_endpoint_and_expiry(tmp_path: Path) -> None:
+def test_private_lease_checks_ca_endpoint_and_expiry(
+    tmp_path: Path, private_acl: PrivateAclModel
+) -> None:
+    assert private_acl(tmp_path, establish=True)
     ca = base64.b64encode(b"fixture-ca").decode()
     config: dict[str, Any] = {
         "apiVersion": "v1",
@@ -669,7 +702,7 @@ class FakeHost:
 
 
 def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, private_acl: PrivateAclModel
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
@@ -689,7 +722,10 @@ def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
     assert loaded.context == "ds60-owned"
     assert loaded.expires_at > time.time() + 125
     assert loaded.kubeconfig.find(b"client-key-data") == -1
-    assert path.stat().st_mode & 0o077 == 0
+    if os.name == "nt":
+        assert session.resolve() in private_acl.roots and private_acl(path)
+    else:
+        assert path.stat().st_mode & 0o077 == 0
     assert all(
         env["KUBECONFIG"] == str(session / "admin.kubeconfig.json") for _, env, _ in host.calls
     )
@@ -699,7 +735,9 @@ def test_host_preparation_never_uses_ambient_context_and_bounds_identity(
     assert token_requests and "--duration=15m" in token_requests[0]
 
 
-def test_host_node_download_requires_explicit_consent(tmp_path: Path) -> None:
+def test_host_node_download_requires_explicit_consent(
+    tmp_path: Path, private_acl: PrivateAclModel
+) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -732,7 +770,9 @@ def test_host_refuses_nonlocal_engine_before_creating_any_state(
     assert not session.exists() and not host.calls
 
 
-def test_host_release_preserves_replaced_namespace_and_other_clusters(tmp_path: Path) -> None:
+def test_host_release_preserves_replaced_namespace_and_other_clusters(
+    tmp_path: Path, private_acl: PrivateAclModel
+) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
     host = FakeHost()
@@ -753,7 +793,9 @@ def test_host_release_preserves_replaced_namespace_and_other_clusters(tmp_path: 
     assert not (session / "worker.kubeconfig.json").exists()
 
 
-def test_pinned_mirror_cannot_change_the_node_digest(tmp_path: Path) -> None:
+def test_pinned_mirror_cannot_change_the_node_digest(
+    tmp_path: Path, private_acl: PrivateAclModel
+) -> None:
     from ds60sqlpy.kubernetes_module import NODE_IMAGE, HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -887,7 +929,9 @@ def test_uncertain_create_with_other_nonce_is_preserved_and_failed(
     assert any(c["name"] == "owned-cleanup" and c["passed"] is False for c in result.checks)
 
 
-def test_host_preparation_failure_cleans_only_recorded_node(tmp_path: Path) -> None:
+def test_host_preparation_failure_cleans_only_recorded_node(
+    tmp_path: Path, private_acl: PrivateAclModel
+) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session
 
     host = FakeHost()
@@ -1097,7 +1141,7 @@ assert state.get('b' * 32)['status'] == 'cancelled'
     "mode", ["lowercase-absent", "already-absent", "engine-failure", "replacement"]
 )
 def test_release_uses_successful_exact_listings_not_daemon_error_text(
-    tmp_path: Path, mode: str
+    tmp_path: Path, mode: str, private_acl: PrivateAclModel
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
@@ -1182,7 +1226,7 @@ def test_cleanup_failure_output_names_the_preserved_resource(
 
 @pytest.mark.parametrize("phase", ["release", "rollback"])
 def test_immutable_node_deletion_preserves_name_replacement_race(
-    tmp_path: Path, phase: str
+    tmp_path: Path, phase: str, private_acl: PrivateAclModel
 ) -> None:
     from ds60sqlpy.kubernetes_module import HostTools, prepare_owned_session, release_owned_session
 
@@ -1321,3 +1365,45 @@ def test_nullable_controller_status_stays_unhealthy(tmp_path: Path, lease: Kuber
     }
     healthy, _ = observe_ready(client, uid, 2, None, deadline, event)
     assert not healthy
+
+
+@pytest.mark.parametrize("returncode", [0, 1, 2, 3])
+def test_windows_acl_command_keeps_paths_as_data_and_refuses_failed_policy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, returncode: int
+) -> None:
+    from ds60sqlpy import kubernetes_module
+
+    path = tmp_path / "runtime with spaces ' and ; punctuation"
+    calls: list[tuple[list[str], dict[str, Any]]] = []
+    monkeypatch.setenv("DS60_WORKER_TOKEN", "synthetic-private-value")
+    monkeypatch.setenv("KUBECONFIG", "synthetic-private-config")
+
+    def run(argv: list[str], **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
+        calls.append((argv, kwargs))
+        return subprocess.CompletedProcess(argv, returncode)
+
+    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", run)
+    assert kubernetes_module._windows_private_acl(path, establish=True) is (returncode == 0)
+    argv, options = calls[0]
+    assert argv[:4] == ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command"]
+    assert str(path) not in argv[-1]
+    assert options["env"]["DS60_PRIVATE_PATH"] == str(path)
+    assert options["env"]["DS60_PRIVATE_ESTABLISH"] == "1"
+    assert not {"DS60_WORKER_TOKEN", "KUBECONFIG"} & options["env"].keys()
+    assert options["timeout"] == 15
+    assert options["stdin"] == options["stdout"] == options["stderr"] == subprocess.DEVNULL
+
+
+@pytest.mark.parametrize(
+    "error", [OSError("unavailable"), subprocess.TimeoutExpired("fixture", 15)]
+)
+def test_windows_acl_command_failure_never_establishes_trust(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, error: Exception
+) -> None:
+    from ds60sqlpy import kubernetes_module
+
+    def failed(*args: Any, **kwargs: Any) -> Any:
+        raise error
+
+    monkeypatch.setattr("ds60sqlpy.kubernetes_module.subprocess.run", failed)
+    assert kubernetes_module._windows_private_acl(tmp_path) is False

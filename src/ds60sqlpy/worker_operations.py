@@ -69,7 +69,7 @@ class OperationResult:
 
 
 class BoundedOutput:
-    """Retain a bounded UTF-8 head and tail while draining both child pipes."""
+    """Retain a bounded UTF-8 head and tail from ordered child output."""
 
     def __init__(
         self, limit: int = MAX_OUTPUT_BYTES, observer: Callable[[str, bool], None] | None = None
@@ -259,7 +259,9 @@ def run_process(
             env=environment,
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            # One pipe preserves write order. Independent readers could consume
+            # buffered stdout after final stderr and evict the diagnostic tail.
+            stderr=subprocess.STDOUT,
             start_new_session=os.name == "posix",
         )
     except OSError as exc:
@@ -278,10 +280,9 @@ def run_process(
     readers: list[threading.Thread] = []
     interrupted = None
     try:
-        readers = [
-            threading.Thread(target=drain, args=(pipe,), daemon=True)
-            for pipe in (process.stdout, process.stderr)
-        ]
+        if process.stdout is None:
+            raise RuntimeError("The child output pipe was not created.")
+        readers = [threading.Thread(target=drain, args=(process.stdout,), daemon=True)]
         for reader in readers:
             reader.start()
         while process.poll() is None:
@@ -307,7 +308,7 @@ def run_process(
             for reader in readers:
                 if reader.ident is not None:
                     reader.join(timeout=2)
-            for pipe, reader in zip((process.stdout, process.stderr), readers, strict=False):
+            for pipe, reader in zip((process.stdout,), readers, strict=False):
                 if pipe is not None and (reader.ident is None or not reader.is_alive()):
                     pipe.close()
         if any(reader.is_alive() for reader in readers):

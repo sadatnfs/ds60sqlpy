@@ -111,6 +111,9 @@ The workflow files are the executable source of truth. They use read-only
 repository permissions, pinned action revisions and local image builds. They
 do not publish Docker images. Core jobs explicitly use UTF-8 on every OS and
 create their test workspace before starting four grouped pytest workers.
+Windows then runs a separate native private-ACL smoke check outside the parallel
+suite. Its artifact records fixed phases and outcomes without account identifiers
+or credential material; a mocked unit-policy check cannot replace that evidence.
 
 | Workflow and job | Trigger and scope | What a pass establishes |
 | --- | --- | --- |
