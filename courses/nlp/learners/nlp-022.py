@@ -1,10 +1,15 @@
-DOCS={"d0":"router reset","d1":"router router reset guide","d2":"payment failed"}
+DOCS = {"d0": "router reset", "d1": "router router reset guide", "d2": "payment failed"}
 
-def bm25(documents,query,k1=1.2,b=.75):
+
+def bm25(documents, query, k1=1.2, b=0.75):
     raise NotImplementedError("Implement the declared term score and preserve document IDs")
 
+
 def main():
-    print("Three lexical retrieval documents loaded. Keep retrieval, permission and answer support separate.")
+    print(
+        "Three lexical retrieval documents loaded. Keep retrieval, permission and answer support separate."
+    )
+
 
 if __name__ == "__main__":
     main()

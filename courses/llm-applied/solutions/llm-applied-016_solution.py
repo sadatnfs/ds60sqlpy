@@ -6,8 +6,6 @@ from torch import nn
 from torch.nn import functional as F
 
 
-
-
 def verify():
     # Exercise 1: Count and orient parameters
     w = torch.eye(8)

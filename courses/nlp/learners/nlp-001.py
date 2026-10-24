@@ -1,4 +1,5 @@
 """nlp-001 learner workspace. Keep your own attempts in the saved classroom pad."""
+
 from collections import Counter
 
 documents = [

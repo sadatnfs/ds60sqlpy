@@ -1,4 +1,5 @@
 """nlp-002 learner workspace. All fixtures are local and intentionally small."""
+
 import unicodedata as ud
 
 composed = "café"

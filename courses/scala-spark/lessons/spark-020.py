@@ -1,40 +1,64 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def canonical(frame):
     raise NotImplementedError("Complete canonical")
 
+
 def keyed_layout(facts):
     raise NotImplementedError("Complete keyed_layout")
+
 
 def reduce_layout(frame):
     raise NotImplementedError("Complete reduce_layout")
 
+
 def partition_ledger(frame):
     raise NotImplementedError("Complete partition_ledger")
+
 
 def local_order(frame):
     raise NotImplementedError("Complete local_order")
 
+
 def preview(frame):
     raise NotImplementedError("Complete preview")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-020").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-020")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        facts = spark.range(0,24,1,4).withColumn("key",F.col("id")%4).withColumn("value",F.col("id")*10)
+        facts = (
+            spark.range(0, 24, 1, 4)
+            .withColumn("key", F.col("id") % 4)
+            .withColumn("value", F.col("id") * 10)
+        )
         assert spark.conf.get("spark.sql.adaptive.enabled") == "false"
         assert facts.count() == 24 and facts.rdd.getNumPartitions() == 4
         assert facts.select("key").distinct().count() == 4
@@ -45,6 +69,7 @@ def main():
         print("spark-020: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

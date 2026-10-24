@@ -1,4 +1,5 @@
 """Exact-span extraction with original fixed invoice fixtures."""
+
 import math
 import re
 
@@ -17,9 +18,13 @@ def extract_invoices(text):
 
 def exact_metrics(predicted, gold):
     tp, fp, fn = len(predicted & gold), len(predicted - gold), len(gold - predicted)
-    return {"tp": tp, "fp": fp, "fn": fn,
-            "precision": tp/(tp+fp) if tp+fp else None,
-            "recall": tp/(tp+fn) if tp+fn else None}
+    return {
+        "tp": tp,
+        "fp": fp,
+        "fn": fn,
+        "precision": tp / (tp + fp) if tp + fp else None,
+        "recall": tp / (tp + fn) if tp + fn else None,
+    }
 
 
 def verify():
@@ -27,8 +32,10 @@ def verify():
     text = "Pay INV-1042, then review INV-9012."
     matches = list(INITIAL.finditer(text))
     assert [(m.group(0), m.group("number"), m.span()) for m in matches] == [
-        ("INV-1042", "1042", (4, 12)), ("INV-9012", "9012", (26, 34))]
-    assert all(text[m.start():m.end()] == m.group(0) for m in matches)
+        ("INV-1042", "1042", (4, 12)),
+        ("INV-9012", "9012", (26, 34)),
+    ]
+    assert all(text[m.start() : m.end()] == m.group(0) for m in matches)
 
     # Exercise 2: plausible overmatching rules must fail these counterexamples.
     for invalid in ("INV-10420", "xINV-1042", "_INV-1042", "INV-１２３４"):
@@ -37,10 +44,12 @@ def verify():
 
     # Exercise 3: extraction and field validation are distinct operations.
     pattern = re.compile(r"INV-[0-9]{4}")
-    assert [pattern.search("ticket: INV-1042") is not None,
-            pattern.match("ticket: INV-1042") is not None,
-            pattern.fullmatch("INV-1042") is not None,
-            pattern.fullmatch("INV-1042 extra") is not None] == [True, False, True, False]
+    assert [
+        pattern.search("ticket: INV-1042") is not None,
+        pattern.match("ticket: INV-1042") is not None,
+        pattern.fullmatch("INV-1042") is not None,
+        pattern.fullmatch("INV-1042 extra") is not None,
+    ] == [True, False, True, False]
 
     # Exercise 4: semantics and canonicalization retain raw provenance.
     text = "INV-0000, inv-7777 and INV-10420"
@@ -53,7 +62,7 @@ def verify():
     predicted = {("t1", 0, 8, "INV-1042"), ("t2", 0, 8, "INV-9012"), ("t3", 0, 8, "INV-0000")}
     metrics = exact_metrics(predicted, gold)
     assert (metrics["tp"], metrics["fp"], metrics["fn"]) == (2, 1, 1)
-    assert math.isclose(metrics["precision"], 2/3) and math.isclose(metrics["recall"], 2/3)
+    assert math.isclose(metrics["precision"], 2 / 3) and math.isclose(metrics["recall"], 2 / 3)
     moved = (predicted - {("t1", 0, 8, "INV-1042")}) | {("other", 0, 8, "INV-1042")}
     assert exact_metrics(moved, gold)["tp"] == 1
     assert exact_metrics(set(), set())["precision"] is None

@@ -1,13 +1,17 @@
-EXAMPLES=[["I","saw","her"],["the","saw","broke"],["the","old","saw"]]
+EXAMPLES = [["I", "saw", "her"], ["the", "saw", "broke"], ["the", "old", "saw"]]
 
-def lemma(word,pos):
+
+def lemma(word, pos):
     raise NotImplementedError("Implement only the explicit covered mappings")
+
 
 def valid_dependency_tree(heads):
     raise NotImplementedError("Check indices, one root and cycles")
 
+
 def main():
     print("Authored language examples loaded. Preserve the known rule failure in your analysis.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,45 +1,69 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def schema_fields(frame):
     raise NotImplementedError("Complete schema_fields")
 
+
 def team_a(frame):
     raise NotImplementedError("Complete team_a")
+
 
 def bounded_ids(frame, limit):
     raise NotImplementedError("Complete bounded_ids")
 
+
 def observed_rows(frame):
     raise NotImplementedError("Complete observed_rows")
+
 
 def canonical(frame):
     raise NotImplementedError("Complete canonical")
 
+
 def settings(spark):
     raise NotImplementedError("Complete settings")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-012").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-012")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([
-            StructField("event_id", LongType(), False),
-            StructField("team", StringType(), True),
-            StructField("amount_cents", LongType(), True),
-        ])
-        raw = spark.createDataFrame([(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema)
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("team", StringType(), True),
+                StructField("amount_cents", LongType(), True),
+            ]
+        )
+        raw = spark.createDataFrame(
+            [(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema
+        )
         assert raw.columns == ["event_id", "team", "amount_cents"]
         assert isinstance(raw.schema["event_id"].dataType, LongType)
         assert raw.schema["event_id"].nullable is False
@@ -48,11 +72,14 @@ def main():
         planned = raw.filter(F.col("team") == F.lit("A"))
         observed_count = planned.count()
         assert observed_count == 2
-        assert [row.event_id for row in planned.select("event_id").orderBy("event_id").collect()] == [1, 3]
+        assert [
+            row.event_id for row in planned.select("event_id").orderBy("event_id").collect()
+        ] == [1, 3]
         print("team A rows=", observed_count)
         print("spark-012: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

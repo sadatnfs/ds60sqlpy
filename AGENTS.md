@@ -177,9 +177,25 @@ allowlist; a static page cannot start arbitrary programs.
 ## Check the work
 
 Use focused checks while iterating, then the relevant integration gates in
-[validation](docs/validation.md). Typical commands from a prepared environment:
+[validation](docs/validation.md). Use `./scripts/format-repo` for maintained
+source formatting and `./scripts/format-repo --check` before submission. Run
+`./scripts/lint-repo` for the shared read-only static checks. The
+Docker toolchain gives every supported language the same local and CI rules;
+use `--list` to inspect coverage and repeat `--language` for a focused iteration.
+Format generated executable lesson files as well as handwritten code, then
+refresh shared readers through their generators. Preserve Markdown fences and
+literal program strings. Do not hand-format generated readers, dependency
+locks, third-party bundles, historical runtime receipts or learner state. Keep
+authored sources and their generated outputs aligned. Source-format parity
+receipts preserve historical byte identities and verify Python AST equivalence;
+they never establish a new runtime pass. A new
+language needs a reviewed formatting adapter and pinned toolchain alongside its
+runtime contract; do not silently exclude it to make the check pass.
+Typical commands from a prepared environment:
 
 ```sh
+./scripts/format-repo --check
+./scripts/lint-repo
 python scripts/check_modules.py
 python scripts/normalize_lesson_prose.py
 python scripts/check_content_rendering.py

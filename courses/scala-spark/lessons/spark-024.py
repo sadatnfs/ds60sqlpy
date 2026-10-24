@@ -1,61 +1,106 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def canonical_rows(frame):
     return sorted(tuple(r) for r in frame.collect())
+
+
 def partition_loads(frame, keys):
-    return sorted(tuple(r) for r in frame.repartition(8,*keys).select(F.spark_partition_id().alias("pid")).groupBy("pid").count().collect())
+    return sorted(
+        tuple(r)
+        for r in frame.repartition(8, *keys)
+        .select(F.spark_partition_id().alias("pid"))
+        .groupBy("pid")
+        .count()
+        .collect()
+    )
+
 
 def key_frequencies(facts):
     raise NotImplementedError("Complete key_frequencies")
 
+
 def baseline_join(facts, dimension):
     raise NotImplementedError("Complete baseline_join")
+
 
 def adaptive_join(facts, dimension):
     raise NotImplementedError("Complete adaptive_join")
 
+
 def salt_facts(facts):
     raise NotImplementedError("Complete salt_facts")
+
 
 def expand_dimension(dimension):
     raise NotImplementedError("Complete expand_dimension")
 
+
 def salted_join(facts, dimension):
     raise NotImplementedError("Complete salted_join")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-024").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-024")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-        spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold","-1")
-        spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
-        spark.conf.set("spark.sql.shuffle.partitions","4")
-        facts = spark.range(0,10000,1,4).withColumnRenamed("id","fact_id").withColumn("key",F.when(F.col("fact_id")<9000,0).otherwise((F.col("fact_id")-9000)%10+1)).withColumn("amount",F.lit(1).cast("long"))
-        dimension = spark.range(0,11,1,2).withColumnRenamed("id","key").withColumn("factor",F.col("key")+1)
-        hot = facts.filter(F.col("key")==0).count()
-        assert hot == 9000 and hot/10000 == 0.9
-        print("Observed hot-key fraction=",hot/10000)
-        expected_weighted = 9000 + 100*sum(range(2,12))
+        spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+        spark.conf.set("spark.sql.adaptive.autoBroadcastJoinThreshold", "-1")
+        spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
+        spark.conf.set("spark.sql.shuffle.partitions", "4")
+        facts = (
+            spark.range(0, 10000, 1, 4)
+            .withColumnRenamed("id", "fact_id")
+            .withColumn(
+                "key",
+                F.when(F.col("fact_id") < 9000, 0).otherwise((F.col("fact_id") - 9000) % 10 + 1),
+            )
+            .withColumn("amount", F.lit(1).cast("long"))
+        )
+        dimension = (
+            spark.range(0, 11, 1, 2)
+            .withColumnRenamed("id", "key")
+            .withColumn("factor", F.col("key") + 1)
+        )
+        hot = facts.filter(F.col("key") == 0).count()
+        assert hot == 9000 and hot / 10000 == 0.9
+        print("Observed hot-key fraction=", hot / 10000)
+        expected_weighted = 9000 + 100 * sum(range(2, 12))
         assert expected_weighted == 15500
-        print("Weighted-total conservation oracle=",expected_weighted)
+        print("Weighted-total conservation oracle=", expected_weighted)
         print("spark-024: worked examples passed; six task implementations remain")
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

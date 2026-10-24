@@ -146,9 +146,12 @@ Run only the relevant generator. The shared sequence from a prepared environment
 is:
 
 ```sh
+./scripts/format-repo
 python scripts/check_modules.py --json
 python scripts/normalize_lesson_prose.py --write
 make generate
+./scripts/format-repo --check
+./scripts/lint-repo
 python scripts/normalize_lesson_prose.py
 python scripts/check_content_rendering.py
 python scripts/course.py validate

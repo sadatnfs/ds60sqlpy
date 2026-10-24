@@ -1,118 +1,243 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import tempfile
 import shutil
 import os
 import uuid
 from pyspark.errors import AnalysisException
 
-event_schema = StructType([StructField("id",LongType(),True),StructField("team",StringType(),True),StructField("amount",LongType(),True),StructField("event_time",TimestampType(),True)])
-result_schema = StructType([StructField("window",StructType([StructField("start",TimestampType(),True),StructField("end",TimestampType(),True)]),True),StructField("team",StringType(),True),StructField("records",LongType(),True),StructField("total",LongType(),True)])
-def publish(root,index,lines):
-    target = root/"input"/f"batch-{index}.json"
-    if target.exists(): raise ValueError("Input filename already published")
-    staged = root/"staging"/(uuid.uuid4().hex+".tmp")
+event_schema = StructType(
+    [
+        StructField("id", LongType(), True),
+        StructField("team", StringType(), True),
+        StructField("amount", LongType(), True),
+        StructField("event_time", TimestampType(), True),
+    ]
+)
+result_schema = StructType(
+    [
+        StructField(
+            "window",
+            StructType(
+                [
+                    StructField("start", TimestampType(), True),
+                    StructField("end", TimestampType(), True),
+                ]
+            ),
+            True,
+        ),
+        StructField("team", StringType(), True),
+        StructField("records", LongType(), True),
+        StructField("total", LongType(), True),
+    ]
+)
+
+
+def publish(root, index, lines):
+    target = root / "input" / f"batch-{index}.json"
+    if target.exists():
+        raise ValueError("Input filename already published")
+    staged = root / "staging" / (uuid.uuid4().hex + ".tmp")
     try:
-        with staged.open("x",encoding="utf-8") as handle: handle.write("\n".join(lines)+"\n")
-        os.replace(staged,target)
-    finally: staged.unlink(missing_ok=True)
-def stream(spark,root):
-    return spark.readStream.schema(event_schema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(str(root/"input"))
-def run_phase(spark,root):
-    query = windowed(stream(spark,root)).writeStream.format("parquet").outputMode("append").option("checkpointLocation",str(root/"checkpoint")).trigger(availableNow=True).start(str(root/"output"))
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        os.replace(staged, target)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def stream(spark, root):
+    return (
+        spark.readStream.schema(event_schema)
+        .option("maxFilesPerTrigger", 1)
+        .option("mode", "FAILFAST")
+        .json(str(root / "input"))
+    )
+
+
+def run_phase(spark, root):
+    query = (
+        windowed(stream(spark, root))
+        .writeStream.format("parquet")
+        .outputMode("append")
+        .option("checkpointLocation", str(root / "checkpoint"))
+        .trigger(availableNow=True)
+        .start(str(root / "output"))
+    )
     try:
-        if not query.awaitTermination(30): raise TimeoutError("Finite phase timed out")
-        if query.exception() is not None or query.isActive: raise RuntimeError("Phase did not terminate cleanly")
+        if not query.awaitTermination(30):
+            raise TimeoutError("Finite phase timed out")
+        if query.exception() is not None or query.isActive:
+            raise RuntimeError("Phase did not terminate cleanly")
         return list(query.recentProgress)
-    finally: query.stop()
+    finally:
+        query.stop()
+
 
 def windowed(events):
-    return events.withWatermark("event_time","5 minutes").groupBy(F.window("event_time","5 minutes"),"team").agg(F.count(F.lit(1)).alias("records"),F.sum("amount").alias("total"))
+    return (
+        events.withWatermark("event_time", "5 minutes")
+        .groupBy(F.window("event_time", "5 minutes"), "team")
+        .agg(F.count(F.lit(1)).alias("records"), F.sum("amount").alias("total"))
+    )
+
 
 def watermarks(progress):
-    return [p["eventTime"]["watermark"] for p in progress if p.get("eventTime",{}).get("watermark") is not None]
+    return [
+        p["eventTime"]["watermark"]
+        for p in progress
+        if p.get("eventTime", {}).get("watermark") is not None
+    ]
+
 
 def final_rows(spark, root):
-    frame = spark.read.schema(result_schema).parquet(str(root/"output"))
-    return [tuple(r) for r in frame.select(F.date_format("window.start","HH:mm").alias("start"),"team","records","total").orderBy("start","team").collect()]
+    frame = spark.read.schema(result_schema).parquet(str(root / "output"))
+    return [
+        tuple(r)
+        for r in frame.select(
+            F.date_format("window.start", "HH:mm").alias("start"), "team", "records", "total"
+        )
+        .orderBy("start", "team")
+        .collect()
+    ]
+
 
 def dropped_rows(progress):
-    operators = [operator for p in progress for operator in p.get("stateOperators",[])]
+    operators = [operator for p in progress for operator in p.get("stateOperators", [])]
     if not operators or any("numRowsDroppedByWatermark" not in operator for operator in operators):
         raise ValueError("No complete state-operator evidence")
     return sum(operator["numRowsDroppedByWatermark"] for operator in operators)
 
+
 def event_ledger(phases, output):
-    return sum(p["numInputRows"] for phase in phases for p in phase),sum(dropped_rows(phase) for phase in phases),sum(row[2] for row in output)
+    return (
+        sum(p["numInputRows"] for phase in phases for p in phase),
+        sum(dropped_rows(phase) for phase in phases),
+        sum(row[2] for row in output),
+    )
+
 
 def reject_unsupported(spark, root, kind):
-    if kind not in {"update-file","append-unwatermarked"}: raise ValueError("Unknown invalid case")
-    relation = windowed(stream(spark,root)) if kind == "update-file" else stream(spark,root).groupBy("team").count()
+    if kind not in {"update-file", "append-unwatermarked"}:
+        raise ValueError("Unknown invalid case")
+    relation = (
+        windowed(stream(spark, root))
+        if kind == "update-file"
+        else stream(spark, root).groupBy("team").count()
+    )
     mode = "update" if kind == "update-file" else "append"
-    query = None; rejected = False
+    query = None
+    rejected = False
     try:
-        query = relation.writeStream.format("parquet").outputMode(mode).option("checkpointLocation",str(root/(kind+"-checkpoint"))).trigger(availableNow=True).start(str(root/(kind+"-output")))
+        query = (
+            relation.writeStream.format("parquet")
+            .outputMode(mode)
+            .option("checkpointLocation", str(root / (kind + "-checkpoint")))
+            .trigger(availableNow=True)
+            .start(str(root / (kind + "-output")))
+        )
         query.awaitTermination(30)
     except AnalysisException:
         rejected = True
     finally:
-        if query is not None: query.stop()
-    if not rejected: raise AssertionError("Unsupported output configuration was accepted")
+        if query is not None:
+            query.stop()
+    if not rejected:
+        raise AssertionError("Unsupported output configuration was accepted")
+
 
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-032").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-032")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-",dir=".")).resolve()
-        (owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+        spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-", dir=".")).resolve()
+        (owned_root / "input").mkdir()
+        (owned_root / "staging").mkdir()
         batches = [
-         ['{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}'],
-         ['{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}','{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}'],
-         ['{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}','{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}'],
-         ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}']]
+            [
+                '{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}',
+            ],
+            [
+                '{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}',
+                '{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}',
+            ],
+            [
+                '{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}',
+                '{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}',
+            ],
+            ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}'],
+        ]
         # Exercise 1: Define watermark placement and window state
-        publish(owned_root,0,batches[0])
-        planned = windowed(stream(spark,owned_root))
-        assert planned.isStreaming and planned.columns == ["window","team","records","total"]
+        publish(owned_root, 0, batches[0])
+        planned = windowed(stream(spark, owned_root))
+        assert planned.isStreaming and planned.columns == ["window", "team", "records", "total"]
         # Exercise 2: Record actual watermark progress after the first phase
-        phase1 = run_phase(spark,owned_root)
+        phase1 = run_phase(spark, owned_root)
         assert sum(p["numInputRows"] for p in phase1) == 2
         marks1 = watermarks(phase1)
-        assert marks1 and datetime.fromisoformat(marks1[-1].replace("Z","+00:00")) <= datetime.fromisoformat("2024-01-01T00:00:00+00:00")
-        print("phase1_watermarks=",marks1)
+        assert marks1 and datetime.fromisoformat(
+            marks1[-1].replace("Z", "+00:00")
+        ) <= datetime.fromisoformat("2024-01-01T00:00:00+00:00")
+        print("phase1_watermarks=", marks1)
         # Exercise 3: Accept a retained out-of-order event and observe finalization
-        publish(owned_root,1,batches[1])
-        phase2 = run_phase(spark,owned_root)
-        assert final_rows(spark,owned_root) == [("00:00","A",3,35)]
-        assert any(datetime.fromisoformat(value.replace("Z","+00:00")) >= datetime.fromisoformat("2024-01-01T00:07:00+00:00") for value in watermarks(phase2))
+        publish(owned_root, 1, batches[1])
+        phase2 = run_phase(spark, owned_root)
+        assert final_rows(spark, owned_root) == [("00:00", "A", 3, 35)]
+        assert any(
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+            >= datetime.fromisoformat("2024-01-01T00:07:00+00:00")
+            for value in watermarks(phase2)
+        )
         # Exercise 4: Observe a far-late drop after the window has closed
-        publish(owned_root,2,batches[2])
-        phase3 = run_phase(spark,owned_root)
+        publish(owned_root, 2, batches[2])
+        phase3 = run_phase(spark, owned_root)
         assert sum(p["numInputRows"] for p in phase3) == 2 and dropped_rows(phase3) == 1
-        assert final_rows(spark,owned_root) == [("00:00","A",3,35)]
-        print("phase3_dropped_by_watermark=",dropped_rows(phase3))
+        assert final_rows(spark, owned_root) == [("00:00", "A", 3, 35)]
+        print("phase3_dropped_by_watermark=", dropped_rows(phase3))
         # Exercise 5: Advance event time and distinguish finalized frompending output
-        publish(owned_root,3,batches[3])
-        phase4 = run_phase(spark,owned_root)
-        output = final_rows(spark,owned_root)
-        assert output == [("00:00","A",3,35),("00:10","A",1,30),("00:10","B",1,7)]
-        assert event_ledger([phase1,phase2,phase3,phase4],output) == (7,1,5)
-        assert any(datetime.fromisoformat(value.replace("Z","+00:00")) >= datetime.fromisoformat("2024-01-01T00:25:00+00:00") for value in watermarks(phase4))
+        publish(owned_root, 3, batches[3])
+        phase4 = run_phase(spark, owned_root)
+        output = final_rows(spark, owned_root)
+        assert output == [("00:00", "A", 3, 35), ("00:10", "A", 1, 30), ("00:10", "B", 1, 7)]
+        assert event_ledger([phase1, phase2, phase3, phase4], output) == (7, 1, 5)
+        assert any(
+            datetime.fromisoformat(value.replace("Z", "+00:00"))
+            >= datetime.fromisoformat("2024-01-01T00:25:00+00:00")
+            for value in watermarks(phase4)
+        )
         # Exercise 6: Verify output-mode and sink eligibility through explicit failures
-        reject_unsupported(spark,owned_root,"update-file");reject_unsupported(spark,owned_root,"append-unwatermarked")
-        assert not spark.streams.active and final_rows(spark,owned_root) == output
+        reject_unsupported(spark, owned_root, "update-file")
+        reject_unsupported(spark, owned_root, "append-unwatermarked")
+        assert not spark.streams.active and final_rows(spark, owned_root) == output
         print("spark-032: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         try:
@@ -122,6 +247,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

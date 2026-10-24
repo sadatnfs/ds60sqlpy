@@ -1,57 +1,114 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def fact_ids(frame):
     return [row.fact_id for row in frame.select("fact_id").orderBy("fact_id").collect()]
 
+
 def pair_ids(frame):
-    return [tuple(row) for row in frame.select("fact_id","dimension_row").orderBy("fact_id","dimension_row").collect()]
+    return [
+        tuple(row)
+        for row in frame.select("fact_id", "dimension_row")
+        .orderBy("fact_id", "dimension_row")
+        .collect()
+    ]
+
 
 def multiplicity(facts, dimension):
     raise NotImplementedError("Complete multiplicity")
 
+
 def equality_join(facts, dimension):
     raise NotImplementedError("Complete equality_join")
+
 
 def left_join(facts, dimension):
     raise NotImplementedError("Complete left_join")
 
+
 def membership(facts, dimension):
     raise NotImplementedError("Complete membership")
+
 
 def null_safe_join(facts, dimension):
     raise NotImplementedError("Complete null_safe_join")
 
+
 def safe_enrichment(facts, dimension):
     raise NotImplementedError("Complete safe_enrichment")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-016").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-016")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        fact_schema = StructType([StructField("fact_id",LongType(),False),StructField("key",StringType(),True),StructField("amount_cents",LongType(),False)])
-        dimension_schema = StructType([StructField("dimension_row",LongType(),False),StructField("key",StringType(),True),StructField("label",StringType(),False)])
-        facts = spark.createDataFrame([(1,"A",10),(2,"A",20),(3,"B",30),(4,"C",40),(5,None,50),(6,"D",60)],schema=fact_schema)
-        dimension = spark.createDataFrame([(101,"A","alpha1"),(102,"A","alpha2"),(103,"A","alpha3"),(104,"B","beta"),(105,None,"unknown"),(106,"E","epsilon")],schema=dimension_schema)
+        fact_schema = StructType(
+            [
+                StructField("fact_id", LongType(), False),
+                StructField("key", StringType(), True),
+                StructField("amount_cents", LongType(), False),
+            ]
+        )
+        dimension_schema = StructType(
+            [
+                StructField("dimension_row", LongType(), False),
+                StructField("key", StringType(), True),
+                StructField("label", StringType(), False),
+            ]
+        )
+        facts = spark.createDataFrame(
+            [(1, "A", 10), (2, "A", 20), (3, "B", 30), (4, "C", 40), (5, None, 50), (6, "D", 60)],
+            schema=fact_schema,
+        )
+        dimension = spark.createDataFrame(
+            [
+                (101, "A", "alpha1"),
+                (102, "A", "alpha2"),
+                (103, "A", "alpha3"),
+                (104, "B", "beta"),
+                (105, None, "unknown"),
+                (106, "E", "epsilon"),
+            ],
+            schema=dimension_schema,
+        )
         a_facts = facts.filter(F.col("key") == F.lit("A")).count()
         a_dimensions = dimension.filter(F.col("key") == F.lit("A")).count()
-        assert (a_facts, a_dimensions, a_facts*a_dimensions) == (2,3,6)
-        print("A predicts", a_facts*a_dimensions, "joined pairs")
-        comparison = spark.sql("SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe").first()
+        assert (a_facts, a_dimensions, a_facts * a_dimensions) == (2, 3, 6)
+        print("A predicts", a_facts * a_dimensions, "joined pairs")
+        comparison = spark.sql(
+            "SELECT CAST(NULL AS STRING) = CAST(NULL AS STRING) AS ordinary, CAST(NULL AS STRING) <=> CAST(NULL AS STRING) AS null_safe"
+        ).first()
         assert tuple(comparison) == (None, True)
         print("Ordinary equality is unknown;explicit NULL-safe equality is true")
         print("spark-016: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

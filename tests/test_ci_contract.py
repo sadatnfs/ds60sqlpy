@@ -25,6 +25,26 @@ def test_core_matrix_overrides_project_python_default_and_asserts_version() -> N
     assert "timeout-minutes: 30" in core_job
 
 
+def test_source_quality_runs_once_with_the_shared_docker_entrypoints() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    formatting = workflow.split("  source-quality:", maxsplit=1)[1].split("  core:", maxsplit=1)[0]
+    assert "runs-on: ubuntu-latest" in formatting
+    assert "matrix:" not in formatting
+    assert "run: ./scripts/format-repo --check" in formatting
+    assert "run: ./scripts/lint-repo" in formatting
+    assert "run: git diff --exit-code" in formatting
+    assert workflow.count("./scripts/format-repo --check") == 1
+    assert "ruff format --check" not in workflow
+    hooks = (REPO_ROOT / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    assert "entry: ./scripts/format-repo --check" in hooks
+    assert "id: ds60-ruff-format" not in hooks
+    makefile = (REPO_ROOT / "Makefile").read_text(encoding="utf-8")
+    assert "format:\n\t./scripts/format-repo\n" in makefile
+    assert "format-check:\n\t./scripts/format-repo --check\n" in makefile
+    assert "lint:\n\t./scripts/lint-repo\n" in makefile
+    assert "check: format-check lint\n" in makefile
+
+
 def test_pytest_console_entrypoint_can_import_repository_scripts() -> None:
     project = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
 

@@ -1,12 +1,16 @@
 import numpy as np
-RIVER=np.array([[1.,0.],[0.,1.]])
-MONEY=np.array([[1.,0.],[0.,-1.]])
 
-def encode(values,valid):
+RIVER = np.array([[1.0, 0.0], [0.0, 1.0]])
+MONEY = np.array([[1.0, 0.0], [0.0, -1.0]])
+
+
+def encode(values, valid):
     raise NotImplementedError("Implement bidirectional attention with a real key mask")
+
 
 def main():
     print("Handcrafted attention fixtures loaded. This is not a pretrained encoder.")
+
 
 if __name__ == "__main__":
     main()

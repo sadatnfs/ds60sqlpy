@@ -1,6 +1,6 @@
 """Literal source template for the standalone llm-016 examples."""
 
-DECODER_SOURCE = r'''class TinyDecoder(nn.Module):
+DECODER_SOURCE = r"""class TinyDecoder(nn.Module):
     def __init__(self, vocab=16, width=32, heads=2, context=32):
         super().__init__()
         dimensions = (vocab, width, heads, context)
@@ -62,4 +62,4 @@ DECODER_SOURCE = r'''class TinyDecoder(nn.Module):
         x = x + self.projection(mixed)
         x = x + self.feed(self.norm2(x))
         return self.output(x), {"k": k.detach(), "v": v.detach()}
-'''
+"""

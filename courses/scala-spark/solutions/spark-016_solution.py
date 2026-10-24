@@ -1,88 +1,204 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def fact_ids(frame):
     return [row.fact_id for row in frame.select("fact_id").orderBy("fact_id").collect()]
 
+
 def pair_ids(frame):
-    return [tuple(row) for row in frame.select("fact_id","dimension_row").orderBy("fact_id","dimension_row").collect()]
+    return [
+        tuple(row)
+        for row in frame.select("fact_id", "dimension_row")
+        .orderBy("fact_id", "dimension_row")
+        .collect()
+    ]
+
 
 def multiplicity(facts, dimension):
     f = facts.groupBy("key").agg(F.count(F.lit(1)).alias("fact_rows")).alias("f")
     d = dimension.groupBy("key").agg(F.count(F.lit(1)).alias("dimension_rows")).alias("d")
-    joined = f.join(d, F.col("f.key").eqNullSafe(F.col("d.key")), "full").select(F.coalesce(F.col("f.key"),F.col("d.key")).alias("key"),F.coalesce("fact_rows",F.lit(0)).alias("fact_rows"),F.coalesce("dimension_rows",F.lit(0)).alias("dimension_rows"))
-    return joined.withColumn("predicted_inner",F.when(F.col("key").isNull(),F.lit(0)).otherwise(F.col("fact_rows")*F.col("dimension_rows")))
+    joined = f.join(d, F.col("f.key").eqNullSafe(F.col("d.key")), "full").select(
+        F.coalesce(F.col("f.key"), F.col("d.key")).alias("key"),
+        F.coalesce("fact_rows", F.lit(0)).alias("fact_rows"),
+        F.coalesce("dimension_rows", F.lit(0)).alias("dimension_rows"),
+    )
+    return joined.withColumn(
+        "predicted_inner",
+        F.when(F.col("key").isNull(), F.lit(0)).otherwise(
+            F.col("fact_rows") * F.col("dimension_rows")
+        ),
+    )
+
 
 def equality_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key")==F.col("d.key"),"inner").select("f.fact_id","d.dimension_row","f.amount_cents")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key") == F.col("d.key"), "inner")
+        .select("f.fact_id", "d.dimension_row", "f.amount_cents")
+    )
+
 
 def left_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key")==F.col("d.key"),"left").select("f.fact_id","d.dimension_row")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key") == F.col("d.key"), "left")
+        .select("f.fact_id", "d.dimension_row")
+    )
+
 
 def membership(facts, dimension):
-    return facts.join(dimension,on="key",how="left_semi"),facts.join(dimension,on="key",how="left_anti")
+    return facts.join(dimension, on="key", how="left_semi"), facts.join(
+        dimension, on="key", how="left_anti"
+    )
+
 
 def null_safe_join(facts, dimension):
-    return facts.alias("f").join(dimension.alias("d"),F.col("f.key").eqNullSafe(F.col("d.key")),"inner").select("f.fact_id","d.dimension_row")
+    return (
+        facts.alias("f")
+        .join(dimension.alias("d"), F.col("f.key").eqNullSafe(F.col("d.key")), "inner")
+        .select("f.fact_id", "d.dimension_row")
+    )
+
 
 def safe_enrichment(facts, dimension):
-    keys = dimension.agg(F.count(F.lit(1)),F.countDistinct("key")).first()
+    keys = dimension.agg(F.count(F.lit(1)), F.countDistinct("key")).first()
     if keys[0] != keys[1]:
         raise ValueError("dimension keys must be nonnull and unique")
-    return facts.join(dimension.select("key","label"),on="key",how="left").select("fact_id","amount_cents","label")
+    return facts.join(dimension.select("key", "label"), on="key", how="left").select(
+        "fact_id", "amount_cents", "label"
+    )
+
 
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-016").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-016")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        fact_schema = StructType([StructField("fact_id",LongType(),False),StructField("key",StringType(),True),StructField("amount_cents",LongType(),False)])
-        dimension_schema = StructType([StructField("dimension_row",LongType(),False),StructField("key",StringType(),True),StructField("label",StringType(),False)])
-        facts = spark.createDataFrame([(1,"A",10),(2,"A",20),(3,"B",30),(4,"C",40),(5,None,50),(6,"D",60)],schema=fact_schema)
-        dimension = spark.createDataFrame([(101,"A","alpha1"),(102,"A","alpha2"),(103,"A","alpha3"),(104,"B","beta"),(105,None,"unknown"),(106,"E","epsilon")],schema=dimension_schema)
+        fact_schema = StructType(
+            [
+                StructField("fact_id", LongType(), False),
+                StructField("key", StringType(), True),
+                StructField("amount_cents", LongType(), False),
+            ]
+        )
+        dimension_schema = StructType(
+            [
+                StructField("dimension_row", LongType(), False),
+                StructField("key", StringType(), True),
+                StructField("label", StringType(), False),
+            ]
+        )
+        facts = spark.createDataFrame(
+            [(1, "A", 10), (2, "A", 20), (3, "B", 30), (4, "C", 40), (5, None, 50), (6, "D", 60)],
+            schema=fact_schema,
+        )
+        dimension = spark.createDataFrame(
+            [
+                (101, "A", "alpha1"),
+                (102, "A", "alpha2"),
+                (103, "A", "alpha3"),
+                (104, "B", "beta"),
+                (105, None, "unknown"),
+                (106, "E", "epsilon"),
+            ],
+            schema=dimension_schema,
+        )
         # Exercise 1: Build a multiplicity ledger before joining facts
-        ledger = [tuple(row) for row in multiplicity(facts,dimension).orderBy(F.col("key").asc_nulls_last()).collect()]
-        assert ledger == [("A",2,3,6),("B",1,1,1),("C",1,0,0),("D",1,0,0),("E",0,1,0),(None,1,1,0)]
+        ledger = [
+            tuple(row)
+            for row in multiplicity(facts, dimension)
+            .orderBy(F.col("key").asc_nulls_last())
+            .collect()
+        ]
+        assert ledger == [
+            ("A", 2, 3, 6),
+            ("B", 1, 1, 1),
+            ("C", 1, 0, 0),
+            ("D", 1, 0, 0),
+            ("E", 0, 1, 0),
+            (None, 1, 1, 0),
+        ]
         assert sum(row[3] for row in ledger) == 7
         # Exercise 2: Verify equality pairs and quantify fanout
-        expected_pairs = [(1,101),(1,102),(1,103),(2,101),(2,102),(2,103),(3,104)]
-        inner = equality_join(facts,dimension)
+        expected_pairs = [(1, 101), (1, 102), (1, 103), (2, 101), (2, 102), (2, 103), (3, 104)]
+        inner = equality_join(facts, dimension)
         assert pair_ids(inner) == expected_pairs and inner.count() == 7
         assert inner.agg(F.sum("amount_cents")).first()[0] == 120
-        facts.createOrReplaceTempView("ds60_spark_016_facts");dimension.createOrReplaceTempView("ds60_spark_016_dimension")
-        assert pair_ids(spark.sql("SELECT f.fact_id,d.dimension_row FROM ds60_spark_016_facts f JOIN ds60_spark_016_dimension d ON f.key=d.key")) == expected_pairs
+        facts.createOrReplaceTempView("ds60_spark_016_facts")
+        dimension.createOrReplaceTempView("ds60_spark_016_dimension")
+        assert (
+            pair_ids(
+                spark.sql(
+                    "SELECT f.fact_id,d.dimension_row FROM ds60_spark_016_facts f JOIN ds60_spark_016_dimension d ON f.key=d.key"
+                )
+            )
+            == expected_pairs
+        )
         # Exercise 3: Count actual matches in a left join
-        left = left_join(facts,dimension)
-        assert [tuple(row) for row in left.orderBy(F.col("fact_id"),F.col("dimension_row").asc_nulls_last()).collect()] == expected_pairs + [(4,None),(5,None),(6,None)]
-        assert tuple(left.agg(F.count(F.lit(1)),F.count("dimension_row"),F.countDistinct("fact_id")).first()) == (10,7,6)
+        left = left_join(facts, dimension)
+        assert [
+            tuple(row)
+            for row in left.orderBy(
+                F.col("fact_id"), F.col("dimension_row").asc_nulls_last()
+            ).collect()
+        ] == expected_pairs + [(4, None), (5, None), (6, None)]
+        assert tuple(
+            left.agg(
+                F.count(F.lit(1)), F.count("dimension_row"), F.countDistinct("fact_id")
+            ).first()
+        ) == (10, 7, 6)
         # Exercise 4: Use semi and anti joins for membership
-        semi,anti = membership(facts,dimension)
-        assert fact_ids(semi) == [1,2,3] and fact_ids(anti) == [4,5,6]
-        assert semi.count()+anti.count() == 6
+        semi, anti = membership(facts, dimension)
+        assert fact_ids(semi) == [1, 2, 3] and fact_ids(anti) == [4, 5, 6]
+        assert semi.count() + anti.count() == 6
         # Exercise 5: Make NULL-safe matching an explicit alternative
-        assert pair_ids(null_safe_join(facts,dimension)) == expected_pairs + [(5,105)]
+        assert pair_ids(null_safe_join(facts, dimension)) == expected_pairs + [(5, 105)]
         # Exercise 6: Gate enrichment on a reviewed unique dimension
         try:
-            safe_enrichment(facts,dimension)
+            safe_enrichment(facts, dimension)
         except ValueError:
             pass
         else:
             raise AssertionError("ambiguous dimension must fail")
-        reviewed = dimension.filter(F.col("dimension_row").isin(103,104,106))
-        enriched = safe_enrichment(facts,reviewed)
-        assert [tuple(row) for row in enriched.orderBy("fact_id").collect()] == [(1,10,"alpha3"),(2,20,"alpha3"),(3,30,"beta"),(4,40,None),(5,50,None),(6,60,None)]
+        reviewed = dimension.filter(F.col("dimension_row").isin(103, 104, 106))
+        enriched = safe_enrichment(facts, reviewed)
+        assert [tuple(row) for row in enriched.orderBy("fact_id").collect()] == [
+            (1, 10, "alpha3"),
+            (2, 20, "alpha3"),
+            (3, 30, "beta"),
+            (4, 40, None),
+            (5, 50, None),
+            (6, 60, None),
+        ]
         assert enriched.count() == 6 and enriched.agg(F.sum("amount_cents")).first()[0] == 210
         print("spark-016: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

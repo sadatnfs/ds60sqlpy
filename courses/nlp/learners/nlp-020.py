@@ -1,12 +1,15 @@
-LABELS=[[1,1,-1],[0,-1,0],[1,0,-1],[-1,-1,-1]]
-PROBABILITIES=[.5,.6,.95,.1]
-FAMILIES=["a","a","b","c"]
+LABELS = [[1, 1, -1], [0, -1, 0], [1, 0, -1], [-1, -1, -1]]
+PROBABILITIES = [0.5, 0.6, 0.95, 0.1]
+FAMILIES = ["a", "a", "b", "c"]
+
 
 def weak_summary(labels):
     raise NotImplementedError("Keep coverage, conflict and aggregate votes separate")
 
+
 def main():
     print("Weak-label and query-pool fixtures loaded. Preserve a separate gold evaluation set.")
+
 
 if __name__ == "__main__":
     main()

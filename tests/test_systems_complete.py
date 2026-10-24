@@ -106,9 +106,15 @@ def test_cpp_references_reject_plausible_contract_regressions(
     broken: str,
 ) -> None:
     source = (CPP / "solutions" / f"{lesson_id}_solution.cpp").read_text()
-    assert original in source
+    # Match C++ tokens so layout changes cannot disable the negative control.
+    # These four expressions contain no string literals or comments.
+    tokens = re.findall(r"\w+|::|!=|\|\||[^\s]", original)
+    pattern = r"\s*".join(re.escape(token) for token in tokens)
+    matches = list(re.finditer(pattern, source))
+    assert len(matches) == 1, "The regression must replace exactly one intended expression"
+    match = matches[0]
     attempt = tmp_path / "main.cpp"
-    attempt.write_text(source.replace(original, broken, 1))
+    attempt.write_text(source[: match.start()] + broken + source[match.end() :])
     executable = tmp_path / "regression"
     built = compile_source(attempt, executable)
     assert built.returncode == 0, built.stderr

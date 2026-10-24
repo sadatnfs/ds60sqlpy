@@ -1,53 +1,81 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import re
 
 
-
 def projection_result(spark, query):
     raise NotImplementedError("Complete projection_result")
+
 
 def explain_text(spark, query, mode):
     raise NotImplementedError("Complete explain_text")
 
+
 def read_schema_evidence(formatted):
     raise NotImplementedError("Complete read_schema_evidence")
+
 
 def aggregate_result(spark, query):
     raise NotImplementedError("Complete aggregate_result")
 
+
 def normalize_evidence(plan, root):
     raise NotImplementedError("Complete normalize_evidence")
+
 
 def configuration_receipt(spark):
     raise NotImplementedError("Complete configuration_receipt")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-021").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-021")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-",dir=".")).resolve()
-        fixture = spark.range(0,12,1,2).withColumn("group_id",F.col("id")%3).withColumn("amount",F.col("id")*10).withColumn("unused_payload",F.lit("xxxxxxxxxxxxxxxx"))
-        data_path = str(owned_root/"data")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-", dir=".")).resolve()
+        fixture = (
+            spark.range(0, 12, 1, 2)
+            .withColumn("group_id", F.col("id") % 3)
+            .withColumn("amount", F.col("id") * 10)
+            .withColumn("unused_payload", F.lit("xxxxxxxxxxxxxxxx"))
+        )
+        data_path = str(owned_root / "data")
         fixture.write.mode("errorifexists").parquet(data_path)
         input_frame = spark.read.parquet(data_path)
         input_frame.createOrReplaceTempView("ds60_spark_021_input")
-        projection_query = "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+        projection_query = (
+            "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+        )
         aggregate_query = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
         assert input_frame.count() == 12
-        assert input_frame.columns == ["id","group_id","amount","unused_payload"]
+        assert input_frame.columns == ["id", "group_id", "amount", "unused_payload"]
         print("Owned Parquet fixture has four stored columns and12 rows")
         rows = spark.sql(projection_query).orderBy("id").collect()
         assert len(rows) == 9 and rows[0][0] == 3 and rows[-1][0] == 11
@@ -59,6 +87,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

@@ -1,12 +1,23 @@
 import numpy as np
-TRAIN=["urgent outage","urgent incident","outage incident","thanks resolved","thanks update","resolved update"]
-LABELS=np.array([1,1,1,0,0,0])
+
+TRAIN = [
+    "urgent outage",
+    "urgent incident",
+    "outage incident",
+    "thanks resolved",
+    "thanks update",
+    "resolved update",
+]
+LABELS = np.array([1, 1, 1, 0, 0, 0])
+
 
 def stable_sigmoid(score):
     raise NotImplementedError("Exercise 1: implement and explain the stable calculation")
 
+
 def main():
     print("Six local training messages are ready. Implement the six guide tasks in this pad.")
+
 
 if __name__ == "__main__":
     main()

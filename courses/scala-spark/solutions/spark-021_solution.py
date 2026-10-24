@@ -1,88 +1,139 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import re
 
 
-
 def projection_result(spark, query):
     return [tuple(r) for r in spark.sql(query).orderBy("id").collect()]
 
+
 def explain_text(spark, query, mode):
-    if mode not in {"EXTENDED","FORMATTED"}:
+    if mode not in {"EXTENDED", "FORMATTED"}:
         raise ValueError("Unsupported evidence mode")
-    return "\n".join(r[0] for r in spark.sql("EXPLAIN "+mode+" "+query).collect())
+    return "\n".join(r[0] for r in spark.sql("EXPLAIN " + mode + " " + query).collect())
+
 
 def read_schema_evidence(formatted):
     return "\n".join(line for line in formatted.splitlines() if "ReadSchema" in line)
 
+
 def aggregate_result(spark, query):
     return [tuple(r) for r in spark.sql(query).orderBy("group_id").collect()]
 
+
 def normalize_evidence(plan, root):
-    return re.sub(r"#[0-9]+","#ID",plan.replace(root,"<owned-root>"))
+    return re.sub(r"#[0-9]+", "#ID", plan.replace(root, "<owned-root>"))
+
 
 def configuration_receipt(spark):
-    return {"spark_version":spark.version,"ansi":spark.conf.get("spark.sql.ansi.enabled"),"aqe":spark.conf.get("spark.sql.adaptive.enabled"),"shuffle_partitions":spark.conf.get("spark.sql.shuffle.partitions")}
+    return {
+        "spark_version": spark.version,
+        "ansi": spark.conf.get("spark.sql.ansi.enabled"),
+        "aqe": spark.conf.get("spark.sql.adaptive.enabled"),
+        "shuffle_partitions": spark.conf.get("spark.sql.shuffle.partitions"),
+    }
+
 
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-021").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-021")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-",dir=".")).resolve()
-        fixture = spark.range(0,12,1,2).withColumn("group_id",F.col("id")%3).withColumn("amount",F.col("id")*10).withColumn("unused_payload",F.lit("xxxxxxxxxxxxxxxx"))
-        data_path = str(owned_root/"data")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-021-", dir=".")).resolve()
+        fixture = (
+            spark.range(0, 12, 1, 2)
+            .withColumn("group_id", F.col("id") % 3)
+            .withColumn("amount", F.col("id") * 10)
+            .withColumn("unused_payload", F.lit("xxxxxxxxxxxxxxxx"))
+        )
+        data_path = str(owned_root / "data")
         fixture.write.mode("errorifexists").parquet(data_path)
         input_frame = spark.read.parquet(data_path)
         input_frame.createOrReplaceTempView("ds60_spark_021_input")
-        projection_query = "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+        projection_query = (
+            "SELECT id,amount*2 AS doubled FROM ds60_spark_021_input WHERE amount>=30"
+        )
         aggregate_query = "SELECT group_id,COUNT(*) AS n,SUM(amount) AS total FROM ds60_spark_021_input WHERE amount>=30 GROUP BY group_id"
         # Exercise 1: Check the query meaning before its execution plan
-        expected = [(i,20*i) for i in range(3,12)]
-        assert projection_result(spark,projection_query) == expected
+        expected = [(i, 20 * i) for i in range(3, 12)]
+        assert projection_result(spark, projection_query) == expected
         # Exercise 2: Capture each extended planning stage
-        extended = explain_text(spark,projection_query,"EXTENDED")
-        assert all(label in extended for label in ["Parsed Logical Plan","Analyzed Logical Plan","Optimized Logical Plan","Physical Plan"])
+        extended = explain_text(spark, projection_query, "EXTENDED")
+        assert all(
+            label in extended
+            for label in [
+                "Parsed Logical Plan",
+                "Analyzed Logical Plan",
+                "Optimized Logical Plan",
+                "Physical Plan",
+            ]
+        )
         try:
-            explain_text(spark,projection_query,"UNSUPPORTED")
+            explain_text(spark, projection_query, "UNSUPPORTED")
         except ValueError:
             pass
         else:
             raise AssertionError("Invalid evidence mode accepted")
         # Exercise 3: Inspect the scan scope for column pruning
-        formatted = explain_text(spark,projection_query,"FORMATTED")
+        formatted = explain_text(spark, projection_query, "FORMATTED")
         read_schema = read_schema_evidence(formatted)
         assert "id:bigint" in read_schema and "amount:bigint" in read_schema
         assert "unused_payload" not in read_schema and "group_id" not in read_schema
         assert "Filter" in formatted and "Project" in formatted
         print(read_schema)
         # Exercise 4: Connect grouped output to a redistribution boundary
-        assert aggregate_result(spark,aggregate_query) == [(0,3,180),(1,3,210),(2,3,240)]
-        aggregate_plan = explain_text(spark,aggregate_query,"FORMATTED")
+        assert aggregate_result(spark, aggregate_query) == [(0, 3, 180), (1, 3, 210), (2, 3, 240)]
+        aggregate_plan = explain_text(spark, aggregate_query, "FORMATTED")
         assert "Aggregate" in aggregate_plan and "Exchange" in aggregate_plan
         assert spark.conf.get("spark.sql.adaptive.enabled") == "false"
         print(aggregate_plan)
         # Exercise 5: Normalize incidental identifiers without erasing semantics
-        assert normalize_evidence("Project id#123L at "+str(owned_root),str(owned_root)) == "Project id#IDL at <owned-root>"
-        normalized = normalize_evidence(formatted,str(owned_root))
-        assert str(owned_root) not in normalized and "Filter" in normalized and "amount" in normalized
+        assert (
+            normalize_evidence("Project id#123L at " + str(owned_root), str(owned_root))
+            == "Project id#IDL at <owned-root>"
+        )
+        normalized = normalize_evidence(formatted, str(owned_root))
+        assert (
+            str(owned_root) not in normalized and "Filter" in normalized and "amount" in normalized
+        )
         # Exercise 6: Compare equivalent query forms with separate semantic and plan evidence
         nested = "SELECT id,doubled FROM (SELECT id,amount,amount*2 AS doubled FROM ds60_spark_021_input) WHERE amount>=30"
-        assert projection_result(spark,nested) == expected
-        assert "Optimized Logical Plan" in explain_text(spark,nested,"EXTENDED")
+        assert projection_result(spark, nested) == expected
+        assert "Optimized Logical Plan" in explain_text(spark, nested, "EXTENDED")
         receipt = configuration_receipt(spark)
-        assert receipt == {"spark_version":"4.0.1","ansi":"true","aqe":"false","shuffle_partitions":"2"}
+        assert receipt == {
+            "spark_version": "4.0.1",
+            "ansi": "true",
+            "aqe": "false",
+            "shuffle_partitions": "2",
+        }
         print(receipt)
         print("spark-021: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
@@ -91,6 +142,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

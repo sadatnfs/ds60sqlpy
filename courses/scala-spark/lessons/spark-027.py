@@ -1,45 +1,104 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pyspark import StorageLevel
-
 
 
 def transform(source):
     raise NotImplementedError("Complete transform")
 
+
 def schema_contract(frame):
     raise NotImplementedError("Complete schema_contract")
+
 
 def assert_same_bag(actual, expected):
     raise NotImplementedError("Complete assert_same_bag")
 
+
 def cached_summary(frame):
     raise NotImplementedError("Complete cached_summary")
+
 
 def failing_reuse(frame):
     raise NotImplementedError("Complete failing_reuse")
 
+
 def difference_counts(actual, expected):
     raise NotImplementedError("Complete difference_counts")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-027").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-027")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("amount",LongType(),True)])
-        source = spark.createDataFrame([(1,"a",10),(1,"a",10),(2,"a",None),(3,"b",0),(4,"b",20),(4,"b",20),(5,None,5),(6,"c",-5)],schema=schema)
-        golden_schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("doubled",LongType(),True)])
-        golden = spark.createDataFrame([(1,"a",20),(1,"a",20),(2,"a",None),(3,"b",0),(4,"b",40),(4,"b",40),(5,None,10)],schema=golden_schema)
-        assert source.count() == 8 and source.select("entity_id","segment","amount").distinct().count() == 6
+        schema = StructType(
+            [
+                StructField("entity_id", LongType(), False),
+                StructField("segment", StringType(), True),
+                StructField("amount", LongType(), True),
+            ]
+        )
+        source = spark.createDataFrame(
+            [
+                (1, "a", 10),
+                (1, "a", 10),
+                (2, "a", None),
+                (3, "b", 0),
+                (4, "b", 20),
+                (4, "b", 20),
+                (5, None, 5),
+                (6, "c", -5),
+            ],
+            schema=schema,
+        )
+        golden_schema = StructType(
+            [
+                StructField("entity_id", LongType(), False),
+                StructField("segment", StringType(), True),
+                StructField("doubled", LongType(), True),
+            ]
+        )
+        golden = spark.createDataFrame(
+            [
+                (1, "a", 20),
+                (1, "a", 20),
+                (2, "a", None),
+                (3, "b", 0),
+                (4, "b", 40),
+                (4, "b", 40),
+                (5, None, 10),
+            ],
+            schema=golden_schema,
+        )
+        assert (
+            source.count() == 8
+            and source.select("entity_id", "segment", "amount").distinct().count() == 6
+        )
         assert golden.count() == 7 and golden.agg(F.sum("doubled")).first()[0] == 130
         print("Golden bag contains duplicates and unknown values deliberately")
         numeric = spark.sql("SELECT CAST(1 AS BIGINT) AS entity_id")
@@ -52,6 +111,7 @@ def main():
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

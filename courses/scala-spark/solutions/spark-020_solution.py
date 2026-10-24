@@ -1,49 +1,90 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def canonical(frame):
-    return [tuple(r) for r in frame.select("id","key","value").orderBy("id").collect()]
+    return [tuple(r) for r in frame.select("id", "key", "value").orderBy("id").collect()]
+
 
 def keyed_layout(facts):
-    return facts.repartition(6,"key")
+    return facts.repartition(6, "key")
+
 
 def reduce_layout(frame):
     return frame.coalesce(2)
 
+
 def partition_ledger(frame):
-    return frame.select("id",F.spark_partition_id().alias("partition_id")).groupBy("partition_id").agg(F.count(F.lit(1)).alias("row_count"),F.sum("id").alias("id_total"))
+    return (
+        frame.select("id", F.spark_partition_id().alias("partition_id"))
+        .groupBy("partition_id")
+        .agg(F.count(F.lit(1)).alias("row_count"), F.sum("id").alias("id_total"))
+    )
+
 
 def local_order(frame):
-    return frame.sortWithinPartitions("key","id")
+    return frame.sortWithinPartitions("key", "id")
+
 
 def preview(frame):
-    return [tuple(r) for r in frame.orderBy(F.col("key").desc(),F.col("id").asc()).limit(5).select("id","key","value").collect()]
+    return [
+        tuple(r)
+        for r in frame.orderBy(F.col("key").desc(), F.col("id").asc())
+        .limit(5)
+        .select("id", "key", "value")
+        .collect()
+    ]
+
 
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-020").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-020")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        facts = spark.range(0,24,1,4).withColumn("key",F.col("id")%4).withColumn("value",F.col("id")*10)
+        facts = (
+            spark.range(0, 24, 1, 4)
+            .withColumn("key", F.col("id") % 4)
+            .withColumn("value", F.col("id") * 10)
+        )
         assert spark.conf.get("spark.sql.adaptive.enabled") == "false"
         # Exercise 1: Establish logical content independently of layout
-        expected = [(i,i%4,i*10) for i in range(24)]
+        expected = [(i, i % 4, i * 10) for i in range(24)]
         assert canonical(facts) == expected
-        assert tuple(facts.agg(F.count(F.lit(1)),F.countDistinct("id"),F.sum("id"),F.sum("value")).first()) == (24,24,276,2760)
+        assert tuple(
+            facts.agg(F.count(F.lit(1)), F.countDistinct("id"), F.sum("id"), F.sum("value")).first()
+        ) == (24, 24, 276, 2760)
         # Exercise 2: Request keyed redistribution and test colocation
         keyed = keyed_layout(facts)
         assert keyed.rdd.getNumPartitions() == 6 and canonical(keyed) == expected
-        colocated = keyed.withColumn("partition_id",F.spark_partition_id()).groupBy("key").agg(F.countDistinct("partition_id").alias("partitions")).collect()
+        colocated = (
+            keyed.withColumn("partition_id", F.spark_partition_id())
+            .groupBy("key")
+            .agg(F.countDistinct("partition_id").alias("partitions"))
+            .collect()
+        )
         assert len(colocated) == 4 and all(r[1] == 1 for r in colocated)
         # Exercise 3: Reduce partitions without assuming balanced redistribution
         reduced = reduce_layout(keyed)
@@ -51,27 +92,35 @@ def main():
         not_increased = facts.coalesce(10)
         assert not_increased.rdd.getNumPartitions() == 4 and canonical(not_increased) == expected
         # Exercise 4: Reconcile an occupied-partition ledger
-        for frame in [keyed,reduced]:
+        for frame in [keyed, reduced]:
             total = frame.rdd.getNumPartitions()
             ledger = partition_ledger(frame).collect()
             assert sum(r[1] for r in ledger) == 24 and sum(r[2] for r in ledger) == 276
             assert len(ledger) <= total and all(0 <= r[0] < total for r in ledger)
-            print("partition_count=",total,"occupied=",len(ledger),"ledger=",[tuple(r) for r in ledger])
+            print(
+                "partition_count=",
+                total,
+                "occupied=",
+                len(ledger),
+                "ledger=",
+                [tuple(r) for r in ledger],
+            )
         # Exercise 5: Verify ordering only within its promised scope
         locally_sorted = local_order(facts.repartition(6))
-        observed = locally_sorted.select(F.spark_partition_id().alias("pid"),"key","id").collect()
+        observed = locally_sorted.select(F.spark_partition_id().alias("pid"), "key", "id").collect()
         by_partition = {}
-        for pid,key,ident in observed:
-            by_partition.setdefault(pid,[]).append((key,ident))
+        for pid, key, ident in observed:
+            by_partition.setdefault(pid, []).append((key, ident))
         assert all(pairs == sorted(pairs) for pairs in by_partition.values())
         assert canonical(locally_sorted) == expected
         # Exercise 6: Create a globally ordered bounded preview
-        expected_preview = [(i,3,i*10) for i in [3,7,11,15,19]]
-        for frame in [facts,keyed,reduced]:
+        expected_preview = [(i, 3, i * 10) for i in [3, 7, 11, 15, 19]]
+        for frame in [facts, keyed, reduced]:
             assert preview(frame) == expected_preview
         print("spark-020: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,5 @@
 """nlp-004 learner workspace. This is a toy word-BPE investigation."""
+
 import re
 
 text = "can't pay."

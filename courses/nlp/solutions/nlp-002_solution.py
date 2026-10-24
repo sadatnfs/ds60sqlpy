@@ -1,4 +1,5 @@
 """Unicode representation and loss checks for the authored local fixture."""
+
 from collections import defaultdict
 import unicodedata as ud
 

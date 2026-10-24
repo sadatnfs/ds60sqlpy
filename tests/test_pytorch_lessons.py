@@ -19,6 +19,8 @@ from typing import Any
 
 import pytest
 
+from scripts.source_format_parity import source_digest_before_formatting
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/deep-learning-pytorch"
 ENTRIES = json.loads((BASE / "lessons.json").read_text())["lessons"]
@@ -323,6 +325,26 @@ def test_portable_authoring_recreates_all_published_artifacts(
             str(Path(relative).relative_to("courses/deep-learning-pytorch"))
             for relative in [entry["guide_path"], entry["source_path"], *entry["solution_paths"]]
         )
+    # Canonical generation includes code styling. Run the same pinned Ruff
+    # formatter on the temporary generated Python, then retain exact byte parity.
+    python_files = [str(destination / name) for name in files if name.endswith(".py")]
+    styled = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "ruff",
+            "format",
+            "--no-cache",
+            "--config",
+            str(ROOT / "pyproject.toml"),
+            *python_files,
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert styled.returncode == 0, styled.stdout + styled.stderr
     mismatches = [
         name for name in files if (destination / name).read_bytes() != (BASE / name).read_bytes()
     ]
@@ -404,4 +426,9 @@ def test_review_runtime_evidence_matches_current_references_and_worked_programs(
             blocks = re.findall(r"```python\n(.*?)\n```", section, re.DOTALL)
             assert len(blocks) == 3
             source = ("\n\n".join(blocks) + "\n").encode()
-        assert hashlib.sha256(source).hexdigest() == record["source_sha256"]
+        digest = (
+            source_digest_before_formatting(ROOT, record["source_path"], source)
+            if record["kind"] == "reference"
+            else hashlib.sha256(source).hexdigest()
+        )
+        assert digest == record["source_sha256"]

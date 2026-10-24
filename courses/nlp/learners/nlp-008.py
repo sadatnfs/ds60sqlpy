@@ -1,12 +1,16 @@
 import numpy as np
-X=np.array([[2.,1.],[1.,0.],[0.,2.],[0.,1.]])
-Y=np.array([1,1,0,0])
 
-def manual_nb(x,y,alpha=1.):
+X = np.array([[2.0, 1.0], [1.0, 0.0], [0.0, 2.0], [0.0, 1.0]])
+Y = np.array([1, 1, 0, 0])
+
+
+def manual_nb(x, y, alpha=1.0):
     raise NotImplementedError("Derive class counts, priors and smoothed log likelihoods")
+
 
 def main():
     print("Feature order is urgent,thanks. Derive the fractions before comparing a library fit.")
+
 
 if __name__ == "__main__":
     main()

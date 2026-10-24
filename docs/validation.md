@@ -38,6 +38,24 @@ Core setup does not install every heavy learning dependency. A test that needs
 an optional compiler, framework, SQL service or model asset must either run in
 its prepared environment or report that boundary explicitly.
 
+## Repository formatting
+
+Run `./scripts/format-repo` to apply maintained code style, or
+`./scripts/format-repo --check` to report drift without editing tracked source.
+Make exposes the same commands as `make format` and `make format-check`.
+`./scripts/lint-repo` (or `make lint`) adds read-only static source checks using
+the same toolchain. `make check` requires both formatting and lint checks.
+These commands use a dedicated Docker toolchain on Linux, macOS and Windows
+through WSL 2. The first invocation builds that tool image; later invocations
+reuse it. `--build` explicitly rebuilds it, and `--list` reports covered files.
+Classroom containers and learner volumes are not part of this operation.
+
+Use a repeated `--language` selection for focused iteration and the unfiltered
+check before submission. Follow [the contributor formatting workflow](../CONTRIBUTING.md#format-the-repository)
+for generated-source ownership and optional pre-commit installation. Formatting
+checks and execution checks are separate evidence: still compile/run changed
+examples and inspect lesson rendering when either may be affected.
+
 ## Fast checks during development
 
 Run the narrow tests for the changed area first, then verify the maintained
@@ -57,7 +75,8 @@ python scripts/check_modules.py
 python scripts/validate_notebooks.py
 node scripts/check_classroom_ui.mjs
 python -m ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
-python -m ruff format --check src scripts tests bridge python/professional docker/init_module_runtime.py
+./scripts/format-repo --check
+./scripts/lint-repo
 python -m mypy
 python scripts/scan_secrets.py --history
 git diff --check
@@ -121,6 +140,7 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 
 | Workflow and job | Trigger and scope | What a pass establishes |
 | --- | --- | --- |
+| Course validation: Source formatting and lint | Push, pull request, manual dispatch and weekly schedule; one Ubuntu Docker job | The pinned formatter finds no maintained-source or owned generated-view drift; scoped static and syntax checks pass, leaving the checkout unchanged |
 | Course validation: Core checks | Push, pull request, manual dispatch and weekly schedule; Ubuntu Python 3.11/3.12 | Lock, generated artifacts, content contracts, UI behavior, lint, typing, grouped tests and selected notebook execution |
 | Course validation: Contributor bootstrap | Same triggers; Ubuntu Python 3.12 | Fresh Linux contributor environment and diagnostics, also used by the WSL development route |
 | Course validation: PostgreSQL 17 end-to-end | Same triggers; disposable Linux PostgreSQL service | All cataloged SQL learner/reference sequences, live database tests and the PostgreSQL magic notebook against the course database |
@@ -138,7 +158,7 @@ are discovered from the same catalog used by the classroom. There is no second
 hand-maintained lesson list. Reading/manual lessons and owned-cluster operations
 appear as explicit exclusions from the ordinary corpus, never successful runs.
 
-Each group owns a disposable project. At most two Docker groups run together,
+Each group owns a disposable project. At most four Docker groups run together,
 and each worker executes one reference at a time. The corpus records failures,
 source hashes, actual exit status and typed checks where registered. An overall
 time budget leaves unexecuted cases visibly pending and fails the job. Artifact

@@ -1,4 +1,5 @@
 """Derive the full theory route index from its plan and authored manifest."""
+
 from pathlib import Path
 import json
 
@@ -6,16 +7,19 @@ ROOT = Path(__file__).resolve().parents[3]
 
 
 def write_readme():
-    plan = json.loads((ROOT / 'docs/expansion/plans/llm-theory.json').read_text())
-    manifest = json.loads((ROOT / 'courses/llm-theory/lessons.json').read_text())
-    registered = {row['id']: row for row in manifest['lessons']}
-    assert len(registered) == len(plan['lessons']) == 48
-    assert set(registered) == {row['id'] for row in plan['lessons']}
-    labels = {'python-core': 'Core / NumPy', 'llm-torch-cpu': 'PyTorch CPU', 'reading': 'Reading'}
-    counts = {profile: sum(row['runtime_profile'] == profile for row in registered.values()) for profile in labels}
-    text = f'''# Language-model mechanisms and evidence
+    plan = json.loads((ROOT / "docs/expansion/plans/llm-theory.json").read_text())
+    manifest = json.loads((ROOT / "courses/llm-theory/lessons.json").read_text())
+    registered = {row["id"]: row for row in manifest["lessons"]}
+    assert len(registered) == len(plan["lessons"]) == 48
+    assert set(registered) == {row["id"] for row in plan["lessons"]}
+    labels = {"python-core": "Core / NumPy", "llm-torch-cpu": "PyTorch CPU", "reading": "Reading"}
+    counts = {
+        profile: sum(row["runtime_profile"] == profile for row in registered.values())
+        for profile in labels
+    }
+    text = f"""# Language-model mechanisms and evidence
 
-All **48 chapters** are authored, from probability and tokenization through actual tiny-model training, inference, evaluation and modern Transformer mechanisms. The route has {counts['python-core']} Core/NumPy lessons, {counts['llm-torch-cpu']} PyTorch CPU lessons and {counts['reading']} reading lessons. The index below is generated from the reviewed plan and complete authored manifest.
+All **48 chapters** are authored, from probability and tokenization through actual tiny-model training, inference, evaluation and modern Transformer mechanisms. The route has {counts["python-core"]} Core/NumPy lessons, {counts["llm-torch-cpu"]} PyTorch CPU lessons and {counts["reading"]} reading lessons. The index below is generated from the reviewed plan and complete authored manifest.
 
 ## Start in the Docker classroom
 
@@ -33,28 +37,28 @@ For a subject assistant, retrieval or fine-tuning project, continue into [Applie
 
 ## Complete chapter index
 
-'''
+"""
     sections = [
-        ('Probability, tokens and attention', 1, 14),
-        ('A tiny causal model: training, inference and evidence', 15, 28),
-        ('Adaptation, evaluation and system decisions', 29, 42),
-        ('Expert Transformer mechanisms', 43, 48),
+        ("Probability, tokens and attention", 1, 14),
+        ("A tiny causal model: training, inference and evidence", 15, 28),
+        ("Adaptation, evaluation and system decisions", 29, 42),
+        ("Expert Transformer mechanisms", 43, 48),
     ]
     for title, first, last in sections:
-        text += f'### {title}\n\n| Chapter | Topic | Runtime |\n| --- | --- | --- |\n'
-        for row in plan['lessons']:
-            number = int(row['id'].rsplit('-', 1)[1])
+        text += f"### {title}\n\n| Chapter | Topic | Runtime |\n| --- | --- | --- |\n"
+        for row in plan["lessons"]:
+            number = int(row["id"].rsplit("-", 1)[1])
             if first <= number <= last:
-                topic = row['title'].replace('|', '\\|')
-                runtime = labels[registered[row['id']]['runtime_profile']]
+                topic = row["title"].replace("|", "\\|")
+                runtime = labels[registered[row["id"]]["runtime_profile"]]
                 text += f"| [{row['id']}](guides/{row['id']}.md) | {topic} | {runtime} |\n"
-        text += '\n'
-    text += '''## Maintainer sources
+        text += "\n"
+    text += """## Maintainer sources
 
 [The authored manifest](lessons.json) records complete bundles. [The reviewed plan](../../docs/expansion/plans/llm-theory.json) supplies stable IDs, ordering and prerequisites. The earlier completion specifications live under `courses/deep-learning-tensorflow/authoring/`; the six expert chapters have their own [authoring sources](authoring/README.md). Regenerate this index with `python courses/llm-theory/authoring/readme.py` rather than hand-maintaining a second lesson list.
-'''
-    (ROOT / 'courses/llm-theory/README.md').write_text(text)
+"""
+    (ROOT / "courses/llm-theory/README.md").write_text(text)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     write_readme()

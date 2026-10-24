@@ -1,5 +1,17 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
@@ -10,52 +22,79 @@ import os
 import uuid
 
 SCHEMA_TEXT = "id:bigint,value:bigint"
+
+
 def check_run_id(run_id):
-    if not isinstance(run_id,str) or re.fullmatch(r"[a-z0-9-]{1,32}",run_id) is None:
+    if not isinstance(run_id, str) or re.fullmatch(r"[a-z0-9-]{1,32}", run_id) is None:
         raise ValueError("Invalid run ID")
-def receipt_text(run_id,digest):
-    return json.dumps({"run_id":run_id,"data_path":"runs/"+run_id+"/data","row_count":30,"schema":SCHEMA_TEXT,"sha256":digest},separators=(",",":"))
+
+
+def receipt_text(run_id, digest):
+    return json.dumps(
+        {
+            "run_id": run_id,
+            "data_path": "runs/" + run_id + "/data",
+            "row_count": 30,
+            "schema": SCHEMA_TEXT,
+            "sha256": digest,
+        },
+        separators=(",", ":"),
+    )
+
+
 def data_file_count(root):
     return sum(p.is_file() for p in root.rglob("*.parquet"))
+
 
 def product_digest(frame):
     raise NotImplementedError("Complete product_digest")
 
+
 def stage_run(spark, root, run_id, source):
     raise NotImplementedError("Complete stage_run")
+
 
 def validate_staged(spark, root, run_id):
     raise NotImplementedError("Complete validate_staged")
 
+
 def publish_run(spark, root, run_id, fail_before_replace=False):
     raise NotImplementedError("Complete publish_run")
+
 
 def read_published(spark, root):
     raise NotImplementedError("Complete read_published")
 
+
 def retry_product(spark, root, run_id, source):
     raise NotImplementedError("Complete retry_product")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-029").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-029")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-",dir=".")).resolve()
-        (owned_root/"runs").mkdir()
-        source = spark.range(0,30,1,2).withColumn("value",F.col("id")*2)
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-", dir=".")).resolve()
+        (owned_root / "runs").mkdir()
+        source = spark.range(0, 30, 1, 2).withColumn("value", F.col("id") * 2)
         ids = range(30)
-        assert sum(i*2 for i in ids) == 870
+        assert sum(i * 2 for i in ids) == 870
         print("Declared30-row product total=870")
-        a = receipt_text("run-a","0"*64);b = receipt_text("run-b","0"*64)
+        a = receipt_text("run-a", "0" * 64)
+        b = receipt_text("run-b", "0" * 64)
         assert json.loads(a)["data_path"] == "runs/run-a/data" and a != b
         print("A publication points to one run-specific product")
         print("spark-029: worked examples passed; six task implementations remain")
@@ -65,6 +104,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

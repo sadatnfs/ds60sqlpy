@@ -1,57 +1,92 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 from pyspark.errors import AnalysisException
 
+
 def same_bag(left, right):
-    columns = ["id","day","amount","payload"]
-    a = left.select(*columns); b = right.select(*columns)
+    columns = ["id", "day", "amount", "payload"]
+    a = left.select(*columns)
+    b = right.select(*columns)
     return a.exceptAll(b).count() == 0 and b.exceptAll(a).count() == 0
+
 
 def write_compact(source, path):
     raise NotImplementedError("Complete write_compact")
 
+
 def filtered_product(frame):
     raise NotImplementedError("Complete filtered_product")
+
 
 def scan_evidence(frame):
     raise NotImplementedError("Complete scan_evidence")
 
+
 def file_inventory(path):
     raise NotImplementedError("Complete file_inventory")
+
 
 def layout_receipt(frame, path):
     raise NotImplementedError("Complete layout_receipt")
 
+
 def reject_existing(source, path):
     raise NotImplementedError("Complete reject_existing")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-025").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-025")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-025-",dir=".")).resolve()
-        schema = StructType([StructField("id",LongType(),False),StructField("day",StringType(),False),StructField("amount",LongType(),False),StructField("payload",StringType(),False)])
-        source = spark.createDataFrame([(i,"even" if i%2==0 else "odd",i*7,"x"*32) for i in range(2000)],schema=schema)
-        compact_path = str(owned_root/"compact")
-        many_path = str(owned_root/"many")
-        assert isinstance(source.schema["id"].dataType,LongType) and source.count() == 2000
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-025-", dir=".")).resolve()
+        schema = StructType(
+            [
+                StructField("id", LongType(), False),
+                StructField("day", StringType(), False),
+                StructField("amount", LongType(), False),
+                StructField("payload", StringType(), False),
+            ]
+        )
+        source = spark.createDataFrame(
+            [(i, "even" if i % 2 == 0 else "odd", i * 7, "x" * 32) for i in range(2000)],
+            schema=schema,
+        )
+        compact_path = str(owned_root / "compact")
+        many_path = str(owned_root / "many")
+        assert isinstance(source.schema["id"].dataType, LongType) and source.count() == 2000
         assert source.agg(F.sum("amount")).first()[0] == 13993000
         print("Explicit-schema source:2000 rows,total13993000")
-        ids = [i for i in range(1990,2000) if i%2==0]
-        assert ids == [1990,1992,1994,1996,1998]
-        print("Independent filtered identity oracle=",ids)
+        ids = [i for i in range(1990, 2000) if i % 2 == 0]
+        assert ids == [1990, 1992, 1994, 1996, 1998]
+        print("Independent filtered identity oracle=", ids)
         print("spark-025: worked examples passed; six task implementations remain")
     finally:
         try:
@@ -59,6 +94,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

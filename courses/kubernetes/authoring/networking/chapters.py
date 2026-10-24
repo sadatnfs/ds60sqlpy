@@ -1,106 +1,393 @@
 """Original deep Kubernetes networking specifications; no cluster operations."""
-CHAPTERS=[]
-def add(title,concepts,mental,mechanism,diagram,a,b,tasks,*refs):
-    assert len(tasks)==6
-    CHAPTERS.append((title,concepts,mental,mechanism,diagram,[a,b],tasks,refs))
 
-add('Three address spaces: Pod IP, node IP and Service IP',['Pod IP','node IP','ClusterIP','network namespace'],
-'''An IP address identifies a network destination within a routing context. Kubernetes commonly exposes three distinct address roles. A Pod IP reaches a particular Pod network endpoint. A node IP reaches a machine participating in the cluster. A Service ClusterIP is a virtual destination whose implementation selects eligible service endpoints. These addresses are not interchangeable names for the same object.
+CHAPTERS = []
+
+
+def add(title, concepts, mental, mechanism, diagram, a, b, tasks, *refs):
+    assert len(tasks) == 6
+    CHAPTERS.append((title, concepts, mental, mechanism, diagram, [a, b], tasks, refs))
+
+
+add(
+    "Three address spaces: Pod IP, node IP and Service IP",
+    ["Pod IP", "node IP", "ClusterIP", "network namespace"],
+    """An IP address identifies a network destination within a routing context. Kubernetes commonly exposes three distinct address roles. A Pod IP reaches a particular Pod network endpoint. A node IP reaches a machine participating in the cluster. A Service ClusterIP is a virtual destination whose implementation selects eligible service endpoints. These addresses are not interchangeable names for the same object.
 
 A Pod can be replaced and receive a different IP and UID. A Service can keep its identity and virtual address while its backend Pods change. A node can host many Pods, and its address is not automatically the public address of every application on it. The correct destination depends on the caller and the intended traffic path.
 
-The synthetic topology uses Pod10.244.1.7, node192.0.2.10 and Service10.96.0.20. The node address is from documentation space and is never a real target. These values illustrate roles; actual ranges are cluster configuration. A browser on your laptop generally cannot route directly to an arbitrary ClusterIP or Pod IP in a desktop cluster.''',
-'''The Pod status can report podIP and podIPs, while its spec names the scheduled node. A Service spec can report clusterIP, clusterIPs, type and ports. Node status contains addresses with types such as InternalIP. Read each field in its own object and preserve the object’s UID so an old address is not confused with a replacement.
+The synthetic topology uses Pod10.244.1.7, node192.0.2.10 and Service10.96.0.20. The node address is from documentation space and is never a real target. These values illustrate roles; actual ranges are cluster configuration. A browser on your laptop generally cannot route directly to an arbitrary ClusterIP or Pod IP in a desktop cluster.""",
+    """The Pod status can report podIP and podIPs, while its spec names the scheduled node. A Service spec can report clusterIP, clusterIPs, type and ports. Node status contains addresses with types such as InternalIP. Read each field in its own object and preserve the object’s UID so an old address is not confused with a replacement.
 
-A Service routes transport traffic to endpoints. It is not a process that has an application socket bound to every virtual address in the ordinary way. The implementation might program kernel rules or eBPF paths. The application process still listens inside a Pod at its target port.''',
-'caller Pod -> Service10.96.0.20:80 -> eligible Pod10.244.1.7:8080\nnode192.0.2.10 hosts the Pod; it is a separate address role',
-('Classify a topology record','These are synthetic observations with explicit roles.','json','{"node_ip":"192.0.2.10","pod_ip":"10.244.1.7","service_ip":"10.96.0.20","service_port":80,"target_port":8080}','The client selects a Service endpoint while the final listener belongs to a Pod.'),
-('Predict Pod replacement','The Service can remain stable while one backend changes.','text','before: Service10.96.0.20 -> Pod UID-A at10.244.1.7\nafter:  Service10.96.0.20 -> Pod UID-B at10.244.1.9','The stable service destination does not prove the same backend process handled both requests.'),
-[('Label all three synthetic address roles.','One node address, one Pod address and one virtual Service address.','The role comes from the object and routing context, not from guessing based on a familiar private prefix.'),('Predict what can change after Pod replacement.','Pod UID and IP can change while the Service remains stable.','Clients should discover the intended service rather than pinning a disposable Pod address without a specific reason.'),('Draw the internal request path with both ports.','Service port80 maps to Pod listener8080.','Port roles are independent of address roles. The application must actually listen at the target endpoint.'),('Diagnose a host browser trying a ClusterIP directly.','The host may have no route to that virtual cluster destination.','A valid Service object does not promise host or internet reachability. Use the explicitly provisioned access path.'),('Distinguish a node address from a public load-balancer address.','They may be different infrastructure endpoints with different policies.','A node can have private addresses only. External publication requires a separate routing and exposure design.'),('Explain a successful request with a changed backend UID.','Service continuity and backend identity are separate observations.','Record the actual serving identity when the exercise requires replacement evidence; a200 response alone cannot identify the process.')],
-'https://kubernetes.io/docs/concepts/services-networking/', 'https://kubernetes.io/docs/concepts/services-networking/service/')
+A Service routes transport traffic to endpoints. It is not a process that has an application socket bound to every virtual address in the ordinary way. The implementation might program kernel rules or eBPF paths. The application process still listens inside a Pod at its target port.""",
+    "caller Pod -> Service10.96.0.20:80 -> eligible Pod10.244.1.7:8080\nnode192.0.2.10 hosts the Pod; it is a separate address role",
+    (
+        "Classify a topology record",
+        "These are synthetic observations with explicit roles.",
+        "json",
+        '{"node_ip":"192.0.2.10","pod_ip":"10.244.1.7","service_ip":"10.96.0.20","service_port":80,"target_port":8080}',
+        "The client selects a Service endpoint while the final listener belongs to a Pod.",
+    ),
+    (
+        "Predict Pod replacement",
+        "The Service can remain stable while one backend changes.",
+        "text",
+        "before: Service10.96.0.20 -> Pod UID-A at10.244.1.7\nafter:  Service10.96.0.20 -> Pod UID-B at10.244.1.9",
+        "The stable service destination does not prove the same backend process handled both requests.",
+    ),
+    [
+        (
+            "Label all three synthetic address roles.",
+            "One node address, one Pod address and one virtual Service address.",
+            "The role comes from the object and routing context, not from guessing based on a familiar private prefix.",
+        ),
+        (
+            "Predict what can change after Pod replacement.",
+            "Pod UID and IP can change while the Service remains stable.",
+            "Clients should discover the intended service rather than pinning a disposable Pod address without a specific reason.",
+        ),
+        (
+            "Draw the internal request path with both ports.",
+            "Service port80 maps to Pod listener8080.",
+            "Port roles are independent of address roles. The application must actually listen at the target endpoint.",
+        ),
+        (
+            "Diagnose a host browser trying a ClusterIP directly.",
+            "The host may have no route to that virtual cluster destination.",
+            "A valid Service object does not promise host or internet reachability. Use the explicitly provisioned access path.",
+        ),
+        (
+            "Distinguish a node address from a public load-balancer address.",
+            "They may be different infrastructure endpoints with different policies.",
+            "A node can have private addresses only. External publication requires a separate routing and exposure design.",
+        ),
+        (
+            "Explain a successful request with a changed backend UID.",
+            "Service continuity and backend identity are separate observations.",
+            "Record the actual serving identity when the exercise requires replacement evidence; a200 response alone cannot identify the process.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/",
+    "https://kubernetes.io/docs/concepts/services-networking/service/",
+)
 
-add('CIDRs, subnets, routing and address planning',['CIDR','subnet','route','overlap'],
-'''CIDR notation combines an address with a prefix length, such as10.244.0.0/16. The prefix describes which leading bits identify the network. A longer prefix describes a smaller address set. CIDR membership is a binary relationship, not a string-prefix test.
+add(
+    "CIDRs, subnets, routing and address planning",
+    ["CIDR", "subnet", "route", "overlap"],
+    """CIDR notation combines an address with a prefix length, such as10.244.0.0/16. The prefix describes which leading bits identify the network. A longer prefix describes a smaller address set. CIDR membership is a binary relationship, not a string-prefix test.
 
 Clusters need address planning for nodes, Pods and Services, and may interact with a host LAN, VPN or cloud network. Overlapping ranges can make a destination ambiguous or route traffic to the wrong place. A configuration can be valid YAML while its network plan is unusable in the actual environment.
 
-Pod and Service CIDRs serve different purposes. Pod ranges allocate workload endpoints according to the CNI and cluster design. Service ranges allocate virtual service destinations. A Service IP should not be assumed to appear as an ordinary Pod interface address. Dual-stack adds another family of addresses and routes rather than replacing these distinctions.''',
-'''Use an IP-address library for membership and overlap reasoning. In a/24 IPv4 network there are256 numeric addresses, but usable allocations depend on the system’s rules and reservations. Do not turn the arithmetic count into a guaranteed Kubernetes capacity claim.
+Pod and Service CIDRs serve different purposes. Pod ranges allocate workload endpoints according to the CNI and cluster design. Service ranges allocate virtual service destinations. A Service IP should not be assumed to appear as an ordinary Pod interface address. Dual-stack adds another family of addresses and routes rather than replacing these distinctions.""",
+    """Use an IP-address library for membership and overlap reasoning. In a/24 IPv4 network there are256 numeric addresses, but usable allocations depend on the system’s rules and reservations. Do not turn the arithmetic count into a guaranteed Kubernetes capacity claim.
 
-A routing table chooses a next hop according to destination and policy, commonly preferring the most specific matching prefix. An overlapping VPN route can affect traffic before it reaches a cluster component. Investigate the caller’s route context rather than changing Kubernetes selectors to fix a host routing conflict.''',
-'caller destination -> routing lookup -> most specific applicable route -> next hop\naddress plan: node network | Pod CIDR | Service CIDR | host/VPN ranges',
-('Check membership using the standard library','This is an offline calculation.','python','from ipaddress import ip_address, ip_network\nnetwork=ip_network("10.244.0.0/16")\nprint(ip_address("10.244.1.7") in network)\nprint(ip_address("10.96.0.20") in network)','True thenFalse; no packet is sent.'),
-('Detect an overlap','A more specific prefix can still overlap a broader one.','python','from ipaddress import ip_network\nprint(ip_network("10.0.0.0/8").overlaps(ip_network("10.244.0.0/16")))','True; address planning must account for both ranges.'),
-[('Predict Pod-IP membership in the fixture CIDR.','10.244.1.7 belongs to10.244.0.0/16.','Use network arithmetic rather than text comparison. Membership says nothing yet about whether the address is allocated or reachable.'),('Compare/16 and/24 address set sizes.','The/24 is the smaller, more specific network.','Prefix length counts fixed bits. More fixed bits leave fewer varying address bits.'),('Build a nonoverlapping synthetic address-plan table.','Node, Pod and Service ranges plus host/VPN ranges are compared.','The plan must include networks outside Kubernetes that the caller traverses. Ignoring the host can leave an otherwise coherent cluster unreachable.'),('Diagnose a VPN route overlapping the Pod range.','The caller can select an unintended route before cluster delivery.','Locate the first wrong next hop. Changing a Service selector does not repair the host route decision.'),('Explain why256 addresses do not guarantee256 allocatable endpoints.','Reservation and implementation rules reduce or constrain allocation.','Arithmetic cardinality is only one input. The allocator and network design determine actual usable capacity.'),('Defend an address plan for a second local cluster.','Ranges and routes avoid collisions with the first cluster and host networks.','Multiple local clusters still share a host environment. Explicit planning prevents hard-to-diagnose cross-target ambiguity.')],
-'https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/', 'https://docs.python.org/3/library/ipaddress.html')
+A routing table chooses a next hop according to destination and policy, commonly preferring the most specific matching prefix. An overlapping VPN route can affect traffic before it reaches a cluster component. Investigate the caller’s route context rather than changing Kubernetes selectors to fix a host routing conflict.""",
+    "caller destination -> routing lookup -> most specific applicable route -> next hop\naddress plan: node network | Pod CIDR | Service CIDR | host/VPN ranges",
+    (
+        "Check membership using the standard library",
+        "This is an offline calculation.",
+        "python",
+        'from ipaddress import ip_address, ip_network\nnetwork=ip_network("10.244.0.0/16")\nprint(ip_address("10.244.1.7") in network)\nprint(ip_address("10.96.0.20") in network)',
+        "True thenFalse; no packet is sent.",
+    ),
+    (
+        "Detect an overlap",
+        "A more specific prefix can still overlap a broader one.",
+        "python",
+        'from ipaddress import ip_network\nprint(ip_network("10.0.0.0/8").overlaps(ip_network("10.244.0.0/16")))',
+        "True; address planning must account for both ranges.",
+    ),
+    [
+        (
+            "Predict Pod-IP membership in the fixture CIDR.",
+            "10.244.1.7 belongs to10.244.0.0/16.",
+            "Use network arithmetic rather than text comparison. Membership says nothing yet about whether the address is allocated or reachable.",
+        ),
+        (
+            "Compare/16 and/24 address set sizes.",
+            "The/24 is the smaller, more specific network.",
+            "Prefix length counts fixed bits. More fixed bits leave fewer varying address bits.",
+        ),
+        (
+            "Build a nonoverlapping synthetic address-plan table.",
+            "Node, Pod and Service ranges plus host/VPN ranges are compared.",
+            "The plan must include networks outside Kubernetes that the caller traverses. Ignoring the host can leave an otherwise coherent cluster unreachable.",
+        ),
+        (
+            "Diagnose a VPN route overlapping the Pod range.",
+            "The caller can select an unintended route before cluster delivery.",
+            "Locate the first wrong next hop. Changing a Service selector does not repair the host route decision.",
+        ),
+        (
+            "Explain why256 addresses do not guarantee256 allocatable endpoints.",
+            "Reservation and implementation rules reduce or constrain allocation.",
+            "Arithmetic cardinality is only one input. The allocator and network design determine actual usable capacity.",
+        ),
+        (
+            "Defend an address plan for a second local cluster.",
+            "Ranges and routes avoid collisions with the first cluster and host networks.",
+            "Multiple local clusters still share a host environment. Explicit planning prevents hard-to-diagnose cross-target ambiguity.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/",
+    "https://docs.python.org/3/library/ipaddress.html",
+)
 
-add('Pod network namespaces, sidecars and localhost',['Pod network','loopback','sidecar','port collision'],
-'''Containers in the same Pod share a network namespace. They can communicate through localhost and share the Pod’s port space. Containers in different Pods normally have different network namespaces and Pod addresses. This makes a Pod a unit of co-location and shared networking rather than merely a label grouping unrelated containers.
+add(
+    "Pod network namespaces, sidecars and localhost",
+    ["Pod network", "loopback", "sidecar", "port collision"],
+    """Containers in the same Pod share a network namespace. They can communicate through localhost and share the Pod’s port space. Containers in different Pods normally have different network namespaces and Pod addresses. This makes a Pod a unit of co-location and shared networking rather than merely a label grouping unrelated containers.
 
 Loopback always refers to the caller’s network namespace. A sidecar in the same Pod can reach an application bound to127.0.0.1:8080. A different Pod cannot reach that listener through the first Pod’s loopback address. To accept traffic on the Pod interface, the application generally listens on an appropriate non-loopback address, often0.0.0.0 for IPv4.
 
-A sidecar is a supporting container associated with an application Pod. It may proxy traffic, collect logs or perform another bounded role. Co-location introduces shared fate, startup and shutdown ordering, resource competition and port conflicts. A sidecar is not automatically a separate security or availability boundary.''',
-'''The containerPort field documents a container’s intended port and can supply a name used elsewhere. It does not start a listener. Two containers in one Pod cannot both bind the same address/port combination independently. Their filesystem namespaces can still differ even though networking is shared.
+A sidecar is a supporting container associated with an application Pod. It may proxy traffic, collect logs or perform another bounded role. Co-location introduces shared fate, startup and shutdown ordering, resource competition and port conflicts. A sidecar is not automatically a separate security or availability boundary.""",
+    """The containerPort field documents a container’s intended port and can supply a name used elsewhere. It does not start a listener. Two containers in one Pod cannot both bind the same address/port combination independently. Their filesystem namespaces can still differ even though networking is shared.
 
-An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.''',
-'app container127.0.0.1:8080 <-> sidecar in same Pod namespace\nother Pod -> Pod IP:8080 -> requires listener on reachable interface',
-('Compare two localhost callers','The same string names different destinations in different Pods.','text','sidecar in PodA ->127.0.0.1:8080 -> app in PodA\nclient in PodB ->127.0.0.1:8080 -> PodB itself','Only the same-Pod sidecar reaches PodA through loopback.'),
-('Read a declared port','This is metadata in a Pod container specification.','yaml','ports:\n  - name: http\n    containerPort: 8080','The field does not cause any process to bind8080.'),
-[('Predict same-Pod localhost access.','The sidecar shares the app network namespace.','The Pod boundary determines the loopback scope. This is why a proxy sidecar can reach a loopback-only app.'),('Predict different-Pod localhost access.','The client reaches its own Pod namespace.','Use the target Pod or Service address for inter-Pod traffic. Copying a same-Pod URL changes its meaning.'),('Draw a sidecar and app port allocation.','Distinct listeners share one Pod port space.','Specify address and port for every listener so a collision is visible before runtime.'),('Diagnose two containers binding0.0.0.0:8080.','They compete for the same socket within one Pod namespace.','The container boundary does not create a second network namespace inside the Pod. Assign distinct listener roles.'),('Explain containerPort versus a real listener.','One is declared metadata; the other is process behavior.','A correct manifest can still run a program listening on another port. Observe the application rather than inferring from metadata.'),('Defend whether a helper belongs in a sidecar or separate Deployment.','Consider shared lifecycle, scaling, networking and failure requirements.','Co-location is useful when tight coupling is intended. Independent scaling or failure isolation may favor a separate workload.')],
-'https://kubernetes.io/docs/concepts/workloads/pods/', 'https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/')
+An emptyDir volume is one way to share files within a Pod, but it is not implied by shared networking and does not survive Pod replacement. Keep the network and storage contracts distinct when explaining a sidecar design.""",
+    "app container127.0.0.1:8080 <-> sidecar in same Pod namespace\nother Pod -> Pod IP:8080 -> requires listener on reachable interface",
+    (
+        "Compare two localhost callers",
+        "The same string names different destinations in different Pods.",
+        "text",
+        "sidecar in PodA ->127.0.0.1:8080 -> app in PodA\nclient in PodB ->127.0.0.1:8080 -> PodB itself",
+        "Only the same-Pod sidecar reaches PodA through loopback.",
+    ),
+    (
+        "Read a declared port",
+        "This is metadata in a Pod container specification.",
+        "yaml",
+        "ports:\n  - name: http\n    containerPort: 8080",
+        "The field does not cause any process to bind8080.",
+    ),
+    [
+        (
+            "Predict same-Pod localhost access.",
+            "The sidecar shares the app network namespace.",
+            "The Pod boundary determines the loopback scope. This is why a proxy sidecar can reach a loopback-only app.",
+        ),
+        (
+            "Predict different-Pod localhost access.",
+            "The client reaches its own Pod namespace.",
+            "Use the target Pod or Service address for inter-Pod traffic. Copying a same-Pod URL changes its meaning.",
+        ),
+        (
+            "Draw a sidecar and app port allocation.",
+            "Distinct listeners share one Pod port space.",
+            "Specify address and port for every listener so a collision is visible before runtime.",
+        ),
+        (
+            "Diagnose two containers binding0.0.0.0:8080.",
+            "They compete for the same socket within one Pod namespace.",
+            "The container boundary does not create a second network namespace inside the Pod. Assign distinct listener roles.",
+        ),
+        (
+            "Explain containerPort versus a real listener.",
+            "One is declared metadata; the other is process behavior.",
+            "A correct manifest can still run a program listening on another port. Observe the application rather than inferring from metadata.",
+        ),
+        (
+            "Defend whether a helper belongs in a sidecar or separate Deployment.",
+            "Consider shared lifecycle, scaling, networking and failure requirements.",
+            "Co-location is useful when tight coupling is intended. Independent scaling or failure isolation may favor a separate workload.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/workloads/pods/",
+    "https://kubernetes.io/docs/concepts/workloads/pods/sidecar-containers/",
+)
 
-add('CNI, cross-node paths, overlays and MTU',['CNI','routing','overlay','MTU'],
-'''The Container Network Interface, or CNI, is a plugin interface used in container networking. In Kubernetes, the chosen network implementation prepares Pod interfaces and connectivity according to cluster configuration. CNI is an interface and ecosystem, not one universal packet-forwarding algorithm.
+add(
+    "CNI, cross-node paths, overlays and MTU",
+    ["CNI", "routing", "overlay", "MTU"],
+    """The Container Network Interface, or CNI, is a plugin interface used in container networking. In Kubernetes, the chosen network implementation prepares Pod interfaces and connectivity according to cluster configuration. CNI is an interface and ecosystem, not one universal packet-forwarding algorithm.
 
 Cross-node Pod traffic can use routed networks, encapsulation overlays or other implementation-specific mechanisms. An overlay wraps an inner packet in an outer packet so the underlying network can transport it between nodes. Encapsulation consumes header space, affecting the maximum transmission unit, or MTU, available to the inner traffic.
 
-A small request may succeed while a large payload fails when MTU discovery, fragmentation or policy is misconfigured. This is different from a Service selector problem. Diagnose with bounded traffic and actual implementation evidence rather than changing cluster networking from a generic tutorial.''',
-'''Separate the Pod-facing interface, node routing or overlay endpoint, underlay network and destination Pod interface. The control plane may show Ready Pods while the cross-node data path is broken. CNI setup failures can also prevent Pod sandbox creation before the app starts.
+A small request may succeed while a large payload fails when MTU discovery, fragmentation or policy is misconfigured. This is different from a Service selector problem. Diagnose with bounded traffic and actual implementation evidence rather than changing cluster networking from a generic tutorial.""",
+    """Separate the Pod-facing interface, node routing or overlay endpoint, underlay network and destination Pod interface. The control plane may show Ready Pods while the cross-node data path is broken. CNI setup failures can also prevent Pod sandbox creation before the app starts.
 
-The synthetic topology uses two nodes and two Pod subnets to make the hop sequence visible. It does not claim that every CNI assigns per-node CIDRs in the same way. Optional live observations require the exact prepared CNI and permissions; the course does not install or replace network plugins.''',
-'PodA -> nodeA Pod interface -> route/encapsulation -> underlay -> nodeB -> PodB\ninner payload + overlay headers must fit the effective path MTU',
-('Trace an overlay path','These are logical responsibilities, not guaranteed interface names.','text','inner:10.244.1.7 ->10.244.2.9\nouter:nodeA address ->nodeB address\ndestination node removes encapsulation and delivers inner packet','Inner Pod addresses and outer transport addresses serve different layers.'),
-('Reason about header budget','This arithmetic is synthetic.','python','underlay_mtu=1500\noverhead=50\nprint(underlay_mtu-overhead)','1450 bytes before further constraints; actual overhead depends on the implementation.'),
-[('Distinguish CNI interface and network implementation.','A plugin contract versus a concrete routing/policy system.','Do not infer packet behavior from the acronym alone. Inspect the installed implementation and configuration.'),('Label inner and outer addresses.','Pod endpoints inside, node transport endpoints outside in the overlay example.','Encapsulation adds a delivery layer. The outer network need not route every Pod address directly.'),('Draw a two-node request path.','Pod interfaces, node forwarding and underlay hops are explicit.','A complete path identifies which component can drop or misroute traffic at each stage.'),('Diagnose small-request success with large-payload failure.','Investigate MTU and path behavior in addition to app limits.','Payload-dependent failure differs from a universally missing endpoint. Use bounded tests and implementation-specific evidence.'),('Explain why Ready does not prove cross-node reachability.','Readiness may be a local check with a narrower path.','A healthy local listener can coexist with broken node-to-node networking. Test from the relevant caller.'),('Plan a CNI-specific qualification without replacing the plugin.','Read configuration, state the implementation and run only owned bounded probes.','Changing the cluster network is a separate administrative action. A lesson should not perform it as an incidental repair.')],
-'https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/', 'https://www.cni.dev/docs/')
+The synthetic topology uses two nodes and two Pod subnets to make the hop sequence visible. It does not claim that every CNI assigns per-node CIDRs in the same way. Optional live observations require the exact prepared CNI and permissions; the course does not install or replace network plugins.""",
+    "PodA -> nodeA Pod interface -> route/encapsulation -> underlay -> nodeB -> PodB\ninner payload + overlay headers must fit the effective path MTU",
+    (
+        "Trace an overlay path",
+        "These are logical responsibilities, not guaranteed interface names.",
+        "text",
+        "inner:10.244.1.7 ->10.244.2.9\nouter:nodeA address ->nodeB address\ndestination node removes encapsulation and delivers inner packet",
+        "Inner Pod addresses and outer transport addresses serve different layers.",
+    ),
+    (
+        "Reason about header budget",
+        "This arithmetic is synthetic.",
+        "python",
+        "underlay_mtu=1500\noverhead=50\nprint(underlay_mtu-overhead)",
+        "1450 bytes before further constraints; actual overhead depends on the implementation.",
+    ),
+    [
+        (
+            "Distinguish CNI interface and network implementation.",
+            "A plugin contract versus a concrete routing/policy system.",
+            "Do not infer packet behavior from the acronym alone. Inspect the installed implementation and configuration.",
+        ),
+        (
+            "Label inner and outer addresses.",
+            "Pod endpoints inside, node transport endpoints outside in the overlay example.",
+            "Encapsulation adds a delivery layer. The outer network need not route every Pod address directly.",
+        ),
+        (
+            "Draw a two-node request path.",
+            "Pod interfaces, node forwarding and underlay hops are explicit.",
+            "A complete path identifies which component can drop or misroute traffic at each stage.",
+        ),
+        (
+            "Diagnose small-request success with large-payload failure.",
+            "Investigate MTU and path behavior in addition to app limits.",
+            "Payload-dependent failure differs from a universally missing endpoint. Use bounded tests and implementation-specific evidence.",
+        ),
+        (
+            "Explain why Ready does not prove cross-node reachability.",
+            "Readiness may be a local check with a narrower path.",
+            "A healthy local listener can coexist with broken node-to-node networking. Test from the relevant caller.",
+        ),
+        (
+            "Plan a CNI-specific qualification without replacing the plugin.",
+            "Read configuration, state the implementation and run only owned bounded probes.",
+            "Changing the cluster network is a separate administrative action. A lesson should not perform it as an incidental repair.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/",
+    "https://www.cni.dev/docs/",
+)
 
-add('ClusterIP Services and Layer4 routing',['ClusterIP','Service selector','port','targetPort'],
-'''A ClusterIP Service gives clients a stable virtual endpoint for a changing set of backends. The selector usually identifies Pods by labels. The Service port is what clients address; targetPort identifies the backend listener, either numerically or through a named container port. A Service does not select an image name or Deployment name directly.
+add(
+    "ClusterIP Services and Layer4 routing",
+    ["ClusterIP", "Service selector", "port", "targetPort"],
+    """A ClusterIP Service gives clients a stable virtual endpoint for a changing set of backends. The selector usually identifies Pods by labels. The Service port is what clients address; targetPort identifies the backend listener, either numerically or through a named container port. A Service does not select an image name or Deployment name directly.
 
 Layer4 routing concerns transport connections such as TCP. It does not normally choose a backend by HTTP path or rewrite an application URL. HTTP-aware routing belongs to a proxy or controller with that capability. A long-lived TCP connection can continue using one backend even if individual requests are numerous.
 
-A Service can exist with no eligible endpoints. Its ClusterIP allocation is not a health certificate. Read the selector, matching Pod labels, readiness and EndpointSlices, then issue a fresh request from the intended caller. Each observation narrows a different possible failure.''',
-'''The fixture uses Service port80 and named targetPort http, resolving to containerPort8080 on the selected Pod. Named ports help avoid duplicating a number but still need a matching declaration and real listener. Protocol defaults and transport type should be explicit when teaching non-TCP workloads.
+A Service can exist with no eligible endpoints. Its ClusterIP allocation is not a health certificate. Read the selector, matching Pod labels, readiness and EndpointSlices, then issue a fresh request from the intended caller. Each observation narrows a different possible failure.""",
+    """The fixture uses Service port80 and named targetPort http, resolving to containerPort8080 on the selected Pod. Named ports help avoid duplicating a number but still need a matching declaration and real listener. Protocol defaults and transport type should be explicit when teaching non-TCP workloads.
 
-A selectorless Service can be paired with manually managed EndpointSlices, but it has a different ownership model and extra restrictions. This introductory fixture uses selectors so the controller maintains endpoints. Do not manually edit controller-owned slices to hide a wrong selector.''',
-'client -> ClusterIP:80 -> service data plane -> ready endpoint PodIP:8080\nselector labels -> endpoint controller -> EndpointSlice addresses and ports',
-('Read the complete routing fields','This is a Service fragment from the maintained fixture.','yaml','type: ClusterIP\nselector:\n  app: network-study\nports:\n  - name: http\n    port: 80\n    targetPort: http','Clients use80; the named backend port resolves to the app listener8080.'),
-('Compare a selector mismatch','Only the labels changed.','text','Service selector: app=network-study\nPod labels: app=wrong\nresult: no matching backend Pods','The Service can retain its virtual IP while traffic has no eligible destination.'),
-[('Predict client and backend ports.','Client80 and backend8080.','The two fields belong to different sides of the mapping. The app listener must match the resolved target.'),('Change only the Service selector in a synthetic record.','The matching endpoint set becomes empty.','The Service object can remain valid. Controller-derived endpoint evidence reveals the mismatch.'),('Trace a fresh TCP request through the Service.','Caller, virtual destination, chosen endpoint and listener are named.','A connection-level path is more precise than saying the Service sends traffic to a Deployment.'),('Diagnose a ClusterIP with no ready endpoints.','Inspect selector matches and readiness before external routing.','Allocation and backend eligibility are separate. A public load balancer would not fix an empty backend set.'),('Explain why HTTP path routing is not provided by this Service.','Layer4 connection selection does not interpret URL paths.','An HTTP-aware proxy needs a separate configuration and implementation. Keep transport and application routing distinct.'),('Design a stable endpoint for replacing Pods.','Clients use Service discovery while backend identities can change.','Verify replacement with UIDs when needed. Stable access does not mean the same Pod handled every request.')],
-'https://kubernetes.io/docs/concepts/services-networking/service/')
+A selectorless Service can be paired with manually managed EndpointSlices, but it has a different ownership model and extra restrictions. This introductory fixture uses selectors so the controller maintains endpoints. Do not manually edit controller-owned slices to hide a wrong selector.""",
+    "client -> ClusterIP:80 -> service data plane -> ready endpoint PodIP:8080\nselector labels -> endpoint controller -> EndpointSlice addresses and ports",
+    (
+        "Read the complete routing fields",
+        "This is a Service fragment from the maintained fixture.",
+        "yaml",
+        "type: ClusterIP\nselector:\n  app: network-study\nports:\n  - name: http\n    port: 80\n    targetPort: http",
+        "Clients use80; the named backend port resolves to the app listener8080.",
+    ),
+    (
+        "Compare a selector mismatch",
+        "Only the labels changed.",
+        "text",
+        "Service selector: app=network-study\nPod labels: app=wrong\nresult: no matching backend Pods",
+        "The Service can retain its virtual IP while traffic has no eligible destination.",
+    ),
+    [
+        (
+            "Predict client and backend ports.",
+            "Client80 and backend8080.",
+            "The two fields belong to different sides of the mapping. The app listener must match the resolved target.",
+        ),
+        (
+            "Change only the Service selector in a synthetic record.",
+            "The matching endpoint set becomes empty.",
+            "The Service object can remain valid. Controller-derived endpoint evidence reveals the mismatch.",
+        ),
+        (
+            "Trace a fresh TCP request through the Service.",
+            "Caller, virtual destination, chosen endpoint and listener are named.",
+            "A connection-level path is more precise than saying the Service sends traffic to a Deployment.",
+        ),
+        (
+            "Diagnose a ClusterIP with no ready endpoints.",
+            "Inspect selector matches and readiness before external routing.",
+            "Allocation and backend eligibility are separate. A public load balancer would not fix an empty backend set.",
+        ),
+        (
+            "Explain why HTTP path routing is not provided by this Service.",
+            "Layer4 connection selection does not interpret URL paths.",
+            "An HTTP-aware proxy needs a separate configuration and implementation. Keep transport and application routing distinct.",
+        ),
+        (
+            "Design a stable endpoint for replacing Pods.",
+            "Clients use Service discovery while backend identities can change.",
+            "Verify replacement with UIDs when needed. Stable access does not mean the same Pod handled every request.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/service/",
+)
 
-add('Cluster DNS, search paths, caching and discovery',['DNS','FQDN','search domain','cache'],
-'''DNS maps names to records such as IP addresses. Kubernetes cluster DNS creates service records according to namespace and cluster domain. A short name can resolve differently depending on the caller’s namespace and search configuration. A fully qualified service name makes the intended scope clearer.
+add(
+    "Cluster DNS, search paths, caching and discovery",
+    ["DNS", "FQDN", "search domain", "cache"],
+    """DNS maps names to records such as IP addresses. Kubernetes cluster DNS creates service records according to namespace and cluster domain. A short name can resolve differently depending on the caller’s namespace and search configuration. A fully qualified service name makes the intended scope clearer.
 
 For a typical cluster domain cluster.local, a Service named api in namespace study has a name like api.study.svc.cluster.local. The cluster domain is configurable, so do not hardcode it as a universal fact in a reusable client. A DNS answer establishes name resolution, not a listening process or healthy application.
 
-Caching affects how quickly clients observe changes. Resolver libraries and applications can cache differently, and long-lived connections can continue using an existing destination without a new DNS lookup. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.''',
-'''A Pod’s dnsPolicy and dnsConfig influence resolver behavior. Search suffixes and ndots can cause multiple queries for one short-looking name. NetworkPolicy that blocks DNS can break service discovery even when direct IP transport works.
+Caching affects how quickly clients observe changes. Resolver libraries and applications can cache differently, and long-lived connections can continue using an existing destination without a new DNS lookup. Diagnose the actual client behavior before concluding that a DNS record update should have moved every request immediately.""",
+    """A Pod’s dnsPolicy and dnsConfig influence resolver behavior. Search suffixes and ndots can cause multiple queries for one short-looking name. NetworkPolicy that blocks DNS can break service discovery even when direct IP transport works.
 
-The fixture’s names are synthetic. Optional host observations should inspect the relevant Pod’s resolver and issue a bounded lookup from the intended namespace. Do not use a successful lookup on the laptop as proof of what a Pod’s resolver sees.''',
-'client name -> resolver search rules/cache -> cluster DNS -> Service record\nresolved address -> separate TCP connection -> separate HTTP behavior',
-('Expand a namespaced service name','Assume cluster.local only for this synthetic example.','text','short from study namespace: api\nqualified: api.study\nfully qualified: api.study.svc.cluster.local.','The trailing dot makes the name absolute for DNS resolution; actual cluster domain must be known.'),
-('Separate resolution from serving','These observations can disagree without contradiction.','text','DNS: api ->10.96.0.20\nTCP: connection refused\nHTTP: no response available','Name resolution succeeded; the failure is later in the path.'),
-[('Predict a short-name lookup from another namespace.','It may search that namespace rather than the intended study service.','Caller context changes name expansion. Use an appropriately qualified name when crossing namespaces.'),('State the configurable part of the FQDN.','The cluster domain is not universally cluster.local.','Read the prepared environment’s configuration. Teaching defaults should be labeled as examples.'),('Draw resolution and connection as separate phases.','DNS record, transport connection and application response have distinct evidence.','This prevents a valid DNS result from being overclaimed as service health.'),('Diagnose direct-IP success with name failure.','Investigate resolver configuration, DNS reachability and policy.','The app listener can be correct while discovery fails. Do not change its port before locating the DNS problem.'),('Explain stale behavior after endpoint changes.','Caching or existing connections can delay fresh destination use.','Inspect the client lifecycle and resolver policy. Repeatedly changing records without evidence can make the incident harder to interpret.'),('Design robust service discovery for a client.','Known namespace/domain, bounded resolution/connection and safe reconnect behavior.','A client must handle transient discovery and transport failures while respecting operation retry safety.')],
-'https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/', 'https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/')
+The fixture’s names are synthetic. Optional host observations should inspect the relevant Pod’s resolver and issue a bounded lookup from the intended namespace. Do not use a successful lookup on the laptop as proof of what a Pod’s resolver sees.""",
+    "client name -> resolver search rules/cache -> cluster DNS -> Service record\nresolved address -> separate TCP connection -> separate HTTP behavior",
+    (
+        "Expand a namespaced service name",
+        "Assume cluster.local only for this synthetic example.",
+        "text",
+        "short from study namespace: api\nqualified: api.study\nfully qualified: api.study.svc.cluster.local.",
+        "The trailing dot makes the name absolute for DNS resolution; actual cluster domain must be known.",
+    ),
+    (
+        "Separate resolution from serving",
+        "These observations can disagree without contradiction.",
+        "text",
+        "DNS: api ->10.96.0.20\nTCP: connection refused\nHTTP: no response available",
+        "Name resolution succeeded; the failure is later in the path.",
+    ),
+    [
+        (
+            "Predict a short-name lookup from another namespace.",
+            "It may search that namespace rather than the intended study service.",
+            "Caller context changes name expansion. Use an appropriately qualified name when crossing namespaces.",
+        ),
+        (
+            "State the configurable part of the FQDN.",
+            "The cluster domain is not universally cluster.local.",
+            "Read the prepared environment’s configuration. Teaching defaults should be labeled as examples.",
+        ),
+        (
+            "Draw resolution and connection as separate phases.",
+            "DNS record, transport connection and application response have distinct evidence.",
+            "This prevents a valid DNS result from being overclaimed as service health.",
+        ),
+        (
+            "Diagnose direct-IP success with name failure.",
+            "Investigate resolver configuration, DNS reachability and policy.",
+            "The app listener can be correct while discovery fails. Do not change its port before locating the DNS problem.",
+        ),
+        (
+            "Explain stale behavior after endpoint changes.",
+            "Caching or existing connections can delay fresh destination use.",
+            "Inspect the client lifecycle and resolver policy. Repeatedly changing records without evidence can make the incident harder to interpret.",
+        ),
+        (
+            "Design robust service discovery for a client.",
+            "Known namespace/domain, bounded resolution/connection and safe reconnect behavior.",
+            "A client must handle transient discovery and transport failures while respecting operation retry safety.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/",
+    "https://kubernetes.io/docs/tasks/administer-cluster/dns-debugging-resolution/",
+)
 
-add('EndpointSlices, readiness and backend identity',['EndpointSlice','ready','serving','terminating'],
-'''EndpointSlices describe sets of network endpoints associated with a Service. They include addresses, ports and condition information, and can reference the Pod supplying an endpoint. The controller uses them to scale endpoint management beyond one monolithic object. A Service can have several slices, so reading only the first is incomplete.
+add(
+    "EndpointSlices, readiness and backend identity",
+    ["EndpointSlice", "ready", "serving", "terminating"],
+    """EndpointSlices describe sets of network endpoints associated with a Service. They include addresses, ports and condition information, and can reference the Pod supplying an endpoint. The controller uses them to scale endpoint management beyond one monolithic object. A Service can have several slices, so reading only the first is incomplete.
 
 Readiness influences whether a Pod should receive ordinary new Service traffic under the relevant routing behavior. Running is a process phase and does not imply Ready. Endpoint conditions ready, serving and terminating describe related but distinct lifecycle facts. Under the API contract, an omitted ready or serving condition is interpreted as true, and omitted terminating as false. For Pod-backed endpoints, serving follows the Pod Ready condition. Ordinary ready generally expresses serving and not terminating, with documented overrides.
 
-Identity matters during replacement. A new Pod can reuse a familiar name pattern but has a new UID. To prove traffic eligibility belongs to the intended revision, join endpoint target references to current Pod UIDs and inspect actual application behavior. A stale IP list from an earlier run is insufficient.''',
-'''The following table distinguishes common condition states. It is a contract-reading exercise, not a fabricated runtime result.
+Identity matters during replacement. A new Pod can reuse a familiar name pattern but has a new UID. To prove traffic eligibility belongs to the intended revision, join endpoint target references to current Pod UIDs and inspect actual application behavior. A stale IP list from an earlier run is insufficient.""",
+    """The following table distinguishes common condition states. It is a contract-reading exercise, not a fabricated runtime result.
 
 | Endpoint state | serving | terminating | ordinary ready |
 | --- | --- | --- | --- |
@@ -113,287 +400,1146 @@ For publishNotReadyAddresses, ready can be forced true even when ordinary applic
 
 Select slices by the standard service-name label and aggregate all returned endpoints of the relevant address family and port. Match targetRef.uid where supplied, rather than assuming an address uniquely identifies the expected Pod forever. Preserve slice ownership and resource versions in a diagnostic record.
 
-The fixture includes two endpoint observations, one ready and one not ready. The offline checker classifies them, but actual routing remains an owned runtime observation. Do not manually mark a controller-owned endpoint ready to bypass an app readiness failure.''',
-'Pod readiness + Service selector -> EndpointSlice controller -> endpoint conditions\nservice data plane consumes endpoint state -> fresh client request proves actual delivery',
-('Read two synthetic endpoints','These are teaching observations, not API output from your cluster.','json','{"endpoints":[{"ip":"10.244.1.7","uid":"pod-a","ready":true},{"ip":"10.244.2.9","uid":"pod-b","ready":false}]}','Only pod-a is eligible under the simplified ordinary-ready policy used in this fixture.'),
-('Distinguish process and routing readiness','The state can be Running while the app is not ready.','text','Pod phase=Running\nReady condition=False\nEndpoint ready=False','A live process is excluded from ordinary new traffic by the stated readiness policy.'),
-[('Predict the ready endpoint set.','Only the endpoint referencing pod-a.','Filter on the stated condition and retain identity. Counting all addresses would overstate eligible capacity.'),('Aggregate endpoints across two slices.','The result includes every relevant slice without duplicate identities.','Large Services can be split across slices. A first-item assumption loses backends.'),('Join eligible endpoint references to current Pod UIDs.','Every accepted backend belongs to the intended current workload.','The UID relation is stronger than a familiar name or IP. It supports replacement and revision reasoning.'),('Diagnose Running but no ready endpoints.','Inspect readiness and selector/controller observations.','The process exists, but eligibility has not been established. Recreating the Service is not automatically the right repair.'),('Explain terminating and serving conditions carefully.','They inform draining behavior and are not identical Boolean synonyms.','Traffic handling can depend on policy and implementation. State the exact condition and observed route rather than flattening all lifecycle states.'),('Prove a replacement backend is actually used.','New UID eligibility plus a fresh source-bound application response.','Control-plane readiness is necessary evidence but does not alone prove the client reached that backend.')],
-'https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/', 'https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/', 'https://kubernetes.io/docs/reference/kubernetes-api/discovery/endpoint-slice-v1/')
+The fixture includes two endpoint observations, one ready and one not ready. The offline checker classifies them, but actual routing remains an owned runtime observation. Do not manually mark a controller-owned endpoint ready to bypass an app readiness failure.""",
+    "Pod readiness + Service selector -> EndpointSlice controller -> endpoint conditions\nservice data plane consumes endpoint state -> fresh client request proves actual delivery",
+    (
+        "Read two synthetic endpoints",
+        "These are teaching observations, not API output from your cluster.",
+        "json",
+        '{"endpoints":[{"ip":"10.244.1.7","uid":"pod-a","ready":true},{"ip":"10.244.2.9","uid":"pod-b","ready":false}]}',
+        "Only pod-a is eligible under the simplified ordinary-ready policy used in this fixture.",
+    ),
+    (
+        "Distinguish process and routing readiness",
+        "The state can be Running while the app is not ready.",
+        "text",
+        "Pod phase=Running\nReady condition=False\nEndpoint ready=False",
+        "A live process is excluded from ordinary new traffic by the stated readiness policy.",
+    ),
+    [
+        (
+            "Predict the ready endpoint set.",
+            "Only the endpoint referencing pod-a.",
+            "Filter on the stated condition and retain identity. Counting all addresses would overstate eligible capacity.",
+        ),
+        (
+            "Aggregate endpoints across two slices.",
+            "The result includes every relevant slice without duplicate identities.",
+            "Large Services can be split across slices. A first-item assumption loses backends.",
+        ),
+        (
+            "Join eligible endpoint references to current Pod UIDs.",
+            "Every accepted backend belongs to the intended current workload.",
+            "The UID relation is stronger than a familiar name or IP. It supports replacement and revision reasoning.",
+        ),
+        (
+            "Diagnose Running but no ready endpoints.",
+            "Inspect readiness and selector/controller observations.",
+            "The process exists, but eligibility has not been established. Recreating the Service is not automatically the right repair.",
+        ),
+        (
+            "Explain terminating and serving conditions carefully.",
+            "They inform draining behavior and are not identical Boolean synonyms.",
+            "Traffic handling can depend on policy and implementation. State the exact condition and observed route rather than flattening all lifecycle states.",
+        ),
+        (
+            "Prove a replacement backend is actually used.",
+            "New UID eligibility plus a fresh source-bound application response.",
+            "Control-plane readiness is necessary evidence but does not alone prove the client reached that backend.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/",
+    "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/",
+    "https://kubernetes.io/docs/reference/kubernetes-api/discovery/endpoint-slice-v1/",
+)
 
-add('Service data planes: iptables, IPVS, nftables and eBPF',['kube-proxy','iptables','nftables','eBPF'],
-'''The Service API describes desired routing behavior. A data-plane implementation turns that intent into packet handling on nodes. kube-proxy is a common component that watches Service and endpoint state and programs the supported backend for the cluster version. Other networking implementations can provide Service routing through eBPF or different mechanisms.
+add(
+    "Service data planes: iptables, IPVS, nftables and eBPF",
+    ["kube-proxy", "iptables", "nftables", "eBPF"],
+    """The Service API describes desired routing behavior. A data-plane implementation turns that intent into packet handling on nodes. kube-proxy is a common component that watches Service and endpoint state and programs the supported backend for the cluster version. Other networking implementations can provide Service routing through eBPF or different mechanisms.
 
 iptables, IPVS and nftables refer to Linux packet-processing facilities with different models and operational properties. Their availability, maturity and support status depend on the Kubernetes and operating-system version. Do not assume every current cluster supports every mode or that an old performance claim applies unchanged.
 
-An eBPF-based implementation can attach programmable logic at particular kernel hooks. That changes how traffic is handled and observed, but it does not eliminate the need for endpoint identity, policy, routing and application acceptance. The API contract and the implementation evidence remain separate layers.''',
-'''Begin diagnosis by identifying the installed implementation, version and active mode. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
+An eBPF-based implementation can attach programmable logic at particular kernel hooks. That changes how traffic is handled and observed, but it does not eliminate the need for endpoint identity, policy, routing and application acceptance. The API contract and the implementation evidence remain separate layers.""",
+    """Begin diagnosis by identifying the installed implementation, version and active mode. A Service object can be correct while a node’s programmed state is stale or broken. Conversely, reading a packet rule does not prove the application accepts a connection.
 
-The course does not modify node packet tables or switch proxy modes. Use the synthetic control/data-plane sequence and consult the prepared environment’s operator documentation. Any privileged host inspection is a separately authorized capability, not part of a browser lesson.''',
-'Service/EndpointSlice API -> watch/reconciliation -> node data-plane state\npacket arrives -> implementation lookup/translation -> selected endpoint -> reply path',
-('Separate API and implementation','The same Service intent can have different implementations.','text','API intent: ClusterIP10.96.0.20:80 -> ready endpoints\nimplementationA: kube-proxy supported kernel mode\nimplementationB: CNI-provided eBPF service routing','The intended mapping is shared; observation tools and failure modes can differ.'),
-('Classify a stale-node symptom','This is a synthetic incident comparison.','text','API endpoint list is current\nclient on nodeA succeeds\nclient on nodeB fails\napp endpoint responds directly from an allowed probe','Investigate node-specific routing/policy state without assuming the Service spec is wrong.'),
-[('Distinguish Service API and data plane.','Desired routing objects versus actual packet handling.','A declarative object needs an implementation to affect traffic. Both layers require evidence.'),('Identify why proxy-mode advice is version-sensitive.','Support and behavior change with Kubernetes and kernel releases.','Use the documentation matching the installed environment rather than a universal mode recommendation.'),('Draw the watch-to-packet sequence.','API observation, reconciliation, programmed state and packet decision are separate.','The sequence gives you places to check when intent and behavior disagree.'),('Diagnose one-node-only Service failure.','Compare node-local data-plane and policy behavior.','A cluster-wide spec can be correct while one node is unhealthy. Preserve caller placement in the evidence.'),('Explain why eBPF is not an application correctness proof.','It is an implementation technique for specific kernel behavior.','A fast or sophisticated data plane can still route to an incorrect app response. Test the user-visible contract.'),('Plan an implementation-specific incident review.','Record active mode, versions, owned probe results and permitted diagnostics.','Do not change packet tables or modes as a speculative lesson repair. Escalate the missing operator capability explicitly.')],
-'https://kubernetes.io/docs/reference/networking/virtual-ips/', 'https://kubernetes.io/docs/concepts/services-networking/service/')
+The course does not modify node packet tables or switch proxy modes. Use the synthetic control/data-plane sequence and consult the prepared environment’s operator documentation. Any privileged host inspection is a separately authorized capability, not part of a browser lesson.""",
+    "Service/EndpointSlice API -> watch/reconciliation -> node data-plane state\npacket arrives -> implementation lookup/translation -> selected endpoint -> reply path",
+    (
+        "Separate API and implementation",
+        "The same Service intent can have different implementations.",
+        "text",
+        "API intent: ClusterIP10.96.0.20:80 -> ready endpoints\nimplementationA: kube-proxy supported kernel mode\nimplementationB: CNI-provided eBPF service routing",
+        "The intended mapping is shared; observation tools and failure modes can differ.",
+    ),
+    (
+        "Classify a stale-node symptom",
+        "This is a synthetic incident comparison.",
+        "text",
+        "API endpoint list is current\nclient on nodeA succeeds\nclient on nodeB fails\napp endpoint responds directly from an allowed probe",
+        "Investigate node-specific routing/policy state without assuming the Service spec is wrong.",
+    ),
+    [
+        (
+            "Distinguish Service API and data plane.",
+            "Desired routing objects versus actual packet handling.",
+            "A declarative object needs an implementation to affect traffic. Both layers require evidence.",
+        ),
+        (
+            "Identify why proxy-mode advice is version-sensitive.",
+            "Support and behavior change with Kubernetes and kernel releases.",
+            "Use the documentation matching the installed environment rather than a universal mode recommendation.",
+        ),
+        (
+            "Draw the watch-to-packet sequence.",
+            "API observation, reconciliation, programmed state and packet decision are separate.",
+            "The sequence gives you places to check when intent and behavior disagree.",
+        ),
+        (
+            "Diagnose one-node-only Service failure.",
+            "Compare node-local data-plane and policy behavior.",
+            "A cluster-wide spec can be correct while one node is unhealthy. Preserve caller placement in the evidence.",
+        ),
+        (
+            "Explain why eBPF is not an application correctness proof.",
+            "It is an implementation technique for specific kernel behavior.",
+            "A fast or sophisticated data plane can still route to an incorrect app response. Test the user-visible contract.",
+        ),
+        (
+            "Plan an implementation-specific incident review.",
+            "Record active mode, versions, owned probe results and permitted diagnostics.",
+            "Do not change packet tables or modes as a speculative lesson repair. Escalate the missing operator capability explicitly.",
+        ),
+    ],
+    "https://kubernetes.io/docs/reference/networking/virtual-ips/",
+    "https://kubernetes.io/docs/concepts/services-networking/service/",
+)
 
-add('NodePort and the path through a node',['NodePort','node address','service port','external reachability'],
-'''A NodePort Service allocates a port from the cluster’s configured NodePort range and makes the Service available through relevant node addresses according to the data-plane configuration. It usually also has a ClusterIP. A client addresses nodeIP:nodePort, and traffic is directed to an eligible backend.
+add(
+    "NodePort and the path through a node",
+    ["NodePort", "node address", "service port", "external reachability"],
+    """A NodePort Service allocates a port from the cluster’s configured NodePort range and makes the Service available through relevant node addresses according to the data-plane configuration. It usually also has a ClusterIP. A client addresses nodeIP:nodePort, and traffic is directed to an eligible backend.
 
 A node address must actually be reachable from the client. Desktop cluster nodes may be containers or VMs behind additional network boundaries. A valid NodePort allocation does not automatically open a host firewall, publish a VM port or create an internet route. Local and cloud setups therefore have different external paths.
 
-The commonly seen range30000 through32767 is a default, not a universal constant. Explicit allocations must fit the configured range and avoid collisions. Do not expose a teaching service publicly just to make a diagram seem more realistic.''',
-'''Read port as the ClusterIP-facing Service port, targetPort as the Pod listener and nodePort as the node-facing port. The application still listens at its target endpoint. externalTrafficPolicy can affect endpoint selection and source address behavior, covered in a later chapter.
+The commonly seen range30000 through32767 is a default, not a universal constant. Explicit allocations must fit the configured range and avoid collisions. Do not expose a teaching service publicly just to make a diagram seem more realistic.""",
+    """Read port as the ClusterIP-facing Service port, targetPort as the Pod listener and nodePort as the node-facing port. The application still listens at its target endpoint. externalTrafficPolicy can affect endpoint selection and source address behavior, covered in a later chapter.
 
-The example uses nodePort30080 only in a manual fixture. The ordinary classroom adapter does not admit this wider networking operation. A local kind setup needs deliberately prepared port mappings or another supported access route before host-browser acceptance is possible.''',
-'external client -> reachable nodeIP:30080 -> Service data plane -> PodIP:8080\ninternal client -> ClusterIP:80 -> same logical Service -> eligible Pod',
-('Read all three ports','This is a manual-only Service fragment.','yaml','type: NodePort\nports:\n  - port: 80\n    targetPort: 8080\n    nodePort: 30080','Three different roles; none changes the app listener automatically.'),
-('Find the missing desktop hop','The node may not be the laptop network namespace.','text','laptop -> desktop VM -> kind node container -> NodePort -> Pod\nmissing VM/container port mapping can block the first hops','The Kubernetes object can be valid while the laptop has no route to it.'),
-[('Label port, targetPort and nodePort.','80,8080 and30080 serve distinct path positions.','A request must use the port appropriate to its caller and destination address.'),('Predict whether a private node is publicly reachable.','No public route is implied by NodePort allocation.','Infrastructure routing and firewall policy remain necessary. Service type alone does not publish the host to the internet.'),('Draw the local-engine NodePort path.','Include VM or node-container boundaries when present.','Desktop environments add hops that a cloud-node diagram can omit. Name the actual host arrangement.'),('Diagnose timeout before traffic reaches the node.','Inspect host/VM route and mapping rather than Pod selectors first.','Locate the earliest failing hop. A correct backend cannot answer packets that never reach the node.'),('Explain the NodePort range as configurable.','The common default is not a guaranteed cluster setting.','Read the prepared cluster configuration before selecting a fixed port. Avoid collisions with existing owned resources.'),('Compare NodePort with a deliberate loopback port-forward.','They have different scopes, lifetimes and routing mechanisms.','A temporary developer tunnel can be useful but does not qualify a NodePort or public load-balancer path.')],
-'https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport', 'https://kind.sigs.k8s.io/docs/user/configuration/#extra-port-mappings')
+The example uses nodePort30080 only in a manual fixture. The ordinary classroom adapter does not admit this wider networking operation. A local kind setup needs deliberately prepared port mappings or another supported access route before host-browser acceptance is possible.""",
+    "external client -> reachable nodeIP:30080 -> Service data plane -> PodIP:8080\ninternal client -> ClusterIP:80 -> same logical Service -> eligible Pod",
+    (
+        "Read all three ports",
+        "This is a manual-only Service fragment.",
+        "yaml",
+        "type: NodePort\nports:\n  - port: 80\n    targetPort: 8080\n    nodePort: 30080",
+        "Three different roles; none changes the app listener automatically.",
+    ),
+    (
+        "Find the missing desktop hop",
+        "The node may not be the laptop network namespace.",
+        "text",
+        "laptop -> desktop VM -> kind node container -> NodePort -> Pod\nmissing VM/container port mapping can block the first hops",
+        "The Kubernetes object can be valid while the laptop has no route to it.",
+    ),
+    [
+        (
+            "Label port, targetPort and nodePort.",
+            "80,8080 and30080 serve distinct path positions.",
+            "A request must use the port appropriate to its caller and destination address.",
+        ),
+        (
+            "Predict whether a private node is publicly reachable.",
+            "No public route is implied by NodePort allocation.",
+            "Infrastructure routing and firewall policy remain necessary. Service type alone does not publish the host to the internet.",
+        ),
+        (
+            "Draw the local-engine NodePort path.",
+            "Include VM or node-container boundaries when present.",
+            "Desktop environments add hops that a cloud-node diagram can omit. Name the actual host arrangement.",
+        ),
+        (
+            "Diagnose timeout before traffic reaches the node.",
+            "Inspect host/VM route and mapping rather than Pod selectors first.",
+            "Locate the earliest failing hop. A correct backend cannot answer packets that never reach the node.",
+        ),
+        (
+            "Explain the NodePort range as configurable.",
+            "The common default is not a guaranteed cluster setting.",
+            "Read the prepared cluster configuration before selecting a fixed port. Avoid collisions with existing owned resources.",
+        ),
+        (
+            "Compare NodePort with a deliberate loopback port-forward.",
+            "They have different scopes, lifetimes and routing mechanisms.",
+            "A temporary developer tunnel can be useful but does not qualify a NodePort or public load-balancer path.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport",
+    "https://kind.sigs.k8s.io/docs/user/configuration/#extra-port-mappings",
+)
 
-add('LoadBalancer Services: cloud controllers and local limitations',['LoadBalancer','cloud controller','health check','external address'],
-'''A load balancer distributes traffic among eligible destinations. A Kubernetes Service of type LoadBalancer asks an integrated implementation to provision or configure an external entrypoint. The API object is a request; a controller and supporting infrastructure must exist to fulfill it.
+add(
+    "LoadBalancer Services: cloud controllers and local limitations",
+    ["LoadBalancer", "cloud controller", "health check", "external address"],
+    """A load balancer distributes traffic among eligible destinations. A Kubernetes Service of type LoadBalancer asks an integrated implementation to provision or configure an external entrypoint. The API object is a request; a controller and supporting infrastructure must exist to fulfill it.
 
 In a cloud, the controller may create provider resources, addresses, listeners and health checks. A local cluster may have no such integration and leave the external address pending. Local load-balancer implementations have their own routing and address-allocation requirements. The course does not install one or incur cloud resources automatically.
 
-Load balancing is not a database replication mechanism, a certificate authority or application authorization. A reachable address can still route to unready nodes, wrong ports or an app that returns errors. Diagnose controller status, infrastructure health and actual request behavior separately.''',
-'''Inspect Service spec.type, loadBalancerClass when used, traffic policy, ports and status.loadBalancer.ingress. An ingress entry can contain an IP or hostname. Do not assume status arrives immediately or that a returned hostname resolves from every network.
+Load balancing is not a database replication mechanism, a certificate authority or application authorization. A reachable address can still route to unready nodes, wrong ports or an app that returns errors. Diagnose controller status, infrastructure health and actual request behavior separately.""",
+    """Inspect Service spec.type, loadBalancerClass when used, traffic policy, ports and status.loadBalancer.ingress. An ingress entry can contain an IP or hostname. Do not assume status arrives immediately or that a returned hostname resolves from every network.
 
-Many implementations use NodePorts, while others can route directly to Pods or use alternate mechanisms. The allocation and routing design is implementation-specific. Changing allocateLoadBalancerNodePorts without knowing the implementation can remove a required path.''',
-'Service intent -> load-balancer controller -> provider/local infrastructure\nclient -> external listener -> node or Pod backend path -> application',
-('Interpret pending external status','This is a synthetic local-cluster observation.','text','spec.type=LoadBalancer\nstatus.loadBalancer.ingress=[]\nno load-balancer controller is prepared','Pending status is an unavailable capability, not proof that the app container is broken.'),
-('Separate listener and application acceptance','A sequence of increasingly strong observations.','text','external address assigned -> listener reachable -> healthy backend selected\n-> expected HTTP route -> expected application body','Address allocation alone does not establish the final result.'),
-[('Predict a LoadBalancer Service on an unsupported local cluster.','The requested external entrypoint may remain unprovisioned.','The API type needs an implementation. Do not fabricate a public IP or change to an unrelated cluster.'),('Name the controller and infrastructure responsibilities.','Reconcile the request and provision actual routing resources.','Kubernetes desired state and provider operations are linked but distinct systems with separate failures.'),('Draw both node-backed and direct-Pod conceptual paths.','The implementation choice is explicit rather than assumed.','Different load balancers use different backend models. Qualification must match the actual installed design.'),('Diagnose assigned address with no successful requests.','Inspect listener, health checks, backend route and app behavior.','A status field is one checkpoint. Continue through the actual request path instead of declaring the service healthy.'),('Explain load-balancer health versus Pod readiness.','Infrastructure health and Kubernetes endpoint eligibility can test different things.','A node health check may not prove the intended application response. Correlate the layers.'),('Plan a local versus cloud qualification.','Named implementation, owned resources, cost/cleanup boundary and real request evidence.','Cloud provisioning is not a free side effect of reading a tutorial. Keep ownership and cleanup explicit before any live experiment.')],
-'https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer', 'https://kubernetes.io/docs/concepts/architecture/cloud-controller/')
+Many implementations use NodePorts, while others can route directly to Pods or use alternate mechanisms. The allocation and routing design is implementation-specific. Changing allocateLoadBalancerNodePorts without knowing the implementation can remove a required path.""",
+    "Service intent -> load-balancer controller -> provider/local infrastructure\nclient -> external listener -> node or Pod backend path -> application",
+    (
+        "Interpret pending external status",
+        "This is a synthetic local-cluster observation.",
+        "text",
+        "spec.type=LoadBalancer\nstatus.loadBalancer.ingress=[]\nno load-balancer controller is prepared",
+        "Pending status is an unavailable capability, not proof that the app container is broken.",
+    ),
+    (
+        "Separate listener and application acceptance",
+        "A sequence of increasingly strong observations.",
+        "text",
+        "external address assigned -> listener reachable -> healthy backend selected\n-> expected HTTP route -> expected application body",
+        "Address allocation alone does not establish the final result.",
+    ),
+    [
+        (
+            "Predict a LoadBalancer Service on an unsupported local cluster.",
+            "The requested external entrypoint may remain unprovisioned.",
+            "The API type needs an implementation. Do not fabricate a public IP or change to an unrelated cluster.",
+        ),
+        (
+            "Name the controller and infrastructure responsibilities.",
+            "Reconcile the request and provision actual routing resources.",
+            "Kubernetes desired state and provider operations are linked but distinct systems with separate failures.",
+        ),
+        (
+            "Draw both node-backed and direct-Pod conceptual paths.",
+            "The implementation choice is explicit rather than assumed.",
+            "Different load balancers use different backend models. Qualification must match the actual installed design.",
+        ),
+        (
+            "Diagnose assigned address with no successful requests.",
+            "Inspect listener, health checks, backend route and app behavior.",
+            "A status field is one checkpoint. Continue through the actual request path instead of declaring the service healthy.",
+        ),
+        (
+            "Explain load-balancer health versus Pod readiness.",
+            "Infrastructure health and Kubernetes endpoint eligibility can test different things.",
+            "A node health check may not prove the intended application response. Correlate the layers.",
+        ),
+        (
+            "Plan a local versus cloud qualification.",
+            "Named implementation, owned resources, cost/cleanup boundary and real request evidence.",
+            "Cloud provisioning is not a free side effect of reading a tutorial. Keep ownership and cleanup explicit before any live experiment.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer",
+    "https://kubernetes.io/docs/concepts/architecture/cloud-controller/",
+)
 
-add('Ingress, HTTP routing and controller ownership',['Ingress','host rule','path rule','controller'],
-'''Ingress describes HTTP and HTTPS routing intent to Services. It requires an Ingress controller that interprets the resource and implements a proxy path. Creating an Ingress object without a controller does not create a web server or make a hostname reachable.
+add(
+    "Ingress, HTTP routing and controller ownership",
+    ["Ingress", "host rule", "path rule", "controller"],
+    """Ingress describes HTTP and HTTPS routing intent to Services. It requires an Ingress controller that interprets the resource and implements a proxy path. Creating an Ingress object without a controller does not create a web server or make a hostname reachable.
 
 A host rule matches the HTTP host name, while a path rule matches the URL path according to its pathType. Exact, Prefix and implementation-specific rules are not interchangeable. Prefix matching is based on path elements, not an arbitrary raw string startsWith rule. Rewriting paths is controller-specific behavior rather than a universal core Ingress feature.
 
-The controller itself needs an exposure path, such as a load balancer or a deliberately mapped local port. DNS must point the chosen hostname at that entrypoint. An HTTP route can be configured correctly while public DNS or TLS is still wrong. Diagnose the request as a chain.''',
-'''Use networking.k8s.io/v1 and specify ingressClassName when the prepared environment requires it. Each backend references a Service and a port in the API, not a Pod directly. That reference does not require every controller to send packets through the Service ClusterIP. A controller can derive eligible Pod endpoints and proxy to them directly, or use the ClusterIP according to its implementation and configuration. Traefik’s documented nativeLB option is one concrete example of these alternatives. The fixture uses a reserved example hostname and is manual-only.
+The controller itself needs an exposure path, such as a load balancer or a deliberately mapped local port. DNS must point the chosen hostname at that entrypoint. An HTTP route can be configured correctly while public DNS or TLS is still wrong. Diagnose the request as a chain.""",
+    """Use networking.k8s.io/v1 and specify ingressClassName when the prepared environment requires it. Each backend references a Service and a port in the API, not a Pod directly. That reference does not require every controller to send packets through the Service ClusterIP. A controller can derive eligible Pod endpoints and proxy to them directly, or use the ClusterIP according to its implementation and configuration. Traefik’s documented nativeLB option is one concrete example of these alternatives. The fixture uses a reserved example hostname and is manual-only.
 
-Ingress remains a supported API, while Gateway API offers a more expressive role-oriented model. Neither choice installs its own controller. A learner should understand both the API contract and the selected implementation before relying on annotations.''',
-'browser Host header -> controller listener -> host/path rule -> Service backend reference\nactual upstream: direct eligible Pod endpoint OR Service ClusterIP path, by controller configuration\n-> Pod listener -> application route',
-('Read a namespaced backend rule','This is a fragment for an explicitly prepared controller.','yaml','rules:\n  - host: study.example.test\n    http:\n      paths:\n        - path: /\n          pathType: Prefix\n          backend:\n            service:\n              name: network-study\n              port:\n                number: 80','The API backend references Service port80. The controller may resolve it to Pod listener8080 directly or route through the ClusterIP, according to its documented upstream mode.'),
-('Separate proxy route and app route','No rewrite is implied in this example.','text','client GET /reports -> Ingress forwards /reports -> app receives /reports\napp has only / -> app may return404','A matched Ingress rule does not guarantee the application implements the forwarded path. The maintained original fixture serves /version with ds60-fixture-v1 plus a newline and /ready with ready plus a newline; / returns404. Use /version for the positive routing check rather than expecting the root path to succeed.'),
-[('Predict behavior with no Ingress controller.','The object can exist without any serving proxy.','API acceptance is not implementation. Inspect controller availability before debugging backend application code.'),('Distinguish host and path matching.','Host identifies the requested site; path identifies a route within it.','Both participate in routing. A request to the right IP with a different Host header can select another rule.'),('Draw the full Ingress-to-Pod request path.','The Service backend reference and the actual configured upstream path are distinguished.','The API references the Service, while the controller may proxy directly to derived Pod endpoints or use ClusterIP routing. Name the actual implementation path.'),('Diagnose an app404 after a matched prefix route.','The forwarded path may not exist in the application.','Inspect rewrite behavior and actual request path. A proxy match only chooses a backend.'),('Explain why controller annotations are not universal.','They belong to a particular implementation contract.','Copying annotations from another controller can be ignored or behave differently. Use the prepared implementation documentation.'),('Compare Ingress and a Layer4 Service.','Ingress interprets HTTP routing; the Service handles transport endpoint selection.','Choose the mechanism according to the protocol and routing requirement rather than treating both as generic public exposure switches.')],
-'https://kubernetes.io/docs/concepts/services-networking/ingress/', 'https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/')
+Ingress remains a supported API, while Gateway API offers a more expressive role-oriented model. Neither choice installs its own controller. A learner should understand both the API contract and the selected implementation before relying on annotations.""",
+    "browser Host header -> controller listener -> host/path rule -> Service backend reference\nactual upstream: direct eligible Pod endpoint OR Service ClusterIP path, by controller configuration\n-> Pod listener -> application route",
+    (
+        "Read a namespaced backend rule",
+        "This is a fragment for an explicitly prepared controller.",
+        "yaml",
+        "rules:\n  - host: study.example.test\n    http:\n      paths:\n        - path: /\n          pathType: Prefix\n          backend:\n            service:\n              name: network-study\n              port:\n                number: 80",
+        "The API backend references Service port80. The controller may resolve it to Pod listener8080 directly or route through the ClusterIP, according to its documented upstream mode.",
+    ),
+    (
+        "Separate proxy route and app route",
+        "No rewrite is implied in this example.",
+        "text",
+        "client GET /reports -> Ingress forwards /reports -> app receives /reports\napp has only / -> app may return404",
+        "A matched Ingress rule does not guarantee the application implements the forwarded path. The maintained original fixture serves /version with ds60-fixture-v1 plus a newline and /ready with ready plus a newline; / returns404. Use /version for the positive routing check rather than expecting the root path to succeed.",
+    ),
+    [
+        (
+            "Predict behavior with no Ingress controller.",
+            "The object can exist without any serving proxy.",
+            "API acceptance is not implementation. Inspect controller availability before debugging backend application code.",
+        ),
+        (
+            "Distinguish host and path matching.",
+            "Host identifies the requested site; path identifies a route within it.",
+            "Both participate in routing. A request to the right IP with a different Host header can select another rule.",
+        ),
+        (
+            "Draw the full Ingress-to-Pod request path.",
+            "The Service backend reference and the actual configured upstream path are distinguished.",
+            "The API references the Service, while the controller may proxy directly to derived Pod endpoints or use ClusterIP routing. Name the actual implementation path.",
+        ),
+        (
+            "Diagnose an app404 after a matched prefix route.",
+            "The forwarded path may not exist in the application.",
+            "Inspect rewrite behavior and actual request path. A proxy match only chooses a backend.",
+        ),
+        (
+            "Explain why controller annotations are not universal.",
+            "They belong to a particular implementation contract.",
+            "Copying annotations from another controller can be ignored or behave differently. Use the prepared implementation documentation.",
+        ),
+        (
+            "Compare Ingress and a Layer4 Service.",
+            "Ingress interprets HTTP routing; the Service handles transport endpoint selection.",
+            "Choose the mechanism according to the protocol and routing requirement rather than treating both as generic public exposure switches.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+    "https://doc.traefik.io/traefik/reference/routing-configuration/kubernetes/ingress/",
+)
 
-add('Gateway API, routes and role-separated configuration',['GatewayClass','Gateway','HTTPRoute','ReferenceGrant'],
-'''Gateway API separates infrastructure selection, traffic listeners and application routes into distinct resources. A GatewayClass describes a controller-managed class. A Gateway asks for listeners and an entrypoint. An HTTPRoute attaches routing rules to an allowed parent Gateway. This can separate platform responsibilities from application routing ownership.
+add(
+    "Gateway API, routes and role-separated configuration",
+    ["GatewayClass", "Gateway", "HTTPRoute", "ReferenceGrant"],
+    """Gateway API separates infrastructure selection, traffic listeners and application routes into distinct resources. A GatewayClass describes a controller-managed class. A Gateway asks for listeners and an entrypoint. An HTTPRoute attaches routing rules to an allowed parent Gateway. This can separate platform responsibilities from application routing ownership.
 
 The resources still require installed APIs and a compatible controller. Status conditions such as Accepted, Programmed and ResolvedRefs describe different aspects of reconciliation. A route being accepted does not prove an actual client request reached the expected application.
 
-Cross-namespace references require deliberate authorization under the API’s rules. ReferenceGrant is one mechanism for allowing supported cross-namespace object references. It should be narrow, naming the intended kinds and relationships. Broad grants or permissive listener attachment can turn an organizational boundary into an accidental shared routing surface.''',
-'''The fixture uses gateway.networking.k8s.io/v1 for Gateway and HTTPRoute. The exact supported route features depend on the installed controller and API version. Read parentRefs, listener names, hostnames and backendRefs field by field.
+Cross-namespace references require deliberate authorization under the API’s rules. ReferenceGrant is one mechanism for allowing supported cross-namespace object references. It should be narrow, naming the intended kinds and relationships. Broad grants or permissive listener attachment can turn an organizational boundary into an accidental shared routing surface.""",
+    """The fixture uses gateway.networking.k8s.io/v1 for Gateway and HTTPRoute. The exact supported route features depend on the installed controller and API version. Read parentRefs, listener names, hostnames and backendRefs field by field.
 
-A platform team might own a shared Gateway while an application team owns an HTTPRoute in its namespace. The listener’s allowedRoutes policy controls which routes may attach. This is separate from whether the referenced backend exists and whether traffic succeeds.''',
-'GatewayClass -> controller implementation\nGateway listener <- allowed HTTPRoute parentRef -> Service backend\nstatus conditions -> actual listener/request qualification',
-('Read a route backend','The route assumes an explicitly prepared parent named study-gateway.','yaml','parentRefs:\n  - name: study-gateway\nhostnames: [study.example.test]\nrules:\n  - backendRefs:\n      - name: network-study\n        port: 80','The route identifies a parent and Service backend; neither resource is created by this fragment.'),
-('Classify condition failures','These are synthetic controller observations.','text','Accepted=False: route attachment or policy issue\nResolvedRefs=False: a referenced object or permission is unresolved\nProgrammed=False: desired data-plane configuration is not ready','Conditions localize different control-plane failures and still need actual request acceptance afterward.'),
-[('Name the roles of class, gateway and route.','Implementation class, listener/entrypoint and application routing intent.','The separation makes ownership explicit. It does not eliminate the need for a controller.'),('Predict a route with an unavailable parent.','It cannot establish the intended attached traffic path.','A syntactically valid parentRef is not evidence that the parent exists or accepts the route.'),('Design a route attachment boundary.','Listener allowedRoutes and route parentRef agree on intended ownership.','The platform should define who can attach routes rather than assuming every namespace may publish through a shared listener.'),('Diagnose ResolvedRefs=False.','Inspect backend identity and required reference authorization.','Do not bypass the condition by granting broad cluster permissions. Repair the exact intended reference.'),('Explain a narrow cross-namespace grant.','Only the intended source kind/namespace can reference the intended target kind.','The grant is an authorization relationship. Keep it as small as the application requirement.'),('Plan Gateway acceptance evidence.','API/controller support, conditions, listener reachability and expected app response.','A complete claim follows configuration through data-plane behavior. Status alone is not an end-to-end test.')],
-'https://gateway-api.sigs.k8s.io/reference/api-types/gateway/', 'https://gateway-api.sigs.k8s.io/reference/api-types/httproute/', 'https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/')
+A platform team might own a shared Gateway while an application team owns an HTTPRoute in its namespace. The listener’s allowedRoutes policy controls which routes may attach. This is separate from whether the referenced backend exists and whether traffic succeeds.""",
+    "GatewayClass -> controller implementation\nGateway listener <- allowed HTTPRoute parentRef -> Service backend\nstatus conditions -> actual listener/request qualification",
+    (
+        "Read a route backend",
+        "The route assumes an explicitly prepared parent named study-gateway.",
+        "yaml",
+        "parentRefs:\n  - name: study-gateway\nhostnames: [study.example.test]\nrules:\n  - backendRefs:\n      - name: network-study\n        port: 80",
+        "The route identifies a parent and Service backend; neither resource is created by this fragment.",
+    ),
+    (
+        "Classify condition failures",
+        "These are synthetic controller observations.",
+        "text",
+        "Accepted=False: route attachment or policy issue\nResolvedRefs=False: a referenced object or permission is unresolved\nProgrammed=False: desired data-plane configuration is not ready",
+        "Conditions localize different control-plane failures and still need actual request acceptance afterward.",
+    ),
+    [
+        (
+            "Name the roles of class, gateway and route.",
+            "Implementation class, listener/entrypoint and application routing intent.",
+            "The separation makes ownership explicit. It does not eliminate the need for a controller.",
+        ),
+        (
+            "Predict a route with an unavailable parent.",
+            "It cannot establish the intended attached traffic path.",
+            "A syntactically valid parentRef is not evidence that the parent exists or accepts the route.",
+        ),
+        (
+            "Design a route attachment boundary.",
+            "Listener allowedRoutes and route parentRef agree on intended ownership.",
+            "The platform should define who can attach routes rather than assuming every namespace may publish through a shared listener.",
+        ),
+        (
+            "Diagnose ResolvedRefs=False.",
+            "Inspect backend identity and required reference authorization.",
+            "Do not bypass the condition by granting broad cluster permissions. Repair the exact intended reference.",
+        ),
+        (
+            "Explain a narrow cross-namespace grant.",
+            "Only the intended source kind/namespace can reference the intended target kind.",
+            "The grant is an authorization relationship. Keep it as small as the application requirement.",
+        ),
+        (
+            "Plan Gateway acceptance evidence.",
+            "API/controller support, conditions, listener reachability and expected app response.",
+            "A complete claim follows configuration through data-plane behavior. Status alone is not an end-to-end test.",
+        ),
+    ],
+    "https://gateway-api.sigs.k8s.io/reference/api-types/gateway/",
+    "https://gateway-api.sigs.k8s.io/reference/api-types/httproute/",
+    "https://gateway-api.sigs.k8s.io/reference/api-types/referencegrant/",
+)
 
-add('TLS termination, certificates and upstream identity',['TLS','certificate','SNI','termination'],
-'''TLS protects a transport connection through encryption and peer authentication according to a trust model. A server certificate binds a public key to identities such as DNS names. The client must validate the requested name, certificate chain and validity conditions. Encryption without meaningful identity verification does not establish the intended server.
+add(
+    "TLS termination, certificates and upstream identity",
+    ["TLS", "certificate", "SNI", "termination"],
+    """TLS protects a transport connection through encryption and peer authentication according to a trust model. A server certificate binds a public key to identities such as DNS names. The client must validate the requested name, certificate chain and validity conditions. Encryption without meaningful identity verification does not establish the intended server.
 
 TLS termination means a component decrypts the client connection and may open another connection upstream. A load balancer, Ingress controller or Gateway can terminate TLS. The proxy-to-application hop then has its own protocol and trust requirements. Client-to-proxy encryption does not automatically encrypt the upstream hop.
 
-SNI communicates the requested server name during the TLS handshake so a listener can select an appropriate certificate. HTTP Host routing occurs after a successful HTTP-capable connection. A certificate mismatch and an HTTP404 are failures at different stages and need different diagnosis.''',
-'''Kubernetes commonly stores certificate/key material in a Secret referenced by the controller configuration. Secret base64 encoding is not encryption. Do not include a private key in a lesson fixture or print Secret data during inspection. The fixture uses no real certificate and does not request one from an external authority.
+SNI communicates the requested server name during the TLS handshake so a listener can select an appropriate certificate. HTTP Host routing occurs after a successful HTTP-capable connection. A certificate mismatch and an HTTP404 are failures at different stages and need different diagnosis.""",
+    """Kubernetes commonly stores certificate/key material in a Secret referenced by the controller configuration. Secret base64 encoding is not encryption. Do not include a private key in a lesson fixture or print Secret data during inspection. The fixture uses no real certificate and does not request one from an external authority.
 
-For a real owned lab, validate the hostname, listener protocol, certificate reference, controller support and upstream policy. Never teach disabling certificate verification as the normal solution to a mismatched name. A self-signed teaching certificate needs an explicitly scoped trust setup, not global trust changes.''',
-'client DNS name -> TLS handshake/SNI -> certificate validation -> proxy\nproxy -> separate upstream HTTP or TLS connection -> app response',
-('Classify two failures','These are intentionally synthetic symptoms.','text','TLS name mismatch: client cannot verify requested identity\nHTTP404: an HTTP server responded but route/content was not found','The second occurs after a successful enough transport exchange to receive HTTP.'),
-('Trace two encrypted hops','Each connection has its own peer identity.','text','browser --TLS(server name A)--> Gateway\nGateway --TLS(upstream identity B)--> app','Validating A does not automatically validate B.'),
-[('Predict whether a matching IP is enough for a DNS certificate.','The requested name must satisfy certificate identity validation.','An IP route and an authenticated DNS identity are different properties. Use the intended name and certificate relationship.'),('Locate the TLS termination point.','The component that decrypts the client connection.','Everything after that point has a separate transport policy. Draw the upstream hop explicitly.'),('Design a no-secret TLS evidence record.','Names, certificate metadata and status without private key bytes.','Useful validation does not require publishing sensitive material. Keep credentials in the prepared private channel.'),('Diagnose certificate mismatch separately from404.','Identity validation versus HTTP routing/content.','Repair the first failing layer. Changing backend selectors cannot fix an invalid certificate name.'),('Explain why base64 Secret data is not encrypted protection.','Encoding is reversible representation, not confidentiality.','Protection depends on access controls, storage encryption and operational handling. Never treat encoded text as safe to publish.'),('Plan a two-hop trust policy.','Client-facing identity and upstream identity are both explicit.','The design should say where encryption is required and which peer each component trusts, then test those claims separately.')],
-'https://kubernetes.io/docs/concepts/configuration/secret/', 'https://gateway-api.sigs.k8s.io/guides/user-guides/tls/')
+For a real owned lab, validate the hostname, listener protocol, certificate reference, controller support and upstream policy. Never teach disabling certificate verification as the normal solution to a mismatched name. A self-signed teaching certificate needs an explicitly scoped trust setup, not global trust changes.""",
+    "client DNS name -> TLS handshake/SNI -> certificate validation -> proxy\nproxy -> separate upstream HTTP or TLS connection -> app response",
+    (
+        "Classify two failures",
+        "These are intentionally synthetic symptoms.",
+        "text",
+        "TLS name mismatch: client cannot verify requested identity\nHTTP404: an HTTP server responded but route/content was not found",
+        "The second occurs after a successful enough transport exchange to receive HTTP.",
+    ),
+    (
+        "Trace two encrypted hops",
+        "Each connection has its own peer identity.",
+        "text",
+        "browser --TLS(server name A)--> Gateway\nGateway --TLS(upstream identity B)--> app",
+        "Validating A does not automatically validate B.",
+    ),
+    [
+        (
+            "Predict whether a matching IP is enough for a DNS certificate.",
+            "The requested name must satisfy certificate identity validation.",
+            "An IP route and an authenticated DNS identity are different properties. Use the intended name and certificate relationship.",
+        ),
+        (
+            "Locate the TLS termination point.",
+            "The component that decrypts the client connection.",
+            "Everything after that point has a separate transport policy. Draw the upstream hop explicitly.",
+        ),
+        (
+            "Design a no-secret TLS evidence record.",
+            "Names, certificate metadata and status without private key bytes.",
+            "Useful validation does not require publishing sensitive material. Keep credentials in the prepared private channel.",
+        ),
+        (
+            "Diagnose certificate mismatch separately from404.",
+            "Identity validation versus HTTP routing/content.",
+            "Repair the first failing layer. Changing backend selectors cannot fix an invalid certificate name.",
+        ),
+        (
+            "Explain why base64 Secret data is not encrypted protection.",
+            "Encoding is reversible representation, not confidentiality.",
+            "Protection depends on access controls, storage encryption and operational handling. Never treat encoded text as safe to publish.",
+        ),
+        (
+            "Plan a two-hop trust policy.",
+            "Client-facing identity and upstream identity are both explicit.",
+            "The design should say where encryption is required and which peer each component trusts, then test those claims separately.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/configuration/secret/",
+    "https://gateway-api.sigs.k8s.io/guides/user-guides/tls/",
+)
 
-add('NAT, source IP and traffic policies',['DNAT','SNAT','externalTrafficPolicy','connection tracking'],
-'''Network address translation changes address or port fields as traffic crosses a boundary. Destination NAT changes where a packet is delivered; source NAT changes the apparent sender. Connection tracking can maintain state so replies follow the corresponding translated path. These mechanisms can make an application’s observed client address differ from the original caller.
+add(
+    "NAT, source IP and traffic policies",
+    ["DNAT", "SNAT", "externalTrafficPolicy", "connection tracking"],
+    """Network address translation changes address or port fields as traffic crosses a boundary. Destination NAT changes where a packet is delivered; source NAT changes the apparent sender. Connection tracking can maintain state so replies follow the corresponding translated path. These mechanisms can make an application’s observed client address differ from the original caller.
 
 Kubernetes traffic policies influence endpoint selection and source-address behavior, but exact paths depend on the Service type and implementation. externalTrafficPolicy Local can preserve source IP in common node-backed paths and restrict external traffic to local endpoints, with availability and load-distribution tradeoffs. It is not a universal declaration that every proxy will forward the original client address unchanged.
 
-An HTTP proxy can also add forwarding headers. Those are application-layer claims, separate from the transport peer address. Trust them only from a configured proxy chain. A user-supplied header must not become an authoritative client identity merely because its name contains forwarded.''',
-'''Track the source and destination tuple at each hop. A request arriving at nodeA may be forwarded to a Pod on nodeB, adding another route and potentially translation. A local-only policy can avoid that hop but requires an eligible local endpoint for the intended traffic.
+An HTTP proxy can also add forwarding headers. Those are application-layer claims, separate from the transport peer address. Trust them only from a configured proxy chain. A user-supplied header must not become an authoritative client identity merely because its name contains forwarded.""",
+    """Track the source and destination tuple at each hop. A request arriving at nodeA may be forwarded to a Pod on nodeB, adding another route and potentially translation. A local-only policy can avoid that hop but requires an eligible local endpoint for the intended traffic.
 
-The synthetic examples explain the tradeoff without asserting a particular provider behavior. A real source-IP test needs a known caller, a controlled server that reports its transport peer, and a documented proxy path. Do not infer it from a header alone.''',
-'original clientIP:port -> node/LB translation -> backend peer address\nreply -> connection state / routing -> original client\nHTTP forwarding headers form a separate trust channel',
-('Trace a translated source','These addresses are illustrative only.','text','original source198.51.100.25\nbackend observes192.0.2.10 after source translation\nheader says198.51.100.25 only if a trusted proxy supplied it','Transport peer and reported original client can differ.'),
-('Compare local and cluster endpoint selection','The details require actual implementation qualification.','text','Cluster policy: eligible endpoint may be on another node\nLocal policy: external traffic uses eligible local endpoints\nnode with no local endpoint requires correct health/routing handling','Locality can change availability and load balance as well as source-IP behavior.'),
-[('Distinguish DNAT and SNAT.','Destination rewrite versus source rewrite.','Track the field that changes. Both can occur in one path, and replies depend on the resulting routing/state.'),('Predict backend peer identity after SNAT.','It can be a node or proxy address rather than the original client.','Application logs must state which identity they record. A changed peer does not necessarily mean a different human caller.'),('Draw a five-tuple path through one translation.','Source/destination addresses and ports are named before and after.','A tuple-level trace is more precise than a vague statement that traffic goes through a Service.'),('Diagnose missing traffic on a node with Local policy and no endpoint.','Endpoint locality and upstream health selection matter.','Do not assume every node can forward to any remote backend under a local-only policy.'),('Explain why arbitrary forwarded headers are untrusted.','Clients can supply them unless the trusted proxy boundary sanitizes them.','Use a defined proxy chain and application configuration. Otherwise logs or rate limits can accept spoofed identity.'),('Design a source-IP acceptance test.','Known caller, documented path, transport peer and trusted-header evidence.','Record the actual implementation and policy. A generic diagram does not prove what your cluster preserves.')],
-'https://kubernetes.io/docs/tutorials/services/source-ip/', 'https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-policies')
+The synthetic examples explain the tradeoff without asserting a particular provider behavior. A real source-IP test needs a known caller, a controlled server that reports its transport peer, and a documented proxy path. Do not infer it from a header alone.""",
+    "original clientIP:port -> node/LB translation -> backend peer address\nreply -> connection state / routing -> original client\nHTTP forwarding headers form a separate trust channel",
+    (
+        "Trace a translated source",
+        "These addresses are illustrative only.",
+        "text",
+        "original source198.51.100.25\nbackend observes192.0.2.10 after source translation\nheader says198.51.100.25 only if a trusted proxy supplied it",
+        "Transport peer and reported original client can differ.",
+    ),
+    (
+        "Compare local and cluster endpoint selection",
+        "The details require actual implementation qualification.",
+        "text",
+        "Cluster policy: eligible endpoint may be on another node\nLocal policy: external traffic uses eligible local endpoints\nnode with no local endpoint requires correct health/routing handling",
+        "Locality can change availability and load balance as well as source-IP behavior.",
+    ),
+    [
+        (
+            "Distinguish DNAT and SNAT.",
+            "Destination rewrite versus source rewrite.",
+            "Track the field that changes. Both can occur in one path, and replies depend on the resulting routing/state.",
+        ),
+        (
+            "Predict backend peer identity after SNAT.",
+            "It can be a node or proxy address rather than the original client.",
+            "Application logs must state which identity they record. A changed peer does not necessarily mean a different human caller.",
+        ),
+        (
+            "Draw a five-tuple path through one translation.",
+            "Source/destination addresses and ports are named before and after.",
+            "A tuple-level trace is more precise than a vague statement that traffic goes through a Service.",
+        ),
+        (
+            "Diagnose missing traffic on a node with Local policy and no endpoint.",
+            "Endpoint locality and upstream health selection matter.",
+            "Do not assume every node can forward to any remote backend under a local-only policy.",
+        ),
+        (
+            "Explain why arbitrary forwarded headers are untrusted.",
+            "Clients can supply them unless the trusted proxy boundary sanitizes them.",
+            "Use a defined proxy chain and application configuration. Otherwise logs or rate limits can accept spoofed identity.",
+        ),
+        (
+            "Design a source-IP acceptance test.",
+            "Known caller, documented path, transport peer and trusted-header evidence.",
+            "Record the actual implementation and policy. A generic diagram does not prove what your cluster preserves.",
+        ),
+    ],
+    "https://kubernetes.io/docs/tutorials/services/source-ip/",
+    "https://kubernetes.io/docs/reference/networking/virtual-ips/#traffic-policies",
+)
 
-add('Headless Services and stateful peer discovery',['headless Service','StatefulSet','stable identity','DNS records'],
-'''A headless Service has clusterIP None and does not provide the ordinary virtual-IP load-balancing abstraction. With a selector, DNS can return endpoint addresses so clients discover individual backends. This is useful when an application protocol needs peer identity rather than an anonymous interchangeable service endpoint.
+add(
+    "Headless Services and stateful peer discovery",
+    ["headless Service", "StatefulSet", "stable identity", "DNS records"],
+    """A headless Service has clusterIP None and does not provide the ordinary virtual-IP load-balancing abstraction. With a selector, DNS can return endpoint addresses so clients discover individual backends. This is useful when an application protocol needs peer identity rather than an anonymous interchangeable service endpoint.
 
 A StatefulSet provides stable Pod identities and ordered-management semantics under its configuration. Stable names do not mean a Pod process never changes, and storage retention does not guarantee application replication or consistency. A replacement Pod can have a new UID while keeping a stable logical name.
 
-Stateful systems often need bootstrap discovery before every peer is ready. publishNotReadyAddresses can alter which endpoints are published, but it also exposes clients to peers that are not ready for ordinary work. Use it only with a protocol that understands the distinction between discovery and serving.''',
-'''The headless Service fixture names the same selector but sets clusterIP to None. Its A/AAAA answers identify Pod addresses directly. There is no virtual-IP proxy translating Service port80 into targetPort 8080: a client using those addresses must connect to the actual endpoint listener8080. A client using SRV discovery must honor the returned endpoint port and target. A/AAAA records carry addresses only, so those clients need the listener port from their application configuration. For this fixture, request http://network-study-headless:8080/version; the successful body is ds60-fixture-v1 plus a newline. The named-port SRV query uses _http._tcp.network-study-headless with the actual namespace and cluster domain, and a capable client honors each returned target/port. Merely requesting headless-name:80 would not reach this fixture’s 8080 listener.
+Stateful systems often need bootstrap discovery before every peer is ready. publishNotReadyAddresses can alter which endpoints are published, but it also exposes clients to peers that are not ready for ordinary work. Use it only with a protocol that understands the distinction between discovery and serving.""",
+    """The headless Service fixture names the same selector but sets clusterIP to None. Its A/AAAA answers identify Pod addresses directly. There is no virtual-IP proxy translating Service port80 into targetPort 8080: a client using those addresses must connect to the actual endpoint listener8080. A client using SRV discovery must honor the returned endpoint port and target. A/AAAA records carry addresses only, so those clients need the listener port from their application configuration. For this fixture, request http://network-study-headless:8080/version; the successful body is ds60-fixture-v1 plus a newline. The named-port SRV query uses _http._tcp.network-study-headless with the actual namespace and cluster domain, and a capable client honors each returned target/port. Merely requesting headless-name:80 would not reach this fixture’s 8080 listener.
 
 A StatefulSet’s serviceName ties its network identity to a governing Service. DNS names depend on Pod identity, service, namespace and cluster domain.
 
-A client receiving several addresses must implement its own selection, retries and protocol semantics. DNS returning three peers does not guarantee a quorum, leader election or replicated data. Those are application properties that require separate evidence.''',
-'headless Service DNS -> individual endpoint addresses -> client peer protocol\nStatefulSet logical name stays stable; Pod UID/process can be replaced',
-('Read the headless setting','This is a manual fixture fragment.','yaml','clusterIP: None\nselector:\n  app: network-study\nports:\n  - name: http\n    port: 80\n    targetPort: http','The Service does not allocate an ordinary ClusterIP virtual destination.'),
-('Separate logical and process identity','A replacement changes a concrete instance.','text','logical peer: store-0\nbefore Pod UID:uid-old\nafter Pod UID:uid-new\nretained claim:explicit persistent storage identity','Stable naming and retained storage are distinct from an unchanged process.'),
-[('Predict the DNS role of a headless Service.','Discovery can return individual backend addresses.','The client sees peers rather than one ordinary virtual IP. It must handle their lifecycle according to its protocol.'),('Distinguish StatefulSet name and Pod UID.','A stable logical name can refer to a replacement instance.','Use UIDs when proving replacement and ownership. Names alone do not establish process continuity.'),('Draw a stateful peer discovery sequence.','Resolve peer addresses, establish identity and run the application protocol.','Discovery is only the first stage. Quorum and data correctness require protocol-specific checks.'),('Diagnose treating headless DNS as automatic load balancing.','The client owns address selection and connection behavior.','Multiple DNS answers do not implement the same contract as a Service virtual IP for every client.'),('Explain publishNotReadyAddresses tradeoffs.','Discovery may include peers not ready for normal serving.','Bootstrap needs can justify this behavior, but ordinary clients must not assume every published address is ready.'),('Design a stateful replacement check.','Logical identity, new UID, intended volume and application-level data result.','A retained PVC object is not enough. The replacement must actually read the expected durable state.')],
-'https://kubernetes.io/docs/concepts/services-networking/service/#headless-services', 'https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/')
+A client receiving several addresses must implement its own selection, retries and protocol semantics. DNS returning three peers does not guarantee a quorum, leader election or replicated data. Those are application properties that require separate evidence.""",
+    "headless Service DNS -> individual endpoint addresses -> client peer protocol\nStatefulSet logical name stays stable; Pod UID/process can be replaced",
+    (
+        "Read the headless setting",
+        "This is a manual fixture fragment.",
+        "yaml",
+        "clusterIP: None\nselector:\n  app: network-study\nports:\n  - name: http\n    port: 80\n    targetPort: http",
+        "The Service does not allocate an ordinary ClusterIP virtual destination.",
+    ),
+    (
+        "Separate logical and process identity",
+        "A replacement changes a concrete instance.",
+        "text",
+        "logical peer: store-0\nbefore Pod UID:uid-old\nafter Pod UID:uid-new\nretained claim:explicit persistent storage identity",
+        "Stable naming and retained storage are distinct from an unchanged process.",
+    ),
+    [
+        (
+            "Predict the DNS role of a headless Service.",
+            "Discovery can return individual backend addresses.",
+            "The client sees peers rather than one ordinary virtual IP. It must handle their lifecycle according to its protocol.",
+        ),
+        (
+            "Distinguish StatefulSet name and Pod UID.",
+            "A stable logical name can refer to a replacement instance.",
+            "Use UIDs when proving replacement and ownership. Names alone do not establish process continuity.",
+        ),
+        (
+            "Draw a stateful peer discovery sequence.",
+            "Resolve peer addresses, establish identity and run the application protocol.",
+            "Discovery is only the first stage. Quorum and data correctness require protocol-specific checks.",
+        ),
+        (
+            "Diagnose treating headless DNS as automatic load balancing.",
+            "The client owns address selection and connection behavior.",
+            "Multiple DNS answers do not implement the same contract as a Service virtual IP for every client.",
+        ),
+        (
+            "Explain publishNotReadyAddresses tradeoffs.",
+            "Discovery may include peers not ready for normal serving.",
+            "Bootstrap needs can justify this behavior, but ordinary clients must not assume every published address is ready.",
+        ),
+        (
+            "Design a stateful replacement check.",
+            "Logical identity, new UID, intended volume and application-level data result.",
+            "A retained PVC object is not enough. The replacement must actually read the expected durable state.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/service/#headless-services",
+    "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/",
+)
 
-add('NetworkPolicy ingress, selectors and additive rules',['NetworkPolicy','ingress','podSelector','namespaceSelector'],
-'''NetworkPolicy describes allowed network relationships for selected Pods. It requires a network implementation that enforces the API. Creating the object on a cluster without enforcement does not prove isolation. The policy is primarily about supported network traffic, not HTTP user identity or arbitrary application authorization.
+add(
+    "NetworkPolicy ingress, selectors and additive rules",
+    ["NetworkPolicy", "ingress", "podSelector", "namespaceSelector"],
+    """NetworkPolicy describes allowed network relationships for selected Pods. It requires a network implementation that enforces the API. Creating the object on a cluster without enforcement does not prove isolation. The policy is primarily about supported network traffic, not HTTP user identity or arbitrary application authorization.
 
 Policies are additive. Once a Pod is isolated for a direction, the union of applicable allow rules determines permitted traffic for that direction. There is no general ordered deny rule that overrides a later allow in the ordinary API. A policy can select all Pods in one namespace with an empty podSelector, while namespace scope remains important.
 
-Selector composition is subtle. A single peer containing both namespaceSelector and podSelector requires both conditions. Separate peers represent alternatives. Confusing these forms can allow far more callers than intended. This lesson makes that Boolean logic explicit with a small synthetic matrix.''',
-'''A policy’s podSelector selects the destination Pods for ingress rules. Each from item describes an allowed source. Ports constrain the destination transport port. Namespace labels are selected on Namespace objects, not copied from Pod labels by assumption.
+Selector composition is subtle. A single peer containing both namespaceSelector and podSelector requires both conditions. Separate peers represent alternatives. Confusing these forms can allow far more callers than intended. This lesson makes that Boolean logic explicit with a small synthetic matrix.""",
+    """A policy’s podSelector selects the destination Pods for ingress rules. Each from item describes an allowed source. Ports constrain the destination transport port. Namespace labels are selected on Namespace objects, not copied from Pod labels by assumption.
 
 For a connection between two Pods, the source Pod’s egress policy and the destination Pod’s ingress policy must both permit it when those directions are isolated. A direction with no applicable isolation does not restrict that connection through NetworkPolicy. Reply traffic belonging to a permitted connection is implicitly allowed; that does not authorize an unrelated new reverse-direction connection.
 
-The fixture provides an allow-client policy as a manual-only example. It does not claim that the ordinary local kind network enforces NetworkPolicy. The offline checker validates selector logic and fields; a live test requires both an allowed and a denied owned client under a known enforcing implementation.''',
-'policy selects destination Pods -> ingress isolation applies\nallowed source peer AND allowed destination port -> candidate permitted flow\nall applicable allow rules combine by union; actual CNI must enforce',
-('Read an AND peer','Both namespace and Pod labels must match this one peer.','yaml','from:\n  - namespaceSelector:\n      matchLabels:\n        study-role: client\n    podSelector:\n      matchLabels:\n        role: tester','A tester in a nonmatching namespace is not allowed by this peer.'),
-('Contrast OR peers','Two list items are alternatives.','yaml','from:\n  - namespaceSelector:\n      matchLabels:\n        study-role: client\n  - podSelector:\n      matchLabels:\n        role: tester','The namespaceSelector-only branch permits all Pods in matching namespaces. The podSelector-only branch permits role=tester Pods only in the NetworkPolicy’s own namespace. Their union is broader than the combined AND peer; it does not mean testers in every namespace.'),
-[('Predict the AND selector result for a wrong namespace.','It does not match even if the Pod role is tester.','Both predicates in one peer must hold. This is a precise Boolean boundary, not a formatting detail.'),('Compare separate peers with a combined peer.','Separate entries create alternatives; combined selectors narrow one peer.','Review the indentation and list structure carefully. YAML shape changes the access relationship.'),('Build an allowed/denied flow matrix.','Caller namespace, Pod labels, target port and expected result are explicit.','A matrix exposes gaps before live testing. Include at least one near-miss case for each selector.'),('Diagnose a policy object with unrestricted actual traffic.','The implementation may not enforce policy or another allow rule may apply.','API acceptance is weaker than isolation evidence. Inspect the complete applicable policy set and the CNI capability.'),('Explain additive allow semantics.','Multiple policies can broaden the union of permitted flows.','Do not assume a default-deny policy overrides a separate broad allow. Evaluate the combined result.'),('Design real isolation acceptance.','One allowed and one denied owned flow under a named enforcing CNI.','The denied case is essential. A successful allowed request alone cannot prove that isolation exists.')],
-'https://kubernetes.io/docs/concepts/services-networking/network-policies/')
+The fixture provides an allow-client policy as a manual-only example. It does not claim that the ordinary local kind network enforces NetworkPolicy. The offline checker validates selector logic and fields; a live test requires both an allowed and a denied owned client under a known enforcing implementation.""",
+    "policy selects destination Pods -> ingress isolation applies\nallowed source peer AND allowed destination port -> candidate permitted flow\nall applicable allow rules combine by union; actual CNI must enforce",
+    (
+        "Read an AND peer",
+        "Both namespace and Pod labels must match this one peer.",
+        "yaml",
+        "from:\n  - namespaceSelector:\n      matchLabels:\n        study-role: client\n    podSelector:\n      matchLabels:\n        role: tester",
+        "A tester in a nonmatching namespace is not allowed by this peer.",
+    ),
+    (
+        "Contrast OR peers",
+        "Two list items are alternatives.",
+        "yaml",
+        "from:\n  - namespaceSelector:\n      matchLabels:\n        study-role: client\n  - podSelector:\n      matchLabels:\n        role: tester",
+        "The namespaceSelector-only branch permits all Pods in matching namespaces. The podSelector-only branch permits role=tester Pods only in the NetworkPolicy’s own namespace. Their union is broader than the combined AND peer; it does not mean testers in every namespace.",
+    ),
+    [
+        (
+            "Predict the AND selector result for a wrong namespace.",
+            "It does not match even if the Pod role is tester.",
+            "Both predicates in one peer must hold. This is a precise Boolean boundary, not a formatting detail.",
+        ),
+        (
+            "Compare separate peers with a combined peer.",
+            "Separate entries create alternatives; combined selectors narrow one peer.",
+            "Review the indentation and list structure carefully. YAML shape changes the access relationship.",
+        ),
+        (
+            "Build an allowed/denied flow matrix.",
+            "Caller namespace, Pod labels, target port and expected result are explicit.",
+            "A matrix exposes gaps before live testing. Include at least one near-miss case for each selector.",
+        ),
+        (
+            "Diagnose a policy object with unrestricted actual traffic.",
+            "The implementation may not enforce policy or another allow rule may apply.",
+            "API acceptance is weaker than isolation evidence. Inspect the complete applicable policy set and the CNI capability.",
+        ),
+        (
+            "Explain additive allow semantics.",
+            "Multiple policies can broaden the union of permitted flows.",
+            "Do not assume a default-deny policy overrides a separate broad allow. Evaluate the combined result.",
+        ),
+        (
+            "Design real isolation acceptance.",
+            "One allowed and one denied owned flow under a named enforcing CNI.",
+            "The denied case is essential. A successful allowed request alone cannot prove that isolation exists.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+)
 
-add('Egress policy, DNS dependencies and external destinations',['egress','DNS dependency','ipBlock','default deny'],
-'''Egress policy controls selected Pods' outgoing traffic under an enforcing implementation. A deny-by-default design begins by selecting the workloads and then allowing the dependencies they actually require. It can expose hidden dependencies such as DNS, metadata endpoints, package downloads or external APIs.
+add(
+    "Egress policy, DNS dependencies and external destinations",
+    ["egress", "DNS dependency", "ipBlock", "default deny"],
+    """Egress policy controls selected Pods' outgoing traffic under an enforcing implementation. A deny-by-default design begins by selecting the workloads and then allowing the dependencies they actually require. It can expose hidden dependencies such as DNS, metadata endpoints, package downloads or external APIs.
 
 DNS is itself network traffic. Blocking it can make every named dependency fail even while a direct allowed IP connection works. UDP is common for DNS, but TCP can also be required. The correct DNS target and policy depend on the cluster’s DNS deployment and any node-local cache.
 
-An IP allowlist is not the same as a domain-name policy. External services can change addresses, use shared infrastructure or return several families. The standard NetworkPolicy API does not provide a general hostname allowlist. Implementation extensions must be named and qualified separately.''',
-'''A policy with policyTypes Egress and an empty egress list isolates selected Pods without permitting outgoing flows through that policy. Additional applicable policies can add allowances. A source egress allowance is not sufficient when the destination is ingress-isolated: the destination must also permit the connection. Replies for a permitted connection are implicitly allowed, while a new reverse connection is evaluated as a new flow. Peer and port rules should be derived from the actual dependency map.
+An IP allowlist is not the same as a domain-name policy. External services can change addresses, use shared infrastructure or return several families. The standard NetworkPolicy API does not provide a general hostname allowlist. Implementation extensions must be named and qualified separately.""",
+    """A policy with policyTypes Egress and an empty egress list isolates selected Pods without permitting outgoing flows through that policy. Additional applicable policies can add allowances. A source egress allowance is not sufficient when the destination is ingress-isolated: the destination must also permit the connection. Replies for a permitted connection are implicitly allowed, while a new reverse connection is evaluated as a new flow. Peer and port rules should be derived from the actual dependency map.
 
-ipBlock represents CIDR-based address ranges with optional exclusions. Address translation can affect which IP an implementation evaluates at a boundary, so test the actual traffic path. Do not promise identical pre-NAT or post-NAT behavior across every plugin and Service combination.''',
-'app -> DNS query -> resolver -> dependency address\napp -> allowed transport -> internal/external dependency\npolicy must permit each required leg, not just the final hostname',
-('Read a default-deny egress policy fragment','This is a manual design input.','yaml','podSelector:\n  matchLabels:\n    app: network-study\npolicyTypes: [Egress]\negress: []','Selected Pods have no outgoing allowance from this policy; other applicable policies still matter.'),
-('Classify a DNS-dependent failure','The synthetic comparison localizes the missing dependency.','text','direct permitted IP request succeeds\nname resolution times out\nDNS egress is not allowed','The app route may be healthy while discovery is blocked.'),
-[('Predict the effect of an empty egress list.','It contributes no allowed outgoing flows for selected Pods.','Isolation and additive policy semantics still apply. Review every policy selecting the same Pod.'),('Include DNS in a dependency map.','Resolver destination and UDP/TCP requirements are explicit.','A hostname-based app dependency starts with a DNS leg. Ignoring it produces confusing broad failures.'),('Design a minimal egress matrix.','Only named required internal or external flows are permitted.','Use the actual prepared topology. A generic allow-all DNS rule may target the wrong namespace or resolver deployment.'),('Diagnose named-request failure with direct-IP success.','Inspect DNS egress and resolver behavior first.','This contrast is stronger evidence than changing application credentials or opening every port.'),('Explain why an IP block is not a hostname policy.','It matches addresses, which may not be stable or exclusive to one service.','Domain-level control needs a named supported extension or proxy design. Do not imply it exists in the standard API.'),('Plan an egress qualification after NAT.','Record implementation, observed addresses and both allowed/denied cases.','Policy evaluation details can differ. Test the actual path before relying on a conceptual address match.')],
-'https://kubernetes.io/docs/concepts/services-networking/network-policies/', 'https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/')
+ipBlock represents CIDR-based address ranges with optional exclusions. Address translation can affect which IP an implementation evaluates at a boundary, so test the actual traffic path. Do not promise identical pre-NAT or post-NAT behavior across every plugin and Service combination.""",
+    "app -> DNS query -> resolver -> dependency address\napp -> allowed transport -> internal/external dependency\npolicy must permit each required leg, not just the final hostname",
+    (
+        "Read a default-deny egress policy fragment",
+        "This is a manual design input.",
+        "yaml",
+        "podSelector:\n  matchLabels:\n    app: network-study\npolicyTypes: [Egress]\negress: []",
+        "Selected Pods have no outgoing allowance from this policy; other applicable policies still matter.",
+    ),
+    (
+        "Classify a DNS-dependent failure",
+        "The synthetic comparison localizes the missing dependency.",
+        "text",
+        "direct permitted IP request succeeds\nname resolution times out\nDNS egress is not allowed",
+        "The app route may be healthy while discovery is blocked.",
+    ),
+    [
+        (
+            "Predict the effect of an empty egress list.",
+            "It contributes no allowed outgoing flows for selected Pods.",
+            "Isolation and additive policy semantics still apply. Review every policy selecting the same Pod.",
+        ),
+        (
+            "Include DNS in a dependency map.",
+            "Resolver destination and UDP/TCP requirements are explicit.",
+            "A hostname-based app dependency starts with a DNS leg. Ignoring it produces confusing broad failures.",
+        ),
+        (
+            "Design a minimal egress matrix.",
+            "Only named required internal or external flows are permitted.",
+            "Use the actual prepared topology. A generic allow-all DNS rule may target the wrong namespace or resolver deployment.",
+        ),
+        (
+            "Diagnose named-request failure with direct-IP success.",
+            "Inspect DNS egress and resolver behavior first.",
+            "This contrast is stronger evidence than changing application credentials or opening every port.",
+        ),
+        (
+            "Explain why an IP block is not a hostname policy.",
+            "It matches addresses, which may not be stable or exclusive to one service.",
+            "Domain-level control needs a named supported extension or proxy design. Do not imply it exists in the standard API.",
+        ),
+        (
+            "Plan an egress qualification after NAT.",
+            "Record implementation, observed addresses and both allowed/denied cases.",
+            "Policy evaluation details can differ. Test the actual path before relying on a conceptual address match.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+    "https://kubernetes.io/docs/tasks/administer-cluster/nodelocaldns/",
+)
 
-add('IPv4, IPv6 and dual-stack Services',['IPv4','IPv6','dual stack','ipFamilyPolicy'],
-'''Dual-stack networking supports IPv4 and IPv6 together. It requires compatible cluster configuration, node networking, CNI behavior and service allocation. Adding an IPv6 address to a manifest cannot supply a missing network family underneath it.
+add(
+    "IPv4, IPv6 and dual-stack Services",
+    ["IPv4", "IPv6", "dual stack", "ipFamilyPolicy"],
+    """Dual-stack networking supports IPv4 and IPv6 together. It requires compatible cluster configuration, node networking, CNI behavior and service allocation. Adding an IPv6 address to a manifest cannot supply a missing network family underneath it.
 
 A dual-stack Service can have addresses in both families. The order and primary family are meaningful in the API. A client may receive A and AAAA DNS records and choose or race connection attempts according to its library. A successful IPv4 request does not prove IPv6 reachability, and a timeout in one family can affect perceived latency.
 
-IPv6 notation uses colons, so literal addresses in URLs need brackets before a port. Documentation addresses are suitable for examples but are never live targets. Use actual owned assigned addresses only in an explicitly prepared lab.''',
-'''Service ipFamilyPolicy can express SingleStack, PreferDualStack or RequireDualStack under supported conditions. ipFamilies and clusterIPs describe the requested or assigned families and addresses. RequireDualStack should fail when the cluster cannot satisfy it rather than silently establish a second network.
+IPv6 notation uses colons, so literal addresses in URLs need brackets before a port. Documentation addresses are suitable for examples but are never live targets. Use actual owned assigned addresses only in an explicitly prepared lab.""",
+    """Service ipFamilyPolicy can express SingleStack, PreferDualStack or RequireDualStack under supported conditions. ipFamilies and clusterIPs describe the requested or assigned families and addresses. RequireDualStack should fail when the cluster cannot satisfy it rather than silently establish a second network.
 
 The supplied course application in docker/kubernetes/fixture.py binds IPv4 only at 0.0.0.0. Therefore dual-stack-service.yaml is an API-design fixture, not a working IPv6 application lab. Before claiming IPv6 acceptance, prepare a separately reviewed listener that actually accepts IPv6 and an appropriate client, in addition to the cluster/CNI capability. Do not infer application-family support from a Service having two allocated addresses. The separate maintained fixture at courses/kubernetes/fixtures/networking/dual-stack/ supplies an AF_INET6 listener with IPV6_V6ONLY disabled, a non-root image, workload/Service example and an explicit-family client. Follow its README for the successful end-to-end path after the owned dual-stack cluster is prepared. It serves /version with ds60-dualstack-v1, while the original fixture serves ds60-fixture-v1.
 
-Check family-specific endpoints, DNS and request paths independently. A NetworkPolicy or firewall rule that covers only IPv4 may leave different behavior for IPv6. Security and observability should cover both intended paths.''',
-'client DNS -> A and/or AAAA -> client family selection\nIPv4 Service -> IPv4 endpoint path\nIPv6 Service -> IPv6 endpoint path\neach path needs independent routing and policy acceptance',
-('Read a dual-stack intent','This is a manual-only Service fragment.','yaml','ipFamilyPolicy: RequireDualStack\nipFamilies: [IPv4, IPv6]','The cluster must support both families; the declaration does not install that support.'),
-('Format an IPv6 literal URL','The address is reserved documentation space.','text','http://[2001:db8::10]:8080/','Brackets separate the address colons from the port separator; do not contact this example address.'),
-[('Predict a RequireDualStack request on a single-stack cluster.','The intended requirement cannot be satisfied.','A declarative request is constrained by cluster capabilities. Report the missing capability instead of inventing a second address.'),('Distinguish A and AAAA records.','IPv4 addresses versus IPv6 addresses.','DNS availability and transport reachability are separate checks for each family.'),('Build a family-specific acceptance table.','DNS, Service, endpoints, policy and app response for both families.','A single successful request may use only one family. Make coverage explicit.'),('Diagnose IPv4 success with IPv6 timeout.','Inspect the IPv6 route, listener, endpoints and policy path.','Do not treat the shared hostname as proof that both network paths work.'),('Explain bracketed IPv6 URL syntax.','Brackets delimit the address before a colon-prefixed port.','Without the delimiters a parser cannot interpret the same structure as an IPv4 host:port string.'),('Review dual-stack security coverage.','Intended allow/deny rules and observations cover both families.','A policy that works for one address family does not automatically establish the other path’s exposure or isolation.')],
-'https://kubernetes.io/docs/concepts/services-networking/dual-stack/')
+Check family-specific endpoints, DNS and request paths independently. A NetworkPolicy or firewall rule that covers only IPv4 may leave different behavior for IPv6. Security and observability should cover both intended paths.""",
+    "client DNS -> A and/or AAAA -> client family selection\nIPv4 Service -> IPv4 endpoint path\nIPv6 Service -> IPv6 endpoint path\neach path needs independent routing and policy acceptance",
+    (
+        "Read a dual-stack intent",
+        "This is a manual-only Service fragment.",
+        "yaml",
+        "ipFamilyPolicy: RequireDualStack\nipFamilies: [IPv4, IPv6]",
+        "The cluster must support both families; the declaration does not install that support.",
+    ),
+    (
+        "Format an IPv6 literal URL",
+        "The address is reserved documentation space.",
+        "text",
+        "http://[2001:db8::10]:8080/",
+        "Brackets separate the address colons from the port separator; do not contact this example address.",
+    ),
+    [
+        (
+            "Predict a RequireDualStack request on a single-stack cluster.",
+            "The intended requirement cannot be satisfied.",
+            "A declarative request is constrained by cluster capabilities. Report the missing capability instead of inventing a second address.",
+        ),
+        (
+            "Distinguish A and AAAA records.",
+            "IPv4 addresses versus IPv6 addresses.",
+            "DNS availability and transport reachability are separate checks for each family.",
+        ),
+        (
+            "Build a family-specific acceptance table.",
+            "DNS, Service, endpoints, policy and app response for both families.",
+            "A single successful request may use only one family. Make coverage explicit.",
+        ),
+        (
+            "Diagnose IPv4 success with IPv6 timeout.",
+            "Inspect the IPv6 route, listener, endpoints and policy path.",
+            "Do not treat the shared hostname as proof that both network paths work.",
+        ),
+        (
+            "Explain bracketed IPv6 URL syntax.",
+            "Brackets delimit the address before a colon-prefixed port.",
+            "Without the delimiters a parser cannot interpret the same structure as an IPv4 host:port string.",
+        ),
+        (
+            "Review dual-stack security coverage.",
+            "Intended allow/deny rules and observations cover both families.",
+            "A policy that works for one address family does not automatically establish the other path’s exposure or isolation.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/dual-stack/",
+)
 
-add('Topology, zones and locality-aware traffic',['zone','topology','locality','failure domain'],
-'''A topology label describes placement, such as a node or availability zone. Locality-aware routing tries to prefer nearby endpoints to reduce latency or cross-zone traffic, subject to implementation and policy. It is a preference or constraint with tradeoffs, not a guarantee of balanced load or failure tolerance.
+add(
+    "Topology, zones and locality-aware traffic",
+    ["zone", "topology", "locality", "failure domain"],
+    """A topology label describes placement, such as a node or availability zone. Locality-aware routing tries to prefer nearby endpoints to reduce latency or cross-zone traffic, subject to implementation and policy. It is a preference or constraint with tradeoffs, not a guarantee of balanced load or failure tolerance.
 
 Spreading replicas across zones can improve resilience to a zone failure, but only if scheduling, storage and dependencies also span the required failure domains. A local preference can concentrate traffic on a small number of endpoints if placement is uneven. Capacity and availability must be considered together.
 
-Topology features evolve with Kubernetes versions. Fields, hints and traffic-distribution semantics should be read for the actual release and data plane. The lesson teaches the reasoning with a synthetic two-zone example and does not promise that every local kind cluster can reproduce cloud-zone behavior.''',
-'''Separate workload placement from traffic selection. Topology spread constraints influence where Pods can be scheduled; Service routing policy influences which eligible endpoint a caller uses. One does not automatically configure the other.
+Topology features evolve with Kubernetes versions. Fields, hints and traffic-distribution semantics should be read for the actual release and data plane. The lesson teaches the reasoning with a synthetic two-zone example and does not promise that every local kind cluster can reproduce cloud-zone behavior.""",
+    """Separate workload placement from traffic selection. Topology spread constraints influence where Pods can be scheduled; Service routing policy influences which eligible endpoint a caller uses. One does not automatically configure the other.
 
-For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.''',
-'scheduler placement -> endpoint distribution across nodes/zones\ncaller location + routing policy -> eligible/preferred endpoint set\ncapacity and failover behavior -> actual latency and availability',
-('Compare two-zone capacity','These are synthetic counts.','json','{"zoneA":{"clients":10,"ready_endpoints":2},"zoneB":{"clients":10,"ready_endpoints":1}}','Equal client counts do not imply equal load per endpoint under strict locality.'),
-('Separate placement and routing','Both decisions need their own configuration.','text','spread constraint: where replicas may run\ntraffic preference: where a caller sends requests\nfailover rule: what happens when nearby endpoints are absent','A spread configuration alone does not prove local routing.'),
-[('Predict per-endpoint load under equal local client demand.','ZoneB can place twice the load on its single endpoint.','Locality can reduce network distance while worsening imbalance. Count capacity at the selected failure domain.'),('Distinguish placement and traffic policy.','Scheduling location versus request destination choice.','Both influence the final path but are controlled by different mechanisms.'),('Design a two-zone failure scenario.','State which endpoints remain and whether routing can fail over.','A resilience claim needs a concrete lost-domain case. Include data dependencies and storage placement.'),('Diagnose local preference with insufficient nearby capacity.','Inspect endpoint distribution and actual load, not only total replicas.','Cluster-wide counts can hide a zonal bottleneck. Choose a policy consistent with capacity and failover requirements.'),('Explain version-dependent topology behavior.','Use the actual API/controller/data-plane support matrix.','Do not copy a field from a newer tutorial into an older cluster and infer it is enforced.'),('Defend a locality tradeoff.','Latency/cost benefits are balanced against capacity and failure behavior.','The decision should include measurable goals and a fallback strategy rather than an unqualified local-is-better rule.')],
-'https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/', 'https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/')
+For the synthetic example, zoneA has two ready app endpoints and zoneB has one. A local-only rule can overload the single endpoint in zoneB even when total cluster capacity appears sufficient. A failover policy must define what happens when a zone has no eligible local endpoint.""",
+    "scheduler placement -> endpoint distribution across nodes/zones\ncaller location + routing policy -> eligible/preferred endpoint set\ncapacity and failover behavior -> actual latency and availability",
+    (
+        "Compare two-zone capacity",
+        "These are synthetic counts.",
+        "json",
+        '{"zoneA":{"clients":10,"ready_endpoints":2},"zoneB":{"clients":10,"ready_endpoints":1}}',
+        "Equal client counts do not imply equal load per endpoint under strict locality.",
+    ),
+    (
+        "Separate placement and routing",
+        "Both decisions need their own configuration.",
+        "text",
+        "spread constraint: where replicas may run\ntraffic preference: where a caller sends requests\nfailover rule: what happens when nearby endpoints are absent",
+        "A spread configuration alone does not prove local routing.",
+    ),
+    [
+        (
+            "Predict per-endpoint load under equal local client demand.",
+            "ZoneB can place twice the load on its single endpoint.",
+            "Locality can reduce network distance while worsening imbalance. Count capacity at the selected failure domain.",
+        ),
+        (
+            "Distinguish placement and traffic policy.",
+            "Scheduling location versus request destination choice.",
+            "Both influence the final path but are controlled by different mechanisms.",
+        ),
+        (
+            "Design a two-zone failure scenario.",
+            "State which endpoints remain and whether routing can fail over.",
+            "A resilience claim needs a concrete lost-domain case. Include data dependencies and storage placement.",
+        ),
+        (
+            "Diagnose local preference with insufficient nearby capacity.",
+            "Inspect endpoint distribution and actual load, not only total replicas.",
+            "Cluster-wide counts can hide a zonal bottleneck. Choose a policy consistent with capacity and failover requirements.",
+        ),
+        (
+            "Explain version-dependent topology behavior.",
+            "Use the actual API/controller/data-plane support matrix.",
+            "Do not copy a field from a newer tutorial into an older cluster and infer it is enforced.",
+        ),
+        (
+            "Defend a locality tradeoff.",
+            "Latency/cost benefits are balanced against capacity and failure behavior.",
+            "The decision should include measurable goals and a fallback strategy rather than an unqualified local-is-better rule.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/",
+    "https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/",
+)
 
-add('Probes, graceful draining and rollout traffic continuity',['startup probe','readiness probe','liveness probe','draining'],
-'''Startup, readiness and liveness probes answer different questions. A startup probe can allow an application time to initialize before other probe behavior begins. Readiness indicates whether the Pod should receive ordinary new traffic. Liveness asks whether restarting the container is an appropriate recovery action.
+add(
+    "Probes, graceful draining and rollout traffic continuity",
+    ["startup probe", "readiness probe", "liveness probe", "draining"],
+    """Startup, readiness and liveness probes answer different questions. A startup probe can allow an application time to initialize before other probe behavior begins. Readiness indicates whether the Pod should receive ordinary new traffic. Liveness asks whether restarting the container is an appropriate recovery action.
 
 A dependency outage is not always a reason to restart every client. If a liveness check fails whenever a database is briefly unavailable, the system can create a restart storm without repairing the database. Probe design should reflect the application’s recovery capabilities and failure modes.
 
-Graceful termination coordinates endpoint eligibility, connection draining and process shutdown. Removing readiness does not instantly terminate every existing connection or guarantee every proxy has updated. A rollout must account for propagation, in-flight requests, termination grace periods and the application’s own shutdown behavior.''',
-'''Set probe paths, ports, timeouts and thresholds according to measured startup and request behavior. A failure threshold is not a proof that an application will recover by the next attempt. Keep startup allowance separate from a per-request deadline.
+Graceful termination coordinates endpoint eligibility, connection draining and process shutdown. Removing readiness does not instantly terminate every existing connection or guarantee every proxy has updated. A rollout must account for propagation, in-flight requests, termination grace periods and the application’s own shutdown behavior.""",
+    """Set probe paths, ports, timeouts and thresholds according to measured startup and request behavior. A failure threshold is not a proof that an application will recover by the next attempt. Keep startup allowance separate from a per-request deadline.
 
-During a rollout, inspect desired generation, updated replicas, ready endpoints and actual responses from the intended revision. An old healthy replica can keep a Service responding while the new revision fails. A200 response alone does not prove rollout completion.''',
-'new Pod starts -> startup condition -> readiness -> eligible new traffic\nold Pod terminates -> readiness/endpoint transition -> drain -> process exits\nexisting connections and controller propagation need bounded handling',
-('Classify three probe purposes','The same endpoint should not be copied blindly into all three roles.','text','startup: initialization is complete\nreadiness: can accept intended work now\nliveness: restart is a justified recovery action','Each check has a different operational consequence.'),
-('Diagnose a masked failed rollout','This is a synthetic observation.','text','old revision:2 Ready Pods\nnew revision:2 Pods failing readiness\nService request:200 from old revision','Availability can remain while the intended new revision is not accepted.'),
-[('Predict a readiness failure consequence.','Ordinary new Service eligibility changes without necessarily restarting the container.','Readiness and liveness are separate control signals. A temporary inability to serve need not mean the process is irrecoverable.'),('Choose a startup allowance for a slow initializer.','A bounded measured initialization window with separate request deadlines.','Do not increase every timeout indiscriminately. Name the phase receiving the allowance.'),('Design a graceful shutdown timeline.','Stop new work, drain bounded in-flight work and exit before forced termination.','Account for propagation and existing connections. Application cleanup must fit the configured grace period.'),('Diagnose200 responses during a failed new rollout.','Identify the serving revision and new-revision readiness separately.','Old replicas can mask the failure. Preserve image and Pod identity in acceptance evidence.'),('Explain why database-dependent liveness can be harmful.','It may restart healthy clients without fixing the unavailable dependency.','Choose probes according to recoverability. Cascading restarts can worsen an outage.'),('Define rollout traffic-continuity acceptance.','Current revision becomes ready, expected responses succeed and old resources drain/clean up.','The complete claim includes revision identity and lifecycle behavior, not just a momentary successful request.')],
-'https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/', 'https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination-flow')
+During a rollout, inspect desired generation, updated replicas, ready endpoints and actual responses from the intended revision. An old healthy replica can keep a Service responding while the new revision fails. A200 response alone does not prove rollout completion.""",
+    "new Pod starts -> startup condition -> readiness -> eligible new traffic\nold Pod terminates -> readiness/endpoint transition -> drain -> process exits\nexisting connections and controller propagation need bounded handling",
+    (
+        "Classify three probe purposes",
+        "The same endpoint should not be copied blindly into all three roles.",
+        "text",
+        "startup: initialization is complete\nreadiness: can accept intended work now\nliveness: restart is a justified recovery action",
+        "Each check has a different operational consequence.",
+    ),
+    (
+        "Diagnose a masked failed rollout",
+        "This is a synthetic observation.",
+        "text",
+        "old revision:2 Ready Pods\nnew revision:2 Pods failing readiness\nService request:200 from old revision",
+        "Availability can remain while the intended new revision is not accepted.",
+    ),
+    [
+        (
+            "Predict a readiness failure consequence.",
+            "Ordinary new Service eligibility changes without necessarily restarting the container.",
+            "Readiness and liveness are separate control signals. A temporary inability to serve need not mean the process is irrecoverable.",
+        ),
+        (
+            "Choose a startup allowance for a slow initializer.",
+            "A bounded measured initialization window with separate request deadlines.",
+            "Do not increase every timeout indiscriminately. Name the phase receiving the allowance.",
+        ),
+        (
+            "Design a graceful shutdown timeline.",
+            "Stop new work, drain bounded in-flight work and exit before forced termination.",
+            "Account for propagation and existing connections. Application cleanup must fit the configured grace period.",
+        ),
+        (
+            "Diagnose200 responses during a failed new rollout.",
+            "Identify the serving revision and new-revision readiness separately.",
+            "Old replicas can mask the failure. Preserve image and Pod identity in acceptance evidence.",
+        ),
+        (
+            "Explain why database-dependent liveness can be harmful.",
+            "It may restart healthy clients without fixing the unavailable dependency.",
+            "Choose probes according to recoverability. Cascading restarts can worsen an outage.",
+        ),
+        (
+            "Define rollout traffic-continuity acceptance.",
+            "Current revision becomes ready, expected responses succeed and old resources drain/clean up.",
+            "The complete claim includes revision identity and lifecycle behavior, not just a momentary successful request.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/",
+    "https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination-flow",
+)
 
-add('Observability: events, logs, metrics and traces',['event','log','metric','trace'],
-'''Observability uses system outputs to reason about internal behavior. Events describe notable Kubernetes lifecycle observations. Logs record application or component messages. Metrics summarize numeric measurements over time. Traces connect spans of a request across components. Each signal has different retention, sampling and interpretation limits.
+add(
+    "Observability: events, logs, metrics and traces",
+    ["event", "log", "metric", "trace"],
+    """Observability uses system outputs to reason about internal behavior. Events describe notable Kubernetes lifecycle observations. Logs record application or component messages. Metrics summarize numeric measurements over time. Traces connect spans of a request across components. Each signal has different retention, sampling and interpretation limits.
 
 A metric’s labels define its dimensions. High-cardinality labels such as every raw user ID or request token can create operational cost and privacy risk. Aggregation can hide a failing subgroup, while excessive detail can overwhelm the system. Choose dimensions that support the diagnostic question.
 
-A trace ID can connect a browser request to proxy and application work when propagation is implemented. It is not a secret or authorization token, and it should not be confused with a Kubernetes resource UID. Time synchronization and sampling affect how confidently signals can be correlated.''',
-'''Begin with a named symptom and time window. Read only relevant namespace objects, bounded logs and the minimal metric dimensions needed. A Pod event about scheduling does not prove a later HTTP request’s outcome. A request latency spike can involve DNS, connection setup, queueing or handler work.
+A trace ID can connect a browser request to proxy and application work when propagation is implemented. It is not a secret or authorization token, and it should not be confused with a Kubernetes resource UID. Time synchronization and sampling affect how confidently signals can be correlated.""",
+    """Begin with a named symptom and time window. Read only relevant namespace objects, bounded logs and the minimal metric dimensions needed. A Pod event about scheduling does not prove a later HTTP request’s outcome. A request latency spike can involve DNS, connection setup, queueing or handler work.
 
-The fixture supplies synthetic event and request records to practice correlation. Actual metrics stacks and distributed tracing require separately prepared components. The lesson does not install observability operators or collect all-cluster data automatically.''',
-'one request identity -> proxy observation -> app observation -> data operation\nresource UID/generation -> controller events\ntime window + bounded metrics -> compare symptoms and hypotheses',
-('Classify evidence types','These are distinct synthetic signals.','text','event: FailedScheduling for Pod UID-A\nlog: request idR returned503\nmetric: request duration histogram for serviceapi\ntrace: spans for requestR across proxy and app','Each signal answers a different question and can have a different retention period.'),
-('Avoid a high-cardinality metric label','Use request IDs in bounded logs/traces instead.','text','poor metric label: request_id=unique-for-every-request\nbetter aggregate: route=/reports, status_class=5xx','The aggregate remains bounded while exact request investigation uses another signal.'),
-[('Match each signal to a diagnostic question.','Events for lifecycle, logs for messages, metrics for trends, traces for request paths.','No signal is universally sufficient. Choose the smallest set that distinguishes the competing explanations.'),('Define a bounded incident time window.','Relevant timestamps and retained identities are explicit.','Without time alignment a healthy later observation can be mistaken for evidence about the original failure.'),('Build a correlated synthetic request packet.','Request ID, service, status, duration and resource revision are related carefully.','Resource identity and request identity serve different roles. Preserve both when connecting rollout changes to request behavior.'),('Diagnose a latency metric without assuming app CPU is the cause.','Break down DNS, connection, queueing and handler phases.','A total duration measures the whole path. Use more specific evidence before changing resource limits.'),('Explain high-cardinality label risk.','Unbounded unique label values expand metric state and cost.','Use bounded dimensions for aggregation and appropriately controlled logs or traces for individual requests.'),('Plan privacy-aware observability for a teaching service.','No credentials or private payloads, bounded retention and useful correlation fields.','Diagnostics should make failures explainable without collecting unrelated personal or secret data.')],
-'https://kubernetes.io/docs/concepts/cluster-administration/observability/', 'https://opentelemetry.io/docs/concepts/signals/')
+The fixture supplies synthetic event and request records to practice correlation. Actual metrics stacks and distributed tracing require separately prepared components. The lesson does not install observability operators or collect all-cluster data automatically.""",
+    "one request identity -> proxy observation -> app observation -> data operation\nresource UID/generation -> controller events\ntime window + bounded metrics -> compare symptoms and hypotheses",
+    (
+        "Classify evidence types",
+        "These are distinct synthetic signals.",
+        "text",
+        "event: FailedScheduling for Pod UID-A\nlog: request idR returned503\nmetric: request duration histogram for serviceapi\ntrace: spans for requestR across proxy and app",
+        "Each signal answers a different question and can have a different retention period.",
+    ),
+    (
+        "Avoid a high-cardinality metric label",
+        "Use request IDs in bounded logs/traces instead.",
+        "text",
+        "poor metric label: request_id=unique-for-every-request\nbetter aggregate: route=/reports, status_class=5xx",
+        "The aggregate remains bounded while exact request investigation uses another signal.",
+    ),
+    [
+        (
+            "Match each signal to a diagnostic question.",
+            "Events for lifecycle, logs for messages, metrics for trends, traces for request paths.",
+            "No signal is universally sufficient. Choose the smallest set that distinguishes the competing explanations.",
+        ),
+        (
+            "Define a bounded incident time window.",
+            "Relevant timestamps and retained identities are explicit.",
+            "Without time alignment a healthy later observation can be mistaken for evidence about the original failure.",
+        ),
+        (
+            "Build a correlated synthetic request packet.",
+            "Request ID, service, status, duration and resource revision are related carefully.",
+            "Resource identity and request identity serve different roles. Preserve both when connecting rollout changes to request behavior.",
+        ),
+        (
+            "Diagnose a latency metric without assuming app CPU is the cause.",
+            "Break down DNS, connection, queueing and handler phases.",
+            "A total duration measures the whole path. Use more specific evidence before changing resource limits.",
+        ),
+        (
+            "Explain high-cardinality label risk.",
+            "Unbounded unique label values expand metric state and cost.",
+            "Use bounded dimensions for aggregation and appropriately controlled logs or traces for individual requests.",
+        ),
+        (
+            "Plan privacy-aware observability for a teaching service.",
+            "No credentials or private payloads, bounded retention and useful correlation fields.",
+            "Diagnostics should make failures explainable without collecting unrelated personal or secret data.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/cluster-administration/observability/",
+    "https://opentelemetry.io/docs/concepts/signals/",
+)
 
-add('A packet-path troubleshooting method from DNS to response',['failure localization','packet path','hypothesis','bounded probe'],
-'''Troubleshooting is a sequence of discriminating observations. Start with the caller, intended name, protocol, port and expected application result. Then identify the first layer where actual behavior differs from the model. Changing several layers at once can make the symptom disappear without explaining the cause.
+add(
+    "A packet-path troubleshooting method from DNS to response",
+    ["failure localization", "packet path", "hypothesis", "bounded probe"],
+    """Troubleshooting is a sequence of discriminating observations. Start with the caller, intended name, protocol, port and expected application result. Then identify the first layer where actual behavior differs from the model. Changing several layers at once can make the symptom disappear without explaining the cause.
 
 A useful request ladder separates name resolution, route reachability, transport connection, TLS identity, proxy routing and application semantics. Kubernetes adds controller and endpoint state that helps explain those steps. A successful test at one layer should not be promoted into a claim about every later layer.
 
-Controlled comparisons are powerful. If direct Pod traffic succeeds but Service traffic fails, focus on selector/endpoints/data-plane differences. If an internal Service request succeeds but external traffic fails, inspect the external listener and routing path. Each comparison requires the same intended application and an owned permitted probe.''',
-'''Use a hypothesis table with expected observation if true, expected observation if false and the smallest safe check. Preserve the failure before repair. Avoid broad all-namespace commands and packet captures when an exact field or short request answers the question.
+Controlled comparisons are powerful. If direct Pod traffic succeeds but Service traffic fails, focus on selector/endpoints/data-plane differences. If an internal Service request succeeds but external traffic fails, inspect the external listener and routing path. Each comparison requires the same intended application and an owned permitted probe.""",
+    """Use a hypothesis table with expected observation if true, expected observation if false and the smallest safe check. Preserve the failure before repair. Avoid broad all-namespace commands and packet captures when an exact field or short request answers the question.
 
-A timeout is ambiguous: it can involve dropped packets, no route, DNS delay, a stalled TLS handshake or an application that never responds. A refused connection, TLS error and HTTP status narrow the phase differently. Read the actual diagnostic rather than translating every failure into service down.''',
-'name -> DNS answer -> route -> TCP connect -> TLS -> proxy rule -> app handler -> expected body\nparallel control evidence: Service selector -> EndpointSlices -> Pod readiness/revision',
-('Compare two paths','The synthetic probes use the same app revision.','text','PodIP:8080 succeeds\nClusterIP:80 fails\nnext: inspect Service targetPort, eligible endpoints and node data plane','The application listener is less likely to be the first failing component.'),
-('Write a falsifiable hypothesis','A useful hypothesis predicts a distinct observation.','text','hypothesis: Service selector matches no Pods\nif true: matching Pod set and ready endpoints are empty\nif false: investigate port mapping or data plane next','The proposed read can disprove the hypothesis without changing the system.'),
-[('Order the request ladder.','DNS, route, transport, optional TLS, proxy/application route and body.','The order prevents diagnosing a later application symptom when the connection never existed.'),('Interpret connection refused versus timeout.','Refusal narrows listener/connectivity behavior; timeout remains broader.','Neither result alone uniquely identifies a root cause. Use it to choose the next discriminating check.'),('Build a three-hypothesis table for Service failure.','Selector, targetPort and data-plane hypotheses each have distinct evidence.','A table makes diagnosis reviewable and reduces random configuration edits.'),('Diagnose internal success with external failure.','Inspect the added external listener/routing/TLS layers.','Keep the working internal evidence. Do not replace healthy Pods before examining the path that differs.'),('Explain why a stale successful receipt is insufficient.','It may belong to another revision, namespace or caller path.','Bind evidence to current identities and source. Historical success is context, not present acceptance.'),('Perform a single-fault incident walkthrough.','One controlled fault, preserved failure, targeted repair and rechecked invariant.','The lesson is complete when the learner can explain why the repair works and what observation would show it failed.')],
-'https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/', 'https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/')
+A timeout is ambiguous: it can involve dropped packets, no route, DNS delay, a stalled TLS handshake or an application that never responds. A refused connection, TLS error and HTTP status narrow the phase differently. Read the actual diagnostic rather than translating every failure into service down.""",
+    "name -> DNS answer -> route -> TCP connect -> TLS -> proxy rule -> app handler -> expected body\nparallel control evidence: Service selector -> EndpointSlices -> Pod readiness/revision",
+    (
+        "Compare two paths",
+        "The synthetic probes use the same app revision.",
+        "text",
+        "PodIP:8080 succeeds\nClusterIP:80 fails\nnext: inspect Service targetPort, eligible endpoints and node data plane",
+        "The application listener is less likely to be the first failing component.",
+    ),
+    (
+        "Write a falsifiable hypothesis",
+        "A useful hypothesis predicts a distinct observation.",
+        "text",
+        "hypothesis: Service selector matches no Pods\nif true: matching Pod set and ready endpoints are empty\nif false: investigate port mapping or data plane next",
+        "The proposed read can disprove the hypothesis without changing the system.",
+    ),
+    [
+        (
+            "Order the request ladder.",
+            "DNS, route, transport, optional TLS, proxy/application route and body.",
+            "The order prevents diagnosing a later application symptom when the connection never existed.",
+        ),
+        (
+            "Interpret connection refused versus timeout.",
+            "Refusal narrows listener/connectivity behavior; timeout remains broader.",
+            "Neither result alone uniquely identifies a root cause. Use it to choose the next discriminating check.",
+        ),
+        (
+            "Build a three-hypothesis table for Service failure.",
+            "Selector, targetPort and data-plane hypotheses each have distinct evidence.",
+            "A table makes diagnosis reviewable and reduces random configuration edits.",
+        ),
+        (
+            "Diagnose internal success with external failure.",
+            "Inspect the added external listener/routing/TLS layers.",
+            "Keep the working internal evidence. Do not replace healthy Pods before examining the path that differs.",
+        ),
+        (
+            "Explain why a stale successful receipt is insufficient.",
+            "It may belong to another revision, namespace or caller path.",
+            "Bind evidence to current identities and source. Historical success is context, not present acceptance.",
+        ),
+        (
+            "Perform a single-fault incident walkthrough.",
+            "One controlled fault, preserved failure, targeted repair and rechecked invariant.",
+            "The lesson is complete when the learner can explain why the repair works and what observation would show it failed.",
+        ),
+    ],
+    "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "https://kubernetes.io/docs/tasks/debug/debug-application/debug-running-pod/",
+)
 
-add('Service meshes, multi-cluster traffic and architectural limits',['service mesh','mTLS','multi-cluster','failure domain'],
-'''A service mesh adds traffic-management, identity or observability capabilities around application communication through a particular implementation. It may use sidecar proxies, node-level components or other designs. It does not remove the underlying need for Pod networking, Service discovery, healthy endpoints and application correctness.
+add(
+    "Service meshes, multi-cluster traffic and architectural limits",
+    ["service mesh", "mTLS", "multi-cluster", "failure domain"],
+    """A service mesh adds traffic-management, identity or observability capabilities around application communication through a particular implementation. It may use sidecar proxies, node-level components or other designs. It does not remove the underlying need for Pod networking, Service discovery, healthy endpoints and application correctness.
 
 Mutual TLS authenticates both ends of a connection under an identity system. It is not the same as application authorization for a business action. A mesh can establish workload identities while the application still needs to decide whether a caller may read a specific record.
 
-Multi-cluster communication introduces additional discovery, routing, identity and failure-domain boundaries. Overlapping Pod CIDRs, different trust roots, regional latency and partial outages complicate the design. A working single-cluster demo does not qualify a cross-region platform.''',
-'''Draw the actual data and control planes. A mesh control plane distributes configuration and identity material; proxies or equivalent components handle traffic. Failure of one plane can have different effects from failure of the other. Policies and retries must account for idempotency and retry amplification.
+Multi-cluster communication introduces additional discovery, routing, identity and failure-domain boundaries. Overlapping Pod CIDRs, different trust roots, regional latency and partial outages complicate the design. A working single-cluster demo does not qualify a cross-region platform.""",
+    """Draw the actual data and control planes. A mesh control plane distributes configuration and identity material; proxies or equivalent components handle traffic. Failure of one plane can have different effects from failure of the other. Policies and retries must account for idempotency and retry amplification.
 
-This chapter is design and reading practice. The course does not install a mesh, connect clusters or create cloud networks. Use synthetic diagrams to compare when a mesh capability is justified and when application-level libraries or simpler routing are sufficient.''',
-'appA -> local traffic component -> authenticated transport -> remote traffic component -> appB\ncontrol plane distributes policy/identity; underlying network still carries packets\nsecond cluster adds discovery, routing and trust boundaries',
-('Separate identity and authorization','A valid workload identity is only one input to policy.','text','mTLS peer identity: serviceA\napplication action: read account123\nauthorization decision: separate policy for that action','An authenticated service is not automatically allowed every business operation.'),
-('Trace retry amplification','The numbers are synthetic.','text','client makes at most 3 total attempts\nproxy makes at most 3 upstream attempts per client attempt\nupstream may receive up to 9 attempts without coordinated budgets','Retries at multiple layers can multiply load and duplicate unsafe operations.'),
-[('Identify mesh control and data planes.','Configuration/identity distribution versus actual traffic handling.','Their failures and evidence differ. A healthy control process does not prove every proxy has applied current policy.'),('Distinguish mTLS and business authorization.','Peer identity versus permission for a domain-specific action.','Keep the policy layers explicit. Encryption and authentication do not replace application access decisions.'),('Draw a two-cluster request path.','Discovery, inter-cluster route, trust and application hops are named.','The diagram should expose new failure domains rather than drawing one seamless arrow.'),('Diagnose retry amplification.','Uncoordinated retry budgets multiply attempts and load.','Set bounded policies with operation safety in mind. More retries can worsen an overloaded dependency.'),('Explain overlapping CIDR risk across clusters.','Address routing can become ambiguous without a deliberate connectivity design.','Cluster-local addresses are not automatically globally unique. Network planning remains necessary.'),('Defend whether a mesh is justified for a workload.','Name required capabilities, operational cost and simpler alternatives.','Choose architecture from requirements. Adding infrastructure is not proof of maturity or reliability.')],
-'https://kubernetes.io/docs/concepts/services-networking/', 'https://istio.io/latest/docs/ops/deployment/architecture/')
+This chapter is design and reading practice. The course does not install a mesh, connect clusters or create cloud networks. Use synthetic diagrams to compare when a mesh capability is justified and when application-level libraries or simpler routing are sufficient.""",
+    "appA -> local traffic component -> authenticated transport -> remote traffic component -> appB\ncontrol plane distributes policy/identity; underlying network still carries packets\nsecond cluster adds discovery, routing and trust boundaries",
+    (
+        "Separate identity and authorization",
+        "A valid workload identity is only one input to policy.",
+        "text",
+        "mTLS peer identity: serviceA\napplication action: read account123\nauthorization decision: separate policy for that action",
+        "An authenticated service is not automatically allowed every business operation.",
+    ),
+    (
+        "Trace retry amplification",
+        "The numbers are synthetic.",
+        "text",
+        "client makes at most 3 total attempts\nproxy makes at most 3 upstream attempts per client attempt\nupstream may receive up to 9 attempts without coordinated budgets",
+        "Retries at multiple layers can multiply load and duplicate unsafe operations.",
+    ),
+    [
+        (
+            "Identify mesh control and data planes.",
+            "Configuration/identity distribution versus actual traffic handling.",
+            "Their failures and evidence differ. A healthy control process does not prove every proxy has applied current policy.",
+        ),
+        (
+            "Distinguish mTLS and business authorization.",
+            "Peer identity versus permission for a domain-specific action.",
+            "Keep the policy layers explicit. Encryption and authentication do not replace application access decisions.",
+        ),
+        (
+            "Draw a two-cluster request path.",
+            "Discovery, inter-cluster route, trust and application hops are named.",
+            "The diagram should expose new failure domains rather than drawing one seamless arrow.",
+        ),
+        (
+            "Diagnose retry amplification.",
+            "Uncoordinated retry budgets multiply attempts and load.",
+            "Set bounded policies with operation safety in mind. More retries can worsen an overloaded dependency.",
+        ),
+        (
+            "Explain overlapping CIDR risk across clusters.",
+            "Address routing can become ambiguous without a deliberate connectivity design.",
+            "Cluster-local addresses are not automatically globally unique. Network planning remains necessary.",
+        ),
+        (
+            "Defend whether a mesh is justified for a workload.",
+            "Name required capabilities, operational cost and simpler alternatives.",
+            "Choose architecture from requirements. Adding infrastructure is not proof of maturity or reliability.",
+        ),
+    ],
+    "https://kubernetes.io/docs/concepts/services-networking/",
+    "https://istio.io/latest/docs/ops/deployment/architecture/",
+)
 
-add('Networking capstone: publish, protect, trace and recover',['architecture','acceptance','incident recovery','ownership'],
-'''The final networking project asks you to explain one complete application path and its failure boundaries. The application has a Deployment, an internal Service, a deliberately prepared external routing layer, TLS where the chosen lab supports it, and a narrow network policy. Every capability must be named rather than assumed.
+add(
+    "Networking capstone: publish, protect, trace and recover",
+    ["architecture", "acceptance", "incident recovery", "ownership"],
+    """The final networking project asks you to explain one complete application path and its failure boundaries. The application has a Deployment, an internal Service, a deliberately prepared external routing layer, TLS where the chosen lab supports it, and a narrow network policy. Every capability must be named rather than assumed.
 
 Start with the synthetic fixture and produce a design packet even when no advanced cluster is available. A live extension requires an explicitly owned target, installed controller support, an enforcing network implementation and a reviewed resource ledger. A source-only design is valuable, but it must not be labeled as an executed production deployment.
 
-The strongest learning outcome is independent diagnosis. You should be able to trace a request, identify a wrong selector or port, distinguish readiness from process state, explain public versus internal addresses, and recover from one controlled failure while preserving data and cleanup ownership.''',
-'''Build an acceptance matrix across source validation, API admission, controller conditions, endpoint identity, internal request, external request, allowed/denied policy flows, rollout revision and cleanup. Mark unavailable capabilities explicitly. No row is automatically implied by another.
+The strongest learning outcome is independent diagnosis. You should be able to trace a request, identify a wrong selector or port, distinguish readiness from process state, explain public versus internal addresses, and recover from one controlled failure while preserving data and cleanup ownership.""",
+    """Build an acceptance matrix across source validation, API admission, controller conditions, endpoint identity, internal request, external request, allowed/denied policy flows, rollout revision and cleanup. Mark unavailable capabilities explicitly. No row is automatically implied by another.
 
-Use the same source and object identities throughout a run. Record a fresh response from the intended revision after a repair. For stateful extensions, add independent data recovery evidence rather than assuming network success preserves records. The capstone is a bounded learning project, not a certificate of universal Kubernetes expertise.''',
-'client -> DNS -> external listener/TLS -> HTTP route -> Service -> ready Pod -> response\npolicy gates intended flows; observability links request and resource identities\ncontrolled failure -> localized diagnosis -> targeted repair -> fresh acceptance -> owned cleanup',
-('Prepare the acceptance matrix','This is a template, not a claim that the rows passed.','text','source/manifest validation\ncontroller and API capability\ncurrent ready endpoint UIDs\ninternal app request\nexternal DNS/TLS/route request\nallowed and denied policy flows\nnew revision after rollout\nUID-aware owned cleanup','Each row needs actual evidence or an explicit not-run boundary.'),
-('Choose one controlled fault','The exercise changes exactly one field in a copied source.','text','fault: Service targetPort points to8081 while app listens on8080\nobserve: endpoints/ports and failed request\nrepair: restore intended target mapping\nrecheck: fresh response from current revision','The repair addresses the identified mismatch without broadening exposure or permissions.'),
-[('Predict the entire request path with address and port roles.','Every hop names its caller, destination and responsible component.','A complete path distinguishes node, Pod, Service and public entrypoint addresses. Do not collapse them into one generic IP.'),('Classify available and unavailable lab capabilities.','Controllers, policy enforcement, dual-stack and external routing are explicit.','An honest capability inventory prevents fake runtime claims and accidental installation or cloud provisioning.'),('Produce a complete architecture and acceptance packet.','Diagram, manifests, ownership ledger, checks and limitations align.','The packet should be usable by another learner with the documented prepared environment, without ambient credentials or hidden state.'),('Diagnose and repair the single target-port fault.','The first incorrect mapping is found and a fresh request verifies repair.','Preserve the failure and keep other fields unchanged. This establishes causality more clearly than recreating every resource.'),('Verify isolation with both positive and negative flows.','Allowed traffic succeeds and the denied owned case fails under an enforcing CNI.','A policy object existing or one successful request cannot establish isolation. Keep the implementation and caller identities in the record.'),('Teach the system and defend its evidence limits.','Explain mechanisms, current results, untested platforms and scoped cleanup.','Independent understanding includes recognizing what remains unqualified. A good operator can stop at a missing capability without inventing success or widening authority.')],
-'https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/', 'https://kubernetes.io/docs/concepts/services-networking/network-policies/', 'https://gateway-api.sigs.k8s.io/guides/')
+Use the same source and object identities throughout a run. Record a fresh response from the intended revision after a repair. For stateful extensions, add independent data recovery evidence rather than assuming network success preserves records. The capstone is a bounded learning project, not a certificate of universal Kubernetes expertise.""",
+    "client -> DNS -> external listener/TLS -> HTTP route -> Service -> ready Pod -> response\npolicy gates intended flows; observability links request and resource identities\ncontrolled failure -> localized diagnosis -> targeted repair -> fresh acceptance -> owned cleanup",
+    (
+        "Prepare the acceptance matrix",
+        "This is a template, not a claim that the rows passed.",
+        "text",
+        "source/manifest validation\ncontroller and API capability\ncurrent ready endpoint UIDs\ninternal app request\nexternal DNS/TLS/route request\nallowed and denied policy flows\nnew revision after rollout\nUID-aware owned cleanup",
+        "Each row needs actual evidence or an explicit not-run boundary.",
+    ),
+    (
+        "Choose one controlled fault",
+        "The exercise changes exactly one field in a copied source.",
+        "text",
+        "fault: Service targetPort points to8081 while app listens on8080\nobserve: endpoints/ports and failed request\nrepair: restore intended target mapping\nrecheck: fresh response from current revision",
+        "The repair addresses the identified mismatch without broadening exposure or permissions.",
+    ),
+    [
+        (
+            "Predict the entire request path with address and port roles.",
+            "Every hop names its caller, destination and responsible component.",
+            "A complete path distinguishes node, Pod, Service and public entrypoint addresses. Do not collapse them into one generic IP.",
+        ),
+        (
+            "Classify available and unavailable lab capabilities.",
+            "Controllers, policy enforcement, dual-stack and external routing are explicit.",
+            "An honest capability inventory prevents fake runtime claims and accidental installation or cloud provisioning.",
+        ),
+        (
+            "Produce a complete architecture and acceptance packet.",
+            "Diagram, manifests, ownership ledger, checks and limitations align.",
+            "The packet should be usable by another learner with the documented prepared environment, without ambient credentials or hidden state.",
+        ),
+        (
+            "Diagnose and repair the single target-port fault.",
+            "The first incorrect mapping is found and a fresh request verifies repair.",
+            "Preserve the failure and keep other fields unchanged. This establishes causality more clearly than recreating every resource.",
+        ),
+        (
+            "Verify isolation with both positive and negative flows.",
+            "Allowed traffic succeeds and the denied owned case fails under an enforcing CNI.",
+            "A policy object existing or one successful request cannot establish isolation. Keep the implementation and caller identities in the record.",
+        ),
+        (
+            "Teach the system and defend its evidence limits.",
+            "Explain mechanisms, current results, untested platforms and scoped cleanup.",
+            "Independent understanding includes recognizing what remains unqualified. A good operator can stop at a missing capability without inventing success or widening authority.",
+        ),
+    ],
+    "https://kubernetes.io/docs/tasks/debug/debug-application/debug-service/",
+    "https://kubernetes.io/docs/concepts/services-networking/network-policies/",
+    "https://gateway-api.sigs.k8s.io/guides/",
+)
 
 
 # Editorial normalization affects prose fields only, never code examples/references.
 def _prose(value):
     import re
-    prefixes = r'A|Client|Depth|Diagnose|Draw|HTTP|Layer|Pod|Service|Values|Width|advances|and|app|are|as|backend|become|bind|binding|by|containerPort|coordinate|for|from|guarantee|have|height|listener|node|nodePort|of|often|port|range|remains|scale|second|segment|through|to|total|totals|use|values|why'
-    value = re.sub(r'\b(' + prefixes + r')(?=\d)', r'\1 ', value)
-    value = re.sub(r',(?=\d)', ', ', value)
+
+    prefixes = r"A|Client|Depth|Diagnose|Draw|HTTP|Layer|Pod|Service|Values|Width|advances|and|app|are|as|backend|become|bind|binding|by|containerPort|coordinate|for|from|guarantee|have|height|listener|node|nodePort|of|often|port|range|remains|scale|second|segment|through|to|total|totals|use|values|why"
+    value = re.sub(r"\b(" + prefixes + r")(?=\d)", r"\1 ", value)
+    value = re.sub(r",(?=\d)", ", ", value)
     return value
 
-CHAPTERS = [(_prose(title), concepts, _prose(mental), _prose(mechanism), _prose(diagram),
-             [(_prose(h), _prose(b), lang, code, _prose(expected)) for h,b,lang,code,expected in examples],
-             [tuple(_prose(v) for v in task) for task in tasks], refs)
-            for title,concepts,mental,mechanism,diagram,examples,tasks,refs in CHAPTERS]
+
+CHAPTERS = [
+    (
+        _prose(title),
+        concepts,
+        _prose(mental),
+        _prose(mechanism),
+        _prose(diagram),
+        [
+            (_prose(h), _prose(b), lang, code, _prose(expected))
+            for h, b, lang, code, expected in examples
+        ],
+        [tuple(_prose(v) for v in task) for task in tasks],
+        refs,
+    )
+    for title, concepts, mental, mechanism, diagram, examples, tasks, refs in CHAPTERS
+]
 
 
 # Topic-specific transfer reasoning belongs in the separate revealed answers.

@@ -1,12 +1,15 @@
-TEXT="Ada joined Acme Labs in Paris."
-LEXICON={"Ada":"PER","Acme":"ORG","Acme Labs":"ORG","Paris":"LOC"}
+TEXT = "Ada joined Acme Labs in Paris."
+LEXICON = {"Ada": "PER", "Acme": "ORG", "Acme Labs": "ORG", "Paris": "LOC"}
 
-def extract_entities(text,lexicon):
+
+def extract_entities(text, lexicon):
     raise NotImplementedError("Return auditable raw spans after reading the guide")
+
 
 def main():
     print(TEXT)
     print("Implement span extraction, exact scoring and the declared relation boundary.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,89 +1,156 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def parse_instants(raw):
-    return raw.withColumn("event_time",F.to_timestamp("text","yyyy-MM-dd'T'HH:mm:ssXXX"))
+    return raw.withColumn("event_time", F.to_timestamp("text", "yyyy-MM-dd'T'HH:mm:ssXXX"))
+
 
 def render_clock(events, zone):
     spark = events.sparkSession
     previous = spark.conf.get("spark.sql.session.timeZone")
     try:
-        spark.conf.set("spark.sql.session.timeZone",zone)
-        return [tuple(r) for r in events.select("event_id",F.date_format("event_time","yyyy-MM-dd HH:mm:ss").alias("clock")).orderBy("event_id").collect()]
+        spark.conf.set("spark.sql.session.timeZone", zone)
+        return [
+            tuple(r)
+            for r in events.select(
+                "event_id", F.date_format("event_time", "yyyy-MM-dd HH:mm:ss").alias("clock")
+            )
+            .orderBy("event_id")
+            .collect()
+        ]
     finally:
-        spark.conf.set("spark.sql.session.timeZone",previous)
+        spark.conf.set("spark.sql.session.timeZone", previous)
+
 
 def local_day(events):
     lower = F.to_timestamp(F.lit("2024-11-03T07:00:00Z"))
     upper = F.to_timestamp(F.lit("2024-11-04T08:00:00Z"))
-    return events.filter((F.col("event_time")>=lower)&(F.col("event_time")<upper))
+    return events.filter((F.col("event_time") >= lower) & (F.col("event_time") < upper))
+
 
 def local_fields(spark):
     previous = spark.conf.get("spark.sql.session.timeZone")
     try:
         results = []
-        for zone in ["UTC","America/Los_Angeles"]:
-            spark.conf.set("spark.sql.session.timeZone",zone)
+        for zone in ["UTC", "America/Los_Angeles"]:
+            spark.conf.set("spark.sql.session.timeZone", zone)
             frame = spark.sql("SELECT CAST('2024-11-03 01:30:00' AS TIMESTAMP_NTZ) AS local_time")
             assert frame.schema["local_time"].dataType.typeName() == "timestamp_ntz"
             results.append(frame.select(F.col("local_time").cast("string")).first()[0])
         return results
     finally:
-        spark.conf.set("spark.sql.session.timeZone",previous)
+        spark.conf.set("spark.sql.session.timeZone", previous)
+
 
 def fold_evidence(events):
-    fold = events.filter(F.col("event_id").isin(2,3))
-    labels = {label for _,label in render_clock(fold,"America/Los_Angeles")}
+    fold = events.filter(F.col("event_id").isin(2, 3))
+    labels = {label for _, label in render_clock(fold, "America/Los_Angeles")}
     instants = {r[0] for r in fold.select(F.unix_timestamp("event_time")).collect()}
-    return len(labels),len(instants)
+    return len(labels), len(instants)
+
 
 def parse_ledger(spark):
-    source = spark.sql("SELECT * FROM VALUES (1,'2024-01-01T00:00:00Z'),(2,'bad'),(3,CAST(NULL AS STRING)) AS v(id,text)")
-    return source.withColumn("parsed",F.try_to_timestamp("text",F.lit("yyyy-MM-dd'T'HH:mm:ssXXX"))).withColumn("reason",F.when(F.col("text").isNull(),"missing_timestamp").when(F.col("parsed").isNull(),"malformed_timestamp").otherwise("accepted"))
+    source = spark.sql(
+        "SELECT * FROM VALUES (1,'2024-01-01T00:00:00Z'),(2,'bad'),(3,CAST(NULL AS STRING)) AS v(id,text)"
+    )
+    return source.withColumn(
+        "parsed", F.try_to_timestamp("text", F.lit("yyyy-MM-dd'T'HH:mm:ssXXX"))
+    ).withColumn(
+        "reason",
+        F.when(F.col("text").isNull(), "missing_timestamp")
+        .when(F.col("parsed").isNull(), "malformed_timestamp")
+        .otherwise("accepted"),
+    )
+
 
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-018").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-018")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.timestampType","TIMESTAMP_LTZ")
-        schema = StructType([StructField("event_id",LongType(),False),StructField("text",StringType(),False)])
-        raw = spark.createDataFrame([(1,"2024-11-03T07:00:00Z"),(2,"2024-11-03T01:30:00-07:00"),(3,"2024-11-03T01:30:00-08:00"),(4,"2024-11-04T08:00:00Z"),(5,"2024-11-03T08:30:00Z"),(6,"2024-11-03T06:59:59Z")],schema=schema)
+        spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
+        schema = StructType(
+            [StructField("event_id", LongType(), False), StructField("text", StringType(), False)]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, "2024-11-03T07:00:00Z"),
+                (2, "2024-11-03T01:30:00-07:00"),
+                (3, "2024-11-03T01:30:00-08:00"),
+                (4, "2024-11-04T08:00:00Z"),
+                (5, "2024-11-03T08:30:00Z"),
+                (6, "2024-11-03T06:59:59Z"),
+            ],
+            schema=schema,
+        )
         # Exercise 1: Parse offset evidence into comparable instants
         events = parse_instants(raw)
-        assert isinstance(events.schema["event_time"].dataType,TimestampType) and events.filter(F.col("event_time").isNull()).count() == 0
-        epochs = {r[0]:r[1] for r in events.select("event_id",F.unix_timestamp("event_time").alias("epoch")).collect()}
-        assert epochs[2] == epochs[5] and epochs[3]-epochs[2] == 3600
+        assert (
+            isinstance(events.schema["event_time"].dataType, TimestampType)
+            and events.filter(F.col("event_time").isNull()).count() == 0
+        )
+        epochs = {
+            r[0]: r[1]
+            for r in events.select(
+                "event_id", F.unix_timestamp("event_time").alias("epoch")
+            ).collect()
+        }
+        assert epochs[2] == epochs[5] and epochs[3] - epochs[2] == 3600
         # Exercise 2: Render a zone without changing the underlying instant
-        utc = dict(render_clock(events,"UTC")); local = dict(render_clock(events,"America/Los_Angeles"))
+        utc = dict(render_clock(events, "UTC"))
+        local = dict(render_clock(events, "America/Los_Angeles"))
         assert utc[2] == "2024-11-03 08:30:00" and utc[3] == "2024-11-03 09:30:00"
         assert local[2] == local[3] == "2024-11-03 01:30:00"
         assert spark.conf.get("spark.sql.session.timeZone") == "UTC"
         # Exercise 3: Filter a complete local day with instant boundaries
-        assert [r[0] for r in local_day(events).select("event_id").orderBy("event_id").collect()] == [1,2,3,5]
-        assert epochs[4]-epochs[1] == 25*3600
+        assert [
+            r[0] for r in local_day(events).select("event_id").orderBy("event_id").collect()
+        ] == [1, 2, 3, 5]
+        assert epochs[4] - epochs[1] == 25 * 3600
         # Exercise 4: Keep an unresolved local timestamp as local fields
-        assert local_fields(spark) == ["2024-11-03 01:30:00","2024-11-03 01:30:00"]
+        assert local_fields(spark) == ["2024-11-03 01:30:00", "2024-11-03 01:30:00"]
         assert spark.conf.get("spark.sql.session.timeZone") == "UTC"
         # Exercise 5: Expose the information lost by a local clock key
-        assert fold_evidence(events) == (1,2)
+        assert fold_evidence(events) == (1, 2)
         # Exercise 6: Quarantine invalid timestamps without confusing missingness
         ledger = parse_ledger(spark)
-        assert [tuple(r) for r in ledger.select("id","reason").orderBy("id").collect()] == [(1,"accepted"),(2,"malformed_timestamp"),(3,"missing_timestamp")]
-        assert ledger.agg(F.count("parsed")).first()[0] == 1 and spark.conf.get("spark.sql.ansi.enabled") == "true"
+        assert [tuple(r) for r in ledger.select("id", "reason").orderBy("id").collect()] == [
+            (1, "accepted"),
+            (2, "malformed_timestamp"),
+            (3, "missing_timestamp"),
+        ]
+        assert (
+            ledger.agg(F.count("parsed")).first()[0] == 1
+            and spark.conf.get("spark.sql.ansi.enabled") == "true"
+        )
         print("spark-018: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

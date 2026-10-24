@@ -1,12 +1,16 @@
 import numpy as np
-VALUES=np.array([[1.,2.],[3.,4.],[100.,100.]])
-MASK=np.array([True,True,False])
 
-def masked_mean(values,mask):
+VALUES = np.array([[1.0, 2.0], [3.0, 4.0], [100.0, 100.0]])
+MASK = np.array([True, True, False])
+
+
+def masked_mean(values, mask):
     raise NotImplementedError("Implement the valid-position denominator")
+
 
 def main():
     print("Pooling and score fixtures are ready. Do not download or claim a pretrained encoder.")
+
 
 if __name__ == "__main__":
     main()

@@ -1,44 +1,99 @@
 from pathlib import Path
-import json,textwrap
-ROOT=Path(__file__).resolve().parents[3]
-SPECS={}
-def ex(title,prompt,expected,code,why):return dict(title=title,prompt=prompt,expected=expected,code=textwrap.dedent(code).strip(),why=why)
-def add(n,mental,anatomy,terms,exercises,helper='',imports='import java.util.*;',source='https://docs.oracle.com/en/java/javase/21/docs/api/index.html',run_notes=''):
- assert len(exercises)==6
- SPECS[f'java-{n:03d}']=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,helper=textwrap.dedent(helper).strip(),imports=imports,source=source,run_notes=run_notes)
-def program(s,blocks):
- return s['imports']+'\n\npublic class Main {\n'+textwrap.indent(s['helper'],'    ')+'\n    public static void main(String[] args) throws Exception {\n'+textwrap.indent('\n\n'.join(blocks),'        ')+'\n    }\n}\n'
+import json, textwrap
+
+ROOT = Path(__file__).resolve().parents[3]
+SPECS = {}
+
+
+def ex(title, prompt, expected, code, why):
+    return dict(
+        title=title, prompt=prompt, expected=expected, code=textwrap.dedent(code).strip(), why=why
+    )
+
+
+def add(
+    n,
+    mental,
+    anatomy,
+    terms,
+    exercises,
+    helper="",
+    imports="import java.util.*;",
+    source="https://docs.oracle.com/en/java/javase/21/docs/api/index.html",
+    run_notes="",
+):
+    assert len(exercises) == 6
+    SPECS[f"java-{n:03d}"] = dict(
+        mental=mental,
+        anatomy=anatomy,
+        terms=terms,
+        exercises=exercises,
+        helper=textwrap.dedent(helper).strip(),
+        imports=imports,
+        source=source,
+        run_notes=run_notes,
+    )
+
+
+def program(s, blocks):
+    return (
+        s["imports"]
+        + "\n\npublic class Main {\n"
+        + textwrap.indent(s["helper"], "    ")
+        + "\n    public static void main(String[] args) throws Exception {\n"
+        + textwrap.indent("\n\n".join(blocks), "        ")
+        + "\n    }\n}\n"
+    )
+
+
 def write_all():
- base=ROOT/'courses/java';plan=json.loads((base/'track.json').read_text());inventory=json.loads((base/'lessons.json').read_text());existing={e['id'] for e in inventory['lessons']}
- for p in plan['lessons']:
-  id=p['id']
-  if id not in SPECS:continue
-  s=SPECS[id];guide=f'courses/java/guides/{id}.md';learner=f'courses/java/lessons/{id}.java';solution=f'courses/java/solutions/{id}_solution.java';explanation=f'courses/java/solutions/{id}_solutions.md'
-  prereq=', '.join('`'+v+'`' for v in p['prerequisites']) or 'None. This lesson starts from a plain text source file.'
-  terms='\n\n'.join(f'**{k}:** {v}' for k,v in s['terms'])
-  exercises='\n\n'.join(f"{i}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Compare your assertion values or captured diagnostic with {e['expected']}" for i,e in enumerate(s['exercises'],1))
-  examples='\n\n'.join(f"### Example {chr(65+i)}: {e['title']}\n\n{e['why']}\n\n```java\n{program(s,[x['code'] for x in s['exercises'][:i+1]])}\n```\n\n**Expected:** {e['expected']}" for i,e in enumerate(s['exercises'][:2]))
-  prompt=f'''Use $guide-ds60sqlpy-learning for {id}: {p['title']}.
+    base = ROOT / "courses/java"
+    plan = json.loads((base / "track.json").read_text())
+    inventory = json.loads((base / "lessons.json").read_text())
+    existing = {e["id"] for e in inventory["lessons"]}
+    for p in plan["lessons"]:
+        id = p["id"]
+        if id not in SPECS:
+            continue
+        s = SPECS[id]
+        guide = f"courses/java/guides/{id}.md"
+        learner = f"courses/java/lessons/{id}.java"
+        solution = f"courses/java/solutions/{id}_solution.java"
+        explanation = f"courses/java/solutions/{id}_solutions.md"
+        prereq = (
+            ", ".join("`" + v + "`" for v in p["prerequisites"])
+            or "None. This lesson starts from a plain text source file."
+        )
+        terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
+        exercises = "\n\n".join(
+            f"{i}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Compare your assertion values or captured diagnostic with {e['expected']}"
+            for i, e in enumerate(s["exercises"], 1)
+        )
+        examples = "\n\n".join(
+            f"### Example {chr(65 + i)}: {e['title']}\n\n{e['why']}\n\n```java\n{program(s, [x['code'] for x in s['exercises'][: i + 1]])}\n```\n\n**Expected:** {e['expected']}"
+            for i, e in enumerate(s["exercises"][:2])
+        )
+        prompt = f"""Use $guide-ds60sqlpy-learning for {id}: {p["title"]}.
 Read {guide} and {learner}. Direct prerequisites: {prereq}.
 Explain the mechanism, ask for a prediction, review my attempt, give one hint,
 request compiler/runtime evidence, and ask a fresh retrieval question.
 Keep courses/java/solutions/ closed until I request comparison or show an attempt.
 Use Java21 and the declared offline fixture. Done when I can explain the state
 transitions, pass all six exercise contracts, diagnose one failure and solve a
-new boundary case without copying the solution.'''
-  guide_text=f'''# {id}: {p['title']}
+new boundary case without copying the solution."""
+        guide_text = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
 
-{p['level'].capitalize()}, approximately {p['minutes']} minutes. Direct prerequisites: {prereq}
+{p["level"].capitalize()}, approximately {p["minutes"]} minutes. Direct prerequisites: {prereq}
 
 ## Learning objectives
 
-Explain {', '.join(k.lower() for k,v in s['terms'])} using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is {s['exercises'][0]['prompt']} The final exercise transfers the mechanism to {s['exercises'][-1]['title'].lower()}.
+Explain {", ".join(k.lower() for k, v in s["terms"])} using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is {s["exercises"][0]["prompt"]} The final exercise transfers the mechanism to {s["exercises"][-1]["title"].lower()}.
 
 ## Purpose and mental model
 
-{s['mental']}
+{s["mental"]}
 
 ## Vocabulary and concepts
 
@@ -57,11 +112,11 @@ java -ea Main
 
 The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
 
-{s.get('run_notes','')}
+{s.get("run_notes", "")}
 
 ## Syntax anatomy and execution trace
 
-{s['anatomy']}
+{s["anatomy"]}
 
 ## Worked example / walkthrough
 
@@ -87,7 +142,7 @@ First reconstruct the values and identities in the worked example. Next isolate 
 
 ## Self-check and retrieval
 
-Close the solution and explain {', '.join(k for k,v in s['terms'][:3])} in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Close the solution and explain {", ".join(k for k, v in s["terms"][:3])} in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
 
 ## Next step
 
@@ -95,60 +150,93 @@ Preserve the saved pad and the six exercise observations. Continue to the next l
 
 ## Sources and verification status
 
-[Official Java21 API or language reference]({s['source']}), reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult `docs/implementation/java-content-status.md` for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java21 API or language reference]({s["source"]}), reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult `docs/implementation/java-content-status.md` for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
 
 ## Ask an AI tutor about this lesson
 
 ```text
 {prompt}
 ```
-'''
-  explanation_text=f'''# {id}: explanatory solutions
+"""
+        explanation_text = f"""# {id}: explanatory solutions
 
 Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
 
 ## Mechanism review
 
-{s['mental']}
+{s["mental"]}
 
 {terms}
 
 ## Reading the reference
 
-{s['anatomy']}
+{s["anatomy"]}
 
-'''
-  code_blocks=[]
-  for i,e in enumerate(s['exercises'],1):
-   explanation_text+=f'''## Exercise {i}: {e['title']}
+"""
+        code_blocks = []
+        for i, e in enumerate(s["exercises"], 1):
+            explanation_text += f"""## Exercise {i}: {e["title"]}
 
-Task: {e['prompt']}
+Task: {e["prompt"]}
 
-{e['why']}
+{e["why"]}
 
 ```java
-{e['code']}
+{e["code"]}
 ```
 
-**Expected:** {e['expected']}
+**Expected:** {e["expected"]}
 
-**Verify:** Compare the program values or named exception with {e['expected']} Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
+**Verify:** Compare the program values or named exception with {e["expected"]} Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.
 
-'''
-   code_blocks.append(f'// Exercise {i}: {e["title"]}\n'+e['code'])
-  explanation_text+='''## After comparing the answer
+"""
+            code_blocks.append(f"// Exercise {i}: {e['title']}\n" + e["code"])
+        explanation_text += """## After comparing the answer
 
 Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
-'''
-  for path,text in [(guide,guide_text),(solution,program(s,code_blocks)),(explanation,explanation_text)]:
-   target=ROOT/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text(text, encoding="utf-8", errors="backslashreplace")
-  comments=[]
-  for i,e in enumerate(s['exercises'],1):comments.append(f'// Exercise {i}: {e["title"]}\n'+'\n'.join('// '+line for line in textwrap.wrap(e['prompt'],90))+'\n// Expected: '+e['expected'])
-  (ROOT/learner).parent.mkdir(parents=True,exist_ok=True);(ROOT/learner).write_text('''// Answer-free learner worksheet. Save your own Main.java before editing.
+"""
+        for path, text in [
+            (guide, guide_text),
+            (solution, program(s, code_blocks)),
+            (explanation, explanation_text),
+        ]:
+            target = ROOT / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text, encoding="utf-8", errors="backslashreplace")
+        comments = []
+        for i, e in enumerate(s["exercises"], 1):
+            comments.append(
+                f"// Exercise {i}: {e['title']}\n"
+                + "\n".join("// " + line for line in textwrap.wrap(e["prompt"], 90))
+                + "\n// Expected: "
+                + e["expected"]
+            )
+        (ROOT / learner).parent.mkdir(parents=True, exist_ok=True)
+        (ROOT / learner).write_text(
+            """// Answer-free learner worksheet. Save your own Main.java before editing.
 public class Main {
     public static void main(String[] args) throws Exception {
-'''+textwrap.indent('\n\n'.join(comments),'        ')+'\n        System.out.println("Implement and check the six exercises in your saved copy.");\n    }\n}\n')
-  if id not in existing:inventory['lessons'].append(dict(id=id,status='authored',language='java',runtime_profile='java21',guide_path=guide,source_path=learner,solution_paths=[solution,explanation],verification_id=None))
-  p['outcome']=s['mental'].split('.')[0]+'.';p['lab']=s['exercises'][0]['prompt'];p['verification']=s['exercises'][0]['expected']+' '+s['exercises'][-1]['expected']
- inventory['lessons'].sort(key=lambda e:e['id']);(base/'lessons.json').write_text(json.dumps(inventory,indent=2)+'\n');(base/'track.json').write_text(json.dumps(plan,indent=2)+'\n')
- print('Authored Java lessons:',len(SPECS))
+"""
+            + textwrap.indent("\n\n".join(comments), "        ")
+            + '\n        System.out.println("Implement and check the six exercises in your saved copy.");\n    }\n}\n'
+        )
+        if id not in existing:
+            inventory["lessons"].append(
+                dict(
+                    id=id,
+                    status="authored",
+                    language="java",
+                    runtime_profile="java21",
+                    guide_path=guide,
+                    source_path=learner,
+                    solution_paths=[solution, explanation],
+                    verification_id=None,
+                )
+            )
+        p["outcome"] = s["mental"].split(".")[0] + "."
+        p["lab"] = s["exercises"][0]["prompt"]
+        p["verification"] = s["exercises"][0]["expected"] + " " + s["exercises"][-1]["expected"]
+    inventory["lessons"].sort(key=lambda e: e["id"])
+    (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
+    (base / "track.json").write_text(json.dumps(plan, indent=2) + "\n")
+    print("Authored Java lessons:", len(SPECS))

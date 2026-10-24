@@ -103,6 +103,72 @@ fixtures, without workplace identifiers, private infrastructure or machine paths
 Use explicit LaTeX for mathematics and tagged code fences for program examples.
 Never modify executable logic only to repair typography.
 
+## Format the repository
+
+Use the same formatter entrypoint on Linux, macOS and Windows through WSL 2.
+Start your Linux-container engine, then run from the repository root:
+
+```sh
+./scripts/format-repo
+./scripts/format-repo --check
+./scripts/lint-repo
+```
+
+The first command applies the maintained formatting rules. The second reports
+drift and exits unsuccessfully when changes are needed, without modifying
+tracked source files. `make format` and `make format-check` are equivalent.
+`make lint` runs the shared static checks. `make check` includes both formatting
+and linting before its other source gates.
+The formatter builds its dedicated tool image on first use, with visible build
+logs, then reuses the local image. Use `./scripts/format-repo --build` after
+changing the toolchain or when deliberately rebuilding that image. It does not
+rebuild or restart classroom services or change their saved volumes.
+
+Use `./scripts/format-repo --list` to inspect the actual coverage and
+`./scripts/format-repo --language python` to narrow an iteration. Repeat
+`--language` for several adapters. The unfiltered check is the submission gate;
+a language-specific pass is only evidence for that selection. The checked-in
+formatter configuration and `docker/formatting/` toolchain own the rules and
+versions, so local checks and the single Linux CI source-quality job agree.
+
+Linting uses the same image and leaves repository source read-only. Its output
+identifies each check and its coverage. Python implementation lint, shell/static
+checks and language syntax checks answer different questions; parser success is
+not compilation, runtime behavior or proof of lesson correctness. Keep the
+relevant tests and prepared-worker execution checks after linting. A new
+language needs a deliberate lint/validation adapter alongside its formatter.
+
+Formatting includes application code, notebooks, every supported language's
+executable lesson files, fixtures and authoring programs. Generated executable
+programs receive the same style pass as handwritten code; their generators
+remain the durable content source. Markdown code fences and literal tutorial
+program strings retain their authored text, so source-pairing checks compare
+syntax while preserving literal values. Generated HTML, third-party bundles,
+dependency locks, immutable runtime evidence and learner state retain their
+existing owners. The checked-in policy and `--list` make exclusions inspectable.
+
+Historical worker receipts remain unchanged. For the Python references bound to
+those receipts, `curriculum/source-format-parity.json` retains compressed
+original bytes, both source hashes and independently checked AST equality.
+This records formatting equivalence, not a new successful execution. Future
+behavior changes still require fresh runtime evidence. Canonical regeneration
+checks apply the pinned formatter before comparing executable output bytes.
+
+For generated subjects, edit the durable authoring source and run that subject's
+generator first. Then format the resulting maintained source and refresh the
+shared generated views. The full formatting entrypoint coordinates its owned
+generated views; subject-specific prose generation remains a separate authoring
+step. Review both source and generated diffs, then run relevant runtime and
+content checks. Never manually reformat generated HTML to conceal source drift.
+
+The optional `.pre-commit-config.yaml` runs the same Docker formatting and static
+checks alongside the sensitive-content scan. Install pre-commit in
+your contributor environment, then run `pre-commit install` if you want those
+checks before each commit. The engine must be available when the hook runs.
+It checks the full working tree, so finish unrelated formatting work and review
+the intended changes before committing. Hooks report drift; apply formatting
+explicitly and review the diff before staging it.
+
 ## Regenerate and validate
 
 Run the relevant subject authoring command first when one exists. Then refresh
@@ -142,7 +208,8 @@ uv run --no-sync python scripts/build_course_guide.py --check
 uv run --no-sync python scripts/build_lesson_readers.py --check
 uv run --no-sync python scripts/check_published_links.py
 uv run --no-sync python -m ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
-uv run --no-sync python -m ruff format --check src scripts tests bridge python/professional docker/init_module_runtime.py
+./scripts/format-repo --check
+./scripts/lint-repo
 uv run --no-sync python -m mypy
 uv run --no-sync python scripts/scan_secrets.py --history
 uv run --no-sync python scripts/check_public_release.py

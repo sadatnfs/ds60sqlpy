@@ -100,8 +100,14 @@ passing compile or reference output alone cannot establish all these properties.
 
 Run the subject's documented authoring command where applicable, then use the
 verified shared commands in [integration boundaries](references/integration.md).
-Check generation drift, content rendering and module/legacy contracts. Run
-meaningful reference and misconception cases. Do not reduce a check to accept
+Run `./scripts/format-repo` after the relevant subject generator, then the full
+`./scripts/format-repo --check` and `./scripts/lint-repo` before submission.
+Inspect `--list` when adding
+file types; a new language needs a reviewed formatter adapter and pinned tools,
+not an unreported exclusion. Preserve third-party code, learner state, locks
+and generated-reader ownership. Embedded teaching snippets keep their authored
+layout. Check generation drift, content rendering and module/legacy contracts.
+Run meaningful reference and misconception cases. Do not reduce a check to accept
 a wrong example or rewrite a historical execution receipt as if it were new.
 
 Exercise the browser path in disposable test state: guide, starter, run or

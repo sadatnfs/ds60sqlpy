@@ -1,61 +1,106 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def schema_fields(frame):
-    return [(field.name, field.dataType.simpleString(), field.nullable) for field in frame.schema.fields]
+    return [
+        (field.name, field.dataType.simpleString(), field.nullable) for field in frame.schema.fields
+    ]
+
 
 def team_a(frame):
     return frame.filter(F.col("team") == F.lit("A"))
 
+
 def bounded_ids(frame, limit):
     if isinstance(limit, bool) or not isinstance(limit, int) or not 0 <= limit <= 20:
         raise ValueError("driver ID budget outside 0..20")
-    rows = [row.event_id for row in frame.select("event_id").orderBy("event_id").limit(limit + 1).collect()]
+    rows = [
+        row.event_id
+        for row in frame.select("event_id").orderBy("event_id").limit(limit + 1).collect()
+    ]
     if len(rows) > limit:
         raise ValueError("driver ID result exceeds budget")
     return rows
 
+
 def observed_rows(frame):
     return frame.filter(F.col("amount_cents").isNotNull())
 
+
 def canonical(frame):
-    return [tuple(row) for row in frame.select("event_id", "team", "amount_cents").orderBy("event_id").collect()]
+    return [
+        tuple(row)
+        for row in frame.select("event_id", "team", "amount_cents").orderBy("event_id").collect()
+    ]
+
 
 def settings(spark):
     context = spark.sparkContext.getConf()
-    return {"master": spark.sparkContext.master, "timezone": spark.conf.get("spark.sql.session.timeZone"),
-            "shuffle": spark.conf.get("spark.sql.shuffle.partitions"), "ansi": spark.conf.get("spark.sql.ansi.enabled"),
-            "adaptive": spark.conf.get("spark.sql.adaptive.enabled"), "ui": context.get("spark.ui.enabled"),
-            "driver_host": context.get("spark.driver.host"), "driver_bind": context.get("spark.driver.bindAddress"),
-            "spark_version": spark.version}
+    return {
+        "master": spark.sparkContext.master,
+        "timezone": spark.conf.get("spark.sql.session.timeZone"),
+        "shuffle": spark.conf.get("spark.sql.shuffle.partitions"),
+        "ansi": spark.conf.get("spark.sql.ansi.enabled"),
+        "adaptive": spark.conf.get("spark.sql.adaptive.enabled"),
+        "ui": context.get("spark.ui.enabled"),
+        "driver_host": context.get("spark.driver.host"),
+        "driver_bind": context.get("spark.driver.bindAddress"),
+        "spark_version": spark.version,
+    }
+
 
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-012").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-012")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([
-            StructField("event_id", LongType(), False),
-            StructField("team", StringType(), True),
-            StructField("amount_cents", LongType(), True),
-        ])
-        raw = spark.createDataFrame([(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema)
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("team", StringType(), True),
+                StructField("amount_cents", LongType(), True),
+            ]
+        )
+        raw = spark.createDataFrame(
+            [(1, "A", 0), (2, "B", None), (3, "A", 25), (4, "B", 40)], schema=schema
+        )
         # Exercise 1: Inspect the complete schema contract
-        assert schema_fields(raw) == [("event_id", "bigint", False), ("team", "string", True), ("amount_cents", "bigint", True)]
+        assert schema_fields(raw) == [
+            ("event_id", "bigint", False),
+            ("team", "string", True),
+            ("amount_cents", "bigint", True),
+        ]
         # Exercise 2: Keep a transformation separate from its action
         a = team_a(raw)
         assert a.count() == 2 and raw.count() == 4
-        assert [row.event_id for row in a.select("event_id").orderBy("event_id").collect()] == [1, 3]
+        assert [row.event_id for row in a.select("event_id").orderBy("event_id").collect()] == [
+            1,
+            3,
+        ]
         # Exercise 3: Bound the driver result and detect overflow of the budget
         assert bounded_ids(raw, 4) == [1, 2, 3, 4]
         for limit in [3, 21]:
@@ -77,10 +122,21 @@ def main():
         assert canonical(raw.repartition(1)) == golden
         assert canonical(raw.repartition(3)) == golden
         # Exercise 6: Read back the actual local session contract
-        assert settings(spark) == {"master": "local[2]", "timezone": "UTC", "shuffle": "2", "ansi": "true", "adaptive": "false", "ui": "false", "driver_host": "127.0.0.1", "driver_bind": "127.0.0.1", "spark_version": "4.0.1"}
+        assert settings(spark) == {
+            "master": "local[2]",
+            "timezone": "UTC",
+            "shuffle": "2",
+            "ansi": "true",
+            "adaptive": "false",
+            "ui": "false",
+            "driver_host": "127.0.0.1",
+            "driver_bind": "127.0.0.1",
+            "spark_version": "4.0.1",
+        }
         print("spark-012: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

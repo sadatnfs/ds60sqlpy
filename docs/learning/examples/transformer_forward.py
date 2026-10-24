@@ -39,9 +39,7 @@ def softmax(scores: Array, allowed: NDArray[np.bool_] | None = None) -> Array:
 
 def layer_norm(x: Array) -> Array:
     """Normalize each token's features, never across different token positions."""
-    return (x - x.mean(axis=-1, keepdims=True)) / np.sqrt(
-        x.var(axis=-1, keepdims=True) + 1e-5
-    )
+    return (x - x.mean(axis=-1, keepdims=True)) / np.sqrt(x.var(axis=-1, keepdims=True) + 1e-5)
 
 
 def forward(ids: list[int], output_weights: Array) -> tuple[Array, Array, Array]:
@@ -61,9 +59,7 @@ def forward(ids: list[int], output_weights: Array) -> tuple[Array, Array, Array]
     k = q.copy()
     v = q.copy()
     scores = q @ k.transpose(0, 2, 1) / np.sqrt(2.0)
-    legal = np.broadcast_to(
-        np.tril(np.ones((length, length), dtype=bool)), scores.shape
-    )
+    legal = np.broadcast_to(np.tril(np.ones((length, length), dtype=bool)), scores.shape)
     attention = softmax(scores, legal)
     mixtures = attention @ v
     joined = mixtures.transpose(1, 0, 2).reshape(length, 4)
@@ -79,10 +75,7 @@ def forward(ids: list[int], output_weights: Array) -> tuple[Array, Array, Array]
 def loss(logits: Array, targets: list[int]) -> float:
     if logits.ndim != 2 or logits.shape[0] != len(targets) or not targets:
         raise ValueError("One target is required for each logits row")
-    if any(
-        type(target) is not int or not 0 <= target < logits.shape[1]
-        for target in targets
-    ):
+    if any(type(target) is not int or not 0 <= target < logits.shape[1] for target in targets):
         raise ValueError("Target IDs must belong to the output vocabulary")
     shifted = logits - logits.max(axis=-1, keepdims=True)
     log_probabilities = shifted - np.log(np.exp(shifted).sum(axis=-1, keepdims=True))
@@ -112,9 +105,7 @@ def main() -> None:
     plus, minus = output_weights.copy(), output_weights.copy()
     plus[0, 1] += epsilon
     minus[0, 1] -= epsilon
-    numerical = (loss(features @ plus, targets) - loss(features @ minus, targets)) / (
-        2 * epsilon
-    )
+    numerical = (loss(features @ plus, targets) - loss(features @ minus, targets)) / (2 * epsilon)
     np.testing.assert_allclose(numerical, gradient[0, 1], atol=1e-8, rtol=0)
     after = loss(features @ (output_weights - 0.05 * gradient), targets)
     assert after < before
@@ -129,9 +120,7 @@ def main() -> None:
     print("Head 0 attention:\n", attention[0])
     print("Last-position next-token probabilities:", probabilities[-1])
     print(f"Mean loss before/after one output-head update: {before:.6f} / {after:.6f}")
-    print(
-        "PASS: legal attention, prefix invariance, finite-difference gradient, descending loss"
-    )
+    print("PASS: legal attention, prefix invariance, finite-difference gradient, descending loss")
 
 
 if __name__ == "__main__":

@@ -1,11 +1,14 @@
-TEXT="服务正常"
-PROBES=["the service is ready","el servicio es correcto","bank","the servicio es ready"]
+TEXT = "服务正常"
+PROBES = ["the service is ready", "el servicio es correcto", "bank", "the servicio es ready"]
+
 
 def language_hint(text):
     raise NotImplementedError("Implement only the declared cue rule with abstention")
 
+
 def main():
     print("Unicode and domain-shift fixtures loaded. Preserve raw strings and unknown outcomes.")
+
 
 if __name__ == "__main__":
     main()

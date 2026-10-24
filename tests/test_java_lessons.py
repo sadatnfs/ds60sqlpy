@@ -11,6 +11,8 @@ from typing import Any
 
 import pytest
 
+from scripts.source_format_parity import code_tokens
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/java"
 ENTRIES = json.loads((BASE / "lessons.json").read_text())["lessons"]
@@ -79,26 +81,26 @@ def test_java_reference_compiles_and_runs_with_assertions(
 
 def test_manual_module_and_packaging_fixtures_match_executed_literal_sources() -> None:
     source = (BASE / "solutions/java-026_solution.java").read_text()
-    matches = re.findall(r'write\("([^"\n]+)",("(?:\\.|[^"\\])*")\);', source)
+    matches = re.findall(r'write\(\s*"([^"\n]+)"\s*,\s*("(?:\\.|[^"\\])*")\s*\);', source)
     assert len(matches) == 4
     for relative, literal in matches:
-        assert (BASE / "fixtures/java-026/src" / relative).read_text().strip() == json.loads(
-            literal
+        assert code_tokens((BASE / "fixtures/java-026/src" / relative).read_text()) == code_tokens(
+            json.loads(literal)
         )
     for number, name in [(27, "Hello.java"), (36, "App.java")]:
         source = (BASE / "solutions" / f"java-{number:03d}_solution.java").read_text()
-        match = re.search(r'Files\.writeString\(source,("(?:\\.|[^"\\])*")\);', source)
+        match = re.search(r'Files\.writeString\(\s*source\s*,\s*("(?:\\.|[^"\\])*")\s*\);', source)
         assert match is not None
         literal = match.group(1)
-        assert (
-            BASE / "fixtures" / f"java-{number:03d}" / "src" / name
-        ).read_text().strip() == json.loads(literal)
+        assert code_tokens(
+            (BASE / "fixtures" / f"java-{number:03d}" / "src" / name).read_text()
+        ) == code_tokens(json.loads(literal))
 
 
 def test_jdbc_lesson_uses_actual_memory_database_and_bound_values() -> None:
     source = (BASE / "solutions/java-029_solution.java").read_text()
     assert "jdbc:h2:mem:" in source and "DriverManager.getConnection" in source
-    assert "prepareStatement" in source and ".setString(1," in source
+    assert "prepareStatement" in source and ".setString(1," in "".join(code_tokens(source))
     assert "setAutoCommit(false)" in source and ".rollback()" in source and ".commit()" in source
     assert "TRANSACTION_READ_COMMITTED" in source
     guide = (BASE / "guides/java-029.md").read_text()
@@ -108,7 +110,9 @@ def test_jdbc_lesson_uses_actual_memory_database_and_bound_values() -> None:
 def test_child_jvm_checks_preserve_environment_and_separate_output_channels() -> None:
     for number in [26, 27, 36]:
         source = (BASE / "solutions" / f"java-{number:03d}_solution.java").read_text()
-        assert ".redirectOutput(stdout.toFile()).redirectError(stderr.toFile())" in source
+        assert ".redirectOutput(stdout.toFile()).redirectError(stderr.toFile())" in "".join(
+            code_tokens(source)
+        )
         assert "redirectErrorStream(true)" not in source
         assert ".environment().remove" not in source and ".environment().clear" not in source
         assert "Files.readString(stderr)" in source

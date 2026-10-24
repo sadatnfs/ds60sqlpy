@@ -1,57 +1,125 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def amount_rows(frame):
-    return [tuple(row) for row in frame.select("event_id", "amount_cents").orderBy("event_id").collect()]
+    return [
+        tuple(row) for row in frame.select("event_id", "amount_cents").orderBy("event_id").collect()
+    ]
+
 
 def with_parsed(frame):
     return frame.withColumn("parsed_amount", F.expr("try_cast(trim(amount_text) AS BIGINT)"))
 
+
 def parse_ledger(frame):
-    return with_parsed(frame).withColumn("parse_status", F.when(F.col("amount_text").isNull(), F.lit("missing")).when(F.col("parsed_amount").isNull(), F.lit("rejected")).otherwise(F.lit("valid")))
+    return with_parsed(frame).withColumn(
+        "parse_status",
+        F.when(F.col("amount_text").isNull(), F.lit("missing"))
+        .when(F.col("parsed_amount").isNull(), F.lit("rejected"))
+        .otherwise(F.lit("valid")),
+    )
+
 
 def accepted_projection(frame):
-    return parse_ledger(frame).filter(F.col("parse_status") != F.lit("rejected")).select("event_id", F.col("parsed_amount").alias("amount_cents"))
+    return (
+        parse_ledger(frame)
+        .filter(F.col("parse_status") != F.lit("rejected"))
+        .select("event_id", F.col("parsed_amount").alias("amount_cents"))
+    )
+
 
 def sql_projection(spark, frame):
     frame.createOrReplaceTempView("ds60_spark_015_raw")
-    return spark.sql("WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL")
+    return spark.sql(
+        "WITH parsed AS (SELECT event_id,amount_text,try_cast(trim(amount_text) AS BIGINT) AS amount_cents FROM ds60_spark_015_raw) SELECT event_id,amount_cents FROM parsed WHERE amount_text IS NULL OR amount_cents IS NOT NULL"
+    )
+
 
 def strict_projection(frame):
     return frame.select("event_id", F.trim("amount_text").cast("bigint").alias("amount_cents"))
 
+
 def nonnegative_amounts(frame):
-    return accepted_projection(frame).filter(F.col("amount_cents").isNull() | (F.col("amount_cents") >= F.lit(0)))
+    return accepted_projection(frame).filter(
+        F.col("amount_cents").isNull() | (F.col("amount_cents") >= F.lit(0))
+    )
+
 
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-015").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-015")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("event_id", LongType(), False), StructField("amount_text", StringType(), True)])
-        raw = spark.createDataFrame([(1,"100"),(2,"0"),(3," 25 "),(4,None),(5,"bad"),(6,"9223372036854775808"),(7,"-5"),(8,"50")], schema=schema)
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("amount_text", StringType(), True),
+            ]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, "100"),
+                (2, "0"),
+                (3, " 25 "),
+                (4, None),
+                (5, "bad"),
+                (6, "9223372036854775808"),
+                (7, "-5"),
+                (8, "50"),
+            ],
+            schema=schema,
+        )
         # Exercise 1: Add an explicit tolerant parse column
         parsed = with_parsed(raw)
         assert parsed.schema["parsed_amount"].dataType.simpleString() == "bigint"
-        assert [tuple(row) for row in parsed.orderBy("event_id").select("event_id", "parsed_amount").collect()] == [(1,100),(2,0),(3,25),(4,None),(5,None),(6,None),(7,-5),(8,50)]
+        assert [
+            tuple(row)
+            for row in parsed.orderBy("event_id").select("event_id", "parsed_amount").collect()
+        ] == [(1, 100), (2, 0), (3, 25), (4, None), (5, None), (6, None), (7, -5), (8, 50)]
         # Exercise 2: Classify missing versus rejected tokens
         ledger = parse_ledger(raw)
-        assert [row.parse_status for row in ledger.orderBy("event_id").select("parse_status").collect()] == ["valid","valid","valid","missing","rejected","rejected","valid","valid"]
-        assert [row.event_id for row in ledger.filter(F.col("parse_status") == F.lit("rejected")).select("event_id").orderBy("event_id").collect()] == [5,6]
+        assert [
+            row.parse_status for row in ledger.orderBy("event_id").select("parse_status").collect()
+        ] == ["valid", "valid", "valid", "missing", "rejected", "rejected", "valid", "valid"]
+        assert [
+            row.event_id
+            for row in ledger.filter(F.col("parse_status") == F.lit("rejected"))
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+        ] == [5, 6]
         # Exercise 3: Project the six parse-accepted events
         accepted = accepted_projection(raw)
-        assert amount_rows(accepted) == [(1,100),(2,0),(3,25),(4,None),(7,-5),(8,50)]
-        assert tuple(accepted.agg(F.count(F.lit(1)), F.count("amount_cents"), F.sum("amount_cents")).first()) == (6,5,170)
+        assert amount_rows(accepted) == [(1, 100), (2, 0), (3, 25), (4, None), (7, -5), (8, 50)]
+        assert tuple(
+            accepted.agg(F.count(F.lit(1)), F.count("amount_cents"), F.sum("amount_cents")).first()
+        ) == (6, 5, 170)
         # Exercise 4: Express the same parse contract in SQL
-        expected = [(1,100),(2,0),(3,25),(4,None),(7,-5),(8,50)]
+        expected = [(1, 100), (2, 0), (3, 25), (4, None), (7, -5), (8, 50)]
         assert amount_rows(sql_projection(spark, raw)) == expected
         assert amount_rows(accepted_projection(raw)) == expected
         # Exercise 5: Observe strict ANSI failure at evaluation
@@ -66,13 +134,21 @@ def main():
         print("Expected strict-cast diagnostic observed: CAST_INVALID_INPUT")
         # Exercise 6: Apply a separate nonnegative domain policy
         domain = nonnegative_amounts(raw)
-        assert amount_rows(domain) == [(1,100),(2,0),(3,25),(4,None),(8,50)]
-        assert tuple(domain.agg(F.count(F.lit(1)), F.count("amount_cents"), F.sum("amount_cents")).first()) == (5,4,175)
+        assert amount_rows(domain) == [(1, 100), (2, 0), (3, 25), (4, None), (8, 50)]
+        assert tuple(
+            domain.agg(F.count(F.lit(1)), F.count("amount_cents"), F.sum("amount_cents")).first()
+        ) == (5, 4, 175)
         assert accepted.filter(F.col("amount_cents") < F.lit(0)).select("event_id").first()[0] == 7
-        assert domain.count() + ledger.filter(F.col("parse_status") == F.lit("rejected")).count() + accepted.filter(F.col("amount_cents") < F.lit(0)).count() == 8
+        assert (
+            domain.count()
+            + ledger.filter(F.col("parse_status") == F.lit("rejected")).count()
+            + accepted.filter(F.col("amount_cents") < F.lit(0)).count()
+            == 8
+        )
         print("spark-015: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

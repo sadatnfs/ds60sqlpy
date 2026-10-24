@@ -1,11 +1,16 @@
-REFERENCE="service is not ready".split()
-CANDIDATE="service is ready".split()
+REFERENCE = "service is not ready".split()
+CANDIDATE = "service is ready".split()
 
-def clipped_precision(candidate,reference,n=1):
+
+def clipped_precision(candidate, reference, n=1):
     raise NotImplementedError("Implement clipped counts and a declared empty policy")
 
+
 def main():
-    print("Overlap and contradiction fixtures loaded. Do not treat a high score as factual support.")
+    print(
+        "Overlap and contradiction fixtures loaded. Do not treat a high score as factual support."
+    )
+
 
 if __name__ == "__main__":
     main()

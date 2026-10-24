@@ -1,11 +1,16 @@
-TARGET=["repair"]
-SENTENCES=["The service is unavailable.","A repair is scheduled."]
+TARGET = ["repair"]
+SENTENCES = ["The service is unavailable.", "A repair is scheduled."]
+
 
 def shifted_targets(tokens):
     raise NotImplementedError("Separate decoder input from prediction targets")
 
+
 def main():
-    print("Sequence and source fixtures loaded. Label the search table and extraction baseline honestly.")
+    print(
+        "Sequence and source fixtures loaded. Label the search table and extraction baseline honestly."
+    )
+
 
 if __name__ == "__main__":
     main()

@@ -1,11 +1,15 @@
 import numpy as np
-COUNTS=np.array([[4.,3.,0.],[3.,4.,0.],[0.,0.,6.]])
+
+COUNTS = np.array([[4.0, 3.0, 0.0], [3.0, 4.0, 0.0], [0.0, 0.0, 6.0]])
+
 
 def ppmi(counts):
     raise NotImplementedError("Implement masked PMI from explicit corpus totals")
 
+
 def main():
     print("The authored context matrix is ready. Trace counts before implementing the six tasks.")
+
 
 if __name__ == "__main__":
     main()

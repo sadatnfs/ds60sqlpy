@@ -1,62 +1,88 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def run_grouped(frame, group):
     sc = frame.sparkSession.sparkContext
-    sc.setJobGroup(group,"Bounded shuffle evidence",interruptOnCancel=True)
+    sc.setJobGroup(group, "Bounded shuffle evidence", interruptOnCancel=True)
     try:
-        return sorted((r[0],r[1]) for r in frame.collect())
+        return sorted((r[0], r[1]) for r in frame.collect())
     finally:
-        sc.setLocalProperty("spark.jobGroup.id",None)
-        sc.setLocalProperty("spark.job.description",None)
-        sc.setLocalProperty("spark.job.interruptOnCancel",None)
+        sc.setLocalProperty("spark.jobGroup.id", None)
+        sc.setLocalProperty("spark.job.description", None)
+        sc.setLocalProperty("spark.job.interruptOnCancel", None)
+
 
 def source_metrics(source):
     raise NotImplementedError("Complete source_metrics")
 
+
 def build_grouped(source, partitions):
     raise NotImplementedError("Complete build_grouped")
+
 
 def exchange_metrics(frame):
     raise NotImplementedError("Complete exchange_metrics")
 
+
 def stage_evidence(spark, group):
     raise NotImplementedError("Complete stage_evidence")
+
 
 def compare_results(left, right):
     raise NotImplementedError("Complete compare_results")
 
+
 def work_model(reducers):
     raise NotImplementedError("Complete work_model")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-022").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-022")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        source = spark.range(0,20000,1,4).withColumn("key",F.col("id")%1000)
+        source = spark.range(0, 20000, 1, 4).withColumn("key", F.col("id") % 1000)
         original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
         assert source.count() == 20000 and source.rdd.getNumPartitions() == 4
         assert source.select("key").distinct().count() == 1000
         print("Input:20000 rows,1000 keys,4 partitions,local[2]")
-        partial_upper = 4*1000
+        partial_upper = 4 * 1000
         assert partial_upper == 4000 and partial_upper < 20000
-        print("Local partial aggregation can reduce occurrences before redistribution;this is a model")
+        print(
+            "Local partial aggregation can reduce occurrences before redistribution;this is a model"
+        )
         print("spark-022: worked examples passed; six task implementations remain")
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

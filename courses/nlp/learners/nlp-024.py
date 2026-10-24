@@ -1,12 +1,24 @@
-TRAIN_TEXTS=["router outage packet loss","network outage router","invoice payment refund","billing invoice payment"]
-TRAIN_LABELS=["network","network","billing","billing"]
-REQUEST="TKT-301 router packet loss"
+TRAIN_TEXTS = [
+    "router outage packet loss",
+    "network outage router",
+    "invoice payment refund",
+    "billing invoice payment",
+]
+TRAIN_LABELS = ["network", "network", "billing", "billing"]
+REQUEST = "TKT-301 router packet loss"
 
-def analyze(text,role,now):
-    raise NotImplementedError("Build the staged parser/classifier/evidence packet with explicit failure states")
+
+def analyze(text, role, now):
+    raise NotImplementedError(
+        "Build the staged parser/classifier/evidence packet with explicit failure states"
+    )
+
 
 def main():
-    print("Capstone fixtures loaded. Keep categories,source evidence and operational actions distinct.")
+    print(
+        "Capstone fixtures loaded. Keep categories,source evidence and operational actions distinct."
+    )
+
 
 if __name__ == "__main__":
     main()

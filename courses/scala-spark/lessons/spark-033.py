@@ -1,74 +1,149 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import os
 import uuid
 
-event_schema = StructType([StructField("delivery_id",LongType(),True),StructField("event_id",StringType(),True),StructField("amount",LongType(),True),StructField("event_time",TimestampType(),True)])
-def publish(root,index,lines):
-    target = root/"input"/f"batch-{index}.json"
-    if target.exists(): raise ValueError("New source filename required")
-    staged = root/"staging"/(uuid.uuid4().hex+".tmp")
+event_schema = StructType(
+    [
+        StructField("delivery_id", LongType(), True),
+        StructField("event_id", StringType(), True),
+        StructField("amount", LongType(), True),
+        StructField("event_time", TimestampType(), True),
+    ]
+)
+
+
+def publish(root, index, lines):
+    target = root / "input" / f"batch-{index}.json"
+    if target.exists():
+        raise ValueError("New source filename required")
+    staged = root / "staging" / (uuid.uuid4().hex + ".tmp")
     try:
-        with staged.open("x",encoding="utf-8") as handle: handle.write("\n".join(lines)+"\n")
-        os.replace(staged,target)
-    finally: staged.unlink(missing_ok=True)
-def input_stream(spark,root):
-    return spark.readStream.schema(event_schema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(str(root/"input"))
-def run_sink(frame,root,name):
-    query = frame.writeStream.format("parquet").outputMode("append").option("checkpointLocation",str(root/(name+"-checkpoint"))).trigger(availableNow=True).start(str(root/(name+"-output")))
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        os.replace(staged, target)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def input_stream(spark, root):
+    return (
+        spark.readStream.schema(event_schema)
+        .option("maxFilesPerTrigger", 1)
+        .option("mode", "FAILFAST")
+        .json(str(root / "input"))
+    )
+
+
+def run_sink(frame, root, name):
+    query = (
+        frame.writeStream.format("parquet")
+        .outputMode("append")
+        .option("checkpointLocation", str(root / (name + "-checkpoint")))
+        .trigger(availableNow=True)
+        .start(str(root / (name + "-output")))
+    )
     try:
-        if not query.awaitTermination(30): raise TimeoutError("Finite sink deadline exceeded")
-        if query.isActive or query.exception() is not None: raise RuntimeError("Query failed")
+        if not query.awaitTermination(30):
+            raise TimeoutError("Finite sink deadline exceeded")
+        if query.isActive or query.exception() is not None:
+            raise RuntimeError("Query failed")
         return list(query.recentProgress)
-    finally: query.stop()
-def output_rows(spark,root):
-    return [tuple(r) for r in spark.read.parquet(str(root/"accepted-output")).select("event_id","delivery_id","amount").orderBy("event_id","delivery_id").collect()]
+    finally:
+        query.stop()
+
+
+def output_rows(spark, root):
+    return [
+        tuple(r)
+        for r in spark.read.parquet(str(root / "accepted-output"))
+        .select("event_id", "delivery_id", "amount")
+        .orderBy("event_id", "delivery_id")
+        .collect()
+    ]
+
 
 def classify(events):
     raise NotImplementedError("Complete classify")
 
+
 def deduplicated(classified):
     raise NotImplementedError("Complete deduplicated")
+
 
 def run_branches(spark, root):
     raise NotImplementedError("Complete run_branches")
 
+
 def business_rows(spark, root):
     raise NotImplementedError("Complete business_rows")
+
 
 def removed_state(progress):
     raise NotImplementedError("Complete removed_state")
 
+
 def delivery_ledger(spark, root):
     raise NotImplementedError("Complete delivery_ledger")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-033").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-033")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-",dir=".")).resolve()
-        (owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+        spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-", dir=".")).resolve()
+        (owned_root / "input").mkdir()
+        (owned_root / "staging").mkdir()
         batches = [
-         ['{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}','{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}'],
-         ['{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}'],
-         ['{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}']]
-        occurrences = [("e1",10),("e2",10),("e1",10),("e3",10)]
-        assert len({event for event,_ in occurrences}) == 3 and len({amount for _,amount in occurrences}) == 1
+            [
+                '{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}',
+                '{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}',
+            ],
+            [
+                '{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}',
+            ],
+            [
+                '{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}'
+            ],
+        ]
+        occurrences = [("e1", 10), ("e2", 10), ("e1", 10), ("e3", 10)]
+        assert (
+            len({event for event, _ in occurrences}) == 3
+            and len({amount for _, amount in occurrences}) == 1
+        )
         print("Equal amounts are not equal event identities")
-        assert [len(batch) for batch in batches] == [3,2,1] and sum(map(len,batches)) == 6
+        assert [len(batch) for batch in batches] == [3, 2, 1] and sum(map(len, batches)) == 6
         print("Six source deliveries feed two independently checkpointed branches")
         print("spark-033: worked examples passed; six task implementations remain")
     finally:
@@ -79,6 +154,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

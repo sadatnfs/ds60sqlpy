@@ -1,51 +1,89 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
-
-
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def parse_instants(raw):
     raise NotImplementedError("Complete parse_instants")
 
+
 def render_clock(events, zone):
     raise NotImplementedError("Complete render_clock")
+
 
 def local_day(events):
     raise NotImplementedError("Complete local_day")
 
+
 def local_fields(spark):
     raise NotImplementedError("Complete local_fields")
+
 
 def fold_evidence(events):
     raise NotImplementedError("Complete fold_evidence")
 
+
 def parse_ledger(spark):
     raise NotImplementedError("Complete parse_ledger")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-018").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-018")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.timestampType","TIMESTAMP_LTZ")
-        schema = StructType([StructField("event_id",LongType(),False),StructField("text",StringType(),False)])
-        raw = spark.createDataFrame([(1,"2024-11-03T07:00:00Z"),(2,"2024-11-03T01:30:00-07:00"),(3,"2024-11-03T01:30:00-08:00"),(4,"2024-11-04T08:00:00Z"),(5,"2024-11-03T08:30:00Z"),(6,"2024-11-03T06:59:59Z")],schema=schema)
-        pair = spark.sql("SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset")
-        r = pair.first(); assert r[0] == r[1]
+        spark.conf.set("spark.sql.timestampType", "TIMESTAMP_LTZ")
+        schema = StructType(
+            [StructField("event_id", LongType(), False), StructField("text", StringType(), False)]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, "2024-11-03T07:00:00Z"),
+                (2, "2024-11-03T01:30:00-07:00"),
+                (3, "2024-11-03T01:30:00-08:00"),
+                (4, "2024-11-04T08:00:00Z"),
+                (5, "2024-11-03T08:30:00Z"),
+                (6, "2024-11-03T06:59:59Z"),
+            ],
+            schema=schema,
+        )
+        pair = spark.sql(
+            "SELECT unix_timestamp(to_timestamp('2024-11-03T08:30:00Z')) AS utc, unix_timestamp(to_timestamp('2024-11-03T01:30:00-07:00')) AS offset"
+        )
+        r = pair.first()
+        assert r[0] == r[1]
         print("Different text, same instant")
-        r = spark.sql("SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours").first()
+        r = spark.sql(
+            "SELECT timestampdiff(HOUR,to_timestamp('2024-11-03T07:00:00Z'),to_timestamp('2024-11-04T08:00:00Z')) AS hours"
+        ).first()
         assert r[0] == 25
         print("Declared Los Angeles day spans 25 elapsed hours")
         print("spark-018: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

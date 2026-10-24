@@ -1,57 +1,92 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def ids(frame):
     return [row.event_id for row in frame.select("event_id").orderBy("event_id").collect()]
 
+
 def above_ten():
     raise NotImplementedError("Complete above_ten")
+
 
 def selected_ids(frame):
     raise NotImplementedError("Complete selected_ids")
 
+
 def missing_ids(frame):
     raise NotImplementedError("Complete missing_ids")
+
 
 def combined_ids(frame):
     raise NotImplementedError("Complete combined_ids")
 
+
 def projected(frame):
     raise NotImplementedError("Complete projected")
+
 
 def sql_ids(spark, frame):
     raise NotImplementedError("Complete sql_ids")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-011").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-011")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([
-            StructField("event_id", LongType(), False),
-            StructField("amount_cents", LongType(), True),
-        ])
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("amount_cents", LongType(), True),
+            ]
+        )
         raw = spark.createDataFrame([(1, 0), (2, 20), (3, None), (4, 20)], schema=schema)
         driver_value = 3 > 1
         predicate = F.col("amount_cents") > F.lit(10)
         assert driver_value is True
-        assert [row.event_id for row in raw.filter(predicate).select("event_id").orderBy("event_id").collect()] == [2, 4]
+        assert [
+            row.event_id
+            for row in raw.filter(predicate).select("event_id").orderBy("event_id").collect()
+        ] == [2, 4]
         print("A Column describes row-wise engine work")
-        missing = [row.event_id for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").collect()]
-        zero = [row.event_id for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").collect()]
+        missing = [
+            row.event_id
+            for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").collect()
+        ]
+        zero = [
+            row.event_id
+            for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").collect()
+        ]
         assert missing == [3] and zero == [1]
         print("Missing amount and observed zero are different rows")
         print("spark-011: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

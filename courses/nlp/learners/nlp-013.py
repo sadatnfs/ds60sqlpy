@@ -1,10 +1,17 @@
-DOCS=["cat kitten pet","dog puppy pet","car wheel road","truck wheel road"]
+DOCS = ["cat kitten pet", "dog puppy pet", "car wheel road", "truck wheel road"]
+
 
 def fit_and_compare(documents):
-    raise NotImplementedError("Fit the three specified models and inspect their different contracts")
+    raise NotImplementedError(
+        "Fit the three specified models and inspect their different contracts"
+    )
+
 
 def main():
-    print("Four authored documents loaded. Keep numerical component IDs separate from human labels.")
+    print(
+        "Four authored documents loaded. Keep numerical component IDs separate from human labels."
+    )
+
 
 if __name__ == "__main__":
     main()

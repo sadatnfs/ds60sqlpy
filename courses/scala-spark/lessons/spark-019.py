@@ -1,50 +1,93 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pyspark.sql import Window
-
 
 
 def validate_candidates(events):
     raise NotImplementedError("Complete validate_candidates")
 
+
 def rank_candidates(events):
     raise NotImplementedError("Complete rank_candidates")
+
 
 def winners(events):
     raise NotImplementedError("Complete winners")
 
+
 def top_time_candidates(events):
     raise NotImplementedError("Complete top_time_candidates")
+
 
 def running_totals(events):
     raise NotImplementedError("Complete running_totals")
 
+
 def previous_evidence(events):
     raise NotImplementedError("Complete previous_evidence")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-019").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-019")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("event_id",LongType(),False),StructField("entity",StringType(),False),StructField("time_text",StringType(),True),StructField("amount",LongType(),False)])
-        events = spark.createDataFrame([(1,"A","2024-01-01 00:00:00",10),(2,"A","2024-01-01 00:01:00",20),(3,"A","2024-01-01 00:01:00",30),(4,"B","2024-01-01 00:00:00",40),(5,"B","2024-01-01 00:02:00",50),(6,"B","2024-01-01 00:02:00",60),(7,"C",None,70),(8,"C","2024-01-01 00:01:00",80)],schema=schema).withColumn("event_time",F.to_timestamp("time_text"))
-        group = events.filter(F.col("entity")=="A")
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("entity", StringType(), False),
+                StructField("time_text", StringType(), True),
+                StructField("amount", LongType(), False),
+            ]
+        )
+        events = spark.createDataFrame(
+            [
+                (1, "A", "2024-01-01 00:00:00", 10),
+                (2, "A", "2024-01-01 00:01:00", 20),
+                (3, "A", "2024-01-01 00:01:00", 30),
+                (4, "B", "2024-01-01 00:00:00", 40),
+                (5, "B", "2024-01-01 00:02:00", 50),
+                (6, "B", "2024-01-01 00:02:00", 60),
+                (7, "C", None, 70),
+                (8, "C", "2024-01-01 00:01:00", 80),
+            ],
+            schema=schema,
+        ).withColumn("event_time", F.to_timestamp("time_text"))
+        group = events.filter(F.col("entity") == "A")
         assert group.count() == 3 and group.select("event_time").distinct().count() == 2
         print("Three event identities share only two timestamp values")
         counts = events.dropDuplicates(["entity"]).count()
         assert counts == 3
-        print("dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy")
+        print(
+            "dropDuplicates guarantees entity cardinality here; it does not state a newest-row policy"
+        )
         print("spark-019: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

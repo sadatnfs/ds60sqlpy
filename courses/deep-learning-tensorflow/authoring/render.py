@@ -1,53 +1,89 @@
 from pathlib import Path
 import json, textwrap, re
+
 ROOT = Path(__file__).resolve().parents[3]
 SPECS = {}
-DEFAULT_DIAGNOSIS = 'When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.'
-def ex(title,prompt,expected,code,why):
-    return dict(title=title,prompt=prompt,expected=expected,code=textwrap.dedent(code).strip(),why=why)
-def add(id,mental,anatomy,terms,exercises,source,imports='import numpy as np',helper=''):
-    assert len(exercises)==6, id
-    SPECS[id]=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,source=source,imports=imports,helper=textwrap.dedent(helper).strip())
+DEFAULT_DIAGNOSIS = "When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result."
+
+
+def ex(title, prompt, expected, code, why):
+    return dict(
+        title=title, prompt=prompt, expected=expected, code=textwrap.dedent(code).strip(), why=why
+    )
+
+
+def add(id, mental, anatomy, terms, exercises, source, imports="import numpy as np", helper=""):
+    assert len(exercises) == 6, id
+    SPECS[id] = dict(
+        mental=mental,
+        anatomy=anatomy,
+        terms=terms,
+        exercises=exercises,
+        source=source,
+        imports=imports,
+        helper=textwrap.dedent(helper).strip(),
+    )
+
+
 def write_all(only=None, guides_only=False):
- for track in ['deep-learning-tensorflow','llm-theory']:
-  base=ROOT/'courses'/track
-  plan=json.loads((ROOT/'docs/expansion/plans'/f'{track}.json').read_text())
-  inventory=json.loads((base/'lessons.json').read_text())
-  existing={x['id'] for x in inventory['lessons']}
-  for p in plan['lessons']:
-   id=p['id']
-   if id not in SPECS or (only is not None and id not in only): continue
-   s=SPECS[id]; reading=p['runtime']=='reading'; ext='md' if reading else 'py'
-   prefix=f'courses/{track}'
-   guide=f'{prefix}/guides/{id}.md'; learner=f'{prefix}/lessons/{id}.{ext}'
-   solution=f'{prefix}/solutions/{id}_solution.py'; explanation=f'{prefix}/solutions/{id}_solutions.md'
-   prereq=', '.join(f'`{q}`' for q in p['prerequisites'])
-   terms='\n\n'.join(f'**{k}:** {v}' for k,v in s['terms'])
-   exercise_text='\n\n'.join(f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}" for n,e in enumerate(s['exercises'],1))
-   examples='\n\n'.join(f"### Example {chr(65+n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(e.get('preamble', s['imports']+chr(10)+s['helper'])+chr(10)) if not reading else ''}{e['code'] if reading or 'worked_examples' in s else chr(10).join(item['code'] for item in s['exercises'][:n+1])}\n```\n\n**Expected:** {e['expected']}" for n,e in enumerate(s.get('worked_examples', s['exercises'][:2])))
-   runtime = ('Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.' if reading else f"Open the Docker classroom, choose **Journeys**, and select `{id}`. Start its `{p['runtime']}` worker using the [Docker classroom instructions](../../../docs/docker-classroom.md), then edit the saved coding pad and choose **Run**. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository's [native setup guide](../../../docs/setup/first-success.md) and the same declared dependencies. Keep editable copies under ignored `.learning/expansion/{id}/` so the checked-in worksheet remains available.")
-   study_method = ('Read both worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it.' if reading else 'Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.')
-   code_anatomy=s['anatomy']
-   prompt=f'''Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p['title']}.
+    for track in ["deep-learning-tensorflow", "llm-theory"]:
+        base = ROOT / "courses" / track
+        plan = json.loads((ROOT / "docs/expansion/plans" / f"{track}.json").read_text())
+        inventory = json.loads((base / "lessons.json").read_text())
+        existing = {x["id"] for x in inventory["lessons"]}
+        for p in plan["lessons"]:
+            id = p["id"]
+            if id not in SPECS or (only is not None and id not in only):
+                continue
+            s = SPECS[id]
+            reading = p["runtime"] == "reading"
+            ext = "md" if reading else "py"
+            prefix = f"courses/{track}"
+            guide = f"{prefix}/guides/{id}.md"
+            learner = f"{prefix}/lessons/{id}.{ext}"
+            solution = f"{prefix}/solutions/{id}_solution.py"
+            explanation = f"{prefix}/solutions/{id}_solutions.md"
+            prereq = ", ".join(f"`{q}`" for q in p["prerequisites"])
+            terms = "\n\n".join(f"**{k}:** {v}" for k, v in s["terms"])
+            exercise_text = "\n\n".join(
+                f"{n}. **{e['title']}.** {e['prompt']}\n   **Expected:** {e['expected']}\n   **Verify:** Save the {('reasoning table' if reading else 'assertion results')} for exercise {n}, including {e['expected']}"
+                for n, e in enumerate(s["exercises"], 1)
+            )
+            examples = "\n\n".join(
+                f"### Example {chr(65 + n)}: {e['title']}\n\n{e['why']}\n\n```{'text' if reading else 'python'}\n{(e.get('preamble', s['imports'] + chr(10) + s['helper']) + chr(10)) if not reading else ''}{e['code'] if reading or 'worked_examples' in s else chr(10).join(item['code'] for item in s['exercises'][: n + 1])}\n```\n\n**Expected:** {e['expected']}"
+                for n, e in enumerate(s.get("worked_examples", s["exercises"][:2]))
+            )
+            runtime = (
+                "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
+                if reading
+                else f"Open the Docker classroom, choose **Journeys**, and select `{id}`. Start its `{p['runtime']}` worker using the [Docker classroom instructions](../../../docs/docker-classroom.md), then edit the saved coding pad and choose **Run**. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository's [native setup guide](../../../docs/setup/first-success.md) and the same declared dependencies. Keep editable copies under ignored `.learning/expansion/{id}/` so the checked-in worksheet remains available."
+            )
+            study_method = (
+                "Read both worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it."
+                if reading
+                else "Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
+            )
+            code_anatomy = s["anatomy"]
+            prompt = f"""Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p["title"]}.
 Read {guide} and {learner}. Direct prerequisites: {prereq}.
 Explain the mental model, ask me to predict the worked example, review my attempt,
 give one hint, request output evidence, and ask a fresh retrieval question.
 Keep {prefix}/solutions/ closed until I request comparison or show an attempt.
 Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
-and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.'''
-   document=f'''# {id}: {p['title']}
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions."""
+            document = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
 
-{p['level'].capitalize()}; approximately {p['minutes']} minutes. Direct prerequisites: {prereq}. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+{p["level"].capitalize()}; approximately {p["minutes"]} minutes. Direct prerequisites: {prereq}. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
 
 ## Learning objectives
 
-{p['outcome']} The central investigation is concrete: {p['lab']} The finish condition is {p['verification']} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+{p["outcome"]} The central investigation is concrete: {p["lab"]} The finish condition is {p["verification"]} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-{s['mental']}
+{s["mental"]}
 
 ## Vocabulary and concepts
 
@@ -63,7 +99,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 {code_anatomy}
 
-{s.get('mechanism_notes', '')}
+{s.get("mechanism_notes", "")}
 
 ## Worked example / walkthrough
 
@@ -71,7 +107,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p['verification']} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: {p["verification"]} Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
@@ -79,7 +115,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-{s.get('diagnosis', DEFAULT_DIAGNOSIS)}
+{s.get("diagnosis", DEFAULT_DIAGNOSIS)}
 
 ## Progressive hints
 
@@ -87,7 +123,7 @@ First draw the state described in the vocabulary section. Next use the smallest 
 
 ## Self-check and retrieval
 
-Close both worked examples. Explain {', '.join(k for k,v in s['terms'][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
+Close both worked examples. Explain {", ".join(k for k, v in s["terms"][:3])} using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.
 
 ## Next step
 
@@ -95,64 +131,97 @@ Revisit the direct prerequisite {prereq} if the calculation cannot be reconstruc
 
 ## Sources and verification status
 
-API and mechanism reference: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/ml-content-status.md`; authored content does not imply that a heavy runtime was executed.
+API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/ml-content-status.md`; authored content does not imply that a heavy runtime was executed.
 
 ## Ask an AI tutor about this lesson
 
 ```text
 {prompt}
 ```
-'''
-   explanation_doc=f'''# {id}: explanatory solutions
+"""
+            explanation_doc = f"""# {id}: explanatory solutions
 
 Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.
 
 ## Mechanism review
 
-{s['mental']}
+{s["mental"]}
 
 {terms}
 
 ## Reading the implementation
 
-{s['anatomy']}
+{s["anatomy"]}
 
-'''
-   blocks=[]
-   for n,e in enumerate(s['exercises'],1):
-    explanation_doc+=f'''## Exercise {n}: {e['title']}
+"""
+            blocks = []
+            for n, e in enumerate(s["exercises"], 1):
+                explanation_doc += f"""## Exercise {n}: {e["title"]}
 
-The question is: {e['prompt']}
+The question is: {e["prompt"]}
 
-{e['why']}
+{e["why"]}
 
-```{'text' if reading else 'python'}
-{e['code']}
+```{"text" if reading else "python"}
+{e["code"]}
 ```
 
-**Expected:** {e['expected']}
+**Expected:** {e["expected"]}
 
-**Verify:** Compare the computed values or written argument with {e['expected']}
+**Verify:** Compare the computed values or written argument with {e["expected"]}
 
-'''
-    blocks.append(f"    # Exercise {n}: {e['title']}\n"+textwrap.indent(e['code'],'    '))
-   explanation_doc+='## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n'
-   (ROOT/guide).write_text(document)
-   if guides_only:
-    continue
-   (ROOT/explanation).write_text(explanation_doc)
-   if reading:
-    (ROOT/learner).write_text(f'# {id}: {p["title"]}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n'+exercise_text+'\n')
-   else:
-    source=f'"""{id}: {p["title"]}.\n\nAnswer-free learner worksheet. See the companion guide for worked examples.\nCopy to .learning before editing. Six independent attempts belong below.\n"""\n\n'
-    for n,e in enumerate(s['exercises'],1):
-     source+=f'# Exercise {n}: {e["title"]}\n'+ '\n'.join('# '+x for x in textwrap.wrap(e['prompt'],88))+'\n# Expected: '+e['expected']+'\n\n'
-    source+='if __name__ == "__main__":\n    print("Read the guide and implement the six exercises in your saved copy.")\n'
-    (ROOT/learner).write_text(source)
-    code='"""'+id+': bounded local reference checks. No network or persistent data writes."""\n\n'+s['imports']+'\n\n'+s['helper']+'\n\n\ndef verify():\n'+'\n\n'.join(blocks)+'\n    return {"checks": 6, "status": "passed"}\n\n\nif __name__ == "__main__":\n    print(verify())\n'
-    (ROOT/solution).write_text(code)
-   if id not in existing:
-    inventory['lessons'].append(dict(id=id,status='authored',language='markdown' if reading else 'python',runtime_profile=p['runtime'],guide_path=guide,source_path=learner,solution_paths=[explanation] if reading else [solution,explanation],verification_id=None))
-  inventory['lessons'].sort(key=lambda x:x['id'])
-  (base/'lessons.json').write_text(json.dumps(inventory,indent=2)+'\n')
- print('Authored',len(SPECS),'lesson bundles')
+"""
+                blocks.append(
+                    f"    # Exercise {n}: {e['title']}\n" + textwrap.indent(e["code"], "    ")
+                )
+            explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
+            (ROOT / guide).write_text(document)
+            if guides_only:
+                continue
+            (ROOT / explanation).write_text(explanation_doc)
+            if reading:
+                (ROOT / learner).write_text(
+                    f"# {id}: {p['title']}\n\nRead the guide, record a prediction, then answer the six cases without opening solutions.\n\n## Exercises\n\n"
+                    + exercise_text
+                    + "\n"
+                )
+            else:
+                source = f'"""{id}: {p["title"]}.\n\nAnswer-free learner worksheet. See the companion guide for worked examples.\nCopy to .learning before editing. Six independent attempts belong below.\n"""\n\n'
+                for n, e in enumerate(s["exercises"], 1):
+                    source += (
+                        f"# Exercise {n}: {e['title']}\n"
+                        + "\n".join("# " + x for x in textwrap.wrap(e["prompt"], 88))
+                        + "\n# Expected: "
+                        + e["expected"]
+                        + "\n\n"
+                    )
+                source += 'if __name__ == "__main__":\n    print("Read the guide and implement the six exercises in your saved copy.")\n'
+                (ROOT / learner).write_text(source)
+                code = (
+                    '"""'
+                    + id
+                    + ': bounded local reference checks. No network or persistent data writes."""\n\n'
+                    + s["imports"]
+                    + "\n\n"
+                    + s["helper"]
+                    + "\n\n\ndef verify():\n"
+                    + "\n\n".join(blocks)
+                    + '\n    return {"checks": 6, "status": "passed"}\n\n\nif __name__ == "__main__":\n    print(verify())\n'
+                )
+                (ROOT / solution).write_text(code)
+            if id not in existing:
+                inventory["lessons"].append(
+                    dict(
+                        id=id,
+                        status="authored",
+                        language="markdown" if reading else "python",
+                        runtime_profile=p["runtime"],
+                        guide_path=guide,
+                        source_path=learner,
+                        solution_paths=[explanation] if reading else [solution, explanation],
+                        verification_id=None,
+                    )
+                )
+        inventory["lessons"].sort(key=lambda x: x["id"])
+        (base / "lessons.json").write_text(json.dumps(inventory, indent=2) + "\n")
+    print("Authored", len(SPECS), "lesson bundles")

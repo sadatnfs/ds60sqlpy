@@ -3,8 +3,7 @@ from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 
 def ids(df):
-    return [row["event_id"] for row in df.select("event_id")
-            .orderBy("event_id").collect()]
+    return [row["event_id"] for row in df.select("event_id").orderBy("event_id").collect()]
 
 
 def metrics(df):
@@ -25,18 +24,18 @@ def summarize(df):
 
 
 def canonical(df):
-    assert [(field.name, field.dataType.simpleString())
-            for field in df.schema.fields] == [
-        ("team", "string"), ("rows", "bigint"),
-        ("valued", "bigint"), ("total_cents", "bigint"),
+    assert [(field.name, field.dataType.simpleString()) for field in df.schema.fields] == [
+        ("team", "string"),
+        ("rows", "bigint"),
+        ("valued", "bigint"),
+        ("total_cents", "bigint"),
     ]
-    return [tuple(row) for row in
-            df.orderBy(F.col("team").asc_nulls_last()).collect()]
-
+    return [tuple(row) for row in df.orderBy(F.col("team").asc_nulls_last()).collect()]
 
 
 def paid_events(raw):
     return raw.filter(F.col("status") == F.lit("paid"))
+
 
 def main():
     spark = (
@@ -51,23 +50,30 @@ def main():
     )
     try:
         assert spark.sparkContext.master == "local[2]"
-        schema = StructType([
-            StructField("event_id", LongType(), False),
-            StructField("team", StringType(), True),
-            StructField("amount_cents", LongType(), True),
-            StructField("status", StringType(), False),
-        ])
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("team", StringType(), True),
+                StructField("amount_cents", LongType(), True),
+                StructField("status", StringType(), False),
+            ]
+        )
         rows = [
-            (1, "A", 100, "paid"), (2, "A", None, "paid"),
-            (3, "B", 0, "paid"), (4, None, 50, "paid"),
-            (5, "B", 150, "void"), (6, "A", 100, "paid"),
+            (1, "A", 100, "paid"),
+            (2, "A", None, "paid"),
+            (3, "B", 0, "paid"),
+            (4, None, 50, "paid"),
+            (5, "B", 150, "void"),
+            (6, "A", 100, "paid"),
             (7, "C", None, "paid"),
         ]
         raw = spark.createDataFrame(rows, schema=schema)
         paid = paid_events(raw)
         golden = [
-            ("A", 3, 2, 200), ("B", 1, 1, 0),
-            ("C", 1, 0, None), (None, 1, 1, 50),
+            ("A", 3, 2, 200),
+            ("B", 1, 1, 0),
+            ("C", 1, 0, None),
+            (None, 1, 1, 50),
         ]
 
         # Exercise 1: grain and the exact paid/excluded IDs.

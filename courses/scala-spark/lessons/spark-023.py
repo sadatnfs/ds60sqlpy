@@ -1,59 +1,101 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def logical_metrics(frame):
-    return tuple(frame.agg(F.count(F.lit(1)),F.countDistinct("fact_id"),F.sum("amount"),F.sum(F.col("amount")*F.col("factor"))).first())
+    return tuple(
+        frame.agg(
+            F.count(F.lit(1)),
+            F.countDistinct("fact_id"),
+            F.sum("amount"),
+            F.sum(F.col("amount") * F.col("factor")),
+        ).first()
+    )
+
+
 def join_plan(frame):
     return frame._jdf.queryExecution().executedPlan().toString()
+
 
 def estimated_bytes(frame):
     raise NotImplementedError("Complete estimated_bytes")
 
+
 def ordinary_join(facts, dimension):
     raise NotImplementedError("Complete ordinary_join")
+
 
 def without_automatic_broadcast(facts, dimension):
     raise NotImplementedError("Complete without_automatic_broadcast")
 
+
 def hinted_join(facts, dimension):
     raise NotImplementedError("Complete hinted_join")
+
 
 def unsupported_hint(facts, dimension):
     raise NotImplementedError("Complete unsupported_hint")
 
+
 def bounded_broadcast(dimension):
     raise NotImplementedError("Complete bounded_broadcast")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-023").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-023")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        facts = spark.range(0,20000,1,4).withColumnRenamed("id","fact_id").withColumn("key",F.col("fact_id")%20).withColumn("amount",F.col("fact_id")%7+1)
-        dimension = spark.range(0,20,1,2).withColumnRenamed("id","key").withColumn("factor",F.col("key")+1)
-        spark.conf.set("spark.sql.autoBroadcastJoinThreshold","10485760")
-        spark.conf.set("spark.sql.join.preferSortMergeJoin","true")
+        facts = (
+            spark.range(0, 20000, 1, 4)
+            .withColumnRenamed("id", "fact_id")
+            .withColumn("key", F.col("fact_id") % 20)
+            .withColumn("amount", F.col("fact_id") % 7 + 1)
+        )
+        dimension = (
+            spark.range(0, 20, 1, 2)
+            .withColumnRenamed("id", "key")
+            .withColumn("factor", F.col("key") + 1)
+        )
+        spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "10485760")
+        spark.conf.set("spark.sql.join.preferSortMergeJoin", "true")
         assert facts.count() == 20000 and dimension.count() == 20
         assert dimension.select("key").distinct().count() == 20
         print("Known finite build side:20 unique keys")
-        total = sum((i%7+1)*(i%20+1) for i in range(20000))
+        total = sum((i % 7 + 1) * (i % 20 + 1) for i in range(20000))
         assert total == 839916
-        print("Independent weighted-total oracle=",total)
+        print("Independent weighted-total oracle=", total)
         print("spark-023: worked examples passed; six task implementations remain")
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

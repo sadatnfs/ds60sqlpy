@@ -1,143 +1,251 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import json
 import uuid
 
-EVENT_SCHEMA=StructType([StructField("id",LongType(),True),StructField("cents",LongType(),True)])
-OWNED_QUERIES=[]
-def publish_file(root,input_path,name,lines):
-    import re,os
-    if re.fullmatch(r"batch-[0-9]{2}\.json",name) is None or len(lines)>8 or any(len(line)>256 for line in lines):
+EVENT_SCHEMA = StructType(
+    [StructField("id", LongType(), True), StructField("cents", LongType(), True)]
+)
+OWNED_QUERIES = []
+
+
+def publish_file(root, input_path, name, lines):
+    import re, os
+
+    if (
+        re.fullmatch(r"batch-[0-9]{2}\.json", name) is None
+        or len(lines) > 8
+        or any(len(line) > 256 for line in lines)
+    ):
         raise ValueError("Fixed finite file contract required")
     input_path.mkdir(exist_ok=True)
-    staged=root/("pending-"+uuid.uuid4().hex+".json")
+    staged = root / ("pending-" + uuid.uuid4().hex + ".json")
     try:
-        with staged.open("x",encoding="utf-8") as handle:
-            handle.write("\n".join(lines)+"\n")
-        if (input_path/name).exists():raise ValueError("Input file identity already exists")
-        os.rename(staged,input_path/name)
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        if (input_path / name).exists():
+            raise ValueError("Input file identity already exists")
+        os.rename(staged, input_path / name)
     finally:
         staged.unlink(missing_ok=True)
-def run_parquet(spark,input_path,checkpoint,output):
-    source=(spark.readStream.schema(EVENT_SCHEMA).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(str(input_path)))
-    query=(source.writeStream.format("parquet").outputMode("append")
-        .option("checkpointLocation",str(checkpoint)).trigger(availableNow=True).start(str(output)))
+
+
+def run_parquet(spark, input_path, checkpoint, output):
+    source = (
+        spark.readStream.schema(EVENT_SCHEMA)
+        .option("maxFilesPerTrigger", 1)
+        .option("mode", "FAILFAST")
+        .json(str(input_path))
+    )
+    query = (
+        source.writeStream.format("parquet")
+        .outputMode("append")
+        .option("checkpointLocation", str(checkpoint))
+        .trigger(availableNow=True)
+        .start(str(output))
+    )
     OWNED_QUERIES.append(query)
     try:
-        if not query.awaitTermination(45):raise TimeoutError("Finite query exceeded45-second deadline")
-        if query.exception() is not None:raise RuntimeError(str(query.exception()))
-        progress=query.recentProgress
-        return {"id":str(query.id),"run_id":str(query.runId),"input_rows":sum(p["numInputRows"] for p in progress),"batches":[p["batchId"] for p in progress]}
+        if not query.awaitTermination(45):
+            raise TimeoutError("Finite query exceeded45-second deadline")
+        if query.exception() is not None:
+            raise RuntimeError(str(query.exception()))
+        progress = query.recentProgress
+        return {
+            "id": str(query.id),
+            "run_id": str(query.runId),
+            "input_rows": sum(p["numInputRows"] for p in progress),
+            "batches": [p["batchId"] for p in progress],
+        }
     finally:
-        if query.isActive:query.stop()
-def bag(spark,path):
-    frame=spark.read.parquet(str(path))
-    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields]!=[("id","bigint"),("cents","bigint")]:raise ValueError("Result schema mismatch")
-    if frame.count()>8:raise ValueError("Tiny result bound exceeded")
-    return [f"{r.id}:{r.cents}" for r in frame.orderBy("id","cents").collect()]
+        if query.isActive:
+            query.stop()
+
+
+def bag(spark, path):
+    frame = spark.read.parquet(str(path))
+    if [(f.name, f.dataType.simpleString()) for f in frame.schema.fields] != [
+        ("id", "bigint"),
+        ("cents", "bigint"),
+    ]:
+        raise ValueError("Result schema mismatch")
+    if frame.count() > 8:
+        raise ValueError("Tiny result bound exceeded")
+    return [f"{r.id}:{r.cents}" for r in frame.orderBy("id", "cents").collect()]
+
 
 def all_metrics(frame):
-    result=[];pending=[frame._jdf.queryExecution().executedPlan()]
+    result = []
+    pending = [frame._jdf.queryExecution().executedPlan()]
     while pending:
-        node=pending.pop();metrics={};items=node.metrics().iterator()
+        node = pending.pop()
+        metrics = {}
+        items = node.metrics().iterator()
         while items.hasNext():
-            item=items.next();metrics[str(item._1())]=int(item._2().value())
-        result.append((str(node.nodeName()),metrics))
-        children=node.children().iterator()
-        while children.hasNext():pending.append(children.next())
+            item = items.next()
+            metrics[str(item._1())] = int(item._2().value())
+        result.append((str(node.nodeName()), metrics))
+        children = node.children().iterator()
+        while children.hasNext():
+            pending.append(children.next())
     return result
 
-def metric(report,key):
-    values=[values[key] for _,values in report["metrics"] if key in values]
+
+def metric(report, key):
+    values = [values[key] for _, values in report["metrics"] if key in values]
     return sum(values) if values else None
 
-def retained_stages(spark,group):
-    tracker=spark.sparkContext.statusTracker();ids=set()
+
+def retained_stages(spark, group):
+    tracker = spark.sparkContext.statusTracker()
+    ids = set()
     for job_id in tracker.getJobIdsForGroup(group):
-        job=tracker.getJobInfo(job_id)
-        if job is not None:ids.update(job.stageIds)
-    rows=[]
+        job = tracker.getJobInfo(job_id)
+        if job is not None:
+            ids.update(job.stageIds)
+    rows = []
     for stage_id in sorted(ids):
-        value=tracker.getStageInfo(stage_id)
-        if value is not None:rows.append((stage_id,value.numTasks,value.numCompletedTasks,value.numFailedTasks))
+        value = tracker.getStageInfo(stage_id)
+        if value is not None:
+            rows.append((stage_id, value.numTasks, value.numCompletedTasks, value.numFailedTasks))
     return rows
 
-def measured(spark,source,partitions,root):
+
+def measured(spark, source, partitions, root):
     import time
-    if type(partitions) is not int or not 1<=partitions<=8:raise ValueError("Partition budget1..8")
-    group=f"budget-{partitions}-{uuid.uuid4().hex}";previous=spark.conf.get("spark.sql.shuffle.partitions")
-    spark.conf.set("spark.sql.shuffle.partitions",str(partitions))
+
+    if type(partitions) is not int or not 1 <= partitions <= 8:
+        raise ValueError("Partition budget1..8")
+    group = f"budget-{partitions}-{uuid.uuid4().hex}"
+    previous = spark.conf.get("spark.sql.shuffle.partitions")
+    spark.conf.set("spark.sql.shuffle.partitions", str(partitions))
     try:
-        shuffled=source.repartition(partitions,F.col("key"));grouped=shuffled.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
-        begin=time.monotonic_ns();spark.sparkContext.setJobGroup(group,"Bounded budget comparison",interruptOnCancel=True)
-        try:rows=sorted((r[0],r[1]) for r in grouped.collect())
+        shuffled = source.repartition(partitions, F.col("key"))
+        grouped = shuffled.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
+        begin = time.monotonic_ns()
+        spark.sparkContext.setJobGroup(group, "Bounded budget comparison", interruptOnCancel=True)
+        try:
+            rows = sorted((r[0], r[1]) for r in grouped.collect())
         finally:
-            for key in ("spark.jobGroup.id","spark.job.description","spark.job.interruptOnCancel"):spark.sparkContext.setLocalProperty(key,None)
-        elapsed=time.monotonic_ns()-begin;metrics=all_metrics(grouped);stages=retained_stages(spark,group)
-        counts={r[0]:r[1] for r in shuffled.select(F.spark_partition_id().alias("partition")).groupBy("partition").count().collect()}
-        bucket_rows=[counts.get(index,0) for index in range(partitions)]
-        output=root/f"product-{partitions}"
+            for key in (
+                "spark.jobGroup.id",
+                "spark.job.description",
+                "spark.job.interruptOnCancel",
+            ):
+                spark.sparkContext.setLocalProperty(key, None)
+        elapsed = time.monotonic_ns() - begin
+        metrics = all_metrics(grouped)
+        stages = retained_stages(spark, group)
+        counts = {
+            r[0]: r[1]
+            for r in shuffled.select(F.spark_partition_id().alias("partition"))
+            .groupBy("partition")
+            .count()
+            .collect()
+        }
+        bucket_rows = [counts.get(index, 0) for index in range(partitions)]
+        output = root / f"product-{partitions}"
         grouped.write.mode("errorifexists").parquet(str(output))
-        readback=sorted((r[0],r[1]) for r in spark.read.parquet(str(output)).collect())
-        if readback!=rows:raise ValueError("Persisted product differs")
-        files=len(list(output.glob("*.parquet")))
-        return {"rows":rows,"partitions":partitions,"bucket_rows":bucket_rows,"files":files,"elapsed_ns":elapsed,"metrics":metrics,"stages":stages}
-    finally:spark.conf.set("spark.sql.shuffle.partitions",previous)
+        readback = sorted((r[0], r[1]) for r in spark.read.parquet(str(output)).collect())
+        if readback != rows:
+            raise ValueError("Persisted product differs")
+        files = len(list(output.glob("*.parquet")))
+        return {
+            "rows": rows,
+            "partitions": partitions,
+            "bucket_rows": bucket_rows,
+            "files": files,
+            "elapsed_ns": elapsed,
+            "metrics": metrics,
+            "stages": stages,
+        }
+    finally:
+        spark.conf.set("spark.sql.shuffle.partitions", previous)
+
 
 def fixture_metrics(source):
     raise NotImplementedError("Complete fixture_metrics")
 
-def measure_two(spark,source,root):
+
+def measure_two(spark, source, root):
     raise NotImplementedError("Complete measure_two")
 
-def measure_four(spark,source,root):
+
+def measure_four(spark, source, root):
     raise NotImplementedError("Complete measure_four")
+
 
 def imbalance(counts):
     raise NotImplementedError("Complete imbalance")
 
-def estimated_cost(vcpu,seconds,gib,days):
+
+def estimated_cost(vcpu, seconds, gib, days):
     raise NotImplementedError("Complete estimated_cost")
 
-def within_budget(rows,partitions):
+
+def within_budget(rows, partitions):
     raise NotImplementedError("Complete within_budget")
+
 
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-039").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-039")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        if spark.version!="4.0.1":raise ValueError("Prepared Spark4.0.1 required")
-        spark.conf.set("spark.sql.streaming.stopTimeout","5000")
-        owned_root=Path(tempfile.mkdtemp(prefix="spark-039-",dir=Path.cwd()))
-        source=spark.range(0,20000,1,4).withColumn("key",F.when(F.col("id")<16000,F.lit(0).cast("long")).otherwise(F.col("id")%100))
-        expected=[(key,16040 if key==0 else 40) for key in range(100)]
-        assert len(expected)==100 and sum(count for _,count in expected)==20000
-        compute=2*(3600/3600)*.05
-        storage=2*(30/30)*.02
-        assert abs(compute+storage-.14)<1e-12
+        if spark.version != "4.0.1":
+            raise ValueError("Prepared Spark4.0.1 required")
+        spark.conf.set("spark.sql.streaming.stopTimeout", "5000")
+        owned_root = Path(tempfile.mkdtemp(prefix="spark-039-", dir=Path.cwd()))
+        source = spark.range(0, 20000, 1, 4).withColumn(
+            "key", F.when(F.col("id") < 16000, F.lit(0).cast("long")).otherwise(F.col("id") % 100)
+        )
+        expected = [(key, 16040 if key == 0 else 40) for key in range(100)]
+        assert len(expected) == 100 and sum(count for _, count in expected) == 20000
+        compute = 2 * (3600 / 3600) * 0.05
+        storage = 2 * (30 / 30) * 0.02
+        assert abs(compute + storage - 0.14) < 1e-12
         print("spark-039: worked examples passed; six task implementations remain")
     finally:
         try:
             for query in OWNED_QUERIES:
-                if query.isActive:query.stop()
-            if any(query.isActive for query in OWNED_QUERIES):raise RuntimeError("Do not remove scratch while an owned query is active")
+                if query.isActive:
+                    query.stop()
+            if any(query.isActive for query in OWNED_QUERIES):
+                raise RuntimeError("Do not remove scratch while an owned query is active")
             if owned_root is not None:
-                if owned_root.parent!=Path.cwd() or not owned_root.name.startswith("spark-"):raise ValueError("Owned cleanup boundary mismatch")
+                if owned_root.parent != Path.cwd() or not owned_root.name.startswith("spark-"):
+                    raise ValueError("Owned cleanup boundary mismatch")
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

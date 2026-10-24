@@ -1,13 +1,17 @@
 import numpy as np
-START=np.array([.6,.4])
-TRANSITION=np.array([[.7,.3],[.4,.6]])
-EMISSION=np.array([[.6,.1],[.2,.7]])
 
-def viterbi(start,transition,emission):
+START = np.array([0.6, 0.4])
+TRANSITION = np.array([[0.7, 0.3], [0.4, 0.6]])
+EMISSION = np.array([[0.6, 0.1], [0.2, 0.7]])
+
+
+def viterbi(start, transition, emission):
     raise NotImplementedError("Implement scores and backpointers after a hand trace")
+
 
 def main():
     print("Two-state probability fixtures loaded. Record your trace and implement the six tasks.")
+
 
 if __name__ == "__main__":
     main()

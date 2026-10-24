@@ -1,12 +1,19 @@
-ROWS=[{"id":"a1","family":"a","time":1},{"id":"a2","family":"a","time":2},
-      {"id":"b1","family":"b","time":1},{"id":"b2","family":"b","time":3},
-      {"id":"c1","family":"c","time":3}]
+ROWS = [
+    {"id": "a1", "family": "a", "time": 1},
+    {"id": "a2", "family": "a", "time": 2},
+    {"id": "b1", "family": "b", "time": 1},
+    {"id": "b2", "family": "b", "time": 3},
+    {"id": "c1", "family": "c", "time": 3},
+]
 
-def split_rows(rows,cutoff):
+
+def split_rows(rows, cutoff):
     raise NotImplementedError("Return train, future-new-family test and exclusion ledger")
+
 
 def main():
     print("Family/time fixtures loaded. State the generalization target before splitting.")
+
 
 if __name__ == "__main__":
     main()

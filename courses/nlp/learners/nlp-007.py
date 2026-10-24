@@ -1,10 +1,13 @@
-TRAIN=["tea tea cup","coffee cup"]
+TRAIN = ["tea tea cup", "coffee cup"]
+
 
 def manual_tfidf(documents):
     raise NotImplementedError("Derive counts, DF, IDF and row normalization")
 
+
 def main():
     print("Two local documents loaded. Keep the training vocabulary frozen for query tests.")
+
 
 if __name__ == "__main__":
     main()

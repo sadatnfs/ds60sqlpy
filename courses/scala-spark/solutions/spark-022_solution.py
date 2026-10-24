@@ -1,25 +1,40 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def run_grouped(frame, group):
     sc = frame.sparkSession.sparkContext
-    sc.setJobGroup(group,"Bounded shuffle evidence",interruptOnCancel=True)
+    sc.setJobGroup(group, "Bounded shuffle evidence", interruptOnCancel=True)
     try:
-        return sorted((r[0],r[1]) for r in frame.collect())
+        return sorted((r[0], r[1]) for r in frame.collect())
     finally:
-        sc.setLocalProperty("spark.jobGroup.id",None)
-        sc.setLocalProperty("spark.job.description",None)
-        sc.setLocalProperty("spark.job.interruptOnCancel",None)
+        sc.setLocalProperty("spark.jobGroup.id", None)
+        sc.setLocalProperty("spark.job.description", None)
+        sc.setLocalProperty("spark.job.interruptOnCancel", None)
+
 
 def source_metrics(source):
-    return tuple(source.agg(F.count(F.lit(1)),F.countDistinct("key"),F.sum("id")).first())
+    return tuple(source.agg(F.count(F.lit(1)), F.countDistinct("key"), F.sum("id")).first())
+
 
 def build_grouped(source, partitions):
-    if isinstance(partitions,bool) or not isinstance(partitions,int) or not 1 <= partitions <= 16:
+    if isinstance(partitions, bool) or not isinstance(partitions, int) or not 1 <= partitions <= 16:
         raise ValueError("Partition budget is1..16")
-    source.sparkSession.conf.set("spark.sql.shuffle.partitions",str(partitions))
+    source.sparkSession.conf.set("spark.sql.shuffle.partitions", str(partitions))
     return source.groupBy("key").agg(F.count(F.lit(1)).alias("n"))
+
 
 def exchange_metrics(frame):
     result = []
@@ -38,6 +53,7 @@ def exchange_metrics(frame):
             pending.append(children.next())
     return result
 
+
 def stage_evidence(spark, group):
     tracker = spark.sparkContext.statusTracker()
     stages = set()
@@ -49,74 +65,105 @@ def stage_evidence(spark, group):
     for stage_id in sorted(stages):
         info = tracker.getStageInfo(stage_id)
         if info is not None:
-            result.append((stage_id,info.numTasks,info.numCompletedTasks,info.numFailedTasks))
+            result.append((stage_id, info.numTasks, info.numCompletedTasks, info.numFailedTasks))
     return result
 
+
 def compare_results(left, right):
-    if left != right or len(left) != 1000 or sum(n for _,n in left) != 20000:
+    if left != right or len(left) != 1000 or sum(n for _, n in left) != 20000:
         raise ValueError("Grouped result contract changed")
 
+
 def work_model(reducers):
-    if isinstance(reducers,bool) or not isinstance(reducers,int) or reducers <= 0:
+    if isinstance(reducers, bool) or not isinstance(reducers, int) or reducers <= 0:
         raise ValueError("Positive reducer count required")
-    return 20000//4,4*1000,1000/reducers
+    return 20000 // 4, 4 * 1000, 1000 / reducers
+
 
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-022").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-022")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        source = spark.range(0,20000,1,4).withColumn("key",F.col("id")%1000)
+        source = spark.range(0, 20000, 1, 4).withColumn("key", F.col("id") % 1000)
         original_shuffle = spark.conf.get("spark.sql.shuffle.partitions")
         # Exercise 1: Establish the high-cardinality fixture oracle
-        assert source_metrics(source) == (20000,1000,199990000)
-        assert 20000*19999//2 == 199990000
+        assert source_metrics(source) == (20000, 1000, 199990000)
+        assert 20000 * 19999 // 2 == 199990000
         # Exercise 2: Build and execute a controlled grouped query
-        two = build_grouped(source,2)
-        two_rows = run_grouped(two,"ds60-spark-022-p2")
-        expected = [(key,20) for key in range(1000)]
-        assert two_rows == expected and sum(n for _,n in two_rows) == 20000
+        two = build_grouped(source, 2)
+        two_rows = run_grouped(two, "ds60-spark-022-p2")
+        expected = [(key, 20) for key in range(1000)]
+        assert two_rows == expected and sum(n for _, n in two_rows) == 20000
         assert "Exchange" in two._jdf.queryExecution().executedPlan().toString()
         try:
-            build_grouped(source,0)
+            build_grouped(source, 0)
         except ValueError:
             pass
         else:
             raise AssertionError("Invalid partition budget accepted")
         # Exercise 3: Read actual exchange metrics after the action
         two_exchange = exchange_metrics(two)
-        assert len(two_exchange) == 1 and two_exchange[0]["numPartitions"] == 2 and two_exchange[0]["dataSize"] > 0
-        print("p2_exchange=",two_exchange)
+        assert (
+            len(two_exchange) == 1
+            and two_exchange[0]["numPartitions"] == 2
+            and two_exchange[0]["dataSize"] > 0
+        )
+        print("p2_exchange=", two_exchange)
         # Exercise 4: Attach stage and task evidence to the named action
-        two_stages = stage_evidence(spark,"ds60-spark-022-p2")
-        assert two_stages and any(row[1] == 2 for row in two_stages) and all(all(n >= 0 for n in row[1:]) for row in two_stages)
-        print("p2_stages=",two_stages)
+        two_stages = stage_evidence(spark, "ds60-spark-022-p2")
+        assert (
+            two_stages
+            and any(row[1] == 2 for row in two_stages)
+            and all(all(n >= 0 for n in row[1:]) for row in two_stages)
+        )
+        print("p2_stages=", two_stages)
         # Exercise 5: Change reduce parallelism while preserving the complete result
-        five = build_grouped(source,5)
-        five_rows = run_grouped(five,"ds60-spark-022-p5")
-        compare_results(two_rows,five_rows);assert five_rows == expected
-        five_exchange = exchange_metrics(five);five_stages = stage_evidence(spark,"ds60-spark-022-p5")
-        assert len(five_exchange) == 1 and five_exchange[0]["numPartitions"] == 5 and five_exchange[0]["dataSize"] > 0
+        five = build_grouped(source, 5)
+        five_rows = run_grouped(five, "ds60-spark-022-p5")
+        compare_results(two_rows, five_rows)
+        assert five_rows == expected
+        five_exchange = exchange_metrics(five)
+        five_stages = stage_evidence(spark, "ds60-spark-022-p5")
+        assert (
+            len(five_exchange) == 1
+            and five_exchange[0]["numPartitions"] == 5
+            and five_exchange[0]["dataSize"] > 0
+        )
         assert any(row[1] == 5 for row in five_stages)
-        print("p5_exchange=",five_exchange,"p5_stages=",five_stages)
+        print("p5_exchange=", five_exchange, "p5_stages=", five_stages)
         # Exercise 6: Separate a workload model from measured evidence
-        assert work_model(2) == (5000,4000,500) and work_model(5) == (5000,4000,200)
-        print("version=",spark.version,"aqe=",spark.conf.get("spark.sql.adaptive.enabled"),"master=",spark.sparkContext.master,"model_only=",[work_model(2),work_model(5)])
-        spark.conf.set("spark.sql.shuffle.partitions",original_shuffle)
+        assert work_model(2) == (5000, 4000, 500) and work_model(5) == (5000, 4000, 200)
+        print(
+            "version=",
+            spark.version,
+            "aqe=",
+            spark.conf.get("spark.sql.adaptive.enabled"),
+            "master=",
+            spark.sparkContext.master,
+            "model_only=",
+            [work_model(2), work_model(5)],
+        )
+        spark.conf.set("spark.sql.shuffle.partitions", original_shuffle)
         print("spark-022: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

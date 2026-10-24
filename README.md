@@ -269,6 +269,12 @@ subjects' stable IDs.
 Developers who modify Python application code or content generators should read
 [CONTRIBUTING.md](CONTRIBUTING.md). It explains the locked Python environment,
 focused checks, grouped parallel tests, source ownership and generated readers.
+Format maintained code across the repository with `./scripts/format-repo`, or
+check formatting without changing source files with `./scripts/format-repo --check`.
+Run `./scripts/lint-repo` for read-only static source checks.
+The commands use a dedicated Docker toolchain, so contributors do not need every
+language compiler on their host. See [the formatting workflow](CONTRIBUTING.md#format-the-repository)
+for generation order, coverage and optional pre-commit checks.
 Running the classroom and developing its application are separate setup paths.
 Use Linux or WSL 2 for the validated contributor environment. Historical host
 notebook, SQL and editor recipes remain under [setup](docs/setup/offline.md) and

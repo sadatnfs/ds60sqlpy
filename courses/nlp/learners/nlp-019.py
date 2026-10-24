@@ -1,11 +1,16 @@
-A=[1,1,0,0,1,0]
-B=[1,0,0,0,1,1]
+A = [1, 1, 0, 0, 1, 0]
+B = [1, 0, 0, 0, 1, 1]
 
-def agreement(a,b):
-    raise NotImplementedError("Compute observed and marginal-expected agreement with an undefined policy")
+
+def agreement(a, b):
+    raise NotImplementedError(
+        "Compute observed and marginal-expected agreement with an undefined policy"
+    )
+
 
 def main():
     print("Independent ratings loaded. Preserve them when adding adjudication.")
+
 
 if __name__ == "__main__":
     main()

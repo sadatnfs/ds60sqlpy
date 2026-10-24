@@ -1,78 +1,145 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def observe(frame):
-    summary = frame.agg(F.count(F.lit(1)),F.countDistinct("fact_id"),F.count("amount"),F.sum("amount"),F.sum(F.col("amount")*F.col("factor")))
-    values = dict(zip(["rows","unique_facts","known_amounts","amount_total","weighted_total"],tuple(summary.collect()[0]),strict=True))
+    summary = frame.agg(
+        F.count(F.lit(1)),
+        F.countDistinct("fact_id"),
+        F.count("amount"),
+        F.sum("amount"),
+        F.sum(F.col("amount") * F.col("factor")),
+    )
+    values = dict(
+        zip(
+            ["rows", "unique_facts", "known_amounts", "amount_total", "weighted_total"],
+            tuple(summary.collect()[0]),
+            strict=True,
+        )
+    )
     exchanges = []
     pending = [summary._jdf.queryExecution().executedPlan()]
     while pending:
         node = pending.pop()
         if "Exchange" in node.nodeName():
-            metrics = {}; iterator = node.metrics().iterator()
+            metrics = {}
+            iterator = node.metrics().iterator()
             while iterator.hasNext():
-                entry = iterator.next(); metrics[str(entry._1())] = int(entry._2().value())
-            exchanges.append((node.nodeName(),metrics))
+                entry = iterator.next()
+                metrics[str(entry._1())] = int(entry._2().value())
+            exchanges.append((node.nodeName(), metrics))
         children = node.children().iterator()
         while children.hasNext():
             pending.append(children.next())
-    return values,exchanges
+    return values, exchanges
+
+
 def same_bag(left, right):
     return left.exceptAll(right).count() == 0 and right.exceptAll(left).count() == 0
+
 
 def classify_facts(raw):
     raise NotImplementedError("Complete classify_facts")
 
+
 def review_dimension(raw):
     raise NotImplementedError("Complete review_dimension")
+
 
 def baseline_product(facts, dimension):
     raise NotImplementedError("Complete baseline_product")
 
+
 def broadcast_product(facts, dimension):
     raise NotImplementedError("Complete broadcast_product")
+
 
 def configuration_receipt(spark):
     raise NotImplementedError("Complete configuration_receipt")
 
+
 def choose_product(facts, dimension, use_broadcast):
     raise NotImplementedError("Complete choose_product")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-028").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-028")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.autoBroadcastJoinThreshold","-1")
-        fact_schema = StructType([StructField("source_id",LongType(),False),StructField("fact_id",LongType(),True),StructField("key",LongType(),False),StructField("amount",LongType(),True)])
-        generated = [(i,i,0 if i<=1600 else (i-1601)%4+1,None if i%10==0 else i%7+1) for i in range(1,2001)]
-        raw_facts = spark.createDataFrame(generated+[(2001,None,0,10),(2002,2001,99,-3)],schema=fact_schema)
-        dim_schema = StructType([StructField("key",LongType(),False),StructField("factor",LongType(),False),StructField("approved",BooleanType(),False)])
-        raw_dimension = spark.createDataFrame([(0,1,False),(0,2,True)]+[(k,k+2,True) for k in range(1,6)],schema=dim_schema)
-        expected_metrics = {"rows":2000,"unique_facts":2000,"known_amounts":1800,"amount_total":7196,"weighted_total":17913}
-        predicted_raw_join_rows = 1600*2+400
+        spark.conf.set("spark.sql.autoBroadcastJoinThreshold", "-1")
+        fact_schema = StructType(
+            [
+                StructField("source_id", LongType(), False),
+                StructField("fact_id", LongType(), True),
+                StructField("key", LongType(), False),
+                StructField("amount", LongType(), True),
+            ]
+        )
+        generated = [
+            (i, i, 0 if i <= 1600 else (i - 1601) % 4 + 1, None if i % 10 == 0 else i % 7 + 1)
+            for i in range(1, 2001)
+        ]
+        raw_facts = spark.createDataFrame(
+            generated + [(2001, None, 0, 10), (2002, 2001, 99, -3)], schema=fact_schema
+        )
+        dim_schema = StructType(
+            [
+                StructField("key", LongType(), False),
+                StructField("factor", LongType(), False),
+                StructField("approved", BooleanType(), False),
+            ]
+        )
+        raw_dimension = spark.createDataFrame(
+            [(0, 1, False), (0, 2, True)] + [(k, k + 2, True) for k in range(1, 6)],
+            schema=dim_schema,
+        )
+        expected_metrics = {
+            "rows": 2000,
+            "unique_facts": 2000,
+            "known_amounts": 1800,
+            "amount_total": 7196,
+            "weighted_total": 17913,
+        }
+        predicted_raw_join_rows = 1600 * 2 + 400
         assert predicted_raw_join_rows == 3600
         print("Raw dimension multiplicity predicts3600 pairs for2000 accepted facts")
-        known = [i for i in range(1,2001) if i%10 != 0]
-        amount_total = sum(i%7+1 for i in known)
-        weighted = sum((i%7+1)*((0 if i<=1600 else (i-1601)%4+1)+2) for i in known)
+        known = [i for i in range(1, 2001) if i % 10 != 0]
+        amount_total = sum(i % 7 + 1 for i in known)
+        weighted = sum((i % 7 + 1) * ((0 if i <= 1600 else (i - 1601) % 4 + 1) + 2) for i in known)
         assert len(known) == 1800 and amount_total == 7196 and weighted == 17913
-        print("Independent formula totals=",amount_total,weighted)
+        print("Independent formula totals=", amount_total, weighted)
         print("spark-028: worked examples passed; six task implementations remain")
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

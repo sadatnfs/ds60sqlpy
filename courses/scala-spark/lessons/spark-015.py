@@ -1,52 +1,105 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def amount_rows(frame):
-    return [tuple(row) for row in frame.select("event_id", "amount_cents").orderBy("event_id").collect()]
+    return [
+        tuple(row) for row in frame.select("event_id", "amount_cents").orderBy("event_id").collect()
+    ]
+
 
 def with_parsed(frame):
     raise NotImplementedError("Complete with_parsed")
 
+
 def parse_ledger(frame):
     raise NotImplementedError("Complete parse_ledger")
+
 
 def accepted_projection(frame):
     raise NotImplementedError("Complete accepted_projection")
 
+
 def sql_projection(spark, frame):
     raise NotImplementedError("Complete sql_projection")
+
 
 def strict_projection(frame):
     raise NotImplementedError("Complete strict_projection")
 
+
 def nonnegative_amounts(frame):
     raise NotImplementedError("Complete nonnegative_amounts")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-015").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-015")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("event_id", LongType(), False), StructField("amount_text", StringType(), True)])
-        raw = spark.createDataFrame([(1,"100"),(2,"0"),(3," 25 "),(4,None),(5,"bad"),(6,"9223372036854775808"),(7,"-5"),(8,"50")], schema=schema)
-        tolerant = raw.select("event_id", F.expr("try_cast(trim(amount_text) AS BIGINT)").alias("parsed_amount"))
-        assert [row.event_id for row in tolerant.filter(F.col("parsed_amount").isNull()).select("event_id").orderBy("event_id").collect()] == [4, 5, 6]
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("amount_text", StringType(), True),
+            ]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, "100"),
+                (2, "0"),
+                (3, " 25 "),
+                (4, None),
+                (5, "bad"),
+                (6, "9223372036854775808"),
+                (7, "-5"),
+                (8, "50"),
+            ],
+            schema=schema,
+        )
+        tolerant = raw.select(
+            "event_id", F.expr("try_cast(trim(amount_text) AS BIGINT)").alias("parsed_amount")
+        )
+        assert [
+            row.event_id
+            for row in tolerant.filter(F.col("parsed_amount").isNull())
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+        ] == [4, 5, 6]
         print("Parse NULLs include both source missingness and rejected text")
-        signed = raw.filter(F.col("event_id") == F.lit(7)).select(F.expr("try_cast(amount_text AS BIGINT)").alias("amount"))
+        signed = raw.filter(F.col("event_id") == F.lit(7)).select(
+            F.expr("try_cast(amount_text AS BIGINT)").alias("amount")
+        )
         assert signed.first()[0] == -5
         assert spark.conf.get("spark.sql.ansi.enabled") == "true"
         print("A signed integer can be cast-valid while domain-invalid")
         print("spark-015: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

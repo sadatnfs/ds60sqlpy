@@ -4,11 +4,9 @@ import numpy as np
 import tensorflow as tf
 
 
-
-
 def verify():
     # Exercise 1: Check eager arithmetic
-    x = tf.constant([1., 2.], dtype=tf.float32)
+    x = tf.constant([1.0, 2.0], dtype=tf.float32)
     eager = x * x + 1
     np.testing.assert_array_equal(eager.numpy(), [2, 5])
 
@@ -22,12 +20,12 @@ def verify():
     assert first >= 1
 
     # Exercise 3: Reuse an equal signature
-    same_signature = tf.constant([3., 4.], dtype=tf.float32)
+    same_signature = tf.constant([3.0, 4.0], dtype=tf.float32)
     np.testing.assert_array_equal(f(same_signature).numpy(), [10, 17])
     assert f.experimental_get_tracing_count() == first
 
     # Exercise 4: Change dtype deliberately
-    different_dtype = tf.constant([1., 2.], dtype=tf.float64)
+    different_dtype = tf.constant([1.0, 2.0], dtype=tf.float64)
     output = f(different_dtype)
     assert output.dtype == tf.float64
     assert f.experimental_get_tracing_count() > first
@@ -51,18 +49,21 @@ def verify():
     def g(value):
         return value * value + 1
 
-    g(tf.constant([1., 2.], dtype=tf.float32))
+    g(tf.constant([1.0, 2.0], dtype=tf.float32))
     count = g.experimental_get_tracing_count()
-    output = g(tf.constant([1., 2., 3.], dtype=tf.float32))
+    output = g(tf.constant([1.0, 2.0, 3.0], dtype=tf.float32))
     assert tuple(output.shape) == (3,)
     assert g.experimental_get_tracing_count() == count
-    for incompatible in [tf.constant([[1., 2.]], dtype=tf.float32), tf.constant([1., 2.], dtype=tf.float64)]:
+    for incompatible in [
+        tf.constant([[1.0, 2.0]], dtype=tf.float32),
+        tf.constant([1.0, 2.0], dtype=tf.float64),
+    ]:
         try:
             g(incompatible)
         except (TypeError, ValueError):
             pass
         else:
-            raise AssertionError('incompatible signature accepted')
+            raise AssertionError("incompatible signature accepted")
     return {"checks": 6, "status": "passed"}
 
 

@@ -1,49 +1,108 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 import re
 
+
 def collected(frame):
-    return [tuple(r) for r in frame.select("id","normalized").orderBy("id").collect()]
+    return [tuple(r) for r in frame.select("id", "normalized").orderBy("id").collect()]
+
 
 def normalize_label(value):
     raise NotImplementedError("Complete normalize_label")
 
+
 def builtin_labels(raw):
     raise NotImplementedError("Complete builtin_labels")
+
 
 def udf_labels(raw):
     raise NotImplementedError("Complete udf_labels")
 
+
 def plan_evidence(frame):
     raise NotImplementedError("Complete plan_evidence")
+
 
 def label_categories(frame):
     raise NotImplementedError("Complete label_categories")
 
+
 def validate_golden(actual, expected):
     raise NotImplementedError("Complete validate_golden")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-026").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-026")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("id",LongType(),False),StructField("label",StringType(),True)])
-        raw = spark.createDataFrame([(1,None),(2,""),(3,"   "),(4,"  ALPHA  Beta "),(5,"\tA\nB\r "),(6,"CAFÉ"),(7,"Straße"),(8,"\u00a0A\u00a0"),(9,"İI"),(10,"🙂 OK"),(11,"e\u0301"),(12,"NULL")],schema=schema)
-        expected = [(1,None),(2,""),(3,""),(4,"alpha beta"),(5,"a b"),(6,"cafÉ"),(7,"straße"),(8,"\u00a0a\u00a0"),(9,"İi"),(10,"🙂 ok"),(11,"e\u0301"),(12,"null")]
-        row = spark.sql("SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only").first()
+        schema = StructType(
+            [StructField("id", LongType(), False), StructField("label", StringType(), True)]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, None),
+                (2, ""),
+                (3, "   "),
+                (4, "  ALPHA  Beta "),
+                (5, "\tA\nB\r "),
+                (6, "CAFÉ"),
+                (7, "Straße"),
+                (8, "\u00a0A\u00a0"),
+                (9, "İI"),
+                (10, "🙂 OK"),
+                (11, "e\u0301"),
+                (12, "NULL"),
+            ],
+            schema=schema,
+        )
+        expected = [
+            (1, None),
+            (2, ""),
+            (3, ""),
+            (4, "alpha beta"),
+            (5, "a b"),
+            (6, "cafÉ"),
+            (7, "straße"),
+            (8, "\u00a0a\u00a0"),
+            (9, "İi"),
+            (10, "🙂 ok"),
+            (11, "e\u0301"),
+            (12, "null"),
+        ]
+        row = spark.sql(
+            "SELECT translate('CAFÉ','ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz') AS ascii_only"
+        ).first()
         assert row[0] == "cafÉ"
         print("ASCII mapping preserves non-ASCII É")
-        row = spark.sql("SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing").first()
-        assert tuple(row) == (True,False,False)
+        row = spark.sql(
+            "SELECT CAST(NULL AS STRING) IS NULL AS missing, '' IS NULL AS empty_missing, 'null' IS NULL AS text_missing"
+        ).first()
+        assert tuple(row) == (True, False, False)
         print("Missing,empty and literal null text are distinct")
         print("spark-026: worked examples passed; six task implementations remain")
     finally:
@@ -51,6 +110,7 @@ def main():
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

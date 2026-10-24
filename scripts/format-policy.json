@@ -1,0 +1,422 @@
+{
+  "exclude": [
+    {
+      "pattern": "lesson-pages/*",
+      "reason": "Generated HTML readers. Rebuild with scripts/build_lesson_readers.py after formatting maintained source."
+    },
+    {
+      "pattern": "reference-pages/*",
+      "reason": "Generated HTML readers. Rebuild with scripts/build_lesson_readers.py after formatting maintained source."
+    },
+    {
+      "pattern": "src/ds60sqlpy/assets/vendor/*",
+      "reason": "Third-party release bytes and accompanying checksum/license records must remain exact."
+    },
+    {
+      "pattern": "courses/kubernetes/fixtures/provenance/*",
+      "reason": "Signed provenance demonstration. Preserve attestation, signature, public key, negative control and receipt byte identity."
+    },
+    {
+      "pattern": "courses/c/guides/*",
+      "reason": "Published output of courses/c/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/c/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/c/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/csharp/guides/*",
+      "reason": "Published output of courses/csharp/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/csharp/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/csharp/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/go/guides/*",
+      "reason": "Published output of courses/go/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/go/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/go/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/rust/guides/*",
+      "reason": "Published output of courses/rust/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/rust/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/rust/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/swift/guides/*",
+      "reason": "Published output of courses/swift/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/swift/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/swift/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/docker/guides/*",
+      "reason": "Published output of courses/docker/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/docker/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/docker/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/java/guides/*",
+      "reason": "Published output of courses/java/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/java/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/java/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/javascript-typescript/guides/*",
+      "reason": "Published output of courses/javascript-typescript/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/javascript-typescript/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/javascript-typescript/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-pytorch/guides/*",
+      "reason": "Published output of courses/deep-learning-pytorch/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/deep-learning-pytorch/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-pytorch/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/llm-applied/guides/*",
+      "reason": "Published output of courses/llm-applied/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "pattern": "courses/llm-applied/lessons/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/llm-applied/solutions/*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/guides/tf-009*",
+      "reason": "Generated deep-learning-tensorflow bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/guides/tf-0[1-3][0-9]*",
+      "reason": "Generated deep-learning-tensorflow bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/lessons/tf-009*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/lessons/tf-0[1-3][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/solutions/tf-009*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/deep-learning-tensorflow/solutions/tf-0[1-3][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/llm-theory/guides/llm-0[1-4][0-9]*",
+      "reason": "Generated llm-theory bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/llm-theory/lessons/llm-0[1-4][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/llm-theory/solutions/llm-0[1-4][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/nlp/guides/nlp-00[5-9]*",
+      "reason": "Generated nlp bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/nlp/guides/nlp-0[1-2][0-9]*",
+      "reason": "Generated nlp bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/nlp/learners/nlp-00[5-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/nlp/learners/nlp-0[1-2][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/nlp/solutions/nlp-00[5-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/nlp/solutions/nlp-0[1-2][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/nlp/fixtures/nlp-00[5-9]*.json",
+      "reason": "Generated nlp bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/nlp/fixtures/nlp-0[1-2][0-9]*.json",
+      "reason": "Generated nlp bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/kubernetes/guides/k8s-00[4-7]*",
+      "reason": "Generated kubernetes bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/kubernetes/guides/k8s-009*",
+      "reason": "Generated kubernetes bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/kubernetes/guides/k8s-0[1-6][0-9]*",
+      "reason": "Generated kubernetes bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "pattern": "courses/kubernetes/lessons/k8s-00[4-7]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/lessons/k8s-009*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/lessons/k8s-0[1-6][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/solutions/k8s-00[4-7]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/solutions/k8s-009*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/solutions/k8s-0[1-6][0-9]*.md",
+      "reason": "Generated lesson prose stays owned by its authoring pipeline. Standalone executable sources are formatted in the canonical final pass."
+    },
+    {
+      "pattern": "courses/kubernetes/fixtures/k8s-*-cases.json",
+      "reason": "Generated teaching case ledgers from Kubernetes authoring, not separately authored manifests."
+    },
+    {
+      "pattern": "courses/*/authoring/*baseline*.json",
+      "reason": "Historical source identities and runtime evidence retain their original bytes; source formatting must not manufacture new qualification evidence."
+    },
+    {
+      "pattern": "courses/*/authoring/*evidence*.json",
+      "reason": "Historical source identities and runtime evidence retain their original bytes; source formatting must not manufacture new qualification evidence."
+    },
+    {
+      "pattern": "courses/*/authoring/*protected_artifacts.json",
+      "reason": "Historical source identities and runtime evidence retain their original bytes; source formatting must not manufacture new qualification evidence."
+    },
+    {
+      "pattern": "courses/*/authoring/*parity_receipt.json",
+      "reason": "Historical source identities and runtime evidence retain their original bytes; source formatting must not manufacture new qualification evidence."
+    }
+  ],
+  "preserve": [
+    {
+      "path": "START_HERE.html",
+      "reason": "Generated landing guide. Rebuild with scripts/build_course_guide.py."
+    },
+    {
+      "path": "courses/c/lessons.json",
+      "reason": "Published output of courses/c/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/c/track.json",
+      "reason": "Published output of courses/c/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/csharp/lessons.json",
+      "reason": "Published output of courses/csharp/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/csharp/track.json",
+      "reason": "Published output of courses/csharp/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/deep-learning-pytorch/authoring/review_matrix.json",
+      "reason": "Generated review matrix checked byte-for-byte by the portable authoring regeneration tests."
+    },
+    {
+      "path": "courses/deep-learning-pytorch/lessons.json",
+      "reason": "Published output of courses/deep-learning-pytorch/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/deep-learning-pytorch/track.json",
+      "reason": "Published output of courses/deep-learning-pytorch/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/deep-learning-tensorflow/lessons.json",
+      "reason": "Generated deep-learning-tensorflow bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "path": "courses/docker/lessons.json",
+      "reason": "Published output of courses/docker/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/docker/track.json",
+      "reason": "Published output of courses/docker/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/go/lessons.json",
+      "reason": "Published output of courses/go/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/go/track.json",
+      "reason": "Published output of courses/go/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/java/lessons.json",
+      "reason": "Published output of courses/java/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/java/track.json",
+      "reason": "Published output of courses/java/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/javascript-typescript/fixtures/d3-inventory.json",
+      "reason": "Generated browser qualification inventory from authoring/d3_extension.py."
+    },
+    {
+      "path": "courses/javascript-typescript/lessons.json",
+      "reason": "Published output of courses/javascript-typescript/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/javascript-typescript/track.json",
+      "reason": "Published output of courses/javascript-typescript/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/kubernetes/fixtures/k8s-022-marker-reader.json",
+      "reason": "Generated marker-reader manifest from authoring/complete/enhance.py."
+    },
+    {
+      "path": "courses/kubernetes/fixtures/k8s-022-marker-writer.json",
+      "reason": "Generated marker-writer manifest from authoring/complete/enhance.py."
+    },
+    {
+      "path": "courses/kubernetes/fixtures/networking/lesson-inventory.json",
+      "reason": "Generated networking lesson inventory from authoring/networking/build.py."
+    },
+    {
+      "path": "courses/kubernetes/lessons.json",
+      "reason": "Generated kubernetes bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "path": "courses/llm-applied/authoring/review_matrix.json",
+      "reason": "Generated review matrix from the applied LLM authoring pipeline."
+    },
+    {
+      "path": "courses/llm-applied/lessons.json",
+      "reason": "Published output of courses/llm-applied/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/llm-applied/track.json",
+      "reason": "Published output of courses/llm-applied/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/llm-theory/lessons.json",
+      "reason": "Generated llm-theory bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "path": "courses/nlp/lessons.json",
+      "reason": "Generated nlp bundle owned by its documented authoring pipeline; earlier independently authored pilots remain eligible for formatting."
+    },
+    {
+      "path": "courses/rust/lessons.json",
+      "reason": "Published output of courses/rust/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/rust/track.json",
+      "reason": "Published output of courses/rust/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/statistics-ml/source-outline.md",
+      "reason": "Frozen source/prose identity used by evidence checks. Formatting must not alter its recorded byte contract."
+    },
+    {
+      "path": "courses/swift/lessons.json",
+      "reason": "Published output of courses/swift/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "courses/swift/track.json",
+      "reason": "Published output of courses/swift/authoring/. Format the durable Python authoring sources; preserve their literal lesson programs and regenerate deliberately."
+    },
+    {
+      "path": "curriculum/catalog.json",
+      "reason": "Generated curriculum index. Rebuild with scripts/build_catalog.py."
+    },
+    {
+      "path": "curriculum/presentation-parity.json",
+      "reason": "Frozen source/prose identity used by evidence checks. Formatting must not alter its recorded byte contract."
+    },
+    {
+      "path": "docs/expansion/plans/kubernetes.json",
+      "reason": "Plan metadata is maintained by Kubernetes complete/networking authoring; preserve stable generated serialization."
+    },
+    {
+      "path": "docs/expansion/plans/llm-theory.json",
+      "reason": "Plan metadata is maintained by the LLM authoring pipeline; preserve stable generated serialization."
+    },
+    {
+      "path": "docs/lesson-depth-report.md",
+      "reason": "Generated audit report. Rebuild with scripts/audit_lesson_depth.py --write-report."
+    },
+    {
+      "path": "docs/practice-coverage.md",
+      "reason": "Generated audit report. Rebuild with scripts/audit_practice.py --write-report."
+    },
+    {
+      "path": "src/ds60sqlpy/assets/journey_preview.html",
+      "reason": "Generated preview. Format journey_preview.template.html, then run scripts/build_journey_preview.py."
+    }
+  ]
+}

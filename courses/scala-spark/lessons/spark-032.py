@@ -1,77 +1,158 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import tempfile
 import shutil
 import os
 import uuid
 from pyspark.errors import AnalysisException
 
-event_schema = StructType([StructField("id",LongType(),True),StructField("team",StringType(),True),StructField("amount",LongType(),True),StructField("event_time",TimestampType(),True)])
-result_schema = StructType([StructField("window",StructType([StructField("start",TimestampType(),True),StructField("end",TimestampType(),True)]),True),StructField("team",StringType(),True),StructField("records",LongType(),True),StructField("total",LongType(),True)])
-def publish(root,index,lines):
-    target = root/"input"/f"batch-{index}.json"
-    if target.exists(): raise ValueError("Input filename already published")
-    staged = root/"staging"/(uuid.uuid4().hex+".tmp")
+event_schema = StructType(
+    [
+        StructField("id", LongType(), True),
+        StructField("team", StringType(), True),
+        StructField("amount", LongType(), True),
+        StructField("event_time", TimestampType(), True),
+    ]
+)
+result_schema = StructType(
+    [
+        StructField(
+            "window",
+            StructType(
+                [
+                    StructField("start", TimestampType(), True),
+                    StructField("end", TimestampType(), True),
+                ]
+            ),
+            True,
+        ),
+        StructField("team", StringType(), True),
+        StructField("records", LongType(), True),
+        StructField("total", LongType(), True),
+    ]
+)
+
+
+def publish(root, index, lines):
+    target = root / "input" / f"batch-{index}.json"
+    if target.exists():
+        raise ValueError("Input filename already published")
+    staged = root / "staging" / (uuid.uuid4().hex + ".tmp")
     try:
-        with staged.open("x",encoding="utf-8") as handle: handle.write("\n".join(lines)+"\n")
-        os.replace(staged,target)
-    finally: staged.unlink(missing_ok=True)
-def stream(spark,root):
-    return spark.readStream.schema(event_schema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(str(root/"input"))
-def run_phase(spark,root):
-    query = windowed(stream(spark,root)).writeStream.format("parquet").outputMode("append").option("checkpointLocation",str(root/"checkpoint")).trigger(availableNow=True).start(str(root/"output"))
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        os.replace(staged, target)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def stream(spark, root):
+    return (
+        spark.readStream.schema(event_schema)
+        .option("maxFilesPerTrigger", 1)
+        .option("mode", "FAILFAST")
+        .json(str(root / "input"))
+    )
+
+
+def run_phase(spark, root):
+    query = (
+        windowed(stream(spark, root))
+        .writeStream.format("parquet")
+        .outputMode("append")
+        .option("checkpointLocation", str(root / "checkpoint"))
+        .trigger(availableNow=True)
+        .start(str(root / "output"))
+    )
     try:
-        if not query.awaitTermination(30): raise TimeoutError("Finite phase timed out")
-        if query.exception() is not None or query.isActive: raise RuntimeError("Phase did not terminate cleanly")
+        if not query.awaitTermination(30):
+            raise TimeoutError("Finite phase timed out")
+        if query.exception() is not None or query.isActive:
+            raise RuntimeError("Phase did not terminate cleanly")
         return list(query.recentProgress)
-    finally: query.stop()
+    finally:
+        query.stop()
+
 
 def windowed(events):
     raise NotImplementedError("Complete windowed")
 
+
 def watermarks(progress):
     raise NotImplementedError("Complete watermarks")
+
 
 def final_rows(spark, root):
     raise NotImplementedError("Complete final_rows")
 
+
 def dropped_rows(progress):
     raise NotImplementedError("Complete dropped_rows")
+
 
 def event_ledger(phases, output):
     raise NotImplementedError("Complete event_ledger")
 
+
 def reject_unsupported(spark, root, kind):
     raise NotImplementedError("Complete reject_unsupported")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-032").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-032")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-",dir=".")).resolve()
-        (owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+        spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-032-", dir=".")).resolve()
+        (owned_root / "input").mkdir()
+        (owned_root / "staging").mkdir()
         batches = [
-         ['{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}'],
-         ['{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}','{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}'],
-         ['{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}','{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}'],
-         ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}']]
-        first_window = [(1,10),(2,20),(3,5)]
-        assert sum(amount for _,amount in first_window) == 35
+            [
+                '{"id":1,"team":"A","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"id":2,"team":"A","amount":20,"event_time":"2024-01-01T00:04:00Z"}',
+            ],
+            [
+                '{"id":3,"team":"A","amount":5,"event_time":"2024-01-01T00:03:00Z"}',
+                '{"id":4,"team":"A","amount":30,"event_time":"2024-01-01T00:12:00Z"}',
+            ],
+            [
+                '{"id":5,"team":"A","amount":999,"event_time":"2024-01-01T00:02:00Z"}',
+                '{"id":6,"team":"B","amount":7,"event_time":"2024-01-01T00:13:00Z"}',
+            ],
+            ['{"id":7,"team":"__advance__","amount":0,"event_time":"2024-01-01T00:30:00Z"}'],
+        ]
+        first_window = [(1, 10), (2, 20), (3, 5)]
+        assert sum(amount for _, amount in first_window) == 35
         print("Retained out-of-order event contributes to35,not30")
         latest = datetime.fromisoformat("2024-01-01T00:30:00+00:00")
-        assert latest-timedelta(minutes=5) == datetime.fromisoformat("2024-01-01T00:25:00+00:00")
+        assert latest - timedelta(minutes=5) == datetime.fromisoformat("2024-01-01T00:25:00+00:00")
         print("Five-minute delay is event-time arithmetic;actual watermark still needs a receipt")
         print("spark-032: worked examples passed; six task implementations remain")
     finally:
@@ -82,6 +163,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

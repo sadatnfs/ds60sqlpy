@@ -1,38 +1,53 @@
 """Durable Docker curriculum authoring. No engine access or downloads."""
+
 from pathlib import Path
 import json
 import runpy
 
 BASE = Path(__file__).resolve().parents[1]
 ROOT = BASE.parents[1]
-SPECS = runpy.run_path(str(Path(__file__).with_name('chapters.py')))['CHAPTERS']
+SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
 
 
 def write(path, text):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text.rstrip() + '\n', encoding='utf-8', newline='\n')
+    path.write_text(text.rstrip() + "\n", encoding="utf-8", newline="\n")
 
 
 def build():
     rows, records = [], []
     for n, spec in enumerate(SPECS, 1):
-        key = f'docker-{n:03d}'
-        level = 'beginner' if n <= 14 else 'intermediate' if n <= 28 else 'advanced'
-        prereq = [f'docker-{n-1:03d}'] if n > 1 else []
+        key = f"docker-{n:03d}"
+        level = "beginner" if n <= 14 else "intermediate" if n <= 28 else "advanced"
+        prereq = [f"docker-{n - 1:03d}"] if n > 1 else []
         title, mental, anatomy, examples, tasks, refs = spec
-        terms = mental.split('\n\n')[0]
-        rows.append(dict(id=key, title=title, level=level, minutes=100 if n < 29 else 120,
-                         prerequisites=prereq, runtime='reading', concepts=title.split(':')[0].split(', '),
-                         outcome=tasks[-1][0], lab=tasks[2][0], verification=tasks[-1][1]))
-        guide = f'courses/docker/guides/{key}.md'
-        source = f'courses/docker/lessons/{key}.md'
-        solution = f'courses/docker/solutions/{key}_solutions.md'
-        prerequisites = ', '.join(f'`{p}`' for p in prereq) or 'None; start with the terminal and process explanations here.'
-        text = f'''# {key}: {title}
+        terms = mental.split("\n\n")[0]
+        rows.append(
+            dict(
+                id=key,
+                title=title,
+                level=level,
+                minutes=100 if n < 29 else 120,
+                prerequisites=prereq,
+                runtime="reading",
+                concepts=title.split(":")[0].split(", "),
+                outcome=tasks[-1][0],
+                lab=tasks[2][0],
+                verification=tasks[-1][1],
+            )
+        )
+        guide = f"courses/docker/guides/{key}.md"
+        source = f"courses/docker/lessons/{key}.md"
+        solution = f"courses/docker/solutions/{key}_solutions.md"
+        prerequisites = (
+            ", ".join(f"`{p}`" for p in prereq)
+            or "None; start with the terminal and process explanations here."
+        )
+        text = f"""# {key}: {title}
 
 ## Level and prerequisites
 
-{level.capitalize()}; about {rows[-1]['minutes']} minutes, with additional time for the optional host experiment. Direct prerequisites: {prerequisites}
+{level.capitalize()}; about {rows[-1]["minutes"]} minutes, with additional time for the optional host experiment. Direct prerequisites: {prerequisites}
 
 ## Learning objectives
 
@@ -55,17 +70,18 @@ Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The support
 For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example.
 
 ## Worked example / walkthrough
-'''
+"""
         for i, (heading, body, lang, code, expected) in enumerate(examples, 1):
-            text += f'\n### Worked example {i}: {heading}\n\n{body}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n'
-        text += '\n## Six progressive exercises\n'
-        worksheet = f'# {key}: learner worksheet\n\nSave predictions before optional host execution. Keep exact project name, engine identity and timestamps with runtime observations. No exercise runs automatically.\n'
-        answer = f'# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n'
+            text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n"
+        text += "\n## Six progressive exercises\n"
+        worksheet = f"# {key}: learner worksheet\n\nSave predictions before optional host execution. Keep exact project name, engine identity and timestamps with runtime observations. No exercise runs automatically.\n"
+        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These are explanations of the supplied teaching fixtures, not fabricated engine results.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n"
         for i, (prompt, expected, reason) in enumerate(tasks, 1):
-            text += f'\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.\n'
-            worksheet += f'\n## Exercise {i}: {prompt}\n\nMy prediction:\n\nMy evidence:\n\nMy explanation and remaining limitation:\n'
-            answer += f'\n## Exercise {i}: {prompt}\n\n{reason}\n\n**Expected:** {expected}\n'
-        text += f'''
+            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Hint:** Identify the object and the phase of its lifetime before changing it. Use the relevant worked example, then vary only the condition named in this task.\n"
+            worksheet += f"\n## Exercise {i}: {prompt}\n\nMy prediction:\n\nMy evidence:\n\nMy explanation and remaining limitation:\n"
+            answer += f"\n## Exercise {i}: {prompt}\n\n{reason}\n\n**Expected:** {expected}\n"
+        text += (
+            f"""
 ## Common mistakes and diagnosis
 
 Start with the smallest observation that separates two plausible causes. An image inspection answers questions about the packaged filesystem and configuration; container inspection adds runtime mounts, network attachment and exit status. An application request adds another layer of evidence. A healthy container can still serve the wrong application result. Preserve the original failure and the exact changed field before retrying.
@@ -80,7 +96,9 @@ Before proceeding, retain six evidence records. For the optional host project, u
 
 ## Primary references
 
-''' + '\n'.join(f'- [Official reference {i}]({url})' for i, url in enumerate(refs, 1)) + f'''
+"""
+            + "\n".join(f"- [Official reference {i}]({url})" for i, url in enumerate(refs, 1))
+            + f"""
 
 ## Ask an AI tutor about this lesson
 
@@ -93,16 +111,43 @@ Distinguish image metadata, container state and actual application evidence.
 Do not execute host commands, change Docker contexts or delete volumes on my behalf.
 Finish with a fresh transfer case and ask which evidence would falsify my explanation.
 ```
-'''
-        answer += '\n## Check your transfer\n\nA useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.\n'
+"""
+        )
+        answer += "\n## Check your transfer\n\nA useful solution identifies the exact object, the phase when a setting takes effect, the expected normal result and an observation that disproves it. Repeating a command until it succeeds hides the mechanism. Change one variable, keep a failure record, and test the intended behavior again. Source examples here are small enough to inspect; a production system additionally needs ownership, lifecycle, data recovery and operational review. The host exercises are optional and must stay within the learner-created project.\n"
         write(ROOT / guide, text)
         write(ROOT / source, worksheet)
         write(ROOT / solution, answer)
-        records.append(dict(id=key, status='authored', language='markdown', runtime_profile='reading', guide_path=guide, source_path=source, solution_paths=[solution], verification_id=None))
-    write(BASE / 'track.json', json.dumps(dict(schema_version=1, id='docker', title='Docker: images, applications and operating containers', summary=f'{len(rows)} detailed lessons from the first container to reproducible builds, Compose, networking, durable data, security, delivery and recovery. Study offline and use clearly scoped optional host labs.', lessons=rows), indent=2))
-    write(BASE / 'lessons.json', json.dumps(dict(schema_version=1, track_id='docker', lessons=records), indent=2))
-    print(f'Authored {len(rows)} Docker lessons with explicit host-only execution boundaries.')
+        records.append(
+            dict(
+                id=key,
+                status="authored",
+                language="markdown",
+                runtime_profile="reading",
+                guide_path=guide,
+                source_path=source,
+                solution_paths=[solution],
+                verification_id=None,
+            )
+        )
+    write(
+        BASE / "track.json",
+        json.dumps(
+            dict(
+                schema_version=1,
+                id="docker",
+                title="Docker: images, applications and operating containers",
+                summary=f"{len(rows)} detailed lessons from the first container to reproducible builds, Compose, networking, durable data, security, delivery and recovery. Study offline and use clearly scoped optional host labs.",
+                lessons=rows,
+            ),
+            indent=2,
+        ),
+    )
+    write(
+        BASE / "lessons.json",
+        json.dumps(dict(schema_version=1, track_id="docker", lessons=records), indent=2),
+    )
+    print(f"Authored {len(rows)} Docker lessons with explicit host-only execution boundaries.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     build()

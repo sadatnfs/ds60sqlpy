@@ -1,11 +1,18 @@
-DOCS=[{"id":"policy","version":1,"published":1,"expires":8,"roles":["ops"]},
-      {"id":"policy","version":2,"published":7,"expires":20,"roles":["ops"]}]
+DOCS = [
+    {"id": "policy", "version": 1, "published": 1, "expires": 8, "roles": ["ops"]},
+    {"id": "policy", "version": 2, "published": 7, "expires": 20, "roles": ["ops"]},
+]
 
-def eligible(documents,role,now):
+
+def eligible(documents, role, now):
     raise NotImplementedError("Enforce trusted role and validity before context construction")
 
+
 def main():
-    print("Version and monitoring fixtures loaded. Separate drift, delayed labels and source authorization.")
+    print(
+        "Version and monitoring fixtures loaded. Separate drift, delayed labels and source authorization."
+    )
+
 
 if __name__ == "__main__":
     main()

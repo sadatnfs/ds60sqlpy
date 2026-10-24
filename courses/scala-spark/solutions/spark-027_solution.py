@@ -1,14 +1,29 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pyspark import StorageLevel
 
 
-
 def transform(source):
-    return source.filter((F.col("amount")>=0)|F.col("amount").isNull()).select("entity_id","segment",(F.col("amount")*2).alias("doubled"))
+    return source.filter((F.col("amount") >= 0) | F.col("amount").isNull()).select(
+        "entity_id", "segment", (F.col("amount") * 2).alias("doubled")
+    )
+
 
 def schema_contract(frame):
-    return [(field.name,field.dataType.simpleString()) for field in frame.schema.fields]
+    return [(field.name, field.dataType.simpleString()) for field in frame.schema.fields]
+
 
 def assert_same_bag(actual, expected):
     if schema_contract(actual) != schema_contract(expected):
@@ -16,16 +31,18 @@ def assert_same_bag(actual, expected):
     if actual.exceptAll(expected).count() or expected.exceptAll(actual).count():
         raise ValueError("bag contract mismatch")
 
+
 def cached_summary(frame):
     frame.persist(StorageLevel.MEMORY_AND_DISK)
     try:
         assert frame.storageLevel != StorageLevel.NONE
         rows = frame.count()
         total = frame.agg(F.sum("doubled")).first()[0]
-        plan = frame.filter(F.col("doubled")>=0)._jdf.queryExecution().executedPlan().toString()
-        return rows,total,plan
+        plan = frame.filter(F.col("doubled") >= 0)._jdf.queryExecution().executedPlan().toString()
+        return rows, total, plan
     finally:
         frame.unpersist(blocking=True)
+
 
 def failing_reuse(frame):
     frame.persist(StorageLevel.MEMORY_AND_DISK)
@@ -35,48 +52,104 @@ def failing_reuse(frame):
     finally:
         frame.unpersist(blocking=True)
 
+
 def difference_counts(actual, expected):
     if schema_contract(actual) != schema_contract(expected):
         raise ValueError("schema contract mismatch")
-    return actual.exceptAll(expected).count(),expected.exceptAll(actual).count()
+    return actual.exceptAll(expected).count(), expected.exceptAll(actual).count()
+
 
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-027").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-027")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("amount",LongType(),True)])
-        source = spark.createDataFrame([(1,"a",10),(1,"a",10),(2,"a",None),(3,"b",0),(4,"b",20),(4,"b",20),(5,None,5),(6,"c",-5)],schema=schema)
-        golden_schema = StructType([StructField("entity_id",LongType(),False),StructField("segment",StringType(),True),StructField("doubled",LongType(),True)])
-        golden = spark.createDataFrame([(1,"a",20),(1,"a",20),(2,"a",None),(3,"b",0),(4,"b",40),(4,"b",40),(5,None,10)],schema=golden_schema)
+        schema = StructType(
+            [
+                StructField("entity_id", LongType(), False),
+                StructField("segment", StringType(), True),
+                StructField("amount", LongType(), True),
+            ]
+        )
+        source = spark.createDataFrame(
+            [
+                (1, "a", 10),
+                (1, "a", 10),
+                (2, "a", None),
+                (3, "b", 0),
+                (4, "b", 20),
+                (4, "b", 20),
+                (5, None, 5),
+                (6, "c", -5),
+            ],
+            schema=schema,
+        )
+        golden_schema = StructType(
+            [
+                StructField("entity_id", LongType(), False),
+                StructField("segment", StringType(), True),
+                StructField("doubled", LongType(), True),
+            ]
+        )
+        golden = spark.createDataFrame(
+            [
+                (1, "a", 20),
+                (1, "a", 20),
+                (2, "a", None),
+                (3, "b", 0),
+                (4, "b", 40),
+                (4, "b", 40),
+                (5, None, 10),
+            ],
+            schema=golden_schema,
+        )
         # Exercise 1: Transform without collapsing occurrences or unknowns
         transformed = transform(source)
-        assert tuple(transformed.agg(F.count(F.lit(1)),F.sum("doubled"),F.count("doubled")).first()) == (7,130,6)
+        assert tuple(
+            transformed.agg(F.count(F.lit(1)), F.sum("doubled"), F.count("doubled")).first()
+        ) == (7, 130, 6)
         # Exercise 2: Define an ordered field/type contract
-        assert schema_contract(transformed) == [("entity_id","bigint"),("segment","string"),("doubled","bigint")]
-        wrong_type = transformed.withColumn("entity_id",F.col("entity_id").cast("string"))
+        assert schema_contract(transformed) == [
+            ("entity_id", "bigint"),
+            ("segment", "string"),
+            ("doubled", "bigint"),
+        ]
+        wrong_type = transformed.withColumn("entity_id", F.col("entity_id").cast("string"))
         assert schema_contract(wrong_type) != schema_contract(golden)
         # Exercise 3: Compare schemas before duplicate-sensitive values
-        assert_same_bag(transformed,golden);assert_same_bag(transformed.repartition(3),golden)
+        assert_same_bag(transformed, golden)
+        assert_same_bag(transformed.repartition(3), golden)
         try:
-            assert_same_bag(wrong_type,golden)
+            assert_same_bag(wrong_type, golden)
         except ValueError as error:
             assert "schema contract" in str(error)
         else:
             raise AssertionError("String identity schema was accepted")
         # Exercise 4: Register, materialize, reuse and release one cached relation
         cached = cached_summary(transformed)
-        assert cached[0:2] == (7,130) and "InMemoryTableScan" in cached[2]
+        assert cached[0:2] == (7, 130) and "InMemoryTableScan" in cached[2]
         assert transformed.storageLevel == StorageLevel.NONE
-        print("registered_then_materialized_rows=",cached[0],"reuse_total=",cached[1],"reuse_plan=",cached[2],"released=true")
+        print(
+            "registered_then_materialized_rows=",
+            cached[0],
+            "reuse_total=",
+            cached[1],
+            "reuse_plan=",
+            cached[2],
+            "released=true",
+        )
         # Exercise 5: Release persistence when a consumer fails
         try:
             failing_reuse(transformed)
@@ -85,12 +158,12 @@ def main():
         else:
             raise AssertionError("Injected failure was lost")
         assert transformed.storageLevel == StorageLevel.NONE
-        assert_same_bag(transform(source),golden)
+        assert_same_bag(transform(source), golden)
         # Exercise 6: Demonstrate why set equality misses duplicate loss
         dropped = transformed.distinct()
-        assert dropped.count() == 5 and difference_counts(dropped,golden) == (0,2)
+        assert dropped.count() == 5 and difference_counts(dropped, golden) == (0, 2)
         try:
-            assert_same_bag(dropped,golden)
+            assert_same_bag(dropped, golden)
         except ValueError as error:
             assert "bag contract" in str(error)
         else:
@@ -101,6 +174,7 @@ def main():
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

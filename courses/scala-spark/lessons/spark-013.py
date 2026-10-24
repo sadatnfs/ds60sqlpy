@@ -5,8 +5,10 @@ from pyspark.sql.types import LongType, StringType, StructField, StructType
 def paid_events(raw):
     raise NotImplementedError("Complete paid event filter")
 
+
 def summarize(paid):
     raise NotImplementedError("Complete team summary")
+
 
 def main():
     spark = (
@@ -21,16 +23,21 @@ def main():
     )
     try:
         assert spark.sparkContext.master == "local[2]"
-        schema = StructType([
-            StructField("event_id", LongType(), False),
-            StructField("team", StringType(), True),
-            StructField("amount_cents", LongType(), True),
-            StructField("status", StringType(), False),
-        ])
+        schema = StructType(
+            [
+                StructField("event_id", LongType(), False),
+                StructField("team", StringType(), True),
+                StructField("amount_cents", LongType(), True),
+                StructField("status", StringType(), False),
+            ]
+        )
         rows = [
-            (1, "A", 100, "paid"), (2, "A", None, "paid"),
-            (3, "B", 0, "paid"), (4, None, 50, "paid"),
-            (5, "B", 150, "void"), (6, "A", 100, "paid"),
+            (1, "A", 100, "paid"),
+            (2, "A", None, "paid"),
+            (3, "B", 0, "paid"),
+            (4, None, 50, "paid"),
+            (5, "B", 150, "void"),
+            (6, "A", 100, "paid"),
             (7, "C", None, "paid"),
         ]
         raw = spark.createDataFrame(rows, schema=schema)

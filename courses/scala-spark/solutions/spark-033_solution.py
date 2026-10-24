@@ -1,109 +1,239 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
 import os
 import uuid
 
-event_schema = StructType([StructField("delivery_id",LongType(),True),StructField("event_id",StringType(),True),StructField("amount",LongType(),True),StructField("event_time",TimestampType(),True)])
-def publish(root,index,lines):
-    target = root/"input"/f"batch-{index}.json"
-    if target.exists(): raise ValueError("New source filename required")
-    staged = root/"staging"/(uuid.uuid4().hex+".tmp")
+event_schema = StructType(
+    [
+        StructField("delivery_id", LongType(), True),
+        StructField("event_id", StringType(), True),
+        StructField("amount", LongType(), True),
+        StructField("event_time", TimestampType(), True),
+    ]
+)
+
+
+def publish(root, index, lines):
+    target = root / "input" / f"batch-{index}.json"
+    if target.exists():
+        raise ValueError("New source filename required")
+    staged = root / "staging" / (uuid.uuid4().hex + ".tmp")
     try:
-        with staged.open("x",encoding="utf-8") as handle: handle.write("\n".join(lines)+"\n")
-        os.replace(staged,target)
-    finally: staged.unlink(missing_ok=True)
-def input_stream(spark,root):
-    return spark.readStream.schema(event_schema).option("maxFilesPerTrigger",1).option("mode","FAILFAST").json(str(root/"input"))
-def run_sink(frame,root,name):
-    query = frame.writeStream.format("parquet").outputMode("append").option("checkpointLocation",str(root/(name+"-checkpoint"))).trigger(availableNow=True).start(str(root/(name+"-output")))
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        os.replace(staged, target)
+    finally:
+        staged.unlink(missing_ok=True)
+
+
+def input_stream(spark, root):
+    return (
+        spark.readStream.schema(event_schema)
+        .option("maxFilesPerTrigger", 1)
+        .option("mode", "FAILFAST")
+        .json(str(root / "input"))
+    )
+
+
+def run_sink(frame, root, name):
+    query = (
+        frame.writeStream.format("parquet")
+        .outputMode("append")
+        .option("checkpointLocation", str(root / (name + "-checkpoint")))
+        .trigger(availableNow=True)
+        .start(str(root / (name + "-output")))
+    )
     try:
-        if not query.awaitTermination(30): raise TimeoutError("Finite sink deadline exceeded")
-        if query.isActive or query.exception() is not None: raise RuntimeError("Query failed")
+        if not query.awaitTermination(30):
+            raise TimeoutError("Finite sink deadline exceeded")
+        if query.isActive or query.exception() is not None:
+            raise RuntimeError("Query failed")
         return list(query.recentProgress)
-    finally: query.stop()
-def output_rows(spark,root):
-    return [tuple(r) for r in spark.read.parquet(str(root/"accepted-output")).select("event_id","delivery_id","amount").orderBy("event_id","delivery_id").collect()]
+    finally:
+        query.stop()
+
+
+def output_rows(spark, root):
+    return [
+        tuple(r)
+        for r in spark.read.parquet(str(root / "accepted-output"))
+        .select("event_id", "delivery_id", "amount")
+        .orderBy("event_id", "delivery_id")
+        .collect()
+    ]
+
 
 def classify(events):
-    return events.withColumn("reason",F.when(F.col("event_id").isNull(),"missing_event_id").otherwise("accepted"))
+    return events.withColumn(
+        "reason", F.when(F.col("event_id").isNull(), "missing_event_id").otherwise("accepted")
+    )
+
 
 def deduplicated(classified):
-    return classified.filter(F.col("reason")=="accepted").drop("reason").withWatermark("event_time","5 minutes").dropDuplicatesWithinWatermark(["event_id"])
+    return (
+        classified.filter(F.col("reason") == "accepted")
+        .drop("reason")
+        .withWatermark("event_time", "5 minutes")
+        .dropDuplicatesWithinWatermark(["event_id"])
+    )
+
 
 def run_branches(spark, root):
-    classified = classify(input_stream(spark,root))
-    accepted = run_sink(deduplicated(classified),root,"accepted")
-    rejected = run_sink(classified.filter(F.col("reason")=="missing_event_id"),root,"quarantine")
-    return accepted,rejected
+    classified = classify(input_stream(spark, root))
+    accepted = run_sink(deduplicated(classified), root, "accepted")
+    rejected = run_sink(
+        classified.filter(F.col("reason") == "missing_event_id"), root, "quarantine"
+    )
+    return accepted, rejected
+
 
 def business_rows(spark, root):
-    return [row for row in output_rows(spark,root) if row[0] != "__advance__"]
+    return [row for row in output_rows(spark, root) if row[0] != "__advance__"]
+
 
 def removed_state(progress):
-    operators = [operator for p in progress for operator in p.get("stateOperators",[])]
+    operators = [operator for p in progress for operator in p.get("stateOperators", [])]
     if not operators or any("numRowsRemoved" not in operator for operator in operators):
         raise ValueError("Missing deduplication state evidence")
     return sum(operator["numRowsRemoved"] for operator in operators)
 
+
 def delivery_ledger(spark, root):
-    source = spark.read.schema(event_schema).json(str(root/"input"))
-    if source.select("delivery_id").distinct().count() != 6: raise ValueError("Delivery identity mismatch")
-    return source.count(),source.filter(F.col("event_id").isNotNull()).count(),spark.read.parquet(str(root/"quarantine-output")).count(),spark.read.parquet(str(root/"accepted-output")).count(),sum(r[2] for r in business_rows(spark,root))
+    source = spark.read.schema(event_schema).json(str(root / "input"))
+    if source.select("delivery_id").distinct().count() != 6:
+        raise ValueError("Delivery identity mismatch")
+    return (
+        source.count(),
+        source.filter(F.col("event_id").isNotNull()).count(),
+        spark.read.parquet(str(root / "quarantine-output")).count(),
+        spark.read.parquet(str(root / "accepted-output")).count(),
+        sum(r[2] for r in business_rows(spark, root)),
+    )
+
 
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-033").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-033")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-",dir=".")).resolve()
-        (owned_root/"input").mkdir();(owned_root/"staging").mkdir()
+        spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-033-", dir=".")).resolve()
+        (owned_root / "input").mkdir()
+        (owned_root / "staging").mkdir()
         batches = [
-         ['{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}','{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}'],
-         ['{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}','{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}'],
-         ['{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}']]
+            [
+                '{"delivery_id":1,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"delivery_id":2,"event_id":"e2","amount":10,"event_time":"2024-01-01T00:02:00Z"}',
+                '{"delivery_id":3,"event_id":null,"amount":99,"event_time":"2024-01-01T00:02:00Z"}',
+            ],
+            [
+                '{"delivery_id":4,"event_id":"e1","amount":10,"event_time":"2024-01-01T00:01:00Z"}',
+                '{"delivery_id":5,"event_id":"e3","amount":10,"event_time":"2024-01-01T00:03:00Z"}',
+            ],
+            [
+                '{"delivery_id":6,"event_id":"__advance__","amount":0,"event_time":"2024-01-01T00:20:00Z"}'
+            ],
+        ]
         # Exercise 1: Classify missing event identity before deduplication
-        publish(owned_root,0,batches[0])
-        classified = classify(input_stream(spark,owned_root))
+        publish(owned_root, 0, batches[0])
+        classified = classify(input_stream(spark, owned_root))
         assert classified.isStreaming and "reason" in classified.columns
         # Exercise 2: Define a bounded event-ID stateful operator
         accepted_stream = deduplicated(classified)
-        assert accepted_stream.isStreaming and accepted_stream.columns == ["delivery_id","event_id","amount","event_time"]
+        assert accepted_stream.isStreaming and accepted_stream.columns == [
+            "delivery_id",
+            "event_id",
+            "amount",
+            "event_time",
+        ]
         # Exercise 3: Execute accepted and quarantine branches with separate checkpoints
-        first = run_branches(spark,owned_root)
-        print("accepted_progress_input=",[(p["batchId"],p["numInputRows"],[source["numInputRows"] for source in p["sources"]]) for p in first[0]],"quarantine_progress_input=",[(p["batchId"],p["numInputRows"],[source["numInputRows"] for source in p["sources"]]) for p in first[1]])
-        first_raw = spark.read.schema(event_schema).json(str(owned_root/"input")).count()
-        assert first_raw == 3 and sum(p["numInputRows"] for p in first[0]) == 2 and sum(p["numInputRows"] for p in first[1]) == 1
-        assert output_rows(spark,owned_root) == [("e1",1,10),("e2",2,10)]
-        quarantine = spark.read.parquet(str(owned_root/"quarantine-output")).select("delivery_id","event_id","reason").collect()
-        assert [tuple(r) for r in quarantine] == [(3,None,"missing_event_id")]
+        first = run_branches(spark, owned_root)
+        print(
+            "accepted_progress_input=",
+            [
+                (
+                    p["batchId"],
+                    p["numInputRows"],
+                    [source["numInputRows"] for source in p["sources"]],
+                )
+                for p in first[0]
+            ],
+            "quarantine_progress_input=",
+            [
+                (
+                    p["batchId"],
+                    p["numInputRows"],
+                    [source["numInputRows"] for source in p["sources"]],
+                )
+                for p in first[1]
+            ],
+        )
+        first_raw = spark.read.schema(event_schema).json(str(owned_root / "input")).count()
+        assert (
+            first_raw == 3
+            and sum(p["numInputRows"] for p in first[0]) == 2
+            and sum(p["numInputRows"] for p in first[1]) == 1
+        )
+        assert output_rows(spark, owned_root) == [("e1", 1, 10), ("e2", 2, 10)]
+        quarantine = (
+            spark.read.parquet(str(owned_root / "quarantine-output"))
+            .select("delivery_id", "event_id", "reason")
+            .collect()
+        )
+        assert [tuple(r) for r in quarantine] == [(3, None, "missing_event_id")]
         # Exercise 4: Suppress a replay while retaining distinct equal-valued events
-        publish(owned_root,1,batches[1])
-        second = run_branches(spark,owned_root)
-        assert sum(p["numInputRows"] for p in second[0]) == 2 and sum(p["numInputRows"] for p in second[1]) == 0
-        assert spark.read.schema(event_schema).json(str(owned_root/"input")).count() == first_raw+2
-        assert business_rows(spark,owned_root) == [("e1",1,10),("e2",2,10),("e3",5,10)]
-        assert sum(r[2] for r in business_rows(spark,owned_root)) == 30
+        publish(owned_root, 1, batches[1])
+        second = run_branches(spark, owned_root)
+        assert (
+            sum(p["numInputRows"] for p in second[0]) == 2
+            and sum(p["numInputRows"] for p in second[1]) == 0
+        )
+        assert (
+            spark.read.schema(event_schema).json(str(owned_root / "input")).count() == first_raw + 2
+        )
+        assert business_rows(spark, owned_root) == [("e1", 1, 10), ("e2", 2, 10), ("e3", 5, 10)]
+        assert sum(r[2] for r in business_rows(spark, owned_root)) == 30
         # Exercise 5: Observe state removal and state the retention limit
-        publish(owned_root,2,batches[2])
-        third = run_branches(spark,owned_root)
+        publish(owned_root, 2, batches[2])
+        third = run_branches(spark, owned_root)
         assert removed_state(third[0]) >= 3
-        assert business_rows(spark,owned_root) == [("e1",1,10),("e2",2,10),("e3",5,10)]
-        assert sum(r[0] == "__advance__" for r in output_rows(spark,owned_root)) == 1
-        print("removed_dedup_state=",removed_state(third[0]),"state_progress=",[operator for p in third[0] for operator in p.get("stateOperators",[])])
+        assert business_rows(spark, owned_root) == [("e1", 1, 10), ("e2", 2, 10), ("e3", 5, 10)]
+        assert sum(r[0] == "__advance__" for r in output_rows(spark, owned_root)) == 1
+        print(
+            "removed_dedup_state=",
+            removed_state(third[0]),
+            "state_progress=",
+            [operator for p in third[0] for operator in p.get("stateOperators", [])],
+        )
         # Exercise 6: Reconcile deliveries, quarantine, replay suppression and business totals
-        assert delivery_ledger(spark,owned_root) == (6,5,1,4,30)
+        assert delivery_ledger(spark, owned_root) == (6, 5, 1, 4, 30)
         assert not spark.streams.active
         print("spark-033: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
@@ -114,6 +244,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

@@ -1,10 +1,13 @@
-TRAIN=[["we","like","tea"],["we","like","coffee"],["they","like","tea"]]
+TRAIN = [["we", "like", "tea"], ["we", "like", "coffee"], ["they", "like", "tea"]]
 
-def fit_bigram(documents,alpha=1.):
+
+def fit_bigram(documents, alpha=1.0):
     raise NotImplementedError("Count sentence-bounded transitions and freeze the vocabulary")
+
 
 def main():
     print("Three authored sentences loaded. Derive the four likelihood factors before coding.")
+
 
 if __name__ == "__main__":
     main()

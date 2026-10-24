@@ -1,4 +1,5 @@
 """Original corpus-contract examples. No network or external data is used."""
+
 from collections import Counter
 from copy import deepcopy
 import math
@@ -51,8 +52,10 @@ def verify():
     assert DOCUMENTS == before
 
     # Exercise 2: invalid text and missing provenance are errors.
-    for broken in ({**DOCUMENTS[0], "text": "  "},
-                   {key: value for key, value in DOCUMENTS[0].items() if key != "family"}):
+    for broken in (
+        {**DOCUMENTS[0], "text": "  "},
+        {key: value for key, value in DOCUMENTS[0].items() if key != "family"},
+    ):
         try:
             validate_corpus([broken])
         except ValueError:
@@ -62,21 +65,27 @@ def verify():
 
     # Exercise 3: text length and number of prediction units differ.
     assert corpus_counts(DOCUMENTS) == {
-        "documents": 4, "classes": {"account": 2, "billing": 2}, "whitespace_pieces": 9
+        "documents": 4,
+        "classes": {"account": 2, "billing": 2},
+        "whitespace_pieces": 9,
     }
     changed = deepcopy(DOCUMENTS)
     changed[0]["text"] += " " + changed[0]["text"]
     assert corpus_counts(changed) == {
-        "documents": 4, "classes": {"account": 2, "billing": 2}, "whitespace_pieces": 11
+        "documents": 4,
+        "classes": {"account": 2, "billing": 2},
+        "whitespace_pieces": 11,
     }
 
     # Exercise 4: the weighted score answers a different question.
     correct = [1, 0]
     assert sum(correct) / len(correct) == 0.5
-    scores = [sum(c*w for c, w in zip(correct, weights)) / sum(weights)
-              for weights in ([1000, 10], [10, 1000])]
-    assert math.isclose(scores[0], 1000/1010, abs_tol=1e-12)
-    assert math.isclose(scores[1], 10/1010, abs_tol=1e-12)
+    scores = [
+        sum(c * w for c, w in zip(correct, weights)) / sum(weights)
+        for weights in ([1000, 10], [10, 1000])
+    ]
+    assert math.isclose(scores[0], 1000 / 1010, abs_tol=1e-12)
+    assert math.isclose(scores[1], 10 / 1010, abs_tol=1e-12)
 
     # Exercise 5: related text stays together, and no row disappears.
     assert family_overlap(DOCUMENTS[:2], DOCUMENTS[2:]) == {"account-reset"}

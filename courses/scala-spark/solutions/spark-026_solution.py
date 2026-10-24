@@ -1,86 +1,176 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 import re
 
+
 def collected(frame):
-    return [tuple(r) for r in frame.select("id","normalized").orderBy("id").collect()]
+    return [tuple(r) for r in frame.select("id", "normalized").orderBy("id").collect()]
+
 
 def normalize_label(value):
     if value is None:
         return None
-    collapsed = re.sub(r"[ \t\r\n]+"," ",value).strip(" ")
-    return collapsed.translate(str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"))
+    collapsed = re.sub(r"[ \t\r\n]+", " ", value).strip(" ")
+    return collapsed.translate(
+        str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+    )
+
 
 def builtin_labels(raw):
-    return raw.select("id",F.trim(F.regexp_replace(F.translate("label","ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),r"[ \t\r\n]+"," ")).alias("normalized"))
+    return raw.select(
+        "id",
+        F.trim(
+            F.regexp_replace(
+                F.translate("label", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),
+                r"[ \t\r\n]+",
+                " ",
+            )
+        ).alias("normalized"),
+    )
+
 
 def udf_labels(raw):
-    normalize = F.udf(normalize_label,StringType(),useArrow=False)
-    return raw.select("id",normalize("label").alias("normalized"))
+    normalize = F.udf(normalize_label, StringType(), useArrow=False)
+    return raw.select("id", normalize("label").alias("normalized"))
+
 
 def plan_evidence(frame):
     return frame._jdf.queryExecution().executedPlan().toString()
 
+
 def label_categories(frame):
-    return sorted(tuple(r) for r in frame.withColumn("category",F.when(F.col("normalized").isNull(),"missing").when(F.col("normalized")=="","empty").otherwise("text")).groupBy("category").count().collect())
+    return sorted(
+        tuple(r)
+        for r in frame.withColumn(
+            "category",
+            F.when(F.col("normalized").isNull(), "missing")
+            .when(F.col("normalized") == "", "empty")
+            .otherwise("text"),
+        )
+        .groupBy("category")
+        .count()
+        .collect()
+    )
+
 
 def validate_golden(actual, expected):
     if actual != expected:
         raise ValueError("Golden label contract mismatch")
 
+
 def main():
 
-    spark = (SparkSession.builder.appName("ds60-spark-026").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-026")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([StructField("id",LongType(),False),StructField("label",StringType(),True)])
-        raw = spark.createDataFrame([(1,None),(2,""),(3,"   "),(4,"  ALPHA  Beta "),(5,"\tA\nB\r "),(6,"CAFÉ"),(7,"Straße"),(8,"\u00a0A\u00a0"),(9,"İI"),(10,"🙂 OK"),(11,"e\u0301"),(12,"NULL")],schema=schema)
-        expected = [(1,None),(2,""),(3,""),(4,"alpha beta"),(5,"a b"),(6,"cafÉ"),(7,"straße"),(8,"\u00a0a\u00a0"),(9,"İi"),(10,"🙂 ok"),(11,"e\u0301"),(12,"null")]
+        schema = StructType(
+            [StructField("id", LongType(), False), StructField("label", StringType(), True)]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, None),
+                (2, ""),
+                (3, "   "),
+                (4, "  ALPHA  Beta "),
+                (5, "\tA\nB\r "),
+                (6, "CAFÉ"),
+                (7, "Straße"),
+                (8, "\u00a0A\u00a0"),
+                (9, "İI"),
+                (10, "🙂 OK"),
+                (11, "e\u0301"),
+                (12, "NULL"),
+            ],
+            schema=schema,
+        )
+        expected = [
+            (1, None),
+            (2, ""),
+            (3, ""),
+            (4, "alpha beta"),
+            (5, "a b"),
+            (6, "cafÉ"),
+            (7, "straße"),
+            (8, "\u00a0a\u00a0"),
+            (9, "İi"),
+            (10, "🙂 ok"),
+            (11, "e\u0301"),
+            (12, "null"),
+        ]
         # Exercise 1: Implement the pure scalar rule precisely
-        scalar = [(r[0],normalize_label(r[1])) for r in raw.orderBy("id").collect()]
+        scalar = [(r[0], normalize_label(r[1])) for r in raw.orderBy("id").collect()]
         assert scalar == expected
         # Exercise 2: Express the same rule with native Spark functions
         builtin = builtin_labels(raw)
-        assert collected(builtin) == expected and isinstance(builtin.schema["normalized"].dataType,StringType)
+        assert collected(builtin) == expected and isinstance(
+            builtin.schema["normalized"].dataType, StringType
+        )
         # Exercise 3: Wrap the scalar rule with a declared UDF return type
         custom = udf_labels(raw)
-        assert collected(custom) == expected and isinstance(custom.schema["normalized"].dataType,StringType)
+        assert collected(custom) == expected and isinstance(
+            custom.schema["normalized"].dataType, StringType
+        )
         # Exercise 4: Locate the execution boundary in physical evidence
-        builtin_plan = plan_evidence(builtin);custom_plan = plan_evidence(custom)
+        builtin_plan = plan_evidence(builtin)
+        custom_plan = plan_evidence(custom)
         assert "BatchEvalPython" not in builtin_plan and "ArrowEvalPython" not in builtin_plan
         assert "BatchEvalPython" in custom_plan and "ArrowEvalPython" not in custom_plan
-        print("builtin_plan=",builtin_plan,"python_udf_plan=",custom_plan)
+        print("builtin_plan=", builtin_plan, "python_udf_plan=", custom_plan)
         # Exercise 5: Preserve missing, empty and ordinary-text populations
-        for frame in [builtin,custom]:
-            assert label_categories(frame) == [("empty",2),("missing",1),("text",9)]
-            assert [r[0] for r in frame.filter(F.col("normalized")=="null").select("id").collect()] == [12]
-            assert [r[0] for r in frame.filter(F.col("normalized").isNull()).select("id").collect()] == [1]
+        for frame in [builtin, custom]:
+            assert label_categories(frame) == [("empty", 2), ("missing", 1), ("text", 9)]
+            assert [
+                r[0] for r in frame.filter(F.col("normalized") == "null").select("id").collect()
+            ] == [12]
+            assert [
+                r[0] for r in frame.filter(F.col("normalized").isNull()).select("id").collect()
+            ] == [1]
         # Exercise 6: Reject a plausible but semantically broader implementation
-        validate_golden(collected(builtin),expected)
-        wrong = [(r[0],None if r[1] is None else r[1].strip().lower()) for r in raw.orderBy("id").collect()]
-        mismatches = {a[0] for a,b in zip(wrong,expected,strict=True) if a != b}
-        assert {4,5,6,8,9} <= mismatches
+        validate_golden(collected(builtin), expected)
+        wrong = [
+            (r[0], None if r[1] is None else r[1].strip().lower())
+            for r in raw.orderBy("id").collect()
+        ]
+        mismatches = {a[0] for a, b in zip(wrong, expected, strict=True) if a != b}
+        assert {4, 5, 6, 8, 9} <= mismatches
         try:
-            validate_golden(wrong,expected)
+            validate_golden(wrong, expected)
         except ValueError:
             pass
         else:
             raise AssertionError("Wrong normalization policy accepted")
-        print("wrong_rule_mismatch_ids=",sorted(mismatches))
+        print("wrong_rule_mismatch_ids=", sorted(mismatches))
         print("spark-026: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         try:
             pass
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

@@ -17,6 +17,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+from scripts.source_format_parity import source_digest_before_formatting
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/llm-applied"
 ENTRIES = json.loads((BASE / "lessons.json").read_text())["lessons"]
@@ -253,7 +255,8 @@ def test_optional_scripts_are_local_only_except_explicit_acquisition_entrypoint(
             assert isinstance(local_only, ast.Constant)
             assert local_only.value is True
         assert "snapshot_download" not in source
-        assert "os.environ['HF_HUB_OFFLINE'] = '1'" in source
+        # Compare normalized syntax, so quote styling cannot hide the offline guard.
+        assert "os.environ['HF_HUB_OFFLINE'] = '1'" in ast.unparse(tree)
     acquisition = (folder / "prepare_assets.py").read_text()
     assert (
         "--acknowledge-network" in acquisition and "if not args.acknowledge_network" in acquisition
@@ -263,7 +266,8 @@ def test_optional_scripts_are_local_only_except_explicit_acquisition_entrypoint(
 
 
 def test_optional_training_checks_masks_before_train_and_records_only_actual_execution() -> None:
-    source = (BASE / "fixtures/pretrained/train_local.py").read_text()
+    # Retain order checks while accepting equivalent formatter whitespace/quotes.
+    source = ast.unparse(ast.parse((BASE / "fixtures/pretrained/train_local.py").read_text()))
     assert source.index("completion_mask") < source.index("trainer.train()")
     assert source.index("batch['labels']") < source.index("trainer.train()")
     assert "max_steps=10" in source and "max_length=128" in source
@@ -316,7 +320,9 @@ def test_applied_review_is_complete_and_preserves_the_qualified_program_baseline
     changed_worked = set()
     for row in baseline:
         for reference in row["references"]:
-            current = hashlib.sha256((ROOT / reference["path"]).read_bytes()).hexdigest()
+            current = source_digest_before_formatting(
+                ROOT, reference["path"], (ROOT / reference["path"]).read_bytes()
+            )
             if current != reference["sha256"]:
                 changed_references.add(row["id"])
         if "worked_program_sha256" in row:
@@ -340,7 +346,12 @@ def test_changed_applied_programs_have_matching_successful_worker_receipts() -> 
             # Later textbook prose may change while the executed program stays exact.
             assert re.fullmatch(r"[0-9a-f]{64}", record["guide_sha256"])
             assert (ROOT / record["guide_path"]).is_file()
-        assert hashlib.sha256(source).hexdigest() == record["source_sha256"]
+        digest = (
+            source_digest_before_formatting(ROOT, record["source_path"], source)
+            if record["kind"] == "reference"
+            else hashlib.sha256(source).hexdigest()
+        )
+        assert digest == record["source_sha256"]
 
 
 def test_group_mean_remains_finite_for_large_valid_values() -> None:
@@ -400,6 +411,8 @@ def test_textbook_expansion_preserves_all_frozen_files_and_fences() -> None:
                 ).encode()
                 assert hashlib.sha256(metadata).hexdigest() == binding["protected_metadata_sha256"]
         else:
+            if record["path"].endswith(".py"):
+                digest = source_digest_before_formatting(ROOT, record["path"], source)
             assert digest == record["sha256"], record["path"]
     total_fences = 0
     for record in proof["guide_fences"]:

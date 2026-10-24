@@ -2,7 +2,7 @@ PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
 MODULE_PROFILES ?= python-core,cpp20
 
-.PHONY: help setup generate journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom classroom-build classroom-start classroom-stop
+.PHONY: help setup generate format format-check lint journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom classroom-build classroom-start classroom-stop
 help:
 	@echo "classroom: resume saved containers; build only missing images (or run ./classroom)"
 	@echo "Windows: run in the WSL 2 Ubuntu shell with Docker integration enabled"
@@ -11,6 +11,8 @@ help:
 	@echo "windows-starter: package the portable Docker source ZIP (legacy target name)"
 	@echo "setup: install the Linux contributor environment; learners only need Docker"
 	@echo "generate: refresh catalog/readers/reports; check: validate source and tests"
+	@echo "format: style maintained sources with Docker; format-check: check without changing sources"
+	@echo "lint: read-only static source checks using the same Docker toolchain"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
 	@echo "journey-preview: rebuild the historical design preview"
 	@echo "modules-build/start/stop: contributor host-folder labs (MODULE_PROFILES=python-core,cpp20)"
@@ -28,10 +30,19 @@ generate:
 	$(PYTHON) scripts/build_course_guide.py
 	$(PYTHON) scripts/build_lesson_readers.py
 
+format:
+	./scripts/format-repo
+
+format-check:
+	./scripts/format-repo --check
+
+lint:
+	./scripts/lint-repo
+
 journey-preview:
 	$(PYTHON) scripts/build_journey_preview.py
 
-check:
+check: format-check lint
 	$(PYTHON) scripts/check_public_release.py
 	$(PYTHON) scripts/normalize_lesson_prose.py
 	$(PYTHON) scripts/check_content_rendering.py

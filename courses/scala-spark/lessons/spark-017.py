@@ -1,51 +1,105 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
-payload_schema = StructType([StructField("parent_id",LongType(),True),StructField("items",ArrayType(StructType([StructField("sku",StringType(),True),StructField("qty",LongType(),True)]),True),True),StructField("_corrupt_record",StringType(),True)])
+payload_schema = StructType(
+    [
+        StructField("parent_id", LongType(), True),
+        StructField(
+            "items",
+            ArrayType(
+                StructType(
+                    [StructField("sku", StringType(), True), StructField("qty", LongType(), True)]
+                ),
+                True,
+            ),
+            True,
+        ),
+        StructField("_corrupt_record", StringType(), True),
+    ]
+)
+
 
 def parse_records(raw):
     raise NotImplementedError("Complete parse_records")
 
+
 def parent_ledger(parsed):
     raise NotImplementedError("Complete parent_ledger")
+
 
 def children(parents):
     raise NotImplementedError("Complete children")
 
+
 def outer_children(parents):
     raise NotImplementedError("Complete outer_children")
+
 
 def summarize_children(outer):
     raise NotImplementedError("Complete summarize_children")
 
+
 def array_relationships(spark):
     raise NotImplementedError("Complete array_relationships")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-017").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-017")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        input_schema = StructType([StructField("source_id",LongType(),False),StructField("raw",StringType(),True)])
-        raw = spark.createDataFrame([(1,'{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}'),(2,'{"parent_id":20,"items":[]}'),(3,'{"parent_id":30,"items":null}'),(4,'{"parent_id":40,"items":[{"sku":"b","qty":null}]}'),(5,'{bad'),(6,'{"items":[]}'),(7,None)],schema=input_schema)
+        input_schema = StructType(
+            [StructField("source_id", LongType(), False), StructField("raw", StringType(), True)]
+        )
+        raw = spark.createDataFrame(
+            [
+                (1, '{"parent_id":10,"items":[{"sku":"a","qty":2},{"sku":"a","qty":3}]}'),
+                (2, '{"parent_id":20,"items":[]}'),
+                (3, '{"parent_id":30,"items":null}'),
+                (4, '{"parent_id":40,"items":[{"sku":"b","qty":null}]}'),
+                (5, "{bad"),
+                (6, '{"items":[]}'),
+                (7, None),
+            ],
+            schema=input_schema,
+        )
         sample = spark.sql("SELECT array(10,20) AS values")
         assert sample.select(F.posexplode("values")).count() == 2
         print("Two array occurrences become two child rows")
-        sample = spark.sql("SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items")
+        sample = spark.sql(
+            "SELECT CAST(array() AS ARRAY<BIGINT>) AS empty_items, CAST(NULL AS ARRAY<BIGINT>) AS unknown_items"
+        )
         assert sample.select(F.explode("empty_items")).count() == 0
         assert sample.select(F.explode_outer("unknown_items")).count() == 1
         print("An outer row can be a placeholder, not an item")
         print("spark-017: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()

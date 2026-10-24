@@ -1,5 +1,17 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 from datetime import datetime
 import tempfile
@@ -8,65 +20,116 @@ import os
 import uuid
 from pyspark.errors import AnalysisException
 
-impression_schema = StructType([StructField("impression_id",StringType(),True),StructField("key",StringType(),True),StructField("impression_time",TimestampType(),True)])
-click_schema = StructType([StructField("click_id",StringType(),True),StructField("key",StringType(),True),StructField("click_time",TimestampType(),True)])
-result_schema = StructType([StructField("impression_id",StringType(),True),StructField("click_id",StringType(),True),StructField("impression_time",TimestampType(),True),StructField("click_time",TimestampType(),True)])
-def publish(root,side,index,lines):
-    if side not in {"impressions","clicks"}: raise ValueError("Unknown input side")
-    target = root/side/f"batch-{index}.json"
-    if target.exists(): raise ValueError("New input filename required")
-    staged = root/"staging"/(uuid.uuid4().hex+".tmp")
+impression_schema = StructType(
+    [
+        StructField("impression_id", StringType(), True),
+        StructField("key", StringType(), True),
+        StructField("impression_time", TimestampType(), True),
+    ]
+)
+click_schema = StructType(
+    [
+        StructField("click_id", StringType(), True),
+        StructField("key", StringType(), True),
+        StructField("click_time", TimestampType(), True),
+    ]
+)
+result_schema = StructType(
+    [
+        StructField("impression_id", StringType(), True),
+        StructField("click_id", StringType(), True),
+        StructField("impression_time", TimestampType(), True),
+        StructField("click_time", TimestampType(), True),
+    ]
+)
+
+
+def publish(root, side, index, lines):
+    if side not in {"impressions", "clicks"}:
+        raise ValueError("Unknown input side")
+    target = root / side / f"batch-{index}.json"
+    if target.exists():
+        raise ValueError("New input filename required")
+    staged = root / "staging" / (uuid.uuid4().hex + ".tmp")
     try:
-        with staged.open("x",encoding="utf-8") as handle: handle.write("\n".join(lines)+"\n")
-        os.replace(staged,target)
-    finally: staged.unlink(missing_ok=True)
+        with staged.open("x", encoding="utf-8") as handle:
+            handle.write("\n".join(lines) + "\n")
+        os.replace(staged, target)
+    finally:
+        staged.unlink(missing_ok=True)
+
 
 def inputs(spark, root):
     raise NotImplementedError("Complete inputs")
 
+
 def bounded_join(impressions, clicks, kind):
     raise NotImplementedError("Complete bounded_join")
+
 
 def run_join(spark, root, kind):
     raise NotImplementedError("Complete run_join")
 
+
 def pairs(spark, root, kind):
     raise NotImplementedError("Complete pairs")
+
 
 def progress_evidence(progress):
     raise NotImplementedError("Complete progress_evidence")
 
+
 def reject_unbounded_outer(spark, root):
     raise NotImplementedError("Complete reject_unbounded_outer")
 
+
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-034").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-034")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        spark.conf.set("spark.sql.streaming.stopTimeout","10000")
-        spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy","min")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-034-",dir=".")).resolve()
-        for name in ["impressions","clicks","staging"]: (owned_root/name).mkdir()
-        impression_lines = ['{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}','{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}','{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}']
-        click_lines = ['{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}','{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}','{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}','{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}']
+        spark.conf.set("spark.sql.streaming.stopTimeout", "10000")
+        spark.conf.set("spark.sql.streaming.multipleWatermarkPolicy", "min")
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-034-", dir=".")).resolve()
+        for name in ["impressions", "clicks", "staging"]:
+            (owned_root / name).mkdir()
+        impression_lines = [
+            '{"impression_id":"i1","key":"A","impression_time":"2024-01-01T00:00:00Z"}',
+            '{"impression_id":"i2","key":"B","impression_time":"2024-01-01T00:00:00Z"}',
+            '{"impression_id":"i3","key":"C","impression_time":"2024-01-01T00:05:00Z"}',
+        ]
+        click_lines = [
+            '{"click_id":"c1","key":"A","click_time":"2024-01-01T00:03:00Z"}',
+            '{"click_id":"c2","key":"C","click_time":"2024-01-01T00:10:00Z"}',
+            '{"click_id":"c3","key":"A","click_time":"2024-01-01T00:10:00Z"}',
+            '{"click_id":"c4","key":"Z","click_time":"2024-01-01T00:04:00Z"}',
+        ]
         impression_minute = 0
-        assert 3 >= impression_minute and 3 < impression_minute+10
-        assert not (10 >= impression_minute and 10 < impression_minute+10)
+        assert 3 >= impression_minute and 3 < impression_minute + 10
+        assert not (10 >= impression_minute and 10 < impression_minute + 10)
         print("Minute3 matches;minute10 is outside the half-open window")
-        impressions = [("i1","A",0),("i2","B",0),("i3","C",5)]
-        clicks = [("c1","A",3),("c2","C",10),("c3","A",10),("c4","Z",4)]
-        pairs = [(i[0],c[0]) for i in impressions for c in clicks if i[1]==c[1] and i[2] <= c[2] < i[2]+10]
-        assert pairs == [("i1","c1"),("i3","c2")]
-        print("Independent business pair oracle=",pairs)
+        impressions = [("i1", "A", 0), ("i2", "B", 0), ("i3", "C", 5)]
+        clicks = [("c1", "A", 3), ("c2", "C", 10), ("c3", "A", 10), ("c4", "Z", 4)]
+        pairs = [
+            (i[0], c[0])
+            for i in impressions
+            for c in clicks
+            if i[1] == c[1] and i[2] <= c[2] < i[2] + 10
+        ]
+        assert pairs == [("i1", "c1"), ("i3", "c2")]
+        print("Independent business pair oracle=", pairs)
         print("spark-034: worked examples passed; six task implementations remain")
     finally:
         try:
@@ -76,6 +139,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

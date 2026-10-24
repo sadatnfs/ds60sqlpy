@@ -1,5 +1,17 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 from pathlib import Path
 import tempfile
 import shutil
@@ -10,145 +22,188 @@ import os
 import uuid
 
 SCHEMA_TEXT = "id:bigint,value:bigint"
+
+
 def check_run_id(run_id):
-    if not isinstance(run_id,str) or re.fullmatch(r"[a-z0-9-]{1,32}",run_id) is None:
+    if not isinstance(run_id, str) or re.fullmatch(r"[a-z0-9-]{1,32}", run_id) is None:
         raise ValueError("Invalid run ID")
-def receipt_text(run_id,digest):
-    return json.dumps({"run_id":run_id,"data_path":"runs/"+run_id+"/data","row_count":30,"schema":SCHEMA_TEXT,"sha256":digest},separators=(",",":"))
+
+
+def receipt_text(run_id, digest):
+    return json.dumps(
+        {
+            "run_id": run_id,
+            "data_path": "runs/" + run_id + "/data",
+            "row_count": 30,
+            "schema": SCHEMA_TEXT,
+            "sha256": digest,
+        },
+        separators=(",", ":"),
+    )
+
+
 def data_file_count(root):
     return sum(p.is_file() for p in root.rglob("*.parquet"))
 
+
 def product_digest(frame):
-    if [(f.name,f.dataType.simpleString()) for f in frame.schema.fields] != [("id","bigint"),("value","bigint")]:
+    if [(f.name, f.dataType.simpleString()) for f in frame.schema.fields] != [
+        ("id", "bigint"),
+        ("value", "bigint"),
+    ]:
         raise ValueError("Product schema mismatch")
-    metrics = tuple(frame.agg(F.count(F.lit(1)),F.countDistinct("id"),F.min("id"),F.max("id"),F.sum("value")).first())
-    if metrics != (30,30,0,29,870):
+    metrics = tuple(
+        frame.agg(
+            F.count(F.lit(1)), F.countDistinct("id"), F.min("id"), F.max("id"), F.sum("value")
+        ).first()
+    )
+    if metrics != (30, 30, 0, 29, 870):
         raise ValueError("Product population mismatch")
-    if frame.filter(F.col("id").isNull()|F.col("value").isNull()|(F.col("value")!=F.col("id")*2)).count():
+    if frame.filter(
+        F.col("id").isNull() | F.col("value").isNull() | (F.col("value") != F.col("id") * 2)
+    ).count():
         raise ValueError("Product value mismatch")
     canonical = "\n".join(frame.orderBy("id").toJSON().collect())
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
+
 def stage_run(spark, root, run_id, source):
     check_run_id(run_id)
     digest = product_digest(source)
-    run = root/"runs"/run_id
+    run = root / "runs" / run_id
     if run.exists():
-        existing = validate_staged(spark,root,run_id)
+        existing = validate_staged(spark, root, run_id)
         if json.loads(existing)["sha256"] != digest:
             raise ValueError("Run identity has different content")
         return existing
     run.mkdir()
-    source.write.mode("errorifexists").parquet(str(run/"data"))
-    if product_digest(spark.read.parquet(str(run/"data"))) != digest:
+    source.write.mode("errorifexists").parquet(str(run / "data"))
+    if product_digest(spark.read.parquet(str(run / "data"))) != digest:
         raise ValueError("Staging readback mismatch")
-    text = receipt_text(run_id,digest)
-    with (run/"receipt.json").open("x",encoding="utf-8") as handle:
+    text = receipt_text(run_id, digest)
+    with (run / "receipt.json").open("x", encoding="utf-8") as handle:
         handle.write(text)
     return text
 
+
 def validate_staged(spark, root, run_id):
     check_run_id(run_id)
-    run = root/"runs"/run_id
-    text = (run/"receipt.json").read_text(encoding="utf-8")
+    run = root / "runs" / run_id
+    text = (run / "receipt.json").read_text(encoding="utf-8")
     node = json.loads(text)
-    if node.get("run_id") != run_id or node.get("data_path") != "runs/"+run_id+"/data":
+    if node.get("run_id") != run_id or node.get("data_path") != "runs/" + run_id + "/data":
         raise ValueError("Receipt identity/path mismatch")
     if node.get("row_count") != 30 or node.get("schema") != SCHEMA_TEXT:
         raise ValueError("Receipt schema/count mismatch")
-    if node.get("sha256") != product_digest(spark.read.parquet(str(run/"data"))):
+    if node.get("sha256") != product_digest(spark.read.parquet(str(run / "data"))):
         raise ValueError("Receipt content mismatch")
     return text
 
+
 def publish_run(spark, root, run_id, fail_before_replace=False):
-    text = validate_staged(spark,root,run_id)
-    pending = root/("manifest-pending-"+uuid.uuid4().hex+".json")
+    text = validate_staged(spark, root, run_id)
+    pending = root / ("manifest-pending-" + uuid.uuid4().hex + ".json")
     try:
-        with pending.open("x",encoding="utf-8") as handle:
+        with pending.open("x", encoding="utf-8") as handle:
             handle.write(text)
         if fail_before_replace:
             raise RuntimeError("injected_before_publication")
-        os.replace(pending,root/"current.json")
+        os.replace(pending, root / "current.json")
     finally:
         pending.unlink(missing_ok=True)
 
+
 def read_published(spark, root):
-    current = (root/"current.json").read_text(encoding="utf-8")
+    current = (root / "current.json").read_text(encoding="utf-8")
     node = json.loads(current)
     run_id = node.get("run_id")
-    validated = validate_staged(spark,root,run_id)
+    validated = validate_staged(spark, root, run_id)
     if json.loads(validated) != node:
         raise ValueError("Published manifest differs from validated receipt")
-    return spark.read.parquet(str(root/"runs"/run_id/"data"))
+    return spark.read.parquet(str(root / "runs" / run_id / "data"))
+
 
 def retry_product(spark, root, run_id, source):
-    stage_run(spark,root,run_id,source)
-    publish_run(spark,root,run_id)
-    return product_digest(read_published(spark,root))
+    stage_run(spark, root, run_id, source)
+    publish_run(spark, root, run_id)
+    return product_digest(read_published(spark, root))
+
 
 def main():
     owned_root = None
-    spark = (SparkSession.builder.appName("ds60-spark-029").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-029")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-",dir=".")).resolve()
-        (owned_root/"runs").mkdir()
-        source = spark.range(0,30,1,2).withColumn("value",F.col("id")*2)
+        owned_root = Path(tempfile.mkdtemp(prefix=".ds60-spark-029-", dir=".")).resolve()
+        (owned_root / "runs").mkdir()
+        source = spark.range(0, 30, 1, 2).withColumn("value", F.col("id") * 2)
         # Exercise 1: Validate the product before computing its digest
         digest = product_digest(source)
-        assert digest == "b4eaf827f5ce5797e0df60939b503b2ca6f264c0c167c9ca557db2aeb6cc2879" and product_digest(source.repartition(3)) == digest
+        assert (
+            digest == "b4eaf827f5ce5797e0df60939b503b2ca6f264c0c167c9ca557db2aeb6cc2879"
+            and product_digest(source.repartition(3)) == digest
+        )
         try:
-            product_digest(spark.range(31).withColumn("value",F.col("id")*2))
+            product_digest(spark.range(31).withColumn("value", F.col("id") * 2))
         except ValueError:
             pass
         else:
             raise AssertionError("Invalid31-row product accepted")
         # Exercise 2: Stage a run and validate the persisted readback
-        staged_a = stage_run(spark,owned_root,"run-a",source)
-        assert (owned_root/"runs/run-a/receipt.json").is_file()
+        staged_a = stage_run(spark, owned_root, "run-a", source)
+        assert (owned_root / "runs/run-a/receipt.json").is_file()
         assert json.loads(staged_a)["sha256"] == digest
         # Exercise 3: Validate a receipt against a fixed owned data path
-        assert validate_staged(spark,owned_root,"run-a") == staged_a
+        assert validate_staged(spark, owned_root, "run-a") == staged_a
         try:
-            validate_staged(spark,owned_root,"../outside")
+            validate_staged(spark, owned_root, "../outside")
         except ValueError:
             pass
         else:
             raise AssertionError("Traversal run ID accepted")
         # Exercise 4: Publish only a validated run at one explicit visibility point
-        publish_run(spark,owned_root,"run-a")
-        published_a = (owned_root/"current.json").read_text(encoding="utf-8")
+        publish_run(spark, owned_root, "run-a")
+        published_a = (owned_root / "current.json").read_text(encoding="utf-8")
         assert published_a == staged_a and json.loads(published_a)["run_id"] == "run-a"
         # Exercise 5: Keep the previous publication readable after an interrupted replacement
-        stage_run(spark,owned_root,"run-b",source)
+        stage_run(spark, owned_root, "run-b", source)
         try:
-            publish_run(spark,owned_root,"run-b",True)
+            publish_run(spark, owned_root, "run-b", True)
         except RuntimeError as error:
             assert str(error) == "injected_before_publication"
         else:
             raise AssertionError("Injected publication failure was lost")
-        assert (owned_root/"current.json").read_text(encoding="utf-8") == published_a
-        assert product_digest(read_published(spark,owned_root)) == digest
+        assert (owned_root / "current.json").read_text(encoding="utf-8") == published_a
+        assert product_digest(read_published(spark, owned_root)) == digest
         # Exercise 6: Replay the same input without appending another product
         files_before = data_file_count(owned_root)
-        assert retry_product(spark,owned_root,"run-a",source.repartition(3)) == digest
-        assert data_file_count(owned_root) == files_before and (owned_root/"current.json").read_text(encoding="utf-8") == published_a
+        assert retry_product(spark, owned_root, "run-a", source.repartition(3)) == digest
+        assert (
+            data_file_count(owned_root) == files_before
+            and (owned_root / "current.json").read_text(encoding="utf-8") == published_a
+        )
         try:
-            retry_product(spark,owned_root,"run-c",spark.range(31).withColumn("value",F.col("id")*2))
+            retry_product(
+                spark, owned_root, "run-c", spark.range(31).withColumn("value", F.col("id") * 2)
+            )
         except ValueError:
             pass
         else:
             raise AssertionError("Invalid replay product accepted")
-        assert (owned_root/"current.json").read_text(encoding="utf-8") == published_a
-        assert read_published(spark,owned_root).count() == 30
+        assert (owned_root / "current.json").read_text(encoding="utf-8") == published_a
+        assert read_published(spark, owned_root).count() == 30
         print("spark-029: six PySpark reference contracts passed; Spark=" + spark.version)
     finally:
         try:
@@ -156,6 +211,7 @@ def main():
                 shutil.rmtree(owned_root)
         finally:
             spark.stop()
+
 
 if __name__ == "__main__":
     main()

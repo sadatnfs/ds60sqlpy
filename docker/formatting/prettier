@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+exec node /opt/formatters/node_modules/prettier/bin/prettier.cjs \
+  --plugin=/opt/formatters/node_modules/prettier-plugin-java/dist/index.js \
+  --plugin=/opt/formatters/node_modules/@prettier/plugin-xml/src/plugin.js \
+  --plugin=/opt/formatters/node_modules/prettier-plugin-toml/lib/index.js "$@"

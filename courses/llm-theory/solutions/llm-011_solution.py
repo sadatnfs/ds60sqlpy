@@ -2,12 +2,13 @@
 
 import numpy as np
 
+
 def split_heads(values, heads):
     values = np.asarray(values)
     if values.ndim != 2 or min(values.shape) == 0:
-        raise ValueError('nonempty token-by-feature input required')
+        raise ValueError("nonempty token-by-feature input required")
     if type(heads) is not int or heads <= 0 or values.shape[1] % heads != 0:
-        raise ValueError('positive head count must divide feature width')
+        raise ValueError("positive head count must divide feature width")
     time, width = values.shape
     head_width = width // heads
     return values.reshape(time, heads, head_width).transpose(1, 0, 2)
@@ -16,7 +17,7 @@ def split_heads(values, heads):
 def join_heads(values):
     values = np.asarray(values)
     if values.ndim != 3 or min(values.shape) == 0:
-        raise ValueError('nonempty head-by-token-by-feature input required')
+        raise ValueError("nonempty head-by-token-by-feature input required")
     heads, time, head_width = values.shape
     return values.transpose(1, 0, 2).reshape(time, heads * head_width)
 
@@ -24,7 +25,7 @@ def join_heads(values):
 def multihead(values, heads=2, causal=True):
     values = np.asarray(values, dtype=np.float64)
     if not np.isfinite(values).all():
-        raise ValueError('finite values required')
+        raise ValueError("finite values required")
     projected = split_heads(values, heads)
     head_width = projected.shape[-1]
     scores = projected @ projected.transpose(0, 2, 1) / np.sqrt(head_width)
@@ -74,7 +75,7 @@ def verify():
     np.testing.assert_array_equal(tokenwise_feed_forward(changed)[0], output[0])
 
     # Exercise 4: Test actual head mixtures and causal prefixes
-    values = np.array([[1., 0., 1., 1.], [0., 1., 1., 0.], [1., 1., 0., 1.]])
+    values = np.array([[1.0, 0.0, 1.0, 1.0], [0.0, 1.0, 1.0, 0.0], [1.0, 1.0, 0.0, 1.0]])
     output, weights = multihead(values, heads=2, causal=True)
     a = np.exp(1 / np.sqrt(2))
     np.testing.assert_allclose(weights[0, 1, :2], [1 / (1 + a), a / (1 + a)], atol=1e-12, rtol=0)
@@ -92,7 +93,7 @@ def verify():
         except ValueError:
             pass
         else:
-            raise AssertionError('invalid head layout accepted')
+            raise AssertionError("invalid head layout accepted")
 
     # Exercise 6: Detect a wrong rejoin
     values = np.arange(8).reshape(2, 4)

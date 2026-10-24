@@ -1,4 +1,5 @@
 """Character-based word BPE demonstration, not a pretrained LLM tokenizer."""
+
 from collections import Counter
 import re
 
@@ -61,9 +62,9 @@ def encode(word, model):
 
 def decode(tokens):
     joined = "".join(tokens)
-    if not joined.endswith(END) or END in joined[:-len(END)]:
+    if not joined.endswith(END) or END in joined[: -len(END)]:
         raise ValueError("Expected exactly one terminal word marker.")
-    return joined[:-len(END)]
+    return joined[: -len(END)]
 
 
 def verify():
@@ -74,11 +75,11 @@ def verify():
     assert re.findall(r"\w+(?:'\w+)*|[^\w\s]", text) == ["can't", "pay", "."]
     matches = list(re.finditer(r"\w+(?:'\w+)*|[^\w\s]", text))
     assert matches[1].span() == (6, 9)
-    assert all(text[m.start():m.end()] == m.group(0) for m in matches)
+    assert all(text[m.start() : m.end()] == m.group(0) for m in matches)
 
     # Exercise 2: counts use corpus frequency, not only word types.
     words = {"low": 3, "lower": 1}
-    counts = pair_counts({word: tuple(word)+(END,) for word in words}, words)
+    counts = pair_counts({word: tuple(word) + (END,) for word in words}, words)
     assert counts[("l", "o")] == counts[("o", "w")] == 4
     assert counts[("w", END)] == 3
 

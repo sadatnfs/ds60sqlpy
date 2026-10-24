@@ -10,6 +10,8 @@ from pathlib import Path
 
 import pytest
 
+from scripts.source_format_parity import code_tokens
+
 ROOT = Path(__file__).resolve().parents[1]
 BASE = ROOT / "courses/cpp"
 EXPECTED = json.loads((BASE / "authoring/depth/expected_outputs.json").read_text())
@@ -59,7 +61,7 @@ def test_guide_embeds_two_complete_sources_and_specific_depth(key: str) -> None:
     for index in (1, 2):
         name = f"{key}-example-{index}.cpp"
         source = (BASE / "examples" / name).read_text().rstrip()
-        assert source in examples
+        assert any(code_tokens(source) == code_tokens(example) for example in examples)
         assert source.count("int main(") == 1
         assert "#include" in source
         assert EXPECTED[name].rstrip() in text

@@ -1,0 +1,3 @@
+#!/bin/sh
+set -eu
+LD_LIBRARY_PATH=/opt/swift-format/lib exec /opt/swift-format/bin/swift-format "$@"

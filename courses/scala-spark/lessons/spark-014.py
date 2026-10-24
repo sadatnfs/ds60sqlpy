@@ -1,71 +1,126 @@
 from pyspark.sql import SparkSession, functions as F
-from pyspark.sql.types import StructType, StructField, LongType, IntegerType, StringType, DoubleType, BooleanType, ArrayType, MapType, TimestampType, DecimalType
+from pyspark.sql.types import (
+    StructType,
+    StructField,
+    LongType,
+    IntegerType,
+    StringType,
+    DoubleType,
+    BooleanType,
+    ArrayType,
+    MapType,
+    TimestampType,
+    DecimalType,
+)
 
 
 def ids(frame):
     return [row.event_id for row in frame.select("event_id").orderBy("event_id").collect()]
 
+
 def metrics(frame):
     row = frame.agg(F.count(F.lit(1)), F.count("amount_cents"), F.sum("amount_cents")).first()
     return tuple(row)
 
+
 def canonical(frame):
     assert [(field.name, field.dataType.simpleString()) for field in frame.schema.fields] == [
-        ("team", "string"), ("rows", "bigint"), ("valued", "bigint"), ("total_cents", "bigint")]
+        ("team", "string"),
+        ("rows", "bigint"),
+        ("valued", "bigint"),
+        ("total_cents", "bigint"),
+    ]
     return [tuple(row) for row in frame.orderBy(F.col("team").asc_nulls_last()).collect()]
+
 
 def classified(frame):
     raise NotImplementedError("Complete classified")
 
+
 def accepted(frame):
     raise NotImplementedError("Complete accepted")
+
 
 def quarantine(frame):
     raise NotImplementedError("Complete quarantine")
 
+
 def summarize_paid(frame):
     raise NotImplementedError("Complete summarize_paid")
+
 
 def paid_projection(frame):
     raise NotImplementedError("Complete paid_projection")
 
+
 def audited_sql_report(spark, frame):
     raise NotImplementedError("Complete audited_sql_report")
 
+
 def main():
-    spark = (SparkSession.builder.appName("ds60-spark-014").master("local[2]")
+    spark = (
+        SparkSession.builder.appName("ds60-spark-014")
+        .master("local[2]")
         .config("spark.ui.enabled", "false")
         .config("spark.driver.host", "127.0.0.1")
         .config("spark.driver.bindAddress", "127.0.0.1")
         .config("spark.sql.shuffle.partitions", "2")
         .config("spark.sql.adaptive.enabled", "false")
         .config("spark.sql.ansi.enabled", "true")
-        .config("spark.sql.session.timeZone", "UTC").getOrCreate())
+        .config("spark.sql.session.timeZone", "UTC")
+        .getOrCreate()
+    )
     try:
         assert spark.sparkContext.master == "local[2]"
         spark.sparkContext.setLogLevel("ERROR")
-        schema = StructType([
-            StructField("source_row", LongType(), False),StructField("event_id", LongType(), True),
-            StructField("team", StringType(), True),StructField("amount_cents", LongType(), True),
-            StructField("status", StringType(), True),
-        ])
+        schema = StructType(
+            [
+                StructField("source_row", LongType(), False),
+                StructField("event_id", LongType(), True),
+                StructField("team", StringType(), True),
+                StructField("amount_cents", LongType(), True),
+                StructField("status", StringType(), True),
+            ]
+        )
         rows = [
-            (1,1,"A",100,"paid"),(2,2,"A",None,"paid"),(3,3,"B",0,"paid"),(4,4,None,50,"paid"),
-            (5,5,"B",150,"void"),(6,6,"A",100,"paid"),(7,7,"C",None,"paid"),(8,8,"B",25,"paid"),
-            (9,9,"E",0,"paid"),(10,10,"D",200,"paid"),(11,11,"A",10,"mystery"),(12,None,"A",5,"paid"),
+            (1, 1, "A", 100, "paid"),
+            (2, 2, "A", None, "paid"),
+            (3, 3, "B", 0, "paid"),
+            (4, 4, None, 50, "paid"),
+            (5, 5, "B", 150, "void"),
+            (6, 6, "A", 100, "paid"),
+            (7, 7, "C", None, "paid"),
+            (8, 8, "B", 25, "paid"),
+            (9, 9, "E", 0, "paid"),
+            (10, 10, "D", 200, "paid"),
+            (11, 11, "A", 10, "mystery"),
+            (12, None, "A", 5, "paid"),
         ]
         raw = spark.createDataFrame(rows, schema=schema)
         assert raw.count() == 12
         assert raw.select("source_row").distinct().count() == 12
         assert raw.filter(F.col("event_id").isNull()).select("source_row").first()[0] == 12
         print("Source occurrence identity survives a missing business ID")
-        unknown = [row.event_id for row in raw.filter(F.col("amount_cents").isNull()).select("event_id").orderBy("event_id").collect()]
-        zero = [row.event_id for row in raw.filter(F.col("amount_cents") == F.lit(0)).select("event_id").orderBy("event_id").collect()]
+        unknown = [
+            row.event_id
+            for row in raw.filter(F.col("amount_cents").isNull())
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+        ]
+        zero = [
+            row.event_id
+            for row in raw.filter(F.col("amount_cents") == F.lit(0))
+            .select("event_id")
+            .orderBy("event_id")
+            .collect()
+        ]
         assert unknown == [2, 7] and zero == [3, 9]
         print("Unknown amounts and observed zeros have different identities")
         print("spark-014: worked examples passed; six task implementations remain")
     finally:
         spark.stop()
+
 
 if __name__ == "__main__":
     main()
