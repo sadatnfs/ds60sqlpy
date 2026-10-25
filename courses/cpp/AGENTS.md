@@ -28,3 +28,10 @@ establish lifetime safety or correct behavior. Test references and plausible
 wrong implementations in the prepared worker, including compile errors and
 bounded execution. Fixtures and verifier harnesses remain reviewed inputs;
 learner source must not choose or replace the oracle.
+
+The [depth authoring guide](authoring/depth/README.md) owns generated worked
+examples and marked explanatory regions. Preserve directly authored base guides,
+learner/reference programs and fixture projects outside that scope. CUDA C++ is
+a separate [GPU subject](../cuda/README.md); an ordinary C++20 compiler does not
+provide device execution. Keep CMake/install projects and one-file pad acceptance
+as separate evidence.

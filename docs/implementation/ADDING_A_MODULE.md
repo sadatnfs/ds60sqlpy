@@ -31,7 +31,9 @@ can describe not-yet-authored work, but only complete authored bundles may enter
 
 For the original Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark
 subjects, edit their existing `docs/expansion/plans/` metadata instead of adding
-a second plan. The original design graph remains a route input. Java is a
+a second plan. `module_plans.load_core_plans` validates these five core plans before the module
+catalog validates their complete prerequisite graph. They are maintained route
+inputs, not a design-preview application. Java is a
 useful additive example; inspect `courses/java/track.json` and `lessons.json`.
 
 `courses/<subject>/lessons.json` has `schema_version`, `track_id` and `lessons`.
@@ -99,6 +101,11 @@ in `worker_operations.py` before choosing a profile. Examples include:
 | `rust-stable` | `main.rs`, Rust 2024 edition with prepared Arrow dependency; no ad hoc Cargo downloads |
 | `swift-linux` | `main.swift`, Swift 6 Linux/Foundation compilation; Apple SDKs require a separate macOS project |
 | `javascript-browser` | `main.js`, opaque browser preview with bundled D3 7.9.0 and inline local data |
+| `html-browser` | One complete HTML document with embedded CSS and bounded inline JavaScript in the isolated offline preview |
+| `php-cli` | `main.php`, PHP syntax check then execution with prepared PDO SQLite; no HTTP server or Composer channel |
+| `cuda-cpp` | `main.cu`, reviewed CUDA C++20 compilation and device execution; optional NVIDIA profile |
+| `cuda-python` | Python with prepared CuPy; optional NVIDIA profile with real device probing |
+| `pytorch-cuda`, `tensorflow-cuda` | Python with the named prepared framework, explicit GPU allocation and no silent CPU readiness fallback |
 | `java21` | `Main.java`, public `Main` class, no package declaration, Java 21 assertions |
 | `javascript-node` | `main.mjs` in Node; browser DOM APIs are unavailable |
 | `typescript-node` | `main.mts`, strict NodeNext checking and compilation before Node execution |
@@ -127,11 +134,13 @@ boundaries as applicable:
 | --- | --- |
 | Profile/language and verifier admission | `modules.py`, `module_extensions.py` |
 | App routing and durable jobs | `module_jobs.py`, `module_service.py` |
-| Fixed argv, preparation and typed checks | `worker_operations.py` and reviewed adapters |
+| Fixed argv, preparation and typed checks | `worker_operations.py`, `gpu_runtime.py` and reviewed adapters |
 | External resource ownership | A dedicated adapter such as `kubernetes_module.py` |
 | Image, packages and resource budget | `docker/workers/`, locks and Compose profiles |
 | Shared launch defaults | `scripts/classroom.sh` profile/service map and launcher tests |
-| Portable packaging | `desktop.py`, starter archive allowlist and packaging tests |
+| Image selection and distribution | `scripts/classroom_images.sh`, `docker/classroom-images.tsv`, publisher tests and manual publication matrix |
+| Formatting and static checks | `scripts/format_repo.py`, `scripts/lint_repo.py`, `docker/formatting/` and their tests |
+| Portable packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` and packaging tests |
 
 Python filenames are under `src/ds60sqlpy/`. A new subject that reuses an
 existing profile does not need a new image or launcher service.
@@ -168,7 +177,11 @@ Run the grouped suite with `python -m pytest -n 4 --dist loadgroup` after
 integration. See [validation](../validation.md) for all release gates.
 
 Browser-only profiles require a real browser path instead of an ordinary worker
-claim. The D3 precedent uses `javascript-browser`, a sandboxed opaque-origin
+claim. HTML documents preserve native parsing, classic lexical scope and lifecycle
+behavior. Preview text in a guide must stay escaped, not executed. Live mode is
+an explicit page-session opt-in: it debounces edits, preserves editor focus,
+cancels on navigation, and never automatically writes immutable observations.
+Manual Run and Save observation have separately tested source identities. The D3 precedent uses `javascript-browser`, a sandboxed opaque-origin
 iframe, bundled library, source-bound client observations and dedicated UI
 qualification. Such records remain explicitly unverified and have no worker
 return code or typed checks. Preserve drafts and history without automatic
@@ -185,6 +198,14 @@ contract only where registered. A subject reusing an existing runtime needs its
 lesson tests, not another runtime image. The supported implementation and
 release target is Linux containers, with Windows using WSL 2. Do not add native
 Windows runtime, private-ACL or executable-build gates for a new subject.
+
+Optional GPU profiles are deliberately outside ordinary defaults and `--all`.
+Use explicit device selection, version/capability checks and real allocation,
+kernel and readback probes. Keep reading and CPU-model alternatives available
+without calling them CUDA execution. Compile-only acceptance, device correctness,
+profiling and multi-GPU operation require different evidence. GPU Spark is an
+owned external workflow with compatible plugin/Spark/Scala/JDK/CUDA versions;
+supported SQL/DataFrame operators are not arbitrary accelerated UDFs.
 
 Record what ran, on which revision and platform, and what remains unverified.
 A configured profile, container build or one architecture's success is not

@@ -1,8 +1,7 @@
 # Guided SQL lesson notebooks
 
 Every cataloged SQL lesson and executable SQL solution can become a private,
-guided Jupyter notebook. The notebook is generated only when the learner opens
-it, under the Git-ignored `.learning/sql/` directory.
+guided Jupyter notebook. The notebook is generated only by an explicit learner or contributor request, under the Git-ignored `.learning/sql/` directory.
 
 This workflow is different from copying a `.sql` file into a `%%sql` cell.
 Course scripts can contain `psql` commands such as `\ir`, `\if`, `\gset`, and
@@ -17,80 +16,39 @@ There is no shell and no free-form path parameter. Lesson IDs, official source
 files, solution files, and learner-local output paths all come from the course
 catalog.
 
-## First-time Windows path
+## Choose the classroom or a prepared notebook environment
 
-From a PowerShell window opened in the repository:
+For normal study, run `./classroom`, select SQL and choose the lesson. The
+snippet and whole-lesson pads are distinct workspaces. Use the whole-lesson
+mode for complete scripts with reviewed `psql` commands. No host Jupyter,
+Python or PostgreSQL installation is required for that Docker route.
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1
+The guided notebook is an optional contributor/editor workflow. It uses a
+separately prepared POSIX environment, also available inside WSL 2. Follow
+[CONTRIBUTING.md](../CONTRIBUTING.md) and [PostgreSQL setup](setup/postgresql.md)
+to prepare its interpreter, `psql` and disposable local database connection.
+Obtain the database's actual published port with `./classroom status`; do not
+assume port 5432. Keep credentials in the private client environment or password
+file, never in the notebook or checked-in editor settings.
 
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
+Generate a learner notebook, or explicitly request the solution notebook:
 
-& $CoursePython scripts\course.py doctor
-& $CoursePython scripts\course.py portal
+```sh
+uv run --no-sync python scripts/course.py sql notebook sql-01
+uv run --no-sync python scripts/course.py sql notebook sql-01 --artifact solution
 ```
 
-Keep that PowerShell window open. The bootstrap adds a discovered PostgreSQL
-installation to the current process path, and Jupyter launched from the portal
-inherits it. If the notebook says `psql` is missing, close Jupyter, return to
-this PowerShell window, rerun the doctor, and start the portal again.
+The focused generator exposes the same contract:
 
-Software discovery and database authentication are separate. If you installed
-PostgreSQL natively on Windows, first complete
-[Let the guided notebook authenticate without a hidden prompt](setup/windows.md#let-the-guided-notebook-authenticate-without-a-hidden-prompt).
-That step keeps the password in Windows PostgreSQL's per-user `pgpass.conf`,
-sets only a password-free local `DS60_DATABASE_URL` in the launching
-PowerShell process, and verifies the connection before Jupyter starts. The
-repository's Docker Compose service already matches the course runner's
-disposable default connection.
-
-The normal portal action is the easiest route. The reopened dashboard says
-**Private launcher mode is active**. Choose any SQL card and select
-**Open SQL workspace**, or open the lesson reader and select
-**Create/open guided SQL notebook**. Both actions create the same editable SQL
-copy and lesson-specific notebook, then open that exact notebook in JupyterLab.
-
-## macOS and Linux path
-
-```bash
-bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/course.py portal
+```sh
+uv run --no-sync python scripts/build_sql_lesson_notebook.py sql-01
 ```
 
-Start the portal from the terminal where `psql` and any
-`DS60_DATABASE_URL` value are available. The normal setup is sufficient for a
-guided lesson notebook because it delegates complete scripts to `psql`. Core
-setup now includes the separate JupySQL `%sql`/`%%sql` magics packages too.
-Use `--advanced` when another cataloged lesson requires a larger optional group.
-
-## Generate without the portal
-
-The same catalog-restricted generator is available from the course CLI:
-
-```powershell
-# Windows PowerShell
-& $CoursePython scripts\course.py sql notebook sql-01
-& $CoursePython scripts\course.py sql notebook sql-01 --artifact solution
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py sql notebook sql-01
-.venv/bin/python scripts/course.py sql notebook sql-01 --artifact solution
-```
-
-The focused script exposes the same contract:
-
-```text
-python scripts/build_sql_lesson_notebook.py sql-01
-python scripts/build_sql_lesson_notebook.py sql-01 --artifact solution
-```
+The command prints the notebook and editable SQL paths. Open that generated
+notebook in your prepared editor or JupyterLab, select the intended contributor
+interpreter and follow its readiness cells. The retired native portal does not
+launch notebook processes. The local notebook workspace is separate from
+Docker-volume pads and does not synchronize them automatically.
 
 Only stable SQL IDs in `curriculum/catalog.json` are accepted. The current
 catalog has one executable `.sql` solution for each SQL module. The optional
@@ -176,10 +134,9 @@ process environment: the notebook does not embed, print, or save it. The runner
 passes the validated target to libpq through the child environment rather than
 a visible command argument, and uses `--no-password` so a kernel cannot hang at
 an invisible password prompt.
-Configure native authentication, a local password file, or the disposable
-Compose URL before starting the portal. Native Windows learners should follow
-the linked password-file steps above rather than putting a password in a
-notebook or repository file.
+Configure the local client environment or private password file before starting
+Jupyter. Windows users prepare that client inside WSL 2. Never put a password
+in notebook content, metadata or repository files.
 
 Database preparation is deliberately a separate cell with
 `CONFIRM_COURSE_RESET = False`. Change it to `True` only after reading the
@@ -193,7 +150,7 @@ The third step matters for Days 52–54: opening Day 54 prepares Days 52 and 53
 in order. Other lessons receive the clean seed schema without replaying dozens
 of unrelated scripts.
 
-The launcher constrains runner paths and client-side `psql` commands; it is not
+The notebook runner constrains paths and client-side `psql` commands; it is not
 an SQL sandbox. An editable exercise can still contain database statements
 with server-side effects, especially when PostgreSQL is running under a
 superuser role. Never paste untrusted SQL. Use only the disposable course
@@ -212,7 +169,7 @@ parameter binding, and explicit SQLAlchemy transaction ownership. See
 
 ## Maintainer contract
 
-Portal and editor integrations should call:
+Contributor and editor integrations call:
 
 ```python
 generate_sql_notebook(catalog, lesson_id, artifact_kind, solution_index)

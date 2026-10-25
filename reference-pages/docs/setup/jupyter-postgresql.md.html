@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>PostgreSQL in Jupyter · DS60 reference</title>
+  <title>Optional PostgreSQL notebooks · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,105 +158,52 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>PostgreSQL in Jupyter</h1>
+      <h1>Optional PostgreSQL notebooks</h1>
       <p class="source-path">Generated from <code>docs/setup/jupyter-postgresql.md</code></p>
     </header>
-    <article class="document"><h2 id="postgresql-in-jupyter">PostgreSQL in Jupyter<a class="heading-anchor" href="#postgresql-in-jupyter" aria-label="Link to this section">#</a></h2>
-<blockquote><p>This page retains host-notebook recipes. The supported classroom runs in Linux Docker containers, with Windows through WSL 2. Native Windows notebook setup is historical compatibility material and is not a release gate.</p></blockquote>
-<p>The professional bridge includes a notebook that runs PostgreSQL queries from the normal Python kernel with JupySQL. JupySQL supplies IPython line and cell magics such as <code>%sql</code> and <code>%%sql</code>; PostgreSQL still runs in the local <code>advanced_sql_training</code> database.</p>
-<p>For a normal SQL course lesson or solution, open its <a href="../guided-sql-notebooks.md.html">generated guided notebook</a> from the learning portal. Those notebooks run the complete cataloged script through <code>psql</code> because many course files use <code>psql</code> meta-commands that are not valid JupySQL cells. Use this page for the dedicated lesson about interactive SQL magics.</p>
-<p>This is an interactive learning workflow. Application code should continue to use explicit Psycopg or SQLAlchemy boundaries, tests, and transaction ownership.</p>
-<h3 id="1-install-the-notebook-database-profile">1. Install the notebook database profile<a class="heading-anchor" href="#1-install-the-notebook-database-profile" aria-label="Link to this section">#</a></h3>
-<p>The default Core setup installs the required packages on all three operating systems. The large advanced profile is not required for this lesson.</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1
-
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span></code></pre>
-<p>The resolver supports both a standard <code>venv</code> and the Anaconda conda-prefix fallback. Reuse <code>$CoursePython</code> for the remaining Windows commands in this PowerShell window.</p>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh</code></pre>
-<p>For a smaller targeted installation after normal setup:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install -e <span class="syntax-string">&quot;</span><span class="syntax-string">.[sql-notebooks]</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python -m pip install -e <span class="syntax-string">&quot;.[sql-notebooks]&quot;</span></code></pre>
-<p>The profile installs JupySQL, pandas for <code>.DataFrame()</code> result conversion, SQLAlchemy, and Psycopg 3. Do not put <code>%pip</code> installation cells into a lesson notebook: they hide which interpreter was modified and cannot work during offline study.</p>
-<h3 id="2-prepare-only-the-disposable-database">2. Prepare only the disposable database<a class="heading-anchor" href="#2-prepare-only-the-disposable-database" aria-label="Link to this section">#</a></h3>
-<p>Start or verify PostgreSQL, then reset the course-owned <code>training</code> schema with the commands in the operating-system setup guide.</p>
-<p>If you use the repository Compose service:</p>
-<pre class="highlighted-code"><code class="language-text">docker compose up -d postgres
-docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql</code></pre>
-<p>Never point the reset or professional notebook at a workplace, shared, production, or personally valuable database.</p>
-<h3 id="3-set-the-connection-for-this-terminal">3. Set the connection for this terminal<a class="heading-anchor" href="#3-set-the-connection-for-this-terminal" aria-label="Link to this section">#</a></h3>
-<p>The notebook reads <code>DS60_DATABASE_URL</code>. Keep it in the terminal environment; do not paste a real password into the notebook, commit it, or print it.</p>
-<p>For the repository&#x27;s disposable Compose database:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://admin:admin@localhost:55432/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-<span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin:admin@localhost:55432/advanced_sql_training&quot;</span></code></pre>
-<p>Those <code>ds60</code> credentials belong only to the disposable local Compose service. For native PostgreSQL, use the local role and authentication method from the OS setup guide. If a password must appear in a URL, percent-encode reserved characters and keep the value out of shell history and repository files; a local password file or operating-system credential store is preferable.</p>
-<p>For a native macOS/Linux username-and-socket route, this dedicated JupySQL notebook needs <code>postgresql:///advanced_sql_training</code> rather than the literal database name accepted by the <code>psql</code>-based guided notebooks. See <a href="postgresql.md.html">Local PostgreSQL</a> for this distinction and socket-location troubleshooting.</p>
-<p>Closing the terminal clears these process-scoped settings. A personal <code>.env</code> file is ignored by Git, but the notebook deliberately does not load one silently.</p>
-<h3 id="4-start-the-course-kernel">4. Start the course kernel<a class="heading-anchor" href="#4-start-the-course-kernel" aria-label="Link to this section">#</a></h3>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>bridge<span class="syntax-punctuation">\</span>professional<span class="syntax-punctuation">\</span>notebooks</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab bridge/professional/notebooks</code></pre>
-<p>In VS Code, open <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code> and select <strong>Python (ds60sqlpy)</strong> (internal kernel name <code>ds60sqlpy</code>).</p>
-<p>The notebook parses the environment value, refuses any target except the disposable course database, and selects the explicit Psycopg 3 driver:</p>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> os
-
-<span class="syntax-keyword">from</span> sqlalchemy <span class="syntax-keyword">import</span> create_engine
-<span class="syntax-keyword">from</span> sqlalchemy.engine <span class="syntax-keyword">import</span> make_url
-
-course_url <span class="syntax-operator">=</span> make_url<span class="syntax-punctuation">(</span>os<span class="syntax-operator">.</span>environ<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_DATABASE_URL</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">if</span> course_url<span class="syntax-operator">.</span>get_backend_name<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">postgres</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">DS60_DATABASE_URL must select PostgreSQL.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">if</span> course_url<span class="syntax-operator">.</span>database <span class="syntax-operator">!=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">advanced_sql_training</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span>
-    <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This notebook is restricted to the disposable course database.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-
-psycopg_url <span class="syntax-operator">=</span> course_url<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</span>drivername<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">postgresql+psycopg</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-engine <span class="syntax-operator">=</span> create_engine<span class="syntax-punctuation">(</span>psycopg_url<span class="syntax-punctuation">,</span> pool_pre_ping<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
-<p>It then loads the extension and passes the engine object - not a password-bearing string - to the magic:</p>
-<pre class="highlighted-code"><code class="language-text">%load_ext sql
-%config SqlMagic.displaycon = False
-%sql engine --alias ds60-course</code></pre>
-<p>JupySQL&#x27;s current connection documentation recommends avoiding hard-coded passwords, and SQLAlchemy documents <code>postgresql+psycopg://</code> as the Psycopg 3 dialect. See the <a href="https://jupysql.readthedocs.io/en/latest/connecting.html">JupySQL connection guide</a> and <a href="https://docs.sqlalchemy.org/en/20/dialects/postgresql.html">SQLAlchemy PostgreSQL dialect</a>.</p>
-<h3 id="5-know-what-the-magics-do">5. Know what the magics do<a class="heading-anchor" href="#5-know-what-the-magics-do" aria-label="Link to this section">#</a></h3>
+    <article class="document"><h2 id="optional-postgresql-notebooks">Optional PostgreSQL notebooks<a class="heading-anchor" href="#optional-postgresql-notebooks" aria-label="Link to this section">#</a></h2>
+<p>Use the Docker classroom for ordinary Python and SQL study. It includes the runtime, database, editor and saved results. This page covers a separately prepared notebook workflow for contributors and learners who specifically want to study IPython SQL magics. Windows uses Ubuntu in WSL 2.</p>
+<h3 id="choose-the-appropriate-notebook">Choose the appropriate notebook<a class="heading-anchor" href="#choose-the-appropriate-notebook" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><code>%sql SELECT ...</code> runs a short, one-line query.</li>
-<li><code>%%sql</code> makes the rest of a cell SQL.</li>
-<li><code>%sql --connections</code> lists the notebook&#x27;s active database connections.</li>
-<li><code>%sql --close &lt;alias&gt;</code> closes one connection.</li>
-<li><code>%config SqlMagic.displaycon = False</code> avoids displaying a connection URL.</li>
-<li><code>%config SqlMagic.autolimit = 100</code> bounds exploratory result retrieval.</li>
-<li><code>%config SqlMagic.named_parameters = &quot;enabled&quot;</code> enables bound <code>:value</code> parameters for SQLAlchemy connections.</li>
+<li><strong>Ordinary SQL lessons:</strong> run them in the classroom&#x27;s <strong>Whole SQL lesson (psql)</strong> mode. Many files contain <code>psql</code> commands that are not SQL magics. An optional <a href="../guided-sql-notebooks.md.html">guided SQL notebook</a> can also be generated with <code>uv run --no-sync python scripts/course.py sql notebook sql-01</code>. Its runner needs a prepared local <code>psql</code> client and the disposable database.</li>
+<li><strong>Interactive SQL magics:</strong> use <a href="../../../lesson-pages/bridge-jupyter-01.html#guide">bridge-jupyter-01</a>. JupySQL runs <code>%sql</code> and <code>%%sql</code> through the selected Python kernel and SQLAlchemy/Psycopg. This is the workflow described below.</li>
 </ul>
-<p>Jinja <code>{{variable}}</code> syntax renders SQL text and can change identifiers or whole clauses. It is code generation, not safe value binding. Use named parameters for values and fixed or allowlisted identifiers. JupySQL documents both modes in its <a href="https://jupysql.readthedocs.io/en/latest/user-guide/template.html">parameterization guide</a>.</p>
-<p>JupySQL defaults to autocommit. The lesson therefore uses bounded read queries and explains transaction ownership before any write. Do not assume that running several notebook cells creates one atomic transaction.</p>
-<h3 id="6-verify-and-go-offline">6. Verify and go offline<a class="heading-anchor" href="#6-verify-and-go-offline" aria-label="Link to this section">#</a></h3>
-<p>Run the notebook checks while connected:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>validate_notebooks<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/validate_notebooks.py</code></pre>
-<p>After packages and PostgreSQL are installed, the notebook needs no internet connection. The database server must still be running locally. Structural validation does not prove live authentication; execute the solution notebook top to bottom against the disposable database for that evidence.</p>
-<h3 id="common-failures">Common failures<a class="heading-anchor" href="#common-failures" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><strong><code>No module named sql</code></strong> - install the <code>sql-notebooks</code> extra in the selected kernel and restart it.</li>
-<li><strong><code>Line magic function %sql not found</code></strong> - run <code>%load_ext sql</code>; also check that no local file named <code>sql.py</code> shadows the extension.</li>
-<li><strong><code>No module named psycopg2</code></strong> - use the explicit <code>postgresql+psycopg://</code> URL for the course&#x27;s Psycopg 3 dependency.</li>
-<li><strong>Connection refused</strong> - start PostgreSQL and check host and port.</li>
-<li><strong>Authentication failed</strong> - verify the local role without displaying the password.</li>
-<li><strong>Queries affect more rows than expected</strong> - stop, confirm the database is <code>advanced_sql_training</code>, and restore the lesson&#x27;s bounded/read-only setup.</li>
-</ul>
-<p>See <a href="../troubleshooting.md.html">Troubleshooting</a> for the general environment and PostgreSQL checks.</p></article>
+<p>Neither route starts an editor through the classroom server. A notebook and a browser pad have separate files and history; copying source does not merge them.</p>
+<h3 id="1-prepare-the-environment-while-connected">1. Prepare the environment while connected<a class="heading-anchor" href="#1-prepare-the-environment-while-connected" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="../../CONTRIBUTING.md.html">contributor setup</a>, then run from the repository root in Bash on Linux, macOS or Windows WSL 2:</p>
+<pre class="highlighted-code"><code class="language-bash">uv sync --frozen --python <span class="syntax-number">3</span>.12 --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
+<p>This uses the repository lock and installs the notebook packages in its virtual environment. Registering the kernel makes that interpreter selectable in Jupyter or VS Code. Do not add <code>%pip</code> install cells: they obscure interpreter selection and prevent predictable offline execution. Installing packages here does not change Docker workers.</p>
+<h3 id="2-prepare-the-local-disposable-database">2. Prepare the local disposable database<a class="heading-anchor" href="#2-prepare-the-local-disposable-database" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter
+./classroom status</code></pre>
+<p>Use the actual PostgreSQL host port shown in status, not a remembered default. The database is <code>advanced_sql_training</code>; fresh local classroom credentials are <code>admin</code> / <code>admin</code>. Read <a href="postgresql.md.html">PostgreSQL setup</a> before choosing the explicit training reset. That reset replaces course-owned data and is not an ordinary startup step. Preserve warehouse and other stateful exercises when following their own instructions.</p>
+<p>The notebook&#x27;s <code>validate_course_database_target</code> guard rejects remote and multi-host targets and inappropriate database names and URL options. Do not remove it to connect to a shared database. Database identity checks do not make arbitrary SQL safe; read the statement and its transaction boundary as well.</p>
+<h3 id="3-keep-the-connection-url-password-free">3. Keep the connection URL password-free<a class="heading-anchor" href="#3-keep-the-connection-url-password-free" aria-label="Link to this section">#</a></h3>
+<p>In the same Bash shell that will launch Jupyter, set the local database URL below. Replace <code>PORT</code> with the actual forwarded PostgreSQL port reported by <code>./classroom status</code>. Keep the explicit local host, <code>admin</code> learning role and <code>advanced_sql_training</code> database. The URL contains no password.</p>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin@127.0.0.1:PORT/advanced_sql_training&quot;</span></code></pre>
+<p>Supply authentication through a private <strong>libpq password file</strong>, outside the repository. In WSL, keep it in your Ubuntu home so Linux file permissions apply. These commands create the private path without truncating an existing file:</p>
+<pre class="highlighted-code"><code class="language-bash">mkdir -p <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60</span><span class="syntax-string">&quot;</span>
+chmod <span class="syntax-number">700</span> <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60</span><span class="syntax-string">&quot;</span>
+<span class="syntax-builtin">export</span> PGPASSFILE<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/.config/ds60/postgresql.pass</span><span class="syntax-string">&quot;</span>
+<span class="syntax-operator">(</span><span class="syntax-builtin">umask</span> <span class="syntax-number">077</span><span class="syntax-punctuation">;</span> touch <span class="syntax-string">&quot;</span>$PGPASSFILE<span class="syntax-string">&quot;</span><span class="syntax-operator">)</span>
+chmod <span class="syntax-number">600</span> <span class="syntax-string">&quot;</span>$PGPASSFILE<span class="syntax-string">&quot;</span></code></pre>
+<p>Open that file in your text editor and add this one-line format, replacing <code>PORT</code> with the same actual port and <code>YOUR_PASSWORD</code> with the password for your local learning role. Do not paste the real line into the notebook or terminal command history. Retain any unrelated existing entries rather than replacing the whole file.</p>
+<pre class="highlighted-code"><code class="language-text">127.0.0.1:PORT:advanced_sql_training:admin:YOUR_PASSWORD</code></pre>
+<p>The file matches host, port, database and role exactly. Escape a colon or backslash inside a field with a backslash. Do not broaden the entry with wildcards just to hide a mismatch. The file must have mode <code>600</code>; libpq ignores password files readable by a group or other users. See the <a href="https://www.postgresql.org/docs/17/libpq-pgpass.html">PostgreSQL password-file documentation</a>.</p>
+<p>Clear inherited password or routing overrides, then launch the prepared kernel from this shell. The password remains in the private file, not the URL or a process argument:</p>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">unset</span> PGPASSWORD PGHOST PGHOSTADDR PGPORT PGSERVICE PGSERVICEFILE PGOPTIONS
+uv run --no-sync python -m jupyter lab bridge/professional/notebooks</code></pre>
+<p>For VS Code, run <code>code .</code> from the same shell instead of JupyterLab, select <strong>Python (ds60sqlpy)</strong> and open the learner notebook. Restart a kernel if its process environment or interpreter changed. If the classroom&#x27;s database port changes, update both the URL and the matching password-file entry before starting a new kernel.</p>
+<p>The notebook validates the local course target before creating its explicit SQLAlchemy <code>postgresql+psycopg</code> engine. Psycopg uses libpq authentication when the URL omits its password. The separate full-script notebook runner also preserves <code>PGPASSFILE</code> while replacing inherited routing variables with the validated local target. Do not add <code>passfile</code> or service-routing query parameters to the URL: the course validator permits only its reviewed <code>sslmode</code> option. Neither workflow displays or stores the password in notebook cells.</p>
+<p>Keep the password file private and outside Git, exports and screenshots. The notebook does not silently load a <code>.env</code> file. Closing the terminal clears its process settings; the private password file remains for later local sessions. See <a href="https://docs.sqlalchemy.org/en/20/core/engines.html">SQLAlchemy URL handling</a> for the distinction between a URL and a separately supplied authentication source.</p>
+<h3 id="4-work-through-the-lesson-in-order">4. Work through the lesson in order<a class="heading-anchor" href="#4-work-through-the-lesson-in-order" aria-label="Link to this section">#</a></h3>
+<p>The dedicated notebook introduces <code>%load_ext sql</code>, line and cell magics, connection aliases, display limits and conversion to pandas. It suppresses connection display. Bind data values using the lesson&#x27;s named-parameter route; Jinja template substitution generates SQL text and is not safe value binding. Use fixed or allowlisted identifiers when the query structure varies.</p>
+<p>Treat notebook ordering and transactions as part of the program. An earlier cell may have changed variables or database state, and separate cells do not implicitly form one atomic transaction. Prefer bounded read queries while learning. Application code should use explicit Psycopg or SQLAlchemy transaction ownership rather than relying on an interactive notebook&#x27;s ambient settings.</p>
+<h3 id="5-validate-honestly-and-prepare-offline-study">5. Validate honestly and prepare offline study<a class="heading-anchor" href="#5-validate-honestly-and-prepare-offline-study" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/validate_notebooks.py</code></pre>
+<p>Structural notebook validation does not prove a live PostgreSQL connection. Record successful live cells separately. Once the environment and required images are prepared, this local exercise does not need internet, but its local database must still run. Save learner copies outside tracked references and clear outputs before committing.</p>
+<p>If the <code>sql</code> extension is missing, check the selected kernel and the installed <code>sql-notebooks</code> extra. If a magic is missing, run the notebook&#x27;s extension-loading cell. A request for <code>psycopg2</code> usually means a URL or engine selected a different driver. Connection refusal means checking the running project&#x27;s host port; authentication errors require checking the local role privately. See <a href="../troubleshooting.md.html">troubleshooting</a> for the general classroom checks.</p></article>
   </main>
 </body>
 </html>

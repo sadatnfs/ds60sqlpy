@@ -462,7 +462,7 @@ def generated_views(root: Path, check: bool) -> bool:
                 success = False
             else:
                 path.write_text(expected, encoding="utf-8", newline="\n")
-    for script in ("build_journey_preview.py", "build_course_guide.py", "build_lesson_readers.py"):
+    for script in ("build_course_guide.py", "build_lesson_readers.py"):
         command = [sys.executable, str(root / "scripts" / script)]
         if check:
             command.append("--check")

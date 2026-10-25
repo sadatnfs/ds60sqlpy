@@ -11,7 +11,7 @@ The course has no sixty-day deadline. Its historical day IDs are stable navigati
 
 ## Find a starting point
 
-Use the [first-success guide](setup/first-success.md) before diagnosing a lesson. You should be able to run one notebook cell, find its output, rerun it from a fresh kernel, and explain the difference between the source file and the result. For SQL, you should be able to connect to the disposable database and identify its name without revealing a credential.
+Use the [first-success guide](setup/first-success.md) before diagnosing a lesson. You should be able to run a small Python pad, find its output, rerun it from a fresh process, and explain the difference between the source file and the result. For SQL, you should be able to connect to the disposable database and identify its name without revealing a credential.
 
 | Your current evidence | Starting route |
 | --- | --- |
@@ -33,19 +33,19 @@ The route planner expands prerequisites from the generated catalog. A route defi
 python scripts/course.py plan
 ```
 
-Use your repository interpreter for that command. On Windows, resolve `$CoursePython` as shown in [first success](setup/first-success.md).
+The browser classroom is the primary learner route. The commands below are
+optional read-only contributor tools for the legacy Python/SQL/bridge graph:
 
-```powershell
-& $CoursePython scripts\course.py plan --path python-foundations --weekly-hours 5
-& $CoursePython scripts\course.py plan --path database-engineering --weekly-hours 6 --use-progress
-& $CoursePython scripts\course.py plan python-ml-02 --json
+```sh
+uv run --no-sync python scripts/course.py plan --path python-foundations --weekly-hours 5
+uv run --no-sync python scripts/course.py plan --path database-engineering --weekly-hours 6 --use-progress
+uv run --no-sync python scripts/course.py plan python-ml-02 --json
 ```
 
-```bash
-.venv/bin/python scripts/course.py plan --path python-foundations --weekly-hours 5
-.venv/bin/python scripts/course.py plan --path database-engineering --weekly-hours 6 --use-progress
-.venv/bin/python scripts/course.py plan python-ml-02 --json
-```
+Use the prepared interpreter from [CONTRIBUTING.md](../CONTRIBUTING.md), including
+inside WSL 2. These CLI paths do not accept every modern module ID or read the
+Docker volume implicitly. Modern subjects use their own manifest prerequisites
+and the classroom's journey view; the MCP module tools expose those routes too.
 
 Reading a plan does not write progress or execute examples. `--use-progress` explicitly reads local completion evidence and excludes those lessons. `[ready]` means that the recorded direct prerequisites are complete; it does not mean the environment has every optional dependency installed. The application offers the same goal-based route in its sidebar.
 
@@ -55,7 +55,7 @@ A practical session is 45 to 90 minutes: retrieve the previous idea, predict a s
 
 After each session, write three short notes: what you predicted, what you actually observed, and what you will test next. Revisit a failed example the following day from a blank file. A week later, try an analogous input without opening the solution. This catches a common failure of tutorial study: recognizing an explanation while being unable to construct the behavior yourself.
 
-At each phase boundary, require four things before moving on:
+For practice subjects, use four observations to judge readiness for the next phase:
 
 1. Rebuild a small example from a blank file or query window.
 2. Show a normal case, a boundary case, and one diagnosed failure.
@@ -70,4 +70,10 @@ The [professional paths](professional-paths.md) retain packaging, concurrency, t
 
 The October additions concentrate on gaps that a broad survey often leaves behind: novice tracing and debugging; trustworthy records and a first investigation; Unicode, exact money and calendar boundaries; group/time leakage; restartable pipelines; SQL bag semantics, fanout, keyset pagination and concurrency traces; and an integrated incident review. Each has separate learner, guide, executable reference, and explanatory solution artifacts, with exercises that state inspectable results.
 
-Use the catalog for the exact current modules, prerequisites, dependency groups, network labels, and file paths. Use [the coding application](offline-app.md) for guided practice, or [AI tutoring](mcp-tutor.md) if you want a conversational coach. The checked-in lessons remain sufficient without either.
+Use the catalog for the exact current modules, prerequisites, dependency groups, network labels, and file paths. Use [the classroom](classroom-experience.md) for guided practice, or [AI tutoring](mcp-tutor.md) if you want a conversational coach. The checked-in lessons remain sufficient without either.
+
+Tutorial books, including statistics/ML, teach through complete worked examples
+without mandatory exercises, exams or prediction gates. Read and revisit them at
+your own pace; a reading marker does not assert mastery. Other language and systems
+subjects have their own beginner entry points and explicit project/runtime boundaries.
+Use the common subject chooser and the [documentation map](README.md) to explore them.

@@ -94,20 +94,12 @@ lifecycle mechanism; it is not a general authenticated secret-management service
 
 ## Regenerate and inspect offline
 
-From the repository root, use the prepared interpreter. POSIX:
+From the repository root, use the [prepared contributor environment](../../../../CONTRIBUTING.md)
+in Bash on Linux, macOS or Windows WSL 2:
 
 ```sh
-.venv/bin/python courses/kubernetes/fixtures/secret-observer/render.py
-.venv/bin/python -m pytest tests/test_kubernetes_secret_observer.py
-```
-
-PowerShell, using the interpreter printed by setup:
-
-```powershell
-& $CoursePython courses/kubernetes/fixtures/secret-observer/render.py
-if ($LASTEXITCODE -ne 0) { throw 'Fixture rendering failed.' }
-& $CoursePython -m pytest tests/test_kubernetes_secret_observer.py
-if ($LASTEXITCODE -ne 0) { throw 'Fixture contract tests failed.' }
+uv run --no-sync python courses/kubernetes/fixtures/secret-observer/render.py
+uv run --no-sync python -m pytest tests/test_kubernetes_secret_observer.py
 ```
 
 The tests use fresh temporary files, a loopback HTTP server and fake API
@@ -134,27 +126,15 @@ It rejects credential plugins and ambient kubeconfig selection. Use a new output
 directory whose parent already exists. These commands neither prepare nor
 release a cluster:
 
-POSIX:
+Bash on Linux/macOS or Windows WSL 2:
 
 ```sh
 : "${LAB_SESSION:?Set the fresh private session directory from preparation}"
 : "${LAB_KUBECTL:?Set the pinned kubectl executable path}"
 : "${LAB_EVIDENCE:?Set a new evidence directory beneath an existing parent}"
-.venv/bin/python courses/kubernetes/fixtures/secret-observer/teacher.py \
+uv run --no-sync python courses/kubernetes/fixtures/secret-observer/teacher.py \
   --session "$LAB_SESSION" --kubectl "$LAB_KUBECTL" \
   --output "$LAB_EVIDENCE" --confirm-synthetic-secret
-```
-
-PowerShell:
-
-```powershell
-if (-not $env:LAB_SESSION -or -not $env:LAB_KUBECTL -or -not $env:LAB_EVIDENCE) {
-    throw 'Fresh owned session, pinned kubectl and new evidence paths are required.'
-}
-& $CoursePython courses/kubernetes/fixtures/secret-observer/teacher.py `
-    --session $env:LAB_SESSION --kubectl $env:LAB_KUBECTL `
-    --output $env:LAB_EVIDENCE --confirm-synthetic-secret
-if ($LASTEXITCODE -ne 0) { throw 'Read the fixture evidence and cleanup status.' }
 ```
 
 Argument paths are separate tokens, so paths containing spaces work. The runner
@@ -217,22 +197,16 @@ ignored during cleanup. A process kill or machine crash can prevent this path.
 If creation may have succeeded but its UID could not be recorded, cleanup
 refuses that ambiguous object and retains the intent/nonce for teacher review.
 Do not delete by name alone to make the receipt green. The separate owned-session
-release operation validates the recorded control-plane identity before removing
-that exclusive course cluster. Use the exact preparation receipt's session:
+release operation validates the recorded control-plane identity and exact local
+engine endpoint before removing that exclusive course cluster. Stop the owned
+classroom lab and worker before releasing their session, following the
+[owned Kubernetes runbook](../../../../docs/modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab). Use the exact preparation receipt's session:
 
-POSIX:
+Bash on Linux/macOS or Windows WSL 2:
 
 ```sh
-.venv/bin/python scripts/prepare_kubernetes.py release \
+uv run --no-sync python scripts/prepare_kubernetes.py release \
   --session "$LAB_SESSION" --confirm-release
-```
-
-PowerShell:
-
-```powershell
-& $CoursePython scripts/prepare_kubernetes.py release `
-    --session $env:LAB_SESSION --confirm-release
-if ($LASTEXITCODE -ne 0) { throw 'Owned session release needs inspection.' }
 ```
 
 Release is separate from this fixture's object cleanup. Retain both receipts.

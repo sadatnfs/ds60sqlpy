@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Python and data-science track · DS60 reference</title>
+  <title>Python and data science · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,91 +158,35 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Python and data-science track</h1>
+      <h1>Python and data science</h1>
       <p class="source-path">Generated from <code>python/ds-60day/README.md</code></p>
     </header>
-    <article class="document"><h2 id="python-and-data-science-track">Python and data-science track<a class="heading-anchor" href="#python-and-data-science-track" aria-label="Link to this section">#</a></h2>
-<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>Python and data science</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
-<p>This track preserves 60 ordered lessons covering practical Python, data analysis, statistics, machine learning, and selected production topics. Four named foundation checkpoints slow the early learning ramp, and thirteen named professional modules extend practice beyond the numbered sequence. Use the catalog&#x27;s prerequisite order rather than treating 60 as a deadline.</p>
-<p>Start at the repository <a href="../../README.md.html">README</a>, and run all commands from the repository root.</p>
-<h3 id="set-up">Set up<a class="heading-anchor" href="#set-up" aria-label="Link to this section">#</a></h3>
-<p>Use the guide for your operating system:</p>
-<ul>
-<li><a href="../../docs/setup/windows.md.html">Windows</a></li>
-<li><a href="../../docs/setup/macos.md.html">macOS</a></li>
-<li><a href="../../docs/setup/linux.md.html">Linux</a></li>
-</ul>
-<p>The recommended baseline is Python 3.12.</p>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor</code></pre>
-<p>Core setup installs the notebook, data, and quality groups. To prepare the later heavy lessons while connected:</p>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1 -Advanced</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --advanced</code></pre>
-<p>Inspect lesson dependencies and first-run downloads before installing everything:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track python</code></pre>
-<h3 id="study-a-lesson">Study a lesson<a class="heading-anchor" href="#study-a-lesson" aria-label="Link to this section">#</a></h3>
-<p>For each lesson:</p>
+    <article class="document"><h2 id="python-and-data-science">Python and data science<a class="heading-anchor" href="#python-and-data-science" aria-label="Link to this section">#</a></h2>
+<p>Study Python in the unified Docker classroom. From the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter</code></pre>
+<p>Choose <strong>Python and data science</strong> from <strong>All learning paths</strong>. The worker supplies Python and the core data packages; host Python or Jupyter installation is unnecessary. Follow <a href="../../docs/one-command-classroom.md.html">first-time setup</a> on macOS, Linux or Windows WSL 2.</p>
+<h3 id="learn-at-your-pace">Learn at your pace<a class="heading-anchor" href="#learn-at-your-pace" aria-label="Link to this section">#</a></h3>
+<p>The Python track contains <strong>89 learning units</strong>: the original 60 numbered lessons, four foundation checkpoints, thirteen professional modules, four NumPy units, four pandas units and four data-structure/algorithm units. Historical day numbers are stable labels, not a schedule. The classroom&#x27;s prerequisite information helps you choose where to start or review.</p>
+<p>The numbered sequence moves from expressions, values and control flow through functions, collections, files, testing and command-line programs, then data analysis, statistics, machine learning and selected engineering topics. Foundation checkpoints after Days 1, 3, 8 and 10 slow the early ramp with tracing, debugging, trustworthy records and an auditable first investigation.</p>
+<p>The deeper <a href="../professional/README.md.html">professional Python route</a> covers array shapes and numerical boundaries, pandas grain and joins, algorithms and their costs, packaging, concurrency, Arrow/DuckDB, service reliability, testing, experiments, model delivery and restartable pipelines. More advanced framework work has its own <a href="../../courses/deep-learning-pytorch/README.md.html">PyTorch</a>, <a href="../../courses/deep-learning-tensorflow/README.md.html">TensorFlow</a>, <a href="../../courses/nlp/README.md.html">NLP</a> and <a href="../../courses/llm-theory/README.md.html">LLM</a> subjects in the same classroom.</p>
+<h3 id="study-one-lesson">Study one lesson<a class="heading-anchor" href="#study-one-lesson" aria-label="Link to this section">#</a></h3>
 <ol>
-<li>Read the matching file under <a href="companion-guides/README.md.html">companion-guides</a>.</li>
-<li>Open the learner notebook under <code>notebooks/</code>.</li>
-<li>Predict and run the examples.</li>
-<li>Attempt the exercises.</li>
-<li>Check the separate solution only after an honest attempt.</li>
+<li>Read the companion guide and prerequisite notes.</li>
+<li>Select the learner artifact and predict the example&#x27;s result.</li>
+<li>Work in your own browser pad, run a small change and read the actual output.</li>
+<li>Attempt the exercises, explain a failure and use progressive hints.</li>
+<li>Compare a reference when ready and record what you can now explain.</li>
 </ol>
-<p>Complete the foundation checkpoints after Days 1, 3, 8, and 10 before continuing into their successor lessons. They add program tracing, evidence-led debugging, trustworthy text-record cleaning, and a first auditable data project. Their <a href="../professional/README.md.html">guides and learner scripts</a> use the same separate-solution workflow. They are deliberately smaller conceptual steps, not additional package installation tasks.</p>
-<p>Start with:</p>
-<ul>
-<li><a href="../../../lesson-pages/python-01.html#guide">Day 1 guide</a></li>
-<li><a href="../../../lesson-pages/python-01.html#learner">Day 1 notebook</a></li>
-<li><a href="../../../lesson-pages/python-01.html#solution-1">Day 1 solution</a></li>
-</ul>
-<p>Launch JupyterLab:</p>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyterlab <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">\</span>ds<span class="syntax-punctuation">-</span>60day<span class="syntax-punctuation">\</span>notebooks</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyterlab python/ds-60day/notebooks</code></pre>
-<p>You can also open notebooks directly in VS Code. Select the repository <code>.venv</code> as both interpreter and notebook kernel; see <a href="../../docs/vscode.md.html">VS Code</a>.</p>
-<h3 id="artifact-coverage">Artifact coverage<a class="heading-anchor" href="#artifact-coverage" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Learner notebooks: Days 1–60</li>
-<li>Companion guides: Days 1–60</li>
-<li>Markdown solutions: Days 1–60</li>
-<li>Runnable solution notebooks: Days 1–60</li>
-<li>Named learner scripts, guides, executable solutions, and solution explanations: four foundation checkpoints and thirteen professional modules</li>
-</ul>
-<p>Use <code>python scripts/course.py catalog --track python</code> rather than inferring that every solution format exists.</p>
-<p>Learner notebooks and solutions are intentionally separate. Lessons vary in depth; repository validation checks structure, syntax, and a fast execution subset without treating file presence as proof of pedagogical completeness.</p>
-<h3 id="continue-into-professional-python">Continue into professional Python<a class="heading-anchor" href="#continue-into-professional-python" aria-label="Link to this section">#</a></h3>
-<p>After the numbered track, or earlier when you meet a module&#x27;s catalog prerequisites, continue with the <a href="../../docs/professional-paths.md.html">professional learning paths</a>. The extension covers package builds, reliable HTTP clients, concurrency, Arrow/DuckDB, generative testing, advanced typing, experiments, reproducible model delivery, service hardening, measurement-first performance, exact value and time boundaries, leakage-resistant evaluation, and restartable pipelines.</p>
-<p>Use stable lesson IDs rather than inventing Day 61 filenames:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track python
-python scripts/course.py progress complete python-pro-01</code></pre>
-<h3 id="offline-behavior">Offline behavior<a class="heading-anchor" href="#offline-behavior" aria-label="Link to this section">#</a></h3>
-<p>Most lessons use generated or local data. Several data-analysis lessons call Seaborn’s sample-data loader; the first call downloads and caches the dataset. Pretrained torchvision, Hugging Face, and spaCy exercises require a disclosed cache or their lesson’s offline fallback.</p>
-<p>Prepare while connected and read <a href="../../docs/setup/offline.md.html">Offline use</a>. A package being installed does not guarantee that its model weights or dataset are cached.</p>
-<h3 id="progress">Progress<a class="heading-anchor" href="#progress" aria-label="Link to this section">#</a></h3>
-<p>Local progress is stored under the ignored <code>.learning/</code> directory:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py progress show
-python scripts/course.py progress complete python-01 --notes &quot;Created the environment and explained kernels.&quot;</code></pre>
-<p>Use the stable lesson IDs printed by the catalog.</p>
-<h3 id="connect-python-with-postgresql">Connect Python with PostgreSQL<a class="heading-anchor" href="#connect-python-with-postgresql" aria-label="Link to this section">#</a></h3>
-<p>After Python Day 15 and SQL Day 15, the optional <a href="../../bridge/README.md.html">engineering bridge</a> adds typed configuration, safe Psycopg queries, transaction and retry design, database testing, ETL, concurrency, and production failure handling.</p>
-<h3 id="learn-with-the-ai-tutor">Learn with the AI tutor<a class="heading-anchor" href="#learn-with-the-ai-tutor" aria-label="Link to this section">#</a></h3>
-<p>The repository-local tutor skill can guide the lesson without revealing answers immediately:</p>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to guide Python Day 1. Check my setup, quiz prerequisites, and give hints before solutions.</code></pre>
-<p>See <a href="../../docs/learning-with-an-ai-tutor.md.html">Learning with an AI tutor</a>.</p>
-<h3 id="validate">Validate<a class="heading-anchor" href="#validate" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py validate</code></pre>
-<p>Structural validation does not mean every notebook was fully executed. See <a href="../../docs/validation.md.html">Validation</a> for the evidence labels and full workflow.</p>
-<h3 id="scope">Scope<a class="heading-anchor" href="#scope" aria-label="Link to this section">#</a></h3>
-<p>This is a practical Python-for-data-science path, not a replacement for the complete Python language reference. The high-level sequence remains in <a href="../PYTHON_TRAINING.md.html">PYTHON_TRAINING.md</a>; <code>curriculum/catalog.json</code> is the checked-in generated artifact map, built from lesson filenames and catalog-builder metadata.</p>
-<p>For help, see <a href="../../docs/troubleshooting.md.html">Troubleshooting</a>.</p></article>
+<p>Start with the <a href="../../../lesson-pages/python-01.html#guide">Day 1 guide</a>. The source <a href="../../../lesson-pages/python-01.html#learner">notebook</a> remains available for an optional contributor/editor workflow; it is not an extra prerequisite for the browser classroom. The <a href="companion-guides/README.md.html">companion guide index</a> explains the source layout.</p>
+<h3 id="saved-work-and-returning">Saved work and returning<a class="heading-anchor" href="#saved-work-and-returning" aria-label="Link to this section">#</a></h3>
+<p>Wait for the pad&#x27;s saved confirmation before leaving. Browser source, notes, progress and results live in the current project&#x27;s Docker learning volume. They are separate from tracked notebooks and references. A successful example run is evidence for that source, not automatic proof of independent mastery.</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>Use the same project name and engine. See <a href="../../docs/docker-classroom.md.html#5-export-learning-work-and-the-database">backup and transfer</a> before deleting volumes or moving machines. A host <code>.learning/</code> directory used by contributor tools is separate and is not automatically merged with Docker.</p>
+<h3 id="optional-environments-and-extensions">Optional environments and extensions<a class="heading-anchor" href="#optional-environments-and-extensions" aria-label="Link to this section">#</a></h3>
+<p>Read the lesson capability notice before running advanced examples. A package being installed does not mean pretrained weights or sample data are cached. Prepare declared dependencies while connected or use the lesson&#x27;s documented local fallback; see <a href="../../docs/setup/offline.md.html">offline use</a>.</p>
+<p>After Python Day 15 and SQL Day 15, the <a href="../../bridge/README.md.html">engineering bridge</a> connects application boundaries, safe SQL, transactions, tests and pipelines. For notebook/editor work or repository checks, follow <a href="../../CONTRIBUTING.md.html">contributor setup</a> and <a href="../../docs/validation.md.html">validation</a>. Those checks distinguish structural correctness, executed references and learner understanding.</p>
+<p>An optional tutor can use the repository&#x27;s learning skill: ask it to guide <code>python-01</code>, review prerequisites and give hints before solutions. The course works without an AI account. See <a href="../../docs/learning-with-an-ai-tutor.md.html">learning with a tutor</a>.</p></article>
   </main>
 </body>
 </html>

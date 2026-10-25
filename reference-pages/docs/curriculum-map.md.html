@@ -162,18 +162,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/curriculum-map.md</code></p>
     </header>
     <article class="document"><h2 id="curriculum-map">Curriculum map<a class="heading-anchor" href="#curriculum-map" aria-label="Link to this section">#</a></h2>
-<p>DS60 contains two substantial 60-lesson cores, an eight-lesson engineering bridge, and 40 named foundation, professional, and specialization modules. The day number is an ordering key, not a promise that every learner should finish in that many calendar days.</p>
-<p>Use the repository environment directly so navigation does not depend on an activated shell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py catalog</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/course.py catalog</code></pre>
-<p>for the checked-in generated inventory in <code>curriculum/catalog.json</code>. The index is built from lesson artifact filenames plus metadata rules in <code>src/ds60sqlpy/catalog_builder.py</code>; do not edit the JSON by hand.</p>
+<p>DS60 combines the original Python and PostgreSQL cores, the engineering bridge, additional foundational/professional lessons and the full subject library in the <a href="../README.md.html">front README</a>. Day numbers are stable labels, not deadlines. This map explains the legacy data-science sequence; modern subjects have their own beginner-to-advanced track metadata and classroom journey.</p>
+<p>Use the classroom chooser for all subjects. In a prepared contributor environment, inspect the two complementary inventories without executing lessons:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py catalog
+uv run --no-sync python scripts/check_modules.py --json</code></pre>
+<p><code>curriculum/catalog.json</code> is generated from legacy artifacts and authoring metadata. Modern module/book admission comes from subject manifests. Do not edit generated catalogs or infer lesson counts from this overview. Windows contributors use WSL 2.</p>
 <h3 id="choose-a-path">Choose a path<a class="heading-anchor" href="#choose-a-path" aria-label="Link to this section">#</a></h3>
 <h4 id="new-to-programming-and-databases">New to programming and databases<a class="heading-anchor" href="#new-to-programming-and-databases" aria-label="Link to this section">#</a></h4>
 <ol>
@@ -227,7 +220,7 @@ $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyw
 <li>Companion guides: Days 1–60</li>
 <li>Markdown solutions: Days 1–60</li>
 <li>Solution notebooks: Days 1–60</li>
-<li>Named Python modules: 17, each with a guide and two solution artifacts</li>
+<li>Additional foundation, NumPy/pandas, algorithm and professional modules listed by the current catalog, each with its declared guide and solution artifacts</li>
 </ul>
 <p>The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.</p>
 <h3 id="postgresql-track">PostgreSQL track<a class="heading-anchor" href="#postgresql-track" aria-label="Link to this section">#</a></h3>
@@ -264,10 +257,9 @@ $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyw
 <li>Companion guides: Days 1–60</li>
 <li>Markdown solutions: Days 1–60</li>
 <li>Executable solution SQL: Days 1–60</li>
-<li>Relational engineering: 2 named modules after the relevant querying, transaction, and locking prerequisites</li>
-<li>Professional and specialization SQL: 10 named modules after the shared core</li>
+<li>Starter, relational-engineering, analytical and professional modules at their declared prerequisite checkpoints; consult the current SQL subject README</li>
 </ul>
-<p>Runnable material and the maintained high-level plan both target PostgreSQL 16 or newer.</p>
+<p>The packaged classroom uses PostgreSQL 17. The older high-level plan describes features available from PostgreSQL 16; validate against the prepared classroom version rather than assuming another server is equivalent.</p>
 <h3 id="python-postgresql-engineering-bridge">Python + PostgreSQL engineering bridge<a class="heading-anchor" href="#python-postgresql-engineering-bridge" aria-label="Link to this section">#</a></h3>
 <p>Track guide: <a href="../bridge/README.md.html">bridge/README.md</a></p>
 <div class="table-wrap"><table><thead><tr>
@@ -345,7 +337,7 @@ $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyw
 <p>For the audited gap record and implementation criteria, see the <a href="curriculum-gap-backlog.md.html">curriculum gap backlog</a>.</p>
 <p>The implemented named modules and recommended lanes are in <a href="professional-paths.md.html">Professional and specialization paths</a>.</p>
 <h3 id="guided-routes-and-the-new-correctness-labs">Guided routes and the new correctness labs<a class="heading-anchor" href="#guided-routes-and-the-new-correctness-labs" aria-label="Link to this section">#</a></h3>
-<p>Use <a href="learning-paths.md.html">learning paths</a> for placement and evidence checkpoints, or launch <a href="offline-app.md.html">the coding application</a>. The planner expands actual prerequisites, including beginner practice, instead of forcing every learner through every specialization. The generated catalog now includes 77 Python, 78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain stable.</p></article>
+<p>Use <a href="learning-paths.md.html">learning paths</a> for placement and evidence checkpoints, or launch <a href="classroom-experience.md.html">the coding application</a>. The planner expands actual prerequisites, including beginner practice, instead of forcing every learner through every specialization. The generated catalog now includes 77 Python, 78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain stable.</p></article>
   </main>
 </body>
 </html>

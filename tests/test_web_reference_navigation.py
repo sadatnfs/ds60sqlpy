@@ -12,7 +12,6 @@ def test_html_source_discovery_does_not_turn_the_course_home_into_a_code_dump(
         "START_HERE.html",
         "lesson-pages/python-001.html",
         "reference-pages/existing.md.html",
-        "src/ds60sqlpy/assets/journey_preview.html",
         "courses/web-development/lessons/web-001.html",
     ]
     for name in names:

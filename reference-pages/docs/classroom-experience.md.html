@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Your classroom, your learning path · DS60 reference</title>
+  <title>Learn in one classroom · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,32 +158,101 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Your classroom, your learning path</h1>
+      <h1>Learn in one classroom</h1>
       <p class="source-path">Generated from <code>docs/classroom-experience.md</code></p>
     </header>
-    <article class="document"><h2 id="your-classroom-your-learning-path">Your classroom, your learning path<a class="heading-anchor" href="#your-classroom-your-learning-path" aria-label="Link to this section">#</a></h2>
-<p>Start the local engine, run <code>./classroom</code> from the course folder, and use the browser address it prints. The opening <code>/classroom</code> page is the home for every subject. You can return to it whenever you want to change what you study.</p>
-<h3 id="choose-a-subject-and-a-starting-point">Choose a subject and a starting point<a class="heading-anchor" href="#choose-a-subject-and-a-starting-point" aria-label="Link to this section">#</a></h3>
-<p>Python, PostgreSQL, the Python/PostgreSQL engineering bridge, statistics and machine learning, C++, Java, JavaScript/TypeScript, Kubernetes, Scala/Spark, TensorFlow, PyTorch, NLP, LLM theory and applied LLM systems all belong to the same classroom. Subject names and individual color themes help you recognize where you are. The name remains visible alongside the color.</p>
-<p>Choose a beginner lesson when the vocabulary is new. Use prerequisites to review a missing concept before a harder chapter. If you already know the foundations, you can open an intermediate or advanced lesson directly. You can follow one path, alternate complementary subjects, or pause a path and return later. The historical sixty-day names are an ordering convention. Estimated study times are planning aids, not deadlines or a required pace.</p>
-<p>The <a href="learning-paths.md.html">learning paths</a> suggest useful combinations. The <a href="learning/llm-textbook.md.html">LLM textbook route</a> connects 48 mechanism chapters with 24 applied chapters. The statistics book is a reference as well as a sequential course, so you can return to a method when a project needs it.</p>
-<h3 id="read-the-explanation-and-inspect-the-example">Read the explanation and inspect the example<a class="heading-anchor" href="#read-the-explanation-and-inspect-the-example" aria-label="Link to this section">#</a></h3>
-<p>The lesson workspace contains its guide and the tools appropriate to that lesson. Mathematical expressions use typeset fractions, powers, indices, vectors and matrices. A formula is accompanied by its assumptions and symbol definitions; rendering does not replace an explanation. Code blocks use their stated language for syntax highlighting and remain copyable. Mathematical rendering and highlighting use local resources, so reading needs no CDN.</p>
-<p>Reading focus gives long explanations more space. You can switch back to the coding view when an example calls for execution. Keep the example&#x27;s declared input, expected observation and limitation together. A small deterministic calculation explains a mechanism; it does not establish a model&#x27;s real-world accuracy or a system&#x27;s production capacity.</p>
-<h3 id="use-the-lesson-s-execution-contract">Use the lesson&#x27;s execution contract<a class="heading-anchor" href="#use-the-lesson-s-execution-contract" aria-label="Link to this section">#</a></h3>
-<p>The capability notice tells you what the selected lesson can run. A compiler lesson, a PostgreSQL script, a notebook and a theory worksheet have different requirements. Do not paste a whole notebook JSON document into a Python pad. Read SQL preparation and transaction notes before running a script, and use only the disposable course database. Kubernetes operations and optional model downloads remain explicit, bounded lesson workflows.</p>
-<p>C, C++, Go, C#, Rust, Swift and Java compile before they run. Read compiler diagnostics from the first error, make one correction, and run again. Node runs server-side JavaScript; TypeScript undergoes type checking and compilation first. The D3 specialization runs real SVG/Canvas code in an isolated browser preview with the library bundled locally. Its saved console output is labeled as a client observation, not server-side verification. History does not recreate or rerun the chart. Framework and Spark lessons use their declared Docker workers. A readiness failure identifies an unavailable runtime; it does not mean your written answer is wrong.</p>
-<p>A new default project prepares all sixteen ordinary workers. For a smaller build, use <code>./classroom --starter</code> and follow a lesson&#x27;s runtime preparation notice when you need another profile. Later <code>./classroom</code> starts remember that selection, reuse images and resume existing containers. Use <code>./classroom --all</code> to select all ordinary workers, <code>./classroom resume</code> to prohibit builds and pulls, or <code>./classroom --rebuild</code> to install updated sources. The <a href="one-command-classroom.md.html">startup guide</a> explains selection, logs and saved work.</p>
-<p>HTML/CSS and browser JavaScript/D3 workspaces also offer an opt-in <strong>Live preview</strong>. Edit the source to update the preview after a short pause, choose a viewport size, and use Pause or Stop when you want to inspect or leave a result. Automatic updates do not fill saved history. Use a manual Run or explicitly save an observation when you want a durable record of the submitted source and console output. Reloading a page restores your draft with live execution turned off. Node and TypeScript compiler workspaces retain their explicit Run behavior.</p>
-<p>PHP examples run as CLI programs with SQLite support. Real cookies, HTTP sessions and multi-file server applications use the separate project fixture described in the web course. CUDA chapters remain readable without an NVIDIA GPU and include portable CPU models; optional GPU execution requires its own explicit setup.</p>
-<h3 id="keep-your-own-evidence-and-pace">Keep your own evidence and pace<a class="heading-anchor" href="#keep-your-own-evidence-and-pace" aria-label="Link to this section">#</a></h3>
-<p>Save your code and notes before changing direction. For programming practice, write a prediction, attempt the task, inspect its output and record what you learned. Hints and separate solutions support comparison after an attempt. The statistics and machine learning book is a tutorial: examples and interview answers are complete, without exams, withheld answers or a prediction gate.</p>
-<p>A progress marker is your record of study, not a certification of expertise. You can revisit an earlier chapter or experiment with a new example whenever it helps. Changing subjects does not rename the lesson or intentionally reset its saved work. Old lesson identifiers remain stable through the UI migration.</p>
-<p><strong>Saved runs</strong> keeps durable Python and SQL run receipts in the learning volume, including the submitted source and recorded output. The workspace restores the latest receipt when you return, and you can inspect earlier runs without re-executing their code or overwriting the current pad. Source version history is separate: an edited or saved source version does not imply that it ran.</p>
-<p>The normal Docker classroom stores progress and working data in named Docker volumes. <code>./classroom stop</code> preserves those volumes; rebuilding images also preserves them. Deleting volumes is different from pruning unused images. Follow <a href="one-command-classroom.md.html">backup and transfer instructions</a> before moving between machines or between the old host-folder workflow and the standard Docker classroom. A full learning-volume backup includes saved code, notes and run output, including receipts under <code>classroom-runs</code>. The older completion-JSON export contains completion markers; it is not a full workspace backup.</p>
-<h3 id="existing-bookmarks-and-offline-reading">Existing bookmarks and offline reading<a class="heading-anchor" href="#existing-bookmarks-and-offline-reading" aria-label="Link to this section">#</a></h3>
-<p><code>/learn</code>, <code>/journeys</code> and <code>/journey-preview</code> are compatibility entrypoints for the same classroom. Use <code>/classroom</code> in new bookmarks and documentation. A previous subject or lesson identifier can still identify saved work even though the opening page has changed.</p>
-<p><code>START_HERE.html</code> and the generated readers remain useful as a static offline library. They cannot start a compiler or database from a browser file URL. Native editor/Jupyter launchers are optional tools for a separately prepared environment. They are not additional required steps after <code>./classroom</code>.</p></article>
+    <article class="document"><h2 id="learn-in-one-classroom">Learn in one classroom<a class="heading-anchor" href="#learn-in-one-classroom" aria-label="Link to this section">#</a></h2>
+<p>Start your local Linux-container engine, run <code>./classroom</code> in the course folder and open the URL it prints. The <code>/classroom</code> home lets you choose any registered subject and return to it at your own pace.</p>
+<h3 id="choose-a-path">Choose a path<a class="heading-anchor" href="#choose-a-path" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Area</th>
+<th>Subjects</th>
+</tr></thead><tbody>
+<tr>
+<td>Programming and interfaces</td>
+<td>Python, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript with D3, HTML/CSS/PHP web development</td>
+</tr>
+<tr>
+<td>Data and statistical work</td>
+<td>PostgreSQL, the Python/PostgreSQL engineering bridge, statistics and machine learning, Scala/Apache Spark</td>
+</tr>
+<tr>
+<td>Learning systems and language models</td>
+<td>TensorFlow, PyTorch, NLP, LLM theory, applied LLM systems</td>
+</tr>
+<tr>
+<td>Infrastructure and acceleration</td>
+<td>Docker, Kubernetes, GPU computing and CUDA</td>
+</tr>
+</tbody></table></div>
+<p>Use <strong>All learning paths</strong> or <strong>Switch subject</strong> to change direction. Subject names and individual color themes identify the current path. Search within a path, filter its stage or choose a lesson from the list. A filter changes what you see; it does not erase your current draft.</p>
+<p>Start with a beginner lesson when the vocabulary is new. Prerequisites are helpful review links. Historical day numbers and estimated sessions are planning aids, not deadlines. Follow a long explanation over several sittings if useful. The <a href="learning-paths.md.html">learning paths</a> suggest combinations, and <a href="learning/llm-textbook.md.html">the LLM textbook route</a> connects mechanisms with applied systems. The statistics book also works as a reference.</p>
+<h3 id="read-the-explanation">Read the explanation<a class="heading-anchor" href="#read-the-explanation" aria-label="Link to this section">#</a></h3>
+<p>A lesson puts its guide beside its coding or reading workspace. Mathematics renders with fractions, powers and indices. Code blocks are highlighted by language and remain copyable. Those resources are bundled locally.</p>
+<p>Use <strong>Focus on reading</strong> for a wider explanation and <strong>Show code and notes</strong> to return to practice. The section chooser jumps within a long guide. Keep each example&#x27;s input, expected observation and limitation together. A tiny demonstration teaches a mechanism; its success does not establish production scale or model quality.</p>
+<p>Programming practice offers predictions, exercises, hints and separate solutions. Reveal a solution when you want to compare with your attempt. The statistics/ML tutorial gives complete worked examples and answered discussion directly, without mandatory exams or hidden answers.</p>
+<h3 id="choose-the-right-execution-environment">Choose the right execution environment<a class="heading-anchor" href="#choose-the-right-execution-environment" aria-label="Link to this section">#</a></h3>
+<p>The capability notice describes the selected lesson or variant. A runtime can be unavailable while the guide and your saved source remain readable. Follow its preparation command instead of installing tools inside the pad.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Workspace</th>
+<th>What a Run does</th>
+</tr></thead><tbody>
+<tr>
+<td>Python</td>
+<td>Executes current source in a fresh process; supported notebook-style cells share state only within that Run</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>Runs a SQL snippet or the selected guarded whole-script psql workflow</td>
+</tr>
+<tr>
+<td>C, C++, Go, C#, Rust, Swift, Java, Scala</td>
+<td>Compiles the declared single-source artifact before execution</td>
+</tr>
+<tr>
+<td>Node JavaScript / TypeScript</td>
+<td>Runs Node code, or checks and compiles TypeScript before Node execution</td>
+</tr>
+<tr>
+<td>HTML/CSS or browser JavaScript/D3</td>
+<td>Opens a separate browser preview with local inline code and bundled resources</td>
+</tr>
+<tr>
+<td>PHP</td>
+<td>Executes a fresh CLI program with prepared PDO SQLite; generated HTML is text output</td>
+</tr>
+<tr>
+<td>TensorFlow, PyTorch and Spark</td>
+<td>Uses the selected prepared CPU worker for bounded local examples</td>
+</tr>
+<tr>
+<td>Reading</td>
+<td>Saves reasoning and notes without an invented execution action</td>
+</tr>
+</tbody></table></div>
+<p>Do not paste raw notebook JSON into a Python pad. Keep <code># %%</code> markers in supported notebook-style source. In SQL, distinguish ordinary statements from psql backslash commands, and read the fixture and transaction contract first.</p>
+<p>Compiled-language workers choose filenames and compiler arguments for you. Read the first diagnostic, change one thing and retry. Larger multi-file builds, interactive servers and project-specific dependencies use their separately documented fixtures.</p>
+<p>CUDA reading and CPU-model variants work without an NVIDIA device. Optional NVIDIA variants require explicit setup and a real device probe. A CPU calculation, a compiled kernel and measured GPU execution establish different facts. Kubernetes similarly requires an explicitly owned target. Opening a lesson does not create a cluster or download pretrained models.</p>
+<h3 id="explore-in-the-preview-studio">Explore in the preview studio<a class="heading-anchor" href="#explore-in-the-preview-studio" aria-label="Link to this section">#</a></h3>
+<p>HTML/CSS and browser JavaScript/D3 provide an optional <strong>Live preview</strong> switch. Turn it on deliberately for the current workspace. Edits refresh after a short pause in typing, and errors appear in the console.</p>
+<p>Use <strong>Focus on editor &amp; preview</strong> to place them side by side on a wide screen; they stack on a narrow screen. <strong>Return to lesson layout</strong> brings the guide back. Desktop, Tablet, Phone and Fit to space resize the same preview without rerunning it. <strong>View console</strong> moves to the output, and fullscreen changes presentation only.</p>
+<p><strong>Pause updates</strong> keeps the last rendered version while you edit. <strong>Resume updates</strong> renders the current draft. <strong>Stop preview</strong> closes the frame and cancels queued updates. Leaving the lesson, viewing a past result or reloading turns live execution off.</p>
+<p>Automatic previews do not create saved-run records. <strong>Run browser preview</strong> leaves live mode and saves its exact submitted source with its observation. <strong>Save observation</strong> keeps the current rendered source/output and pauses automatic updates. Ordinary draft saving continues independently.</p>
+<p>The preview supports inline scripts, native HTML parsing and real browser lifecycle events. External scripts/imports, network data, real form submission and navigation metadata are outside its contract. Use the web course&#x27;s separate loopback server project for real HTTP sessions. Browser observations are client-reported results, not independent backend verifier evidence.</p>
+<h3 id="save-work-and-understand-history">Save work and understand history<a class="heading-anchor" href="#save-work-and-understand-history" aria-label="Link to this section">#</a></h3>
+<p>The classroom keeps work separate by lesson, language, variant and SQL mode. <strong>Save work</strong> records the current draft and notes; ordinary edits also schedule a save. Wait for the saved confirmation before closing. If a server save fails, the interface tells you whether a recoverable browser draft remains. Keep a copy until server saving is confirmed.</p>
+<p><strong>Saved runs</strong> stores the source and output from a particular execution or explicit browser observation. Reading history does not rerun that source or replace your current edit. A saved run can describe an older version than the draft visible in the editor.</p>
+<p>Python/SQL workspaces offer earlier saved pad versions where supported. Modern module pads retain their current source and recorded run snapshots; do not assume every keystroke creates an immutable version. Restoring or copying earlier source differs from inspecting earlier output.</p>
+<p>Progress markers record your learning choices. A tutorial read marker is a bookmark. A reference run and a completion mark do not certify independent mastery; explanation and transfer to a new case provide additional evidence.</p>
+<h3 id="return-to-the-same-learning-data">Return to the same learning data<a class="heading-anchor" href="#return-to-the-same-learning-data" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>Stopping keeps project volumes. Strict resume never builds or pulls. Normal <code>./classroom</code> can prepare missing images. Install changed local sources with <code>./classroom --local-build --rebuild</code>.</p>
+<p>Keep the same engine and project name. Repeat a custom <code>--project NAME</code> on each command. The learning volume stores pads, notes, history and progress; PostgreSQL tables use another volume. The checkout&#x27;s <code>.classroom/</code> directory stores launcher preferences, not a backup of either volume.</p>
+<p>See <a href="one-command-classroom.md.html">startup and recovery</a> and <a href="one-command-classroom.md.html#backup-and-transfer">backup and transfer</a>. A source ZIP, Docker image and learning-data backup serve different purposes.</p>
+<h3 id="read-offline-or-study-with-a-companion">Read offline or study with a companion<a class="heading-anchor" href="#read-offline-or-study-with-a-companion" aria-label="Link to this section">#</a></h3>
+<p><code>START_HERE.html</code> and generated readers provide static offline reading after the full source folder is downloaded. They cannot execute a compiler or database from a browser file URL. Existing <code>/learn</code> and <code>/journeys</code> bookmarks resolve to the unified classroom; use <code>/classroom</code> for new links.</p>
+<p>An assistant can use the learning companion skill to explain a guide and review the attempt you share. The optional <a href="mcp-tutor.md.html">MCP tutor</a> reads checked-in curriculum and has no code execution. It cannot silently inspect a Docker-volume pad. Learning requires no AI service.</p></article>
   </main>
 </body>
 </html>

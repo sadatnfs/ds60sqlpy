@@ -5,19 +5,11 @@ foundations and professional practice that do not fit honestly into one more
 linear countdown. The generated catalog is the source of truth for exact
 prerequisites and artifact paths:
 
-```powershell
-# Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py catalog
-```
+The classroom lists these routes with their prerequisites. Contributors can
+inspect the legacy catalog with their prepared POSIX/WSL interpreter:
 
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py catalog
+```sh
+uv run --no-sync python scripts/course.py catalog
 ```
 
 Choose a lane from demonstrated prerequisites. You do not need every
@@ -106,21 +98,23 @@ A module is complete when the learner can:
 4. distinguish local/fake evidence from any optional live or platform-specific
    evidence.
 
-Use the exact stable ID when recording optional progress. On Windows, reuse
-the `$CoursePython` value resolved at the top of this page; rerun that resolver
-first if this is a new PowerShell window.
+Record classroom progress in the browser lesson workspace when that is where
+you studied. Its pads, notes and progress remain in the project's Docker
+learning volume.
 
-```powershell
-# Windows PowerShell
-& $CoursePython scripts\course.py progress complete python-pro-01 `
-    --notes "Built and inspected a wheel from a clean target."
-```
+The contributor CLI maintains separate progress in this checkout's ignored
+`.learning/` directory. It does not update Docker-volume progress. If you
+intentionally studied through the prepared contributor workflow, use the exact
+stable lesson ID and record your own evidence from the repository root in
+Bash on Linux/macOS or Windows WSL 2:
 
 ```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py progress complete python-pro-01 \
+uv run --no-sync python scripts/course.py progress complete python-pro-01 \
   --notes "Built and inspected a wheel from a clean target."
 ```
+
+This records your chosen completion; it does not execute the exercise or
+certify mastery. Do not mark completion merely because a reference ran.
 
 ## Beginner confidence before professional work
 
@@ -146,15 +140,15 @@ independent investigation without requiring an advanced library.
 These modules extend the earlier lanes. Generate their exact routes rather
 than guessing prerequisites from a day label:
 
-```powershell
-& $CoursePython scripts\course.py plan bridge-capstone-01 --weekly-hours 5
-```
+For a prepared contributor environment, this command only reads the catalog
+and prints the route. It does not run code, install dependencies or change
+browser progress:
 
 ```bash
-.venv/bin/python scripts/course.py plan bridge-capstone-01 --weekly-hours 5
+uv run --no-sync python scripts/course.py plan bridge-capstone-01 --weekly-hours 5
 ```
 
-The same goal appears in the [guided coding application](offline-app.md).
+The same goal appears in the [guided coding application](classroom-experience.md).
 See [placement and learning paths](learning-paths.md) before skipping beginner
 practice. Consult the generated catalog for each module's guide and learner
 file instead of maintaining another manually copied artifact inventory here.

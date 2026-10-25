@@ -46,7 +46,7 @@ jobs:
       - name: Build the fixed fixture and Kubernetes worker before starting the lease
         run: |
           docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
-          docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.0 .
+          docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.1 .
       - name: Prepare pinned host tools with official checksum verification
         run: >-
           uv run --no-sync python scripts/prepare_kubernetes.py tools

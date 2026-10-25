@@ -7,3 +7,9 @@ Default execution is offline after deliberately prepared NumPy/PyTorch dependenc
 Treat retrieved text and tool proposals as untrusted data. Enforce access policy before retrieval, retain provenance and offsets, separate statistical computation from generated prose, and evaluate task utility independently of fluency. QLoRA-style CPU demonstrations must state exactly which quantization/storage/gradient behavior they implement and which GPU/NF4/memory properties they do not measure.
 
 Use exact references from primary papers and versioned official documentation. Update the authoring specifications as well as generated lesson bundles. No em dashes.
+
+Read [authoring/README.md](authoring/README.md) for full versus guides-only
+regeneration and immutable program evidence. Connect subject-matter work to
+retrieval provenance, held-out task evaluation and adaptation rather than claiming
+that fine-tuning stores an authoritative database. GPU memory/performance and
+framework device mechanics belong to the [CUDA route](../cuda/README.md).

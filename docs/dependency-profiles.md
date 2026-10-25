@@ -1,96 +1,72 @@
-# Catalog dependency labels and setup profiles
+# Dependencies and execution profiles
 
-The catalog's `dependency_group` is a learner-facing readiness label. It is not
-always the name of a `pyproject.toml` extra. Do not blindly turn every catalog
-value into `pip install -e ".[VALUE]"`.
+Three kinds of names appear in DS60. They answer different questions:
 
-| Catalog label | What the lesson needs | How to prepare |
-|---|---|---|
-| `core` | Python standard library and course tools | Run the normal setup script |
-| `data` | NumPy, pandas, plotting, statistics, and scikit-learn | Run the normal setup script |
-| `postgres` | The disposable PostgreSQL course database and `psql` | Follow the [PostgreSQL setup](../sql/postgres-60day/README.md) |
-| `bridge` | psycopg, pooling, and Python/PostgreSQL integration | Included in normal Core setup |
-| `professional` | Packaging (`build`, `pip`, `setuptools`, and `wheel`), Arrow/Parquet, DuckDB, and property-based tests | Included in normal Core setup |
-| `quality` | pytest, Hypothesis-aware test tooling, type checking, and linting | Included in Core, including the `professional` extra for Hypothesis |
-| `sql-notebooks` | Jupyter SQL magics, pandas result conversion, SQLAlchemy, and the Psycopg 3 PostgreSQL driver | Included in normal Core setup |
-| `geo` | Geospatial Python packages | Run advanced setup, or install the `geo` extra |
-| `ml` | Optional advanced machine-learning libraries | Run advanced setup, or install the `ml` extra |
-| `production` | FastAPI, Dask, MLflow, and Prefect | Run advanced setup, or install the `production` extra |
-| `deep-learning` | PyTorch and torchvision | Run advanced setup, or install the `deep-learning` extra |
-| `nlp` | Transformers, datasets, evaluation, and spaCy | Run advanced setup, or install the `nlp` extra |
-| `advanced` | Capstone readiness across several optional groups | Run the aggregate advanced setup; there is intentionally no `advanced` extra |
+| Name | Meaning | Source of truth |
+| --- | --- | --- |
+| Legacy `dependency_group` | Packages or services a Python/SQL/bridge lesson needs | `curriculum/catalog.json` |
+| Module `runtime_profile` | The fixed environment for one lesson variant | `courses/*/lessons.json` and the runtime registry |
+| Python project extra | Optional packages for a prepared Python environment | `pyproject.toml` and `uv.lock` |
 
-The `deep-learning` extra uses platform markers rather than assuming one wheel
-works everywhere. Windows and Linux use the current compatible
-PyTorch/TorchVision pair. Intel macOS uses the final published Intel-wheel
-pair, while Apple Silicon uses a pair that remains installable on macOS 13.
-These versions still support the tensor, training-loop, and transfer-learning
-APIs used by the course.
+Do not turn a label into an installation command without checking its contract.
+For example, `postgres` means a database/client capability, while `advanced` is
+an aggregate readiness label. Neither is an installable Python extra.
 
-The setup scripts are the simplest route:
+## Learners use prepared Docker runtimes
 
-```powershell
-# Windows PowerShell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1 -Profile Advanced
+Start with `./classroom`. A new project prepares all ordinary workers. Use
+`./classroom --starter` for the app, PostgreSQL and Python Core, or select specific
+additional profiles. The selection is remembered. See [runtime profiles](modules-runtime.md)
+and the [launcher guide](one-command-classroom.md).
 
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
+Python Core, TensorFlow, PyTorch and PySpark are different prepared environments.
+Selecting Python does not imply every library is installed. Opening a chapter or
+pressing Run never installs arbitrary dependencies. HTML/CSS and browser JavaScript/D3
+use the isolated browser preview; PHP uses its CLI worker with SQLite. Optional
+CUDA and cluster operations require their separate explicit preparation.
+
+## Legacy readiness labels
+
+| Label | Capability |
+| --- | --- |
+| `core` | Python standard library and course tools |
+| `data` | NumPy, pandas, plotting, statistics and scikit-learn |
+| `bridge` | Psycopg and Python/PostgreSQL integration |
+| `professional` | Packaging, Arrow/Parquet, DuckDB and property-based testing |
+| `quality` | Contributor tests, typing and linting |
+| `sql-notebooks` | JupySQL, SQLAlchemy and a PostgreSQL driver |
+| `postgres` | Disposable course PostgreSQL and `psql` |
+| `ml`, `production`, `geo`, `deep-learning`, `nlp` | Corresponding optional packages and separately declared assets |
+| `advanced` | Several optional capabilities, determined by the lesson |
+
+Core packages do not make every framework, server application or model workflow
+runnable in a single-file pad. Use the declared worker or external project.
+[Docker package options](docker-profiles.md) explains app-image customization
+when a legacy Python lesson needs an additional package group.
+
+## Contributor environments
+
+Follow [CONTRIBUTING.md](../CONTRIBUTING.md). The POSIX setup helper supports:
+
+```sh
+bash scripts/setup.sh --dependency-mode locked
+bash scripts/setup.sh --advanced --dependency-mode locked
 ```
 
-```bash
-# macOS or Linux
-bash scripts/setup.sh --advanced
-```
+Locked mode requires an existing `uv` installation. Project mode resolves declared
+requirements without reproducing the lock and is not evidence for the locked release.
+Automatic mode reports the tool it selects. Existing environments are validated,
+not silently replaced. Windows contributors run these commands in WSL 2.
 
-Maintainers or learners conserving disk space may install one exact extra
-after the normal setup has installed the shared notebook/data/quality
-baseline:
+`uv sync` synchronizes selected extras exactly. A later smaller selection can remove
+previously installed packages. Keep the intended extras in your command. Source,
+learner work, database data and caches are separate from installed packages.
 
-```powershell
-# Example on Windows
-& $CoursePython -m pip install -e ".[bridge]"
-```
+The root project and individual workers have different reviewed locks. Compiler
+versions, packages and source limits come from Dockerfiles and runtime adapters,
+not the host's installed tools. Platform markers describe dependency selection;
+a resolved lock does not prove execution on that platform.
 
-```bash
-# Example on macOS or Linux
-.venv/bin/python -m pip install -e ".[bridge]"
-```
-
-Replace `bridge` only with a real extra listed in `pyproject.toml`. First-run
-data/model downloads are separate from package installation; consult the
-lesson's catalog `network` value and companion guide before going offline.
-
-## Installation modes and evidence
-
-Windows bootstrap accepts `-DependencyMode Auto`, `Locked`, or `Project`.
-macOS/Linux setup accepts `--dependency-mode auto`, `locked`, or `project`.
-Auto uses an existing standalone `uv` installation; otherwise pip resolves
-project declarations. Locked requires `uv` and verifies agreement between
-`uv.lock` and `pyproject.toml`. Project does not reproduce exact locked versions.
-
-`uv sync` performs exact synchronization. Running Core after Advanced in locked
-mode removes packages outside the selected Core profile. Choose Advanced again
-when you need all optional groups. Source files, notebooks, progress, and
-datasets are separate from installed packages. See
-[uv locking and syncing](https://docs.astral.sh/uv/concepts/projects/sync/).
-
-Both setup paths validate and reuse the repository environment; they do not
-replace a broken `.venv` automatically. The POSIX script expects
-`.venv/bin/python`. Virtual environments depend on their base interpreter and
-location: copy source and recreate `.venv` rather than copying an environment
-to another machine. See [Python venv](https://docs.python.org/3.12/library/venv.html).
-
-The supported course range remains Python 3.11-3.12. Binary packages also depend
-on OS and CPU. A lock resolution for another platform proves dependency
-selection, not native execution there. Advanced imports do not download or
-verify model assets. Check the actual CI run before treating a configured
-matrix job as passing evidence.
-
-Docker users can add exact optional groups without changing the lightweight
-Core default. See [optional Docker profiles](docker-profiles.md) for explicit
-build commands, CPU wheel selection, memory limits, disk use, and model/data
-cache boundaries.
+Weights, tokenizer assets, spaCy pipelines, map tiles and external services need
+the exact preparation declared by their lessons. Verify offline assets separately
+from package import success.

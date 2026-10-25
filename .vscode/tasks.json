@@ -2,49 +2,29 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Course: Guided start (Windows)",
+      "label": "Course: Docker classroom",
       "type": "process",
-      "command": "powershell.exe",
-      "args": [
-        "-NoLogo",
-        "-NoProfile",
-        "-ExecutionPolicy",
-        "Bypass",
-        "-File",
-        "${workspaceFolder}\\scripts\\start_ds60.ps1"
-      ],
+      "command": "bash",
+      "args": ["scripts/classroom.sh"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
     {
-      "label": "Course: Guided coding lab",
+      "label": "Course: Contributor classroom",
       "type": "process",
       "command": "${command:python.interpreterPath}",
-      "args": ["scripts/learning_lab.py"],
+      "args": ["scripts/course.py", "serve"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },
     {
-      "label": "Course: Setup",
+      "label": "Course: Contributor setup (POSIX / WSL)",
       "type": "shell",
       "command": "bash scripts/setup.sh",
-      "windows": {
-        "command": "powershell -ExecutionPolicy Bypass -File .\\scripts\\bootstrap_windows.ps1"
-      },
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Course: Learning portal",
-      "type": "process",
-      "command": "${command:python.interpreterPath}",
-      "args": ["scripts/learning_portal.py"],
       "options": {
         "cwd": "${workspaceFolder}"
       },

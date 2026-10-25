@@ -5,12 +5,12 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 All 66 lessons have authored guides, learner artifacts, six inspectable exercises and separate explanations. The bounded browser profile executes only its reviewed Deployment/Service/ConfigMap or finite Job contract. Advanced activities are complete offline and host-lab lessons with explicit missing-capability boundaries, not invented browser execution.
 
-Use [host-labs.md](host-labs.md) for exact targeting, 15-minute lease timing, observation and cleanup. Use the [preparation guide](../../docker/kubernetes/README.md) for the actual owned runtime. The [status record](../../docs/implementation/kubernetes-content-status.md) separates local content tests, real contract-2 runtime receipts and unqualified advanced host capabilities.
+Use [host-labs.md](host-labs.md) for exact targeting, 15-minute lease timing, observation and cleanup. Use the [preparation guide](../../docker/kubernetes/README.md) for the actual owned runtime. The [validation guide](../../docs/validation.md) distinguishes local content checks, actual owned-cluster execution and separately prepared host capabilities. Consult CI artifacts for the exact revision and platform before claiming runtime acceptance.
 
 ## Lesson sequence
 

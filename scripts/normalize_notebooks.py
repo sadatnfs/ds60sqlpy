@@ -26,6 +26,154 @@ DAY_PATTERN: Final = re.compile(r"day(?P<day>\d{2})_")
 DAY55_BROKEN_PAYLOAD: Final = """-d '{"features": [5.1, 3.5, 1.4, 0.2]}'"""
 DAY55_REPAIRED_PAYLOAD: Final = """-d '{\\"features\\": [5.1, 3.5, 1.4, 0.2]}'"""
 
+DAY1_ENVIRONMENT_GUIDE: Final = (
+    "## 1) Choose the classroom or an optional notebook environment\n"
+    "\n"
+    "For ordinary browser study, run `./classroom` from the repository "
+    "root and choose Python and data science. Docker supplies Python and "
+    "packages; no host Python setup is required.\n"
+    "\n"
+    "The following is an optional contributor notebook workflow in Bash "
+    "on Linux/macOS or Ubuntu in Windows WSL 2. Prepare Python 3.12 and "
+    "uv outside the repository virtual environment as described in "
+    "`CONTRIBUTING.md`, then run from the repository root:\n"
+    "\n"
+    "```bash\n"
+    "bash scripts/setup.sh --dependency-mode locked\n"
+    "uv run --no-sync python scripts/course.py doctor --no-database\n"
+    "uv run --no-sync python -m jupyter lab python/ds-60day/notebooks\n"
+    "```\n"
+    "\n"
+    "The setup script prepares the locked Core dependencies and "
+    "registers Python (ds60sqlpy). Select that kernel and confirm that "
+    "`sys.executable` points to this checkout's `.venv/bin/python`. "
+    "Activation is optional. Host notebooks and CLI progress are "
+    "separate from Docker-volume pads and progress."
+)
+
+DAY1_REPL_GUIDE: Final = (
+    "## 2) Python REPL basics\n"
+    "A REPL is an interactive Python prompt. In the separately prepared "
+    "contributor environment, run this from the repository root in Bash "
+    "on Linux/macOS or Windows WSL 2:\n"
+    "\n"
+    "```bash\n"
+    "uv run --no-sync python\n"
+    "```\n"
+    "\n"
+    "At the `>>>` prompt, try the expressions below. Enter `exit()` when "
+    "finished. The browser coding pad executes a submitted program in a "
+    "fresh process; it is not a persistent terminal REPL."
+)
+
+DAY1_SCRIPT_GUIDE: Final = (
+    "Run the file with the prepared contributor interpreter from the "
+    "repository root in Bash on Linux/macOS or Windows WSL 2:\n"
+    "\n"
+    "```bash\n"
+    "uv run --no-sync python hello.py\n"
+    "```\n"
+    "\n"
+    "Below we reproduce similar logic in this notebook cell."
+)
+
+DAY1_PACKAGES_GUIDE: Final = (
+    "## 4) Inspecting packages in the course environment\n"
+    "The prepared Core environment includes NumPy and pandas. Inspect "
+    "their installed versions with the same interpreter, without an ad "
+    "hoc installation:\n"
+    "\n"
+    "```bash\n"
+    'uv run --no-sync python -c "from importlib.metadata import version; '
+    "print(version('numpy')); print(version('pandas'))\"\n"
+    "```\n"
+    "\n"
+    "Run this in Bash on Linux/macOS or Windows WSL 2 after contributor "
+    "setup. Maintainers declare dependencies in `pyproject.toml` and the "
+    "lock; learners follow the documented dependency profile rather than "
+    "installing packages inside notebook cells."
+)
+
+# Recognize previously normalized Markdown without emitting retired launchers.
+# These legacy inputs are migration data, never suggested execution commands.
+DAY1_SETUP_REPAIRS: Final[tuple[tuple[str, str], ...]] = (
+    (
+        (
+            "## 1) Create the course environment from the repository root\n"
+            "\n"
+            "Windows PowerShell:\n"
+            "```powershell\n"
+            "powershell -ExecutionPolicy Bypass -File .\\scripts\\setup.ps1\n"
+            ".\\.venv\\Scripts\\python.exe scripts\\course.py doctor\n"
+            "```\n"
+            "macOS/Linux:\n"
+            "```bash\n"
+            "bash scripts/setup.sh\n"
+            ".venv/bin/python scripts/course.py doctor\n"
+            "```\n"
+            "\n"
+            "Activation is optional. In VS Code, select the interpreter inside "
+            "`.venv` as both the Python interpreter and notebook kernel."
+        ),
+        DAY1_ENVIRONMENT_GUIDE,
+    ),
+    (
+        (
+            "## 2) Python REPL basics\n"
+            "A REPL is an interactive Python prompt. Start the interpreter that "
+            "belongs to this repository:\n"
+            "\n"
+            "Windows PowerShell:\n"
+            "```powershell\n"
+            ".\\.venv\\Scripts\\python.exe\n"
+            "```\n"
+            "macOS/Linux:\n"
+            "```bash\n"
+            ".venv/bin/python\n"
+            "```\n"
+            "At the `>>>` prompt, try the expressions below. Enter `exit()` when you are finished."
+        ),
+        DAY1_REPL_GUIDE,
+    ),
+    (
+        (
+            "Run it with the repository interpreter:\n"
+            "\n"
+            "Windows PowerShell:\n"
+            "```powershell\n"
+            ".\\.venv\\Scripts\\python.exe hello.py\n"
+            "```\n"
+            "macOS/Linux:\n"
+            "```bash\n"
+            ".venv/bin/python hello.py\n"
+            "```\n"
+            "\n"
+            "Below we reproduce similar logic in this notebook cell."
+        ),
+        DAY1_SCRIPT_GUIDE,
+    ),
+    (
+        (
+            "## 4) Inspecting packages in the course environment\n"
+            "The setup script already installed NumPy and pandas. Verify them "
+            "through the same interpreter instead of using a bare `pip` command:\n"
+            "\n"
+            "Windows PowerShell:\n"
+            "```powershell\n"
+            ".\\.venv\\Scripts\\python.exe -m pip show numpy pandas\n"
+            "```\n"
+            "macOS/Linux:\n"
+            "```bash\n"
+            ".venv/bin/python -m pip show numpy pandas\n"
+            "```\n"
+            "Maintainers add course dependencies to `pyproject.toml`; learners "
+            "normally rerun the setup script rather than installing ad hoc "
+            "packages."
+        ),
+        DAY1_PACKAGES_GUIDE,
+    ),
+)
+
 SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
     "python/ds-60day/notebooks/day01_setup_and_repl.ipynb": (
         (
@@ -58,19 +206,7 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
             "```bash\n"
             "jupyter lab\n"
             "```",
-            "## 1) Create the course environment from the repository root\n\n"
-            "Windows PowerShell:\n"
-            "```powershell\n"
-            "powershell -ExecutionPolicy Bypass -File .\\scripts\\setup.ps1\n"
-            ".\\.venv\\Scripts\\python.exe scripts\\course.py doctor\n"
-            "```\n"
-            "macOS/Linux:\n"
-            "```bash\n"
-            "bash scripts/setup.sh\n"
-            ".venv/bin/python scripts/course.py doctor\n"
-            "```\n\n"
-            "Activation is optional. In VS Code, select the interpreter inside "
-            "`.venv` as both the Python interpreter and notebook kernel.",
+            DAY1_ENVIRONMENT_GUIDE,
         ),
         (
             "- Use pip to install packages.",
@@ -88,33 +224,12 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
             "## 2) Python REPL basics\n"
             "Type `python` or `python3` in your terminal to open an interactive "
             "shell (REPL). Try some math and string operations.",
-            "## 2) Python REPL basics\n"
-            "A REPL is an interactive Python prompt. Start the interpreter that "
-            "belongs to this repository:\n\n"
-            "Windows PowerShell:\n"
-            "```powershell\n"
-            ".\\.venv\\Scripts\\python.exe\n"
-            "```\n"
-            "macOS/Linux:\n"
-            "```bash\n"
-            ".venv/bin/python\n"
-            "```\n"
-            "At the `>>>` prompt, try the expressions below. Enter `exit()` when "
-            "you are finished.",
+            DAY1_REPL_GUIDE,
         ),
         (
             "Run it with `python hello.py`.\n\n"
             "Below we reproduce similar logic in this notebook cell.",
-            "Run it with the repository interpreter:\n\n"
-            "Windows PowerShell:\n"
-            "```powershell\n"
-            ".\\.venv\\Scripts\\python.exe hello.py\n"
-            "```\n"
-            "macOS/Linux:\n"
-            "```bash\n"
-            ".venv/bin/python hello.py\n"
-            "```\n\n"
-            "Below we reproduce similar logic in this notebook cell.",
+            DAY1_SCRIPT_GUIDE,
         ),
         (
             "## 4) Installing a package with pip\n"
@@ -123,19 +238,7 @@ SOURCE_REPLACEMENTS: Final[dict[str, tuple[tuple[str, str], ...]]] = {
             "pip install numpy pandas\n"
             "```\n"
             "Then you can import them below.",
-            "## 4) Inspecting packages in the course environment\n"
-            "The setup script already installed NumPy and pandas. Verify them "
-            "through the same interpreter instead of using a bare `pip` command:\n\n"
-            "Windows PowerShell:\n"
-            "```powershell\n"
-            ".\\.venv\\Scripts\\python.exe -m pip show numpy pandas\n"
-            "```\n"
-            "macOS/Linux:\n"
-            "```bash\n"
-            ".venv/bin/python -m pip show numpy pandas\n"
-            "```\n"
-            "Maintainers add course dependencies to `pyproject.toml`; learners "
-            "normally rerun the setup script rather than installing ad hoc packages.",
+            DAY1_PACKAGES_GUIDE,
         ),
         (
             "import sys, platform\n"
@@ -643,6 +746,14 @@ def _apply_source_repairs(
             if old in source and new not in source:
                 source = source.replace(old, new)
                 applied += 1
+        if (
+            relative_path.as_posix() == "python/ds-60day/notebooks/day01_setup_and_repl.ipynb"
+            and cell.cell_type == "markdown"
+        ):
+            for old, new in DAY1_SETUP_REPAIRS:
+                if old in source and new not in source:
+                    source = source.replace(old, new)
+                    applied += 1
         cell.source = source
     return applied
 

@@ -19,8 +19,8 @@ must identify subjects independently of color. Prerequisites and estimated
 minutes support choice without imposing a study deadline.
 
 Lead run instructions with the supported classroom workflow and its capability
-notice. Keep native editor, Jupyter and command-line recipes under an explicit
-optional heading. Do not promise that a pad executes an entire notebook,
+notice. Keep contributor Jupyter, local SQL and separately prepared project
+recipes under an explicit optional heading. Do not promise that a pad executes an entire notebook,
 stateful SQL workflow or cluster operation unless that route implements the
 artifact contract. Preserve stable lesson IDs and learner state when changing
 navigation. The tutorial-book exception still has no exam or solution gate.
@@ -153,8 +153,9 @@ of the following:
    can vary, explain the invariant instead of inventing an exact value.
 6. **A novice-safe run path.** Name the file or notebook, tool, kernel or
    database, command or button, where output appears, and what success looks
-   like. SQL guides must lead with the classroom capability notice, then retain the optional guided SQL notebook route and
-   separately labeled PowerShell and POSIX `psql` alternatives.
+   like. SQL guides must lead with the classroom capability notice. Optional
+   contributor notebooks and local `psql` commands belong in a separately
+   prepared route; ordinary Windows learners use the same WSL 2 Docker commands.
 7. **A practice ramp.** Move from prediction and tracing to a guided change,
    independent construction, debugging, an edge case, and transfer to a new
    context. A long list of equally vague tasks is not progression.
@@ -272,7 +273,7 @@ The prompt must be specific rather than “explain this topic.” Include:
 The generated lesson reader extracts this exact fenced prompt into a dedicated,
 copyable coaching panel; it does not maintain a second hand-authored prompt.
 Keep the Markdown block complete so the same source remains usable in VS Code,
-plain text, static HTML, and private portal modes.
+plain text, static HTML and the unified classroom.
 
 ## Difficulty and pacing
 
@@ -368,24 +369,30 @@ notebook.
 
 ## Cross-platform commands
 
-When commands differ, give separately labeled blocks:
+The learner route uses the same Bash launcher on Linux, macOS and Windows
+through WSL 2. Link to the [one-command guide](one-command-classroom.md) for
+engine installation and preparation instead of duplicating installers:
 
-```powershell
-# Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py doctor
+```sh
+./classroom
+./classroom stop
+./classroom resume
 ```
 
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py doctor
+A custom project requires the same `--project NAME` on each command. `resume`
+does not pull or build; `--rebuild` deliberately applies source/configuration
+updates. Do not reset learner state to demonstrate startup.
+
+For explicitly prepared contributor commands, use the environment documented in
+[CONTRIBUTING](../CONTRIBUTING.md), for example:
+
+```sh
+uv run --no-sync python scripts/course.py validate
 ```
 
-Do not put Bash operators in PowerShell examples. Prefer a cross-platform Python helper when the procedure is more than a few commands.
+Keep host toolchain work, real external projects and classroom execution
+separate. Do not reintroduce native Windows installers, private editor-launch
+APIs or a second UI merely to provide an alternative command block.
 
 ## Offline-first design
 
@@ -443,15 +450,15 @@ Each reader must keep this learner journey:
 1. rendered companion guide;
 2. read-only learner-artifact preview with a path to the real file;
 3. an honest handoff to the coding lab's declared capability, or a documented
-   native editor/Jupyter/guided SQL workflow; and
+   separately prepared contributor Jupyter/SQL or external-project workflow; and
 4. visibly separated solutions after the attempt.
 
 Reader generation must remain offline and self-contained. Escape source,
 reject unsafe URL schemes, render no untrusted notebook HTML, load no remote
 fonts/scripts/analytics, and rewrite known course links to the matching reader
-section. A static `file://` page may offer a best-effort registered VS Code
-URL, but only the authenticated loopback launcher may start allowlisted native
-actions.
+section. Static pages display source and links; they do not start native
+editors, terminals or servers. The unified classroom owns authenticated execution
+through its declared runtime contracts.
 
 Every learner-visible local Markdown or SQL link from the dashboard, lesson
 readers, or rendered references must point to generated HTML. The generator
@@ -459,13 +466,13 @@ derives a deterministic recursive closure from explicit dashboard references
 and links rendered from catalog artifacts; do not replace it with a scan of
 arbitrary untracked files. Seed each registered track's plan from catalog
 metadata, including plans that the original three tracks never link to. Keep
-completion on the dashboard in static mode. The native private portal can
-show its per-lesson checkbox; lab-served readers link back to that lesson's
-saved evidence workflow and hide native launch actions. A server token alone
-does not mean that VS Code/Jupyter launching is enabled.
+completion on the dashboard in static mode. Classroom-served readers link
+back to that lesson's saved-evidence workflow. Reading progress and source-bound
+execution receipts remain different evidence, and opening a reader never runs code.
 
 Do not create hand-maintained SQL notebooks for every lesson. For a cataloged SQL lesson,
-the private launcher derives an ignored working notebook and editable SQL copy
+the explicitly invoked contributor notebook command derives an ignored working
+notebook and editable SQL copy
 under `.learning/sql/<lesson-id>/` through
 `src/ds60sqlpy/sql_notebook.py`. The generator must preserve existing learner
 files, accept only stable catalog identities, keep paths below `.learning/sql/`,

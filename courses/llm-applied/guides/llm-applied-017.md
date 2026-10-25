@@ -208,7 +208,7 @@ Revisit the direct prerequisite `llm-applied-016`, `llm-034` if the calculation 
 
 ## Sources and verification status
 
-API and mechanism reference: [QLoRA](https://arxiv.org/abs/2305.14314), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/llm-applied-status.md`; authored content does not imply that a heavy runtime was executed.
+API and mechanism reference: [QLoRA](https://arxiv.org/abs/2305.14314), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 
 

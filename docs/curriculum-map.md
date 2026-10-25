@@ -1,29 +1,22 @@
 # Curriculum map
 
-DS60 contains two substantial 60-lesson cores, an eight-lesson engineering
-bridge, and 40 named foundation, professional, and specialization modules. The
-day number is an ordering key, not a promise that every learner should finish
-in that many calendar days.
+DS60 combines the original Python and PostgreSQL cores, the engineering bridge,
+additional foundational/professional lessons and the full subject library in the
+[front README](../README.md). Day numbers are stable labels, not deadlines.
+This map explains the legacy data-science sequence; modern subjects have their
+own beginner-to-advanced track metadata and classroom journey.
 
-Use the repository environment directly so navigation does not depend on an
-activated shell:
+Use the classroom chooser for all subjects. In a prepared contributor environment,
+inspect the two complementary inventories without executing lessons:
 
-```powershell
-# Windows PowerShell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py catalog
+```sh
+uv run --no-sync python scripts/course.py catalog
+uv run --no-sync python scripts/check_modules.py --json
 ```
 
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py catalog
-```
-
-for the checked-in generated inventory in `curriculum/catalog.json`. The index is built from lesson artifact filenames plus metadata rules in `src/ds60sqlpy/catalog_builder.py`; do not edit the JSON by hand.
+`curriculum/catalog.json` is generated from legacy artifacts and authoring metadata.
+Modern module/book admission comes from subject manifests. Do not edit generated
+catalogs or infer lesson counts from this overview. Windows contributors use WSL 2.
 
 ## Choose a path
 
@@ -82,8 +75,8 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Solution notebooks: Days 1–60
-- Named Python modules: 17, each with a guide and two solution
-  artifacts
+- Additional foundation, NumPy/pandas, algorithm and professional modules listed
+  by the current catalog, each with its declared guide and solution artifacts
 
 The track is a practical Python-for-data-science curriculum. It does not replace the complete Python language reference, and some advanced topics are surveys rather than mastery in one session.
 
@@ -105,12 +98,12 @@ Artifacts currently present:
 - Companion guides: Days 1–60
 - Markdown solutions: Days 1–60
 - Executable solution SQL: Days 1–60
-- Relational engineering: 2 named modules after the relevant querying,
-  transaction, and locking prerequisites
-- Professional and specialization SQL: 10 named modules after the shared core
+- Starter, relational-engineering, analytical and professional modules at their
+  declared prerequisite checkpoints; consult the current SQL subject README
 
-Runnable material and the maintained high-level plan both target PostgreSQL
-16 or newer.
+The packaged classroom uses PostgreSQL 17. The older high-level plan describes
+features available from PostgreSQL 16; validate against the prepared classroom
+version rather than assuming another server is equivalent.
 
 ## Python + PostgreSQL engineering bridge
 
@@ -191,7 +184,7 @@ The implemented named modules and recommended lanes are in
 ## Guided routes and the new correctness labs
 
 Use [learning paths](learning-paths.md) for placement and evidence checkpoints,
-or launch [the coding application](offline-app.md). The planner expands actual
+or launch [the coding application](classroom-experience.md). The planner expands actual
 prerequisites, including beginner practice, instead of forcing every learner
 through every specialization. The generated catalog now includes 77 Python,
 78 PostgreSQL, and 13 bridge lessons. Historical IDs and saved progress remain

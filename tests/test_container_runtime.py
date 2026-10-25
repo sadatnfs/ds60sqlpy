@@ -143,7 +143,7 @@ def test_missing_or_unwritable_bind_does_not_reset_existing_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     settings = ContainerSettings(501, 20, 8765, False)
-    with pytest.raises(ValueError, match="Mount a host"):
+    with pytest.raises(ValueError, match="Mount the learning-data volume"):
         learning_environment(tmp_path, {"DS60_CONTAINER": "1"}, settings)
     learning = tmp_path / ".learning"
     learning.mkdir()
@@ -196,3 +196,40 @@ def test_plot_prewarm_is_bounded_and_shares_the_durable_cache(
     monkeypatch.setattr("ds60sqlpy.container_runtime.subprocess.run", timeout)
     assert not warm_matplotlib(tmp_path)
     assert "first plot may reach" in capsys.readouterr().err
+
+
+def test_container_start_stages_course_and_uses_the_mounted_workspace(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy import container_runtime, lab
+    from ds60sqlpy.catalog import Catalog
+
+    settings = ContainerSettings(501, 20, 8765, False)
+    catalog = Catalog.load()
+    calls: list[tuple[object, ...]] = []
+    monkeypatch.setattr(container_runtime, "container_settings", lambda environment: settings)
+    monkeypatch.setattr(os, "geteuid", lambda: 501)
+    monkeypatch.setattr(container_runtime, "WORKSPACE", tmp_path)
+    monkeypatch.setattr(container_runtime, "learning_environment", lambda *args: {})
+    monkeypatch.setattr(container_runtime, "warm_matplotlib", lambda path: True)
+
+    def stage(source: Path, destination: Path) -> Path:
+        calls.append(("stage", source, destination))
+        return tmp_path
+
+    def load(source: Path) -> Catalog:
+        calls.append(("catalog", source))
+        return catalog
+
+    def serve(value: Catalog, *, port: int, open_browser: bool, container: bool) -> None:
+        calls.append(("serve", value, port, open_browser, container))
+
+    monkeypatch.setattr(container_runtime, "prepare_workspace", stage)
+    monkeypatch.setattr(Catalog, "load", load)
+    monkeypatch.setattr(lab, "serve_lab", serve)
+    assert container_runtime.start_lab() == 0
+    assert calls == [
+        ("stage", Path("/opt/course"), tmp_path),
+        ("catalog", tmp_path),
+        ("serve", catalog, 8765, False, True),
+    ]

@@ -36,7 +36,7 @@ def authored(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ModuleCatalog:
             }
         ],
     }
-    monkeypatch.setattr("ds60sqlpy.modules.load_designs", lambda root: [plan])
+    monkeypatch.setattr("ds60sqlpy.modules.load_core_plans", lambda root: [plan])
     monkeypatch.setattr(
         "ds60sqlpy.modules.Catalog.load", lambda root: SimpleNamespace(lessons=lambda: [])
     )

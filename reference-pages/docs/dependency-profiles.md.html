@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Catalog dependency labels and setup profiles · DS60 reference</title>
+  <title>Dependencies and execution profiles · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,107 +158,87 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Catalog dependency labels and setup profiles</h1>
+      <h1>Dependencies and execution profiles</h1>
       <p class="source-path">Generated from <code>docs/dependency-profiles.md</code></p>
     </header>
-    <article class="document"><h2 id="catalog-dependency-labels-and-setup-profiles">Catalog dependency labels and setup profiles<a class="heading-anchor" href="#catalog-dependency-labels-and-setup-profiles" aria-label="Link to this section">#</a></h2>
-<p>The catalog&#x27;s <code>dependency_group</code> is a learner-facing readiness label. It is not always the name of a <code>pyproject.toml</code> extra. Do not blindly turn every catalog value into <code>pip install -e &quot;.[VALUE]&quot;</code>.</p>
+    <article class="document"><h2 id="dependencies-and-execution-profiles">Dependencies and execution profiles<a class="heading-anchor" href="#dependencies-and-execution-profiles" aria-label="Link to this section">#</a></h2>
+<p>Three kinds of names appear in DS60. They answer different questions:</p>
 <div class="table-wrap"><table><thead><tr>
-<th>Catalog label</th>
-<th>What the lesson needs</th>
-<th>How to prepare</th>
+<th>Name</th>
+<th>Meaning</th>
+<th>Source of truth</th>
+</tr></thead><tbody>
+<tr>
+<td>Legacy <code>dependency_group</code></td>
+<td>Packages or services a Python/SQL/bridge lesson needs</td>
+<td><code>curriculum/catalog.json</code></td>
+</tr>
+<tr>
+<td>Module <code>runtime_profile</code></td>
+<td>The fixed environment for one lesson variant</td>
+<td><code>courses/*/lessons.json</code> and the runtime registry</td>
+</tr>
+<tr>
+<td>Python project extra</td>
+<td>Optional packages for a prepared Python environment</td>
+<td><code>pyproject.toml</code> and <code>uv.lock</code></td>
+</tr>
+</tbody></table></div>
+<p>Do not turn a label into an installation command without checking its contract. For example, <code>postgres</code> means a database/client capability, while <code>advanced</code> is an aggregate readiness label. Neither is an installable Python extra.</p>
+<h3 id="learners-use-prepared-docker-runtimes">Learners use prepared Docker runtimes<a class="heading-anchor" href="#learners-use-prepared-docker-runtimes" aria-label="Link to this section">#</a></h3>
+<p>Start with <code>./classroom</code>. A new project prepares all ordinary workers. Use <code>./classroom --starter</code> for the app, PostgreSQL and Python Core, or select specific additional profiles. The selection is remembered. See <a href="modules-runtime.md.html">runtime profiles</a> and the <a href="one-command-classroom.md.html">launcher guide</a>.</p>
+<p>Python Core, TensorFlow, PyTorch and PySpark are different prepared environments. Selecting Python does not imply every library is installed. Opening a chapter or pressing Run never installs arbitrary dependencies. HTML/CSS and browser JavaScript/D3 use the isolated browser preview; PHP uses its CLI worker with SQLite. Optional CUDA and cluster operations require their separate explicit preparation.</p>
+<h3 id="legacy-readiness-labels">Legacy readiness labels<a class="heading-anchor" href="#legacy-readiness-labels" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Label</th>
+<th>Capability</th>
 </tr></thead><tbody>
 <tr>
 <td><code>core</code></td>
 <td>Python standard library and course tools</td>
-<td>Run the normal setup script</td>
 </tr>
 <tr>
 <td><code>data</code></td>
-<td>NumPy, pandas, plotting, statistics, and scikit-learn</td>
-<td>Run the normal setup script</td>
-</tr>
-<tr>
-<td><code>postgres</code></td>
-<td>The disposable PostgreSQL course database and <code>psql</code></td>
-<td>Follow the <a href="../sql/postgres-60day/README.md.html">PostgreSQL setup</a></td>
+<td>NumPy, pandas, plotting, statistics and scikit-learn</td>
 </tr>
 <tr>
 <td><code>bridge</code></td>
-<td>psycopg, pooling, and Python/PostgreSQL integration</td>
-<td>Included in normal Core setup</td>
+<td>Psycopg and Python/PostgreSQL integration</td>
 </tr>
 <tr>
 <td><code>professional</code></td>
-<td>Packaging (<code>build</code>, <code>pip</code>, <code>setuptools</code>, and <code>wheel</code>), Arrow/Parquet, DuckDB, and property-based tests</td>
-<td>Included in normal Core setup</td>
+<td>Packaging, Arrow/Parquet, DuckDB and property-based testing</td>
 </tr>
 <tr>
 <td><code>quality</code></td>
-<td>pytest, Hypothesis-aware test tooling, type checking, and linting</td>
-<td>Included in Core, including the <code>professional</code> extra for Hypothesis</td>
+<td>Contributor tests, typing and linting</td>
 </tr>
 <tr>
 <td><code>sql-notebooks</code></td>
-<td>Jupyter SQL magics, pandas result conversion, SQLAlchemy, and the Psycopg 3 PostgreSQL driver</td>
-<td>Included in normal Core setup</td>
+<td>JupySQL, SQLAlchemy and a PostgreSQL driver</td>
 </tr>
 <tr>
-<td><code>geo</code></td>
-<td>Geospatial Python packages</td>
-<td>Run advanced setup, or install the <code>geo</code> extra</td>
+<td><code>postgres</code></td>
+<td>Disposable course PostgreSQL and <code>psql</code></td>
 </tr>
 <tr>
-<td><code>ml</code></td>
-<td>Optional advanced machine-learning libraries</td>
-<td>Run advanced setup, or install the <code>ml</code> extra</td>
-</tr>
-<tr>
-<td><code>production</code></td>
-<td>FastAPI, Dask, MLflow, and Prefect</td>
-<td>Run advanced setup, or install the <code>production</code> extra</td>
-</tr>
-<tr>
-<td><code>deep-learning</code></td>
-<td>PyTorch and torchvision</td>
-<td>Run advanced setup, or install the <code>deep-learning</code> extra</td>
-</tr>
-<tr>
-<td><code>nlp</code></td>
-<td>Transformers, datasets, evaluation, and spaCy</td>
-<td>Run advanced setup, or install the <code>nlp</code> extra</td>
+<td><code>ml</code>, <code>production</code>, <code>geo</code>, <code>deep-learning</code>, <code>nlp</code></td>
+<td>Corresponding optional packages and separately declared assets</td>
 </tr>
 <tr>
 <td><code>advanced</code></td>
-<td>Capstone readiness across several optional groups</td>
-<td>Run the aggregate advanced setup; there is intentionally no <code>advanced</code> extra</td>
+<td>Several optional capabilities, determined by the lesson</td>
 </tr>
 </tbody></table></div>
-<p>The <code>deep-learning</code> extra uses platform markers rather than assuming one wheel works everywhere. Windows and Linux use the current compatible PyTorch/TorchVision pair. Intel macOS uses the final published Intel-wheel pair, while Apple Silicon uses a pair that remains installable on macOS 13. These versions still support the tensor, training-loop, and transfer-learning APIs used by the course.</p>
-<p>The setup scripts are the simplest route:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced
-
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS or Linux</span>
-bash scripts/setup.sh --advanced</code></pre>
-<p>Maintainers or learners conserving disk space may install one exact extra after the normal setup has installed the shared notebook/data/quality baseline:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Example on Windows</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install -e <span class="syntax-string">&quot;</span><span class="syntax-string">.[bridge]</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Example on macOS or Linux</span>
-.venv/bin/python -m pip install -e <span class="syntax-string">&quot;.[bridge]&quot;</span></code></pre>
-<p>Replace <code>bridge</code> only with a real extra listed in <code>pyproject.toml</code>. First-run data/model downloads are separate from package installation; consult the lesson&#x27;s catalog <code>network</code> value and companion guide before going offline.</p>
-<h3 id="installation-modes-and-evidence">Installation modes and evidence<a class="heading-anchor" href="#installation-modes-and-evidence" aria-label="Link to this section">#</a></h3>
-<p>Windows bootstrap accepts <code>-DependencyMode Auto</code>, <code>Locked</code>, or <code>Project</code>. macOS/Linux setup accepts <code>--dependency-mode auto</code>, <code>locked</code>, or <code>project</code>. Auto uses an existing standalone <code>uv</code> installation; otherwise pip resolves project declarations. Locked requires <code>uv</code> and verifies agreement between <code>uv.lock</code> and <code>pyproject.toml</code>. Project does not reproduce exact locked versions.</p>
-<p><code>uv sync</code> performs exact synchronization. Running Core after Advanced in locked mode removes packages outside the selected Core profile. Choose Advanced again when you need all optional groups. Source files, notebooks, progress, and datasets are separate from installed packages. See <a href="https://docs.astral.sh/uv/concepts/projects/sync/">uv locking and syncing</a>.</p>
-<p>Both setup paths validate and reuse the repository environment; they do not replace a broken <code>.venv</code> automatically. The POSIX script expects <code>.venv/bin/python</code>. Virtual environments depend on their base interpreter and location: copy source and recreate <code>.venv</code> rather than copying an environment to another machine. See <a href="https://docs.python.org/3.12/library/venv.html">Python venv</a>.</p>
-<p>The supported course range remains Python 3.11-3.12. Binary packages also depend on OS and CPU. A lock resolution for another platform proves dependency selection, not native execution there. Advanced imports do not download or verify model assets. Check the actual CI run before treating a configured matrix job as passing evidence.</p>
-<p>Docker users can add exact optional groups without changing the lightweight Core default. See <a href="docker-profiles.md.html">optional Docker profiles</a> for explicit build commands, CPU wheel selection, memory limits, disk use, and model/data cache boundaries.</p></article>
+<p>Core packages do not make every framework, server application or model workflow runnable in a single-file pad. Use the declared worker or external project. <a href="docker-profiles.md.html">Docker package options</a> explains app-image customization when a legacy Python lesson needs an additional package group.</p>
+<h3 id="contributor-environments">Contributor environments<a class="heading-anchor" href="#contributor-environments" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="../CONTRIBUTING.md.html">CONTRIBUTING.md</a>. The POSIX setup helper supports:</p>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --dependency-mode locked
+bash scripts/setup.sh --advanced --dependency-mode locked</code></pre>
+<p>Locked mode requires an existing <code>uv</code> installation. Project mode resolves declared requirements without reproducing the lock and is not evidence for the locked release. Automatic mode reports the tool it selects. Existing environments are validated, not silently replaced. Windows contributors run these commands in WSL 2.</p>
+<p><code>uv sync</code> synchronizes selected extras exactly. A later smaller selection can remove previously installed packages. Keep the intended extras in your command. Source, learner work, database data and caches are separate from installed packages.</p>
+<p>The root project and individual workers have different reviewed locks. Compiler versions, packages and source limits come from Dockerfiles and runtime adapters, not the host&#x27;s installed tools. Platform markers describe dependency selection; a resolved lock does not prove execution on that platform.</p>
+<p>Weights, tokenizer assets, spaCy pipelines, map tiles and external services need the exact preparation declared by their lessons. Verify offline assets separately from package import success.</p></article>
   </main>
 </body>
 </html>

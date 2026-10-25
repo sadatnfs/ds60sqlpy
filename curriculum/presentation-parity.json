@@ -350,38 +350,62 @@
     {
       "path": "courses/deep-learning-pytorch/guides/torch-005.md",
       "historical_sha256": "77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda",
-      "presentation_sha256": "44f32ef828adcb7b244e98ec78e412218609243b788814d7288fe32d1ee9fe89",
+      "presentation_sha256": "e3483fa1454569a33bc1ee7e87cb2a02a658b0aee8f3f4b74a1533ae6be36552",
       "code_block_sha256": [
         "42202950e5ee8b65b1ce6b2d170a9ac2c66d1107b7ef6913042872e2e3b0917e",
         "cfdfb3c950a49fc04d319b39bd86b61aaacadb8cc873b5ccd95800446fe12601",
         "40da7d11627073bd8b702df41710d0b9beb0a4ce0bd4948c6a5f0018e12fa283",
         "04f7e8ef0430716403965b4717360616b6a3631ce66e9a5a1740c8beb53b0ed5"
       ],
-      "kind": "markdown"
+      "kind": "markdown",
+      "presentation_history": [
+        {
+          "baseline_commit": "55453571e970cb54ea5875e2feb80fdfd9c82da8",
+          "previous_sha256": "44f32ef828adcb7b244e98ec78e412218609243b788814d7288fe32d1ee9fe89",
+          "updated_sha256": "e3483fa1454569a33bc1ee7e87cb2a02a658b0aee8f3f4b74a1533ae6be36552",
+          "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        }
+      ]
     },
     {
       "path": "courses/deep-learning-pytorch/guides/torch-012.md",
       "historical_sha256": "90019fddbdacdf0c6efe211c13e708e2a93f9549195c89e9635322afa688aef3",
-      "presentation_sha256": "2b264e07951966d76dbc031b7de6b604ae611de5823e21eba26d87504fcc7a0f",
+      "presentation_sha256": "a2dea94f89ccaf9dd3bed232af8aaf6b2635be35d7d47074bad6b55fd2707332",
       "code_block_sha256": [
         "d4c93b21a4b208f699d313c3c6205057b177b89b77d9822dc586c922dc683547",
         "350a6ab02aa8ff72dd664de997d4207f5ae1ebc4c95e53b9ff6d66e2b91b74f8",
         "614afcf43c1faa31d2ced6aace15073256a0986c3b0cd2d2aa77459669c8049d",
         "12ee29c9ffd78fcb6063460b781bd9c883c2918747b64c7136cda685c5f83e4a"
       ],
-      "kind": "markdown"
+      "kind": "markdown",
+      "presentation_history": [
+        {
+          "baseline_commit": "55453571e970cb54ea5875e2feb80fdfd9c82da8",
+          "previous_sha256": "2b264e07951966d76dbc031b7de6b604ae611de5823e21eba26d87504fcc7a0f",
+          "updated_sha256": "a2dea94f89ccaf9dd3bed232af8aaf6b2635be35d7d47074bad6b55fd2707332",
+          "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        }
+      ]
     },
     {
       "path": "courses/deep-learning-pytorch/guides/torch-016.md",
       "historical_sha256": "208d77980330fe66a1b917dba3f396f8a71291aa52df4e935cb03acd08bc105b",
-      "presentation_sha256": "d3d3fd1b1db18e14d82690ca5be36a2ccb824ddb8ab81fdd3d927f055a77fc0e",
+      "presentation_sha256": "c510b43a84497059f28c2a0539a7169ce7bf96a7413ed27428e06a788385d614",
       "code_block_sha256": [
         "bcf36df2c10f62e86bba9526bfed4d33845ac5740d0696bb77ed8ca06c37edf7",
         "d3437f49f12ddc5ae24a2190891c9031deea8a659e1d7bf14a95eac1f828bdbc",
         "e4614691eff24d18cc8c1d7a345460704b5fb3e5a63db40da39b2c4744efc208",
         "873f43f1cae851227c306d8127bc51e6e574db799688e5261b6f8a3771c7e5ba"
       ],
-      "kind": "markdown"
+      "kind": "markdown",
+      "presentation_history": [
+        {
+          "baseline_commit": "55453571e970cb54ea5875e2feb80fdfd9c82da8",
+          "previous_sha256": "d3d3fd1b1db18e14d82690ca5be36a2ccb824ddb8ab81fdd3d927f055a77fc0e",
+          "updated_sha256": "c510b43a84497059f28c2a0539a7169ce7bf96a7413ed27428e06a788385d614",
+          "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        }
+      ]
     },
     {
       "path": "courses/llm-applied/track.json",
@@ -393,14 +417,22 @@
     {
       "path": "courses/deep-learning-pytorch/guides/torch-015.md",
       "historical_sha256": "04bb96e04a3cc0c8beb3ff3aad8d9ae45c7ce740e3afa4c614e50afe4b965eaa",
-      "presentation_sha256": "ae229623997ef6934b27584b2ad9abcfc2e6e4c0f124c68e94af0c7a45de5ca3",
+      "presentation_sha256": "1f2b54d31c20526fbab3da987403e414a10662db4f3bd0747c8530a51e3eb5fc",
       "code_block_sha256": [
         "20c7b4e7e3a2c8f18cacff595e6bf582c6b4302e35e616408f19b1a98aab35f1",
         "bd658da66120d46a6c8f7c5b62538eaef0d8e70584d714c57a36f773ff8294e0",
         "b406c2b9b878c69fa5022f50a2ffa3a13d8a0acb9a621380a8bc2f50a288cdf7",
         "2fa1afbdf6f5e4cabbf91e746abed673b8bea735e31c4ce15a5cbc364e9ad786"
       ],
-      "kind": "markdown"
+      "kind": "markdown",
+      "presentation_history": [
+        {
+          "baseline_commit": "55453571e970cb54ea5875e2feb80fdfd9c82da8",
+          "previous_sha256": "ae229623997ef6934b27584b2ad9abcfc2e6e4c0f124c68e94af0c7a45de5ca3",
+          "updated_sha256": "1f2b54d31c20526fbab3da987403e414a10662db4f3bd0747c8530a51e3eb5fc",
+          "reason": "Replace the retired status-page reference and native Windows setup directions with maintained validation and Docker/WSL guidance. Protected code blocks are byte-identical."
+        }
+      ]
     }
   ]
 }

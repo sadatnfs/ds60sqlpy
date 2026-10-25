@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 This book develops the 1,005 named methods in the supplied 40-section outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method. Each chapter explains mechanisms, assumptions, appropriate uses, failure modes and interpretation, then connects them to complete Python demonstrations and answered interview discussions.
@@ -16,10 +16,17 @@ This is a tutorial and reference book. It contains no exams, problem sets or hid
 
 Open a chapter in the classroom reader, or read its Markdown file. Reading needs no Python packages. The examples use Python 3.11 or 3.12 and the repository's prepared scientific environment: NumPy, pandas, SciPy, scikit-learn and statsmodels. No dataset, pretrained model, API key or network connection is required after dependencies are installed. Examples construct tiny local fixtures and print interpretable results.
 
-From the repository root, run this command in a terminal whose `python` resolves to the prepared environment. The command is identical in PowerShell, Command Prompt, Bash and zsh:
+Use `./classroom --starter`, open a chapter and select its Python worked
+example. The `python-core` worker supplies the scientific dependencies and
+keeps your editable copy and saved output in the learning volume. The complete
+worked reference is available directly because this subject is a tutorial,
+not an exam or hidden-solution exercise.
 
-```text
-python courses/statistics-ml/examples/chapter_01.py
+For an optional prepared contributor environment, follow
+[CONTRIBUTING](../../CONTRIBUTING.md), then run on Linux/macOS or Windows WSL 2:
+
+```bash
+uv run --no-sync python courses/statistics-ml/examples/chapter_01.py
 ```
 
 Replace `01` with the chapter number. Optional ecosystems such as PyMC/Stan, XGBoost, NetworkX, lifelines, UMAP and specialized spatial, survey or reinforcement-learning packages are discussed only where relevant. They are not required by the examples and are never installed or imported automatically.

@@ -15,13 +15,14 @@ this playbook into a reusable contributor-agent workflow.
 | --- | --- | --- |
 | Extend existing Python, SQL or bridge material | Existing artifacts and `catalog_builder.py`; additive legacy manifests when appropriate | Legacy catalog, practice and depth gates |
 | Add a new subject to the classroom | `courses/<subject>/track.json` and `lessons.json` | `ModuleCatalog`, subject tests and browser/runtime checks |
-| Extend one of the original five module subjects | Existing plan under `docs/expansion/plans/` and its `courses/<subject>/lessons.json` | Same module gates, existing design checks |
+| Extend one of the original five module subjects | Existing plan under `docs/expansion/plans/` and its `courses/<subject>/lessons.json` | Same module gates and core-plan validation |
 | Extend the statistics tutorial | `courses/statistics-ml/manifest.json`, chapters, examples and coverage | Tutorial coverage, numerical examples and rendering |
 | Add a new execution language or external operation | Reviewed backend adapter, profile and image in addition to content | Actual runtime success, failure, cleanup and persistence evidence |
 
 The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++
 and Scala/Spark. Their plans supply live route metadata; authored admission
-still comes from `lessons.json`. Additive subjects use `track.json`. Do not
+still comes from `lessons.json`. `module_plans.load_core_plans` owns these five
+plan inputs. Additive subjects use `track.json`. Do not
 migrate an existing subject between these contracts as an incidental edit.
 
 The statistics loader is currently specific to that book. A different tutorial
@@ -49,7 +50,9 @@ A beginner does not need every advanced topic immediately. Cross-subject
 prerequisites should name stable IDs, not hide a whole language inside a
 single introductory lesson. See the skill's
 [progression reference](../.agents/skills/add-learning-path/references/progression.md)
-for Python, SQL, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript, D3, Scala/Spark, Docker and Kubernetes networking examples.
+for the language, web, GPU/ML, data and systems routes. Preserve distinctions
+such as browser versus Node, PHP CLI versus HTTP, CPU models versus NVIDIA
+execution, and Spark CPU operators versus supported accelerated plans.
 
 ## Author and integrate a module
 
@@ -68,7 +71,16 @@ The statistics tutorial has no exercise quota or hidden answer gate.
 Preserve IDs, variant aliases and state ownership. Add accessible subject
 colors and a text label to the existing UI; do not add another public page.
 Review the declared runtime before promising a Run action. A syntax lexer or
-file extension does not install a compiler.
+file extension does not install a compiler. New ordinary workers also need the
+image catalog and launcher, formatting/lint adapters, source packaging and CI
+profile checks. Optional GPU/cluster routes require explicit capabilities and
+separate qualification rather than entry into ordinary defaults.
+
+HTML/CSS and browser JavaScript use the shared opaque preview. Live updates are
+opt-in, cancel on navigation and do not automatically create result receipts.
+PHP HTTP/session examples use a separately owned project rather than pretending
+that the CLI worker is a web server. GPU lessons should retain meaningful
+reading/CPU routes without claiming those routes execute CUDA on another GPU.
 
 ## Legacy catalog extensions
 

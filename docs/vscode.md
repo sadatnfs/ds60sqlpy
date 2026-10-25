@@ -1,170 +1,64 @@
-# Visual Studio Code workflow
+# Optional editor and notebook workflow
 
-Open the repository root in VS Code. Opening only `python/ds-60day` or `sql/postgres-60day` makes relative commands and agent guidance harder to resolve.
+The browser classroom needs no editor extension or host language toolchain. Use
+VS Code to inspect source, contribute or work on an explicit external project.
+Open the repository root with `code .`, or open that folder from the editor.
+Windows contributors use their WSL checkout and its Linux terminal.
 
-```text
-code .
-```
+## Contributor Python and notebooks
 
-## Recommended extensions
-
-The repository recommends:
-
-- Ruff (`charliermarsh.ruff`)
-- Python (`ms-python.python`)
-- Pylance (`ms-python.vscode-pylance`)
-- Jupyter (`ms-toolsai.jupyter`)
-- PostgreSQL (`ms-ossdata.vscode-pgsql`)
-- markdownlint (`DavidAnson.vscode-markdownlint`)
-
-VS Code should offer these automatically from `.vscode/extensions.json`. Use **Extensions: Show Recommended Extensions** if it does not.
-
-Extensions are a connected-setup requirement. For a fully offline machine, download their `.vsix` packages in advance.
-
-## Select the Python interpreter
-
-Create the environment first with the OS setup script.
-
-1. Open the Command Palette:
-   - Windows/Linux: `Ctrl+Shift+P`
-   - macOS: `Cmd+Shift+P`
-2. Run **Python: Select Interpreter**.
-3. Choose:
-   - Windows: the interpreter printed by `bootstrap_windows.ps1`:
-     `.venv\Scripts\python.exe` for a standard `venv`, or
-     `.venv\python.exe` for the Anaconda conda-prefix fallback
-   - macOS/Linux: `.venv/bin/python`
-4. Open a new integrated terminal.
-5. Run **Terminal → Run Task → Course: Doctor**. If you prefer the terminal,
-   use the activation-free command for your operating system:
-
-   ```powershell
-   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   & $CoursePython scripts\course.py doctor
-   ```
-
-   ```bash
-   # macOS or Linux
-   .venv/bin/python scripts/course.py doctor
-   ```
-
-The status bar should show the selected `.venv` interpreter. Selecting it does
-not guarantee that PowerShell execution policy allowed terminal
-auto-activation, which is why the command above resolves and invokes either
-supported Windows layout directly.
-
-## Select a notebook kernel
-
-Interpreter selection and notebook-kernel selection are related but separate.
-
-1. Open a lesson notebook.
-2. Choose **Select Kernel** in the upper-right corner.
-3. Choose **Python Environments**.
-4. Select the repository `.venv`.
-
-If a package imports in the terminal but not the notebook, the notebook almost always has the wrong kernel. Restart the kernel after installing packages.
-
-Prove the choice in a notebook cell:
+Prepare the environment using [CONTRIBUTING.md](../CONTRIBUTING.md), then select
+`.venv/bin/python` for Python tasks. Notebook kernel selection is separate: select
+that same environment and verify it in a cell:
 
 ```python
 import sys
-
 print(sys.executable)
 print(sys.version)
 print(2 + 3)
 ```
 
-Expected: this repository's `.venv` path, Python 3.11 or 3.12, and `5`.
-Compare the path with the activation-free terminal command above. The name
-`Python (ds60sqlpy)` alone is insufficient when you have multiple clones:
-registration uses one per-user kernel name, so the latest setup can point that
-name to another clone. Select the exact environment in **Select Kernel** or
-rerun kernel registration from the intended repository interpreter.
+The path must identify this checkout's environment, and the last line must print
+`5`. A friendly kernel name alone is insufficient with several checkouts. Restart
+the kernel after changing installed packages. Keep source notebooks unexecuted
+in Git and save personal outputs separately.
 
-If VS Code offers **Workspace Trust**, review the repository before granting
-trust. Restricted Mode can limit notebook execution. Restart VS Code or reload
-its window if a newly installed extension is missing. Follow the
-[official notebook workflow](https://code.visualstudio.com/docs/datascience/jupyter-notebooks)
-for current UI details. For a complete first notebook, use
-[Your first successful session](setup/first-success.md).
+`.vscode/extensions.json` contains optional Python, Ruff, notebook, PostgreSQL and
+Markdown conveniences. Extensions do not install or qualify Docker runtime tools.
+The repository does not ship a separate native Windows installer or devcontainer route.
 
-Start at **Terminal → Run Task → Course: Learning portal** for the private
-progress dashboard and allowlisted VS Code/Jupyter launch buttons. You can also
-start JupyterLab directly with **Course: JupyterLab** or work in VS Code's
-notebook editor.
+## Repository tasks and formatting
 
-The professional PostgreSQL notebook uses the same Python kernel plus the
-JupySQL extension. Prepare its process-scoped connection and packages with
-[PostgreSQL in Jupyter](setup/jupyter-postgresql.md); do not save a database
-password in notebook metadata or VS Code workspace settings.
+Inspect `.vscode/tasks.json` for maintained task names. Classroom tasks delegate
+to `./classroom`; contributor checks use the selected interpreter. The contributor
+serve command runs the same HTTP interface on loopback, without provisioning workers
+or synchronizing local `.learning/` files with a Docker project.
 
-## Repository tasks
+Use the shared formatter and linter:
 
-Use **Terminal → Run Task**:
-
-- `Course: Setup`
-- `Course: Learning portal`
-- `Course: Doctor`
-- `Course: Catalog`
-- `Course: Validate`
-- `Course: JupyterLab`
-- `Course: PostgreSQL Notebook`
-- `Course: Bridge tests`
-- `Course: Professional tests`
-
-Python-backed tasks use the interpreter selected through **Python: Select
-Interpreter**, so both supported Windows `.venv` layouts work without editing
-the task file. The Windows setup task uses the discovery bootstrap, which can
-find supported Anaconda and PostgreSQL installations even when they are absent
-from `PATH`.
-
-## PostgreSQL
-
-The PostgreSQL extension is optional; every SQL lesson can run through `psql`.
-
-For a local connection:
-
-- Server: `localhost`
-- Port: `5432`
-- Database: `advanced_sql_training`
-- User: the role created in your OS setup guide
-
-Do not save a real production password in repository settings. Keep this connection limited to the disposable course database.
-
-When running files in the terminal, preserve error-stop behavior:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
+```sh
+./scripts/format-repo
+./scripts/lint-repo
 ```
 
-VS Code query-editor execution does not automatically reproduce every `psql` behavior. Use the terminal command when validating an entire lesson file.
+Editor format-on-save is not a substitute for the pinned release checks. New
+languages need reviewed formatting, lint and runtime adapters.
 
-## Working with the AI tutor
+## SQL, projects and tutoring
 
-Open the AI tutor from the repository root so it discovers:
+Use the classroom SQL pad for normal study. For an explicit external client,
+obtain the actual port from `./classroom status` and use only the disposable
+`advanced_sql_training` database. Do not assume port 5432 or commit credentials.
+Complete scripts require `psql` semantics that a query editor may not reproduce.
+See [guided SQL notebooks](guided-sql-notebooks.md) and [PostgreSQL in Jupyter](setup/jupyter-postgresql.md).
 
-- Root and nested `AGENTS.md` files
-- The `$guide-ds60sqlpy-learning` repo skill
-- The curriculum catalog
-- The checked-in validation commands
+Multi-file C++, Java, Rust, Go, C#, Swift and web projects follow their own fixture
+READMEs. Single-file pad success does not qualify an external project toolchain.
 
-Ask an AI tutor to inspect the learner’s current file before suggesting a fix. See [Learning with an AI tutor](learning-with-an-ai-tutor.md).
+Open your coding assistant from the repository root so it discovers AGENTS files and both skills.
+Use the learning skill for explanations and learner-directed practice, and the
+add-learning-path skill for curriculum development. Share the actual attempt:
+reference code and an unseen Docker pad are different sources.
 
-## Files generated while learning
-
-Write experiments to `artifacts/` or personal progress to `.learning/`; both are ignored. Do not save generated models, notebook checkpoints, credentials, or large downloads beside course source files.
-
-## Common VS Code fixes
-
-- Wrong interpreter: run **Python: Select Interpreter** again.
-- Wrong notebook kernel: use **Select Kernel**, then restart.
-- New packages not visible: restart the kernel and verify the selected `.venv`.
-- `code` command missing: open VS Code normally and use **File → Open Folder**.
-- PostgreSQL extension connects but a lesson behaves differently: validate with the documented `psql` command.
-
-More help: [Troubleshooting](troubleshooting.md).
+Keep personal experiments in ignored `.learning/` or `artifacts/` locations and
+back them up separately. [Documentation map](README.md) links the maintained routes.

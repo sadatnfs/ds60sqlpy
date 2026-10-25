@@ -414,8 +414,13 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
             )
             assert "ports" not in service and "networks" not in service
     base = yaml.safe_load((ROOT / "compose.yaml").read_text())
+    assert set(base["services"]) == {"postgres", "lab"}
+    assert "volumes" not in base["services"]["lab"]
     assert all(port.startswith("127.0.0.1:") for port in base["services"]["postgres"]["ports"])
-    worker = yaml.safe_load((ROOT / "compose.modules.yaml").read_text())["x-worker"]
+    modules = yaml.safe_load((ROOT / "compose.modules.yaml").read_text())
+    assert not {"postgres", "lab"} & modules["services"].keys()
+    worker = modules["x-worker"]
+    assert "volumes" not in worker
     assert worker["networks"] == ["module-private"] and "ports" not in worker
     assert worker["read_only"] is True and "KILL" in worker["cap_add"]
     all_text = (ROOT / "compose.classroom.yaml").read_text()

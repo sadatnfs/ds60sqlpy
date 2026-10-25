@@ -95,7 +95,7 @@ else
   fi
 fi
 
-# Core matches the Windows Core bootstrap and the packages checked by doctor.
+# Core includes the contributor dependencies checked by doctor.
 extras=notebooks,data,quality,bridge,professional,sql-notebooks
 if [ "${profile}" = advanced ]; then
   extras="${extras},ml,production,deep-learning,nlp,geo"
@@ -123,5 +123,5 @@ fi
 printf '\nSetup complete. Start Jupyter with:\n'
 printf '  .venv/bin/python -m jupyter lab\n'
 printf 'Start the learning dashboard with:\n'
-printf '  .venv/bin/python scripts/learning_portal.py\n'
+printf '  .venv/bin/python scripts/course.py serve\n'
 printf 'No database was contacted or modified. Continue with your OS setup guide for SQL.\n'

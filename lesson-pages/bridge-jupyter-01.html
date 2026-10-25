@@ -64,8 +64,6 @@
       font-size: .73rem; letter-spacing: .04em;
     }
     .top-actions { display: flex; align-items: center; gap: .7rem; }
-    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
-    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
     .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
     .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
@@ -95,7 +93,6 @@
     .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
     .button.secondary { color: var(--navy); background: transparent; }
     .button.secondary:hover { color: #fff; background: var(--navy); }
-    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
     .sql-run-guide {
       margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
@@ -200,7 +197,6 @@
     .nav-card.disabled { opacity: .65; }
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
-      .top-actions .completion { display: none; }
       .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
       .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
@@ -268,10 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
       <div class="top-actions">
-        <label class="completion launcher-only" hidden>
-          <input id="lesson-complete" type="checkbox">
-          Mark complete
-        </label>
+
         <a class="static-only" href="../START_HERE.html#catalog">
           Track completion on the course dashboard
         </a>
@@ -302,22 +295,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <h2 id="run-heading">Run this lesson in the classroom</h2>
+          <p id="run-guidance">Open this lesson in the Docker classroom, read its capability notice, and run the notebook cells in order using the coding pad. The preview below is read-only. Prepared contributors may also use the original notebook with the course Jupyter kernel.</p>
           <div class="static-help">
-            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
           </div>
-          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
           <a class="button" href="#" data-vscode-path="bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb">
             Open learner artifact in VS Code
           </a>
-          <button class="button launcher-only" type="button" id="launch-learner" hidden>
-            Open with guided launcher
-          </button>
-          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-
           <a class="button lab-only" href="../learn?lesson=bridge-jupyter-01" hidden>
             Practice and keep evidence in the coding lab
           </a>
@@ -358,14 +345,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             <a class="button secondary" href="#" data-vscode-path="bridge/professional/companion-guides/bridge_jupyter_01_postgresql_magics.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Companion guide"
-              data-artifact-kind="guide"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -373,47 +353,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <p><strong>Level:</strong> Intermediate/advanced <strong>Stable lesson ID:</strong> <code>bridge-jupyter-01</code> <strong>Catalog prerequisites:</strong> <code>python-18</code>, <code>sql-15</code>, and <code>bridge-03</code> <strong>Prerequisites:</strong> Python Day 18, SQL Day 15, <a href="bridge-03.html#guide">Bridge Day 3</a>, the repository notebook and bridge dependencies, and a reset disposable course database.</p>
 <p>This module is for interactive analysis. Its learner artifact is the <a href="bridge-jupyter-01.html#learner">answer-free notebook</a>; the completed notebook remains separate under <code>solutions/</code>.</p>
-<h5 id="guide--one-time-connected-setup">One-time connected setup<a class="heading-anchor" href="#guide--one-time-connected-setup" aria-label="Link to this section">#</a></h5>
-<p>Install the course profiles before going offline:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-<span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced
-
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-bash scripts/setup.sh --advanced</code></pre>
-<p>Do not install packages with <code>%pip</code> inside the lesson. Central setup keeps the kernel reproducible and prevents a notebook from silently selecting a different interpreter.</p>
-<p>Reset and verify only the disposable <code>advanced_sql_training</code> database using the canonical PostgreSQL setup guide. The reset drops and recreates the course-owned <code>training</code> schema; never point it at valuable data.</p>
-<h5 id="guide--start-vs-code-with-the-environment-value">Start VS Code with the environment value<a class="heading-anchor" href="#guide--start-vs-code-with-the-environment-value" aria-label="Link to this section">#</a></h5>
-<p>Close existing course kernels. From the repository root, set the connection string only for the current shell and launch VS Code from that same process:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-builtin">Read-Host</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Paste the disposable course PostgreSQL URL</span><span class="syntax-string">&quot;</span>
-code <span class="syntax-punctuation">.</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-<span class="syntax-builtin">read</span> -r -s -p <span class="syntax-string">&quot;Disposable course PostgreSQL URL: &quot;</span> DS60_DATABASE_URL
+<h5 id="guide--prepare-the-optional-notebook-workflow">Prepare the optional notebook workflow<a class="heading-anchor" href="#guide--prepare-the-optional-notebook-workflow" aria-label="Link to this section">#</a></h5>
+<p>The Docker classroom is the normal study route: run <code>./classroom</code>, choose <strong>Python + PostgreSQL engineering</strong>, and open <code>bridge-jupyter-01</code>. Read its capability notice. The dedicated interactive notebook below is an optional contributor workflow; the classroom does not launch a host Jupyter server.</p>
+<p>Use Linux, macOS or Ubuntu in <strong>Windows WSL 2</strong>. From the repository root, prepare the locked environment while connected, following <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a>:</p>
+<pre class="highlighted-code"><code class="language-bash">uv sync --frozen --python <span class="syntax-number">3</span>.12 --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
+<p>Do not install packages with <code>%pip</code> inside the lesson. Central setup keeps the kernel reproducible and prevents a notebook from silently selecting a different interpreter. These host packages are separate from the classroom worker images.</p>
+<p>Start the disposable course database with <code>./classroom --starter</code>. Use <code>./classroom status</code> to find its actual forwarded database port. Reset the course-owned <code>training</code> schema only if this lesson needs its baseline, using the explicit classroom reset control. Never reset valuable data.</p>
+<h5 id="guide--start-jupyter-or-vs-code-from-the-prepared-shell">Start Jupyter or VS Code from the prepared shell<a class="heading-anchor" href="#guide--start-jupyter-or-vs-code-from-the-prepared-shell" aria-label="Link to this section">#</a></h5>
+<p>Close existing course kernels. Enter the disposable local PostgreSQL URL at the hidden prompt below, using the actual port from status and the database <code>advanced_sql_training</code>. Fresh classroom credentials are <code>admin</code> / <code>admin</code>. Do not assume the same port or credentials for a different project.</p>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">read</span> -r -s -p <span class="syntax-string">&quot;Disposable course PostgreSQL URL: &quot;</span> DS60_DATABASE_URL
 <span class="syntax-builtin">export</span> DS60_DATABASE_URL
 <span class="syntax-builtin">printf</span> <span class="syntax-string">&#x27;\n&#x27;</span>
-code .</code></pre>
-<p>Open the learner notebook, choose the <code>ds60sqlpy</code> kernel, and run cells in order. Starting VS Code from the shell matters: a kernel cannot inherit an environment variable added later to an unrelated terminal.</p>
-<p>JupyterLab is also supported:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, after setting DS60_DATABASE_URL</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, after setting DS60_DATABASE_URL</span>
-.venv/bin/python -m jupyter lab</code></pre>
-<p>Do not print the environment value, paste it into a cell, save it in notebook output, or commit a credential file.</p>
+uv run --no-sync python -m jupyter lab bridge/professional/notebooks</code></pre>
+<p>For VS Code, run <code>code .</code> from that same prepared shell instead of the last command. Select <strong>Python (ds60sqlpy)</strong> and open the learner notebook. A running kernel cannot inherit a variable added later in an unrelated terminal. Do not print the environment value, paste it into a cell, save it in notebook output, or commit a credential file.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python + PostgreSQL engineering</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
 <ol>
-<li>From the repository root, complete the Windows-first advanced setup with <code>&amp; .\scripts\bootstrap_windows.ps1 -Profile Advanced</code> (or <code>bash scripts/setup.sh --advanced</code> on macOS/Linux).</li>
-<li>Start PostgreSQL only for the live cells, reset the disposable <code>advanced_sql_training</code> database, and set <code>DS60_DATABASE_URL</code> in the same shell that launches VS Code or JupyterLab.</li>
-<li>Open <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code>, select the <code>ds60sqlpy</code> kernel, and run cells from top to bottom. Never paste or display the connection URL in a cell.</li>
-<li>If PostgreSQL is unavailable, complete every static review, prediction, parameter-safety, and notebook-hygiene exercise offline. Live behavior is optional evidence, not a completion requirement.</li>
-<li>Keep outputs clear before committing. The completed notebook under <code>solutions/</code> stays closed until the attempt and evidence phases are done.</li>
+<li>Open <code>bridge-jupyter-01</code> in the Docker classroom and read the guide and capability notice. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</li>
+<li>For live SQL magics, complete the optional notebook preparation above. PostgreSQL must be reachable at the local address reported by <code>./classroom status</code>; keep <code>DS60_DATABASE_URL</code> private.</li>
+<li>Open <code>bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb</code>, select the prepared kernel, and run cells from top to bottom.</li>
+<li>If PostgreSQL is unavailable, complete the static review, predictions, parameter-safety and notebook-hygiene exercises offline. Record missing live evidence honestly rather than inventing a successful connection.</li>
+<li>Clear notebook outputs before committing. Compare the completed notebook under <code>solutions/</code> only when ready for reference review.</li>
 </ol>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end, you can:</p>
@@ -802,14 +762,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
             <a class="button secondary" href="#" data-vscode-path="bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="lesson"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -1087,14 +1040,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
             <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solutions.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="lesson notes"
-              data-artifact-kind="solution"
-               data-solution-index="0"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1256,14 +1202,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
             <a class="button secondary" href="#" data-vscode-path="bridge/professional/solutions/bridge_jupyter_01_postgresql_magics_solution.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="solution"
-               data-solution-index="1"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1531,24 +1470,15 @@ solve the final transfer problem without opening solutions/.</textarea>
 
   <script>
     "use strict";
-    const LESSON_ID = "bridge-jupyter-01";
-    const LEARNER_PATH = "bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb";
-    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
     );
     if (labMode) {
       document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
-      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
       document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
       document.querySelector("#run-guidance").textContent =
         "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
@@ -1639,111 +1569,6 @@ solve the final transfer problem without opening solutions/.</textarea>
       }
     });
 
-    function readProgress() {
-      try {
-        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
-      } catch {
-        return { completed: [], setup: {}, os: "windows" };
-      }
-    }
-
-    function writeProgress(complete) {
-      const state = readProgress();
-      const completed = new Set(state.completed);
-      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
-      state.completed = [...completed].sort();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
-    }
-
-    const completion = document.querySelector("#lesson-complete");
-    if (launcherMode) {
-      completion.checked = readProgress().completed.includes(LESSON_ID);
-      completion.addEventListener("change", async () => {
-        writeProgress(completion.checked);
-        try {
-          await apiRequest("/api/progress", {
-            method: "POST",
-            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
-          });
-          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
-        } catch (error) {
-          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
-        }
-      });
-    }
-
-    function setStatus(message, failed = false) {
-      const status = document.querySelector("#launcher-status");
-      status.textContent = message;
-      status.style.color = failed ? "var(--red)" : "var(--muted)";
-    }
-
-    async function apiRequest(path, options = {}) {
-      const response = await fetch(path, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "X-DS60-Token": SERVER_TOKEN,
-          ...(options.headers || {})
-        }
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
-      return payload;
-    }
-
-    async function launch(detail) {
-      setStatus("Opening the allowlisted course artifact…");
-      try {
-        const payload = await apiRequest("/api/launch", {
-          method: "POST",
-          body: JSON.stringify(detail)
-        });
-        setStatus(payload.action + " started.");
-      } catch (error) {
-        setStatus("Could not launch this artifact: " + error.message, true);
-      }
-    }
-
-    if (launcherMode) {
-      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
-      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
-      setStatus("Guided launcher mode is ready.");
-      document.querySelector("#launch-learner").addEventListener("click", () => {
-        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
-      });
-      const jupyterButton = document.querySelector("#launch-jupyter");
-      if (jupyterButton) {
-        jupyterButton.addEventListener("click", () => {
-          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
-        });
-      }
-      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
-      if (sqlNotebookButton) {
-        sqlNotebookButton.addEventListener("click", () => {
-          void launch({
-            action: "jupyter-sql",
-            lesson_id: LESSON_ID,
-            artifact: "lesson",
-            solution_index: 1
-          });
-        });
-      }
-      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const detail = {
-            action: "open-artifact",
-            lesson_id: LESSON_ID,
-            artifact: button.dataset.artifactKind
-          };
-          if (button.dataset.solutionIndex !== undefined) {
-            detail.solution_index = Number(button.dataset.solutionIndex);
-          }
-          void launch(detail);
-        });
-      });
-    }
   </script>
 </body>
 </html>

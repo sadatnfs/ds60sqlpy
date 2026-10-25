@@ -14,99 +14,67 @@ This module is for interactive analysis. Its learner artifact is the
 [answer-free notebook](../notebooks/bridge_jupyter_01_postgresql_magics.ipynb);
 the completed notebook remains separate under `solutions/`.
 
-### One-time connected setup
+### Prepare the optional notebook workflow
 
-Install the course profiles before going offline:
+The Docker classroom is the normal study route: run `./classroom`, choose
+**Python + PostgreSQL engineering**, and open `bridge-jupyter-01`. Read its
+capability notice. The dedicated interactive notebook below is an optional
+contributor workflow; the classroom does not launch a host Jupyter server.
 
-```powershell
-# Windows PowerShell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1 -Profile Advanced
-
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-```
+Use Linux, macOS or Ubuntu in **Windows WSL 2**. From the repository root,
+prepare the locked environment while connected, following
+[contributor setup](../../../CONTRIBUTING.md):
 
 ```bash
-# macOS/Linux
-bash scripts/setup.sh --advanced
+uv sync --frozen --python 3.12 --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
 ```
 
 Do not install packages with `%pip` inside the lesson. Central setup keeps the
 kernel reproducible and prevents a notebook from silently selecting a different
-interpreter.
+interpreter. These host packages are separate from the classroom worker images.
 
-Reset and verify only the disposable `advanced_sql_training` database using
-the canonical PostgreSQL setup guide. The reset drops and recreates the
-course-owned `training` schema; never point it at valuable data.
+Start the disposable course database with `./classroom --starter`. Use
+`./classroom status` to find its actual forwarded database port. Reset the
+course-owned `training` schema only if this lesson needs its baseline, using
+the explicit classroom reset control. Never reset valuable data.
 
-### Start VS Code with the environment value
+### Start Jupyter or VS Code from the prepared shell
 
-Close existing course kernels. From the repository root, set the connection
-string only for the current shell and launch VS Code from that same process:
-
-```powershell
-# Windows PowerShell
-$env:DS60_DATABASE_URL = Read-Host "Paste the disposable course PostgreSQL URL"
-code .
-```
+Close existing course kernels. Enter the disposable local PostgreSQL URL at
+the hidden prompt below, using the actual port from status and the database
+`advanced_sql_training`. Fresh classroom credentials are `admin` / `admin`.
+Do not assume the same port or credentials for a different project.
 
 ```bash
-# macOS/Linux
 read -r -s -p "Disposable course PostgreSQL URL: " DS60_DATABASE_URL
 export DS60_DATABASE_URL
 printf '\n'
-code .
+uv run --no-sync python -m jupyter lab bridge/professional/notebooks
 ```
 
-Open the learner notebook, choose the `ds60sqlpy` kernel, and run cells in
-order. Starting VS Code from the shell matters: a kernel cannot inherit an
-environment variable added later to an unrelated terminal.
-
-JupyterLab is also supported:
-
-```powershell
-# Windows PowerShell, after setting DS60_DATABASE_URL
-& $CoursePython -m jupyter lab
-```
-
-```bash
-# macOS/Linux, after setting DS60_DATABASE_URL
-.venv/bin/python -m jupyter lab
-```
-
+For VS Code, run `code .` from that same prepared shell instead of the last
+command. Select **Python (ds60sqlpy)** and open the learner notebook. A running
+kernel cannot inherit a variable added later in an unrelated terminal.
 Do not print the environment value, paste it into a cell, save it in notebook
 output, or commit a credential file.
-
 
 <!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN -->
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python + PostgreSQL engineering** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. From the repository root, complete the Windows-first advanced setup with
-   `& .\scripts\bootstrap_windows.ps1 -Profile Advanced`
-   (or `bash scripts/setup.sh --advanced` on macOS/Linux).
-2. Start PostgreSQL only for the live cells, reset the disposable
-   `advanced_sql_training` database, and set `DS60_DATABASE_URL` in the same
-   shell that launches VS Code or JupyterLab.
-3. Open `bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb`, select the `ds60sqlpy` kernel, and run cells
-   from top to bottom. Never paste or display the connection URL in a cell.
-4. If PostgreSQL is unavailable, complete every static review, prediction,
-   parameter-safety, and notebook-hygiene exercise offline. Live behavior is
-   optional evidence, not a completion requirement.
-5. Keep outputs clear before committing. The completed notebook under
-   `solutions/` stays closed until the attempt and evidence phases are done.
+1. Open `bridge-jupyter-01` in the Docker classroom and read the guide and
+   capability notice. The [classroom guide](../../../docs/classroom-experience.md)
+   explains saved work, runtimes and switching subjects.
+2. For live SQL magics, complete the optional notebook preparation above.
+   PostgreSQL must be reachable at the local address reported by
+   `./classroom status`; keep `DS60_DATABASE_URL` private.
+3. Open `bridge/professional/notebooks/bridge_jupyter_01_postgresql_magics.ipynb`,
+   select the prepared kernel, and run cells from top to bottom.
+4. If PostgreSQL is unavailable, complete the static review, predictions,
+   parameter-safety and notebook-hygiene exercises offline. Record missing
+   live evidence honestly rather than inventing a successful connection.
+5. Clear notebook outputs before committing. Compare the completed notebook
+   under `solutions/` only when ready for reference review.
 <!-- END BRIDGE ENRICHMENT: HOW TO RUN -->
 
 ## Learning objectives

@@ -20,7 +20,10 @@ Keep Node and browser environments distinct. The Node worker stages `main.mjs`;
 TypeScript stages `main.mts`, performs strict NodeNext checking and compiles
 before Node execution. Use only prepared built-ins and declared typings. Do not
 install packages from a normal example. Browser DOM APIs such as `document` and
-`window` require the documented browser fixture route or reading mode.
+`window` require `javascript-browser` or the separately prepared browser fixture,
+not a Node runtime. The D3 extension uses the bundled library and inline data.
+Live preview is opt-in, preserves editor focus and does not automatically write
+immutable observations. History/reload/navigation must not replay code.
 
 Explain coercion, scope, closures, object identity, modules, asynchronous jobs,
 errors and runtime validation before large applications. Types do not validate

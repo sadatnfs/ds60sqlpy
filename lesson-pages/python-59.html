@@ -64,8 +64,6 @@
       font-size: .73rem; letter-spacing: .04em;
     }
     .top-actions { display: flex; align-items: center; gap: .7rem; }
-    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
-    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
     .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
     .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
@@ -95,7 +93,6 @@
     .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
     .button.secondary { color: var(--navy); background: transparent; }
     .button.secondary:hover { color: #fff; background: var(--navy); }
-    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
     .sql-run-guide {
       margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
@@ -200,7 +197,6 @@
     .nav-card.disabled { opacity: .65; }
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
-      .top-actions .completion { display: none; }
       .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
       .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
@@ -268,10 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
       <div class="top-actions">
-        <label class="completion launcher-only" hidden>
-          <input id="lesson-complete" type="checkbox">
-          Mark complete
-        </label>
+
         <a class="static-only" href="../START_HERE.html#catalog">
           Track completion on the course dashboard
         </a>
@@ -302,22 +295,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <h2 id="run-heading">Run this lesson in the classroom</h2>
+          <p id="run-guidance">Open this lesson in the Docker classroom, read its capability notice, and run the notebook cells in order using the coding pad. The preview below is read-only. Prepared contributors may also use the original notebook with the course Jupyter kernel.</p>
           <div class="static-help">
-            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
           </div>
-          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
           <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day59_capstone_kickoff.ipynb">
             Open learner artifact in VS Code
           </a>
-          <button class="button launcher-only" type="button" id="launch-learner" hidden>
-            Open with guided launcher
-          </button>
-          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-
           <a class="button lab-only" href="../learn?lesson=python-59" hidden>
             Practice and keep evidence in the coding lab
           </a>
@@ -358,14 +345,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day59_capstone_kickoff.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Companion guide"
-              data-artifact-kind="guide"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -725,14 +705,7 @@ merely ran is not evidence of mastery.</code></pre></div>
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day59_capstone_kickoff.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="lesson"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -939,14 +912,7 @@ merely ran is not evidence of mastery.</code></pre></div>
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day59_capstone_kickoff/day59_solutions.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="lesson notes"
-              data-artifact-kind="solution"
-               data-solution-index="0"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1067,14 +1033,7 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day59_capstone_kickoff/day59_solutions.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="solution"
-               data-solution-index="1"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1238,24 +1197,15 @@ merely ran is not evidence of mastery.</textarea>
 
   <script>
     "use strict";
-    const LESSON_ID = "python-59";
-    const LEARNER_PATH = "python/ds-60day/notebooks/day59_capstone_kickoff.ipynb";
-    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
     );
     if (labMode) {
       document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
-      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
       document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
       document.querySelector("#run-guidance").textContent =
         "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
@@ -1346,111 +1296,6 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    function readProgress() {
-      try {
-        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
-      } catch {
-        return { completed: [], setup: {}, os: "windows" };
-      }
-    }
-
-    function writeProgress(complete) {
-      const state = readProgress();
-      const completed = new Set(state.completed);
-      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
-      state.completed = [...completed].sort();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
-    }
-
-    const completion = document.querySelector("#lesson-complete");
-    if (launcherMode) {
-      completion.checked = readProgress().completed.includes(LESSON_ID);
-      completion.addEventListener("change", async () => {
-        writeProgress(completion.checked);
-        try {
-          await apiRequest("/api/progress", {
-            method: "POST",
-            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
-          });
-          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
-        } catch (error) {
-          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
-        }
-      });
-    }
-
-    function setStatus(message, failed = false) {
-      const status = document.querySelector("#launcher-status");
-      status.textContent = message;
-      status.style.color = failed ? "var(--red)" : "var(--muted)";
-    }
-
-    async function apiRequest(path, options = {}) {
-      const response = await fetch(path, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "X-DS60-Token": SERVER_TOKEN,
-          ...(options.headers || {})
-        }
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
-      return payload;
-    }
-
-    async function launch(detail) {
-      setStatus("Opening the allowlisted course artifact…");
-      try {
-        const payload = await apiRequest("/api/launch", {
-          method: "POST",
-          body: JSON.stringify(detail)
-        });
-        setStatus(payload.action + " started.");
-      } catch (error) {
-        setStatus("Could not launch this artifact: " + error.message, true);
-      }
-    }
-
-    if (launcherMode) {
-      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
-      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
-      setStatus("Guided launcher mode is ready.");
-      document.querySelector("#launch-learner").addEventListener("click", () => {
-        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
-      });
-      const jupyterButton = document.querySelector("#launch-jupyter");
-      if (jupyterButton) {
-        jupyterButton.addEventListener("click", () => {
-          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
-        });
-      }
-      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
-      if (sqlNotebookButton) {
-        sqlNotebookButton.addEventListener("click", () => {
-          void launch({
-            action: "jupyter-sql",
-            lesson_id: LESSON_ID,
-            artifact: "lesson",
-            solution_index: 1
-          });
-        });
-      }
-      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const detail = {
-            action: "open-artifact",
-            lesson_id: LESSON_ID,
-            artifact: button.dataset.artifactKind
-          };
-          if (button.dataset.solutionIndex !== undefined) {
-            detail.solution_index = Number(button.dataset.solutionIndex);
-          }
-          void launch(detail);
-        });
-      });
-    }
   </script>
 </body>
 </html>

@@ -2,7 +2,7 @@ ARG DS60_BASE_IMAGE=python:3.12-slim-bookworm
 FROM ${DS60_BASE_IMAGE}
 
 LABEL org.opencontainers.image.title="DS60 Learning Lab" \
-    org.opencontainers.image.version="0.4.0" \
+    org.opencontainers.image.version="0.4.1" \
     org.opencontainers.image.description="Local classroom for programming, data science and machine learning" \
     org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.url="https://github.com/sadatnfs/ds60sqlpy" \

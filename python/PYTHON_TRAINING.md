@@ -1,5 +1,12 @@
 # Python and Data Science: foundations, 60 core lessons, and professional study
 
+This document outlines the original 60 Python lessons. The classroom also includes
+additional foundations, NumPy/pandas, algorithms and professional routes. Use
+[the current Python guide](ds-60day/README.md) for startup and the complete route.
+The supported learner environment is Docker; local interpreter and virtual-environment
+concepts below are taught concepts, not extra host installation prerequisites.
+
+
 Overview
 - Goal: Progress from first Python programs to substantial data-science and
   production projects. “Day” is a stable lesson number, not a deadline.
@@ -23,7 +30,7 @@ topic in one sitting.
 ## Phase 1 - Core Python & Good Coding Practices (Days 1–15)
 
 Day 1 - Python setup & REPL, virtual environments, package management
-- Objectives: Run the repository setup for Windows, macOS, or Linux; select the
+- Objectives: Start the Docker classroom on Linux, macOS or Windows/WSL 2; identify the
   `.venv` interpreter in VS Code; use Python and Jupyter.
 - Exercise: Verify the environment, run a simple script, and launch Jupyter.
 

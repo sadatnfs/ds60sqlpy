@@ -13,72 +13,67 @@
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **PostgreSQL** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+Start the Linux-container engine and run `./classroom` from the repository
+root. On Windows, use Ubuntu in WSL 2 or the thin
+`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
+`/classroom` home, then open **sql-01**. The
+[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
+the saved project selection. No host Python or PostgreSQL installation is
+required for this browser route.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+1. Read the prerequisite and fixture notes before running the file. Use only
+   the local disposable `advanced_sql_training` database. A simple snippet
+   such as `SELECT 1;` needs no training-schema reset.
+2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
+   preserves the lesson's reviewed psql directives, relative includes and
+   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
+   statements, but is not a replacement for an entire script's setup.
+3. When the lesson requires the course training data, use the explicit
+   preparation action and read its reset acknowledgement. It replaces the
+   course-owned `training` schema. Do not reset unrelated data or prepare
+   every lesson by habit; stateful sequences have their own ordering.
+4. Edit the learner copy in the classroom and save your prediction before
+   running. Its whole-script workspace is
+   `.learning/sql/sql-01/lesson/workspace/sql/postgres-60day/day01_select_where_orderby.sql`.
+   For browser work this path is inside the Docker learning volume, not a
+   newly created host folder beside your checkout. The checked-in source
+   remains the answer-free starting artifact.
+5. Run the whole script and inspect the full transcript. The runner uses
+   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
+   count; DDL/DML has command tags; intentional checks may produce NOTICE
+   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
+   even when an earlier query printed plausible values.
+6. Verify the lesson's expected grain, ordering, constraints and declared
+   transaction or cleanup outcome. Keep required ROLLBACK statements.
+   The warehouse sequence and other explicitly stateful exercises explain
+   when state is committed. Read saved output without rerunning it when
+   reviewing an earlier attempt.
 
-The rendered lesson page is a reading surface; PostgreSQL runs the real learner
-file. The safest beginner route is the private course portal because it checks
-the database target, creates an ignored working copy, and shows the complete
-`psql` transcript in a Jupyter notebook.
+If a relation is missing, inspect the lesson's required fixture and predecessor
+rather than guessing a new table definition. If authentication or runtime
+readiness fails, use `./classroom status` and the setup guide. Keep credentials
+out of SQL, notebooks, screenshots and committed files. Repair the first error
+before trusting partial output, and reveal separate solutions only when you
+want to compare after an attempt.
 
-1. Open a terminal **in the repository root**. On Windows, double-click
-   `START_DS60.cmd` or run this in PowerShell:
+### Optional contributor notebook route
 
-   ```powershell
-   .\START_DS60.cmd
-   ```
+For notebook work, deliberately prepare the Linux/WSL contributor environment
+from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
+the notebook dependencies. Generate this lesson's private workspace through
+the maintained CLI:
 
-   On macOS or Linux:
-
-   ```bash
-   .venv/bin/python scripts/learning_portal.py
-   ```
-
-2. In the portal, open **SQL-01**, choose **Create/open guided SQL notebook**,
-   and run the readiness cells from top to bottom. The notebook accepts only
-   the local disposable `advanced_sql_training` database.
-3. In the preparation cell, read the warning before changing
-   `CONFIRM_COURSE_RESET` to `True`. Preparation drops and recreates only the
-   course-owned `training` schema, loads deterministic seed rows, and verifies
-   them. Never point this action at a shared or valuable database.
-4. Open the notebook link to the editable
-   `.learning/sql/sql-01/lesson/workspace/sql/postgres-60day/day01_select_where_orderby.sql` copy. Write predictions
-   in comments, edit only that copy, save it, and run the notebook's full-script
-   cell. It deliberately uses `psql -X -v ON_ERROR_STOP=1 -f`; this preserves
-   the same behavior as the official `.sql` file.
-5. Read output directly below the run cell. Each `SELECT` prints a
-   table-shaped result with column headings and a row count. Success means the
-   transcript has no `ERROR`, the runner reports exit code 0, and the final
-   `ROLLBACK` leaves the seed data unchanged. The following verification cell
-   should also pass.
-
-If Jupyter is not available, run the official answer-free file directly:
-
-```powershell
-# Windows PowerShell, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql\postgres-60day\day01_select_where_orderby.sql"
+```sh
+uv run --no-sync python scripts/course.py sql notebook sql-01
 ```
 
-```bash
-# macOS/Linux, from the repository root
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
-  -f sql/postgres-60day/day01_select_where_orderby.sql
-```
-
-The terminal is then the output surface. If PowerShell says `psql` is not
-recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL without
-permanently changing `PATH`. If PostgreSQL reports that the database or a
-`training` relation does not exist, return to the notebook preparation cell
-and explicitly prepare the disposable database. For authentication errors,
-rerun the setup/doctor flow - do not paste a password into a lesson, notebook, or
-committed file. With `ON_ERROR_STOP`, fix the first reported error and rerun the
-whole transactional script rather than continuing from partial state.
+Open the printed notebook path in that environment's JupyterLab. It uses the
+same catalog-derived learner-copy layout in that contributor checkout and
+executes the complete script through psql. Its host-side state is separate
+from the Docker browser's named volume. Follow
+[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
+selection and kernel setup. Notebook generation does not execute SQL or
+authorize a reset.
 
 ## A beginner's mental model for this lesson
 
@@ -305,7 +300,7 @@ logical order and state the expected row grain/shape before asking me to run
 anything. The guide's lesson-specific worked-model focus is: Trace the first learner query in logical order: FROM training.customers produces candidate rows, WHERE country IN ('US', 'CA') filters them, ORDER BY createdat DESC, customerid DESC fixes their order, and LIMIT 10 keeps the first ten. Remove the customerid tie-breaker and explain why rows with equal timestamps no longer have a guaranteed relative order.
 
 Use only the local disposable advanced_sql_training database. Prefer the
-lesson reader's Create/open guided SQL notebook action and its ignored
+Docker classroom's Whole SQL lesson (psql) workspace and its ignored
 .learning/sql/sql-01/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 

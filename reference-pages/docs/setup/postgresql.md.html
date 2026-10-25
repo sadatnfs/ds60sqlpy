@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Local PostgreSQL, step by step · DS60 reference</title>
+  <title>PostgreSQL in the Docker classroom · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,101 +158,46 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Local PostgreSQL, step by step</h1>
+      <h1>PostgreSQL in the Docker classroom</h1>
       <p class="source-path">Generated from <code>docs/setup/postgresql.md</code></p>
     </header>
-    <article class="document"><h2 id="local-postgresql-step-by-step">Local PostgreSQL, step by step<a class="heading-anchor" href="#local-postgresql-step-by-step" aria-label="Link to this section">#</a></h2>
-<blockquote><p>The supported classroom includes PostgreSQL and its clients inside Linux containers. Start with <a href="../one-command-classroom.md.html">the Docker/WSL walkthrough</a>. Native server instructions below are historical compatibility references, not prerequisites or release gates.</p></blockquote>
-<p>PostgreSQL runs as a server. <code>psql</code>, the course SQL runner, and a notebook are clients connecting to that server. Installing a Python driver does not install the server, and installing a server does not guarantee that <code>psql</code> is on PATH.</p>
-<p>Use PostgreSQL 16 or newer; the canonical course container and SQL CI use PostgreSQL 17. These commands operate only on the disposable <code>advanced_sql_training</code> database. The setup file drops and recreates its <code>training</code> schema. Preserve any personal tables or work before rerunning it.</p>
-<h3 id="choose-one-route">Choose one route<a class="heading-anchor" href="#choose-one-route" aria-label="Link to this section">#</a></h3>
+    <article class="document"><h2 id="postgresql-in-the-docker-classroom">PostgreSQL in the Docker classroom<a class="heading-anchor" href="#postgresql-in-the-docker-classroom" aria-label="Link to this section">#</a></h2>
+<p>The supported classroom starts PostgreSQL with the application. Use <code>./classroom</code> or <code>./classroom --starter</code>; no host PostgreSQL installation, pgAdmin setup or native Windows password file is required.</p>
+<p>The course targets the disposable database <code>advanced_sql_training</code>. Its fresh Docker learner login is <code>admin</code> with password <code>admin</code>. A separate bootstrap role performs container initialization. The classroom supplies the connection internally, so ordinary SQL source should contain no connection string.</p>
+<h3 id="confirm-the-connection-from-the-sql-pad">Confirm the connection from the SQL pad<a class="heading-anchor" href="#confirm-the-connection-from-the-sql-pad" aria-label="Link to this section">#</a></h3>
+<p>Open <strong>PostgreSQL</strong>, choose the first on-ramp lesson and select SQL snippet mode when offered. Run:</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> current_database<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> database_name<span class="syntax-punctuation">,</span> <span class="syntax-keyword">current_user</span> <span class="syntax-keyword">AS</span> learner_role<span class="syntax-punctuation">;</span></code></pre>
+<p>On a fresh default installation, expect <code>advanced_sql_training</code> and <code>admin</code>. A deliberately configured existing course login can differ. Keep the query result with your notes; a running container alone does not prove a query works.</p>
+<h3 id="choose-the-correct-execution-mode">Choose the correct execution mode<a class="heading-anchor" href="#choose-the-correct-execution-mode" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
-<th>Route</th>
-<th>Good fit</th>
-<th>What you need</th>
+<th>Mode</th>
+<th>Intended artifact</th>
 </tr></thead><tbody>
 <tr>
-<td>Browser app in Docker</td>
-<td>You want the guided coding page and host-saved progress</td>
-<td><a href="../docker-beginners.md.html">Docker beginner walkthrough</a>; no native Python or PostgreSQL needed</td>
+<td>SQL snippet</td>
+<td>Ordinary SQL statements entered in the browser</td>
 </tr>
 <tr>
-<td>Native server</td>
-<td>You want the normal local database workflow</td>
-<td>Your <a href="first-success.md.html#1-choose-the-matching-operating-system-guide">OS setup guide</a>, PostgreSQL server, <code>psql</code>, and local authentication</td>
-</tr>
-<tr>
-<td>Course container</td>
-<td>You already use Docker or want consistent server defaults</td>
-<td>Docker Desktop on Windows/macOS, or Docker Engine plus Compose on Linux; host <code>psql</code> only for Python-launched SQL</td>
+<td>Whole SQL lesson (psql)</td>
+<td>The selected lesson script, including reviewed psql directives and relative fixture references</td>
 </tr>
 </tbody></table></div>
-<p>Choose one for your first session. If both servers run, they need different ports. A container-only SQL workflow does not require a host PostgreSQL server or host <code>psql</code>; the <code>sql-runner</code> container supplies its own client.</p>
-<h3 id="route-a-the-course-container">Route A: the course container<a class="heading-anchor" href="#route-a-the-course-container" aria-label="Link to this section">#</a></h3>
-<p>For the full browser application with automatic opening and a host-backed learning folder, begin with the <a href="../docker-beginners.md.html">Docker walkthrough</a>. The remaining commands are the SQL-only terminal route and the optional connection from host notebooks. They use the same <code>ds60-learning</code> project. A fresh database uses <code>admin</code> / <code>admin</code>, a limited course role, on host port 55432 by default. The bootstrap administrator is a separate account.</p>
-<p>Start Docker first. Confirm both tools respond:</p>
-<pre class="highlighted-code"><code class="language-text">docker --version
-docker compose version</code></pre>
-<p>From the repository root, use the same commands in PowerShell and Bash:</p>
-<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60-learning up -d postgres
-docker compose --project-name ds60-learning ps
-docker compose --project-name ds60-learning run --rm sql-runner -c &quot;SELECT current_database(), 2 + 3 AS first_result;&quot;</code></pre>
-<p>Expect <code>advanced_sql_training</code> and <code>5</code>. The <code>sql-runner</code> waits for the server&#x27;s health check. A running container alone is not proof the database is ready; this distinction follows <a href="https://docs.docker.com/compose/how-tos/startup-order/">Compose&#x27;s startup-order documentation</a>. If a command fails, inspect <code>docker compose --project-name ds60-learning logs postgres</code> before rerunning it.</p>
-<p>Initialize the disposable seed and run the invariant checks:</p>
-<pre class="highlighted-code"><code class="language-text">docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/00_verify.sql
-docker compose --project-name ds60-learning run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
-<p>Each command must exit successfully. The verifier checks more than whether a table exists. You should see Day 1&#x27;s result tables after it succeeds. <code>sql-runner</code> already supplies <code>-X -v ON_ERROR_STOP=1</code> and the fixed course target.</p>
-<p>To use <strong>guided SQL notebooks</strong>, also install the PostgreSQL client tools on the host and confirm <code>psql --version</code>. The notebook launches host <code>psql</code>; it does not automatically execute a container. The standalone Docker commands above remain available if you do not install that host client.</p>
-<p>The container runner uses the fresh course database&#x27;s limited <code>admin</code> connection. A host client needs its own explicit target. When switching from a native server, explicitly choose that URL in the terminal that starts the portal:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://admin:admin@127.0.0.1:55432/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-<span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin:admin@127.0.0.1:55432/advanced_sql_training&quot;</span></code></pre>
-<p>For a port conflict, choose a new host port before starting the container:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_POSTGRES_PORT <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">55433</span><span class="syntax-string">&quot;</span>
-docker compose <span class="syntax-punctuation">-</span>-project-name ds60-learning up -d postgres
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://admin:admin@127.0.0.1:55433/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-<span class="syntax-builtin">export</span> DS60_POSTGRES_PORT<span class="syntax-operator">=</span><span class="syntax-number">55433</span>
-docker compose --project-name ds60-learning up -d postgres
-<span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://admin:admin@127.0.0.1:55433/advanced_sql_training&quot;</span></code></pre>
-<p>Container-to-container <code>sql-runner</code> commands still use port 5432 internally. For normal shutdown use the matching Docker launcher <code>stop</code>, or run <code>docker compose --project-name ds60-learning stop</code>. Both preserve the database volume. Saved browser work remains in the separate host <code>.learning</code> bind mount. Volume deletion is a separate destructive operation and is not needed to stop or resume study.</p>
-<p>The Docker browser app and SQL-only commands above do not need host Python or host <code>psql</code>. If you separately want Windows host notebooks, use <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql</code> for native Python, then install PostgreSQL client tools for notebook-launched SQL. The native <code>START_DS60.cmd</code> workflow differs from the Docker <code>START_DOCKER_LAB.cmd</code> workflow; choose the one matching where execution happens.</p>
-<h3 id="route-b-the-native-server">Route B: the native server<a class="heading-anchor" href="#route-b-the-native-server" aria-label="Link to this section">#</a></h3>
-<p>Complete your <a href="windows.md.html#5-set-up-postgresql">Windows</a>, <a href="macos.md.html#4-set-up-postgresql">macOS</a>, or <a href="linux.md.html#4-set-up-postgresql">Linux</a> instructions first. They explain installing, starting, creating the local role, and creating <code>advanced_sql_training</code>.</p>
-<h4 id="macos-and-linux-with-the-normal-username-socket-connection">macOS and Linux with the normal username/socket connection<a class="heading-anchor" href="#macos-and-linux-with-the-normal-username-socket-connection" aria-label="Link to this section">#</a></h4>
-<p>The OS guides use the local operating-system username and a Unix socket, a local connection that does not use the TCP network. Check that exact route:</p>
-<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -c <span class="syntax-string">&quot;SELECT current_database(), current_user, 2 + 3 AS first_result;&quot;</span></code></pre>
-<p>Expect the course database, your local username, and <code>5</code>. Initialize and verify if this is a fresh disposable database:</p>
-<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
-<p>The course tools otherwise default to the container connection. Give them the same native target and start the portal in this terminal:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span>advanced_sql_training
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/learning_portal.py</code></pre>
-<p>The literal database name is supported by doctor and the guided <code>psql</code> notebooks; it deliberately uses local defaults without inheriting routing overrides such as <code>PGHOST</code> or <code>PGSERVICE</code>. It is not a SQLAlchemy URL. For the separate <a href="jupyter-postgresql.md.html">JupySQL lesson</a>, use <code>postgresql:///advanced_sql_training</code> for a matching local default socket, or an explicit local TCP URL and the authentication described below.</p>
-<h4 id="windows-or-a-native-server-requiring-a-password">Windows, or a native server requiring a password<a class="heading-anchor" href="#windows-or-a-native-server-requiring-a-password" aria-label="Link to this section">#</a></h4>
-<p>Use the local role from the installer, commonly <code>postgres</code> on Windows. Verify the target interactively:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -c &quot;SELECT current_database(), 2 + 3 AS first_result;&quot;</code></pre>
-<p>Follow the <a href="windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">Windows password-file instructions</a> before launching a notebook. Guided execution intentionally disables password prompts; an interactive terminal login alone does not prove it will work.</p>
-<p>On macOS/Linux a local password file is <code>~/.pgpass</code> with permissions <code>0600</code>. On Windows it is <code>%APPDATA%\postgresql\pgpass.conf</code>. The entry must match host, port, database, and role. Escape <code>:</code> and <code>\</code> in passwords with a preceding backslash. Keep the file private and outside this repository. See the <a href="https://www.postgresql.org/docs/17/libpq-pgpass.html">PostgreSQL password-file reference</a>.</p>
-<p>Set a password-free URL in the launching terminal, using your actual role:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell</span>
-$env:DS60_DATABASE_URL <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">postgresql://postgres@localhost:5432/advanced_sql_training</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, only when using the postgres role over local TCP</span>
-<span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span><span class="syntax-string">&quot;postgresql://postgres@localhost:5432/advanced_sql_training&quot;</span></code></pre>
-<p>On Linux, a socket login using peer authentication and a TCP login using a password are different authentication routes. Avoid changing server-wide authentication to <code>trust</code> as a troubleshooting shortcut. If a Python driver uses a different default socket location from distro <code>psql</code>, the explicit local TCP route and a matching password file avoid that ambiguity.</p>
-<h3 id="confirm-the-whole-path">Confirm the whole path<a class="heading-anchor" href="#confirm-the-whole-path" aria-label="Link to this section">#</a></h3>
-<ol>
-<li>Run doctor using the repository interpreter in the terminal with your chosen connection. Expect the course database to be reachable.</li>
-<li>Start the learning portal in that same terminal.</li>
-<li>Open <code>sql-start-01</code> for the beginner fixture, or <code>sql-01</code> after completing the on-ramp, and choose <strong>Create/open guided SQL notebook</strong>.</li>
-<li>Run the notebook&#x27;s read-only readiness step, read the reset notice before initializing the disposable seed, and run Day 1.</li>
-<li>Check the output against the lesson guide. Keep personal SQL in the ignored working copy under <code>.learning/sql/sql-01/</code>.</li>
-</ol>
-<p>The <code>DS60_DATABASE_URL</code> setting lasts for the terminal and its child processes. Repeat it in a new terminal. Native course tools do not automatically load <code>.env</code>; Compose has its own configuration mechanism. The browser container receives its internal database target from the Docker startup configuration, not the host port in a native notebook URL. Doctor proves bounded connectivity. Seed verification proves the fixture invariants. Successful Day 1 execution proves that lesson path. None of those checks proves that every later lesson or native OS configuration has run.</p></article>
+<p>Read the lesson before switching modes. A psql backslash command is not ordinary SQL and should not be pasted into an incompatible client. Whole-script execution preserves the course&#x27;s declared transaction and include behavior; it does not grant arbitrary access to host files.</p>
+<p>Start with <code>sql-start-01</code>, <code>sql-start-02</code> and <code>sql-start-03</code>. Their small temporary fixtures introduce rows, filtering and aggregation before the numbered sequence.</p>
+<h3 id="training-data-and-permissions">Training data and permissions<a class="heading-anchor" href="#training-data-and-permissions" aria-label="Link to this section">#</a></h3>
+<p>Some lessons need the course-owned <code>training</code> schema. The setup script <code>sql/postgres-60day/00_setup.sql</code> drops and recreates that schema. Use the classroom&#x27;s explicit preparation action only after reading its acknowledgement. It is not required for <code>SELECT 1;</code> and is not a general repair for a failed query.</p>
+<p>Keep lesson work inside the local disposable course database. Ordinary learner credentials do not imply permission for server administration, extensions, replication or physical recovery. Advanced lessons identify separate capability requirements and useful reading/default exercises.</p>
+<p>Most exercises use transactions that roll back their changes. Some sequences deliberately retain state, such as the warehouse lessons spanning SQL Days 52 through 54. Follow their ordering and fixture instructions rather than resetting between every file.</p>
+<h3 id="ports-and-stopping">Ports and stopping<a class="heading-anchor" href="#ports-and-stopping" aria-label="Link to this section">#</a></h3>
+<p>The database listens on its container port inside the project. The launcher publishes a separate loopback host port and can choose it automatically. Use <code>./classroom status</code> instead of assuming the host port is 5432 or 55432.</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>These commands retain PostgreSQL&#x27;s named data volume. A new image or container does not replace its stored tables. Deleting the volume is a separate reset. Changing a database password setting does not automatically rewrite an already initialized database&#x27;s roles.</p>
+<h3 id="back-up-the-right-data">Back up the right data<a class="heading-anchor" href="#back-up-the-right-data" aria-label="Link to this section">#</a></h3>
+<p>SQL tables live in the database volume. Browser drafts, notes and saved query output live in the learning volume. Back up both when you want the complete workspace. A saved SQL receipt is useful evidence of an earlier query, but it is not a database backup.</p>
+<p>Follow <a href="../docker-classroom.md.html#5-export-learning-work-and-the-database">the classroom export procedure</a> and use a deliberate restore target. Never restore over unrelated data. Keep the same project name when identifying volumes and containers.</p>
+<h3 id="optional-notebook-work">Optional notebook work<a class="heading-anchor" href="#optional-notebook-work" aria-label="Link to this section">#</a></h3>
+<p>A separately prepared contributor environment can use <a href="jupyter-postgresql.md.html">the guided PostgreSQL notebook workflow</a>. That is an explicit alternative for notebook work, not an additional setup requirement for the Docker browser. Windows contributors use WSL 2 for the Linux tooling.</p></article>
   </main>
 </body>
 </html>

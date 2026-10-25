@@ -5,14 +5,14 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
 ## Runtime and commands
 
 Lead learner instructions with the Docker classroom. The host interpreter
-commands below apply to optional native development and notebook workflows.
-Windows Docker instructions use WSL 2 rather than native PowerShell.
+commands below apply to the prepared contributor environment and optional
+Jupyter workflows, not a second learner installer. Windows uses WSL 2.
 
 - Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.
-- Run from the repository root.
-- Use the repository `.venv`; prefer `python -m ...` over bare tool commands.
-- On Windows, use `.\.venv\Scripts\python.exe`.
-- On macOS/Linux, use `.venv/bin/python`.
+- Run from the repository root using the environment in [CONTRIBUTING](../CONTRIBUTING.md).
+- Prefer `uv run --no-sync python ...` or the prepared `.venv/bin/python`.
+- Browser Python runs use a fresh process for each Run; notebook kernels have
+  their own state. Explain the selected route rather than implying equivalence.
 
 ## Learner notebooks
 

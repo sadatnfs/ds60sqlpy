@@ -71,7 +71,8 @@ HELP
   esac
   fingerprint=$(
     cd "$root"
-    find docker/formatting -type f -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
+    # Documentation is excluded from the build context and cannot change tools.
+    find docker/formatting -type f -not -name README.md -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
       LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
   )
   image="ds60-formatting:$fingerprint"

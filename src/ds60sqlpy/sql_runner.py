@@ -11,7 +11,6 @@ from pathlib import Path
 from urllib.parse import quote, urlunsplit
 
 from ds60sqlpy.catalog import Catalog
-from ds60sqlpy.runtime_environment import external_dll_directory, external_program_environment
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
     course_psql_environment,
@@ -61,7 +60,7 @@ class SqlRunner:
         quiet: bool = False,
         capture_output: bool = False,
     ) -> None:
-        executable = shutil.which("psql", path=external_program_environment().get("PATH"))
+        executable = shutil.which("psql")
         if executable is None:
             raise SqlRunnerError(
                 "psql is not on PATH. Install PostgreSQL client tools or use the "
@@ -99,24 +98,22 @@ class SqlRunner:
             application_name="ds60sqlpy-course-runner",
             connect_timeout=10,
         )
-        environment = external_program_environment(environment)
         stdout = (
             subprocess.PIPE if self.capture_output else subprocess.DEVNULL if self.quiet else None
         )
         if self.capture_output:
             environment["PGOPTIONS"] = "-c statement_timeout=30000 -c lock_timeout=2000"
         try:
-            with external_dll_directory():
-                result = subprocess.run(
-                    command,
-                    check=False,
-                    env=environment,
-                    stdin=subprocess.DEVNULL,
-                    stdout=stdout,
-                    stderr=subprocess.PIPE if self.capture_output else None,
-                    text=True,
-                    timeout=60 if self.capture_output else None,
-                )
+            result = subprocess.run(
+                command,
+                check=False,
+                env=environment,
+                stdin=subprocess.DEVNULL,
+                stdout=stdout,
+                stderr=subprocess.PIPE if self.capture_output else None,
+                text=True,
+                timeout=60 if self.capture_output else None,
+            )
         except subprocess.TimeoutExpired as exc:
             raise SqlRunnerError(
                 "Course SQL preparation timed out. The training schema may be incomplete. "

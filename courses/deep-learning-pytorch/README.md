@@ -1,26 +1,33 @@
 # Deep Learning with PyTorch
 
-> **Study in the unified classroom:** run `./classroom` from the repository
-> root, then choose **Deep Learning with PyTorch** on `/classroom`. Python, SQL and all other
-> subjects share this home and workspace. Each subject has its own theme;
-> prerequisites guide your choices and you set the pace. The
-> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+This 36-lesson route moves from tensor storage and gradients through data
+loading, training, classifiers, convolutions, sequences, attention, custom
+autograd, transfer, checkpoints, numerical stability, profiling and export.
+Each topic is paired with the [TensorFlow route](../deep-learning-tensorflow/README.md)
+so you can compare mathematical behavior and framework implementation.
 
+Run `./classroom --profile llm-torch-cpu` from the repository root, then select
+**Deep Learning with PyTorch**. The profile's historical name also serves this
+full framework course. Host PyTorch, a GPU, external datasets and downloaded
+pretrained weights are unnecessary for its ordinary CPU examples. See
+[setup](../../docs/one-command-classroom.md) for Docker and Windows WSL 2.
 
-This complete 36-lesson authored route gives PyTorch the same broad subject coverage as the [36-lesson TensorFlow course](../deep-learning-tensorflow/README.md). It progresses from tensor storage and gradients through data loading,training,classifiers,convolutions,recurrent sequences,attention,custom autograd,transfer,checkpointing,numerics,profiling,export and a model-release capstone. Each topic is paired with its TensorFlow counterpart so you can compare the mathematical contract and the framework-specific implementation separately.
+The [manifest](lessons.json) lists guides, starters and separate references.
+The first lesson is a reading worksheet; the other 35 have executable Python
+references. Guides include worked examples, six practice exercises, hints and
+interview reasoning. Work in the classroom's saved pad and compare references
+when ready. A successful reference run verifies that fixture, not independent
+understanding or the reliability of a production model.
 
-The [authored manifest](lessons.json) lists real guide,learner and separate solution artifacts. The [track plan](track.json) preserves prerequisites and paired IDs. Every guide has three worked examples,six concrete exercises,progressive hints,answered interview reasoning and a copy-ready the AI tutor prompt. Read the [comparison guide](COMPARISON.md) for layout,reduction,state and mode differences. Source completion does not imply runtime acceptance;the [execution checkpoint](../../docs/implementation/pytorch-content-status.md) records actual receipts.
+## Compare both frameworks carefully
 
-## Run the same prepared CPU environment
-
-Use the Docker classroom's `llm-torch-cpu` profile. Its historical name does not restrict it to language models:the prepared PyTorch2.9.1 CPU/NumPy2.2.6 worker runs this whole deep-learning route. No host PyTorch,GPU,torchvision,external dataset or pretrained-model download is needed. DataLoader usesnum_workers=0 in the default examples. See [classroom setup](../../docs/docker-classroom.md) for image preparation,logs and persistent learner pads.
-
-The first lesson is a reading worksheet;the other35 have executable Python references. Work in your saved pad or an ignored `.learning/` copy. Keep official solutions closed until you attempt the exercises or explicitly request comparison. A successful reference run verifies its assertions,not your independent understanding or a production model's reliability.
-
-## Study both frameworks by contract
-
-Match data identities,shapes,dtypes,initial state,loss reduction and optimizer policy before comparing numbers. PyTorchLinear and Keras Dense store weight axes differently. BatchNorm momentum conventions differ. PyTorchbackward accumulates leaf gradients unless cleared,andtrain/eval is separate from gradient mode. Checkpoint and inference artifacts have different state and lifetime contracts. The paired lessons expose these differences with controlled failures rather than treating similarly named APIs as interchangeable.
+Match data identity, shapes, dtypes, initial state, loss reduction and optimizer
+policy before comparing numbers. PyTorch `Linear` and Keras `Dense` store weight
+axes differently. BatchNorm momentum conventions differ. PyTorch `backward`
+accumulates leaf gradients unless cleared, and training/evaluation mode is
+separate from gradient recording. Checkpoints and inference artifacts also
+have different state requirements. The [comparison guide](COMPARISON.md)
+explains these contracts and controlled failure cases.
 
 | PyTorch lesson | Topic | TensorFlow pair |
 | --- | --- | --- |
@@ -61,8 +68,20 @@ Match data identities,shapes,dtypes,initial state,loss reduction and optimizer p
 | [torch-035](guides/torch-035.md) | Paired model comparisons and uncertainty | [tf-035](../deep-learning-tensorflow/guides/tf-035.md) |
 | [torch-036](guides/torch-036.md) | Capstone: release a small reproducible PyTorch model | [tf-036](../deep-learning-tensorflow/guides/tf-036.md) |
 
-## Evidence and limits
+## Beyond the CPU course
 
-Tiny CPU fixtures establish local arithmetic,gradient,state and artifact contracts. They do not establish GPU throughput,distributed scaling,privacy,fairness or representative population quality. The compilation lesson uses a transparent eager graph backend and makes no native-kernel speedup claim. Persistence lessons use fresh subprocesses,owned temporary directories and explicit failure diagnostics. The release capstone deliberately rejects a corrupted artifact and permits a no-go decision.
+Tiny CPU fixtures establish local arithmetic, gradient, state and artifact
+behavior. They do not establish GPU throughput, distributed scaling, privacy,
+fairness or representative population quality. The compilation lesson uses an
+explicit eager graph backend and makes no native-kernel speedup claim.
+Persistence examples use owned temporary directories and test failure paths.
 
-For domain assistants and actual tiny-model adaptation,continue with [applied LLMs](../llm-applied/README.md). For inference and study-design reasoning,see the [statistics and machine-learning book](../statistics-ml/README.md). Those topics complement the framework mechanics and do not replace them.
+Continue with [CUDA and GPU computing](../cuda/README.md) for actual device
+placement, synchronization, memory, mixed precision and profiling. Its CPU
+models remain useful on non-NVIDIA machines, while real CUDA variants have
+separate hardware requirements. For subject-matter assistants and adaptation,
+see [applied LLMs](../llm-applied/README.md). For inference and study design,
+see [statistics and machine learning](../statistics-ml/README.md).
+
+Current architecture and evidence boundaries are documented in the
+[implementation checkpoint](../../docs/implementation/CHECKPOINT.md).

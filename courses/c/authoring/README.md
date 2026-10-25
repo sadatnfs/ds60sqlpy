@@ -45,3 +45,13 @@ demonstration.
 The first two cases are worked examples; the remaining cases extend, debug,
 bound or transfer the mechanism. Supporting helper code is teaching material.
 The complete six-case reference and explanations remain a separate reveal.
+
+## Shared maintenance gates
+
+Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and
+[validation](../../../docs/validation.md) for shared formatting, generated-reader,
+link and grouped-test gates. Run only this directory's documented generator;
+`make generate` refreshes shared views, not every subject's authoring source.
+Check the generated diff and execute changed references in their declared
+runtime. A generation pass, parser result or historical receipt is not new
+runtime evidence. Preserve learner data and immutable evidence files.

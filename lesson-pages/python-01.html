@@ -64,8 +64,6 @@
       font-size: .73rem; letter-spacing: .04em;
     }
     .top-actions { display: flex; align-items: center; gap: .7rem; }
-    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
-    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
     .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
     .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
@@ -95,7 +93,6 @@
     .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
     .button.secondary { color: var(--navy); background: transparent; }
     .button.secondary:hover { color: #fff; background: var(--navy); }
-    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
     .sql-run-guide {
       margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
@@ -200,7 +197,6 @@
     .nav-card.disabled { opacity: .65; }
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
-      .top-actions .completion { display: none; }
       .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
       .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
@@ -268,10 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
       <div class="top-actions">
-        <label class="completion launcher-only" hidden>
-          <input id="lesson-complete" type="checkbox">
-          Mark complete
-        </label>
+
         <a class="static-only" href="../START_HERE.html#catalog">
           Track completion on the course dashboard
         </a>
@@ -302,22 +295,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Run this notebook with the course kernel</h2>
-          <p id="run-guidance">Open the real notebook in VS Code or JupyterLab, select <strong>Python (ds60sqlpy)</strong>, and run cells in order. The preview below is intentionally read-only.</p>
+          <h2 id="run-heading">Run this lesson in the classroom</h2>
+          <p id="run-guidance">Open this lesson in the Docker classroom, read its capability notice, and run the notebook cells in order using the coding pad. The preview below is read-only. Prepared contributors may also use the original notebook with the course Jupyter kernel.</p>
           <div class="static-help">
-            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
           </div>
-          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
           <a class="button" href="#" data-vscode-path="python/ds-60day/notebooks/day01_setup_and_repl.ipynb">
             Open learner artifact in VS Code
           </a>
-          <button class="button launcher-only" type="button" id="launch-learner" hidden>
-            Open with guided launcher
-          </button>
-          <button class="button launcher-only" type="button" id="launch-jupyter" hidden>Open this notebook in JupyterLab</button>
-
           <a class="button lab-only" href="../learn?lesson=python-01" hidden>
             Practice and keep evidence in the coding lab
           </a>
@@ -358,14 +345,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/companion-guides/day01_setup_and_repl.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Companion guide"
-              data-artifact-kind="guide"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -384,27 +364,25 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>None. Start with the operating-system setup in <a href="../reference-pages/docs/setup/windows.md.html"><code>docs/setup/windows.md</code></a> or the corresponding macOS/Linux guide. Python 3.12 is the canonical version; 3.11 is also supported.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<p>Work from the repository root. The rendered HTML lesson is a readable preview; execute the real notebook in VS Code or JupyterLab.</p>
+<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects. No host notebook setup is needed for this route.</p>
+<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
+<p>Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in Windows WSL 2. Complete <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> once, including the notebook and data dependencies. Docker&#x27;s Python worker does not install packages into this host interpreter. Run the following commands from the repository root using that prepared environment.</p>
 <ol>
-<li>Confirm the course environment before changing it:</li>
+<li>Check the interpreter and register its notebook kernel. Registration is needed once for this environment, or again after moving/replacing it:</li>
 </ol>
-<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-comment"># Windows PowerShell</span>
-   $CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-   <span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-       <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-   <span class="syntax-punctuation">}</span>
-   <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-comment"># macOS/Linux</span>
-   .venv/bin/python scripts/course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
+   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
+<p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
 <ol>
-<li>Read <code>python/ds-60day/companion-guides/day01_setup_and_repl.md</code>, then open <code>python/ds-60day/notebooks/day01_setup_and_repl.ipynb</code> from the repository folder in VS Code or JupyterLab.</li>
-<li>Select <strong>Python (ds60sqlpy)</strong>. Do not run <code>%pip</code> in the notebook. If an import is missing, use the doctor and the catalog dependency label to repair the shared environment.</li>
-<li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
-<li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
+<li>Read <code>python/ds-60day/companion-guides/day01_setup_and_repl.md</code>, then launch the notebook directory:</li>
 </ol>
+<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
+<p>Open <code>python/ds-60day/notebooks/day01_setup_and_repl.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
+<ol>
+<li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
+<li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
+</ol>
+<p>Notebook files and contributor CLI progress belong to this host checkout. They are separate from the browser&#x27;s saved pads, notes and progress in Docker volumes. Neither route automatically copies attempts or completion markers to the other; record progress in the interface you actually used.</p>
 <p><strong>Lesson outcome:</strong> use day 1; setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment and explain the evidence produced by your code.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
@@ -474,18 +452,12 @@ message</code></pre>
 <li><strong>Kernel:</strong> the interpreter process backing a notebook. Selecting the wrong kernel is like running the right file with the wrong toolbox.</li>
 </ul>
 <p><code>.venv</code> and cache directories are local, disposable machine state. They are ignored by Git; each learner creates their own.</p>
-<h4 id="guide--create-and-verify-the-course-environment">Create and verify the course environment<a class="heading-anchor" href="#guide--create-and-verify-the-course-environment" aria-label="Link to this section">#</a></h4>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 <span class="syntax-punctuation">-</span>-version
-powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m jupyterlab python<span class="syntax-punctuation">\</span>ds<span class="syntax-punctuation">-</span>60day<span class="syntax-punctuation">\</span>notebooks</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">python3.12 --version
-bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python -m jupyterlab python/ds-60day/notebooks</code></pre>
-<p>Activation is optional. Calling the interpreter by its path avoids PowerShell execution-policy issues and makes the selected environment unambiguous. In VS Code, select that same <code>.venv</code> interpreter and the <code>Python (ds60sqlpy)</code> kernel.</p>
+<h4 id="guide--create-and-verify-the-optional-contributor-environment">Create and verify the optional contributor environment<a class="heading-anchor" href="#guide--create-and-verify-the-optional-contributor-environment" aria-label="Link to this section">#</a></h4>
+<p>The ordinary browser route uses <code>./classroom</code> and its Docker-supplied Python. For this lesson&#x27;s optional terminal and notebook practice, prepare Python 3.12 and uv as described in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a>. Use Bash on Linux/macOS or Ubuntu in Windows WSL 2, then run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --dependency-mode locked
+uv run --no-sync python scripts/course.py doctor --no-database
+uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
+<p>The maintained setup script prepares the locked Core packages and registers <strong>Python (ds60sqlpy)</strong>. Select that kernel and confirm <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. Activation is optional. These notebook files and contributor progress remain separate from browser work in Docker volumes; a host setup does not modify the classroom&#x27;s installed images.</p>
 <h4 id="guide--worked-example">Worked example<a class="heading-anchor" href="#guide--worked-example" aria-label="Link to this section">#</a></h4>
 <p>Try this in the REPL, then save it as <code>hello.py</code> and run the file:</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">greet</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
@@ -580,14 +552,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/notebooks/day01_setup_and_repl.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="lesson"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -656,21 +621,17 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Alternative to compare:</strong> A one-line REPL experiment is fast; a saved script is reproducible; a notebook is best when prose, code, and observations belong together.</p>
 <p><strong>Boundary to test:</strong> Paths differ across Windows, macOS, and Linux, so verify meaningful path components instead of hard-coding an entire developer-specific path.</p>
 <p>Do not move on merely because the cell runs. Explain which object, branch, axis, row, or resource changed and why.</p></article>
-<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-9--1-create-the-course-environment-from-the-repository-root">1) Create the course environment from the repository root<a class="heading-anchor" href="#learner--cell-9--1-create-the-course-environment-from-the-repository-root" aria-label="Link to this section">#</a></h4>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>setup<span class="syntax-punctuation">.</span>ps1
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor</code></pre>
-<p>Activation is optional. In VS Code, select the interpreter inside <code>.venv</code> as both the Python interpreter and notebook kernel.</p></article>
+<article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 7</div><h4 id="learner--cell-9--1-choose-the-classroom-or-an-optional-notebook-environment">1) Choose the classroom or an optional notebook environment<a class="heading-anchor" href="#learner--cell-9--1-choose-the-classroom-or-an-optional-notebook-environment" aria-label="Link to this section">#</a></h4>
+<p>For ordinary browser study, run <code>./classroom</code> from the repository root and choose Python and data science. Docker supplies Python and packages; no host Python setup is required.</p>
+<p>The following is an optional contributor notebook workflow in Bash on Linux/macOS or Ubuntu in Windows WSL 2. Prepare Python 3.12 and uv outside the repository virtual environment as described in <code>CONTRIBUTING.md</code>, then run from the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh --dependency-mode locked
+uv run --no-sync python scripts/course.py doctor --no-database
+uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
+<p>The setup script prepares the locked Core dependencies and registers Python (ds60sqlpy). Select that kernel and confirm that <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. Activation is optional. Host notebooks and CLI progress are separate from Docker-volume pads and progress.</p></article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 8</div><h4 id="learner--cell-10--2-python-repl-basics">2) Python REPL basics<a class="heading-anchor" href="#learner--cell-10--2-python-repl-basics" aria-label="Link to this section">#</a></h4>
-<p>A REPL is an interactive Python prompt. Start the interpreter that belongs to this repository:</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python</code></pre>
-<p>At the <code>&gt;&gt;&gt;</code> prompt, try the expressions below. Enter <code>exit()</code> when you are finished.</p></article>
+<p>A REPL is an interactive Python prompt. In the separately prepared contributor environment, run this from the repository root in Bash on Linux/macOS or Windows WSL 2:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python</code></pre>
+<p>At the <code>&gt;&gt;&gt;</code> prompt, try the expressions below. Enter <code>exit()</code> when finished. The browser coding pad executes a submitted program in a fresh process; it is not a persistent terminal REPL.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 3</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-number">1</span> <span class="syntax-operator">+</span> <span class="syntax-number">1</span></span>
 <span class="source-line"><span class="syntax-string">&quot;</span><span class="syntax-string">Hello </span><span class="syntax-string">&quot;</span> <span class="syntax-operator">+</span> <span class="syntax-string">&quot;</span><span class="syntax-string">world</span><span class="syntax-string">&quot;</span></span>
 <span class="source-line"><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">data science</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
@@ -682,11 +643,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 
 <span class="syntax-keyword">if</span> __name__ <span class="syntax-operator">==</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">__main__</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span>
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>greet<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">Data Scientist</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Run it with the repository interpreter:</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe hello<span class="syntax-punctuation">.</span>py</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python hello.py</code></pre>
+<p>Run the file with the prepared contributor interpreter from the repository root in Bash on Linux/macOS or Windows WSL 2:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python hello.py</code></pre>
 <p>Below we reproduce similar logic in this notebook cell.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 4</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">def</span> <span class="syntax-function">greet</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span></span>
 <span class="source-line">    <span class="syntax-string">&quot;&quot;&quot;Return a friendly greeting for ``name``.&quot;&quot;&quot;</span></span>
@@ -697,12 +655,9 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="source-line">greet<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">Data Scientist</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 10</div><h4 id="learner--cell-14--4-inspecting-packages-in-the-course-environment">4) Inspecting packages in the course environment<a class="heading-anchor" href="#learner--cell-14--4-inspecting-packages-in-the-course-environment" aria-label="Link to this section">#</a></h4>
-<p>The setup script already installed NumPy and pandas. Verify them through the same interpreter instead of using a bare <code>pip</code> command:</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip show numpy pandas</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m pip show numpy pandas</code></pre>
-<p>Maintainers add course dependencies to <code>pyproject.toml</code>; learners normally rerun the setup script rather than installing ad hoc packages.</p></article>
+<p>The prepared Core environment includes NumPy and pandas. Inspect their installed versions with the same interpreter, without an ad hoc installation:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python -c <span class="syntax-string">&quot;from importlib.metadata import version; print(version(&#x27;numpy&#x27;)); print(version(&#x27;pandas&#x27;))&quot;</span></code></pre>
+<p>Run this in Bash on Linux/macOS or Windows WSL 2 after contributor setup. Maintainers declare dependencies in <code>pyproject.toml</code> and the lock; learners follow the documented dependency profile rather than installing packages inside notebook cells.</p></article>
 <article class="notebook-cell code-cell"><div class="cell-label">Code cell 5</div><pre class="source-code language-python"><code><span class="source-line"><span class="syntax-keyword">import</span> platform</span>
 <span class="source-line"><span class="syntax-keyword">import</span> sys</span>
 <span class="source-line"></span>
@@ -890,18 +845,12 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="lesson notes"
-              data-artifact-kind="solution"
-               data-solution-index="0"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-01-solutions-setup-repl-virtual-envs-package-management">Day 01: Solutions: Setup, REPL, Virtual Envs, Package Management<a class="heading-anchor" href="#solution-1--day-01-solutions-setup-repl-virtual-envs-package-management" aria-label="Link to this section">#</a></h3>
+<p>The environment and Jupyter exercises below use the optional prepared <a href="../reference-pages/CONTRIBUTING.md.html">POSIX/WSL contributor environment</a>. Ordinary Docker classroom study requires no host Python setup. A contributor terminal and Jupyter kernel have separate state from browser Runs, and host <code>.learning/</code> files or CLI progress do not automatically access Docker learner volumes.</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>execution contexts and a trustworthy course environment</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Python code always runs inside a particular <strong>interpreter process</strong>. That process has a version, a filesystem location, an installed package set, and a current working directory. A terminal REPL, a script, and a notebook may look like three different tools, but each eventually asks an interpreter to execute Python.</p>
@@ -922,10 +871,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <p><strong>Learner contract:</strong> Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. <strong>Required evidence:</strong> copy the Python version and interpreter path from the report. <strong>Success:</strong> the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. <strong>Constraint:</strong> do not install or delete anything while diagnosing. <strong>Verify:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Run the repository setup, then run <code>scripts/course.py doctor</code> with the repository interpreter. Required evidence: copy the Python version and interpreter path from the report. Success: the version is 3.11 or 3.12, the path belongs to this repository&#x27;s <code>.venv</code>, and the doctor does not report a blocking core failure. Constraint: do not install or delete anything while diagnosing. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed. That connects the answer to execution contexts and a trustworthy course environment.</p>
 <p>Run the doctor with the repository interpreter and keep its output as evidence; no Python implementation is needed for this environment check.</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, after resolving $CoursePython as shown in the guide</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/course.py doctor</code></pre>
+<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Prepared contributor environment on Linux, macOS or Windows through WSL 2</span>
+uv run --no-sync python scripts/course.py doctor</code></pre>
 <p>Read the reported executable path rather than accepting a successful command from an unrelated global Python.</p>
 <p><strong>Verification evidence:</strong> Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository&#x27;s <code>.venv</code>; record that no blocking core check failed.</p>
 <h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
@@ -987,16 +934,13 @@ notebook_python <span class="syntax-operator">=</span> Path<span class="syntax-p
 <p><strong>Learner contract:</strong> Create two temporary virtual environments outside the repository and install NumPy in only one. <strong>Evidence:</strong> use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. <strong>Constraint:</strong> do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. <strong>Verify:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create two temporary virtual environments outside the repository and install NumPy in only one. Evidence: use each environment&#x27;s <code>python -m pip show numpy</code> and interpreter path to prove isolation. Constraint: do not alter or delete the course <code>.venv</code>; remove only the two temporary environments you created after recording the result. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged. That connects the answer to execution contexts and a trustworthy course environment.</p>
 <p>Create temporary environments outside the repository, always invoking pip through the interpreter that owns the environment:</p>
-<pre class="highlighted-code"><code class="language-powershell">py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv $env:TEMP<span class="syntax-punctuation">\</span>ds60-env-a
-py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv $env:TEMP<span class="syntax-punctuation">\</span>ds60-env-b
-<span class="syntax-punctuation">&amp;</span> $env:TEMP<span class="syntax-punctuation">\</span>ds60-env-a<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip install numpy
-<span class="syntax-punctuation">&amp;</span> $env:TEMP<span class="syntax-punctuation">\</span>ds60-env-a<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip show numpy
-<span class="syntax-punctuation">&amp;</span> $env:TEMP<span class="syntax-punctuation">\</span>ds60-env-b<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe -m pip show numpy</code></pre>
-<pre class="highlighted-code"><code class="language-bash">python3.12 -m venv /tmp/ds60-env-a
-python3.12 -m venv /tmp/ds60-env-b
-/tmp/ds60-env-a/bin/python -m pip install numpy
-/tmp/ds60-env-a/bin/python -m pip show numpy
-/tmp/ds60-env-b/bin/python -m pip show numpy</code></pre>
+<pre class="highlighted-code"><code class="language-bash">study_env_a<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>mktemp -d <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>TMPDIR<span class="syntax-keyword">:-</span><span class="syntax-punctuation">/tmp</span><span class="syntax-string">}</span><span class="syntax-string">/ds60-env-a.XXXXXX</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
+study_env_b<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>mktemp -d <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>TMPDIR<span class="syntax-keyword">:-</span><span class="syntax-punctuation">/tmp</span><span class="syntax-string">}</span><span class="syntax-string">/ds60-env-b.XXXXXX</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">)</span><span class="syntax-string">&quot;</span>
+uv run --no-sync python -m venv <span class="syntax-string">&quot;</span>$study_env_a<span class="syntax-string">&quot;</span>
+uv run --no-sync python -m venv <span class="syntax-string">&quot;</span>$study_env_b<span class="syntax-string">&quot;</span>
+<span class="syntax-string">&quot;</span>$study_env_a<span class="syntax-string">/bin/python</span><span class="syntax-string">&quot;</span> -m pip install numpy
+<span class="syntax-string">&quot;</span>$study_env_a<span class="syntax-string">/bin/python</span><span class="syntax-string">&quot;</span> -m pip show numpy
+<span class="syntax-string">&quot;</span>$study_env_b<span class="syntax-string">/bin/python</span><span class="syntax-string">&quot;</span> -m pip show numpy</code></pre>
 <p>The final command should report NumPy absent; neither command targets the course <code>.venv</code>.</p>
 <p><strong>Verification evidence:</strong> Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.</p>
 <h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
@@ -1023,7 +967,7 @@ python3.12 -m venv /tmp/ds60-env-b
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.</p>
 <h5 id="solution-1--shared-implementation-for-exercise-6-prediction">Shared implementation for Exercise 6: Prediction<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-6-prediction" aria-label="Link to this section">#</a></h5>
-<p>The correct result is an executable inside this repository&#x27;s <code>.venv</code> (<code>.venv\Scripts\python.exe</code> on Windows or <code>.venv/bin/python</code> on POSIX). The exact prefix varies by clone location, so inspect the path rather than comparing it with a developer-specific absolute string.</p>
+<p>The correct result is an executable inside this repository&#x27;s <code>.venv</code> (<code>.venv/bin/python</code> in the prepared POSIX or WSL checkout). The exact prefix varies by clone location, so inspect the path rather than comparing it with a developer-specific absolute string.</p>
 <h5 id="solution-1--shared-implementation-for-exercise-7-trace">Shared implementation for Exercise 7: Trace<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-7-trace" aria-label="Link to this section">#</a></h5>
 <p><code>python -m pip</code> asks a known interpreter to import its installed <code>pip</code> module. A bare <code>pip</code> is whichever executable the shell finds first on <code>PATH</code>; it can belong to Anaconda, the Windows launcher, or another environment.</p>
 <h5 id="solution-1--shared-implementation-for-exercises-8-10-evidence-first-environment-diagnosis">Shared implementation for Exercises 8–10: Evidence-first environment diagnosis<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-evidence-first-environment-diagnosis" aria-label="Link to this section">#</a></h5>
@@ -1052,13 +996,13 @@ report <span class="syntax-operator">=</span> environment_report<span class="syn
 <span class="syntax-keyword">assert</span> Path<span class="syntax-punctuation">(</span>report<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">executable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>name<span class="syntax-operator">.</span>lower<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 
 <span class="syntax-comment"># Debugging order:</span>
-<span class="syntax-comment"># 1. Print sys.executable in PowerShell&#x27;s Python and in the notebook.</span>
+<span class="syntax-comment"># 1. Print sys.executable in the contributor terminal and in the notebook.</span>
 <span class="syntax-comment"># 2. Run each executable with `-m pip --version`.</span>
 <span class="syntax-comment"># 3. Select/register the kernel that points at the repository interpreter.</span>
 <span class="syntax-comment">#</span>
 <span class="syntax-comment"># If `.venv` already contains ipykernel, registration is local and works</span>
 <span class="syntax-comment"># offline:</span>
-<span class="syntax-comment">#   .\.venv\Scripts\python.exe -m ipykernel install --user \</span>
+<span class="syntax-comment">#   uv run --no-sync python -m ipykernel install --user \</span>
 <span class="syntax-comment">#       --name ds60sqlpy --display-name &quot;Python (ds60sqlpy)&quot;</span>
 <span class="syntax-comment"># Package installation still requires the downloaded wheel cache or a network.</span></code></pre>
 <p>The repair changes kernel metadata; it should not involve copying packages between interpreters or adding an arbitrary global directory to <code>PATH</code>.</p></div>
@@ -1083,14 +1027,7 @@ report <span class="syntax-operator">=</span> environment_report<span class="syn
             <a class="button secondary" href="#" data-vscode-path="python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.ipynb">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Jupyter notebook"
-              data-artifact-kind="solution"
-               data-solution-index="1"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1234,24 +1171,15 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
 
   <script>
     "use strict";
-    const LESSON_ID = "python-01";
-    const LEARNER_PATH = "python/ds-60day/notebooks/day01_setup_and_repl.ipynb";
-    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
     );
     if (labMode) {
       document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
-      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
       document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
       document.querySelector("#run-guidance").textContent =
         "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
@@ -1342,111 +1270,6 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    function readProgress() {
-      try {
-        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
-      } catch {
-        return { completed: [], setup: {}, os: "windows" };
-      }
-    }
-
-    function writeProgress(complete) {
-      const state = readProgress();
-      const completed = new Set(state.completed);
-      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
-      state.completed = [...completed].sort();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
-    }
-
-    const completion = document.querySelector("#lesson-complete");
-    if (launcherMode) {
-      completion.checked = readProgress().completed.includes(LESSON_ID);
-      completion.addEventListener("change", async () => {
-        writeProgress(completion.checked);
-        try {
-          await apiRequest("/api/progress", {
-            method: "POST",
-            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
-          });
-          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
-        } catch (error) {
-          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
-        }
-      });
-    }
-
-    function setStatus(message, failed = false) {
-      const status = document.querySelector("#launcher-status");
-      status.textContent = message;
-      status.style.color = failed ? "var(--red)" : "var(--muted)";
-    }
-
-    async function apiRequest(path, options = {}) {
-      const response = await fetch(path, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "X-DS60-Token": SERVER_TOKEN,
-          ...(options.headers || {})
-        }
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
-      return payload;
-    }
-
-    async function launch(detail) {
-      setStatus("Opening the allowlisted course artifact…");
-      try {
-        const payload = await apiRequest("/api/launch", {
-          method: "POST",
-          body: JSON.stringify(detail)
-        });
-        setStatus(payload.action + " started.");
-      } catch (error) {
-        setStatus("Could not launch this artifact: " + error.message, true);
-      }
-    }
-
-    if (launcherMode) {
-      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
-      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
-      setStatus("Guided launcher mode is ready.");
-      document.querySelector("#launch-learner").addEventListener("click", () => {
-        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
-      });
-      const jupyterButton = document.querySelector("#launch-jupyter");
-      if (jupyterButton) {
-        jupyterButton.addEventListener("click", () => {
-          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
-        });
-      }
-      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
-      if (sqlNotebookButton) {
-        sqlNotebookButton.addEventListener("click", () => {
-          void launch({
-            action: "jupyter-sql",
-            lesson_id: LESSON_ID,
-            artifact: "lesson",
-            solution_index: 1
-          });
-        });
-      }
-      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const detail = {
-            action: "open-artifact",
-            lesson_id: LESSON_ID,
-            artifact: button.dataset.artifactKind
-          };
-          if (button.dataset.solutionIndex !== undefined) {
-            detail.solution_index = Number(button.dataset.solutionIndex);
-          }
-          void launch(detail);
-        });
-      });
-    }
   </script>
 </body>
 </html>

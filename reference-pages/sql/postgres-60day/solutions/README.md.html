@@ -168,7 +168,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Markdown explanations: Days 1–60</li>
 <li>Executable <code>.sql</code> solutions: Days 1–60</li>
 </ul>
-<p>Use <code>python scripts/course.py catalog --track sql</code> from the repository root for the generated availability view.</p>
+<p>The classroom lists references per lesson. Prepared contributors can also use <code>uv run --no-sync python scripts/course.py catalog --track sql</code> from the root.</p>
 <h3 id="conventions">Conventions<a class="heading-anchor" href="#conventions" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Solutions target the disposable <code>training</code> schema created by <code>00_setup.sql</code>.</li>
@@ -178,11 +178,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Days 38 and 39 include runnable single-session work plus explicit manual two-session instructions because isolation anomalies and deadlocks require genuine concurrency.</li>
 <li>Days 52–54 are the declared stateful solution sequence. Day 52 resets and commits the course-owned <code>dwh</code> schema; run Days 53 and 54 after it.</li>
 </ul>
-<p>Run an available executable solution from the repository root:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day01_solutions.sql</code></pre>
-<p>Or validate the complete answer sequence, including the Days 52–54 warehouse state contract:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py sql solutions --reset</code></pre>
-<p><code>--reset</code> is destructive only to the disposable course schemas described in the main SQL README.</p>
+<p>In the classroom, choose the solution artifact when ready to compare, then use <strong>Whole SQL lesson (psql)</strong>. Read the transaction notes first, especially for the stateful warehouse sequence. The transcript records the actual source and result; reading a reference does not run it automatically.</p>
+<p>Contributors preparing reference qualification should follow <a href="../../../docs/validation.md.html">validation</a> and use an explicitly selected local disposable database. The full solution-sequence command supports a deliberate reset, which replaces the course-owned schemas. It is not an ordinary learner resume operation. Do not run it against valuable or shared data.</p>
 <p>Try the learner exercise first. A solution is a comparison and explanation, not a replacement for the attempt.</p></article>
   </main>
 </body>

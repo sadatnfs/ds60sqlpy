@@ -137,6 +137,24 @@ interaction cleanup and resize behavior with a new small dataset. A rendered
 chart or a saved browser observation alone does not establish correct encoding,
 accessibility or independent verification.
 
+## Web and GPU routes
+
+For HTML/CSS, inspect semantic structure, accessible names, keyboard order,
+responsive layout and the actual painted result. For PHP, distinguish validation,
+contextual escaping, prepared values and server-side ownership. Ask the learner
+to explain why a request/session model differs from the separately prepared real
+HTTP fixture. A successful preview or printout is not an accessibility or security
+qualification. Keep browser observations distinct from trusted worker checks.
+
+For CUDA, ask the learner to explain the execution/memory model, index bounds,
+ownership, synchronization and numerical tolerance before optimizing. CPU models,
+compilation, device correctness and profiling are separate evidence. Optional
+hardware being unavailable is not a failed learner answer. Compare PyTorch and
+TensorFlow device placement, gradient state, precision and synchronization using
+actual framework contracts. For GPU Spark, require supported executed operator
+and plan evidence, configuration/version compatibility and a fair CPU comparison;
+a plugin flag or arbitrary Python UDF does not establish acceleration.
+
 ## Scala, Spark and systems
 
 Check Scala language foundations before distributed Spark work. Ask the learner

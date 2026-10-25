@@ -183,7 +183,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Extend one of the original five module subjects</td>
 <td>Existing plan under <code>docs/expansion/plans/</code> and its <code>courses/&lt;subject&gt;/lessons.json</code></td>
-<td>Same module gates, existing design checks</td>
+<td>Same module gates and core-plan validation</td>
 </tr>
 <tr>
 <td>Extend the statistics tutorial</td>
@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Actual runtime success, failure, cleanup and persistence evidence</td>
 </tr>
 </tbody></table></div>
-<p>The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark. Their plans supply live route metadata; authored admission still comes from <code>lessons.json</code>. Additive subjects use <code>track.json</code>. Do not migrate an existing subject between these contracts as an incidental edit.</p>
+<p>The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark. Their plans supply live route metadata; authored admission still comes from <code>lessons.json</code>. <code>module_plans.load_core_plans</code> owns these five plan inputs. Additive subjects use <code>track.json</code>. Do not migrate an existing subject between these contracts as an incidental edit.</p>
 <p>The statistics loader is currently specific to that book. A different tutorial book requires a deliberate loader/schema extension and tests, or a proposal kept outside active registration until supported. Do not assume any arbitrary <code>manifest.json</code> is automatically discovered.</p>
 <h3 id="design-a-useful-progression">Design a useful progression<a class="heading-anchor" href="#design-a-useful-progression" aria-label="Link to this section">#</a></h3>
 <p>Define the starting knowledge, observable independent project and prerequisites. Build the shortest sequence that teaches the mechanisms needed for that project:</p>
@@ -208,11 +208,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Explain performance, concurrency, ownership or distributed semantics where they matter to the subject.</li>
 <li>Finish with an independently designed project and explicit tradeoffs, limitations and recovery behavior.</li>
 </ol>
-<p>A beginner does not need every advanced topic immediately. Cross-subject prerequisites should name stable IDs, not hide a whole language inside a single introductory lesson. See the skill&#x27;s progression reference for Python, SQL, C, C++, Go, C#, Rust, Swift, Java, JavaScript/TypeScript, D3, Scala/Spark, Docker and Kubernetes networking examples.</p>
+<p>A beginner does not need every advanced topic immediately. Cross-subject prerequisites should name stable IDs, not hide a whole language inside a single introductory lesson. See the skill&#x27;s progression reference for the language, web, GPU/ML, data and systems routes. Preserve distinctions such as browser versus Node, PHP CLI versus HTTP, CPU models versus NVIDIA execution, and Spark CPU operators versus supported accelerated plans.</p>
 <h3 id="author-and-integrate-a-module">Author and integrate a module<a class="heading-anchor" href="#author-and-integrate-a-module" aria-label="Link to this section">#</a></h3>
 <p>Follow <a href="implementation/ADDING_A_MODULE.md.html">ADDING_A_MODULE.md</a> for exact route, manifest, variant and runtime boundaries. Inspect an existing subject and the loader instead of guessing fields. There is no universal scaffold command in this repository. Create only the files needed for the chosen subject and use an existing subject&#x27;s documented authoring command only for that subject.</p>
 <p>Write the self-contained guide, learner artifact, reference and explanatory solution under <code>courses/&lt;subject&gt;/</code>. Define vocabulary, show worked examples, include expected observations and misconceptions, and provide progressive practice. Reading-only practice uses reasoning and a separate explanation. The statistics tutorial has no exercise quota or hidden answer gate.</p>
-<p>Preserve IDs, variant aliases and state ownership. Add accessible subject colors and a text label to the existing UI; do not add another public page. Review the declared runtime before promising a Run action. A syntax lexer or file extension does not install a compiler.</p>
+<p>Preserve IDs, variant aliases and state ownership. Add accessible subject colors and a text label to the existing UI; do not add another public page. Review the declared runtime before promising a Run action. A syntax lexer or file extension does not install a compiler. New ordinary workers also need the image catalog and launcher, formatting/lint adapters, source packaging and CI profile checks. Optional GPU/cluster routes require explicit capabilities and separate qualification rather than entry into ordinary defaults.</p>
+<p>HTML/CSS and browser JavaScript use the shared opaque preview. Live updates are opt-in, cancel on navigation and do not automatically create result receipts. PHP HTTP/session examples use a separately owned project rather than pretending that the CLI worker is a web server. GPU lessons should retain meaningful reading/CPU routes without claiming those routes execute CUDA on another GPU.</p>
 <h3 id="legacy-catalog-extensions">Legacy catalog extensions<a class="heading-anchor" href="#legacy-catalog-extensions" aria-label="Link to this section">#</a></h3>
 <p>Use <code>curriculum/extensions/&lt;subject&gt;.json</code> only when deliberately extending the legacy catalog contract. <a href="examples/curriculum-extension.json.html">The inactive example</a> shows its schema. It is not a template for modern <code>track.json</code>/<code>lessons.json</code> module registration and does not assert that its referenced files exist.</p>
 <p>Legacy manifests use <code>schema_version: 1</code>, <code>tracks</code>, complete <code>lessons</code>, and optional <code>learning_paths</code>. Their runner and allowed suffixes come from <code>src/ds60sqlpy/curriculum_framework.py</code>. Preserve historical track/day pairs, IDs and the acyclic prerequisite graph. Add new legacy IDs to <code>curriculum/practice_expansion.json</code> with baseline zero and target six; do not change the historical baseline. Do not add module or tutorial IDs to that registry simply because they are new lessons.</p>

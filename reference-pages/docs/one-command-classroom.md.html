@@ -166,8 +166,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>After Docker is installed and running, open a terminal in the extracted course folder or repository and run:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
 <p>That is the complete ordinary startup command on <strong>macOS, Linux and Windows through WSL 2</strong>. It checks the engine and Compose version, reuses the current project&#x27;s saved selection, starts existing containers, waits for health checks, verifies the web page and opens its actual local address. It builds only missing images. A new project selects the classroom and all sixteen ordinary workers unless you choose <code>--starter</code> or specific profiles.</p>
-<p>Repeat the same command to <strong>resume your existing installation</strong>. Updating the source folder does not automatically rebuild installed images. Use <code>./classroom --rebuild</code> when you deliberately want to install those updates.</p>
-<p>The command uses Bash, already available on macOS and in Ubuntu/WSL. Confirm that <code>docker info</code> succeeds as your normal user before starting; engine access permissions and WSL integration belong to the engine installation. The course runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Go, .NET, Rust, Swift, Java, Node, TensorFlow, PyTorch or Spark on the host. First preparation needs internet and downloads several large SDK and framework images. For the full sixteen-worker set, budget about <strong>60 GB of free disk</strong> for images, dependencies and build cache, and start with <strong>8 GB of engine memory</strong>. This is planning guidance, not a measured minimum or a guarantee: architecture, selected profiles and retained builds change storage use. Check both your host&#x27;s free space and the engine VM&#x27;s available disk before a full build. If space is limited, use <code>./classroom --starter</code>, then add only the profiles you need. Never remove learning volumes to recover build-cache space.</p>
+<p>Repeat the same command to <strong>resume your existing installation</strong>. Updating the source folder does not automatically rebuild installed images. Use <code>./classroom --local-build --rebuild</code> when you deliberately want to install updated local source. Published Hub images have their own update mode below.</p>
+<p>The command uses Bash, already available on macOS and in Ubuntu/WSL. Confirm that <code>docker info</code> succeeds as your normal user before starting; engine access permissions and WSL integration belong to the engine installation. The course runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Go, .NET, Rust, Swift, Java, Node, PHP, TensorFlow, PyTorch or Spark on the host. First preparation needs internet and downloads several large SDK and framework images. For the full sixteen-worker set, budget about <strong>60 GB of free disk</strong> for images, dependencies and build cache, and start with <strong>8 GB of engine memory</strong>. This is planning guidance, not a measured minimum or a guarantee: architecture, selected profiles and retained builds change storage use. Check both your host&#x27;s free space and the engine VM&#x27;s available disk before a full build. If space is limited, use <code>./classroom --starter</code>, then add only the profiles you need. Never remove learning volumes to recover build-cache space.</p>
 <h3 id="windows-the-same-command-in-wsl-2">Windows: the same command in WSL 2<a class="heading-anchor" href="#windows-the-same-command-in-wsl-2" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Install WSL 2 with a normal Linux distribution such as Ubuntu. Microsoft&#x27;s <a href="https://learn.microsoft.com/en-us/windows/wsl/install">WSL installation guide</a> covers the one-time administrator/reboot steps. Complete Ubuntu&#x27;s first-run username setup. The course launcher does not install or reset distributions.</li>
@@ -175,7 +175,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>In the Ubuntu terminal, <code>docker info</code> and <code>docker compose version</code> should succeed. Open the extracted repository directory, then run <code>./classroom</code>. A Windows path such as <code>C:\Users\Ada\Downloads\DS60LearningLab</code> is usually <code>/mnt/c/Users/Ada/Downloads/DS60LearningLab</code> inside Ubuntu. Quote paths with spaces. A checkout in Ubuntu&#x27;s Linux filesystem is also supported.</li>
 </ol>
 <p>From Windows Explorer you may instead double-click <strong>START_DOCKER_CLASSROOM.cmd</strong>, or run <code>classroom.cmd</code> in Command Prompt. This thin wrapper invokes the same Bash entrypoint through the default WSL distribution. Set Ubuntu as your default distribution when necessary, using Microsoft&#x27;s <a href="https://learn.microsoft.com/en-us/windows/wsl/basic-commands">WSL commands</a>. The wrapper preserves the selected course directory; it does not maintain a second Windows implementation of the build workflow. On Mac, double-click <strong>START_DOCKER_CLASSROOM.command</strong> if you prefer a launcher to a terminal.</p>
-<p>A Docker Desktop WSL backend alone does not imply that a user Ubuntu shell and its Docker integration are ready. The distinction matters for the Windows wrapper. If Windows execution is blocked by installation policy, follow your organization&#x27;s approved setup route. WSL installation and engine integration cannot be established by a macOS run; the release report states what was observed. The product runs in Linux containers. Native Windows Python backends and executable bundles are outside the supported route and release gates.</p>
+<p>A Docker Desktop WSL backend alone does not imply that a user Ubuntu shell and its Docker integration are ready. The distinction matters for the Windows wrapper. If Windows execution is blocked by installation policy, follow your organization&#x27;s approved setup route. WSL installation and engine integration cannot be established by a macOS run; the release report states what was observed. The product runs in Linux containers. Windows uses the same Bash launcher inside its prepared WSL 2 distribution.</p>
 <h3 id="resume-recover-or-update">Resume, recover or update<a class="heading-anchor" href="#resume-recover-or-update" aria-label="Link to this section">#</a></h3>
 <p>Start the same Docker engine, open the same source folder and run:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
@@ -192,7 +192,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Continue studying</td>
 <td><code>./classroom</code></td>
-<td>Resume the saved selection; build only missing images</td>
+<td>Resume the saved selection; prepare only missing images using the saved local/Hub mode</td>
 </tr>
 <tr>
 <td>Continue without any downloads or builds</td>
@@ -205,14 +205,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Stop project containers; retain all volumes and settings</td>
 </tr>
 <tr>
-<td>Install changed source files</td>
-<td><code>./classroom --rebuild</code></td>
-<td>Rebuild the selected images and update containers as needed</td>
+<td>Install changed local source files</td>
+<td><code>./classroom --local-build --rebuild</code></td>
+<td>Build selected local images and update containers while retaining volumes</td>
 </tr>
 <tr>
-<td>Prepare updated images for later</td>
-<td><code>./classroom build</code></td>
+<td>Prepare local images for later</td>
+<td><code>./classroom build --local-build</code></td>
 <td>Build selected images without starting services</td>
+</tr>
+<tr>
+<td>Download a configured Hub release for later</td>
+<td><code>./classroom pull</code></td>
+<td>Pull selected Hub images without starting services; requires saved Hub configuration</td>
 </tr>
 <tr>
 <td>Prepare every ordinary runtime</td>
@@ -227,81 +232,24 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 ./classroom stop --project my-study</code></pre>
 <p>The launcher does not guess among unrelated projects. A different project name selects different volumes, even when its images are the same.</p>
 <h3 id="what-a-new-default-project-prepares">What a new default project prepares<a class="heading-anchor" href="#what-a-new-default-project-prepares" aria-label="Link to this section">#</a></h3>
-<div class="table-wrap"><table><thead><tr>
-<th>Runtime</th>
-<th>Service</th>
-</tr></thead><tbody>
-<tr>
-<td>Python, NumPy, pandas, statistics and NLP</td>
-<td><code>python-core-worker</code></td>
-</tr>
-<tr>
-<td>C++20 compiler</td>
-<td><code>cpp-worker</code></td>
-</tr>
-<tr>
-<td>C17 compiler</td>
-<td><code>c-worker</code></td>
-</tr>
-<tr>
-<td>Go compiler and prepared standard library</td>
-<td><code>go-worker</code></td>
-</tr>
-<tr>
-<td>C# and .NET compiler/runtime</td>
-<td><code>csharp-worker</code></td>
-</tr>
-<tr>
-<td>Rust compiler and prepared Arrow dependency</td>
-<td><code>rust-worker</code></td>
-</tr>
-<tr>
-<td>Swift 6 Linux/Foundation compiler</td>
-<td><code>swift-worker</code></td>
-</tr>
-<tr>
-<td>Java compiler and JVM</td>
-<td><code>java-worker</code></td>
-</tr>
-<tr>
-<td>JavaScript with Node</td>
-<td><code>javascript-worker</code></td>
-</tr>
-<tr>
-<td>Strict TypeScript compilation</td>
-<td><code>typescript-worker</code></td>
-</tr>
-<tr>
-<td>TensorFlow on CPU</td>
-<td><code>tensorflow-worker</code></td>
-</tr>
-<tr>
-<td>PyTorch and tensor-based LLM lessons</td>
-<td><code>llm-worker</code></td>
-</tr>
-<tr>
-<td>Scala/JVM</td>
-<td><code>scala-worker</code></td>
-</tr>
-<tr>
-<td>Spark with Scala</td>
-<td><code>spark-scala-worker</code></td>
-</tr>
-<tr>
-<td>PySpark</td>
-<td><code>spark-python-worker</code></td>
-</tr>
-</tbody></table></div>
-<p>Kubernetes cluster preparation and optional pretrained-model downloads remain explicit lesson workflows. Opening the classroom does not create a cluster, download model weights or call a paid API. The ordinary lessons are usable offline after their images and local fixtures are prepared.</p>
-<p>A new project uses the repository&#x27;s pinned/public registry alternatives by default, with TLS verification enabled. The chosen registry mode is remembered per project; it matters when an image needs preparation. This handles the Docker Hub CDN issue observed during local validation. Existing <code>.env</code> and shell overrides remain in effect. To use ordinary upstream image defaults instead, run:</p>
+<p>The app serves the complete library, PostgreSQL stores the disposable course database, and sixteen ordinary workers provide the language/framework runtimes. <a href="docker-profiles.md.html">Runtime profiles</a> lists their exact names, filenames and boundaries. HTML/CSS and browser JavaScript/D3 need only the app&#x27;s bundled preview. PHP uses its own CLI worker.</p>
+<p>Kubernetes cluster preparation, pretrained-model downloads and optional NVIDIA GPU workers remain explicit workflows. GPU profiles are excluded from <code>--all</code>; a CPU-only machine can still read the CUDA subject and run its CPU models. Opening the classroom does not create a cluster, download model weights or call a paid API.</p>
+<p>A new project uses the repository&#x27;s pinned/public registry alternatives by default, with TLS verification enabled. The chosen registry mode is remembered per project; it matters when an image needs preparation. Use it when the selected public base registry is the appropriate route for your network. Existing <code>.env</code> and shell overrides remain in effect. To use ordinary upstream image defaults instead, run:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --registry upstream</code></pre>
 <p>A build log line marked <code>CACHED</code> means Docker reused an unchanged step. <code>RUN</code> steps install the image&#x27;s dependencies; <code>COPY</code> steps place the course sources inside it. The image is saved to your local engine. No command pushes an image, prunes caches or deletes a learning volume.</p>
+<h3 id="local-builds-and-published-hub-images">Local builds and published Hub images<a class="heading-anchor" href="#local-builds-and-published-hub-images" aria-label="Link to this section">#</a></h3>
+<p>Local builds are the default. Their source comes from your downloaded checkout, and normal startup builds only missing selected images. To build selected local images with visible logs and start them in one command, use:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --rebuild</code></pre>
+<p>After the owner publishes a compatible release, you can instead choose Hub images. Replace the placeholders with the actual publisher and release:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub PUBLISHER --tag VERSION</code></pre>
+<p>That setting is remembered for this project. Hub mode pulls matching native architecture tags and never silently falls back to a local build. Normal startup pulls missing selected images; <code>resume</code> never pulls. <code>./classroom pull</code> refreshes the selected Hub images without starting them. <code>--rebuild</code> in Hub mode refreshes images and applies the update; it does not compile local edits.</p>
+<p>Use <code>--local-build</code> when deliberately returning to source builds. Image source and base-registry choice are different: <code>--registry</code> chooses public base-image sources for local preparation, while <code>--from-hub</code> chooses published DS60 images. A successful Git push does not mean images were published. See <a href="dockerhub.md.html">Docker Hub distribution</a> for tags, architectures and publication.</p>
 <h3 id="ports-and-saved-work">Ports and saved work<a class="heading-anchor" href="#ports-and-saved-work" aria-label="Link to this section">#</a></h3>
 <p>For a new project without explicit port settings, Docker selects available <strong>loopback-only</strong> host ports. The application keeps its fixed internal port; the launcher reads the actual published address after startup. It prints the URL even if browser opening is unavailable, and saves it in <code>.classroom/&lt;project&gt;/classroom.url</code>. You do not need to guess port 8765 or stop another application that already uses it.</p>
 <p>A repeat start keeps the same project and its Docker volumes. Saved pads, notes, progress and job history live in the learning volume, while PostgreSQL uses its own volume. Port selection does not identify your progress. Docker can assign new automatic host ports when a stopped database container restarts, without replacing that container. The launcher opens the new address and, when the browser port changes, recreates only the app from the same existing image. This repair does not rebuild images or touch learning volumes. Replacing a missing database container can also change its automatic ports.</p>
 <p>The launcher supplies the mapped browser port to the container while retaining one exact allowed Host and Origin. Do not configure arbitrary public hosts or relax that check to fix a port error. Direct manual Compose operation should use fixed ports; use <code>./classroom</code> for automatic port discovery.</p>
-<p>The ignored <code>.classroom/&lt;project&gt;/</code> directory contains <code>selection.env</code> for the selected runtime profiles and registry mode, <code>ports.env</code> for host-port choices, <code>classroom.url</code> for the last ready address, and a transient launch lock. The profile/registry selection and requested ports are saved before image preparation; the ready URL is written only after the browser endpoint responds. Existing projects without <code>selection.env</code> infer known profiles from their own worker containers; if neither saved selection nor recognizable workers exists, the new-project default applies. Explicit profile flags override the remembered selection.</p>
-<p>These files are not the learning database or a backup. Keep this directory for convenient restarts; deleting it does not delete Docker volumes, but can lose profile or port preferences. It is excluded from images and archives. The older host-folder <code>.learning</code> workflow remains a separate storage route; follow the backup/transfer guidance before moving between them.</p>
+<p>The ignored <code>.classroom/&lt;project&gt;/</code> directory contains <code>selection.env</code> for the selected runtime profiles and registry mode, <code>ports.env</code> for host-port choices, <code>images.env</code> for local/Hub image selection and release, <code>classroom.url</code> for the last ready address, and a transient launch lock. The profile/registry selection, image-source settings and requested ports are saved before image preparation; the ready URL is written only after the browser endpoint responds. Existing projects without <code>selection.env</code> infer known profiles from their own worker containers; if neither saved selection nor recognizable workers exists, the new-project default applies. Explicit profile flags override the remembered selection.</p>
+<p>These files are not the learning database or a backup. Keep this directory for convenient restarts; deleting it does not delete Docker volumes, but can lose profile or port preferences. It is excluded from images and archives. If you have an older host-folder <code>.learning</code> backup, keep it intact and separate until a deliberate transfer has been verified. Startup does not automatically merge it into a Docker volume.</p>
 <p>To request fixed host ports explicitly:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom --port <span class="syntax-number">8766</span> --database-port <span class="syntax-number">55433</span></code></pre>
 <p>For an existing project, changing its ports needs the explicit update path:</p>
@@ -321,11 +269,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-comment"># Resume the saved selection without pulling or rebuilding.</span>
 ./classroom resume
 
-<span class="syntax-comment"># Install source updates, retaining learning and database volumes.</span>
-./classroom --rebuild
+<span class="syntax-comment"># Install local source updates, retaining learning and database volumes.</span>
+./classroom --local-build --rebuild
 
-<span class="syntax-comment"># Build updated selected images without starting services.</span>
-./classroom build
+<span class="syntax-comment"># Build updated selected local images without starting services.</span>
+./classroom build --local-build
 
 <span class="syntax-comment"># Check prerequisites without creating state or starting services.</span>
 ./classroom doctor
@@ -338,8 +286,29 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 ./classroom stop</code></pre>
 <p><code>--starter</code> replaces the remembered selection with Python Core. Explicit <code>--profile</code> flags replace it with Core plus exactly the listed profiles; include every optional profile you want in that selection. <code>--all</code> selects all sixteen. A later bare <code>./classroom</code> reuses your last selection.</p>
 <p>Starting a subset does not stop other workers that are already running. To switch to a smaller running set, stop the classroom first and then start with <code>--starter</code> or explicit <code>--profile</code> options. <code>--project NAME</code> intentionally selects a separate project and learning volumes; use the same name on later commands to resume that project.</p>
+<h3 id="backup-and-transfer">Backup and transfer<a class="heading-anchor" href="#backup-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>There are three separate things to retain:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Item</th>
+<th>What it preserves</th>
+</tr></thead><tbody>
+<tr>
+<td>Source folder or release ZIP</td>
+<td>Lesson content, launch scripts and build instructions</td>
+</tr>
+<tr>
+<td>Project learning-volume backup</td>
+<td>Saved drafts, notes, source versions and run observations/receipts</td>
+</tr>
+<tr>
+<td>PostgreSQL database dump</td>
+<td>SQL tables and other database state</td>
+</tr>
+</tbody></table></div>
+<p>The <code>.classroom/&lt;project&gt;/</code> folder stores selection and port preferences. It helps you resume, but it is not a backup of learning data. A Docker image or Hub pull also does not contain your saved progress.</p>
+<p>Save your drafts, let active Runs finish, and follow the <a href="docker-classroom.md.html#5-export-learning-work-and-the-database">learning and database export procedure</a>. Use a new restore project to test recovery before replacing any existing workspace. Exclude the private <code>classroom-runtime</code> credential volume from learning exports. Keep original backups until the restored drafts, notes, results and SQL data have been checked.</p>
 <h3 id="when-something-fails">When something fails<a class="heading-anchor" href="#when-something-fails" aria-label="Link to this section">#</a></h3>
-<p>Read the first failed step. An unavailable engine calls for starting the engine; a missing Docker command inside WSL calls for enabling distribution integration; an old Compose version calls for updating Compose. The shared launcher requires <strong>Compose 2.28.0 or newer</strong>, including its resolved-environment query. Manual Compose files alone require 2.24.4 for reset/override tags.</p>
+<p>Read the first failed step. An unavailable engine calls for starting the engine; a missing Docker command inside WSL calls for enabling distribution integration; an old Compose version calls for updating Compose. The shared launcher requires <strong>Compose 2.28.0 or newer</strong>, including its resolved-environment query. Use that same supported baseline for this course even if an older Compose understands some individual configuration features.</p>
 <p>Build and startup failures stop the workflow before it opens a browser. No failed command silently deletes data. Fix the indicated problem and rerun the same command. Ctrl+C cancels the launcher and releases its own lock. A second launcher for the same project refuses a concurrent start; rerun it after the first finishes. It does not race two database initializers. A stale lock from a terminated process is reclaimed only when its recorded process is absent and its lock directory contains no unexpected files. Recovery has its own atomic lock, so two simultaneous restarts cannot remove each other&#x27;s ownership. If a process is terminated during recovery and leaves a recovery lock, inspect it before retrying; the launcher preserves ambiguous state.</p>
 <p>A full backup of the learning volume preserves saved code, notes, progress, source versions and recorded run output. Python and SQL receipts live under <code>classroom-runs</code> in that volume and appear in the shared <strong>Saved runs</strong> view. Opening a prior receipt displays its recorded source and output without re-executing it or replacing your pad. Source version history remains separate from execution history. The older completion-JSON export contains completion markers only; use the complete learning-volume backup when transferring your whole workspace, and back up PostgreSQL separately when you need its state.</p>
 <p>For backup, manual Compose operation and optional host labs, continue to the <a href="docker-classroom.md.html">full classroom reference</a>. Direct Compose remains an advanced alternative; use the single entrypoint when you want it to handle the image, readiness and URL steps together.</p></article>

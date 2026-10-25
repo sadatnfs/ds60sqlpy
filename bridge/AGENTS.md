@@ -81,3 +81,9 @@ ruff format --check bridge
 Also check local Markdown links and `git diff --check`. Remove any generated
 `__pycache__`, `.pytest_cache`, coverage, or learner-output files before
 handoff.
+
+Learners use the unified Docker classroom; local Jupyter/PostgreSQL commands
+are explicitly prepared contributor workflows from [CONTRIBUTING](../CONTRIBUTING.md).
+Windows uses WSL 2, with no native launcher or host bootstrap dependency.
+Preserve the distinction between an isolated Python policy model, a local SQL
+notebook and actual PostgreSQL transaction/concurrency evidence.

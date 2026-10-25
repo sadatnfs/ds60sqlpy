@@ -645,13 +645,23 @@ def _guide_issues(
         workspace_path = f".learning/sql/{lesson.id}/lesson/workspace/{lesson.lesson_path}"
         required_sql_text = {
             "advanced_sql_training": "the disposable course database",
-            "Create/open guided SQL notebook": "the guided SQL notebook action",
-            "psql": "a manual psql fallback",
+            "./classroom": "the supported classroom startup command",
+            "psql": "the whole-script PostgreSQL client",
             workspace_path: "the exact ignored learner SQL working copy",
         }
         for marker, label in required_sql_text.items():
             if marker.casefold() not in source.casefold():
                 issues.append(f"SQL guide does not name {label}")
+        if re.search(r"\bwhole[- ](?:SQL[- ])?lesson\b", source, flags=re.IGNORECASE) is None:
+            issues.append("SQL guide does not explain the whole-lesson execution mode")
+        retired_routes = (
+            "START_DS60.cmd",
+            "scripts/learning_portal.py",
+            "scripts\\learning_portal.py",
+            "Create/open guided SQL notebook",
+        )
+        if any(route.casefold() in source.casefold() for route in retired_routes):
+            issues.append("SQL guide still prescribes a retired native portal action")
 
     if solution_words < MIN_SOLUTION_WORDS:
         issues.append(

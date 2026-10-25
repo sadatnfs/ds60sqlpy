@@ -37,6 +37,8 @@ worked reasoning and complete examples instead of an exam or hidden answer.
 | Rust | Ownership, borrowing, moves, enums, pattern matching and Result | Traits, generics, iterators, lifetimes, collections and tests | Concurrency, unsafe boundaries, performance, Arrow arrays/schema/nulls and data interoperability |
 | Swift | Values, optionals, collections, functions and structs | Protocols, generics, errors, async tasks, actors and Foundation | Isolation, cancellation, app state and architecture; SwiftUI/UIKit/signing require the separate Apple SDK route |
 | D3 specialization | SVG, selections, joins, scales, axes and data validation | Statistical graphics, missingness, reusable components and accessible interaction | Brush/zoom, hierarchy/network/geo layouts, Canvas, coordinated dashboards and actual browser acceptance |
+| HTML/CSS/PHP | Semantic document structure, cascade/layout, forms, PHP values/functions and output | Accessibility, responsive design, contextual escaping, prepared SQLite values and bounded request models | Real owned HTTP/session project, CSRF/ownership, integration, debugging and deployment boundaries |
+| GPU/CUDA | CPU/GPU roles, threads/blocks/warps, memory spaces, allocation and checked kernels | Parallel reductions/scans, synchronization, coalescing, streams/events, CuPy and framework device behavior | Measured kernel tradeoffs, mixed precision, custom gradients, attention/adaptation, supported GPU Spark operators and resource-aware operation |
 | Docker | Process/image/container distinction, Dockerfile, ports and Compose | Networking, durable data, backup/restore, permissions and resource constraints | BuildKit, multi-stage/multi-platform, supply chain, CI, failure domains and scoped recovery |
 | Kubernetes networking | Pod/node/Service addresses, CIDRs, CNI, DNS and endpoint readiness | Service data planes, NodePort, load balancers, Ingress/Gateway and TLS | Source-IP/NAT, policy enforcement, dual-stack, topology, draining, observability and request-path diagnosis |
 
@@ -46,6 +48,13 @@ JavaScript's Node environment distinct from the browser DOM. Explain C++ and
 Java entrypoints, staged filenames, compile errors and runtime errors before
 asking for larger applications. SQL queries need row-grain contracts rather
 than only matching one displayed result.
+
+For web development, explain the browser, Node process, PHP CLI and HTTP server
+as distinct environments. Teach semantic and accessible output before frameworks.
+For GPU learning, preserve useful CPU models while clearly identifying actual
+device work. Pair PyTorch and TensorFlow concepts without substituting one
+framework's API semantics. GPU Spark should follow common GPU and existing Spark
+foundations, not force an unrelated dataframe elective into its prerequisites.
 
 For each route, study its `README.md`, `AGENTS.md`, metadata and a beginner,
 intermediate and advanced guide before designing a new subject. Prefer the

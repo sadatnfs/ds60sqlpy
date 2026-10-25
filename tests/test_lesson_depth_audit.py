@@ -50,6 +50,28 @@ def test_sql_rules_apply_to_sql_runner_in_any_registered_track() -> None:
     assert "SQL guide does not name the exact ignored learner SQL working copy" in issues
 
 
+def test_sql_run_contract_requires_current_classroom_and_rejects_retired_launchers() -> None:
+    lesson = Catalog.load(Path(__file__).resolve().parents[1]).get("sql-01")
+    workspace = f".learning/sql/{lesson.id}/lesson/workspace/{lesson.lesson_path}"
+    current = (
+        f"./classroom advanced_sql_training psql {workspace} "
+        "Use whole-lesson execution and inspect the transcript."
+    )
+    issues = _guide_issues(lesson, current, solution_words=700, solution_code_blocks=1)
+    assert not any(issue.startswith("SQL guide") for issue in issues)
+    retired = _guide_issues(
+        lesson, current + " Open START_DS60.cmd.", solution_words=700, solution_code_blocks=1
+    )
+    assert "SQL guide still prescribes a retired native portal action" in retired
+    missing_mode = _guide_issues(
+        lesson,
+        current.replace("whole-lesson", "notebook"),
+        solution_words=700,
+        solution_code_blocks=1,
+    )
+    assert "SQL guide does not explain the whole-lesson execution mode" in missing_mode
+
+
 def test_future_python_notebooks_keep_the_full_teaching_density_gate(tmp_path: Path) -> None:
     lesson = replace(
         Catalog.load(Path(__file__).resolve().parents[1]).get("python-01"),

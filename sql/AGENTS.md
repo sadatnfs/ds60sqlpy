@@ -55,8 +55,9 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
   must lead with `## How to run this lesson`, identify the unified `/classroom`
   workflow and its capability notice, and name the disposable
   `advanced_sql_training` database. Preserve the separately labeled optional
-  private-reader **Create/open guided SQL notebook** action and repository-root
-  `psql -X -v ON_ERROR_STOP=1` fallback for prepared native environments.
+  contributor SQL notebook generation and repository-root
+  `psql -X -v ON_ERROR_STOP=1` route for an explicitly prepared local database.
+  Do not advertise a native editor-launch button or host installation to Docker learners.
 - Explain every new clause and the query's logical row-shaping sequence. Worked
   examples must state the starting row grain, expected columns/rows, NULL and
   ordering assumptions, and what evidence proves the query behaved correctly.
@@ -73,7 +74,8 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
   missing course prose.
 - Do not claim an executable solution exists when only prose is present.
 - Use repository-root commands in documentation.
-- Provide PowerShell-safe alternatives for pipes, file redirection, and API examples.
+- Use the same Bash commands on Linux, macOS and Windows through WSL 2; keep
+  contributor database commands separate from ordinary Docker learning.
 - Meet the immutable `curriculum/practice_baseline.json` target on the learner
   SQL, guide, and explanatory solution. Number distinct prompts consistently
   across surfaces and explain each solution statement/clause rather than
@@ -81,7 +83,8 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 
 ## Validation
 
-Start from a freshly reset disposable database:
+Only after explicitly preparing an owned disposable database, this reset/check
+sequence is available. It destroys the existing course `training` schema:
 
 ```text
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
@@ -111,6 +114,6 @@ When an artifact filename, stateful group, or solution availability changes, run
 The generated SQL notebook boundary lives in
 `src/ds60sqlpy/sql_notebook.py`. It accepts stable catalog identity only,
 writes under ignored `.learning/sql/`, refuses symlink/path escapes, and
-restricts execution to `advanced_sql_training`. Portal code may consume the
-returned notebook path but must not add arbitrary path, SQL, connection, or
-shell parameters.
+restricts execution to `advanced_sql_training`. The contributor notebook command
+must not add arbitrary path, SQL, connection or shell parameters. This is a
+separate prepared workflow, not a browser native-process API.

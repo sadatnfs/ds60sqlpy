@@ -27,3 +27,11 @@ null semantics and driver/executor behavior. Use small local datasets and bound
 collects. Start and stop Spark sessions explicitly. Compare Scala and PySpark
 semantics without counting variants as separate canonical learning objectives.
 A local test does not prove distributed scale or production fault recovery.
+
+Streaming examples create fresh owned checkpoint/source/sink directories and
+stop only their own queries before cleanup. Preserve compatible state identity
+inside a recovery demonstration. Source recovery, event deduplication and sink
+idempotency are separate guarantees. Directly authored bundles remain their own
+sources; consult existing tests and fixtures before replacing them with a generator.
+GPU acceleration is taught in the [CUDA Spark route](../cuda/spark/README.md).
+Keep local CPU execution distinct from supported GPU plans and real cluster evidence.

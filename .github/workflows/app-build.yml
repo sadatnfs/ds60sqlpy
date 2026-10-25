@@ -36,7 +36,7 @@ jobs:
         run: uv sync --frozen
       - name: Package the complete Docker classroom starter
         run: >-
-          uv run --no-sync python scripts/build_windows_starter.py
+          uv run --no-sync python scripts/build_starter.py
           --output dist/DS60LearningLab-Docker-Starter.zip
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 This optional track extends the eight-day
@@ -39,41 +39,18 @@ Recommended order is the table order. The modules are independently runnable,
 but the operations and analytics projects assume the database-testing habits
 from [Bridge Day 5](../companion-guides/day05_db_testing_fixtures_doubles.md).
 
-## One-time setup
+## Prepare the selected workflow
 
-The repository-wide setup scripts are the easiest cross-platform route. Run
-them from the repository root while connected to the internet:
+Use `./classroom --starter` and choose **Python + PostgreSQL engineering** for
+the normal browser route. Read the selected unit's capability notice before
+running. Live database, notebook and external project steps are explicit;
+opening a guide does not prepare a host notebook interpreter.
 
-```powershell
-# Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
-```
-
-```bash
-# macOS/Linux
-bash scripts/setup.sh --advanced
-```
-
-For a smaller environment, install only this track's profiles:
-
-```powershell
-# Windows PowerShell
-py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install -e ".[notebooks,professional,sql-notebooks,quality]"
-```
-
-```bash
-# macOS/Linux
-python3.12 -m venv .venv
-.venv/bin/python -m pip install --upgrade pip
-.venv/bin/python -m pip install -e ".[notebooks,professional,sql-notebooks,quality]"
-```
-
-After installation, the lessons, solutions, fixtures, and tests work without
-internet access. See the
-[PostgreSQL notebook setup guide](../../docs/setup/jupyter-postgresql.md) for
-VS Code/Jupyter kernel selection and the optional local PostgreSQL database.
+For the dedicated JupySQL unit, follow the
+[optional notebook guide](../../docs/setup/jupyter-postgresql.md). For direct
+project files and tests, follow [contributor setup](../../CONTRIBUTING.md) on
+Linux/macOS or Windows WSL 2. Prepare required packages while connected before
+claiming an offline run.
 
 ## How to study
 
@@ -89,7 +66,7 @@ For each module:
    differs.
 6. Run the focused tests before moving to the next module.
 
-A useful the AI tutor prompt is:
+A useful AI tutor prompt is:
 
 > Guide me through `bridge-analytics-01`. Read its companion guide and learner
 > file, but do not read the solution yet. Ask me to predict the next test
@@ -97,55 +74,20 @@ A useful the AI tutor prompt is:
 
 ## Running the modules
 
-The three Python reference projects run directly:
+In the classroom, work in a saved learner pad and inspect the matching run
+record. The source and notes survive normal stop/resume in the same project.
+Reference solutions remain separate until you choose comparison.
 
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe bridge\professional\solutions\bridge_ops_01_migration_observability_solution.py
-.\.venv\Scripts\python.exe bridge\professional\solutions\bridge_ai_01_application_engineering_solution.py
-.\.venv\Scripts\python.exe bridge\professional\solutions\bridge_analytics_01_local_project_solution.py
-```
+Prepared contributors can run a particular source directly, for example:
 
 ```bash
-# macOS/Linux
-.venv/bin/python bridge/professional/solutions/bridge_ops_01_migration_observability_solution.py
-.venv/bin/python bridge/professional/solutions/bridge_ai_01_application_engineering_solution.py
-.venv/bin/python bridge/professional/solutions/bridge_analytics_01_local_project_solution.py
+uv run --no-sync python bridge/professional/lessons/bridge_ai_01_application_engineering.py
 ```
 
-Start JupyterLab for the notebook module:
-
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe -m jupyter lab .\bridge\professional\notebooks
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python -m jupyter lab bridge/professional/notebooks
-```
-
-The notebook uses JupySQL's line magic for one statement:
-
-```python
-%sql SELECT current_database(), current_user;
-```
-
-and its cell magic for a multiline query:
-
-```python
-%%sql
-SELECT category, count(*) AS row_count
-FROM training_products
-GROUP BY category
-ORDER BY category;
-```
-
-It creates a SQLAlchemy engine from `DS60_DATABASE_URL` and connects without
-printing the URL. Named values use `:parameter`; identifiers cannot be bound as
-values and must come from trusted course code. The notebook explains when to
-use JupySQL for exploration and when to switch to Psycopg for explicit
-transactions or application code.
+The notebook's `%sql` and `%%sql` work only in its prepared IPython kernel.
+It validates the local course target, uses a SQLAlchemy engine without printing
+its URL, and distinguishes bound values from generated identifiers. Follow
+its guide rather than pasting notebook magics into a Python script.
 
 ## Offline and live boundaries
 
@@ -156,44 +98,23 @@ transactions or application code.
 | `bridge-ai-01` | Fully local deterministic embedding, answer model, and evaluation | None |
 | `bridge-analytics-01` | Fully local in-memory DuckDB; no database file remains | None |
 
-Set the PostgreSQL URL only for the two marked live paths:
+For marked live paths, supply the private connection through the shell
+that launches the tool, using the actual local port from `./classroom status`.
+The [notebook setup guide](../../docs/setup/jupyter-postgresql.md) shows a hidden
+prompt. Never commit a URL or point a reset or integration test at shared data.
 
-```powershell
-# Windows PowerShell
-$env:DS60_DATABASE_URL = "postgresql://localhost:5432/advanced_sql_training"
-```
+## Contributor validation
 
-```bash
-# macOS/Linux
-export DS60_DATABASE_URL="postgresql://localhost:5432/advanced_sql_training"
-```
-
-Do not commit this value. Never point a course notebook, migration, reset
-script, or live integration test at a shared or production database.
-
-## Validation
-
-Run the professional track checks from the repository root:
-
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q -p no:cacheprovider
-.\.venv\Scripts\python.exe scripts\validate_notebooks.py
-.\.venv\Scripts\ruff.exe check bridge\professional
-.\.venv\Scripts\mypy.exe --strict bridge\professional\solutions bridge\professional\tests
-```
+After [contributor setup](../../CONTRIBUTING.md), run:
 
 ```bash
-# macOS/Linux
-.venv/bin/python -m pytest bridge/professional/tests -q -p no:cacheprovider
-.venv/bin/python scripts/validate_notebooks.py
-.venv/bin/ruff check bridge/professional
-.venv/bin/mypy --strict bridge/professional/solutions bridge/professional/tests
+uv run --no-sync python -m pytest bridge/professional/tests -q
+uv run --no-sync python scripts/validate_notebooks.py
 ```
 
-Use `-p no:cacheprovider` when copying the repository to removable media so
-pytest does not create `.pytest_cache`. Python `__pycache__`, Ruff, mypy, and
-Jupyter checkpoint directories are generated state, not lesson content.
+A structural or fake-session check is separate from a real database observation.
+Use the [validation guide](../../docs/validation.md) for lint, typing and broader
+release checks. Generated caches and notebook checkpoints are not course content.
 
 ## Safety rules
 

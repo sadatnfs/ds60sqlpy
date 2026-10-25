@@ -96,7 +96,7 @@ def tutor(legacy: Catalog, monkeypatch: pytest.MonkeyPatch) -> TutorAdapter:
         "pilot": {"lesson_id": "cpp-009"},
         "lessons": planned,
     }
-    monkeypatch.setattr("ds60sqlpy.modules.load_designs", lambda _root: [plan])
+    monkeypatch.setattr("ds60sqlpy.modules.load_core_plans", lambda _root: [plan])
     base = root / "courses/cpp"
     (base / "solutions").mkdir(parents=True)
     for filename, text in {

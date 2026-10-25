@@ -168,14 +168,14 @@ Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not tr
 
 ## Next step
 
-Continue with [spark-002](spark-002.md) for Scala-first study; the PySpark branch spark011 remains a separately planned prerequisite bridge. See the [full plan](../../../docs/expansion/tracks/scala-spark.md).
+Continue with [spark-002](spark-002.md) for Scala-first study, or use the authored [PySpark bridge, spark-011](spark-011.md) when its Python prerequisites are familiar. See the [course README](../README.md) for how these routes meet.
 
 ## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-001.
 Read courses/scala-spark/guides/spark-001.md and courses/scala-spark/lessons/spark-001.md.
-Direct design prerequisites: none. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Direct design prerequisites: none. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

@@ -23,45 +23,53 @@ Complete Day 18 (`python-18`): typed, cleaned DataFrames and missing-value rules
 ## How to run this lesson
 
 **Primary browser route:** run `./classroom` from the repository root and
-choose **Python** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+choose **Python and data science** on `/classroom`. Open this lesson in the
+shared workspace, read its capability notice and use its supported coding or
+reading workflow. The [classroom guide](../../../docs/classroom-experience.md)
+explains saved work, runtimes and switching subjects. No host notebook setup
+is needed for this route.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+### Optional contributor notebook route
 
-Work from the repository root. The rendered HTML lesson is a readable
-preview; execute the real notebook in VS Code or JupyterLab.
+Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in
+Windows WSL 2. Complete [contributor setup](../../../CONTRIBUTING.md) once,
+including the notebook and data dependencies. Docker's Python worker does not
+install packages into this host interpreter. Run the following commands from
+the repository root using that prepared environment.
 
-1. Confirm the course environment before changing it:
-
-   ```powershell
-   # Windows PowerShell
-   $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-       (Resolve-Path .\.venv\Scripts\python.exe).Path
-   } else {
-       (Resolve-Path .\.venv\python.exe).Path
-   }
-   & $CoursePython scripts\course.py doctor
-   ```
+1. Check the interpreter and register its notebook kernel. Registration is
+   needed once for this environment, or again after moving/replacing it:
 
    ```bash
-   # macOS/Linux
-   .venv/bin/python scripts/course.py doctor
+   uv run --no-sync python scripts/course.py doctor --no-database
+   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
    ```
 
-2. Read `python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md`, then open `python/ds-60day/notebooks/day19_pandas_groupby_pivot.ipynb` from the repository
-   folder in VS Code or JupyterLab.
-3. Select **Python (ds60sqlpy)**. Do not run `%pip` in the notebook. If
-   an import is missing, use the doctor and the catalog dependency label
-   to repair the shared environment.
-4. Restart the kernel and run from the first cell downward. Before every
-   example, write a prediction; after it runs, compare the actual value,
-   type, shape, or side effect with the stated observation.
-5. Attempt each numbered exercise in its own work cell. Use the explicit
-   verification as part of the task. Keep `solutions/` closed until you
-   have a tested attempt or deliberately ask for help.
+   `--no-database` keeps this Python setup check local and does not require
+   PostgreSQL. Do not install packages with `%pip` in a lesson. Use the
+   declared dependency group when an optional import needs preparation.
+2. Read `python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md`, then launch the notebook directory:
+
+   ```bash
+   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks
+   ```
+
+   Open `python/ds-60day/notebooks/day19_pandas_groupby_pivot.ipynb` and select **Python (ds60sqlpy)**. The friendly name alone
+   is insufficient if you use several checkouts: confirm that the kernel's
+   `sys.executable` points to this checkout's `.venv/bin/python`.
+   [VS Code guidance](../../../docs/vscode.md) explains the alternative editor
+   route; Windows users open that editor in WSL with the same Linux environment.
+3. Restart the kernel and run cells from the top. Notebook cells share kernel
+   state; each browser Run starts a fresh process. Before every example,
+   predict its result, then compare the actual value, type, shape or side effect.
+4. Attempt the numbered exercises in your own work cells and keep a backup of
+   your notebook edits. Follow each example's file and working-directory
+   instructions. Keep `solutions/` separate until you want reference comparison.
+
+Notebook files and contributor CLI progress belong to this host checkout.
+They are separate from the browser's saved pads, notes and progress in Docker
+volumes. Neither route automatically copies attempts or completion markers to
+the other; record progress in the interface you actually used.
 
 **Lesson outcome:** use day 19; groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping
 and explain the evidence produced by your code.

@@ -37,3 +37,8 @@ Compile changed references with strict warnings, execute their assertions and us
 sanitizers for memory-sensitive changes when available. Report local compiler,
 actual Linux-worker, sanitizer and browser evidence separately. A passing run is
 not a proof that every possible C input or platform is safe.
+
+Use [the subject authoring guide](authoring/README.md) for regeneration and
+[the module contract](../../docs/implementation/ADDING_A_MODULE.md) for shared
+runtime integration. Root guidance owns common formatting, saved-work and
+publication rules; subject changes must preserve those boundaries.

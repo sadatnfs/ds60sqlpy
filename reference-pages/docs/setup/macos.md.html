@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>macOS setup · DS60 reference</title>
+  <title>Start the classroom on macOS · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,84 +158,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>macOS setup</h1>
+      <h1>Start the classroom on macOS</h1>
       <p class="source-path">Generated from <code>docs/setup/macos.md</code></p>
     </header>
-    <article class="document"><h2 id="macos-setup">macOS setup<a class="heading-anchor" href="#macos-setup" aria-label="Link to this section">#</a></h2>
-<p>The supported course experience is the unified Linux-container Docker classroom. Every subject, including Python and SQL, opens from the same <code>/classroom</code> page. You only need a local Docker-compatible engine, Linux containers, and the documented Compose version. The language runtimes live inside the images.</p>
-<p>From the extracted course folder or checkout, run:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom</code></pre>
-<p>The command builds locally, starts the services, checks readiness and opens the actual browser address. Follow the <a href="../one-command-classroom.md.html">one-command walkthrough</a> for first-time engine installation, WSL integration, stopping, backups and recovery. Saved work in the standard classroom uses persistent named Docker volumes. Use <code>./classroom status</code> to rediscover its address.</p>
-<h3 id="optional-native-environment">Optional native environment<a class="heading-anchor" href="#optional-native-environment" aria-label="Link to this section">#</a></h3>
-<p>The remainder of this page is a historical host-setup reference, outside the supported Docker product and its release gates. Native Windows environments and native executable bundles are unsupported. Use Linux or WSL 2 for the validated contributor workflow in <a href="../../CONTRIBUTING.md.html">CONTRIBUTING</a>. Keep any retained native <code>.learning</code> files separate from Docker-volume state.</p>
-<h3 id="1-install-base-tools">1. Install base tools<a class="heading-anchor" href="#1-install-base-tools" aria-label="Link to this section">#</a></h3>
-<p>Install:</p>
-<ol>
-<li><a href="https://git-scm.com/download/mac">Git</a></li>
-<li><a href="https://www.python.org/downloads/macos/">Python 3.12</a> or an equivalent Homebrew installation</li>
-<li><a href="https://code.visualstudio.com/download">Visual Studio Code</a></li>
-<li>PostgreSQL 16+ or Docker Desktop for the SQL track</li>
-</ol>
-<p>Verify:</p>
-<pre class="highlighted-code"><code class="language-bash">git --version
-python3.12 --version
-code --version</code></pre>
-<p>If Git requests Apple&#x27;s Command Line Tools, finish that installation and reopen Terminal. If <code>code</code> is missing, open VS Code normally and use <strong>File → Open Folder</strong>; its Command Palette also offers <strong>Shell Command: Install &#x27;code&#x27; command in PATH</strong>. <a href="https://brew.sh/">Homebrew</a> is a separate package manager; install it first if you choose the <code>brew</code> commands below. Match native Apple Silicon Python and Homebrew to an Apple Silicon Mac rather than mixing them with an Intel/Rosetta environment.</p>
-<p>Apple Silicon and Intel Macs are supported, but optional heavy machine-learning packages may install different platform wheels. CPU execution is the default.</p>
-<h3 id="2-clone-and-open-the-repository">2. Clone and open the repository<a class="heading-anchor" href="#2-clone-and-open-the-repository" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
-<span class="syntax-builtin">cd</span> ds60sqlpy
-code .
-<span class="syntax-builtin">test</span> -f README.md</code></pre>
-<p>If the repository is already cloned, <code>cd</code> to the directory containing <code>README.md</code>.</p>
-<h3 id="3-create-the-python-environment">3. Create the Python environment<a class="heading-anchor" href="#3-create-the-python-environment" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
-.venv/bin/python --version
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/course.py catalog</code></pre>
-<p>Activation is optional. If you want an activated shell:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">source</span> .venv/bin/activate
-python scripts/course.py doctor</code></pre>
-<p>In VS Code, select <code>.venv/bin/python</code> as the interpreter and notebook kernel. See <a href="../vscode.md.html">VS Code</a>.</p>
-<p>Core setup installs notebook, data, quality, bridge, professional, and SQL notebook tooling on every operating system. It reuses a valid <code>.venv</code> and does not contact a database. With an existing external <code>uv</code> installation it uses the checked-in lock; otherwise it installs the project declarations with pip. For an explicitly locked install, use <code>bash scripts/setup.sh --dependency-mode locked</code> after installing <a href="https://docs.astral.sh/uv/getting-started/installation/">uv</a>.</p>
-<p>Before later specialized machine-learning, production, deep-learning, natural-language-processing, or geospatial lessons, install the advanced profile while connected:</p>
-<pre class="highlighted-code"><code class="language-bash">brew install libomp
-bash scripts/setup.sh --advanced</code></pre>
-<p>The Homebrew OpenMP runtime is required by the LightGBM and XGBoost macOS wheels. The dependency profile selects a compatible PyTorch/TorchVision pair: the final Intel-macOS wheels on Intel Macs and a macOS 13-compatible pair on Apple Silicon. The advanced profile can take substantially longer. You may defer it until the generated catalog shows that a planned lesson needs it. Use the <a href="../dependency-profiles.md.html">catalog-label mapping</a>: labels such as <code>core</code>, <code>postgres</code>, and <code>advanced</code> are not literal package extras.</p>
-<h3 id="4-set-up-postgresql">4. Set up PostgreSQL<a class="heading-anchor" href="#4-set-up-postgresql" aria-label="Link to this section">#</a></h3>
-<h4 id="option-a-homebrew">Option A: Homebrew<a class="heading-anchor" href="#option-a-homebrew" aria-label="Link to this section">#</a></h4>
-<p>Install and start a supported PostgreSQL version. PostgreSQL 17 matches the canonical automation:</p>
-<pre class="highlighted-code"><code class="language-bash">brew install postgresql@17
-brew services start postgresql@17
-<span class="syntax-builtin">export</span> PATH<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-keyword">$(</span>brew --prefix postgresql@17<span class="syntax-keyword">)</span><span class="syntax-string">/bin:</span>$PATH<span class="syntax-string">&quot;</span>
-psql --version</code></pre>
-<p>To keep that PATH setting for future Terminal sessions, add the export line to <code>~/.zprofile</code>.</p>
-<p>Homebrew commonly creates a database role matching your macOS username rather than a <code>postgres</code> role. Use that local role:</p>
-<pre class="highlighted-code"><code class="language-bash">createdb advanced_sql_training
-psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
-<p>If <code>createdb</code> says the database already exists, continue to the setup command.</p>
-<p><code>00_setup.sql</code> drops and recreates the disposable <code>training</code> schema. Never run it against a database that contains data you care about. <code>00_verify.sql</code> raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.</p>
-<p>Tell doctor and the guided SQL notebooks to use that same native local role and socket connection, then keep this Terminal window for the portal:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span>advanced_sql_training
-.venv/bin/python scripts/course.py doctor</code></pre>
-<p>Expect <code>Course database: advanced_sql_training is reachable</code>. Repeat the export in each new Terminal session. For a password-protected native server or the separate JupySQL lesson, use the matching connection instructions in <a href="postgresql.md.html">Local PostgreSQL</a>.</p>
-<h4 id="canonical-container-alternative">Canonical container alternative<a class="heading-anchor" href="#canonical-container-alternative" aria-label="Link to this section">#</a></h4>
-<p>For the full browser app, use the <a href="../docker-beginners.md.html">Docker beginner walkthrough</a>. Its shell launcher prepares host persistence and opens the ready browser without a native Python environment. For a SQL-only container server or later host notebooks, use <a href="postgresql.md.html#route-a-the-course-container">Local PostgreSQL</a>. That guide explains seed setup, the separate host-client requirement, ports, authentication, and shutdown that preserves data.</p>
-<h3 id="5-start-learning">5. Start learning<a class="heading-anchor" href="#5-start-learning" aria-label="Link to this section">#</a></h3>
-<p>For the guided dashboard, file-backed progress, and exact VS Code/Jupyter lesson actions, start the private loopback portal and keep its terminal open:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/learning_portal.py</code></pre>
-<p>The browser page clearly identifies private launcher mode. If you instead open <code>START_HERE.html</code> directly, it is a read-only course navigator; it cannot start local programs.</p>
-<p>Python:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab python/ds-60day/notebooks</code></pre>
-<p>SQL:</p>
-<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
-<p>In private launcher mode, the recommended SQL route is to open the Day 1 reader and choose <strong>Create/open guided SQL notebook</strong>. That creates a preserved, ignored working copy under <code>.learning/sql/sql-01/</code> and runs the complete script through a fixed <code>psql -f</code> path.</p>
-<p>For <code>%sql</code> and <code>%%sql</code> in the course kernel, continue with <a href="jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>.</p>
-<p>For a tiny first notebook with explicit expected output, follow <a href="first-success.md.html#3-make-a-scratch-notebook-and-run-one-cell">Your first successful session</a>.</p>
-<h3 id="6-prepare-for-offline-study">6. Prepare for offline study<a class="heading-anchor" href="#6-prepare-for-offline-study" aria-label="Link to this section">#</a></h3>
-<p>Run disclosed first-use downloads while connected, then follow <a href="offline.md.html">Offline use</a>. Seaborn datasets cache after first use; pretrained models require their own cache or a lesson’s offline fallback.</p>
-<p>For common failures, see <a href="../troubleshooting.md.html">Troubleshooting</a>.</p></article>
+    <article class="document"><h2 id="start-the-classroom-on-macos">Start the classroom on macOS<a class="heading-anchor" href="#start-the-classroom-on-macos" aria-label="Link to this section">#</a></h2>
+<p>The supported classroom runs Linux containers and opens in your browser. macOS supplies Terminal and Bash. Course Python packages, PostgreSQL, compilers and framework tools are prepared inside Docker images.</p>
+<h3 id="1-prepare-the-engine">1. Prepare the engine<a class="heading-anchor" href="#1-prepare-the-engine" aria-label="Link to this section">#</a></h3>
+<p>Choose a local Linux-container engine:</p>
+<ul>
+<li>Install <a href="https://docs.docker.com/desktop/setup/install/mac-install/">Docker Desktop for Mac</a> using the download matching Apple silicon or Intel.</li>
+<li>Or install <a href="https://docs.rancherdesktop.io/getting-started/installation/">Rancher Desktop</a> and select <a href="https://docs.rancherdesktop.io/ui/preferences/container-engine/general/">dockerd/Moby</a> for Docker API compatibility.</li>
+</ul>
+<p>Start the application and wait for the engine to become ready. Follow its current OS requirements and resource settings. Keep your existing engine selection when resuming work because another engine has a different image and volume store.</p>
+<p>Open <strong>Terminal</strong> and check:</p>
+<pre class="highlighted-code"><code class="language-bash">docker info --format <span class="syntax-string">&#x27;{{.OSType}}&#x27;</span>
+docker compose version
+bash --version</code></pre>
+<p>Expect <code>linux</code> and Compose <strong>2.28.0 or newer</strong>. An installed Docker command without a reachable engine is not ready for the classroom.</p>
+<h3 id="2-open-the-course-directory">2. Open the course directory<a class="heading-anchor" href="#2-open-the-course-directory" aria-label="Link to this section">#</a></h3>
+<p>Clone the repository if you have access, or extract the complete starter ZIP. Repository access is currently private; use an authenticated Git credential manager or the owner&#x27;s supplied archive. Never put a token in a clone URL.</p>
+<pre class="highlighted-code"><code class="language-bash">git clone https://github.com/sadatnfs/ds60sqlpy.git
+<span class="syntax-builtin">cd</span> ds60sqlpy</code></pre>
+<p>For a ZIP, use <code>cd</code> with its actual extracted directory instead. Check that <code>ls classroom README.md</code> lists both files. Quote a path containing spaces.</p>
+<h3 id="3-prepare-and-open-the-classroom">3. Prepare and open the classroom<a class="heading-anchor" href="#3-prepare-and-open-the-classroom" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom doctor
+./classroom --starter</code></pre>
+<p>The starter prepares Python and PostgreSQL while keeping every subject readable. Use <code>./classroom --all</code> for all sixteen ordinary workers. A first build requires internet and disk space for images and intermediate build layers; the <a href="../one-command-classroom.md.html">one-command guide</a> explains resources and choosing a smaller selection.</p>
+<p>The launcher prints the actual loopback URL and tries to open it. Paste that URL into your browser if necessary. You can also double-click <strong>START_DOCKER_CLASSROOM.command</strong> after engine setup. It uses the same saved selection as the terminal launcher.</p>
+<p>If extraction removed executable permissions, use <code>bash classroom doctor</code> and <code>bash classroom --starter</code>. A macOS security dialog about a downloaded file is a host decision; the terminal route remains available after inspecting the downloaded source.</p>
+<h3 id="4-pause-return-and-update">4. Pause, return and update<a class="heading-anchor" href="#4-pause-return-and-update" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>Stopping preserves named volumes. Strict <code>resume</code> uses prepared images without downloads or builds. Normal <code>./classroom</code> also resumes, preparing only missing images when needed. After obtaining changed source files, deliberately update local images with:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --rebuild</code></pre>
+<p>Keep a custom <code>--project NAME</code> consistent across commands. Use <code>./classroom status</code> to find the current URL, especially with automatic ports. Copying the source folder alone does not transfer Docker-volume progress.</p>
+<h3 id="apple-silicon-and-optional-gpu-work">Apple silicon and optional GPU work<a class="heading-anchor" href="#apple-silicon-and-optional-gpu-work" aria-label="Link to this section">#</a></h3>
+<p>Ordinary workers use their supported Linux architecture. Local images built on Apple silicon are normally ARM64; a Hub release must provide matching architecture tags. See <a href="../dockerhub.md.html">image distribution</a>.</p>
+<p>CUDA requires supported NVIDIA hardware and software. An Apple GPU does not become a CUDA device inside Docker. The CUDA subject offers reading and CPU models on this Mac, with explicitly separate NVIDIA or non-CUDA project routes. See <a href="../cuda-classroom.md.html">CUDA setup</a>.</p>
+<p>Portable Swift/Foundation lessons run in the Linux worker. Apple app projects deliberately use the Swift course&#x27;s separate macOS/Xcode instructions. They do not change the prerequisites for ordinary classroom study.</p>
+<p>Continue with <a href="first-success.md.html">your first successful session</a>, then <a href="../classroom-experience.md.html">the classroom guide</a>.</p></article>
   </main>
 </body>
 </html>

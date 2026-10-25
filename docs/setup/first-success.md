@@ -1,183 +1,122 @@
-# Your first successful session
+# Your first successful classroom session
 
-> The supported first session uses [the Docker/WSL walkthrough](../one-command-classroom.md):
-> start `./classroom`, choose Python or PostgreSQL, and run a small example in
-> its browser pad. The host-notebook walkthrough below is historical
-> compatibility material, outside the supported product and release gates.
+You can begin without knowing Python, SQL or Git. The first goal is modest:
+open the classroom, run one Python example, run one SQL query, save a draft
+and return to it after stopping the containers.
 
-> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
-> the engineering bridge and every module/book subject share one home and
-> individually themed workspaces. Choose any path and set your own pace.
-> Start with `./classroom`; see the [classroom guide](../classroom-experience.md) for reading, code,
-> saved work and compatibility bookmarks.
+## Prepare the host once
 
+Follow the guide for [Windows with WSL 2](windows.md),
+[macOS](macos.md) or [Linux](linux.md). Start the Linux-container engine and open
+a Bash terminal in the extracted course directory. On Windows, use Ubuntu in
+WSL 2 for the course commands.
 
-You do not need to know programming, SQL, or Git before starting. Set aside a
-first session for getting one Python cell and one SQL query to run. Setup is
-part of learning. The lesson sequence starts after those two small wins.
-
-## Understand the tools before installing them
-
-| Word | Meaning in this course |
+| Term | Meaning here |
 | --- | --- |
-| Repository | This course folder and the files inside it |
-| Terminal | A window where you type commands and read their output |
-| Shell | The program interpreting terminal commands: PowerShell on Windows, Bash or Zsh on macOS/Linux |
-| Python interpreter | The program that executes Python code |
-| Package | A reusable library installed for one Python interpreter |
-| `.venv` | This repository's isolated Python and packages |
-| Notebook | A file ending in `.ipynb` with text and runnable cells |
-| Kernel | The Python process executing a notebook's cells |
-| PostgreSQL server | The local program storing tables and answering SQL queries |
-| `psql` | A terminal client that sends SQL to PostgreSQL |
-| Docker container | An isolated process used here to run a consistent PostgreSQL server |
+| Course folder | The source files, guides and launcher you downloaded |
+| Docker image | Prepared application code and dependencies |
+| Container | A running or stopped instance created from an image |
+| Runtime profile | The prepared environment a lesson needs, such as Python or C++ |
+| Named volume | Engine-managed storage retained across container replacement |
+| Browser pad | Your editable source for the selected lesson and language |
+| Saved run | The source and output recorded for a particular execution |
 
-VS Code is the editor. JupyterLab is an alternative notebook interface that
-opens in your browser. The learning portal helps you navigate lessons and
-launch either editor; the browser's static lesson preview is read-only.
+## Open a small first classroom
 
-## 1. Choose the matching operating-system guide
-
-- [Windows with PowerShell](windows.md)
-- [macOS with Terminal](macos.md)
-- [Linux with a terminal](linux.md)
-
-Type only the contents of a command block, without its triple-backtick fence.
-Run one command at a time and wait for the prompt to return. A command can
-succeed without printing anything. Lines beginning with `#` explain the next
-command. Do not paste a PowerShell block into a Bash terminal or a SQL prompt.
-
-On Windows, open **Windows PowerShell** from Start. On macOS, open **Terminal**
-from Applications → Utilities. On Linux, open your desktop's terminal app.
-Commands below assume you have completed the OS guide's package setup and are
-in the repository root, the folder containing `README.md` and `pyproject.toml`.
-
-The first setup needs internet access. Python 3.12 is the course baseline;
-3.11 is supported too. An installed newer Python can coexist with it. The
-course does not require you to replace your operating system's Python.
-
-## 2. Prove the terminal uses the course Python
-
-Windows PowerShell, once in each new terminal:
-
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython -c "import sys; print(sys.executable); print(2 + 3)"
+```sh
+./classroom doctor
+./classroom --starter
 ```
 
-macOS/Linux:
+The first command checks prerequisites. The second prepares the app, PostgreSQL
+and Python Core, then prints and opens the actual local URL. A new bare
+`./classroom` prepares the full ordinary set instead. Both choices keep every
+subject readable. Read the build output and wait for the ready address.
 
-```bash
-.venv/bin/python -c "import sys; print(sys.executable); print(2 + 3)"
+If execution permissions were lost during ZIP extraction, use `bash classroom`
+in place of `./classroom`. If the browser does not open, copy the printed URL.
+Use `./classroom status` to retrieve it later.
+
+## Run Python in its own workspace
+
+1. Choose **Python and data science** and its first lesson.
+2. Read the guide. Use **Show code and notes** if reading focus hides the pad.
+3. Keep the starter or save a copy before replacing its text for this small
+   experiment.
+4. Enter this ordinary Python program:
+
+```python
+learner = "Ada"
+study_minutes = 20
+print(f"Hello, {learner}. Today I studied for {study_minutes} minutes.")
+print(2 + 3)
 ```
 
-Expected: a Python path inside this course's `.venv`, then `5`. Keep using that
-interpreter for installations and commands. Environment activation is optional.
+5. Predict the output, then choose **Run code**. Expect the greeting and `5`.
+6. Add a note explaining which values changed and choose **Save work**. Wait for
+   the saved confirmation before closing the page.
 
-Run doctor with the same interpreter:
+A Run starts a fresh process. A variable from an earlier Run is not still in
+memory, so retain the definitions you need in the source. Notebook-style
+`# %%` cells share state within a single Run; the next Run starts over.
+Do not paste an entire `.ipynb` JSON file into the pad.
 
-```powershell
-# Windows
-& $CoursePython scripts\course.py doctor
+## Run a first SQL query
+
+Switch to **PostgreSQL** and start with `sql-start-01`. Choose **SQL snippet**
+when the workspace offers a mode selector and enter:
+
+```sql
+SELECT 1 AS first_result, 2 + 3 AS total;
 ```
 
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py doctor
+Expect one row with `first_result = 1` and `total = 5`. This query needs no
+training-table reset. The Docker classroom supplies its local database
+connection; you do not need a host database or a password in the SQL pad.
+
+Continue through `sql-start-02` and `sql-start-03` before `sql-01`.
+When a later lesson needs the training schema, read its setup instructions.
+Resetting that schema replaces course data and is a deliberate action, not a
+routine startup step.
+
+## Save, switch and inspect history
+
+Return to the Python lesson. Its draft and notes should still be separate from
+SQL. **Saved runs** displays a run's recorded source and output without running
+it again or replacing your current edit. A run can describe an older source
+version than the draft you are currently editing.
+
+Python/SQL workspaces also expose earlier saved pad versions where supported.
+Copying or restoring source is different from reading past output. Follow the
+button's description before choosing either action.
+
+## Stop and resume
+
+After saving, return to the terminal:
+
+```sh
+./classroom stop
+./classroom resume
 ```
 
-A missing optional Docker/VS Code command is a warning. A missing course
-package requires setup repair. A database warning is expected if you have
-chosen to start with Python before installing PostgreSQL. Doctor's package
-discovery is not an execution test of every library or lesson.
+Stopping keeps named volumes. Resume uses prepared images without rebuilding
+or pulling. Open the newly printed URL and return to the same lessons.
+If you chose a custom project, repeat its name on both commands, for example
+`./classroom resume --project my-study`.
 
-## 3. Make a scratch notebook and run one cell
+Your course folder, installed images and saved learning volumes are separate.
+Keep the same engine and project. Copying a checkout or a ZIP alone does not
+copy saved progress.
 
-Start JupyterLab from this terminal:
+## Choose the next useful step
 
-```powershell
-# Windows
-& $CoursePython -m jupyter lab
-```
+Open **All learning paths** or use **Switch subject**. Pick a beginner lesson,
+review a prerequisite or combine complementary paths. HTML/CSS and browser
+JavaScript/D3 can use the optional Live preview studio; PHP, compiled
+languages and framework lessons use their declared workers. A missing worker
+has setup instructions in the capability notice.
 
-```bash
-# macOS/Linux
-.venv/bin/python -m jupyter lab
-```
-
-Keep the terminal open. If a browser does not open, use the local Jupyter URL
-printed there. Treat a URL containing a token as private.
-
-1. In JupyterLab's file browser, create an `artifacts` folder if it does not
-   already exist and open it. This ignored folder is for your experiments.
-2. Create a notebook with **Python (ds60sqlpy)**. Rename it `first-success.ipynb`.
-3. Type the following into a code cell and press `Shift+Enter`:
-
-   ```python
-   import sys
-
-   print(sys.executable)
-   learner = "Ada"
-   study_minutes = 20
-   print(f"Hello, {learner}. Today I studied for {study_minutes} minutes.")
-   print(2 + 3)
-   ```
-
-4. Expect the `.venv` path, the greeting, and `5`.
-5. Change the name and minutes, predict the new output, then run it again.
-6. Restart the kernel and run all cells. The output should remain correct.
-   Restarting removes variables remembered from earlier cell execution.
-
-In VS Code, the same cell works in an `.ipynb` file after **Select Kernel** →
-the repository's Python environment. Selecting a terminal interpreter and
-selecting a notebook kernel are separate steps. See the
-[VS Code notebook documentation](https://code.visualstudio.com/docs/datascience/jupyter-notebooks)
-and the [course VS Code guide](../vscode.md).
-
-## 4. Prove SQL works
-
-Follow [Local PostgreSQL, step by step](postgresql.md) using either the native
-server or the course's container. That guide includes a query returning `5`,
-the disposable database setup, seed verification, and the exact connection
-setting needed by the private learning portal.
-
-You can study the Python fundamentals first if database setup must wait.
-Creating a Python environment does not install or start a PostgreSQL server.
-
-## 5. Start the first lesson
-
-Start the dashboard from the terminal that has your database setting:
-
-```powershell
-# Windows
-& $CoursePython scripts\learning_portal.py
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python scripts/learning_portal.py
-```
-
-Choose Python Day 1 (`python-01`) or SQL Day 1 (`sql-01`). Read its guide, predict
-what the examples will do, run them, and attempt the exercises before reading
-solutions. SQL's **Create/open guided SQL notebook** action preserves your
-working copy under `.learning/sql/`. Opening a lesson is a navigation step;
-being able to explain and reproduce its result is your learning check.
-
-At the end of the session, save your notebook and press `Ctrl+C` in the
-terminal to stop a server you started. Closing a browser tab alone does not
-stop Jupyter or the portal. Follow any visible confirmation prompt. Next time,
-open the repository, resolve the course interpreter, and launch the portal;
-you do not need to reinstall packages.
-
-## If the first session fails
-
-Find the first failing step above and use the corresponding section in
-[Troubleshooting](../troubleshooting.md). Include the exact command, operating
-system, first error, and the interpreter path when seeking help. Remove
-passwords and private Jupyter URLs. Your scratch notebook, progress, and SQL
-working copies should be preserved during a repair.
+Use the [classroom guide](../classroom-experience.md) for study habits and
+preview controls, and the [one-command guide](../one-command-classroom.md)
+for updates, profiles, backups and recovery. A completed example is a starting
+point for learning, not a certification of mastery.

@@ -24,9 +24,12 @@ choose **Python** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+**Optional contributor route:** use the prepared environment in
+[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
+WSL 2. The commands below assume its packages are already installed. They are
+not prerequisites for opening this lesson in the Docker classroom. Local
+`.learning/` files and CLI progress belong to this checkout; they do not read or
+update the Docker classroom's named learning volume.
 
 Use the repository folder in VS Code. The rendered lesson page is a preview;
 edit the actual [learner script](../lessons/py_foundations_01_read_trace_state.py). Copy it to an ignored
@@ -34,21 +37,10 @@ folder under `.learning/` first if you want to keep your attempt across course
 updates. Use the interpreter from setup. These examples need only Python's
 standard library, have no network calls, and use the same inputs on each run.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython python\professional\lessons\py_foundations_01_read_trace_state.py
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python python/professional/lessons/py_foundations_01_read_trace_state.py
+```sh
+uv run --no-sync python python/professional/lessons/py_foundations_01_read_trace_state.py
 ```
 
 The terminal shows a small worked example and the remaining TODO count.

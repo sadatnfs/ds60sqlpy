@@ -1,4 +1,5 @@
-name: ds60-learning
+# Shared PostgreSQL and app definitions extended by compose.classroom.yaml.
+# Use ./classroom for startup, named learner volumes and resume.
 
 services:
   postgres:
@@ -20,53 +21,20 @@ services:
       timeout: 5s
       retries: 30
 
-  sql-runner:
-    image: postgres:17
-    profiles: ["tools"]
-    environment:
-      PGPASSWORD: ${DS60_COURSE_PASSWORD:-admin}
-    volumes:
-      - .:/course:ro
-    working_dir: /course
-    depends_on:
-      postgres:
-        condition: service_healthy
-    entrypoint:
-      - psql
-      - -X
-      - -v
-      - ON_ERROR_STOP=1
-      - --host
-      - postgres
-      - --username
-      - ${DS60_COURSE_USER:-admin}
-      - --dbname
-      - advanced_sql_training
-
   lab:
-    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:0.4.0}
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:0.4.1}
     pull_policy: never
     build:
       context: .
       args:
         DS60_BASE_IMAGE: ${DS60_BASE_IMAGE:-python:3.12-slim-bookworm}
         DS60_DOCKER_PROFILES: ${DS60_DOCKER_PROFILES:-core}
-    profiles: ["lab"]
     network_mode: "service:postgres"
     environment:
       DS60_COURSE_USER: ${DS60_COURSE_USER:-admin}
       DS60_COURSE_PASSWORD: ${DS60_COURSE_PASSWORD:-admin}
-      DS60_UID: ${DS60_UID:-1000}
-      DS60_GID: ${DS60_GID:-1000}
-      DS60_ROOTLESS: ${DS60_ROOTLESS:-0}
       DS60_LAB_PORT: ${DS60_LAB_PORT:-8765}
       DS60_LAB_DATABASE_URL: ${DS60_LAB_DATABASE_URL:-}
-    volumes:
-      - type: bind
-        source: ${DS60_LEARNING_DIR:-./.learning}
-        target: /workspace/.learning
-        bind:
-          create_host_path: false
     depends_on:
       postgres:
         condition: service_healthy

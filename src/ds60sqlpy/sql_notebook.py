@@ -559,8 +559,8 @@ def _notebook_document(
                 - Confirm the kernel name in the top-right area is **Python
                   (ds60sqlpy)**.
                 - Confirm this is lesson `{lesson.id}`, not a similarly named file.
-                - Keep the portal terminal open so Jupyter inherits the discovered
-                  PostgreSQL tools and local connection settings.
+                - Start Jupyter from the prepared contributor environment so it inherits
+                  PostgreSQL tools and the explicitly configured local connection.
                 - Use only the disposable `{COURSE_DATABASE_NAME}` database.
                 """
             ),
@@ -573,9 +573,9 @@ def _notebook_document(
                 f"""\
                 ## Setup
 
-                1. Start this notebook through the course portal.
+                1. Open this generated notebook in JupyterLab from the repository root.
                 2. Run the next two cells to locate the repository and check `psql`.
-                3. If readiness is false, return to the portal's setup check.
+                3. If readiness is false, follow `docs/setup/jupyter-postgresql.md`.
 
                 The runner accepts only `{COURSE_DATABASE_NAME}`. It reads an optional
                 `DS60_DATABASE_URL` from the Jupyter process without displaying it.
@@ -599,12 +599,12 @@ def _notebook_document(
 
                 Continue only when the last line says `Ready to execute: True`.
 
-                - **Workspace missing or changed:** reopen this exact lesson from the
-                  portal. Existing work is preserved, so do not delete it as a first
-                  troubleshooting step.
-                - **`psql` missing:** close JupyterLab, rerun the Windows course
-                  launcher or the macOS/Linux doctor, and launch the portal again from
-                  that environment.
+                - **Workspace missing or changed:** regenerate this exact notebook with
+                  `python scripts/course.py sql notebook {lesson.id}`. Existing work
+                  is preserved; do not delete it as a troubleshooting step.
+                - **`psql` missing:** install PostgreSQL client tools in the prepared
+                  contributor environment and restart JupyterLab there. Windows
+                  contributors use WSL 2.
                 - **Unsafe database target:** remove the unrelated connection override
                   and configure only local `{COURSE_DATABASE_NAME}`. The helper will
                   not echo a password-bearing URL.
@@ -722,7 +722,7 @@ def _notebook_document(
                 1. Complete every prediction and exercise in the editable SQL file.
                 2. Explain the first error before changing the query.
                 3. Compare with the solution only after making a serious attempt.
-                4. Return to the course portal, record completion, and open the
+                4. Record your completion with the contributor progress CLI, and open the
                    recommended next lesson.
 
                 For short exploratory queries after learning this workflow, use the
@@ -1021,8 +1021,9 @@ def _validate_workspace_meta_commands(
             or mirrored.read_bytes() != source.read_bytes()
         ):
             raise SqlNotebookError(
-                "A fixed psql include dependency changed or is missing. Remove "
-                "this generated lesson workspace and reopen it from the portal."
+                "A fixed psql include dependency changed or is missing. Preserve and move aside "
+                "only this lesson's generated workspace before recreating it with the "
+                "SQL notebook CLI; existing files are never overwritten automatically."
             )
 
 
@@ -1090,8 +1091,8 @@ def _run_psql(catalog: Catalog, path: Path, label: str) -> SqlNotebookRun:
     executable = shutil.which("psql")
     if executable is None:
         raise SqlNotebookError(
-            "psql is not on PATH for the Jupyter process. Return to the portal "
-            "readiness check or restart Jupyter after PostgreSQL setup."
+            "psql is not on PATH for the Jupyter process. Install PostgreSQL client "
+            "tools in the contributor environment and restart Jupyter there."
         )
     target = _course_database_target()
     command = [
@@ -1239,8 +1240,8 @@ def validate_sql_workspace(
         or not workspace.sql_path.resolve().is_relative_to(workspace_root)
     ):
         raise SqlNotebookError(
-            "The generated SQL working copy is missing or unsafe. Reopen the "
-            "cataloged artifact from the course portal."
+            "The generated SQL working copy is missing or unsafe. Preserve existing "
+            "work, then regenerate this artifact with the SQL notebook CLI."
         )
     _validate_workspace_meta_commands(catalog, workspace, submitted_code)
     return workspace

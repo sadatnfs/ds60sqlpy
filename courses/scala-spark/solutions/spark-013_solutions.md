@@ -490,9 +490,11 @@ piece of evidence earns at most 1, even if another assertion happens to pass.
 Do not make the official answer the only test oracle. Deliberately introduce
 the bad distinct projection once and confirm that the canonical contract fails.
 
-Proceed to `spark-014` in the [track plan](../../../docs/expansion/tracks/scala-spark.md), carrying
+Proceed to [spark-014](../guides/spark-014.md), carrying
 forward the explicit schema, rejection ledger, golden fixture and session
 ownership rules. Spark execution, compiler compatibility, bounded process
-cleanup and platform acceptance remain release gates for the future adapters.
+cleanup and platform acceptance remain independent release gates. Consult
+[validation](../../../docs/validation.md) and the exact-revision CI artifacts
+before making a runtime claim.
 
 Complete worker references: [Scala](spark-013_solution.scala) and [PySpark](spark-013_solution.py). Both use the same schema and seven-row fixture. Execution and typed contract verification are separate receipts; neither grades the retrieval explanation.

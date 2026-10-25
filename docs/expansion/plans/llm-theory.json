@@ -1,6 +1,5 @@
 {
   "schema_version": 1,
-  "status": "planned",
   "id": "llm-theory",
   "title": "Language models: mechanisms, training and evidence",
   "summary": "48 detailed lessons on how language models work, from token probabilities and causal attention to Transformers, adaptation, efficient attention, expert routing and exact decoding mechanisms.",
@@ -1026,39 +1025,7 @@
     }
   ],
   "pilot": {
-    "lesson_id": "llm-009",
-    "guide_path": "docs/expansion/samples/llm-theory-pilot.md",
-    "solution_path": "docs/expansion/samples/llm-theory-pilot-solutions.md",
-    "language": "python",
-    "code": "import numpy as np\n\ndef attention(q, k, v, allowed):\n    q, k, v = (np.asarray(value, dtype=np.float64) for value in (q, k, v))\n    allowed = np.asarray(allowed)\n    if any(value.ndim != 2 for value in (q, k, v)):\n        raise ValueError(\"q, k and v must be matrices\")\n    count, width = q.shape\n    if count == 0 or width == 0 or v.shape[1] == 0:\n        raise ValueError(\"nonempty token and feature axes required\")\n    if k.shape != (count, width) or v.shape[0] != count:\n        raise ValueError(\"self-attention shapes do not agree\")\n    if allowed.dtype != np.bool_:\n        raise TypeError(\"allowed must be boolean\")\n    if allowed.shape != (count, count):\n        raise ValueError(\"allowed must have shape (tokens, tokens)\")\n    if not allowed.any(axis=1).all():\n        raise ValueError(\"each query needs at least one key\")\n    if not all(np.isfinite(value).all() for value in (q, k, v)):\n        raise ValueError(\"finite inputs required\")\n    scores = (q @ k.T) / np.sqrt(width)\n    if not np.isfinite(scores[allowed]).all():\n        raise ValueError(\"finite allowed scores required\")\n    masked = np.where(allowed, scores, -np.inf)\n    shifted = masked - masked.max(axis=1, keepdims=True)\n    weights = np.exp(shifted)\n    weights /= weights.sum(axis=1, keepdims=True)\n    return weights @ v, weights\n\nq = np.zeros((3, 2), dtype=np.float64)\nk = q.copy()\nv = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])\nallowed = np.tri(3, dtype=bool)\noutput, weights = attention(q, k, v, allowed)\nexpected = np.array([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]])\nnp.testing.assert_allclose(output, expected, rtol=0, atol=1e-12)\nnp.testing.assert_allclose(weights.sum(axis=1), 1.0, rtol=0, atol=1e-12)\nfor cut in range(1, 4):\n    prefix, _ = attention(q[:cut], k[:cut], v[:cut], np.tri(cut, dtype=bool))\n    np.testing.assert_allclose(output[:cut], prefix, rtol=0, atol=1e-12)\nprint(output)\n",
-    "concept": {
-      "title": "A causal mask is an information contract",
-      "explanation": "Each query row may combine only its own and earlier key positions. Mask forbidden score entries before softmax, normalize along the key axis and reject fully masked rows. A useful independent check recomputes every prefix and compares it with the matching rows of the full computation.",
-      "worked_example": "With zero Q/K and V=[[2,0],[0,2],[6,6]], allowed rows are [1,0,0], [1,1,0] and [1,1,1]. The outputs are [2,0], [1,1] and [8/3,8/3], checked with NumPy float64 and atol 1e-12."
-    },
-    "prediction": {
-      "prompt": "When the diagonal is allowed, what should the three equal-score attention rows produce?",
-      "choices": [
-        "Every output row is the global average [8/3,8/3].",
-        "The first two rows are [2,0] and [1,1]; the third averages all three values.",
-        "The first query has no keys and should silently produce zeros."
-      ],
-      "correct_index": 1,
-      "explanation": "The diagonal lets the first query use its current input. Later rows gain earlier keys, while future positions remain forbidden; an all-masked row is an error, not an invented zero output."
-    },
-    "hint_steps": [
-      "Draw rows as queries and columns as keys. Mark exactly which positions are at or before each query.",
-      "For each prefix, slice Q, K and V as well as the square mask, then compare the prefix result with the same rows of the full result.",
-      "Mask scores before exponentiation and inspect each row sum. A post-softmax multiplication can leave a subnormalized row and still look triangular."
-    ],
-    "transfer_prompt": "For token IDs [2,5,7,3], build shifted inputs and labels. Explain why a diagonal causal mask is appropriate for next-token prediction, and name one leakage failure it does not prevent.",
-    "rubric": [
-      "Name query/key/value axes and the include-True mask convention.",
-      "Match fixed outputs and row sums within 1e-12 with no NaNs.",
-      "Test future-only perturbations and independent prefixes, including nonzero scores.",
-      "Reject malformed, nonboolean and fully masked rows explicitly.",
-      "Explain target shifting and why causal correctness alone proves neither dataset isolation nor language-model reliability."
-    ]
+    "lesson_id": "llm-009"
   },
   "sources": [
     {

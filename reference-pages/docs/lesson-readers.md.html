@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Offline lesson readers · DS60 reference</title>
+  <title>Reading lessons in the classroom and offline · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,63 +158,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Offline lesson readers</h1>
+      <h1>Reading lessons in the classroom and offline</h1>
       <p class="source-path">Generated from <code>docs/lesson-readers.md</code></p>
     </header>
-    <article class="document"><h2 id="offline-lesson-readers">Offline lesson readers<a class="heading-anchor" href="#offline-lesson-readers" aria-label="Link to this section">#</a></h2>
-<p>Every catalog entry has a generated page under <code>lesson-pages/</code>. Start from <a href="../../START_HERE.html"><code>START_HERE.html</code></a>, choose <strong>Start lesson</strong>, and use one page for the complete learning sequence:</p>
-<ol>
-<li>read the rendered companion guide;</li>
-<li>open the real learner artifact in VS Code or Jupyter and do the work;</li>
-<li>return to the readable preview when you need context; and</li>
-<li>compare the rendered solutions only after an honest attempt.</li>
-</ol>
-<p>The reader tabs never send a <code>.md</code>, <code>.ipynb</code>, <code>.py</code>, or <code>.sql</code> file directly to the browser. Markdown becomes semantic HTML, notebook Markdown and code cells become a read-only notebook preview, and Python/SQL source becomes an escaped, line-numbered listing. Notebook outputs are never executed while the pages are built or viewed. Untrusted rich HTML output is not reproduced. HTML comments in Markdown are treated as maintainer-only authoring metadata and are omitted from learner pages. Comments inside inline or fenced code remain escaped lesson content, so a lesson can demonstrate comment syntax without allowing raw HTML to execute. An incomplete comment is escaped rather than hiding the remainder of a lesson.</p>
-<p>Local Markdown and SQL links that are not themselves cataloged lesson artifacts route to deterministic pages under <code>reference-pages/</code>. This includes setup guides, curriculum documentation, README/AGENTS guidance, and linked SQL support files. Those reference pages recursively rewrite their own local Markdown/SQL links, so navigation never falls back to a raw source tab.</p>
-<h3 id="static-and-guided-modes">Static and guided modes<a class="heading-anchor" href="#static-and-guided-modes" aria-label="Link to this section">#</a></h3>
-<p>The same reader URL works in both portal modes:</p>
+    <article class="document"><h2 id="reading-lessons-in-the-classroom-and-offline">Reading lessons in the classroom and offline<a class="heading-anchor" href="#reading-lessons-in-the-classroom-and-offline" aria-label="Link to this section">#</a></h2>
+<p>Use <code>./classroom</code> for every subject, guide, coding or reading workspace, notes and saved work. Generated <code>START_HERE.html</code> and reader pages provide a portable reading library when the server is not running.</p>
+<h3 id="what-gets-rendered">What gets rendered<a class="heading-anchor" href="#what-gets-rendered" aria-label="Link to this section">#</a></h3>
+<p>Legacy Python, SQL and bridge entries have pages under <code>lesson-pages/</code>. Module guides, source listings and linked documentation have deterministic pages under <code>reference-pages/</code>. Loaders and manifests determine this inventory.</p>
+<p>Markdown becomes semantic HTML; notebook cells become read-only previews; source files become escaped, highlighted listings. Even an HTML lesson is shown as source in a reader. It executes only in the explicit browser preview. Building or opening a reader never executes code or notebook outputs.</p>
+<p>Explicit LaTeX renders to offline MathML. Syntax highlighting is bundled locally, and copying code preserves its characters. Maintainer-only Markdown HTML comments are omitted while code comments remain escaped text. Unsafe URL schemes and source outside the repository are rejected.</p>
+<h3 id="reading-and-saved-work-boundaries">Reading and saved-work boundaries<a class="heading-anchor" href="#reading-and-saved-work-boundaries" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
-<th>Mode</th>
-<th>Reader URL shape</th>
-<th>Run controls</th>
+<th>Surface</th>
+<th>Capability</th>
+<th>Storage</th>
 </tr></thead><tbody>
 <tr>
-<td>Static/USB</td>
-<td><code>lesson-pages/&lt;lesson-id&gt;.html</code> over <code>file://</code></td>
-<td>A best-effort <code>vscode://file</code> link derived in the browser from the current repository location</td>
+<td>Docker classroom</td>
+<td>All subjects, actual readiness, pads, notes and durable results</td>
+<td>Project learning volume</td>
 </tr>
 <tr>
-<td>Guided launcher</td>
-<td><code>/lesson-pages/&lt;lesson-id&gt;.html</code> on <code>127.0.0.1</code></td>
-<td>Allowlisted exact-artifact VS Code and notebook JupyterLab actions</td>
+<td>Static dashboard/readers</td>
+<td>Offline explanations, source previews and reading navigation</td>
+<td>Browser-local preferences/markers where supported</td>
 </tr>
 </tbody></table></div>
-<p>Static pages cannot safely start arbitrary native processes. The VS Code link uses the official file URL handler and may require a browser confirmation. If the operating system has not registered that handler, open the repository folder in VS Code and use the catalog path printed beside the artifact.</p>
-<p>In static mode, mark completion on <code>START_HERE.html</code>. Browser handling for separate <code>file://</code> documents is not consistent enough to promise that a lesson page checkbox and dashboard share one storage boundary, so the reader shows a clear <strong>Track completion on the course dashboard</strong> link instead. In private launcher mode, the tokenized lesson reader may show its own checkbox because it writes to the same ignored <code>.learning/progress.json</code> boundary as the dashboard and CLI.</p>
-<p>Guided launcher mode is the recommended experience for a new learner after setup. The server injects its in-memory token into each served reader. A reader can then request only these fixed, catalog-resolved actions:</p>
-<ul>
-<li>open the guide, learner artifact, or indexed solution in VS Code; and</li>
-<li>open the exact cataloged learner notebook in JupyterLab; or</li>
-<li>create an ignored, editable guided notebook for a cataloged SQL lesson and open that notebook in JupyterLab.</li>
-</ul>
-<p>Every Python and SQL reader also has an <strong>Ask an AI tutor about this lesson</strong> panel. It contains the read-only, copy-ready fenced prompt authored in that lesson&#x27;s companion guide. The guide is the single source of truth for the stable ID, paths, prerequisites, lesson-specific concepts, execution safety, solution boundary, progressive coaching loop, and evidence-based done condition. The reader generator uses a catalog-derived safe fallback only if an older or temporarily incomplete guide lacks the required block; the depth audit rejects that missing block. This is optional coaching context; the rendered guide before it must still define and demonstrate the concept completely.</p>
-<p>The generated <code>START_HERE.html</code> selector embeds the same guide-authored prompt for every catalog entry. Selecting a lesson on the dashboard and opening its reader therefore cannot produce two different tutoring contracts.</p>
-<p>On Windows, double-click <code>START_DS60.cmd</code> rather than trying to make a static browser page start local software. It performs readiness checks and reopens the same course guide in authenticated loopback mode. SQL lesson run cards can then request only the fixed <code>jupyter-sql</code> action for their own stable lesson ID; the launcher generates the notebook under <code>.learning/sql/</code>.</p>
-<p>The browser never supplies a shell command or unrestricted filesystem path. See <a href="learning-portal.md.html">Learning portal</a> for startup and security details.</p>
-<h3 id="offline-and-portability-contract">Offline and portability contract<a class="heading-anchor" href="#offline-and-portability-contract" aria-label="Link to this section">#</a></h3>
-<p>Each lesson page embeds all of its CSS, JavaScript, guide content, learner preview, and solution previews. Rendered references embed their own CSS and source content. Neither surface loads a remote font, stylesheet, script, image, or analytics service. Known links between catalog artifacts are rewritten to the corresponding reader and section; for example, a guide&#x27;s learner-notebook link becomes <code>python-01.html#learner</code>.</p>
-<p>The pages are generated from checked-in source artifacts. Do not edit the HTML under <code>lesson-pages/</code> or <code>reference-pages/</code> by hand.</p>
-<h3 id="maintainer-workflow">Maintainer workflow<a class="heading-anchor" href="#maintainer-workflow" aria-label="Link to this section">#</a></h3>
-<p>Generate and verify the readers:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell (reuse $CoursePython from the setup/bootstrap guide)</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_lesson_readers<span class="syntax-punctuation">.</span>py
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>build_lesson_readers<span class="syntax-punctuation">.</span>py <span class="syntax-punctuation">-</span>-check
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">\</span>test_lesson_reader<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/build_lesson_readers.py
-.venv/bin/python scripts/build_lesson_readers.py --check
-.venv/bin/python -m pytest tests/test_lesson_reader.py</code></pre>
-<p><code>src/ds60sqlpy/lesson_reader.py</code> is the renderer and <code>scripts/build_lesson_readers.py</code> is its command-line entry point. The generator escapes source content, blocks unsafe Markdown URL schemes, resolves paths inside the repository, follows only the deterministic closure of local Markdown/SQL links reachable from the course entry points, and removes only obsolete generated <code>.html</code> files from the selected output directories.</p></article>
+<p>Static pages cannot start compilers, PostgreSQL or arbitrary native programs. They show source paths for a deliberately prepared editor. They do not synchronize browser-local markers with Docker volumes. Use the classroom for server-backed progress and <a href="docker-classroom.md.html">backup instructions</a> for complete workspaces.</p>
+<p>The historical <code>/learn</code>, <code>/journeys</code> and <code>/journey-preview</code> URLs remain aliases of <code>/classroom</code>. There is one application interface. The former prototype and native editor-launch bridge have been removed.</p>
+<h3 id="tutoring-and-solutions">Tutoring and solutions<a class="heading-anchor" href="#tutoring-and-solutions" aria-label="Link to this section">#</a></h3>
+<p>Practice guides include an optional <strong>Ask an AI tutor about this lesson</strong> prompt. The authored guide owns its ID, paths, prerequisites and teaching context. The depth audit rejects missing practice prompts. Read and attempt practice before comparing solutions, unless you explicitly want a worked answer. Tutorial books expose their examples directly without exams or hidden answers. See <a href="learning-with-an-ai-tutor.md.html">AI tutoring</a>.</p>
+<h3 id="maintain-the-readers">Maintain the readers<a class="heading-anchor" href="#maintain-the-readers" aria-label="Link to this section">#</a></h3>
+<p>Edit durable subject sources, then regenerate shared views in a prepared environment:</p>
+<pre class="highlighted-code"><code class="language-bash">make generate
+uv run --no-sync python scripts/build_course_guide.py --check
+uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python scripts/check_content_rendering.py
+uv run --no-sync python scripts/check_published_links.py</code></pre>
+<p><code>make generate</code> does not run every subject authoring pipeline. Follow the subject&#x27;s <code>authoring/README.md</code> first. Never hand-edit generated readers. Their generator rewrites local links and removes only stale HTML inside its owned output directories. Keep these outputs in source archives so reading remains available offline.</p></article>
   </main>
 </body>
 </html>

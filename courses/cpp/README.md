@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 This 42-lesson journey begins with source files, the compiler, the linker and
@@ -13,7 +13,7 @@ a running process. It develops values and control flow into ownership, standard
 containers, generic programming, error handling, concurrency and maintainable
 projects. Every lesson has a guide, a learner worksheet and separate solutions.
 
-Start with [cpp-001](guides/cpp-001.md), then open the course's **Journeys** page
+Start with [cpp-001](guides/cpp-001.md), then open the course's **All learning paths** page
 and select the next lesson. The `cpp20` Docker worker compiles one C++20 source
 file with GCC and returns compiler diagnostics, standard output and exit status
 to the browser. No host C++ installation is required. Use the
@@ -79,14 +79,15 @@ and are revealed for comparison; a passing example does not establish mastery.
 
 ## Validation and limits
 
-All runnable reference programs have successful local Linux arm64 Docker
-receipts for their current source bytes. The
-[implementation checkpoint](../../docs/implementation/CHECKPOINT.md) records
-runtime, test and platform acceptance separately. Reading lessons use reasoning
-and written evidence. Windows/WSL2 and amd64 configuration support does not by
-itself establish an observed run on those systems.
+Use the [validation guide](../../docs/validation.md) to select compilation,
+execution and browser checks, then inspect CI artifacts for the exact revision,
+compiler and platform. The [implementation checkpoint](../../docs/implementation/CHECKPOINT.md)
+describes architecture and durable limits; it is not an execution receipt.
+Reading lessons use reasoning and written evidence. Windows/WSL 2 or amd64
+configuration support does not by itself establish an observed run there.
 
-Both complete CMake projects and all 76 added worked programs also compiled and
-ran in the prepared GCC image. New source changes or another toolchain require
-appropriate new checks. Course fixtures use local authored inputs and do not
+Multi-file CMake projects and standalone worked programs have their own
+compilation and execution checks. Changed source or another toolchain needs
+appropriate new evidence. A successful build alone does not establish lifetime
+safety or correct behavior. Fixtures use local authored inputs and do not
 install dependencies while a lesson runs.

@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 These named modules provide a gentler route into the numbered Python lessons
@@ -78,60 +78,45 @@ Each module has four deliberately separate artifacts:
 - `solutions/<stem>_solutions.md` explains the reasoning, alternatives, and
   edge cases.
 
-Do not edit the solution while attempting a lesson. Copy the learner artifact
-to `.learning/` if you want to preserve your work independently of repository
-updates.
+Work in the classroom's saved learner pad while attempting a lesson.
+Tracked starter and solution files remain separate from your Docker-volume work.
 
-## Run a learner artifact
+## Deeper arrays, tables and algorithms
 
-Windows PowerShell:
+The catalog also includes `python-numpy-01` through `python-numpy-04`,
+`python-pandas-01` through `python-pandas-04`, and `python-algo-01` through
+`python-algo-04`. These expand shapes and broadcasting, numerical behavior,
+table grain and joins, data cleaning, collection design and algorithmic cost.
+Use their actual prerequisite chains rather than treating the numbered route
+as a mandatory completion barrier.
 
-```powershell
-.\.venv\Scripts\python.exe python\professional\lessons\py_pro_02_concurrency_parallelism.py
-```
+## Run and preserve an attempt
 
-macOS/Linux:
+Run `./classroom --starter` from the repository root, choose Python and select
+the unit by stable ID. Read its capability notice, edit the learner pad and
+inspect saved run output. Standard-library examples are local and bounded.
+Modules using packages such as Arrow, DuckDB or Hypothesis declare them; a
+fallback example does not establish the behavior of an unavailable package.
 
-```bash
-.venv/bin/python python/professional/lessons/py_pro_02_concurrency_parallelism.py
-```
+The packaging fixture disables build isolation to avoid unplanned downloads.
+Other projects use injected transports, local fixtures and temporary directories
+where their guides specify them. Read each lesson's exact limitations before
+claiming a network service, production release or performance improvement.
 
-The standard-library paths work without network access. The Arrow/DuckDB module
-detects optional packages and demonstrates a CSV fallback when they are absent.
-The packaging module builds with isolation disabled, so it never attempts to
-resolve build requirements from the internet.
+## Contributor verification
 
-The advanced modules remain local as well. Hypothesis is used with an
-in-memory, deterministic profile and no example database; statistics use a
-tracked CSV; model delivery uses JSON manifests and hashes; the service lab
-injects identity, clocks, probes, and work instead of opening a socket; and the
-performance lab reports measurements without asserting a universal speedup.
-
-## Run the focused tests
-
-Windows PowerShell:
-
-```powershell
-$env:PYTHONDONTWRITEBYTECODE = "1"
-.\.venv\Scripts\python.exe -m unittest discover -s python\professional\tests -v
-```
-
-macOS/Linux:
+For direct scripts and focused tests, first prepare the environment in
+[CONTRIBUTING](../../CONTRIBUTING.md). On Linux/macOS or Windows WSL 2:
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest discover -s python/professional/tests -v
+uv run --no-sync python python/professional/lessons/py_pro_02_concurrency_parallelism.py
+uv run --no-sync python -m pytest python/professional/tests tests/test_python_expansion_boundaries.py -q
 ```
 
-The new boundary and failure drills also have a focused test suite:
-
-```text
-python -m pytest tests/test_python_expansion_boundaries.py
-```
-
-Use the same course interpreter selected in setup for that command. Some
-integration checks in the original professional tests are reported as skipped when their optional package is
-not installed. A skip is not silent: its message identifies the missing local
-bootstrap dependency.
+These commands use host contributor files, not browser pad state. Missing
+optional packages must be reported as skips or preparation gaps, not successful
+runtime coverage. The [validation guide](../../docs/validation.md) describes
+parallel checks and their evidence scope.
 
 ## Safety and generated files
 

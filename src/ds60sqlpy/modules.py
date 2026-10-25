@@ -1,7 +1,7 @@
 """Authored expansion modules, separate from the published legacy catalog.
 
 The design graph remains visible, but only reviewed authored file manifests can
-supply source to the explicit module lab. No manifest can supply a command.
+supply source to the unified classroom. No manifest can supply a command.
 """
 
 from __future__ import annotations
@@ -14,8 +14,8 @@ from typing import Any
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import is_content_link, validate_content_path
-from ds60sqlpy.journey_design import load_designs
 from ds60sqlpy.module_extensions import load_extra_plans, validate_graph
+from ds60sqlpy.module_plans import load_core_plans
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 LANGUAGES = {
@@ -73,7 +73,7 @@ class ModuleCatalog:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         extra, manifests = load_extra_plans(self.root, set(LANGUAGES))
-        self.plans = [*load_designs(self.root), *extra]
+        self.plans = [*load_core_plans(self.root), *extra]
         validate_graph(self.plans, {lesson.id for lesson in Catalog.load(self.root).lessons()})
         self.planned = {
             lesson["id"]: {**lesson, "track_id": plan["id"]}

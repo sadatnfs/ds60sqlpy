@@ -15,15 +15,15 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.catalog_builder import build_catalog, write_catalog
+from ds60sqlpy.classroom_http import CourseHTTPServer
 from ds60sqlpy.cli import main
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS, load_extensions
 from ds60sqlpy.lab import LabServer
 from ds60sqlpy.lesson_reader import build_lesson_html, rendered_targets
 from ds60sqlpy.mcp_server import TutorAdapter
-from ds60sqlpy.portal import PortalServer
 from ds60sqlpy.study_plan import build_study_plan
-from scripts.build_app import stage_course
+from scripts.course_payload import stage_course
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -324,7 +324,7 @@ def test_notebook_starter_preserves_magic_cell_boundaries(skeleton: Path) -> Non
         assert lines[cell["start_line"] - 1] == cell["code"].splitlines()[0]
 
 
-def test_new_track_reader_is_served_in_lab_mode_and_original_portal_stays_reading(
+def test_new_track_reader_is_served_in_unified_classroom_mode(
     tmp_path: Path,
 ) -> None:
     root = tmp_path / "complete course"
@@ -342,7 +342,7 @@ def test_new_track_reader_is_served_in_lab_mode_and_original_portal_stays_readin
     page.write_text(build_lesson_html(catalog, lesson, targets=targets), encoding="utf-8")
     assert "const LAB_MODE = false;" in page.read_text()
     opener = build_opener(ProxyHandler({}))
-    for server_class, expected in ((LabServer, "true"), (PortalServer, "false")):
+    for server_class, expected in ((LabServer, "true"), (CourseHTTPServer, "true")):
         server = server_class(catalog, progress_path=tmp_path / f"{expected}-progress.json")
         thread = threading.Thread(target=server.serve_forever)
         thread.start()

@@ -7,9 +7,12 @@ choose **Python + PostgreSQL engineering** on `/classroom`. Open this lesson in 
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+**Optional contributor route:** use the prepared environment in
+[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
+WSL 2. The commands below assume its packages are already installed. They are
+not prerequisites for opening this lesson in the Docker classroom. Local
+`.learning/` files and CLI progress belong to this checkout; they do not read or
+update the Docker classroom's named learning volume.
 
 This capstone runs offline with the Python standard library. It does not open a
 database, contact a service, publish a real product, or download a dataset.
@@ -19,28 +22,17 @@ Code, read its types, and run its supplied `main()` once. It prints a scenario
 orientation and performs no unfinished exercise. A successful starter run is
 orientation evidence, not proof that you completed the eight exercises.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython bridge\professional\lessons\bridge_capstone_01_evidence_review.py
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python bridge/professional/lessons/bridge_capstone_01_evidence_review.py
+```sh
+uv run --no-sync python bridge/professional/lessons/bridge_capstone_01_evidence_review.py
 ```
 
 Use VS Code's **Save As** to create a new `work/capstone_attempt.py` if you want
 to preserve the official starter. Choose an unused name and retain its
 repository-relative `FIXTURES` path. Run the copy from the repository root.
 Write your own tests in `work/test_capstone_attempt.py`, importing your attempt,
-then run `python -m pytest -q work/test_capstone_attempt.py` with the same
+then run `uv run --no-sync python -m pytest -q work/test_capstone_attempt.py` with the same
 course interpreter. The supplied focused tests import the reference solution;
 passing those tests verifies the repository reference, not your unimplemented
 copy. After attempting the exercises, compare the separate

@@ -1,152 +1,115 @@
 ---
 name: add-learning-path
-description: Add or extend a DS60 subject, language or tutorial sequence with prerequisite-aware lessons, reviewed runtime integration, reproducible authoring and browser delivery. Use for curriculum implementation or expansion, not ordinary tutoring or an unrelated application feature.
+description: Add or extend DS60 lessons, learning paths or execution languages with prerequisite-aware teaching, maintained authoring sources and verified classroom integration. Use for curriculum implementation, not ordinary learner tutoring.
 ---
 
 # Add a learning path
 
-Build a coherent path from the learner's actual starting point to independently
-solving a bounded problem. Keep explanations, practice or tutorial mode, runtime
-capabilities and saved-work behavior consistent. Preserve the user's requested
-scope; a new lesson does not automatically require a new runtime or a whole
-beginner-to-advanced subject.
+Build a coherent route from the learner's actual starting point to independent,
+bounded work. Preserve the user's requested subject and scope. Adding a lesson
+need not create a new subject, language profile or service.
 
-## Choose the existing contract
+## Choose the contract before writing
 
-Read [root guidance](../../../AGENTS.md), the closest subject `AGENTS.md`,
-[content authoring](../../../docs/content-authoring.md) and the relevant subject
-plan. Inspect the working tree and keep unrelated changes. Use parallel work
-for independent content and verification with clear file ownership.
+Read [root guidance](../../../AGENTS.md), the closest subject `AGENTS.md`, the
+[content contract](../../../docs/content-authoring.md) and the existing subject's
+`authoring/README.md` when present. Inspect the working tree and preserve other
+work. Use parallel agents with explicit ownership for independent authoring,
+runtime and review tasks.
 
-Use [integration boundaries](references/integration.md) when deciding between:
+Use [integration boundaries](references/integration.md) when choosing among
+legacy Python/SQL/bridge, a modern module, a language variant, reading practice,
+the statistics tutorial or a new backend. Subject and runtime are separate.
+Original core-module plans remain in `docs/expansion/plans/`; new additive
+subjects normally use `courses/<subject>/track.json` and `lessons.json`.
+Do not invent another learner UI or revive retired desktop/portal launchers.
 
-- an existing legacy Python, SQL or bridge lesson;
-- a modern module subject, lesson or language variant;
-- a reading-only practice lesson;
-- the statistics tutorial, or a deliberately implemented new tutorial loader;
-- a genuinely new execution backend.
+Inspect one beginner, intermediate and advanced unit in a suitable existing
+route. Reuse direct prerequisites and successful teaching patterns, not another
+language's terminology or arbitrary lesson count. Read the
+[progression reference](references/progression.md) for a zero-to-independent arc
+and language-specific mechanisms, including web development and GPU computing.
 
-A subject and a language profile are different things. A math topic can reuse
-Python; a conceptual lesson may need no runtime. New module subjects normally
-use `courses/<subject>/track.json` and `lessons.json`. Do not insert them into
-the generated legacy catalog merely to make them visible.
+## Write a complete teaching unit
 
-## Design the learning sequence
+Specify starting knowledge, observable outcome, exact environment and the
+evidence a learner can produce. Explain vocabulary and syntax before using them.
+Include at least two worked cases that change a meaningful condition, expected
+observations, plausible mistakes and a concrete next step. Practice progresses
+through prediction, guided change, independent work, debugging and transfer.
+Keep learner attempts, executable references and explanatory solutions distinct.
+An editable worked example is not an answer to every independent exercise.
 
-Use [the progression reference](references/progression.md) for language-specific
-mechanisms and a practical zero-to-independent progression. First inspect
-existing lessons so the change closes a gap instead of duplicating content.
-Write an observable finish condition, direct prerequisites and the evidence a
-learner can produce. Keep stable IDs and preserve existing completion records.
+Reading practice uses derivations, traces and written reasoning without an
+invented Run operation. The statistics book is a tutorial with complete worked
+answers and no exams, exercise quota or hidden-solution gate. A new tutorial
+book requires a supported loader, not merely a file named `manifest.json`.
 
-For a full subject, cover beginner, intermediate and advanced stages with
-meaningful milestones. Plan around skills and projects, not a fixed day count.
-For a small addition, place it at the right prerequisite milestone. Do not
-publish filler to satisfy a stage or exercise counter.
+Use small deterministic offline fixtures. Label optional downloads, hardware,
+services and separately prepared projects. Use explicit LaTeX delimiters and
+accurate code-fence languages. Preserve literal source and copy/paste behavior.
+Write original, self-contained prose; a tutor cannot compensate for an empty
+chapter or repeated generic filler.
 
-## Author a complete teaching unit
+## Register only what exists
 
-Find the durable source generator, if one exists, before editing its output.
-Each practice unit needs a self-contained guide, learner artifact, separate
-reference and explanation, bounded local fixtures, progressive hints and
-inspectable expected observations. Explain new terms, syntax anatomy, at least
-two worked examples, common errors, tradeoffs and retrieval/transfer. Use the
-subject's real exercise contract; keep solutions out of answer-free starters.
+Follow the exact [module schema](../../../docs/implementation/ADDING_A_MODULE.md).
+Preserve stable IDs, prerequisites, variant aliases and saved-state namespaces.
+Keep proposals outside authored admission until real guides, artifacts and
+solutions exist. Use `verification_id: null` unless a trusted, tested verifier
+is actually registered. A zero exit code is not a typed behavioral verifier.
 
-Reading practice uses reasoning and a separate explanation, with no invented
-execution step. Tutorial mode provides worked theory, code, use cases and
-answered discussion directly. The statistics book explicitly has no exams,
-problem sets, prediction gate or hidden solutions. A different tutorial book
-needs a supported loader before registration.
+Edit the durable authoring source before its generated output. Run only that
+subject's generator, then its check mode where provided. The CUDA route assembles
+separate owned fragments; web development generates from chapter data and source
+templates. The original plans are loaded by `module_plans.load_core_plans`, not
+a design-preview renderer. Shared HTML remains generated through `make generate`.
 
-Author mathematics with explicit LaTeX and tag code fences with the real
-language. Literal program syntax remains code. Keep offline default fixtures
-small and deterministic. Identify optional downloads, datasets, hardware and
-external services without triggering them during normal reading or generation.
-Use original prose and public or synthetic examples, with appropriate sources
-and licenses. Avoid private organization data and developer machine paths.
+Use the existing `/classroom` directory, accessible theme and capability notice.
+Keep drafts and results separate for every lesson/variant/language. Navigation
+must preserve recoverable edits; viewing history must not run or restore source.
 
-## Register and integrate
+## Add execution deliberately
 
-Follow [the module contract](../../../docs/implementation/ADDING_A_MODULE.md)
-for exact schemas. Register authored content only after its real artifacts
-exist. Do not invent a scaffold CLI, verifier ID, runtime, command field or
-arbitrary endpoint. Inspect current allowlists and reuse a reviewed profile.
+Inspect the actual profile's filename, prepared packages, argv, input, file and
+multi-file boundaries before promising a capstone. Ordinary workers use Linux
+containers; Windows uses WSL 2. A larger project or external resource needs its
+own bounded, documented contract. Manifests cannot supply arbitrary commands,
+compiler flags, endpoints, engine sockets or cluster credentials.
 
-Runtime admission targets Linux-container workers. Windows learners use WSL 2
-and its Docker integration; retain the thin Windows Docker launchers as host
-setup tools. Native Windows backends, ACL implementation and executable builds
-are not supported targets or release gates. Use the current Linux core,
-contributor, Docker/browser, owned-Kubernetes and portable-ZIP CI contracts.
-A Linux container pass does not establish WSL installation or another host's
-engine setup; report those boundaries separately.
+HTML/CSS and browser JavaScript/D3 have a real opaque preview with source-bound
+client observations, not server verification. Live preview is opt-in, does not
+automatically create receipts, and stops on navigation/reload. PHP CLI is distinct
+from the separately owned HTTP/session project. CUDA CPU models and compilation
+are distinct from real GPU correctness and profiling. GPU workers are optional,
+require an explicitly selected compatible NVIDIA device and remain outside
+ordinary default/`--all` preparation. GPU Spark requires actual compatible
+operators, plans and metrics; arbitrary UDFs do not become GPU code automatically.
 
-New subjects join the same `/classroom` directory. Add an accessible distinct
-theme and text label, then verify search and prerequisites. Preserve separate
-pads and result history for lesson, variant, language and SQL mode. Navigating
-must save or retain a recoverable draft; viewing history must not overwrite
-source or execute code. Capability notices must reflect actual readiness.
+A new ordinary profile must update reviewed runtime code, image/dependency locks,
+launcher and image catalog, formatter/linter, source packaging and the ordinary
+CI matrix. Optional hardware or cluster profiles need separate real-capability
+gates. Read only the applicable details in [integration](references/integration.md).
 
-Before promising a CLI or project, inspect supported arguments, standard input,
-files, multi-file builds and dependency installation. Use an implemented bounded
-channel or clearly label the separate prepared external workflow.
+## Verify the result and hand it off
 
-A new backend is a separate implementation: fixed argv, bounded execution and
-output, cancellation, cleanup, immutable fixtures, explicit external ownership,
-prepared dependencies and actual worker evidence. A lexer, manifest entry,
-passing compile or reference output alone cannot establish all these properties.
+Use the subject's authoring checks and relevant reference programs. Format code
+with `./scripts/format-repo`, then run read-only format/lint checks. Preserve
+Markdown literals, vendor files, historical receipts and learner state. Run
+reviewed prose normalization and shared generation; never edit generated HTML
+or weaken a failure to make the gate green.
 
-## Verify and hand off
+Test the changed behavior in the real declared execution surface: browser
+interaction, compiler diagnostics, invalid inputs, cancellation, bounded output,
+source isolation and saved-result readback after container replacement as
+applicable. Use explicitly disposable state. Read-only MCP discovery should
+expose the same IDs and prerequisites. Follow [validation](../../../docs/validation.md)
+for the relevant gates, including grouped parallel pytest for implementation
+changes. A pure prose correction does not require unrelated GPU or cluster runs.
 
-Run the subject's documented authoring command where applicable, then use the
-verified shared commands in [integration boundaries](references/integration.md).
-Run `./scripts/format-repo` after the relevant subject generator, then the full
-`./scripts/format-repo --check` and `./scripts/lint-repo` before submission.
-Inspect `--list` when adding
-file types; a new language needs a reviewed formatter adapter and pinned tools,
-not an unreported exclusion. Preserve third-party code, learner state, locks
-and generated-reader ownership. Embedded teaching snippets keep their authored
-layout. Check generation drift, content rendering and module/legacy contracts.
-Run meaningful reference and misconception cases. Do not reduce a check to accept
-a wrong example or rewrite a historical execution receipt as if it were new.
-
-Exercise the browser path in disposable test state: guide, starter, run or
-reading behavior, explicit solution reveal, errors, switching, save/reload and
-restoration after container replacement. Test read-only tutor discovery when
-identity changes. Run grouped parallel tests for integration without altering
-unrelated learner state or publishing images.
-
-Report changed durable sources, registered IDs, commands and actual results,
-including skipped or unverified platforms. Keep generated readers aligned and
-update contributor/learner documentation where behavior changes. A successful
-check is evidence for its tested contract, not a promise of expert competence
-or a bug-free product.
-
-## Current reference implementations
-
-Use `courses/cuda/authoring/` for a mixed reading/CPU/optional-GPU subject.
-The fragment assembler owns `courses/cuda/track.json` and `lessons.json`.
-Preserve each chapter's separate CPU model and optional GPU evidence. New GPU
-APIs, packages, architectures and Spark plugins require independent qualification;
-do not copy a CPU result into a GPU receipt. CUDA C++ uses a profile-specific
-`.cu` suffix and fixed `main.cu`; headers and project builds remain separate.
-
-Use `courses/web-development/authoring/` for integrated HTML/CSS/PHP pedagogy.
-Prose data and canonical executable templates generate complete bundles. The
-`html-browser` profile previews one document with inline assets; `php-cli`
-executes one server-language file, not an HTTP server. Add a real scoped project
-fixture when teaching request/session behavior that cannot occur in a CLI pad.
-New file types belong in the shared formatting, syntax and reader mappings.
-
-Use the C, Go, C#, Rust and Swift subjects for single-source compiled-language
-contracts and staged filenames. Use JavaScript js-043 through js-066 for an
-offline browser-library specialization with actual D3 interaction and saved
-client observations. Use the Docker subject and Kubernetes networking extension
-for complete reading/manual paths whose advanced host capabilities remain
-explicit. These are examples to inspect, not generators to run over a different
-subject. The progression and integration references document their boundaries.
-
-Browser acceptance must cover the live state after representative interactions,
-resizing and navigation, not merely an initial success marker. Inspect settled
-painted output and handled sandbox errors, retain original observations, and
-qualify saved-result readback after actual container replacement without replay.
+Report maintained sources, registered IDs, actual checks and remaining hardware
+or platform limits. Separate parsed source, CPU models, compiled artifacts,
+executed results, browser observations and hosted CI. Do not turn a historical
+receipt into a claim about changed source, or a chapter count into expertise.
+Git commits, registry publication and destructive cleanup remain within the
+user's separately authorized scope.

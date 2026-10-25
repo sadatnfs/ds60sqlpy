@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 All **66 lessons** are authored, with standalone guides, two worked examples, six practice tasks, answer-free learner files and separate explained solutions. The route connects language fundamentals, Node programs, strict TypeScript, browser interaction and application engineering. [The local manifest](lessons.json) registers complete bundles; [the route plan](track.json) preserves their stable IDs and prerequisites.
@@ -34,7 +34,20 @@ results are source-bound client observations and are never labeled as trusted
 backend verification. [The D3 inventory](fixtures/d3-inventory.json) lists every
 reference and completion marker for real-browser qualification.
 
-Save learner work in a classroom pad or ignored `.learning/expansion/<lesson-id>/`. References own only their temporary directories and tiny local services. See [the implementation checkpoint](../../docs/implementation/javascript-content-status.md) for exact prepared-container and browser evidence. Authored content, passing fixture execution and learner mastery are distinct observations.
+Save learner work in a classroom pad or ignored `.learning/expansion/<lesson-id>/`. References own only their temporary directories and tiny local services. Use [validation](../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect prepared-container and browser results. Authored content, passing fixture execution and learner mastery are distinct observations.
+
+## Browser design and live preview
+
+For D3 lessons, enable **Live preview** to refresh the preview after you stop
+typing briefly. Use desktop, tablet or mobile widths, inspect console errors
+and pause or stop automatic updates when needed. Live refreshes do not create
+run history; manual Run and explicit saved observations preserve the source
+associated with their result. Switching lessons cancels the current preview.
+
+The [HTML, CSS and PHP course](../web-development/README.md) develops semantic
+markup, accessible forms, layout and server-side boundaries alongside this
+language route. Its HTML/CSS lessons use the same classroom preview. Node's
+worker and browser DOM execution remain distinct environments.
 
 ## Reproducible authoring
 

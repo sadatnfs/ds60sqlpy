@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +50,7 @@ VERIFY = "Verify archive, provenance, immutable ID and platform before login"
 def publication(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.chdir(tmp_path)
     (tmp_path / "docker").mkdir()
-    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "0.4.0"\n')
+    (tmp_path / "pyproject.toml").write_text('[project]\nversion = "0.4.1"\n')
     (tmp_path / "docker/classroom-images.tsv").write_text(
         "# profile service repository suffix variable kind\n"
         "app lab ds60sqlpy-lab lab DS60_LAB_IMAGE app\n"
@@ -60,7 +61,7 @@ def publication(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     )
     values = {
         "PROFILE": "python-core",
-        "RELEASE_VERSION": "0.4.0",
+        "RELEASE_VERSION": "0.4.1",
         "ARCHITECTURE": "amd64",
         "HUB_USER": "exampleuser",
         "REPOSITORY": "exampleuser/classroom",
@@ -255,7 +256,7 @@ def test_export_saves_the_inspected_immutable_id_and_hashes_actual_bytes(
     def output(args: list[str], **kwargs: Any) -> str | bytes:
         if args == ["git", "rev-parse", "HEAD"]:
             return REVISION + "\n"
-        assert args[-1] == "ds60sqlpy-worker-python-core:0.4.0"
+        assert args[-1] == "ds60sqlpy-worker-python-core:0.4.1"
         return json.dumps({"Id": IMAGE_ID, "Os": "linux", "Architecture": "amd64"}).encode()
 
     def run(args: list[str], **kwargs: Any) -> None:
@@ -360,9 +361,9 @@ def checked_archive(publication: Path) -> tuple[Path, dict[str, Any]]:
         "run_id": "12345",
         "run_attempt": "2",
         "profile": "python-core",
-        "release_version": "0.4.0",
+        "release_version": "0.4.1",
         "namespace": "exampleuser",
-        "source_image": "ds60sqlpy-worker-python-core:0.4.0",
+        "source_image": "ds60sqlpy-worker-python-core:0.4.1",
         "image_id": IMAGE_ID,
         "os": "linux",
         "architecture": "amd64",
@@ -392,7 +393,7 @@ def test_verified_handoff_loads_then_checks_identity_before_restoring_local_tag(
     execute_block("publish", VERIFY)
     assert calls[0] == ["docker", "image", "load", "--input", "work/checked-image/image.tar"]
     assert calls[1][:3] == ["docker", "image", "inspect"]
-    assert calls[2] == ["docker", "image", "tag", IMAGE_ID, "ds60sqlpy-worker-python-core:0.4.0"]
+    assert calls[2] == ["docker", "image", "tag", IMAGE_ID, "ds60sqlpy-worker-python-core:0.4.1"]
     assert not any("push" in call or "login" in call for call in calls)
 
 
@@ -408,7 +409,7 @@ def test_verified_handoff_loads_then_checks_identity_before_restoring_local_tag(
         ("namespace", "elsewhere"),
         ("architecture", "arm64"),
         ("os", "windows"),
-        ("source_image", "unrelated:0.4.0"),
+        ("source_image", "unrelated:0.4.1"),
         ("image_id", "mutable-tag"),
         ("archive_sha256", "0" * 64),
         ("archive_bytes", 1),
@@ -474,3 +475,9 @@ def test_duplicate_metadata_fields_and_symlinked_payloads_refuse_loading(
     archive.symlink_to(publication / "actual-image.tar")
     with pytest.raises(AssertionError):
         execute_block("publish", VERIFY)
+
+
+def test_manual_publication_default_matches_this_release() -> None:
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text())
+    default = workflow()["on"]["workflow_dispatch"]["inputs"]["version"]["default"]
+    assert default == project["project"]["version"]

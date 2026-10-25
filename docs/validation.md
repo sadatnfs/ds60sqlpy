@@ -31,8 +31,8 @@ uv run --no-sync python scripts/course.py doctor
 
 Prefix the Python commands below with `uv run --no-sync`, or use the interpreter
 inside this checkout's `.venv`. On Windows, WSL 2 provides the same Bash, Linux
-Python environment and Docker workflow. Historical native setup recipes are
-unsupported compatibility references, not alternate release requirements.
+Python environment and Docker workflow. Retired native installers and executable
+builders are no longer shipped; they are not alternate release requirements.
 
 Core setup does not install every heavy learning dependency. A test that needs
 an optional compiler, framework, SQL service or model asset must either run in
@@ -70,8 +70,8 @@ python scripts/normalize_lesson_prose.py
 python scripts/check_content_rendering.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
-python scripts/build_journey_preview.py --check
 python scripts/check_modules.py
+python scripts/check_repository_guidance.py
 python scripts/validate_notebooks.py
 node scripts/check_classroom_ui.mjs
 python -m ruff check src scripts tests bridge python/professional docker/init_module_runtime.py
@@ -126,7 +126,7 @@ machines with little memory. More workers do not guarantee shorter runtimes.
 
 Record the passed, failed and skipped totals from the actual run. Explain skips
 by surface, such as an optional framework, a live database or historical
-native-platform compatibility tests outside the supported matrix.
+optional services or platform-specific filesystem cases.
 Do not describe a skipped platform as validated.
 
 ## What hosted workflows check
@@ -382,6 +382,15 @@ source and observed result. A Dockerfile, installed dependency, parse-only
 check or old image hash is not current execution evidence. Preserve truthful
 historical receipts, but attach fresh evidence when executable source changes.
 
+A guide may have a separate binding in `curriculum/presentation-parity.json`.
+For a prose-only correction, first verify that the committed guide matches the
+previous presentation hash and that every protected code block still matches
+its recorded hash. Preserve the historical runtime hash and code hashes. Record
+the previous and updated presentation hashes, baseline commit and reason in the
+binding's `presentation_history`, then update its current presentation hash and
+run the existing parity tests. This records a documentation change, not another
+execution. Never use it to approve changed examples or rewrite runtime receipts.
+
 ## Release decision
 
 Before shipping, record the exact revision, generation drift result, quality
@@ -443,3 +452,20 @@ report retains the original execution evidence and appends the readback result.
 The invoker must actually perform container replacement; a second read against
 the same process alone does not prove replacement durability. The Python Core
 CI job supplies that explicit down/up boundary after its D3 run.
+
+## Guidance and retirement checks
+
+`python scripts/check_repository_guidance.py` checks maintained documentation,
+AGENTS files and both repository skills without network access or source writes.
+It resolves local Markdown targets, verifies loader-derived subject README/AGENTS
+coverage and skill identities/references, rejects checkout escapes, and catches
+retired command paths in guidance. Use `--json` for machine-readable output or
+`--report PATH` for an explicit report. Code literals are not treated as document links;
+fragment IDs remain the responsibility of the published HTML link checker.
+
+The gate runs in Course validation, `make check` and the source-starter builder.
+A clean report does not establish pedagogical quality or prove every source file
+is used. Review changed workflows and run the relevant behavioral tests as well.
+Preserve immutable execution receipts and course source/solution separation when
+retiring a feature. Remove its entrypoints, callers, tests and documentation together;
+keep shared security or persistence behavior until its replacement is qualified.

@@ -1,438 +1,202 @@
-# Troubleshooting
+# Classroom troubleshooting
 
-> For the supported Docker classroom, begin with `./classroom doctor`,
-> `./classroom status` and `./classroom logs` from Linux, macOS or WSL 2. See
-> [the one-command guide](one-command-classroom.md). Native host diagnostics
-> below are retained compatibility references, outside product support.
+Start from the failing machine and the exact command and error. A successful
+run on another computer does not establish this computer's engine state.
+Keep saved volumes intact while diagnosing. Run commands from the course
+folder in Bash on macOS/Linux or Ubuntu in Windows WSL 2.
 
-Start from the repository root and run:
-
-```text
-python scripts/course.py doctor
-```
-
-If `python` points elsewhere, use the repository interpreter directly. On
-Windows PowerShell, resolve the standard-`venv` or conda-prefix layout once per
-window:
-
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py doctor
-```
-
-On macOS/Linux, run `.venv/bin/python scripts/course.py doctor`.
-
-For the difference between `.venv`, disposable caches, offline model data,
-learner progress, and Docker state, see
-[Local environments and caches](local-files-and-caches.md).
-
-## “File not found” for requirements, scripts, notebooks, or SQL
-
-You are probably in the wrong directory.
-
-Windows PowerShell:
-
-```powershell
-Test-Path .\README.md
-Get-Location
-```
-
-macOS/Linux:
+## First checks
 
 ```bash
-test -f README.md
-pwd
+docker context show
+docker info --format '{{.OSType}}'
+docker compose version
+./classroom doctor
+./classroom status
 ```
 
-Change to the directory containing the root README and retry.
+Use the same `--project NAME` on classroom commands if you chose a custom
+project. Keep useful error lines and runtime versions; do not share environment
+files, credentials, tokens or full database URLs.
 
-## `python` or `py` is not found
+## The engine is unavailable
 
-- Windows: do not reinstall merely because an existing Python or Anaconda
-  installation is missing from `PATH`. From the repository root, run the
-  read-only discovery preview first:
+Start Docker Desktop or Rancher Desktop and wait for its engine to become
+ready. On Linux, check the installed Docker service and your user's access.
+`docker version` must show a server as well as a client. A remote Docker
+context is not the supported local-browser setup. Rancher Desktop must use
+**Moby**, since its containerd mode uses a different tool interface.
 
-  ```powershell
-  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-  & .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
-  ```
+On Windows, use WSL 2 and enable your engine's integration with the Ubuntu
+distribution you are running. Check `wsl --list --verbose` from Windows
+Terminal. Do not install a second competing daemon inside Ubuntu just to hide
+an integration problem. See the [Windows guide](setup/windows.md).
 
-  If it finds a supported Python, Anaconda, or Miniconda installation, rerun
-  without `-WhatIf` to prepare the repository environment. Only if discovery
-  reports that no supported interpreter exists should you install Python 3.12
-  manually or explicitly preview the optional winget path with
-  `& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -InstallMissingWithWinget -WhatIf`.
-- macOS/Linux: run `python3.12 --version`; do not replace the operating system’s Python.
-- In VS Code: select the repository `.venv` from **Python: Select Interpreter**.
+On Linux, follow the engine's documented permissions setup. Do not make the
+Docker socket writable by everyone or run the entire classroom as root.
+Membership in the Docker group carries substantial host privileges.
 
-## Virtual environment creation fails
+## Compose rejects the configuration
 
-Windows:
+The classroom needs Compose **2.28.0 or newer**, invoked as `docker compose`.
+An error involving `!reset`, unsupported service options or a missing Compose
+command can indicate an older or incomplete installation. Upgrade the Compose
+plugin through the engine's documented installation route. A generic YAML
+parser is not a full Compose validator.
 
-```powershell
-& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -WhatIf
-& .\scripts\bootstrap_windows.ps1 -SkipPostgreSql
-```
+## The launcher cannot be found or executed
 
-The preview discovers Python.org and Anaconda/Miniconda installations before
-the real run chooses either the standard `venv` layout or the conda-prefix
-fallback. It does not delete a partial environment.
+Run it from the extracted folder containing `classroom` and
+`compose.classroom.yaml`. A ZIP viewer is not an extracted directory. If an
+archive or filesystem lost the executable bit, use `bash classroom --starter`
+or `chmod +x classroom` before retrying. Quote paths containing spaces.
 
-Linux may need the venv package:
+Windows uses Ubuntu/WSL for `./classroom`; the thin `.cmd` launcher delegates
+to that environment. It does not install Docker, Python or PostgreSQL. See
+[OS setup](README.md) if the engine or WSL distribution is missing.
+
+## The browser did not open or shows an old page
+
+Run `./classroom status` and open the current printed `/classroom` URL.
+Browser opening can be unavailable from WSL or a headless shell even when the
+server is healthy. A changed automatic port can make an old bookmark obsolete.
+Use `./classroom --no-browser` when you prefer to open it yourself.
+
+If edited source is absent, remember that an image contains the files present
+at build time. Install source updates deliberately with
+`./classroom --local-build --rebuild`. Strict `resume` intentionally does not
+rebuild. In Hub mode, use the publisher's matching updated tag instead.
+
+## A port is already in use
+
+The launcher normally chooses available loopback ports and remembers settings.
+Do not stop an unrelated service to claim its port. Choose unused ports with
+`--port` and `--database-port` when preparing this classroom, and use the
+current address reported by status. Read the
+[one-command guide](one-command-classroom.md) before changing remembered port
+settings for an existing project.
+
+## Startup asks for a build, but I only want my previous work
 
 ```bash
-sudo apt-get install python3.12-venv
+./classroom resume
 ```
 
-Remove a partially created `.venv` only after confirming it is the repository environment and contains no work you need.
+This forbids both builds and pulls. If a required image is absent, the error
+identifies what must be prepared. Check that you selected the same engine,
+context, project and image mode. Rebuilding an image does not restore deleted
+volumes, and using another project does not open the original saved work.
 
-## PowerShell refuses to activate the environment
+For normal reuse, `./classroom` starts existing resources and prepares only
+missing images. `--rebuild` is a deliberate update action. An explicit
+`--profile` selection replaces the remembered worker list, not the saved pads.
 
-Activation is not required:
+## Build downloads fail
 
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py doctor
-```
+Read the first failing download or package step. Registry rate limits,
+authentication, proxy configuration, insufficient disk and TLS certificate
+errors are different problems. Retry only after addressing the cause.
+Do not disable TLS verification. The launcher provides `--registry mirrors`
+and `--registry upstream` for supported base-image selection; neither option
+repairs an untrusted certificate configuration or publishes your images.
 
-For a temporary activated session:
+Hub mode needs an existing release tag and platform image in the selected
+namespace. `manifest unknown`, access denied or an unavailable architecture
+can mean the publisher has not supplied it. Return to local source builds with
+`--local-build`, or use a verified tag. See [Hub usage](dockerhub.md).
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1
-```
+## Docker reports missing parent snapshots or AlreadyExists
 
-The activation script exists only in the standard `venv` layout. The
-conda-prefix fallback continues to use `& $CoursePython ...`. Do not change
-machine-wide execution policy for this course.
+Errors such as `failed to prepare extraction snapshot`, `missing parent`,
+`target snapshot ... already exists` or `bucket: not found` occur in the
+engine's image storage before the course runs. Repeated course-code edits do
+not repair that storage.
 
-## A package installs but the notebook cannot import it
+1. Stop retrying concurrent builds. Check engine disk space and diagnostics.
+2. Export saved learning work and the database while the engine can still
+   read them. See [backup instructions](docker-classroom.md#5-export-learning-work-and-the-database).
+3. Restart the engine normally and retry the specific image operation.
+4. If the problem persists, use the engine vendor's supported storage repair
+   or reset procedure after protecting data. A factory reset or global prune
+   can affect every project on that engine, not just this classroom.
 
-The terminal interpreter and notebook kernel differ.
+Switching engines or storage implementations can hide images and volumes
+without moving them. Do not conclude that data is gone merely because another
+context shows an empty image list. Avoid manual edits to internal snapshot
+folders. Keep the original error and engine version for vendor diagnostics.
 
-1. Run:
+## A language cannot run
 
-   ```text
-   python -c "import sys; print(sys.executable)"
-   ```
-
-2. In the notebook, run:
-
-   ```python
-   import sys
-   print(sys.executable)
-   ```
-
-3. Select the repository `.venv` kernel and restart it.
-
-Multiple clones share the per-user `ds60sqlpy` kernel name. Check the complete
-`sys.executable` path. A stale registration can point to a moved or deleted
-folder. Repair only the registration from the intended environment:
-
-```powershell
-# Windows, after resolving $CoursePython above
-& $CoursePython -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-```
+Open the lesson's capability notice. Prepare the matching ordinary profile
+from [the runtime table](docker-profiles.md), for example:
 
 ```bash
-# macOS/Linux
-.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
+./classroom --profile cpp20 --profile php-cli
 ```
 
-Restart the kernel and verify its path again. Virtual environments should be
-recreated after moving them rather than copied between operating systems or
-folders. See [Python venv](https://docs.python.org/3.12/library/venv.html).
-
-## `jupyter` is not found
-
-Use the environment’s Python:
-
-Windows:
-
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython -m jupyterlab
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python -m jupyterlab
-```
-
-If the module is missing, rerun the setup script and doctor.
-
-## Package installation fails
-
-- Confirm Python 3.12 is active.
-- Upgrade installer tooling through the setup script.
-- Read the first package error, not only the final summary.
-- Optional heavy packages may need more disk, memory, or a platform-specific wheel.
-- CPU is the supported default; do not install a CUDA build unless a lesson explicitly asks for it.
-- Do not work around a failed install by putting packages into the system Python.
-
-If locked setup reports a stale lock, use the matching source checkout and
-`uv.lock`, or ask a maintainer to update the lock. Do not silently remove
-`--locked` during a reproducibility check. On a restrictive network, use your
-organization's approved proxy/certificate setup or a prepared
-[offline wheelhouse](setup/offline.md#optional-package-only-offline-bundle).
-Do not disable TLS verification or include credentials in support commands.
-A source build instead of a binary wheel can indicate an unsupported Python,
-CPU architecture, or OS for that package.
-
-On macOS, missing `libomp.dylib` during advanced imports calls for the
-documented `brew install libomp` runtime. On Debian/Ubuntu, a missing
-`libgomp.so.1` calls for `libgomp1`. Those native runtimes are separate from
-Python package installation.
-
-## A Seaborn dataset fails offline
-
-Seaborn sample data downloads on first use.
-
-1. Reconnect temporarily.
-2. Run the affected `sns.load_dataset(...)` once.
-3. Confirm the local cache exists.
-4. Retry offline.
-
-See [Offline use](setup/offline.md).
-
-## Hugging Face, spaCy, or torchvision tries to download
-
-The model or weights are not yet cached.
-
-- Run the disclosed preparation step while connected.
-- Or use the lesson’s local/no-pretrained fallback.
-- Do not claim the lesson is offline-ready merely because the Python package is installed.
-
-## `psql` is not found
-
-- Windows: first run
-  `& .\scripts\bootstrap_windows.ps1 -WhatIf`; it searches `PATH`, the
-  registry, and versioned PostgreSQL installation directories before any
-  install advice. Use the discovered executable in the current session, or
-  rerun with `-PersistUserPath` only if you want the narrowly scoped user
-  `PATH` change.
-- macOS Homebrew: add `$(brew --prefix postgresql@17)/bin` to `PATH`.
-- Linux: install the PostgreSQL client package.
-
-Then verify:
-
-```text
-psql --version
-```
-
-The supported major version is 16 or newer.
-
-## PostgreSQL connection is refused
-
-Confirm the server is running:
-
-- Windows: check the PostgreSQL service in **Services**
-- macOS Homebrew: `brew services list`
-- Linux: `systemctl status postgresql`
-- Container: `docker compose ps` and `docker compose logs postgres`
-
-Also check host, port, database, and role. The default port is 5432.
-
-## Native `psql` works, but doctor or a guided notebook cannot connect
-
-Native OS setup uses your local role, while course tools default to the
-Compose `ds60` connection. Select the same target as the successful native
-command in the terminal that starts the portal. For macOS/Linux's normal
-username-and-socket route:
-
-```bash
-export DS60_DATABASE_URL=advanced_sql_training
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/learning_portal.py
-```
-
-For native Windows, follow the [password-file handoff](setup/windows.md#let-the-guided-notebook-authenticate-without-a-hidden-prompt)
-and set its password-free local URL in the launching PowerShell window.
-Guided notebooks disable password prompts. An interactive login that asked
-for a password does not prove unattended authentication. See
-[Local PostgreSQL](setup/postgresql.md).
-
-## Docker SQL works, but the guided notebook says `psql` is missing
-
-`docker compose run --rm sql-runner` has a client inside its container. Python
-guided notebooks run host `psql`, so install that client or continue using
-container SQL commands. The PostgreSQL server can remain only in Docker. A
-Docker daemon, a host client, and a Python driver are separate requirements
-for different workflows.
-
-## Docker is installed but Compose cannot start PostgreSQL
-
-1. Start Docker Desktop or your container daemon.
-2. Check the exact state:
-
-   ```text
-   docker compose ps
-   docker compose logs postgres
-   ```
-
-3. If host port 5432 is already in use, choose another host port before starting the service.
-
-   Windows PowerShell:
-
-   ```powershell
-   $env:DS60_POSTGRES_PORT = "55432"
-   docker compose up -d postgres
-   ```
-
-   macOS/Linux:
-
-   ```bash
-   export DS60_POSTGRES_PORT=55432
-   docker compose up -d postgres
-   ```
-
-The `sql-runner` service connects over the internal Compose network, so its course commands remain unchanged.
-
-## `role "postgres" does not exist` on macOS
-
-Homebrew commonly creates a role matching the macOS username. Omit `-U postgres` and use:
-
-```bash
-psql -d advanced_sql_training
-```
-
-Do not create an unnecessary superuser merely to match an old command.
-
-## Peer authentication fails on Linux
-
-Create a PostgreSQL role matching the Linux username:
-
-```bash
-sudo -u postgres createuser --createdb "$USER"
-createdb advanced_sql_training
-```
-
-Then use normal local `psql` commands without `-U postgres`.
-
-## The training database already exists
-
-That is normally fine. Run the setup file to reset only the disposable `training` schema:
-
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-```
-
-This deletes and recreates the training schema. Stop if the target database is not disposable.
-
-Run `sql/postgres-60day/00_verify.sql` immediately afterward to catch an incomplete or incorrect seed.
-
-## A later SQL project says a table or schema does not exist
-
-Most lessons are independent and rollback-safe. Days 52–54 are the declared stateful exception: Day 52 resets and commits the course-owned `dwh` schema, then Days 53 and 54 use it in order. Do not simply remove `ROLLBACK` from other lessons.
-
-1. Inspect the lesson’s generated catalog entry and companion guide.
-2. For the warehouse project, run Days 52, 53, and 54 in order.
-3. Use `ON_ERROR_STOP=1`.
-4. Report a curriculum defect if the earlier lesson rolls back an object the later lesson requires.
-
-## A bridge lesson cannot connect to PostgreSQL
-
-The bridge defaults to fakes; use a live database only when the lesson marks
-the step as optional.
-
-1. Run the bridge tests first:
-
-   ```text
-   python -m pytest bridge/tests
-   ```
-
-2. Confirm `DS60_DATABASE_URL` points to the disposable course database, not a
-   workplace, shared, or production database.
-3. Run the SQL setup and verification before a live exercise.
-4. Check whether the lesson needs Psycopg:
-
-   Windows PowerShell:
-
-   ```powershell
-   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-   & .\scripts\bootstrap_windows.ps1 -Profile Advanced
-   ```
-
-   macOS/Linux:
-
-   ```bash
-   bash scripts/setup.sh --advanced
-   ```
-
-5. Distinguish a fake-backed unit-test pass from server authentication,
-   permissions, lock behavior, or network evidence.
-
-## `%sql` or `%%sql` is unavailable in a notebook
-
-The SQL magics come from JupySQL and run only in an IPython-based kernel.
-
-1. Select the repository `ds60sqlpy` kernel.
-2. Install the `sql-notebooks` profile while connected.
-3. Restart the kernel.
-4. Run `%load_ext sql` before `%sql`.
-5. Confirm no learner file named `sql.py` is shadowing the extension.
-
-If the extension loads but PostgreSQL does not connect, verify
-`DS60_DATABASE_URL` in the terminal that launched Jupyter. Do not print the
-value when it contains a password. Use `postgresql+psycopg://` through the
-lesson's SQLAlchemy engine rather than accidentally requesting the older
-`psycopg2` driver. See [PostgreSQL in Jupyter](setup/jupyter-postgresql.md).
-
-## A SQL file shows errors but the command exits successfully
-
-Use:
-
-```text
-psql -X -v ON_ERROR_STOP=1 ...
-```
-
-Without `ON_ERROR_STOP`, `psql` can continue after a statement fails.
-
-## Bash commands fail in PowerShell
-
-PowerShell does not use:
-
-- `source`
-- Bash `\` line continuations
-- `cat file | ...`
-- Bash `|| echo` on Windows PowerShell 5.1
-
-Use the Windows guide and PowerShell examples instead of translating punctuation literally.
-
-## Find the executable solution for a lesson
-
-Inspect:
-
-```text
-python scripts/course.py catalog
-```
-
-PostgreSQL executable and Markdown solutions cover Days 1–60. Use the
-generated availability view for the exact path. The Day 52–54 executable
-warehouse solutions are stateful and must run in order.
-
-## Still blocked
-
-Capture:
-
-- Operating system and version
-- The exact command
-- Full first error
-- `python scripts/course.py doctor` output
-- `python --version` and `psql --version` when relevant
-- The selected VS Code interpreter/kernel
-
-Then ask the AI tutor using [Learning with an AI tutor](learning-with-an-ai-tutor.md) or open an issue with those details and no secrets.
+C++ and Java are compiled in their workers. Node JavaScript and browser
+JavaScript have different APIs. HTML/CSS runs in the browser preview, while
+PHP executes in the PHP CLI worker. A lesson about HTTP sessions may use its
+separate documented project fixture; the single-file PHP pad does not create
+a permanent web server.
+
+GPU execution needs a compatible NVIDIA host and explicit preparation. Apple
+GPU, AMD GPU and CPU-only learners can use the CUDA conceptual/CPU variants
+without claiming CUDA hardware execution. An unavailable GPU variant must not
+silently substitute CPU results. Kubernetes live work needs an explicitly
+owned local cluster. Neither capability is enabled by ordinary `--all`.
+
+## Preview or output looks wrong
+
+The reader renders code highlighting and mathematics locally. In a browser
+HTML/JavaScript lesson, check the console panel for syntax or runtime errors.
+External network assets and navigation are restricted; use bundled/local
+lesson resources and read the preview capability notice. Live preview is
+opt-in, and **Pause** or **Stop** prevents automatic reruns. A saved observation
+is a point-in-time record, not permission to execute source when revisiting it.
+
+A worker run's output belongs to the source saved with that run. Later edits to
+the pad do not rewrite history. Read the exit status and diagnostic text, not
+only whether a chart appeared or stdout contains a success-looking message.
+
+## PostgreSQL or whole SQL lessons fail
+
+SQL snippets accept ordinary SQL. Full course scripts may contain `psql`
+commands, so choose **Whole SQL lesson (psql)** for those artifacts. Read the
+first PostgreSQL error and the transcript. Check the database identity and
+expected schema before modifying a query to make it pass.
+
+A training reset replaces course-owned training data. It is a deliberate
+operation, not a general error-recovery button. Warehouse Days 52 through 54
+have their own stateful progression. See [PostgreSQL setup](setup/postgresql.md).
+For optional JupySQL kernels, use the separate
+[notebook guide](setup/jupyter-postgresql.md); Docker worker packages are not
+installed into a host notebook interpreter.
+
+## Progress appears missing
+
+Wait for the saved confirmation before leaving a pad. Reopen the same lesson
+and variant, then check the engine context and project name. Saved source,
+notes and results live in `<project>_classroom-learning`; database tables live
+in `<project>_postgres-data`. They are separate from the source checkout and
+`.classroom/` launcher settings.
+
+A new source ZIP or rebuilt image does not contain personal progress. Do not
+prune volumes, run `down -v`, or reset the engine while investigating missing
+work. Restore from a deliberate backup only after checking the exact target.
+If volumes were deleted, a source Git checkout cannot reconstruct them.
+
+## Optional models and offline study
+
+An installed package does not imply its model weights, dataset, tokenizer or
+compiler cache has been prepared. Read the lesson's offline variant and
+preparation disclosure. Do not download models automatically just because a
+reference describes them. See [offline preparation](setup/offline.md).
+
+## Reporting a reproducible issue
+
+Include the command, selected project/profile/variant, operating system,
+engine and Compose versions, lesson ID, first relevant error and whether the
+same saved source reproduces it. State whether you were building, resuming,
+reading, compiling or executing. Redact private paths and secrets. For
+contributor checks and evidence scope, see [validation](validation.md).

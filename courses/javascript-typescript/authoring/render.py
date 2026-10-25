@@ -157,7 +157,7 @@ Close the solution and explain {", ".join(name for name, _ in spec["terms"][:3])
 
 ## Sources and verification status
 
-[Official language or host reference]({spec["source"]}). Fixtures and exercises are original course material. Actual prepared Node, TypeScript and browser execution evidence is tracked in `docs/implementation/javascript-content-status.md`. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.
+[Official language or host reference]({spec["source"]}). Fixtures and exercises are original course material. The [validation guide](../../../docs/validation.md) describes runtime checks. Consult CI artifacts for the exact revision and platform to see which Node, TypeScript and browser checks actually ran. Manual-only steps remain unqualified until performed. No default lesson installs dependencies, downloads a model or contacts a shared service.
 
 ## Ask an AI tutor about this lesson
 

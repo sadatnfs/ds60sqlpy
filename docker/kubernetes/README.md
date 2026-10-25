@@ -1,142 +1,77 @@
-# Owned Kubernetes module preparation
+# Owned Kubernetes runtime and fixture
 
-This optional profile uses one dedicated kind node and a private scoped worker.
-It is separate from ordinary Python/SQL startup. Source files and fake-backed
-tests do not establish an installed cluster or a qualified platform. Keep the
-main HTTP application stopped during provisioning acceptance unless explicitly
-starting the module lab is part of the chosen test.
+This optional extension uses a dedicated disposable kind node and a private
+scoped worker inside the existing classroom. Start with the canonical
+[prepare, inspect, start, stop and release walkthrough](../../docs/modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab).
+It uses `compose.classroom.yaml` plus the self-contained
+`compose.classroom.kubernetes.yaml`; there is no separate host-folder launcher.
 
-The pins are kind v0.33.0, kubectl v1.37.0, and
-`kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5`.
-The [official kind release](https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0)
-is the source of the node digest and architecture support. Tool preparation
-retrieves official SHA256 metadata before publishing a downloaded binary.
-[Kubernetes tool installation](https://kubernetes.io/docs/tasks/tools/) describes
-the release/checksum distribution. TLS verification stays enabled. A registry
-certificate failure is a preparation failure, not a reason to disable TLS or
-change the node digest.
+The host companion needs a prepared POSIX Python environment on Linux, WSL 2
+or macOS and an explicitly selected local Unix-socket Docker endpoint. It never
+reads or changes the default kubeconfig and never selects an ambient cluster.
+Windows users run the companion inside WSL 2 with Linux paths. The ordinary
+classroom still needs no host Python, kind or kubectl.
 
-Before starting, check current host and engine-VM disk space, RAM allocation,
-existing resources and download sizes. Budget the worker plus the control-plane
-node separately from any Spark/TensorFlow worker. Stop other owned heavy tests
-through their normal lifecycle before preparing this node. Do not prune unrelated
-images, restart the engine or change its settings as an automatic repair.
+## Prepared inputs and private state
 
-Use the course's configured Python interpreter for the host companion. It never
-reads or rewrites the user's default kubeconfig. It creates a new private runtime
-directory, uses explicit kubeconfig/context arguments, binds the host API only
-to127.0.0.1 and refuses remote Docker endpoints. The companion uses POSIX
-permissions on Linux, WSL 2 or macOS. Native Windows credential reads and host
-preparation are unsupported and refuse before mutation. Windows users run the
-companion inside WSL 2 with Linux paths and a local Unix-socket Docker endpoint;
-named-pipe endpoints are unsupported. Do not hand a Windows path to a Linux CLI.
+Current source pins are kind v0.33.0, kubectl v1.37.0 and the exact node image
+listed as `NODE_IMAGE` in
+[`kubernetes_module.py`](../../src/ds60sqlpy/kubernetes_module.py). The host helper
+checks official release SHA256 metadata before publishing tool downloads.
+TLS stays enabled. A reviewed mirror may change the node registry prefix while
+preserving the exact approved release/index digest; a floating tag or disabled
+TLS is not an equivalent input.
 
-Read-only inventory, from the repository root:
+Review engine disk space and RAM before adding the worker and control-plane
+node. Build both Dockerfiles and prepare the tools before creating a short-lived
+session. Neither pressing Run nor opening a lesson installs a tool, pulls an
+image or creates a cluster. The fixture image remains
+`ds60sqlpy-k8s-fixture:0.2.0`; its protocol version is separate from the classroom
+release version used for the worker image. Both Dockerfiles accept an explicit
+`DS60_PYTHON_IMAGE` build argument for a reviewed base mirror.
 
-```text
-python scripts/prepare_kubernetes.py doctor
-```
+The helper prints a private session path and nonsecret status, never the
+credential body. Keep this directory outside source, `.learning`, exported
+notes and portable backups. `DS60_K8S_SESSION_DIR` supplies the explicit lease
+and scoped kubeconfig mounts. The classroom initializer owns the separate
+`classroom-runtime` named volume containing the private worker HTTP token.
+The overlay retains every ordinary/GPU worker endpoint and adds Kubernetes.
+Its worker joins `module-private` and the owned `kind` network, publishes no
+host port and receives no Docker socket or host administrator kubeconfig.
 
-Connected tool preparation is explicit and installs into the chosen tool cache,
-not a global PATH or home configuration:
+The worker must prove its demoted identities cannot read supervisor secrets,
+verify the namespace UID/owner and reject invalid or expired leases. Kubectl
+uses the dedicated credential-only UID 65533; ordinary isolated child work uses
+UID 65534, and fixture Pods use UID 65532 without service-account token mounts.
+Learner YAML cannot select arbitrary images, commands, namespace identities,
+host paths, plugins, proxy settings or credentials.
 
-```text
-python scripts/prepare_kubernetes.py tools --allow-download
-```
+## Lifecycle and cleanup evidence
 
-Build the tiny fixture and optional worker only after the resource/download
-preflight is approved. Both Dockerfiles accept a previously qualified
-`DS60_PYTHON_IMAGE` base override. Building is a separate action; no job Run
-performs an image pull or dependency installation.
+Prepare requests a 15-minute token and records the returned expiry. Inspection
+requires enough remaining lifetime for the longest work deadline and cleanup.
+A stopped browser or container does not extend it. An expired session needs
+scoped release and fresh explicit preparation, not timestamp edits or an
+ambient admin fallback.
 
-```text
-docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
-docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.0 .
-```
+Each Run records resource identities, owner and a private nonce. Deletion uses
+UID preconditions; ambiguous create responses can be recovered only under the
+same owned identity. Work and cleanup have separate deadlines. A cleanup result
+that cannot prove absence stays failed. SIGTERM requests bounded cancellation
+before shutdown, and the Compose worker has a 30-second stop grace period.
 
-Use the local engine endpoint reported by the existing launcher doctor. For
-Rancher Desktop on macOS, the common endpoint is the user's `.rd/docker.sock`;
-other engines may use a different socket. This is an example only when that is
-the engine you selected:
+Host release checks the full recorded node container ID, kind owner label and
+namespace UID. It preserves replacements and ambiguous resources, proves the
+owned node is absent, then removes credential files. It does not delete learner
+volumes, shared networks or unrelated engine resources. Partial preparation
+retains private recovery evidence; do not replace identity checks with a broad
+name-based cleanup.
 
-```bash
-python scripts/prepare_kubernetes.py prepare --confirm-create \
-  --docker-host "unix://$HOME/.rd/docker.sock" --allow-node-download
-```
-
-On Windows, run the same Bash/Python preparation inside WSL 2 and use the
-Unix-socket endpoint reported by Docker in that Linux terminal.
-
-`--allow-node-download` is required only when the pinned node bytes are absent.
-The fixture must already exist locally and is explicitly loaded into the owned
-kind node. Where the official registry path has a certificate-chain failure, an
-explicit mirror option is accepted only with the **same** release/index digest:
-
-```text
---node-image mirror.gcr.io/kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5
-```
-
-The helper prints the private session path and nonsecret status; it never prints
-the token, admin certificate or kubeconfig contents. Keep that directory outside
-`.learning`, source, exported notes and backups. Save the returned
-`DS60_K8S_SESSION_DIR` value in the launching shell. Both optional Compose routes
-mount the lease and scoped kubeconfig from this explicit directory. Their
-worker HTTP credential comes from different storage:
-
-- The primary Docker classroom uses `compose.classroom.kubernetes.yaml` with
-  `compose.classroom.yaml`. Its initializer owns the private `classroom-runtime`
-  named volume, shared read-only with the app and broker. This route does not
-  require `DS60_MODULE_RUNTIME_DIR`.
-- The older host-folder launcher uses `compose.kubernetes.yaml` with its module
-  Compose files. It mounts the `worker-token` file beneath the explicit
-  `DS60_MODULE_RUNTIME_DIR` prepared by that launcher.
-
-Keep each route's matching initializer, credential storage and Compose files
-together. Neither broker publishes a host port or receives a daemon socket or
-host administrator kubeconfig. It joins only the module-private network and the
-kind network needed for its owned internal API endpoint.
-
-The worker must prove that demoted UIDs65533 and65534 cannot read the original
-supervisor credentials, verify the namespace UID/owner against its private
-lease, and disable readiness when that probe or lease becomes invalid. Kubectl
-runs as the separate credential-only UID65533. Learner YAML cannot choose an
-image, command, namespace, host path, plugin, proxy, context or credential.
-
-The original hello path supports the fixed-name Deployment and optional Service;
-the contract-2 extension below adds a bounded ConfigMap and a standalone finite task.
-It verifies controller and Ready Pod identities, deduplicated ready EndpointSlice
-Pod UIDs, and a fresh in-cluster `/version` client when a Service is supplied.
-The client is a fixed broker-created Job; users cannot submit arbitrary Jobs.
-Every Run cleans only its recorded owner+job-nonce+UID resources, including
-readback recovery when creation committed but its response was lost. Deletion
-sends an API UID precondition. The private cluster lease remains until explicit
-host release. Rolling revisions, Pod-deletion tasks and second-Service transfer
-remain scoped manual/teacher exercises in this initial adapter.
-
-Release only the exact owned session after checking its receipt:
-
-```text
-python scripts/prepare_kubernetes.py release --session <PRIVATE_SESSION_PATH> --confirm-release
-```
-
-The helper checks the control-plane container ID, kind ownership label and
-namespace UID before deletion. A replacement or ambiguous object is preserved.
-It confirms the owned node is absent before removing its credential files.
-Shared networks, public image caches, learner source/evidence and unrelated
-containers remain intact. A failed partial preparation retains a private
-recovery receipt; where the exact created node identity was recorded, cleanup
-is attempted only for that unchanged node. Unproved partial state requires
-explicit inspection rather than a broad delete-all or engine reset.
-
-
-The [module runtime walkthrough](../../docs/modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab)
-connects build, private host preparation, explicit-session start, stop and
-release. Prepare after building because the scoped lease lasts15 minutes.
-Release/failed-preparation cleanup targets only the recorded 64-character hexadecimal Docker
-node ID. It does not run a name-based global kind cleanup or remove shared
-networks. Same-name replacements and ambiguous engine failures preserve the
-private recovery evidence.
-
+Source tests and image definitions do not establish a working cluster. Record
+actual build, preload, lease, positive/negative operation, cancellation and
+cleanup evidence on the platform being qualified. The CI fixture is disposable;
+its cleanup command is not a learner-data deletion recipe. Use
+[validation](../../docs/validation.md) for maintained qualification commands.
 
 ## Fixture contract 2 and bounded ordinary labs
 

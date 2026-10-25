@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 </tbody></table></div>
 <p>The additive loader requires a route to cover all three stages. A partial proposal belongs in design documentation until its complete route is ready; do not pad the plan with meaningless entries to satisfy validation. Plan rows can describe not-yet-authored work, but only complete authored bundles may enter <code>lessons.json</code>. Learners must be able to distinguish planned from authored work.</p>
-<p>For the original Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark subjects, edit their existing <code>docs/expansion/plans/</code> metadata instead of adding a second plan. The original design graph remains a route input. Java is a useful additive example; inspect <code>courses/java/track.json</code> and <code>lessons.json</code>.</p>
+<p>For the original Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark subjects, edit their existing <code>docs/expansion/plans/</code> metadata instead of adding a second plan. <code>module_plans.load_core_plans</code> validates these five core plans before the module catalog validates their complete prerequisite graph. They are maintained route inputs, not a design-preview application. Java is a useful additive example; inspect <code>courses/java/track.json</code> and <code>lessons.json</code>.</p>
 <p><code>courses/&lt;subject&gt;/lessons.json</code> has <code>schema_version</code>, <code>track_id</code> and <code>lessons</code>. Each admitted practice record has exactly these fields:</p>
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
   <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-001&quot;</span><span class="syntax-punctuation">,</span>
@@ -255,6 +255,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td><code>main.js</code>, opaque browser preview with bundled D3 7.9.0 and inline local data</td>
 </tr>
 <tr>
+<td><code>html-browser</code></td>
+<td>One complete HTML document with embedded CSS and bounded inline JavaScript in the isolated offline preview</td>
+</tr>
+<tr>
+<td><code>php-cli</code></td>
+<td><code>main.php</code>, PHP syntax check then execution with prepared PDO SQLite; no HTTP server or Composer channel</td>
+</tr>
+<tr>
+<td><code>cuda-cpp</code></td>
+<td><code>main.cu</code>, reviewed CUDA C++20 compilation and device execution; optional NVIDIA profile</td>
+</tr>
+<tr>
+<td><code>cuda-python</code></td>
+<td>Python with prepared CuPy; optional NVIDIA profile with real device probing</td>
+</tr>
+<tr>
+<td><code>pytorch-cuda</code>, <code>tensorflow-cuda</code></td>
+<td>Python with the named prepared framework, explicit GPU allocation and no silent CPU readiness fallback</td>
+</tr>
+<tr>
 <td><code>java21</code></td>
 <td><code>Main.java</code>, public <code>Main</code> class, no package declaration, Java 21 assertions</td>
 </tr>
@@ -297,7 +317,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Fixed argv, preparation and typed checks</td>
-<td><code>worker_operations.py</code> and reviewed adapters</td>
+<td><code>worker_operations.py</code>, <code>gpu_runtime.py</code> and reviewed adapters</td>
 </tr>
 <tr>
 <td>External resource ownership</td>
@@ -312,8 +332,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td><code>scripts/classroom.sh</code> profile/service map and launcher tests</td>
 </tr>
 <tr>
+<td>Image selection and distribution</td>
+<td><code>scripts/classroom_images.sh</code>, <code>docker/classroom-images.tsv</code>, publisher tests and manual publication matrix</td>
+</tr>
+<tr>
+<td>Formatting and static checks</td>
+<td><code>scripts/format_repo.py</code>, <code>scripts/lint_repo.py</code>, <code>docker/formatting/</code> and their tests</td>
+</tr>
+<tr>
 <td>Portable packaging</td>
-<td><code>desktop.py</code>, starter archive allowlist and packaging tests</td>
+<td><code>course_paths.py</code>, <code>scripts/course_payload.py</code>, <code>scripts/build_starter.py</code> and packaging tests</td>
 </tr>
 </tbody></table></div>
 <p>Python filenames are under <code>src/ds60sqlpy/</code>. A new subject that reuses an existing profile does not need a new image or launcher service.</p>
@@ -323,8 +351,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>classroom.py</code> derives subjects, lessons and guide links from the loaders. <code>classroom.js</code> supplies their common interface. Add a distinct accessible theme keyed by subject ID, a visible label and both light/dark checks. Save or retain recoverable drafts before switching contexts. Viewing an earlier result must not execute code or replace current source.</p>
 <p>Use explicit LaTeX and tagged code fences. Run the subject authoring generator when relevant, then <code>python scripts/normalize_lesson_prose.py --write</code>, shared generation and the publication rendering gate. Do not hand-edit HTML or change reference code to resolve a display defect.</p>
 <p>Run <code>python scripts/check_modules.py</code>, relevant subject tests, actual reference programs and typed verifiers in the prepared runtime. Review browser guide, source, reveal, error output, variant switching and save/reload behavior. Registration changes also need read-only MCP discovery and prerequisite checks. Run the grouped suite with <code>python -m pytest -n 4 --dist loadgroup</code> after integration. See <a href="../validation.md.html">validation</a> for all release gates.</p>
-<p>Browser-only profiles require a real browser path instead of an ordinary worker claim. The D3 precedent uses <code>javascript-browser</code>, a sandboxed opaque-origin iframe, bundled library, source-bound client observations and dedicated UI qualification. Such records remain explicitly unverified and have no worker return code or typed checks. Preserve drafts and history without automatic replay. A Docker/cluster reading lesson must never gain engine or ambient cluster access merely to make its Run button available.</p>
+<p>Browser-only profiles require a real browser path instead of an ordinary worker claim. HTML documents preserve native parsing, classic lexical scope and lifecycle behavior. Preview text in a guide must stay escaped, not executed. Live mode is an explicit page-session opt-in: it debounces edits, preserves editor focus, cancels on navigation, and never automatically writes immutable observations. Manual Run and Save observation have separately tested source identities. The D3 precedent uses <code>javascript-browser</code>, a sandboxed opaque-origin iframe, bundled library, source-bound client observations and dedicated UI qualification. Such records remain explicitly unverified and have no worker return code or typed checks. Preserve drafts and history without automatic replay. A Docker/cluster reading lesson must never gain engine or ambient cluster access merely to make its Run button available.</p>
 <p>When introducing a new ordinary runtime profile, add a small deterministic cataloged reference to <code>CASES</code> in <code>scripts/check_classroom_profiles.py</code> and to the container workflow&#x27;s grouped profile matrix. The check requires actual source-bound reference execution, declared typed checks and readback after container replacement without rerunning. Generic references validate their assertions and expected output; specialized typed checks are an additional contract only where registered. A subject reusing an existing runtime needs its lesson tests, not another runtime image. The supported implementation and release target is Linux containers, with Windows using WSL 2. Do not add native Windows runtime, private-ACL or executable-build gates for a new subject.</p>
+<p>Optional GPU profiles are deliberately outside ordinary defaults and <code>--all</code>. Use explicit device selection, version/capability checks and real allocation, kernel and readback probes. Keep reading and CPU-model alternatives available without calling them CUDA execution. Compile-only acceptance, device correctness, profiling and multi-GPU operation require different evidence. GPU Spark is an owned external workflow with compatible plugin/Spark/Scala/JDK/CUDA versions; supported SQL/DataFrame operators are not arbitrary accelerated UDFs.</p>
 <p>Record what ran, on which revision and platform, and what remains unverified. A configured profile, container build or one architecture&#x27;s success is not acceptance on every operating system. Preserve learning volumes and unrelated workloads when removing test resources.</p></article>
   </main>
 </body>

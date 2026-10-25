@@ -200,18 +200,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li>Keep the lesson script, companion guide, Markdown solution, executable solution when present, catalog-builder inputs, and generated catalog entry aligned.</li>
 <li>Use Markdown solutions for explanation and <code>.sql</code> solutions for executable coverage.</li>
-<li>Assume the learner has never used a database client. Every companion guide must lead with <code>## How to run this lesson</code>, identify the unified <code>/classroom</code> workflow and its capability notice, and name the disposable <code>advanced_sql_training</code> database. Preserve the separately labeled optional private-reader <strong>Create/open guided SQL notebook</strong> action and repository-root <code>psql -X -v ON_ERROR_STOP=1</code> fallback for prepared native environments.</li>
+<li>Assume the learner has never used a database client. Every companion guide must lead with <code>## How to run this lesson</code>, identify the unified <code>/classroom</code> workflow and its capability notice, and name the disposable <code>advanced_sql_training</code> database. Preserve the separately labeled optional contributor SQL notebook generation and repository-root <code>psql -X -v ON_ERROR_STOP=1</code> route for an explicitly prepared local database. Do not advertise a native editor-launch button or host installation to Docker learners.</li>
 <li>Explain every new clause and the query&#x27;s logical row-shaping sequence. Worked examples must state the starting row grain, expected columns/rows, NULL and ordering assumptions, and what evidence proves the query behaved correctly.</li>
 <li>In every exercise contract, name the actual identity columns for the outer row grain and list projected columns explicitly. Do not use <code>*</code>, unnamed-key placeholders, a measure as a supposed unique identity, or a nested window/subquery clause as the final <code>ORDER BY</code>.</li>
 <li>Markdown solutions must explain each clause or statement, intermediate row shape, tempting wrong approaches, verification queries, and rollback or persistence behavior instead of only displaying a final query.</li>
 <li>End every guide with the copy-ready, lesson-specific <code>## Ask an AI tutor about this lesson</code> block defined in <code>docs/content-authoring.md</code>; coaching is optional and may not compensate for missing course prose.</li>
 <li>Do not claim an executable solution exists when only prose is present.</li>
 <li>Use repository-root commands in documentation.</li>
-<li>Provide PowerShell-safe alternatives for pipes, file redirection, and API examples.</li>
+<li>Use the same Bash commands on Linux, macOS and Windows through WSL 2; keep contributor database commands separate from ordinary Docker learning.</li>
 <li>Meet the immutable <code>curriculum/practice_baseline.json</code> target on the learner SQL, guide, and explanatory solution. Number distinct prompts consistently across surfaces and explain each solution statement/clause rather than merely presenting a final query.</li>
 </ul>
 <h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
-<p>Start from a freshly reset disposable database:</p>
+<p>Only after explicitly preparing an owned disposable database, this reset/check sequence is available. It destroys the existing course <code>training</code> schema:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
@@ -229,7 +229,7 @@ python scripts/audit_lesson_depth.py</code></pre>
 <li>Catalog and solution availability are accurate.</li>
 </ul>
 <p>When an artifact filename, stateful group, or solution availability changes, run <code>python scripts/build_catalog.py</code> before validation.</p>
-<p>The generated SQL notebook boundary lives in <code>src/ds60sqlpy/sql_notebook.py</code>. It accepts stable catalog identity only, writes under ignored <code>.learning/sql/</code>, refuses symlink/path escapes, and restricts execution to <code>advanced_sql_training</code>. Portal code may consume the returned notebook path but must not add arbitrary path, SQL, connection, or shell parameters.</p></article>
+<p>The generated SQL notebook boundary lives in <code>src/ds60sqlpy/sql_notebook.py</code>. It accepts stable catalog identity only, writes under ignored <code>.learning/sql/</code>, refuses symlink/path escapes, and restricts execution to <code>advanced_sql_training</code>. The contributor notebook command must not add arbitrary path, SQL, connection or shell parameters. This is a separate prepared workflow, not a browser native-process API.</p></article>
   </main>
 </body>
 </html>

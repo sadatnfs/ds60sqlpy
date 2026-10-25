@@ -315,12 +315,13 @@ def test_learner_has_answer_free_check_and_solution_completes_it() -> None:
 
 def test_cross_platform_guide_and_reasoning_contract() -> None:
     guide = GUIDE.read_text(encoding="utf-8")
-    assert "# Windows PowerShell" in guide
-    assert "# macOS/Linux" in guide
-    assert r"& .\scripts\bootstrap_windows.ps1 -Profile Advanced" in guide
-    assert "& $CoursePython -m jupyter lab" in guide
-    assert ".venv/bin/python -m jupyter lab" in guide
-    assert "$env:DS60_DATABASE_URL = Read-Host" in guide
+    assert "Windows WSL 2" in guide
+    assert "./classroom status" in guide
+    assert "uv sync --frozen --python 3.12" in guide
+    assert "--extra sql-notebooks" in guide
+    assert "uv run --no-sync python -m jupyter lab" in guide
+    assert "--name ds60sqlpy" in guide
+    assert "export DS60_DATABASE_URL" in guide
     assert "read -r -s" in guide
     assert "code ." in guide
     assert "validate_course_database_target" in guide

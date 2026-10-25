@@ -12,8 +12,8 @@ Compose and run `./classroom`. Windows uses WSL 2. The
 [one-command guide](docs/one-command-classroom.md) covers installation, logs,
 profiles, storage and recovery. No host language toolchain is needed for the
 ordinary Docker route. The supported delivery target is Linux containers.
-Native Windows runtimes and native executable builds are not release gates;
-Windows contributors use the WSL 2 Linux environment.
+Windows contributors use the WSL 2 Linux environment. The product has one
+classroom UI; native executable installers and editor-launch services are retired.
 
 For application development or content generation, use Python 3.12 and the
 checked-in dependency lock. From the repository root, with `uv` installed:
@@ -26,11 +26,26 @@ uv run --no-sync python scripts/check_modules.py
 
 Run these commands in Linux or WSL 2. `uv run --no-sync` uses the prepared
 environment without activating it. Node.js is needed for the UI behavior
-checker. Optional framework and compiler checks use their declared container
-profiles; do not install every large dependency for an unrelated docs edit.
-Retained native setup scripts are unsupported compatibility conveniences.
+checker, with Node.js 24 used by CI. Optional framework and compiler checks use
+their declared container profiles; do not install every large dependency for an
+unrelated docs edit. The optional repository Serena configuration indexes the
+maintenance sources; it does not require host SDKs for every taught language.
 See [dependency profiles](docs/dependency-profiles.md) and
 [validation](docs/validation.md).
+
+For a contributor-only loopback server using this same prepared Python environment:
+
+```sh
+uv run --no-sync python scripts/course.py serve --no-browser
+```
+
+The installed equivalent is `ds60 serve`. Use `--port PORT` to choose a port;
+`--python PATH` explicitly selects the interpreter for supported local execution.
+Put the global `--repo PATH` option before `serve` when selecting a checkout.
+This serves the unified classroom and reports actual local/worker capabilities.
+It does not prepare Docker workers or import a Docker volume's learner state.
+Use a disposable local workspace for browser and persistence tests. For ordinary
+learning and release qualification, use `./classroom` and its prepared workers.
 
 ## Before editing
 
@@ -48,7 +63,9 @@ Find the durable source before changing a generated artifact:
 | Existing generated subject   | Its `courses/<subject>/authoring/README.md`                                                                            |
 | Browser interface            | `src/ds60sqlpy/assets/classroom.*` and `classroom.py`                                                                  |
 | Runtime adapter              | `module_jobs.py`, `worker_operations.py`, profile Dockerfile and Compose                                               |
-| Reader formatting            | `lesson_reader.py`, `reader_math.py`, `reader_content.py`                                                              |
+| Reader formatting            | `lesson_reader.py`, `reader_math.py`, `reader_content.py` |
+| Source archive and workspace staging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
+| Image selection/distribution | `docker/classroom-images.tsv`, `scripts/classroom_images.sh`, [Docker Hub](docs/dockerhub.md) |
 
 Python implementation filenames are under `src/ds60sqlpy/`. The repository
 [add-learning-path skill](.agents/skills/add-learning-path/SKILL.md) provides a
@@ -240,7 +257,12 @@ Only use disposable project resources. Preserve learner volumes during cleanup.
 Release CI checks Ubuntu Python 3.11/3.12, Linux contributor setup, PostgreSQL,
 Linux-container runtimes and Chromium, the owned Linux Kubernetes adapter and
 the portable source ZIP. Scheduled/manual advanced imports also run on Linux.
-A native Windows ACL check or executable build is not part of this matrix.
+Optional GPU and cluster profiles have separate capability and execution gates.
+A CPU model, parsed source or container build does not prove GPU operation.
+The source starter is built with `make starter` or
+`python scripts/build_starter.py --output dist/ds60-classroom-starter.zip`; it
+contains the maintained source and launcher, not Git history, learner data or
+prebuilt images. See [validation](docs/validation.md) for its release checks.
 
 ## Database and dependency changes
 

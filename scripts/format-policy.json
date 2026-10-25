@@ -453,10 +453,6 @@
     {
       "path": "docs/practice-coverage.md",
       "reason": "Generated audit report. Rebuild with scripts/audit_practice.py --write-report."
-    },
-    {
-      "path": "src/ds60sqlpy/assets/journey_preview.html",
-      "reason": "Generated preview. Format journey_preview.template.html, then run scripts/build_journey_preview.py."
     }
   ]
 }

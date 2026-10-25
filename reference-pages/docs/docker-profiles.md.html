@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Optional Python package sets and Docker runtime profiles · DS60 reference</title>
+  <title>Choose the runtime a lesson needs · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,22 +158,116 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Optional Python package sets and Docker runtime profiles</h1>
+      <h1>Choose the runtime a lesson needs</h1>
       <p class="source-path">Generated from <code>docs/docker-profiles.md</code></p>
     </header>
-    <article class="document"><h2 id="optional-python-package-sets-and-docker-runtime-profiles">Optional Python package sets and Docker runtime profiles<a class="heading-anchor" href="#optional-python-package-sets-and-docker-runtime-profiles" aria-label="Link to this section">#</a></h2>
-<p>The supported startup route is <code>./classroom</code>, with sixteen ordinary Linux workers and bundled HTML/CSS/JavaScript/D3 browser previews. Select worker profiles through the <a href="one-command-classroom.md.html">one-command guide</a>. C, Go, C#, Rust and Swift use their dedicated prepared workers, while D3 needs no compiler worker. Docker lessons and advanced Kubernetes host labs retain explicit ownership boundaries. PHP uses its prepared CLI worker. Optional NVIDIA profiles are separate from the ordinary workers; see <a href="cuda-classroom.md.html">CUDA preparation</a> for explicit device selection, reading/CPU alternatives and hardware limits.</p>
-<p>The package-set configuration below describes optional Python dependencies and retained compatibility launchers. It is not an additional prerequisite for the normal unified classroom. Windows learners use WSL 2 for the supported route.</p>
-<p>The Python app image installs Core: notebooks, data science, Python/PostgreSQL integration, professional tools, SQL notebooks, and quality tools. It keeps the first download smaller. Optional packages are installed only when you explicitly build another profile. Clicking Run never installs a missing package.</p>
-<p>The app reports two separate facts: whether its Python/SQL backend can run a snippet, and whether the selected lesson&#x27;s full package profile is present. A missing optional profile does not prevent standard-library practice. An installed package is not proof that its native imports, model files, dataset cache, GPU, external service, or full notebook workflow have been verified.</p>
+    <article class="document"><h2 id="choose-the-runtime-a-lesson-needs">Choose the runtime a lesson needs<a class="heading-anchor" href="#choose-the-runtime-a-lesson-needs" aria-label="Link to this section">#</a></h2>
+<p>A subject is a learning path. A runtime profile is the prepared environment that executes an artifact. Several subjects can share one profile, and one subject can contain reading lessons and multiple language variants.</p>
+<p>Start with <code>./classroom</code> for the saved selection. A new project prepares all sixteen ordinary workers. For a smaller installation:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter</code></pre>
+<p>This prepares the app, PostgreSQL and Python Core while keeping the complete library readable. Choose additional profiles or the full ordinary set:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --profile cpp20 --profile php-cli
+./classroom --all</code></pre>
+<p>An explicit profile list replaces the remembered selection with Core plus those names. It does not stop unselected workers already running. To reduce the active set, stop the classroom before starting the smaller selection. Always repeat your custom <code>--project NAME</code> if you use one.</p>
+<h3 id="ordinary-worker-profiles">Ordinary worker profiles<a class="heading-anchor" href="#ordinary-worker-profiles" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
-<th><code>DS60_DOCKER_PROFILES</code> value</th>
-<th>Adds to Core</th>
+<th>Profile</th>
+<th>Source contract</th>
+<th>Typical use</th>
 </tr></thead><tbody>
 <tr>
-<td><code>core</code></td>
-<td>The default package set</td>
+<td><code>python-core</code></td>
+<td>Python source / supported notebook-style cells</td>
+<td>Python, NumPy, pandas, statistics, NLP and CPU models</td>
 </tr>
+<tr>
+<td><code>cpp20</code></td>
+<td><code>main.cpp</code>, C++20</td>
+<td>C++ language and bounded systems examples</td>
+</tr>
+<tr>
+<td><code>c17</code></td>
+<td><code>main.c</code>, C17</td>
+<td>C, memory and POSIX examples</td>
+</tr>
+<tr>
+<td><code>go</code></td>
+<td><code>main.go</code> with prepared standard library</td>
+<td>Go programs and offline controller models</td>
+</tr>
+<tr>
+<td><code>csharp-dotnet</code></td>
+<td><code>Program.cs</code> in a fixed .NET project</td>
+<td>C# language and application-core examples</td>
+</tr>
+<tr>
+<td><code>rust-stable</code></td>
+<td><code>main.rs</code> with prepared Arrow dependencies</td>
+<td>Rust and columnar data</td>
+</tr>
+<tr>
+<td><code>swift-linux</code></td>
+<td><code>main.swift</code> with an explicit entry point</td>
+<td>Portable Swift and Foundation</td>
+</tr>
+<tr>
+<td><code>java21</code></td>
+<td><code>Main.java</code> with public <code>Main</code></td>
+<td>Java and prepared JVM libraries</td>
+</tr>
+<tr>
+<td><code>javascript-node</code></td>
+<td><code>main.mjs</code></td>
+<td>Node JavaScript</td>
+</tr>
+<tr>
+<td><code>typescript-node</code></td>
+<td><code>main.mts</code>, strict NodeNext checking</td>
+<td>TypeScript compiled for Node</td>
+</tr>
+<tr>
+<td><code>tensorflow-cpu</code></td>
+<td>Python with prepared TensorFlow</td>
+<td>TensorFlow/Keras CPU lessons</td>
+</tr>
+<tr>
+<td><code>llm-torch-cpu</code></td>
+<td>Python with prepared PyTorch</td>
+<td>PyTorch and tensor-based LLM CPU lessons</td>
+</tr>
+<tr>
+<td><code>scala-jvm</code></td>
+<td><code>Main.scala</code> with <code>object Main</code></td>
+<td>Scala language foundations</td>
+</tr>
+<tr>
+<td><code>spark-local-scala</code></td>
+<td>Scala application in local Spark</td>
+<td>Scala/Spark batch and bounded streaming</td>
+</tr>
+<tr>
+<td><code>spark-local-python</code></td>
+<td>Python application in local Spark</td>
+<td>PySpark variants</td>
+</tr>
+<tr>
+<td><code>php-cli</code></td>
+<td><code>main.php</code> with PDO SQLite</td>
+<td>PHP language and application-core examples</td>
+</tr>
+</tbody></table></div>
+<p>PostgreSQL is included with the classroom, not an additional worker flag. HTML/CSS and browser JavaScript/D3 use the bundled preview and need no separate compiler worker. Their <code>html-browser</code> and <code>javascript-browser</code> labels are not launcher <code>--profile</code> selections.</p>
+<p>A ready worker establishes its declared runtime is available. Read each lesson&#x27;s package, fixture and resource requirements before treating that as evidence for a larger project. Run does not install dependencies.</p>
+<h3 id="optional-gpu-and-cluster-environments">Optional GPU and cluster environments<a class="heading-anchor" href="#optional-gpu-and-cluster-environments" aria-label="Link to this section">#</a></h3>
+<p>NVIDIA profiles <code>cuda-cpp</code>, <code>cuda-python</code>, <code>pytorch-cuda</code> and <code>tensorflow-cuda</code> are excluded from ordinary startup and <code>--all</code>. They need explicit device selection and compatible hardware, driver and container support. Follow <a href="cuda-classroom.md.html">CUDA setup</a> and the selected variant&#x27;s instructions. CPU workers remain CPU environments on a GPU-equipped host.</p>
+<p>Kubernetes uses a separately prepared owned cluster and scoped capabilities. The classroom receives neither the engine socket nor an ambient cluster configuration. Follow <a href="modules-runtime.md.html#prepare-and-run-the-owned-kubernetes-lab">Kubernetes setup</a>.</p>
+<p>Real web servers, multi-file C++ projects, Apple app development, long model training and larger Spark clusters are explicit project workflows. A single-source pad does not implicitly provide their additional capabilities.</p>
+<h3 id="optional-python-package-sets-for-local-builds">Optional Python package sets for local builds<a class="heading-anchor" href="#optional-python-package-sets-for-local-builds" aria-label="Link to this section">#</a></h3>
+<p>The app and Python Core worker use locked Core extras: notebooks, data, bridge, quality, professional and SQL notebooks. Advanced Python lessons can declare additional package groups.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Package group</th>
+<th>Examples of additional libraries</th>
+</tr></thead><tbody>
 <tr>
 <td><code>ml</code></td>
 <td>XGBoost, LightGBM, SHAP, LIME, pmdarima, imbalance tools, Numba</td>
@@ -184,7 +278,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td><code>deep-learning</code></td>
-<td>PyTorch and torchvision</td>
+<td>PyTorch and torchvision for the relevant Python examples</td>
 </tr>
 <tr>
 <td><code>nlp</code></td>
@@ -196,27 +290,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td><code>advanced</code></td>
-<td>All five optional lesson groups above</td>
+<td>All five groups above</td>
+</tr>
+<tr>
+<td><code>mcp</code></td>
+<td>Optional stdio tutoring adapter dependency</td>
 </tr>
 </tbody></table></div>
-<p>You can combine names, for example <code>deep-learning,nlp</code>. Other exact optional extras declared in <code>pyproject.toml</code>, such as <code>mcp</code>, can also be selected. Unknown names, URLs and installer arguments are rejected before installation. Core remains included.</p>
-<h3 id="build-the-package-set-you-need">Build the package set you need<a class="heading-anchor" href="#build-the-package-set-you-need" aria-label="Link to this section">#</a></h3>
-<p>Copy <code>.env.example</code> to <code>.env</code> if you do not already have <code>.env</code>. Preserve any existing settings. Set these values:</p>
-<pre class="highlighted-code"><code class="language-dotenv">DS60_DOCKER_PROFILES=deep-learning,nlp
-DS60_LAB_MEMORY=4g</code></pre>
-<p>Build explicitly, then start. From Windows PowerShell, with no Python or Git prerequisite:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DOCKER_LAB<span class="syntax-punctuation">.</span>cmd -Action build
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DOCKER_LAB<span class="syntax-punctuation">.</span>cmd -Action start</code></pre>
-<p>From macOS, Linux, or a WSL shell:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/docker_lab.sh start --build</code></pre>
-<p>These commands build locally. They do not push an image. Changing <code>.env</code> without rebuilding does not add or remove Python packages. Rebuilding replaces the local image tag; restarting recreates the app&#x27;s official course copy while retaining the host <code>.learning</code> directory and database volume. See <a href="offline-app.md.html">persistent storage</a> before moving or backing up a course folder.</p>
-<p>All selected extras come from the frozen <code>uv.lock</code>. Linux and Windows locked environments use the official CPU-only PyTorch index; macOS retains its platform-specific wheel choices. The default Compose service does not request a GPU. GPU drivers, compatible GPU wheels, container device access, and GPU validation require a separate explicit setup. The <a href="https://docs.astral.sh/uv/guides/integration/pytorch/">official uv PyTorch integration guide</a> explains the index distinction. Unlocked pip installation does not use <code>tool.uv.sources</code> and may choose different wheels.</p>
-<h3 id="memory-downloads-and-offline-work">Memory, downloads and offline work<a class="heading-anchor" href="#memory-downloads-and-offline-work" aria-label="Link to this section">#</a></h3>
-<p>Core limits the app container to <code>2g</code> by default. <code>DS60_LAB_MEMORY</code> changes that container limit; it does not add physical RAM or increase the engine VM&#x27;s allocation. Choose a value within your engine and host capacity. Long training jobs can still exceed the selected 15, 60 or 120 second coding-pad limit; use the notebook workflow for longer work.</p>
-<p>Advanced is substantially larger. The repaired Linux arm64 proof image reported 1,257,193,256 bytes (about 1.26 GB) through Docker image inspection. Separately, BuildKit reported about 4.5 GB for an unpacked dependency build-cache record and 3.4 GB for its shared package cache. Those build-cache records include retained intermediate work and are not the final image size or an amount you can simply add to it. Repeated rebuilds need additional temporary disk space. These observations cover one architecture and lock, not universal size guarantees. Select the groups you need and inspect available space before building. Do not broadly prune another project&#x27;s images, volumes or cache to make room.</p>
-<p>Package installation does not download pretrained models, trained spaCy pipelines, map tiles or every example dataset. Prepare the exact assets described by the lesson before disconnecting. Container home and caches live below the host <code>.learning</code> directory; paths and first-run downloads chosen by learner code still matter. Inspect the lesson&#x27;s network hint. <code>HF_HUB_OFFLINE=1</code> and the library-specific offline settings can verify a prewarmed Hugging Face workflow without silently fetching a missing model.</p>
-<p>The browser runs an ordinary Python program, marked notebook cells, or a guarded whole SQL script. Notebook starters preserve <code># %%</code> boundaries; with IPython installed, cells and magics run in sequence with one shared namespace inside that Run, including inline PNG plots. Each Run starts a fresh process. Persistent kernels, interactive services, infrastructure changes, privileged server exercises and long training have their own notebook or external workflows. Registering a C++, Scala, or Kubernetes lesson does not install an execution adapter; unavailable adapters support reading and saved source without claiming a successful run.</p>
-<p>The Advanced Linux arm64 proof imported the optional package groups with networking disabled and ran tiny CPU autograd, randomly initialized BERT, blank spaCy, and geospatial geometry checks. It downloaded no pretrained model. That proof does not establish native Windows/macOS imports, GPU execution, trained-model quality, or production service acceptance.</p></article>
+<p>These package groups differ from worker names. For example, <code>tensorflow-cpu</code> selects a dedicated worker, while <code>DS60_DOCKER_PROFILES=ml</code> changes packages installed in a locally built app/Core image.</p>
+<p>Preserve existing settings when adding <code>DS60_DOCKER_PROFILES</code> to your ignored <code>.env</code> file, then rebuild deliberately. An explicit one-command example is:</p>
+<pre class="highlighted-code"><code class="language-bash">DS60_DOCKER_PROFILES<span class="syntax-operator">=</span>ml ./classroom --starter --local-build --rebuild</code></pre>
+<p>That assignment applies to that command. Retain the group in your settings for later rebuilds if needed. Only declared extras from <code>uv.lock</code> are installed; package-source strings and arbitrary installer arguments are rejected.</p>
+<p>Published Hub images have the publisher&#x27;s prepared package set. Editing a local build setting does not add packages to a pulled image. Use the release&#x27;s capability contract or make a deliberate local build.</p>
+<h3 id="resources-and-offline-use">Resources and offline use<a class="heading-anchor" href="#resources-and-offline-use" aria-label="Link to this section">#</a></h3>
+<p>A container&#x27;s memory limit is different from the engine VM&#x27;s available memory. <code>DS60_LAB_MEMORY</code> controls the app container; worker limits and total engine allocation are separate. Choose fewer profiles when RAM or disk is constrained.</p>
+<p>Package installation does not download every model, tokenizer or dataset. Prepare assets through the lesson&#x27;s workflow and keep their storage separate from temporary job files. The named learning volume preserves classroom work; it does not automatically preserve arbitrary temporary caches or checkpoints.</p>
+<p>See <a href="setup/offline.md.html">offline preparation</a>, <a href="dockerhub.md.html">image distribution</a> and <a href="one-command-classroom.md.html">the launcher guide</a> for the corresponding steps.</p></article>
   </main>
 </body>
 </html>

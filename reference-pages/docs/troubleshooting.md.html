@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Troubleshooting · DS60 reference</title>
+  <title>Classroom troubleshooting · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,243 +158,66 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Troubleshooting</h1>
+      <h1>Classroom troubleshooting</h1>
       <p class="source-path">Generated from <code>docs/troubleshooting.md</code></p>
     </header>
-    <article class="document"><h2 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h2>
-<blockquote><p>For the supported Docker classroom, begin with <code>./classroom doctor</code>, <code>./classroom status</code> and <code>./classroom logs</code> from Linux, macOS or WSL 2. See <a href="one-command-classroom.md.html">the one-command guide</a>. Native host diagnostics below are retained compatibility references, outside product support.</p></blockquote>
-<p>Start from the repository root and run:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py doctor</code></pre>
-<p>If <code>python</code> points elsewhere, use the repository interpreter directly. On Windows PowerShell, resolve the standard-<code>venv</code> or conda-prefix layout once per window:</p>
-<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<p>On macOS/Linux, run <code>.venv/bin/python scripts/course.py doctor</code>.</p>
-<p>For the difference between <code>.venv</code>, disposable caches, offline model data, learner progress, and Docker state, see <a href="local-files-and-caches.md.html">Local environments and caches</a>.</p>
-<h3 id="file-not-found-for-requirements-scripts-notebooks-or-sql">“File not found” for requirements, scripts, notebooks, or SQL<a class="heading-anchor" href="#file-not-found-for-requirements-scripts-notebooks-or-sql" aria-label="Link to this section">#</a></h3>
-<p>You are probably in the wrong directory.</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>README<span class="syntax-punctuation">.</span><span class="syntax-builtin">md</span>
-<span class="syntax-builtin">Get-Location</span></code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">test</span> -f README.md
-pwd</code></pre>
-<p>Change to the directory containing the root README and retry.</p>
-<h3 id="python-or-py-is-not-found"><code>python</code> or <code>py</code> is not found<a class="heading-anchor" href="#python-or-py-is-not-found" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Windows: do not reinstall merely because an existing Python or Anaconda installation is missing from <code>PATH</code>. From the repository root, run the read-only discovery preview first:</li>
-</ul>
-<pre class="highlighted-code"><code class="language-powershell">  <span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-  <span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql -WhatIf</code></pre>
-<p>If it finds a supported Python, Anaconda, or Miniconda installation, rerun without <code>-WhatIf</code> to prepare the repository environment. Only if discovery reports that no supported interpreter exists should you install Python 3.12 manually or explicitly preview the optional winget path with <code>&amp; .\scripts\bootstrap_windows.ps1 -SkipPostgreSql -InstallMissingWithWinget -WhatIf</code>.</p>
-<ul>
-<li>macOS/Linux: run <code>python3.12 --version</code>; do not replace the operating system’s Python.</li>
-<li>In VS Code: select the repository <code>.venv</code> from <strong>Python: Select Interpreter</strong>.</li>
-</ul>
-<h3 id="virtual-environment-creation-fails">Virtual environment creation fails<a class="heading-anchor" href="#virtual-environment-creation-fails" aria-label="Link to this section">#</a></h3>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql -WhatIf
-<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -SkipPostgreSql</code></pre>
-<p>The preview discovers Python.org and Anaconda/Miniconda installations before the real run chooses either the standard <code>venv</code> layout or the conda-prefix fallback. It does not delete a partial environment.</p>
-<p>Linux may need the venv package:</p>
-<pre class="highlighted-code"><code class="language-bash">sudo apt-get install python3.12-venv</code></pre>
-<p>Remove a partially created <code>.venv</code> only after confirming it is the repository environment and contains no work you need.</p>
-<h3 id="powershell-refuses-to-activate-the-environment">PowerShell refuses to activate the environment<a class="heading-anchor" href="#powershell-refuses-to-activate-the-environment" aria-label="Link to this section">#</a></h3>
-<p>Activation is not required:</p>
-<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<p>For a temporary activated session:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-<span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>Activate<span class="syntax-punctuation">.</span>ps1</code></pre>
-<p>The activation script exists only in the standard <code>venv</code> layout. The conda-prefix fallback continues to use <code>&amp; $CoursePython ...</code>. Do not change machine-wide execution policy for this course.</p>
-<h3 id="a-package-installs-but-the-notebook-cannot-import-it">A package installs but the notebook cannot import it<a class="heading-anchor" href="#a-package-installs-but-the-notebook-cannot-import-it" aria-label="Link to this section">#</a></h3>
-<p>The terminal interpreter and notebook kernel differ.</p>
+    <article class="document"><h2 id="classroom-troubleshooting">Classroom troubleshooting<a class="heading-anchor" href="#classroom-troubleshooting" aria-label="Link to this section">#</a></h2>
+<p>Start from the failing machine and the exact command and error. A successful run on another computer does not establish this computer&#x27;s engine state. Keep saved volumes intact while diagnosing. Run commands from the course folder in Bash on macOS/Linux or Ubuntu in Windows WSL 2.</p>
+<h3 id="first-checks">First checks<a class="heading-anchor" href="#first-checks" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">docker context show
+docker info --format <span class="syntax-string">&#x27;{{.OSType}}&#x27;</span>
+docker compose version
+./classroom doctor
+./classroom status</code></pre>
+<p>Use the same <code>--project NAME</code> on classroom commands if you chose a custom project. Keep useful error lines and runtime versions; do not share environment files, credentials, tokens or full database URLs.</p>
+<h3 id="the-engine-is-unavailable">The engine is unavailable<a class="heading-anchor" href="#the-engine-is-unavailable" aria-label="Link to this section">#</a></h3>
+<p>Start Docker Desktop or Rancher Desktop and wait for its engine to become ready. On Linux, check the installed Docker service and your user&#x27;s access. <code>docker version</code> must show a server as well as a client. A remote Docker context is not the supported local-browser setup. Rancher Desktop must use <strong>Moby</strong>, since its containerd mode uses a different tool interface.</p>
+<p>On Windows, use WSL 2 and enable your engine&#x27;s integration with the Ubuntu distribution you are running. Check <code>wsl --list --verbose</code> from Windows Terminal. Do not install a second competing daemon inside Ubuntu just to hide an integration problem. See the <a href="setup/windows.md.html">Windows guide</a>.</p>
+<p>On Linux, follow the engine&#x27;s documented permissions setup. Do not make the Docker socket writable by everyone or run the entire classroom as root. Membership in the Docker group carries substantial host privileges.</p>
+<h3 id="compose-rejects-the-configuration">Compose rejects the configuration<a class="heading-anchor" href="#compose-rejects-the-configuration" aria-label="Link to this section">#</a></h3>
+<p>The classroom needs Compose <strong>2.28.0 or newer</strong>, invoked as <code>docker compose</code>. An error involving <code>!reset</code>, unsupported service options or a missing Compose command can indicate an older or incomplete installation. Upgrade the Compose plugin through the engine&#x27;s documented installation route. A generic YAML parser is not a full Compose validator.</p>
+<h3 id="the-launcher-cannot-be-found-or-executed">The launcher cannot be found or executed<a class="heading-anchor" href="#the-launcher-cannot-be-found-or-executed" aria-label="Link to this section">#</a></h3>
+<p>Run it from the extracted folder containing <code>classroom</code> and <code>compose.classroom.yaml</code>. A ZIP viewer is not an extracted directory. If an archive or filesystem lost the executable bit, use <code>bash classroom --starter</code> or <code>chmod +x classroom</code> before retrying. Quote paths containing spaces.</p>
+<p>Windows uses Ubuntu/WSL for <code>./classroom</code>; the thin <code>.cmd</code> launcher delegates to that environment. It does not install Docker, Python or PostgreSQL. See <a href="README.md.html">OS setup</a> if the engine or WSL distribution is missing.</p>
+<h3 id="the-browser-did-not-open-or-shows-an-old-page">The browser did not open or shows an old page<a class="heading-anchor" href="#the-browser-did-not-open-or-shows-an-old-page" aria-label="Link to this section">#</a></h3>
+<p>Run <code>./classroom status</code> and open the current printed <code>/classroom</code> URL. Browser opening can be unavailable from WSL or a headless shell even when the server is healthy. A changed automatic port can make an old bookmark obsolete. Use <code>./classroom --no-browser</code> when you prefer to open it yourself.</p>
+<p>If edited source is absent, remember that an image contains the files present at build time. Install source updates deliberately with <code>./classroom --local-build --rebuild</code>. Strict <code>resume</code> intentionally does not rebuild. In Hub mode, use the publisher&#x27;s matching updated tag instead.</p>
+<h3 id="a-port-is-already-in-use">A port is already in use<a class="heading-anchor" href="#a-port-is-already-in-use" aria-label="Link to this section">#</a></h3>
+<p>The launcher normally chooses available loopback ports and remembers settings. Do not stop an unrelated service to claim its port. Choose unused ports with <code>--port</code> and <code>--database-port</code> when preparing this classroom, and use the current address reported by status. Read the <a href="one-command-classroom.md.html">one-command guide</a> before changing remembered port settings for an existing project.</p>
+<h3 id="startup-asks-for-a-build-but-i-only-want-my-previous-work">Startup asks for a build, but I only want my previous work<a class="heading-anchor" href="#startup-asks-for-a-build-but-i-only-want-my-previous-work" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom resume</code></pre>
+<p>This forbids both builds and pulls. If a required image is absent, the error identifies what must be prepared. Check that you selected the same engine, context, project and image mode. Rebuilding an image does not restore deleted volumes, and using another project does not open the original saved work.</p>
+<p>For normal reuse, <code>./classroom</code> starts existing resources and prepares only missing images. <code>--rebuild</code> is a deliberate update action. An explicit <code>--profile</code> selection replaces the remembered worker list, not the saved pads.</p>
+<h3 id="build-downloads-fail">Build downloads fail<a class="heading-anchor" href="#build-downloads-fail" aria-label="Link to this section">#</a></h3>
+<p>Read the first failing download or package step. Registry rate limits, authentication, proxy configuration, insufficient disk and TLS certificate errors are different problems. Retry only after addressing the cause. Do not disable TLS verification. The launcher provides <code>--registry mirrors</code> and <code>--registry upstream</code> for supported base-image selection; neither option repairs an untrusted certificate configuration or publishes your images.</p>
+<p>Hub mode needs an existing release tag and platform image in the selected namespace. <code>manifest unknown</code>, access denied or an unavailable architecture can mean the publisher has not supplied it. Return to local source builds with <code>--local-build</code>, or use a verified tag. See <a href="dockerhub.md.html">Hub usage</a>.</p>
+<h3 id="docker-reports-missing-parent-snapshots-or-alreadyexists">Docker reports missing parent snapshots or AlreadyExists<a class="heading-anchor" href="#docker-reports-missing-parent-snapshots-or-alreadyexists" aria-label="Link to this section">#</a></h3>
+<p>Errors such as <code>failed to prepare extraction snapshot</code>, <code>missing parent</code>, <code>target snapshot ... already exists</code> or <code>bucket: not found</code> occur in the engine&#x27;s image storage before the course runs. Repeated course-code edits do not repair that storage.</p>
 <ol>
-<li>Run:</li>
+<li>Stop retrying concurrent builds. Check engine disk space and diagnostics.</li>
+<li>Export saved learning work and the database while the engine can still read them. See <a href="docker-classroom.md.html#5-export-learning-work-and-the-database">backup instructions</a>.</li>
+<li>Restart the engine normally and retry the specific image operation.</li>
+<li>If the problem persists, use the engine vendor&#x27;s supported storage repair or reset procedure after protecting data. A factory reset or global prune can affect every project on that engine, not just this classroom.</li>
 </ol>
-<pre class="highlighted-code"><code class="language-text">   python -c &quot;import sys; print(sys.executable)&quot;</code></pre>
-<ol>
-<li>In the notebook, run:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-python">   <span class="syntax-keyword">import</span> sys
-   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">)</span></code></pre>
-<ol>
-<li>Select the repository <code>.venv</code> kernel and restart it.</li>
-</ol>
-<p>Multiple clones share the per-user <code>ds60sqlpy</code> kernel name. Check the complete <code>sys.executable</code> path. A stale registration can point to a moved or deleted folder. Repair only the registration from the intended environment:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows, after resolving $CoursePython above</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m ipykernel install <span class="syntax-punctuation">-</span>-user <span class="syntax-punctuation">-</span>-name ds60sqlpy <span class="syntax-punctuation">-</span>-display-name <span class="syntax-string">&quot;</span><span class="syntax-string">Python (ds60sqlpy)</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
-<p>Restart the kernel and verify its path again. Virtual environments should be recreated after moving them rather than copied between operating systems or folders. See <a href="https://docs.python.org/3.12/library/venv.html">Python venv</a>.</p>
-<h3 id="jupyter-is-not-found"><code>jupyter</code> is not found<a class="heading-anchor" href="#jupyter-is-not-found" aria-label="Link to this section">#</a></h3>
-<p>Use the environment’s Python:</p>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyterlab</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyterlab</code></pre>
-<p>If the module is missing, rerun the setup script and doctor.</p>
-<h3 id="package-installation-fails">Package installation fails<a class="heading-anchor" href="#package-installation-fails" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Confirm Python 3.12 is active.</li>
-<li>Upgrade installer tooling through the setup script.</li>
-<li>Read the first package error, not only the final summary.</li>
-<li>Optional heavy packages may need more disk, memory, or a platform-specific wheel.</li>
-<li>CPU is the supported default; do not install a CUDA build unless a lesson explicitly asks for it.</li>
-<li>Do not work around a failed install by putting packages into the system Python.</li>
-</ul>
-<p>If locked setup reports a stale lock, use the matching source checkout and <code>uv.lock</code>, or ask a maintainer to update the lock. Do not silently remove <code>--locked</code> during a reproducibility check. On a restrictive network, use your organization&#x27;s approved proxy/certificate setup or a prepared <a href="setup/offline.md.html#optional-package-only-offline-bundle">offline wheelhouse</a>. Do not disable TLS verification or include credentials in support commands. A source build instead of a binary wheel can indicate an unsupported Python, CPU architecture, or OS for that package.</p>
-<p>On macOS, missing <code>libomp.dylib</code> during advanced imports calls for the documented <code>brew install libomp</code> runtime. On Debian/Ubuntu, a missing <code>libgomp.so.1</code> calls for <code>libgomp1</code>. Those native runtimes are separate from Python package installation.</p>
-<h3 id="a-seaborn-dataset-fails-offline">A Seaborn dataset fails offline<a class="heading-anchor" href="#a-seaborn-dataset-fails-offline" aria-label="Link to this section">#</a></h3>
-<p>Seaborn sample data downloads on first use.</p>
-<ol>
-<li>Reconnect temporarily.</li>
-<li>Run the affected <code>sns.load_dataset(...)</code> once.</li>
-<li>Confirm the local cache exists.</li>
-<li>Retry offline.</li>
-</ol>
-<p>See <a href="setup/offline.md.html">Offline use</a>.</p>
-<h3 id="hugging-face-spacy-or-torchvision-tries-to-download">Hugging Face, spaCy, or torchvision tries to download<a class="heading-anchor" href="#hugging-face-spacy-or-torchvision-tries-to-download" aria-label="Link to this section">#</a></h3>
-<p>The model or weights are not yet cached.</p>
-<ul>
-<li>Run the disclosed preparation step while connected.</li>
-<li>Or use the lesson’s local/no-pretrained fallback.</li>
-<li>Do not claim the lesson is offline-ready merely because the Python package is installed.</li>
-</ul>
-<h3 id="psql-is-not-found"><code>psql</code> is not found<a class="heading-anchor" href="#psql-is-not-found" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Windows: first run <code>&amp; .\scripts\bootstrap_windows.ps1 -WhatIf</code>; it searches <code>PATH</code>, the registry, and versioned PostgreSQL installation directories before any install advice. Use the discovered executable in the current session, or rerun with <code>-PersistUserPath</code> only if you want the narrowly scoped user <code>PATH</code> change.</li>
-<li>macOS Homebrew: add <code>$(brew --prefix postgresql@17)/bin</code> to <code>PATH</code>.</li>
-<li>Linux: install the PostgreSQL client package.</li>
-</ul>
-<p>Then verify:</p>
-<pre class="highlighted-code"><code class="language-text">psql --version</code></pre>
-<p>The supported major version is 16 or newer.</p>
-<h3 id="postgresql-connection-is-refused">PostgreSQL connection is refused<a class="heading-anchor" href="#postgresql-connection-is-refused" aria-label="Link to this section">#</a></h3>
-<p>Confirm the server is running:</p>
-<ul>
-<li>Windows: check the PostgreSQL service in <strong>Services</strong></li>
-<li>macOS Homebrew: <code>brew services list</code></li>
-<li>Linux: <code>systemctl status postgresql</code></li>
-<li>Container: <code>docker compose ps</code> and <code>docker compose logs postgres</code></li>
-</ul>
-<p>Also check host, port, database, and role. The default port is 5432.</p>
-<h3 id="native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect">Native <code>psql</code> works, but doctor or a guided notebook cannot connect<a class="heading-anchor" href="#native-psql-works-but-doctor-or-a-guided-notebook-cannot-connect" aria-label="Link to this section">#</a></h3>
-<p>Native OS setup uses your local role, while course tools default to the Compose <code>ds60</code> connection. Select the same target as the successful native command in the terminal that starts the portal. For macOS/Linux&#x27;s normal username-and-socket route:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> DS60_DATABASE_URL<span class="syntax-operator">=</span>advanced_sql_training
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/learning_portal.py</code></pre>
-<p>For native Windows, follow the <a href="setup/windows.md.html#let-the-guided-notebook-authenticate-without-a-hidden-prompt">password-file handoff</a> and set its password-free local URL in the launching PowerShell window. Guided notebooks disable password prompts. An interactive login that asked for a password does not prove unattended authentication. See <a href="setup/postgresql.md.html">Local PostgreSQL</a>.</p>
-<h3 id="docker-sql-works-but-the-guided-notebook-says-psql-is-missing">Docker SQL works, but the guided notebook says <code>psql</code> is missing<a class="heading-anchor" href="#docker-sql-works-but-the-guided-notebook-says-psql-is-missing" aria-label="Link to this section">#</a></h3>
-<p><code>docker compose run --rm sql-runner</code> has a client inside its container. Python guided notebooks run host <code>psql</code>, so install that client or continue using container SQL commands. The PostgreSQL server can remain only in Docker. A Docker daemon, a host client, and a Python driver are separate requirements for different workflows.</p>
-<h3 id="docker-is-installed-but-compose-cannot-start-postgresql">Docker is installed but Compose cannot start PostgreSQL<a class="heading-anchor" href="#docker-is-installed-but-compose-cannot-start-postgresql" aria-label="Link to this section">#</a></h3>
-<ol>
-<li>Start Docker Desktop or your container daemon.</li>
-<li>Check the exact state:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-text">   docker compose ps
-   docker compose logs postgres</code></pre>
-<ol>
-<li>If host port 5432 is already in use, choose another host port before starting the service.</li>
-</ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">   $env:DS60_POSTGRES_PORT <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">55432</span><span class="syntax-string">&quot;</span>
-   docker compose up -d postgres</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">   <span class="syntax-builtin">export</span> DS60_POSTGRES_PORT<span class="syntax-operator">=</span><span class="syntax-number">55432</span>
-   docker compose up -d postgres</code></pre>
-<p>The <code>sql-runner</code> service connects over the internal Compose network, so its course commands remain unchanged.</p>
-<h3 id="role-postgres-does-not-exist-on-macos"><code>role &quot;postgres&quot; does not exist</code> on macOS<a class="heading-anchor" href="#role-postgres-does-not-exist-on-macos" aria-label="Link to this section">#</a></h3>
-<p>Homebrew commonly creates a role matching the macOS username. Omit <code>-U postgres</code> and use:</p>
-<pre class="highlighted-code"><code class="language-bash">psql -d advanced_sql_training</code></pre>
-<p>Do not create an unnecessary superuser merely to match an old command.</p>
-<h3 id="peer-authentication-fails-on-linux">Peer authentication fails on Linux<a class="heading-anchor" href="#peer-authentication-fails-on-linux" aria-label="Link to this section">#</a></h3>
-<p>Create a PostgreSQL role matching the Linux username:</p>
-<pre class="highlighted-code"><code class="language-bash">sudo -u postgres createuser --createdb <span class="syntax-string">&quot;</span>$USER<span class="syntax-string">&quot;</span>
-createdb advanced_sql_training</code></pre>
-<p>Then use normal local <code>psql</code> commands without <code>-U postgres</code>.</p>
-<h3 id="the-training-database-already-exists">The training database already exists<a class="heading-anchor" href="#the-training-database-already-exists" aria-label="Link to this section">#</a></h3>
-<p>That is normally fine. Run the setup file to reset only the disposable <code>training</code> schema:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql</code></pre>
-<p>This deletes and recreates the training schema. Stop if the target database is not disposable.</p>
-<p>Run <code>sql/postgres-60day/00_verify.sql</code> immediately afterward to catch an incomplete or incorrect seed.</p>
-<h3 id="a-later-sql-project-says-a-table-or-schema-does-not-exist">A later SQL project says a table or schema does not exist<a class="heading-anchor" href="#a-later-sql-project-says-a-table-or-schema-does-not-exist" aria-label="Link to this section">#</a></h3>
-<p>Most lessons are independent and rollback-safe. Days 52–54 are the declared stateful exception: Day 52 resets and commits the course-owned <code>dwh</code> schema, then Days 53 and 54 use it in order. Do not simply remove <code>ROLLBACK</code> from other lessons.</p>
-<ol>
-<li>Inspect the lesson’s generated catalog entry and companion guide.</li>
-<li>For the warehouse project, run Days 52, 53, and 54 in order.</li>
-<li>Use <code>ON_ERROR_STOP=1</code>.</li>
-<li>Report a curriculum defect if the earlier lesson rolls back an object the later lesson requires.</li>
-</ol>
-<h3 id="a-bridge-lesson-cannot-connect-to-postgresql">A bridge lesson cannot connect to PostgreSQL<a class="heading-anchor" href="#a-bridge-lesson-cannot-connect-to-postgresql" aria-label="Link to this section">#</a></h3>
-<p>The bridge defaults to fakes; use a live database only when the lesson marks the step as optional.</p>
-<ol>
-<li>Run the bridge tests first:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-text">   python -m pytest bridge/tests</code></pre>
-<ol>
-<li>Confirm <code>DS60_DATABASE_URL</code> points to the disposable course database, not a workplace, shared, or production database.</li>
-<li>Run the SQL setup and verification before a live exercise.</li>
-<li>Check whether the lesson needs Psycopg:</li>
-</ol>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-   <span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1 -Profile Advanced</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">   bash scripts/setup.sh --advanced</code></pre>
-<ol>
-<li>Distinguish a fake-backed unit-test pass from server authentication, permissions, lock behavior, or network evidence.</li>
-</ol>
-<h3 id="sql-or-sql-is-unavailable-in-a-notebook"><code>%sql</code> or <code>%%sql</code> is unavailable in a notebook<a class="heading-anchor" href="#sql-or-sql-is-unavailable-in-a-notebook" aria-label="Link to this section">#</a></h3>
-<p>The SQL magics come from JupySQL and run only in an IPython-based kernel.</p>
-<ol>
-<li>Select the repository <code>ds60sqlpy</code> kernel.</li>
-<li>Install the <code>sql-notebooks</code> profile while connected.</li>
-<li>Restart the kernel.</li>
-<li>Run <code>%load_ext sql</code> before <code>%sql</code>.</li>
-<li>Confirm no learner file named <code>sql.py</code> is shadowing the extension.</li>
-</ol>
-<p>If the extension loads but PostgreSQL does not connect, verify <code>DS60_DATABASE_URL</code> in the terminal that launched Jupyter. Do not print the value when it contains a password. Use <code>postgresql+psycopg://</code> through the lesson&#x27;s SQLAlchemy engine rather than accidentally requesting the older <code>psycopg2</code> driver. See <a href="setup/jupyter-postgresql.md.html">PostgreSQL in Jupyter</a>.</p>
-<h3 id="a-sql-file-shows-errors-but-the-command-exits-successfully">A SQL file shows errors but the command exits successfully<a class="heading-anchor" href="#a-sql-file-shows-errors-but-the-command-exits-successfully" aria-label="Link to this section">#</a></h3>
-<p>Use:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
-<p>Without <code>ON_ERROR_STOP</code>, <code>psql</code> can continue after a statement fails.</p>
-<h3 id="bash-commands-fail-in-powershell">Bash commands fail in PowerShell<a class="heading-anchor" href="#bash-commands-fail-in-powershell" aria-label="Link to this section">#</a></h3>
-<p>PowerShell does not use:</p>
-<ul>
-<li><code>source</code></li>
-<li>Bash <code>\</code> line continuations</li>
-<li><code>cat file | ...</code></li>
-<li>Bash <code>|| echo</code> on Windows PowerShell 5.1</li>
-</ul>
-<p>Use the Windows guide and PowerShell examples instead of translating punctuation literally.</p>
-<h3 id="find-the-executable-solution-for-a-lesson">Find the executable solution for a lesson<a class="heading-anchor" href="#find-the-executable-solution-for-a-lesson" aria-label="Link to this section">#</a></h3>
-<p>Inspect:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog</code></pre>
-<p>PostgreSQL executable and Markdown solutions cover Days 1–60. Use the generated availability view for the exact path. The Day 52–54 executable warehouse solutions are stateful and must run in order.</p>
-<h3 id="still-blocked">Still blocked<a class="heading-anchor" href="#still-blocked" aria-label="Link to this section">#</a></h3>
-<p>Capture:</p>
-<ul>
-<li>Operating system and version</li>
-<li>The exact command</li>
-<li>Full first error</li>
-<li><code>python scripts/course.py doctor</code> output</li>
-<li><code>python --version</code> and <code>psql --version</code> when relevant</li>
-<li>The selected VS Code interpreter/kernel</li>
-</ul>
-<p>Then ask the AI tutor using <a href="learning-with-an-ai-tutor.md.html">Learning with an AI tutor</a> or open an issue with those details and no secrets.</p></article>
+<p>Switching engines or storage implementations can hide images and volumes without moving them. Do not conclude that data is gone merely because another context shows an empty image list. Avoid manual edits to internal snapshot folders. Keep the original error and engine version for vendor diagnostics.</p>
+<h3 id="a-language-cannot-run">A language cannot run<a class="heading-anchor" href="#a-language-cannot-run" aria-label="Link to this section">#</a></h3>
+<p>Open the lesson&#x27;s capability notice. Prepare the matching ordinary profile from <a href="docker-profiles.md.html">the runtime table</a>, for example:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --profile cpp20 --profile php-cli</code></pre>
+<p>C++ and Java are compiled in their workers. Node JavaScript and browser JavaScript have different APIs. HTML/CSS runs in the browser preview, while PHP executes in the PHP CLI worker. A lesson about HTTP sessions may use its separate documented project fixture; the single-file PHP pad does not create a permanent web server.</p>
+<p>GPU execution needs a compatible NVIDIA host and explicit preparation. Apple GPU, AMD GPU and CPU-only learners can use the CUDA conceptual/CPU variants without claiming CUDA hardware execution. An unavailable GPU variant must not silently substitute CPU results. Kubernetes live work needs an explicitly owned local cluster. Neither capability is enabled by ordinary <code>--all</code>.</p>
+<h3 id="preview-or-output-looks-wrong">Preview or output looks wrong<a class="heading-anchor" href="#preview-or-output-looks-wrong" aria-label="Link to this section">#</a></h3>
+<p>The reader renders code highlighting and mathematics locally. In a browser HTML/JavaScript lesson, check the console panel for syntax or runtime errors. External network assets and navigation are restricted; use bundled/local lesson resources and read the preview capability notice. Live preview is opt-in, and <strong>Pause</strong> or <strong>Stop</strong> prevents automatic reruns. A saved observation is a point-in-time record, not permission to execute source when revisiting it.</p>
+<p>A worker run&#x27;s output belongs to the source saved with that run. Later edits to the pad do not rewrite history. Read the exit status and diagnostic text, not only whether a chart appeared or stdout contains a success-looking message.</p>
+<h3 id="postgresql-or-whole-sql-lessons-fail">PostgreSQL or whole SQL lessons fail<a class="heading-anchor" href="#postgresql-or-whole-sql-lessons-fail" aria-label="Link to this section">#</a></h3>
+<p>SQL snippets accept ordinary SQL. Full course scripts may contain <code>psql</code> commands, so choose <strong>Whole SQL lesson (psql)</strong> for those artifacts. Read the first PostgreSQL error and the transcript. Check the database identity and expected schema before modifying a query to make it pass.</p>
+<p>A training reset replaces course-owned training data. It is a deliberate operation, not a general error-recovery button. Warehouse Days 52 through 54 have their own stateful progression. See <a href="setup/postgresql.md.html">PostgreSQL setup</a>. For optional JupySQL kernels, use the separate <a href="setup/jupyter-postgresql.md.html">notebook guide</a>; Docker worker packages are not installed into a host notebook interpreter.</p>
+<h3 id="progress-appears-missing">Progress appears missing<a class="heading-anchor" href="#progress-appears-missing" aria-label="Link to this section">#</a></h3>
+<p>Wait for the saved confirmation before leaving a pad. Reopen the same lesson and variant, then check the engine context and project name. Saved source, notes and results live in <code>&lt;project&gt;_classroom-learning</code>; database tables live in <code>&lt;project&gt;_postgres-data</code>. They are separate from the source checkout and <code>.classroom/</code> launcher settings.</p>
+<p>A new source ZIP or rebuilt image does not contain personal progress. Do not prune volumes, run <code>down -v</code>, or reset the engine while investigating missing work. Restore from a deliberate backup only after checking the exact target. If volumes were deleted, a source Git checkout cannot reconstruct them.</p>
+<h3 id="optional-models-and-offline-study">Optional models and offline study<a class="heading-anchor" href="#optional-models-and-offline-study" aria-label="Link to this section">#</a></h3>
+<p>An installed package does not imply its model weights, dataset, tokenizer or compiler cache has been prepared. Read the lesson&#x27;s offline variant and preparation disclosure. Do not download models automatically just because a reference describes them. See <a href="setup/offline.md.html">offline preparation</a>.</p>
+<h3 id="reporting-a-reproducible-issue">Reporting a reproducible issue<a class="heading-anchor" href="#reporting-a-reproducible-issue" aria-label="Link to this section">#</a></h3>
+<p>Include the command, selected project/profile/variant, operating system, engine and Compose versions, lesson ID, first relevant error and whether the same saved source reproduces it. State whether you were building, resuming, reading, compiling or executing. Redact private paths and secrets. For contributor checks and evidence scope, see <a href="validation.md.html">validation</a>.</p></article>
   </main>
 </body>
 </html>

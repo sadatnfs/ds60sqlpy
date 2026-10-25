@@ -11,9 +11,9 @@ from urllib.request import ProxyHandler, build_opener
 import pytest
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.classroom_http import CourseHTTPServer
 from ds60sqlpy.http_server import LocalHTTPServer, LocalThreadingHTTPServer
 from ds60sqlpy.module_worker import WorkerHTTPServer, WorkerState
-from ds60sqlpy.portal import PortalServer
 
 
 class ReadyHandler(BaseHTTPRequestHandler):
@@ -50,7 +50,7 @@ def test_local_server_binds_and_serves_while_reverse_dns_is_unavailable(
     assert not thread.is_alive()
 
 
-def test_real_worker_and_portal_use_dns_independent_binding(
+def test_worker_and_classroom_use_dns_independent_binding(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(socket, "getfqdn", no_dns)
@@ -60,8 +60,8 @@ def test_real_worker_and_portal_use_dns_independent_binding(
         assert worker.server_name == "127.0.0.1" and worker.server_port > 0
     finally:
         worker.server_close()
-    portal = PortalServer(Catalog.load(), progress_path=tmp_path / "progress.json")
+    classroom = CourseHTTPServer(Catalog.load(), progress_path=tmp_path / "progress.json")
     try:
-        assert portal.server_name == "127.0.0.1" and portal.server_port > 0
+        assert classroom.server_name == "127.0.0.1" and classroom.server_port > 0
     finally:
-        portal.server_close()
+        classroom.server_close()

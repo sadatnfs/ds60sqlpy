@@ -1,5 +1,12 @@
 # Day 01: Solutions: Setup, REPL, Virtual Envs, Package Management
 
+The environment and Jupyter exercises below use the optional prepared
+[POSIX/WSL contributor environment](../../../../CONTRIBUTING.md). Ordinary
+Docker classroom study requires no host Python setup. A contributor terminal
+and Jupyter kernel have separate state from browser Runs, and host `.learning/`
+files or CLI progress do not automatically access Docker learner volumes.
+
+
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
 
@@ -44,14 +51,9 @@ For this lesson's **execution contexts and a trustworthy course environment** mo
 Run the doctor with the repository interpreter and keep its output as
 evidence; no Python implementation is needed for this environment check.
 
-```powershell
-# Windows PowerShell, after resolving $CoursePython as shown in the guide
-& $CoursePython scripts\course.py doctor
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python scripts/course.py doctor
+```sh
+# Prepared contributor environment on Linux, macOS or Windows through WSL 2
+uv run --no-sync python scripts/course.py doctor
 ```
 
 Read the reported executable path rather than accepting a successful
@@ -156,20 +158,14 @@ text returns status 2 without hiding unrelated programming errors.
 Create temporary environments outside the repository, always invoking
 pip through the interpreter that owns the environment:
 
-```powershell
-py -3.12 -m venv $env:TEMP\ds60-env-a
-py -3.12 -m venv $env:TEMP\ds60-env-b
-& $env:TEMP\ds60-env-a\Scripts\python.exe -m pip install numpy
-& $env:TEMP\ds60-env-a\Scripts\python.exe -m pip show numpy
-& $env:TEMP\ds60-env-b\Scripts\python.exe -m pip show numpy
-```
-
-```bash
-python3.12 -m venv /tmp/ds60-env-a
-python3.12 -m venv /tmp/ds60-env-b
-/tmp/ds60-env-a/bin/python -m pip install numpy
-/tmp/ds60-env-a/bin/python -m pip show numpy
-/tmp/ds60-env-b/bin/python -m pip show numpy
+```sh
+study_env_a="$(mktemp -d "${TMPDIR:-/tmp}/ds60-env-a.XXXXXX")"
+study_env_b="$(mktemp -d "${TMPDIR:-/tmp}/ds60-env-b.XXXXXX")"
+uv run --no-sync python -m venv "$study_env_a"
+uv run --no-sync python -m venv "$study_env_b"
+"$study_env_a/bin/python" -m pip install numpy
+"$study_env_a/bin/python" -m pip show numpy
+"$study_env_b/bin/python" -m pip show numpy
 ```
 
 The final command should report NumPy absent; neither command targets
@@ -226,7 +222,7 @@ Treat the interpreter, package installer, and notebook kernel as one connected s
 ### Shared implementation for Exercise 6: Prediction
 
 The correct result is an executable inside this repository's `.venv`
-(`.venv\Scripts\python.exe` on Windows or `.venv/bin/python` on POSIX). The
+(`.venv/bin/python` in the prepared POSIX or WSL checkout). The
 exact prefix varies by clone location, so inspect the path rather than comparing
 it with a developer-specific absolute string.
 
@@ -264,13 +260,13 @@ assert report["python"].count(".") == 2
 assert Path(report["executable"]).name.lower().startswith("python")
 
 # Debugging order:
-# 1. Print sys.executable in PowerShell's Python and in the notebook.
+# 1. Print sys.executable in the contributor terminal and in the notebook.
 # 2. Run each executable with `-m pip --version`.
 # 3. Select/register the kernel that points at the repository interpreter.
 #
 # If `.venv` already contains ipykernel, registration is local and works
 # offline:
-#   .\.venv\Scripts\python.exe -m ipykernel install --user \
+#   uv run --no-sync python -m ipykernel install --user \
 #       --name ds60sqlpy --display-name "Python (ds60sqlpy)"
 # Package installation still requires the downloaded wheel cache or a network.
 ```

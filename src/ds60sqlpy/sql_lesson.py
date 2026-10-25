@@ -17,10 +17,8 @@ from ds60sqlpy.execution import (
     ALLOWED_TIMEOUT_SECONDS,
     COURSE_ROLE_QUERY,
     MAX_CODE_BYTES,
-    WORKER_GATE,
     PadRunner,
 )
-from ds60sqlpy.runtime_environment import external_program_environment
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
     _psql_meta_segments,
@@ -34,8 +32,7 @@ from ds60sqlpy.sql_runner import default_course_database_url
 
 SAFE_PSQL_COMMANDS = {"echo", "set", "ir", "gset", "if", "elif", "else", "endif", "gexec"}
 PSQL_WORKER = (
-    WORKER_GATE
-    + "COURSE_ROLE_QUERY = "
+    "COURSE_ROLE_QUERY = "
     + repr(COURSE_ROLE_QUERY)
     + "\n"
     + r"""
@@ -140,7 +137,7 @@ class SqlLessonRunner:
         lesson_source_policy(self.catalog, lesson_id)
         if self.pads.python is None:
             raise ValueError("Select a usable Python 3.11-3.12 backend with psycopg.")
-        environment = external_program_environment()
+        environment = dict(os.environ)
         executable = shutil.which("psql", path=environment.get("PATH"))
         if executable is None:
             raise ValueError(

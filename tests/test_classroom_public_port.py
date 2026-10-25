@@ -15,8 +15,8 @@ from typing import Any
 import pytest
 
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.classroom_http import CourseHTTPServer
 from ds60sqlpy.lab import LabServer
-from ds60sqlpy.portal import PortalServer
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -27,14 +27,14 @@ def test_container_public_port_retains_exact_host_origin_and_token_checks(
     monkeypatch.setenv("DS60_CONTAINER", "1")
     monkeypatch.setenv("DS60_PUBLIC_PORT", "80")
     monkeypatch.setattr("ds60sqlpy.lab.rendered_targets", lambda catalog: {})
-    original = PortalServer.__init__
+    original = CourseHTTPServer.__init__
 
-    def bind_only_loopback(self: PortalServer, catalog: Catalog, **kwargs: Any) -> None:
+    def bind_only_loopback(self: CourseHTTPServer, catalog: Catalog, **kwargs: Any) -> None:
         assert kwargs["bind_host"] == "0.0.0.0"
         kwargs["bind_host"] = "127.0.0.1"
         original(self, catalog, **kwargs)
 
-    monkeypatch.setattr(PortalServer, "__init__", bind_only_loopback)
+    monkeypatch.setattr(CourseHTTPServer, "__init__", bind_only_loopback)
     server = LabServer(Catalog.load(), container=True, progress_path=tmp_path / "progress.json")
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -92,7 +92,7 @@ def test_invalid_public_port_is_rejected_before_a_socket_is_bound(
     def forbidden(*args: Any, **kwargs: Any) -> None:
         raise AssertionError("invalid configuration reached socket creation")
 
-    monkeypatch.setattr(PortalServer, "__init__", forbidden)
+    monkeypatch.setattr(CourseHTTPServer, "__init__", forbidden)
     with pytest.raises(ValueError, match="DS60_PUBLIC_PORT"):
         LabServer(Catalog.load(), container=True, progress_path=tmp_path / "progress.json")
 

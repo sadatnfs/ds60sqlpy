@@ -161,17 +161,24 @@ Import defines functions only; the guard owns process execution.
 
 **Reasoning:** Implement this exact contract as written: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. Constraint: do not mix Bash syntax into PowerShell. Keep the prompt's named data and constraints visible in the code, then establish this specific result: copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument. That connects the answer to a small command-line application with separated boundaries.
 
-Copy-ready invocations keep platform syntax separate:
+The maintained contributor route uses the prepared POSIX/WSL environment:
+
+```sh
+uv run --no-sync python -m your_package.record_tool "data/input records.json" --limit 3
+```
+
+The exercise also compares shell syntax. The following self-contained example
+is only for an already prepared native Windows virtual environment; native
+Windows package setup is outside the classroom support contract. It does not
+use a course-specific launcher variable:
 
 ```powershell
-& $CoursePython -m your_package.record_tool "data\input records.json" --limit 3
+& .\.venv\Scripts\python.exe -m your_package.record_tool "data\input records.json" --limit 3
 ```
 
-```bash
-.venv/bin/python -m your_package.record_tool "data/input records.json" --limit 3
-```
-
-Both run from the repository root and quote the path containing spaces.
+Both examples run from the repository root with the named package prepared and
+quote the path containing spaces. Their host files are separate from Docker
+classroom pads and progress.
 
 **Verification evidence:** copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument.
 

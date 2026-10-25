@@ -120,7 +120,7 @@ def test_posix_pad_and_cluster_cleanup_keep_process_group_kill(
     assert signals == [(Process.pid, 9), (Process.pid, 9)]
 
 
-def test_windows_cleanup_uses_existing_tree_fallback_without_posix_calls(
+def test_unsupported_native_worker_cleanup_does_not_use_posix_calls(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     commands: list[list[str]] = []
@@ -136,10 +136,10 @@ def test_windows_cleanup_uses_existing_tree_fallback_without_posix_calls(
 
     monkeypatch.setattr(os, "killpg", forbidden, raising=False)
     monkeypatch.setattr(subprocess, "run", run)
-    for stop in (execution.PadRunner._stop, worker_operations._stop_tree, kubernetes_module._stop):
+    for stop in (worker_operations._stop_tree, kubernetes_module._stop):
         process = Process()
         stop(cast(subprocess.Popen[bytes], process))
         assert process.kills == 1
-    assert commands == [["taskkill", "/PID", str(Process.pid), "/T", "/F"]]
+    assert commands == []
     with pytest.raises(RuntimeError, match="POSIX runtime"):
         worker_operations._signal_group(Process.pid, 9)

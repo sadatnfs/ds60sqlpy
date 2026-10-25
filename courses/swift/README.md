@@ -1,5 +1,17 @@
 # Swift: a complete language learning journey
 
+From the repository root, prepare this worker with:
+
+```bash
+./classroom --profile swift-linux
+```
+
+Choose the subject from **All learning paths**. The [setup guide](../../docs/one-command-classroom.md)
+explains Docker on macOS, Linux and Windows WSL 2. Use `./classroom stop` and
+`./classroom resume` with the same project to retain your source, notes and
+results. An explicit profile list replaces the saved runtime selection while
+preserving work in its named volume.
+
 This path contains 48 practice chapters, with sixteen beginner, sixteen intermediate and sixteen advanced chapters. Open the unified Docker classroom, choose Swift, and move at your own pace. The stable lesson IDs preserve separate saved pads, notes and progress. Follow prerequisites when a mechanism is unfamiliar rather than treating the minute estimates as deadlines.
 
 Each chapter explains vocabulary and syntax, walks through two complete examples, asks six progressive tasks and keeps its unfinished starter separate from executable references and explanatory solutions. A success marker demonstrates the checked fixture ran; independent explanation and transfer remain part of learning.

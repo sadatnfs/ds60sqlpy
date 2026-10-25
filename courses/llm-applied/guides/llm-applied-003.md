@@ -207,7 +207,7 @@ Revisit the direct prerequisite `llm-applied-002` if the calculation cannot be r
 
 ## Sources and verification status
 
-API and mechanism reference: [Hugging Face chat templates 4.57.1](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/llm-applied-status.md`; authored content does not imply that a heavy runtime was executed.
+API and mechanism reference: [Hugging Face chat templates 4.57.1](https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 
 

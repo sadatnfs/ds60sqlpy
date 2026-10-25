@@ -1,283 +1,198 @@
 # Repository guidance for coding agents
 
-## Mission and scope
+## Mission and first steps
 
-Maintain a self-contained, beginner-friendly learning library and one local
-Docker classroom at `/classroom`. Teach programming, data science, statistics,
-machine learning and systems through accurate explanations and reproducible
-examples. Historical day numbers are stable labels, not a curriculum limit.
+Maintain one local Docker classroom at `/classroom` for programming, data
+science, statistics, machine learning and systems. The current library has 22
+subjects; derive lesson IDs, variants and readiness from the catalog loaders,
+not a copied inventory. Historical day numbers are stable labels, not a deadline.
 
-Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md) and the closest
-nested `AGENTS.md` before editing. Run `git status --short --branch` and preserve
-unrelated changes. Work in the requested checkout. Do not stage, commit, push,
-create another checkout or publish images unless that is part of the request.
-Use parallel agents for independent work with explicit file ownership. Do not
-use em dashes in authored prose.
+Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and the closest
+subject `AGENTS.md`. Inspect `git status --short --branch` and preserve unrelated
+work. Use the user's requested checkout and parallel agents with explicit file
+ownership. Respect existing task authorization; do not add a separate approval
+step for ordinary authorized edits. Git publication, image publication, history
+rewrites and destructive cleanup have distinct scopes. Do not use em dashes.
 
-## Find the maintained source
+## Choose the right role
+
+- For explanation, placement, debugging or resuming study, use
+  [Guide learning](.agents/skills/guide-ds60sqlpy-learning/SKILL.md).
+- For new or extended lessons, subjects or runtimes, use
+  [Add a learning path](.agents/skills/add-learning-path/SKILL.md).
+- For application work, begin with the [repository tour](docs/repository-tour.md)
+  and [current architecture](docs/implementation/CHECKPOINT.md).
+
+A tutoring request is not automatically a request to implement curriculum,
+replace a learner's attempt, run code or mark completion. Inspect the actual
+lesson and learner-provided work, explain one mechanism, and offer progressive
+hints. Reveal practice references when requested or when the chosen review
+explicitly includes comparison. The statistics book exposes worked answers
+without exams or solution gates. A read marker or reference run is not mastery.
+
+The optional MCP adapter reads checked-in curriculum by default and does not
+execute code. Its module tools do not read Docker-volume pads or results.
+Do not claim to have inspected unseen learner state. Use a learner-provided
+attempt or an authorized workspace/UI interface. Progress writes need the
+adapter's opt-in and the learner's instruction. Preserve authorization already
+given for the current task rather than asking repeatedly.
+
+## Maintained sources
 
 | Concern | Source |
 | --- | --- |
-| Learner setup and persistence | `classroom`, `scripts/classroom.sh`, `compose.classroom.yaml`, `docs/one-command-classroom.md` |
-| Unified UI and subject directory | `src/ds60sqlpy/classroom.py`, `src/ds60sqlpy/assets/classroom.html`, `.css`, `.js` |
-| Legacy Python, SQL and bridge identity | `catalog_builder.py`, lesson artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
-| Module route and prerequisites | Original five plans in `docs/expansion/plans/`; additive subjects in `courses/<subject>/track.json` |
-| Authored module admission | `courses/<subject>/lessons.json`, `modules.py`, `module_extensions.py` |
-| Statistics tutorial book | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters and examples |
-| Saved work and execution | `lab.py`, `classroom_runs.py`, `module_service.py`, `module_jobs.py`, `worker_operations.py`, `browser_runs.py` |
-| Static and live document rendering | `lesson_reader.py`, `reader_math.py`, `reader_content.py` |
-| Read-only tutoring context | `mcp_server.py`, `coaching.py`, `study_plan.py` |
-| Content rules and expansion | `docs/content-authoring.md`, `docs/implementation/ADDING_A_MODULE.md` |
-| Architecture and current limits | `docs/implementation/CHECKPOINT.md` |
-| Verification and CI | `docs/validation.md`, `.github/workflows/`, focused tests |
+| Startup, resume and image selection | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh`, `docker/classroom-images.tsv` |
+| Product composition and runtime preparation | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/workers/`, reviewed optional overlays |
+| Unified directory, editor and preview | `classroom.py`, `assets/classroom.*`, `browser_runs.py` |
+| Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
+| Original five module plans | `module_plans.py`, `docs/expansion/plans/` |
+| Additive subjects and variants | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |
+| Statistics tutorial | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters and examples |
+| Jobs, execution and results | `module_jobs.py`, `module_service.py`, `worker_operations.py`, `classroom_runs.py`, `lab.py` |
+| Static/live reading | `lesson_reader.py`, `reader_math.py`, `reader_content.py`, `classroom_http.py`, `http_server.py` |
+| Tutoring and legacy progress | `mcp_server.py`, `coaching.py`, `study_plan.py`, repository skills |
+| Portable source packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
+| Authoring and verification | [content contract](docs/content-authoring.md), [module contract](docs/implementation/ADDING_A_MODULE.md), [validation](docs/validation.md) |
 
-Python module filenames in this table are beneath `src/ds60sqlpy/` unless a
-full path is given. Derive inventories from the loaders. Do not maintain a
-second lesson list in UI code or documentation that could be generated.
+Python filenames without a full path are beneath `src/ds60sqlpy/`.
+Do not recreate retired desktop executables, native editor-launch APIs or a
+second Python/SQL/module UI. Local contributor `ds60 serve` uses the same
+classroom shell; Docker remains the supported learner delivery route.
 
-Two repository skills are available:
+## Authoring and extension
 
-- [Guide learning](.agents/skills/guide-ds60sqlpy-learning/SKILL.md) for tutoring,
-  placement, explanation and learner-directed progress.
-- [Add a learning path](.agents/skills/add-learning-path/SKILL.md) for adding or
-  extending a subject, language or tutorial sequence.
+Define the learner's starting point, direct prerequisites, observable outcome
+and evidence before selecting a lesson count. Teach vocabulary and syntax before
+using them. Include at least two explained worked cases, meaningful mistakes,
+bounded fixtures and concrete next steps. Practice should progress from tracing
+to modification, independent work, debugging and transfer. Avoid generic repeated
+paragraphs that merely satisfy a heading or exercise counter.
 
-## Act as a learning companion
+Keep stable lesson IDs, prerequisite relationships, variant aliases and saved
+state namespaces. The legacy practice baseline is immutable; additions use its
+separate expansion registry. Modern modules use their own admission contracts.
+The statistics book is a tutorial with complete examples and answered discussion,
+not a practice module with hidden answers or mandatory problem sets.
 
-For a learner's question, use the repository learning skill before proposing
-curriculum or application changes. Read the current guide, prerequisites and
-learner-provided attempt. Start with explanation and read-only diagnosis; do not
-turn a request for help into edits, execution, a reference-solution reveal or a
-completion write. Carry out actions the learner actually requests, while
-preserving their source, notes, history and chosen pace. Give progressive hints
-and the smallest useful next step. Read markers and successful reference runs
-are not mastery assessments.
+Read the subject's `authoring/README.md` when present. Edit its durable source,
+run only the relevant generator, format generated executable code, then refresh
+shared readers. Directly authored subjects retain their documented artifact
+sources. `make generate` refreshes shared metadata and readers; it does not run
+every subject generator. Never hand-edit `START_HERE.html`, `lesson-pages/` or
+`reference-pages/`.
 
-All registered subjects share this companion approach: Python,
-PostgreSQL, the engineering bridge, statistics/ML, C, C++, Go, C#, Rust, Swift,
-Docker, Java, JavaScript/TypeScript with D3, Kubernetes, Scala/Spark, TensorFlow,
-PyTorch, NLP, LLM theory, applied LLMs, GPU/CUDA and web development with HTML,
-CSS and PHP. Derive exact lesson IDs and capability
-notices from the current loaders and guides. Keep tutorial-book discussion free
-of mandatory exams or withheld worked answers. Do not assume the MCP adapter
-can read the Docker classroom's saved pads or execute code; its module tools
-read checked-in curriculum only. Ask the learner to share the relevant attempt,
-or inspect the workspace through an authorized local interface.
+Write mathematics with `\(...\)` or `\[...\]` and code in accurately tagged
+fences. Preserve literal program characters. Rendering and highlighting must
+work offline. Prose normalization and statistics-example fence synchronization
+have reviewed contracts; they cannot change executable meaning or create new
+runtime evidence. Use UTF-8 and LF for generated repository text.
 
-## Teaching and authoring
+A subject, language and runtime are different concepts. Prefer an existing
+reviewed profile when it fits. New profiles need fixed operations, dependencies,
+formatting/lint support, image/launcher registration, actual failure/success
+checks and saved-work acceptance. A lexer or manifest alone does not create an
+executor. See [the extension playbook](docs/curriculum-extension-playbook.md).
 
-Keep lessons useful without an AI tutor. Define vocabulary before use, explain
-syntax and mechanisms, show at least two focused worked examples and their
-expected observations, diagnose common mistakes, and provide concrete next steps.
-Practice lessons progress from prediction to guided change, independent work,
-debugging and transfer. Keep learner artifacts, executable references and
-explanatory solutions separate. Give progressive hints before revealing answers,
-unless the learner explicitly requests the solution.
+## Runtime and learner-state invariants
 
-The statistics/ML book has `learning_mode: tutorial`. It teaches theory,
-assumptions, worked code, use cases and answered interview discussion without
-exams, problem sets, prediction gates or hidden solutions. Its read marker is
-not a mastery assessment. Use coverage and numerical-example checks for this
-book, not practice exercise-count rules.
+Use Linux containers on Linux/macOS and Windows through WSL 2. Ordinary learners
+need no host compilers or database installation. Keep the thin Docker launchers;
+do not add native Windows backends, ACL machinery or executable-build gates.
+Separately prepared contributor SQL/Jupyter tools and genuine external projects,
+such as Swift/Xcode, have their own documented boundaries.
 
-Preserve stable lesson IDs, prerequisite graph, variant IDs and saved-state
-namespaces. The legacy practice baseline is immutable. New legacy catalog
-lessons use `curriculum/practice_expansion.json`; module subjects use their own
-content gates. Do not apply the legacy registry to every module or tutorial.
-Every practice guide has a lesson-specific `## Ask an AI tutor about this lesson`
-block; the source prompt must match its actual ID and artifact paths.
+`./classroom` is resume-first: reuse saved selection and existing images and
+containers, preparing only missing images. `resume` and `--no-build` never build
+or pull. `--rebuild` deliberately installs source/configuration updates; `build`
+prepares images without starting. Hub mode pulls its declared version and never
+falls back to a local build. Keep the same custom `--project NAME` on later
+commands. Do not change a project or engine to hide a startup defect.
 
-Find an existing subject's `authoring/README.md` before editing generated
-content. Edit the durable authoring source as well as its published artifact,
-then run only the relevant subject generator. `make generate` refreshes shared
-catalogs, reports and readers; it does not regenerate every subject's prose.
-Never hand-edit `START_HERE.html`, `lesson-pages/` or `reference-pages/`.
+Launcher preferences under `.classroom/<project>/` are separate from named
+learning, PostgreSQL and private-runtime volumes. Preserve all learner state.
+A normal resume reuses containers; an automatically changed browser port can
+require recreating only the app from its existing image for exact Host/Origin
+checks. That is not an image rebuild. Fixed port choices preserve a stable URL;
+applying changed port settings uses the explicit update route.
 
-Use explicit `\(...\)` or `\[...\]` LaTeX for mathematics and tagged code fences.
-Keep literal program syntax in code. Rendering must preserve copied characters,
-escape source, and work without a CDN. After authoring generation, run the
-reviewed prose normalization before building HTML. A typography edit must not
-change executable reference behavior or manufacture new runtime evidence.
+Save or retain recoverable drafts before changing context. Keep source, notes,
+results and history separate by lesson, language/variant and SQL mode. Reading
+a past result must not rerun code or replace the current pad. Unknown job outcomes
+must be reconciled without replay. A receipt-save failure must report the real
+execution result and a storage warning.
 
-## Execution and learner state
+HTML/CSS and JavaScript/D3 previews are opaque, offline browser observations.
+Live preview requires an explicit current-page opt-in, debounces edits, preserves
+editor focus and does not automatically create immutable receipts. Manual Run
+or explicit Save observation captures submitted source. Navigation, Stop,
+history selection and reload must not silently resume execution. PHP CLI uses
+`main.php` and PDO SQLite; real HTTP/session work belongs to the separate owned
+web fixture. Do not label request models as actual browser/server exchanges.
 
-CUDA chapters have genuine reading and CPU-model paths. Neither is evidence of
-GPU execution. Optional CUDA workers require explicit NVIDIA device selection
-and a checked real kernel probe; they stay outside default and `--all` builds.
-Keep CPU profiles hiding GPUs. Treat compiler-only, real-device, profiler and
-multi-GPU evidence separately. Device fault or timeout recovery must not reset a
-GPU automatically. No GPU or WSL qualification follows from a macOS CPU run.
+CUDA reading and CPU models are useful without NVIDIA hardware. Optional GPU
+workers stay outside default/`--all`, require explicit device selection and a
+real allocation/kernel/readback probe. Compilation, GPU correctness, profiling
+and multi-GPU operation are separate evidence. A Mac container does not turn an
+Apple GPU into CUDA. GPU Spark needs compatible components and actual supported
+operator/plan evidence. Never reset a shared GPU automatically after a fault.
 
-HTML/CSS use the opaque, offline browser preview with separate observations.
-PHP uses a fixed CLI worker with PDO SQLite; browser cookies, HTTP sessions and
-multi-file server applications use the explicitly prepared web-project fixture.
-Do not claim that a PHP CLI simulation is a real browser request. Keep HTML and
-JavaScript source/results scoped to their actual lesson and runtime.
+The classroom runs trusted local learner code, not arbitrary hosted tenants.
+Preserve Host, origin, token, path, request/output-size, process and resource
+checks. Publish ports to loopback; use `http_server.py` to avoid reverse-DNS
+startup dependencies. Keep worker COPY lists aligned with imports. Manifests
+cannot supply shell commands, compiler flags, endpoints or host paths.
 
-Hub image selection is saved in `.classroom/<project>/images.env`, separately
-from learner data. `--from-hub` never falls back to building. `resume` never pulls.
-The publication script previews by default and requires explicit `--push`.
-Images are versioned by role and native architecture in one Hub repository.
-The manual publication workflow needs exact-revision CI, deliberate enablement
-and separately configured credentials. Never infer image publication authority
-from a request to push Git commits. See `docs/dockerhub.md`.
+Kubernetes needs explicitly owned resources, reviewed operations, no ambient
+kubeconfig and bounded UID-aware cleanup. Ordinary workers never receive an
+engine socket. Optional packages, external services and model/data downloads
+require deliberate preparation; opening a lesson must not fetch them.
 
-Docker with Linux containers and Compose is the supported delivery route.
-Windows uses WSL 2; macOS and Linux use the same Bash launcher.
+SQL automation targets only the explicitly disposable local
+`advanced_sql_training` database, validates routing, uses a private credential
+environment and invokes `psql -X -v ON_ERROR_STOP=1`. Resetting `training` is
+destructive. Preserve declared stateful lesson sequences and never redirect
+checks to shared or valuable data. Fakes prove policy, not PostgreSQL behavior.
 
-Treat `./classroom` as resume-first: use the saved per-project selection and
-existing containers/images, building only missing images. `resume` and
-`--no-build` must never build or pull; `--rebuild` deliberately installs changed
-source/configuration. `build` updates images without starting services. The
-launcher saves selection before preparation, so an interrupted initial build
-retains its intended profiles. `--starter`, explicit `--profile` flags and
-`--all` replace the selection; unselected running workers remain running.
-Repeat the learner's custom `--project` on every command. Never guess another
-project or silently change the project to repair startup.
+## Verification and handoff
 
-Distinguish `.classroom/<project>/` launcher preferences from Docker learning,
-PostgreSQL and private-runtime volumes. They are different storage layers.
-Inspect `./classroom status` and current engine state before acting. Normal
-resume reuses existing containers. Docker may reassign automatic host ports
-when the stopped database starts while retaining its ID. If the browser port
-changes, only the app is recreated from its existing image to preserve exact
-Host/Origin checks; no image build or pull is needed. Database and workers
-retain their IDs and all volumes remain intact. Fixed browser and database
-ports allow all existing IDs and the URL to remain stable on later unchanged
-resumes. Deliberately changing port settings needs `--rebuild`. Missing
-containers can be recreated from existing images while retaining volumes.
-A configuration mismatch needs the explicit update path. Do not recommend rebuilding every image, deleting
-settings, pruning containers or deleting volumes as a routine restart.
-
-No host language compiler is required for ordinary classroom profiles. Validate contributor
-setup on Linux, including WSL 2. Retained native setup scripts and executable
-builders are unsupported compatibility tooling, not release gates. Do not add
-native Windows backend, ACL or executable qualification requirements. Keep the
-Windows Docker wrappers that delegate to WSL. Supply OS-specific engine setup
-commands only when needed; never label Bash commands as PowerShell.
-
-The classroom executes trusted local learner code. It is not a hosted security
-sandbox for arbitrary users. Preserve exact Host, origin, token, request-size,
-output-size and filesystem checks. Native servers bind loopback; container
-ports publish to loopback. Manifests cannot supply shell commands, endpoints,
-compiler flags, cluster identities or host paths. Reviewed backend code owns
-runtime profiles and bounded execution.
-Use `http_server.py` for local and private-worker HTTP servers so startup does
-not depend on reverse DNS. Keep minimal worker Docker COPY lists aligned with
-shared imports. Repository text generators must write explicit UTF-8 and LF
-newlines so byte-level fixture and regeneration checks remain portable.
-
-Kubernetes host preparation and private credential handling require POSIX paths
-and permissions. Windows users run the companion inside WSL 2; native Windows
-credential APIs and named-pipe cluster endpoints are unsupported.
-
-A profile name, installed compiler, successful parse and executed lesson are
-different evidence. Report the actual capability and never enable Run based
-only on metadata. Kubernetes needs an explicitly owned disposable target, no
-ambient kubeconfig, and bounded UID-aware cleanup. Model downloads and external
-services need deliberate setup; opening a lesson must not fetch them.
-
-Preserve learner pads, source history, notes, progress, saved runs and named
-Docker volumes. Save or retain recoverable drafts before changing context.
-Keep results scoped by lesson, language and SQL mode. Reading a past result
-must not replace current source or run it again. If execution succeeds but
-saving its receipt fails, return the actual result and a storage warning.
-
-SQL automation must validate the exact local disposable
-`advanced_sql_training` database, reject remote or routing overrides, pass
-credentials through a private child environment, and use
-`psql -X -v ON_ERROR_STOP=1`. Resetting `training` is destructive even in a
-teaching project. Never reset a shared database or erase learner state as a
-repair step. Preserve declared multi-lesson transaction and fixture contracts.
-
-The optional stdio MCP adapter has a read-only default and no code execution.
-Practice solutions require explicit reveal. Progress writes require the
-adapter's opt-in and the learner's instruction. Tutorial worked answers are
-available directly. Native portal actions remain a fixed catalog-derived
-allowlist; a static page cannot start arbitrary programs.
-
-## Check the work
-
-Use focused checks while iterating, then the relevant integration gates in
-[validation](docs/validation.md). Use `./scripts/format-repo` for maintained
-source formatting and `./scripts/format-repo --check` before submission. Run
-`./scripts/lint-repo` for the shared read-only static checks. The
-Docker toolchain gives every supported language the same local and CI rules;
-use `--list` to inspect coverage and repeat `--language` for a focused iteration.
-Format generated executable lesson files as well as handwritten code, then
-refresh shared readers through their generators. Preserve Markdown fences and
-literal program strings. Do not hand-format generated readers, dependency
-locks, third-party bundles, historical runtime receipts or learner state. Keep
-authored sources and their generated outputs aligned. Source-format parity
-receipts preserve historical byte identities and verify Python AST equivalence;
-they never establish a new runtime pass. A new
-language needs a reviewed formatting adapter and pinned toolchain alongside its
-runtime contract; do not silently exclude it to make the check pass.
-Typical commands from a prepared environment:
+Use focused checks during implementation and [the release gates](docs/validation.md)
+for the actual change. The shared entrypoints are:
 
 ```sh
 ./scripts/format-repo --check
 ./scripts/lint-repo
-python scripts/check_modules.py
-python scripts/normalize_lesson_prose.py
-python scripts/check_content_rendering.py
-python scripts/course.py validate
-python scripts/audit_practice.py
-python scripts/audit_lesson_depth.py
-python scripts/build_course_guide.py --check
-python scripts/build_lesson_readers.py --check
-python scripts/check_published_links.py
-node scripts/check_classroom_ui.mjs
-python -m pytest -n 4 --dist loadgroup
-python scripts/scan_secrets.py --history
-python scripts/check_public_release.py
+uv run --no-sync python scripts/check_modules.py
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python -m pytest -n 4 --dist loadgroup
 git diff --check
 ```
 
-Keep `--dist loadgroup` with parallel tests so shared PostgreSQL fixtures stay
-serialized. Bound worker count to available resources; keep Docker builds
-sequential on constrained machines. Do not suppress failures, relax assertions
-or replace expected behavior to obtain a green run.
+These `uv` commands require the prepared contributor environment from
+[CONTRIBUTING](CONTRIBUTING.md). Keep `--dist loadgroup` for shared database
+fixtures. Bound parallelism and keep large Docker builds sequential when disk
+or memory is constrained. Do not weaken assertions or rewrite expected behavior
+to conceal a failure. Do not rerun expensive successful checks without a new
+change or unresolved concern.
 
-Report source validation, unit tests, live runtime execution, browser delivery,
-and Linux-container CI separately. The release matrix covers Ubuntu core and
-contributor checks, PostgreSQL, ordinary Docker workers, Chromium, owned Linux
-Kubernetes and the portable source ZIP. A local pass does not prove hosted CI,
-WSL installation, a different engine configuration or a different architecture. Record skipped or unavailable surfaces. Never describe
-a scan as proof that the repository is bug free. Keep machine-specific logs,
-image IDs, ports and temporary paths out of maintained onboarding documents.
+Report source checks, unit tests, actual runtime execution, browser delivery,
+container recreation and hosted CI separately. Record exact source/revision and
+platform; name skips and unavailable hardware. Historical receipts and
+source-format parity records remain immutable. They do not qualify new behavior.
+Do not place machine-specific image IDs, ports, temporary paths or test-session
+counts into maintained onboarding instructions.
 
-## Optional documentation-only CI skip
+For a genuinely prose-only authorized push, GitHub's `[skip ci]` spelling is
+available under the [documented constraints](docs/validation.md#optional-documentation-only-ci-skip).
+It must not hide implementation, examples, dependencies, workflows or other
+unvalidated commits. A skipped check is not a passed check.
 
-For an authorized push containing only prose and its regenerated readers, use
-GitHub's native `[skip ci]` token, with a space. `[skip-ci]` is unsupported by
-this native feature; do not add a custom workflow gate. Never include
-unvalidated code, executable lesson examples, tests, runtime/configuration,
-dependencies or workflow changes in that push. A skip marker in one pushed
-commit must not hide implementation changes in another.
-
-Regenerate readers locally and run prose, rendering, link and whitespace
-checks first. See [the exact commands and limitations](docs/validation.md#optional-documentation-only-ci-skip)
-and [commit example](CONTRIBUTING.md#optional-ci-skip-for-a-prose-only-push).
-The marker affects push/PR triggers, not scheduled/manual or already-running
-jobs. Required PR checks may remain Pending; use an unmarked follow-up or an
-appropriate manual run under repository policy. Do not report a skip as a pass.
-
-## Publication and cleanup
-
-Portable payloads must exclude `.learning/`, runtime session credentials,
-`.classroom/`, model caches, environment files, local logs and Git history.
-Preserve public source licenses and required third-party notices. Use neutral
-examples without workplace identifiers or private infrastructure references.
-
-Before authorized commits, review the intended public Git identity without
-copying private identity values into reports. See the repository-local setup in
-[CONTRIBUTING.md](CONTRIBUTING.md). Source and ZIP sanitation do not rewrite
-existing author/committer metadata or Git history. Do not change global Git
-configuration, rewrite history or publish rewritten branches without a separate
-explicit instruction from the repository owner.
-
-Cleanup must be scoped to resources created for this project. Remove containers
-and images only when authorized, and inspect ownership first. Keep progress
-volumes unless their deletion is explicitly requested. Do not stop unrelated
-services, reconfigure an engine or run broad pruning as an incidental cleanup.
+Portable payloads exclude learner state, credentials, caches, local logs and Git
+history. Preserve source licenses and use neutral public/synthetic examples.
+Review the chosen repository-local public commit identity without exposing
+private identity values. Git pushes do not authorize Docker Hub publication.
+The publisher previews by default; the manual publication workflow requires all
+image qualification before its protected publish phase. See [Docker Hub](docs/dockerhub.md).
+Cleanup only owned task resources, and retain learner volumes unless their
+deletion was explicitly requested. Do not prune unrelated resources or rewrite
+history as incidental cleanup.

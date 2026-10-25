@@ -1,6 +1,5 @@
 {
   "schema_version": 1,
-  "status": "planned",
   "id": "deep-learning-tensorflow",
   "title": "Deep learning with TensorFlow and Keras",
   "summary": "36 lessons in TensorFlow and Keras, from tensor arithmetic and gradients to training, neural architectures, diagnosis and a reproducible model release. Compare mechanisms with the paired PyTorch lessons.",
@@ -522,39 +521,7 @@
     }
   ],
   "pilot": {
-    "lesson_id": "tf-008",
-    "guide_path": "docs/expansion/samples/deep-learning-tensorflow-pilot.md",
-    "solution_path": "docs/expansion/samples/deep-learning-tensorflow-pilot-solutions.md",
-    "language": "python",
-    "code": "import math\nimport tensorflow as tf\n\n# A CPU-only arithmetic experiment, not a model-quality benchmark.\nwith tf.device(\"/CPU:0\"):\n    x = tf.constant([1.0, 2.0, 3.0], dtype=tf.float64)\n    y = tf.constant([2.0, 4.0, 6.0], dtype=tf.float64)\n    w = tf.Variable(0.0, dtype=tf.float64)\n    learning_rate = tf.constant(0.1, dtype=tf.float64)\n\n    with tf.GradientTape() as tape:\n        prediction = w * x\n        loss = tf.reduce_mean(tf.square(prediction - y))\n    gradient = tape.gradient(loss, w)\n    if gradient is None:\n        raise ValueError(\"The loss is disconnected from w\")\n    before = float(loss.numpy())\n    grad = float(gradient.numpy())\n    w.assign_sub(learning_rate * gradient)\n    after = float(tf.reduce_mean(tf.square(w * x - y)).numpy())\n\nassert math.isclose(before, 56 / 3, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(grad, -56 / 3, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(float(w.numpy()), 28 / 15, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(after, 56 / 675, rel_tol=0, abs_tol=1e-12)\nprint({\"loss_before\": before, \"gradient\": grad,\n       \"weight_after\": float(w.numpy()), \"loss_after\": after})\n",
-    "concept": {
-      "title": "One learning step is an inspectable state transition",
-      "explanation": "The forward computation produces a mean squared loss. GradientTape records how that loss depends on the scalar Variable w. The gradient is sensitivity at the old w; assign_sub applies a separate state update. Recompute loss after the update. Equal observation shapes are part of the mathematical contract.",
-      "worked_example": "For x=[1,2,3], y=2x and w=0, L=56/3 and dL/dw=-56/3. With learning rate 0.1, w becomes 28/15 and the recomputed loss becomes 56/675. Use float64 and absolute tolerance 1e-12."
-    },
-    "prediction": {
-      "prompt": "Before running the fixed three-point example, which gradient and update should you expect?",
-      "choices": [
-        "The gradient is -56/3 and w becomes 28/15.",
-        "The gradient is +56/3 and w becomes -28/15.",
-        "The gradient is None because x is a constant tensor."
-      ],
-      "correct_index": 0,
-      "explanation": "The tape follows operations from watched Variable w to the loss. The gradient is negative at w=0, so subtracting it increases w toward 2; x does not have to be trainable."
-    },
-    "hint_steps": [
-      "Write the three residuals at w=0, square them and divide their sum by 3.",
-      "Differentiate each residual square with respect to w; keep the same denominator 3 and inspect whether every forward operation is inside the tape.",
-      "The new weight is old_weight minus learning_rate times gradient. Check shapes before interpreting a matching scalar loss."
-    ],
-    "transfer_prompt": "Add a scalar bias for targets y=2x+1. Derive both gradients and inspect one held-out prediction without tuning on that held-out point.",
-    "rubric": [
-      "State tensor shapes, float64 dtype, loss reduction and units.",
-      "Match the independent loss/gradient/update oracle within 1e-12.",
-      "Distinguish None, a legitimate zero gradient and an overly large step.",
-      "Detect a broadcasting bug even when initial scalar losses agree.",
-      "Separate arithmetic correctness and training loss from held-out or production-quality claims."
-    ]
+    "lesson_id": "tf-008"
   },
   "sources": [
     {

@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Offline use · DS60 reference</title>
+  <title>Prepare the classroom for offline study · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,172 +158,61 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Offline use</h1>
+      <h1>Prepare the classroom for offline study</h1>
       <p class="source-path">Generated from <code>docs/setup/offline.md</code></p>
     </header>
-    <article class="document"><h2 id="offline-use">Offline use<a class="heading-anchor" href="#offline-use" aria-label="Link to this section">#</a></h2>
-<p>DS60 is designed for a one-time connected bootstrap followed by offline study. “Offline” describes lesson execution after tools, packages, and disclosed assets have been installed; it does not mean a brand-new computer can install Python, VS Code, PostgreSQL, container images, and packages without installation media.</p>
-<p>For the supported Docker product, prepare the images with <code>./classroom</code> while connected, rehearse the required lessons, then resume with <code>./classroom resume</code> (or the equivalent <code>./classroom --no-build</code>). This uses the saved profile selection and never builds or pulls; missing images produce an actionable error. Ordinary <code>./classroom</code> also reuses local images, but may prepare a missing one. Repeat your custom <code>--project NAME</code> if you used one originally. Windows uses those same commands inside WSL 2. Keep the project&#x27;s named learning and PostgreSQL volumes; see the <a href="../one-command-classroom.md.html">one-command guide</a>. The host-Python and PowerShell recipes later on this page are historical compatibility references, outside the supported release matrix.</p>
-<h3 id="what-works-offline-after-setup">What works offline after setup<a class="heading-anchor" href="#what-works-offline-after-setup" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Core Python and standard-library lessons</li>
-<li>Generated and repository-tracked data</li>
-<li>Datasets bundled with scikit-learn</li>
-<li>Local Jupyter and VS Code execution</li>
-<li>The PostgreSQL training schema after the server or container image is installed</li>
-<li>Bridge fake-backed exercises and tests; optional live checks work after the local PostgreSQL environment is prepared</li>
-<li>PostgreSQL notebook magics after the <code>sql-notebooks</code> profile and local database are installed; no remote notebook service is required</li>
-<li>Local plots, files, APIs, MLflow, and orchestration examples that do not opt into cloud services</li>
-<li>Tutor-independent course navigation and validation</li>
-</ul>
-<h3 id="first-use-downloads">First-use downloads<a class="heading-anchor" href="#first-use-downloads" aria-label="Link to this section">#</a></h3>
-<p>Run these while connected before relying on the corresponding lessons offline:</p>
+    <article class="document"><h2 id="prepare-the-classroom-for-offline-study">Prepare the classroom for offline study<a class="heading-anchor" href="#prepare-the-classroom-for-offline-study" aria-label="Link to this section">#</a></h2>
+<p>The ordinary classroom can run offline after its selected images and required lesson assets are prepared. Reading a guide, rendering its mathematics and highlighting its code do not require a CDN. Optional model downloads, external services, cluster setup and GPU hosts have their own requirements.</p>
+<h3 id="prepare-while-connected">Prepare while connected<a class="heading-anchor" href="#prepare-while-connected" aria-label="Link to this section">#</a></h3>
+<p>In the course directory, choose your needed runtime set:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter</code></pre>
+<p>Or prepare every ordinary worker:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all</code></pre>
+<p>These choices are remembered for the project. Run representative lessons from the paths you intend to study and inspect their capability notices. A completed image build is useful evidence, but a real reference attempt also exposes missing local assets or an unprepared external dependency.</p>
+<p>Keep the downloaded source folder, including generated readers and fixtures. A ZIP is source delivery, not a copy of installed images or saved work.</p>
+<h3 id="return-without-downloads">Return without downloads<a class="heading-anchor" href="#return-without-downloads" aria-label="Link to this section">#</a></h3>
+<p>With the same local engine running, use:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom resume</code></pre>
+<p>Strict resume never builds or pulls. If an image is missing, it reports the missing preparation rather than silently downloading it. Use normal startup while connected to finish preparation.</p>
+<p>After disconnecting, repeat one small Python example, one SQL query and any specialized runtime you plan to use. Browser Live preview also works with bundled HTML/CSS/JavaScript/D3 inputs. External scripts and network data remain outside that preview&#x27;s contract.</p>
+<h3 id="package-installation-and-lesson-assets-are-different">Package installation and lesson assets are different<a class="heading-anchor" href="#package-installation-and-lesson-assets-are-different" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
-<th>Asset</th>
-<th>Used by</th>
-<th>Offline behavior</th>
+<th>Resource</th>
+<th>Preparation boundary</th>
 </tr></thead><tbody>
 <tr>
-<td>Seaborn sample datasets</td>
-<td>Several data-analysis lessons</td>
-<td>Accepted first-run download; Seaborn reuses its local cache afterward</td>
+<td>Runtime/compiler packages</td>
+<td>Built into a selected image, or obtained from a matching published Hub tag</td>
 </tr>
 <tr>
-<td>Python packages and platform wheels</td>
-<td>Course environment</td>
-<td>Installed once by the setup script</td>
+<td>Synthetic data and checked-in fixtures</td>
+<td>Included with course sources and images</td>
 </tr>
 <tr>
-<td>PostgreSQL or PostgreSQL container image</td>
-<td>SQL track</td>
-<td>Runs locally after installation or image pull</td>
+<td>Pretrained weights, tokenizer files or extra datasets</td>
+<td>Downloaded only through the specific lesson&#x27;s explicit preparation route</td>
 </tr>
 <tr>
-<td>JupySQL, pandas, SQLAlchemy, and Psycopg wheels</td>
-<td>PostgreSQL notebook bridge</td>
-<td>Installed by the default Core setup on every OS; queries stay local afterward</td>
+<td>Remote service or cluster</td>
+<td>Requires a separately available and deliberately selected environment</td>
 </tr>
 <tr>
-<td>torchvision pretrained weights</td>
-<td>Transfer-learning lesson</td>
-<td>Must already be cached, or use the lesson’s non-pretrained fallback</td>
-</tr>
-<tr>
-<td>Hugging Face model/tokenizer</td>
-<td>NLP lesson</td>
-<td>Must already be cached, or use the local fallback</td>
-</tr>
-<tr>
-<td>spaCy language model</td>
-<td>NLP lesson</td>
-<td>Must be installed while connected, or use <code>spacy.blank(...)</code> where the lesson permits</td>
+<td>NVIDIA device</td>
+<td>Requires compatible hardware, drivers and an explicitly enabled GPU profile</td>
 </tr>
 </tbody></table></div>
-<p>External “further reading” links are optional and do not form part of the offline execution contract.</p>
-<h3 id="prepare-while-connected">Prepare while connected<a class="heading-anchor" href="#prepare-while-connected" aria-label="Link to this section">#</a></h3>
-<p>The following steps describe retained host environments. Docker learners use the connected build and offline resume commands above; native Windows setup is not a supported product route.</p>
-<ol>
-<li>Run the OS setup script.</li>
-<li>Run the environment doctor.</li>
-<li>Inspect the catalog for optional network or heavy requirements.</li>
-<li>Open and execute any accepted first-download lessons you plan to study.</li>
-<li>Run repository validation.</li>
-</ol>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Recommended: double-click START_DS60.cmd and approve the connected setup.</span>
-<span class="syntax-comment"># Manual equivalent:</span>
-<span class="syntax-builtin">Set-ExecutionPolicy</span> -Scope <span class="syntax-keyword">Process</span> -ExecutionPolicy Bypass
-<span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>bootstrap_windows<span class="syntax-punctuation">.</span>ps1
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py catalog
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py validate</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/course.py catalog
-.venv/bin/python scripts/course.py validate</code></pre>
-<p>Structural validation does not populate or verify every third-party cache. Test each planned network-tagged lesson once while connected, then repeat it disconnected; a missing cache must produce an actionable lesson error or use the documented fallback rather than silently fetching.</p>
-<h3 id="confirm-offline-readiness">Confirm offline readiness<a class="heading-anchor" href="#confirm-offline-readiness" aria-label="Link to this section">#</a></h3>
-<p>Disconnect from the network or disable Wi-Fi and start a fresh terminal.</p>
-<p>Windows:</p>
-<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py validate</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/course.py validate</code></pre>
-<p>Then open the planned lesson from a fresh notebook kernel. A cached lesson should not attempt a network request.</p>
-<p>For Hugging Face tooling, these environment variables make accidental online fallback fail fast:</p>
-<p>Windows PowerShell:</p>
-<pre class="highlighted-code"><code class="language-powershell">$env:HF_HUB_OFFLINE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span>
-$env:TRANSFORMERS_OFFLINE <span class="syntax-punctuation">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">1</span><span class="syntax-string">&quot;</span></code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">export</span> HF_HUB_OFFLINE<span class="syntax-operator">=</span><span class="syntax-number">1</span>
-<span class="syntax-builtin">export</span> TRANSFORMERS_OFFLINE<span class="syntax-operator">=</span><span class="syntax-number">1</span></code></pre>
-<p>These variables do not create a cache; they only require tools to use one.</p>
-<h3 id="cache-notes">Cache notes<a class="heading-anchor" href="#cache-notes" aria-label="Link to this section">#</a></h3>
-<p>Common default locations include:</p>
+<p>A library import does not prove that model weights or sample datasets are cached. Some legacy notebooks offer external dataset examples or offline fallbacks; read their requirements before disconnecting. Downloads into a temporary worker job directory do not become durable assets automatically. Use the preparation path and storage location declared by that lesson.</p>
+<h3 id="move-prepared-images-to-another-machine">Move prepared images to another machine<a class="heading-anchor" href="#move-prepared-images-to-another-machine" aria-label="Link to this section">#</a></h3>
+<p>Use a supported image-transfer route deliberately:</p>
 <ul>
-<li>Seaborn: <code>seaborn-data</code> under the user home directory</li>
-<li>Hugging Face: <code>.cache/huggingface</code> under the user home directory</li>
-<li>PyTorch: <code>.cache/torch</code> under the user home directory</li>
+<li>After the owner publishes matching tags, the destination can use <code>./classroom --from-hub PUBLISHER --tag VERSION</code> while connected.</li>
+<li>For a disconnected transfer, Docker can save local images to an archive and load them into another engine. Follow Docker&#x27;s <a href="https://docs.docker.com/reference/cli/docker/image/save/">image save</a> and <a href="https://docs.docker.com/reference/cli/docker/image/load/">image load</a> commands. Preserve the exact required tags and architecture.</li>
 </ul>
-<p>Locations can vary by operating system and environment configuration. Do not commit machine caches to the repository.</p>
-<p>Prepare the Seaborn datasets currently used by the historical lessons in a scratch notebook while connected:</p>
-<pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> seaborn <span class="syntax-keyword">as</span> sns
-
-<span class="syntax-keyword">for</span> name <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tips</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">titanic</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">penguins</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
-    frame <span class="syntax-operator">=</span> sns<span class="syntax-operator">.</span>load_dataset<span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">)</span>
-    <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>name<span class="syntax-punctuation">,</span> frame<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">)</span></code></pre>
-<p>Expect three nonempty shapes. Then disconnect, restart the kernel, and repeat the cell. A successful connected load alone does not prove the second run avoids a network lookup. <code>HF_HUB_OFFLINE</code> only controls Hugging Face libraries; it does not disable Seaborn, pip, Docker pulls, or arbitrary HTTP requests. For downloaded model weights, exercise the exact model identifier and revision that the lesson uses, or choose its documented local fallback.</p>
-<h3 id="fully-disconnected-installation">Fully disconnected installation<a class="heading-anchor" href="#fully-disconnected-installation" aria-label="Link to this section">#</a></h3>
-<p>A completely offline fresh-machine installation requires a separately prepared bundle containing, at minimum:</p>
-<ul>
-<li>Python installer</li>
-<li>Git and VS Code installers</li>
-<li>Required VS Code <code>.vsix</code> files</li>
-<li>Platform- and Python-version-specific wheels</li>
-<li>PostgreSQL installer or exported container image</li>
-<li>Course datasets and permitted model assets</li>
-<li>Checksums and licenses</li>
-</ul>
-<p>The Git repository alone is not that bundle. If you build one, generate it on a connected machine for a specific operating system, CPU architecture, and Python version, then install wheels with <code>--no-index --find-links</code>. Do not claim another platform is supported until that bundle is tested there.</p>
-<h3 id="optional-package-only-offline-bundle">Optional package-only offline bundle<a class="heading-anchor" href="#optional-package-only-offline-bundle" aria-label="Link to this section">#</a></h3>
-<p>On a connected machine matching the target OS, CPU, and Python version, create a course wheel and Core dependency wheels in an ignored folder:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows, after resolving $CoursePython as above</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip wheel <span class="syntax-punctuation">-</span>-wheel-dir artifacts<span class="syntax-punctuation">\</span>wheelhouse <span class="syntax-string">&quot;</span><span class="syntax-string">.[notebooks,data,quality,bridge,professional,sql-notebooks]</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python -m pip wheel --wheel-dir artifacts/wheelhouse <span class="syntax-string">&quot;.[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</span></code></pre>
-<p>On the offline machine, install Python first, copy the repository and matching wheelhouse, then create <code>.venv</code> and install the built course wheel:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Native Windows Python.org route</span>
-py <span class="syntax-punctuation">-</span>3<span class="syntax-punctuation">.</span>12 -m venv <span class="syntax-punctuation">.</span>venv
-$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m pip install <span class="syntax-punctuation">-</span>-no-index <span class="syntax-punctuation">-</span>-find-links artifacts<span class="syntax-punctuation">\</span>wheelhouse <span class="syntax-string">&quot;</span><span class="syntax-string">ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]</span><span class="syntax-string">&quot;</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m ipykernel install <span class="syntax-punctuation">-</span>-user <span class="syntax-punctuation">-</span>-name ds60sqlpy <span class="syntax-punctuation">-</span>-display-name <span class="syntax-string">&quot;</span><span class="syntax-string">Python (ds60sqlpy)</span><span class="syntax-string">&quot;</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor <span class="syntax-punctuation">-</span>-no-database</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux; use python3.11 if that is the bundle&#x27;s interpreter</span>
-python3.12 -m venv .venv
-.venv/bin/python -m pip install --no-index --find-links artifacts/wheelhouse <span class="syntax-string">&quot;ds60sqlpy[notebooks,data,quality,bridge,professional,sql-notebooks]&quot;</span>
-.venv/bin/python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span>
-.venv/bin/python scripts/course.py doctor --no-database</code></pre>
-<p>Installing the wheel avoids an offline source build. Keep the repository and installed package versions in sync. This is a package-only bundle, separate from a standalone application: it omits Python, PostgreSQL, VS Code, extensions, datasets, and models. Default setup scripts perform a connected installation; they are not offline bundle installers. Verify the intended workflow on the actual target OS before distributing it. See <a href="https://pip.pypa.io/en/stable/cli/pip_wheel/">pip wheel</a> and <a href="https://pip.pypa.io/en/stable/user_guide/#installing-from-local-packages">installing local packages</a>.</p>
-<h3 id="adding-a-lesson">Adding a lesson<a class="heading-anchor" href="#adding-a-lesson" aria-label="Link to this section">#</a></h3>
-<p>New lesson code must not make a silent network call. Record its network classification in the catalog-builder metadata, regenerate <code>curriculum/catalog.json</code>, and choose one:</p>
-<ol>
-<li>Track or generate the asset locally.</li>
-<li>Accept a disclosed first-run cache and provide a local fallback.</li>
-<li>Mark the entire exercise as optional enrichment.</li>
-</ol>
-<p>See <a href="../content-authoring.md.html">Content authoring</a>.</p></article>
+<p>An ARM64 image is not automatically an AMD64 image. The course source ZIP, image archive and learning-data backup solve different problems. Loading images does not restore browser drafts or PostgreSQL tables.</p>
+<p>See <a href="../dockerhub.md.html">Docker Hub distribution</a> for image names and architecture tags, and <a href="../one-command-classroom.md.html#backup-and-transfer">backup and transfer</a> for saved learning data. Do not include private runtime credentials or model cache credentials in a shared archive.</p>
+<h3 id="static-reading-without-an-engine">Static reading without an engine<a class="heading-anchor" href="#static-reading-without-an-engine" aria-label="Link to this section">#</a></h3>
+<p>Open <code>START_HERE.html</code> from the extracted source folder for the generated reading library. Keep the folder structure intact so local links work. Static readers display content; they do not execute programs or connect to a database. Return to <code>./classroom</code> when you want the interactive workspace.</p>
+<p>An optional AI tutor has its own connectivity requirements. The curriculum and MCP content server do not bundle an offline language model.</p></article>
   </main>
 </body>
 </html>

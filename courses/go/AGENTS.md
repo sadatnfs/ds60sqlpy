@@ -29,3 +29,8 @@ Check every changed reference with the actual declared worker when available.
 Local Go runs are additional evidence, not Linux-container acceptance. Preserve
 meaningful error and boundary cases and do not weaken checks to get a green run.
 Use grouped parallel repository tests and keep all learner state untouched.
+
+Use [the subject authoring guide](authoring/README.md) for regeneration and
+[the module contract](../../docs/implementation/ADDING_A_MODULE.md) for shared
+runtime integration. Root guidance owns common formatting, saved-work and
+publication rules; subject changes must preserve those boundaries.

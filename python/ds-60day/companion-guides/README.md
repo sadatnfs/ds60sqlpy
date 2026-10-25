@@ -1,6 +1,7 @@
 # Companion Guides for 60-Day Python Data Science Notebooks
 
 This folder contains narrative, text-only companion guides for each daily notebook in `../notebooks`. Each guide includes:
+
 - Learning objectives and why the topic matters
 - Conceptual explanations and multiple worked examples (beyond the notebook)
 - Common pitfalls and mental models
@@ -8,11 +9,13 @@ This folder contains narrative, text-only companion guides for each daily notebo
 - Further reading and docs links
 
 Naming matches the notebooks, e.g.:
+
 - day01_setup_and_repl.md → notebooks/day01_setup_and_repl.ipynb
 - ...
 - day60_capstone_completion_presentation.md → notebooks/day60_capstone_completion_presentation.ipynb
 
-Index of guides (16–60 added):
+## Data and modeling sequence, Days 16 through 60
+
 - 16: NumPy fundamentals; arrays, vectorization, broadcasting
 - 17: Pandas intro; Series, DataFrame, Index
 - 18: Pandas I/O and cleaning
@@ -58,3 +61,8 @@ Index of guides (16–60 added):
 - 58: Code review, refactor, tests
 - 59: Capstone kickoff
 - 60: Capstone completion & presentation
+
+Use the [Python track entrypoint](../README.md) to study these guides in the
+Docker classroom and continue into the named foundations, NumPy, pandas,
+algorithm and professional units. Notebook files remain optional source
+artifacts; ordinary browser study requires no host Jupyter installation.

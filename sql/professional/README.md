@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 These named modules extend the numbered PostgreSQL track without renumbering
@@ -13,7 +13,7 @@ Days 1–60. They teach database responsibilities that are normally encountered
 in application and production work: owning a relational model, evolving it
 through reviewed migrations, and enforcing least privilege.
 
-All runnable work targets PostgreSQL 16 or newer and the disposable
+The classroom supplies PostgreSQL 17; the portable SQL examples target PostgreSQL 16 or newer and the disposable
 `advanced_sql_training` database. Run commands from the repository root. Never
 substitute a production, shared, or personally valuable database.
 
@@ -56,9 +56,18 @@ prerequisites.
 
 ## Running a learner script
 
-The same command works in Windows PowerShell, macOS, and Linux:
+Start `./classroom --starter`, choose PostgreSQL and select the unit's
+**Whole SQL lesson (psql)** artifact. The Docker service supplies PostgreSQL 17
+and the transcript. No host database or `psql` installation is needed for this
+route. Preserve the lesson's declared rollback and cleanup behavior.
 
-```text
+The commands below are optional contributor/project recipes. Prepare a local
+`psql` client and an explicit connection to the disposable database using the
+actual forwarded port from `./classroom status`. Set PostgreSQL connection
+settings securely for that shell; a database name alone does not select the
+classroom's host port. Do not put passwords in source files or shell history.
+
+```bash
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_start_01_tables_and_grain.sql
 ```
 
@@ -119,12 +128,11 @@ solution cleans up its normal-run objects. Keep `-X` so personal `psql`
 configuration cannot alter a lesson, and keep `ON_ERROR_STOP=1` so unexpected
 errors stop immediately.
 
-Default SQL work needs no network access after PostgreSQL is installed. The
+Default classroom SQL work needs no internet after its images are prepared. The
 optional physical/PITR specialization may require a one-time container-image
 pull and explicit operator approval; it is documentation-only in this track.
 No connection string or password belongs in these files. If `psql` prompts for
-credentials, use the local authentication method from the operating-system
-setup guide; do not save secrets in the repository.
+credentials, use the deliberately prepared disposable connection; do not save secrets in the repository.
 
 ## Optional shared concurrency fixture
 

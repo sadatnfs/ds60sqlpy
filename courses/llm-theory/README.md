@@ -5,18 +5,18 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 All **48 chapters** are authored, from probability and tokenization through actual tiny-model training, inference, evaluation and modern Transformer mechanisms. The route has 27 Core/NumPy lessons, 16 PyTorch CPU lessons and 5 reading lessons. The index below is generated from the reviewed plan and complete authored manifest.
 
 ## Start in the Docker classroom
 
-Use the [Docker classroom setup](../../docs/docker-classroom.md), open **Journeys**, and choose the LLM theory journey. Select a chapter, read its guide, save your own learner pad and use **Run** for an executable lesson. The selected worker supplies the declared Python packages. Host Python, PyTorch and TensorFlow installations are not prerequisites for this route.
+Use the [Docker classroom setup](../../docs/docker-classroom.md), open **All learning paths**, and choose the LLM theory journey. Select a chapter, read its guide, save your own learner pad and use **Run** for an executable lesson. The selected worker supplies the declared Python packages. Host Python, PyTorch and TensorFlow installations are not prerequisites for this route.
 
 Reading chapters use written calculations and reasoning cases. Their read marker is a study record, not an executed test or proof of mastery. For code chapters, record predictions, attempt the six tasks, use progressive hints, then compare the separate executable and explained solutions after an attempt. Preserve learner work under the classroom's saved pad or ignored `.learning/expansion/` directories.
 
-The default lessons use tiny literal offline fixtures and bounded CPU computations. No default chapter downloads model weights or calls a paid model API. Actual reference and worked-example qualification is recorded in the [ML content status](../../docs/implementation/ml-content-status.md), [expert chapter status](../../docs/implementation/llm-expert-status.md) and [depth-review record](../../docs/implementation/ml-depth-review.md). Runtime evidence is separate from a claim that a small model is a reliable subject expert.
+The default lessons use tiny literal offline fixtures and bounded CPU computations. No default chapter downloads model weights or calls a paid model API. The [implementation checkpoint](../../docs/implementation/CHECKPOINT.md) explains the current architecture and evidence boundaries. Runtime evidence is separate from a claim that a small model is a reliable subject expert.
 
 ## Follow a complete Transformer calculation
 

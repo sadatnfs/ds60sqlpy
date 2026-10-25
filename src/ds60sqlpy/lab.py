@@ -16,20 +16,18 @@ from urllib.parse import urlsplit
 from ds60sqlpy.capabilities import CapabilityService
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.classroom import ClassroomService
+from ds60sqlpy.classroom_http import CourseHTTPServer, CourseRequestHandler, RequestError
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.module_service import ModuleService
-from ds60sqlpy.portal import PortalError, PortalRequestHandler, PortalServer
 from ds60sqlpy.sql_lesson import SqlLessonRunner
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
 
 
-class LabServer(PortalServer):
-    """A separate execution-capable server; the original portal stays read-only."""
-
-    is_learning_lab = True
+class LabServer(CourseHTTPServer):
+    """The unified classroom server with explicit learner-controlled execution."""
 
     # Keep bounded execution controllers alive during shutdown so their finally
     # blocks reap workers and descendants before the application exits.
@@ -65,7 +63,6 @@ class LabServer(PortalServer):
             catalog,
             port=port,
             progress_path=progress_path,
-            allow_launches=False,
             bind_host="0.0.0.0" if container else "127.0.0.1",
         )
         # A mapped Docker host port changes the one exact accepted Host/Origin,
@@ -292,7 +289,7 @@ class LabServer(PortalServer):
         raise ValueError("Unknown learning-lab action.")
 
 
-class LabRequestHandler(PortalRequestHandler):
+class LabRequestHandler(CourseRequestHandler):
     """Keep the original exact-Host, origin, token, and content limits."""
 
     @property
@@ -396,7 +393,7 @@ class LabRequestHandler(PortalRequestHandler):
             ):
                 raise ValueError("This endpoint accepts only its own application actions.")
             self._send_json(self.lab.action(payload))
-        except (KeyError, OSError, PortalError, TypeError, ValueError) as exc:
+        except (KeyError, OSError, RequestError, TypeError, ValueError) as exc:
             self._send_error(HTTPStatus.BAD_REQUEST, str(exc))
 
 

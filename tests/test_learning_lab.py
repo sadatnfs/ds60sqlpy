@@ -12,7 +12,7 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.coaching import CoachingService
-from ds60sqlpy.desktop import prepare_workspace
+from ds60sqlpy.container_runtime import prepare_workspace
 from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadRunner
 from ds60sqlpy.lab import LabServer
 from ds60sqlpy.progress import ProgressStore
@@ -147,7 +147,7 @@ def test_workspace_install_reuses_existing_course_and_preserves_state(tmp_path: 
         prepare_workspace(source, unknown)
 
 
-def test_lab_requires_origin_token_and_does_not_execute_from_portal(tmp_path: Path) -> None:
+def test_lab_requires_exact_origin_and_session_token_before_execution(tmp_path: Path) -> None:
     catalog = Catalog.load()
     server = LabServer(catalog, progress_path=tmp_path / "progress.json", python=sys.executable)
     # Point pad writes to a private temporary catalog, keeping official artifacts untouched.
@@ -197,10 +197,10 @@ def test_workspace_does_not_copy_into_its_own_payload(tmp_path: Path) -> None:
     assert not destination.exists()
 
 
-def test_native_payload_excludes_local_state_and_build_metadata(
+def test_source_payload_excludes_local_state_and_build_metadata(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    from scripts import build_app
+    from scripts import course_payload
 
     source = tmp_path / "course"
     (source / "src/ds60sqlpy").mkdir(parents=True)
@@ -210,9 +210,9 @@ def test_native_payload_excludes_local_state_and_build_metadata(
     (source / ".learning").mkdir()
     (source / ".learning/progress.json").write_text("private learner state", encoding="utf-8")
     (source / ".env").write_text("private local configuration", encoding="utf-8")
-    monkeypatch.setattr(build_app, "ROOT", source)
+    monkeypatch.setattr(course_payload, "ROOT", source)
     payload = tmp_path / "payload"
-    build_app.stage_course(payload)
+    course_payload.stage_course(payload)
     assert (payload / "src/ds60sqlpy/module.py").is_file()
     assert not (payload / "src/ds60sqlpy.egg-info").exists()
     assert not (payload / ".learning").exists()

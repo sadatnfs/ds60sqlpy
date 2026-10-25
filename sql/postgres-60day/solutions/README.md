@@ -7,7 +7,8 @@ Current artifact coverage:
 - Markdown explanations: Days 1–60
 - Executable `.sql` solutions: Days 1–60
 
-Use `python scripts/course.py catalog --track sql` from the repository root for the generated availability view.
+The classroom lists references per lesson. Prepared contributors can also use
+`uv run --no-sync python scripts/course.py catalog --track sql` from the root.
 
 ## Conventions
 
@@ -21,20 +22,15 @@ Use `python scripts/course.py catalog --track sql` from the repository root for 
 - Days 52–54 are the declared stateful solution sequence. Day 52 resets and
   commits the course-owned `dwh` schema; run Days 53 and 54 after it.
 
-Run an available executable solution from the repository root:
+In the classroom, choose the solution artifact when ready to compare, then use
+**Whole SQL lesson (psql)**. Read the transaction notes first, especially for
+the stateful warehouse sequence. The transcript records the actual source and
+result; reading a reference does not run it automatically.
 
-```text
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/solutions/day01_solutions.sql
-```
-
-Or validate the complete answer sequence, including the Days 52–54 warehouse
-state contract:
-
-```text
-python scripts/course.py sql solutions --reset
-```
-
-`--reset` is destructive only to the disposable course schemas described in
-the main SQL README.
+Contributors preparing reference qualification should follow
+[validation](../../../docs/validation.md) and use an explicitly selected local
+disposable database. The full solution-sequence command supports a deliberate
+reset, which replaces the course-owned schemas. It is not an ordinary learner
+resume operation. Do not run it against valuable or shared data.
 
 Try the learner exercise first. A solution is a comparison and explanation, not a replacement for the attempt.

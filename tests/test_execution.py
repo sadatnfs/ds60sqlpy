@@ -17,7 +17,7 @@ import pytest
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
-from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner, external_program_environment
+from ds60sqlpy.execution import MAX_OUTPUT_BYTES, PadResult, PadRunner
 from ds60sqlpy.sql_notebook import validate_course_database_target
 
 
@@ -104,17 +104,16 @@ def test_descendants_are_stopped_after_normal_parent_exit(course: Catalog) -> No
     assert not sentinel.exists(), "A descendant survived the normally completed coding-pad run."
 
 
-def test_frozen_discovery_prefers_workspace_venv_without_resolving_its_python_symlink(
+def test_explicit_backend_preserves_workspace_venv_python_symlink(
     course: Catalog, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     prefix = course.repo_root / ".venv"
     subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(prefix)], check=True)
-    monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.delenv("DS60_PYTHON", raising=False)
-    discovered = PadRunner._discover_python(course.repo_root)
+    discovered = PadRunner._discover_python(course.repo_root, configured=str(prefix / "bin/python"))
     assert discovered is not None
     assert str(prefix) in discovered
-    assert discovered != str(Path(discovered).resolve()) or os.name == "nt"
+    assert discovered != str(Path(discovered).resolve())
 
 
 def test_explicit_backend_rejects_a_missing_or_unsupported_program(
@@ -128,25 +127,6 @@ def test_explicit_backend_rejects_a_missing_or_unsupported_program(
     with pytest.raises(ValueError, match="DS60_PYTHON"):
         runner.run("python-01", "python", "print(1)")
     assert not (course.repo_root / ".learning").exists()
-
-
-def test_frozen_environment_restores_loader_values_without_changing_the_parent(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(sys, "frozen", True, raising=False)
-    monkeypatch.setattr(sys, "_MEIPASS", "/temporary/bundle", raising=False)
-    monkeypatch.setenv("LD_LIBRARY_PATH", "/temporary/bundle")
-    monkeypatch.setenv("LD_LIBRARY_PATH_ORIG", "/system/libraries")
-    monkeypatch.setenv("DYLD_LIBRARY_PATH", "/temporary/bundle")
-    monkeypatch.delenv("DYLD_LIBRARY_PATH_ORIG", raising=False)
-    monkeypatch.setenv("_PYI_APPLICATION_HOME_DIR", "/temporary/bundle")
-    monkeypatch.setenv("PATH", os.pathsep.join(("/temporary/bundle/bin", "/system/bin")))
-    child = external_program_environment()
-    assert child["LD_LIBRARY_PATH"] == "/system/libraries"
-    assert "DYLD_LIBRARY_PATH" not in child
-    assert "_PYI_APPLICATION_HOME_DIR" not in child
-    assert "/temporary/bundle/bin" not in child["PATH"]
-    assert os.environ["LD_LIBRARY_PATH"] == "/temporary/bundle"
 
 
 def test_backend_transcripts_redact_known_database_credentials(
@@ -547,7 +527,7 @@ def test_live_sql_pad_rejects_superuser_before_running_learner_statements(
     payload = json.loads(result["output"])
     assert payload["error_type"] == "CourseRoleError"
     assert "limited course login" in payload["message"]
-    assert "docs/offline-app.md" in payload["message"]
+    assert "docs/setup/postgresql.md" in payload["message"]
 
 
 @pytest.mark.parametrize(
@@ -740,10 +720,8 @@ def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
     line_ending: bytes,
     symbol: str,
 ) -> None:
-    from ds60sqlpy.execution import WORKER_GATE
-
     code = (
-        WORKER_GATE + "import os\n"
+        "import os\n"
         "def emit(fd, data):\n"
         "    while data:\n"
         "        data = data[os.write(fd, data):]\n"
@@ -754,7 +732,7 @@ def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
     )
     result = PadRunner(course)._execute(
         [sys.executable, "-u", "-c", code],
-        external_program_environment(),
+        dict(os.environ),
         "python",
         truncate_output=True,
     )
@@ -766,11 +744,9 @@ def test_whole_script_capture_drains_bounded_output_and_retains_final_errors(
 
 
 def test_whole_script_output_drain_still_obeys_the_process_time_limit(course: Catalog) -> None:
-    from ds60sqlpy.execution import WORKER_GATE
-
     result = PadRunner(course, timeout=0.2)._execute(
-        [sys.executable, "-u", "-c", WORKER_GATE + "while True: print('x' * 8192)"],
-        external_program_environment(),
+        [sys.executable, "-u", "-c", "while True: print('x' * 8192)"],
+        dict(os.environ),
         "python",
         truncate_output=True,
     )

@@ -430,6 +430,21 @@ def test_wrapper_prepares_missing_tools_with_visible_logs_then_formats(wrapper: 
     assert not run[run.index("--mount") + 1].endswith(",readonly")
 
 
+def test_tool_image_tracks_build_inputs_but_not_documentation(wrapper: Any) -> None:
+    root, invoke = wrapper
+
+    def selected_image() -> str:
+        result, calls = invoke("--check")
+        assert result.returncode == 0, result.stderr
+        return str(next(call[2] for call in calls if call[:2] == ["image", "inspect"]))
+
+    original = selected_image()
+    put(root, "docker/formatting/README.md", "Clarified contributor instructions.\n")
+    assert selected_image() == original
+    put(root, "docker/formatting/Dockerfile", "FROM changed-toolchain\n")
+    assert selected_image() != original
+
+
 @pytest.mark.parametrize(
     "settings",
     [

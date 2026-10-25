@@ -159,7 +159,7 @@ def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
     assert "tests/test_execution.py tests/test_sql_expansion_live.py" in postgres
     app = (WORKFLOW.parent / "app-build.yml").read_text(encoding="utf-8")
     starter = app.split("  docker-starter:", maxsplit=1)[1].split("  docker:", maxsplit=1)[0]
-    assert starter.index("uv sync --frozen") < starter.index("scripts/build_windows_starter.py")
+    assert starter.index("uv sync --frozen") < starter.index("scripts/build_starter.py")
     assert "--output dist/DS60LearningLab-Docker-Starter.zip" in starter
     assert "path: dist/DS60LearningLab-Docker-Starter.zip" in starter
     assert "if-no-files-found: error" in starter
@@ -250,3 +250,12 @@ def test_core_test_command_works_in_a_fresh_checkout_without_work_directory(
     assert result.returncode == 0, result.stdout + result.stderr
     assert (checkout / "work/test-results/core.xml").is_file()
     assert (checkout / "work/test-tmp").is_dir()
+
+
+def test_owned_kubernetes_build_matches_the_selected_overlay_image() -> None:
+    workflow = (REPO_ROOT / ".github/workflows/kubernetes.yml").read_text()
+    overlay = (REPO_ROOT / "compose.classroom.kubernetes.yaml").read_text()
+    built = re.findall(r"-t (ds60sqlpy-worker-k8s-kind:[^\s]+)", workflow)
+    selected = re.findall(r"image: (ds60sqlpy-worker-k8s-kind:[^\s]+)", overlay)
+    version = tomllib.loads(PYPROJECT.read_text())["project"]["version"]
+    assert built == selected == [f"ds60sqlpy-worker-k8s-kind:{version}"]

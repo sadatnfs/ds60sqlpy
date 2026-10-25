@@ -19,27 +19,19 @@ choose **Python** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+**Optional contributor route:** use the prepared environment in
+[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
+WSL 2. The commands below assume its packages are already installed. They are
+not prerequisites for opening this lesson in the Docker classroom. Local
+`.learning/` files and CLI progress belong to this checkout; they do not read or
+update the Docker classroom's named learning volume.
 
 Open the [learner script](../lessons/py_numpy_04.py) in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored `.learning/` copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython python/professional/lessons/py_numpy_04.py
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python python/professional/lessons/py_numpy_04.py
+```sh
+uv run --no-sync python python/professional/lessons/py_numpy_04.py
 ```
 
 Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_numpy_04_solutions.md) and [runnable reference](../solutions/py_numpy_04_solution.py) closed until an attempt or an explicit worked comparison.

@@ -3,7 +3,7 @@
 The optional DS60 MCP server lets the AI tutor read the local curriculum, plan a path,
 open the exact lesson, and provide progressive hints. MCP is the connection
 protocol between the AI tutor and this local Python process. You can also learn
-without it using the course application, JupyterLab, and checked-in guides.
+without it using the Docker classroom and checked-in guides.
 
 The adapter uses standard input/output pipes. It opens no listening port,
 connects to no remote service, and does not execute Python, SQL, or shell
@@ -28,94 +28,74 @@ worked answers directly and does not require exams or hidden-solution gates.
 
 To resume the classroom, use `./classroom` for normal reuse of saved containers
 and images, or `./classroom resume` to prohibit builds and pulls. Supply the same
-custom `--project NAME` if one was used. `./classroom --rebuild` deliberately
-installs updated source files. The tutor must distinguish these startup settings
+custom `--project NAME` if one was used. `./classroom --local-build --rebuild` deliberately
+installs updated local source files. The tutor must distinguish these startup settings
 from your Docker learning volume and must not reset either to fix an error.
 
-## Install the optional adapter
+## Prepare the optional stdio adapter
 
-The following setup is an additional host-side integration for a stdio client;
-it is not required by the Docker classroom. Run normal OS setup first. Install the extra into the same course interpreter
-while connected. It uses the official Python MCP SDK v2; old `FastMCP` examples
-from SDK v1 are not this adapter's interface.
+This is a separate assistant integration, not a requirement for running the
+Docker classroom. Use the prepared contributor environment described in
+[CONTRIBUTING.md](../CONTRIBUTING.md), with Python 3.12 and the checked-in lock.
+On Windows, prepare and run these commands inside WSL 2. A macOS client can
+use a deliberately prepared local contributor interpreter.
 
-Windows PowerShell, from the repository root:
+From the repository root, include the optional MCP dependency along with the
+Core groups you want to retain:
 
-```powershell
-$CourseRoot = (Resolve-Path .).Path
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython -m pip install -e ".[mcp]"
-$McpScript = Join-Path $CourseRoot "scripts\mcp_server.py"
-& $CoursePython $McpScript --help
+```sh
+uv sync --frozen --python 3.12 --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks --extra mcp
+uv run --no-sync python -c "import importlib.metadata; print(importlib.metadata.version('mcp'))"
+uv run --no-sync python scripts/mcp_server.py --help
 ```
 
-macOS/Linux:
+The adapter uses the official Python MCP SDK v2. Its help shows required
+`--repo` and optional `--allow-progress-writes` arguments. Keep `--extra mcp`
+in later exact sync commands if you want to retain this integration.
+Installing the package does not configure an MCP client or start a server.
 
-```bash
-CourseRoot="$(pwd -P)"
-"${CourseRoot}/.venv/bin/python" -m pip install -e ".[mcp]"
-"${CourseRoot}/.venv/bin/python" "${CourseRoot}/scripts/mcp_server.py" --help
-```
+## Connect a compatible MCP client
 
-Expect help showing the required `--repo` argument and the optional
-`--allow-progress-writes` flag. The installed `ds60-mcp` entry point provides
-the same server, but an absolute Python path is easier to diagnose in a client
-configuration and works with both Windows environment layouts.
-
-If you use exact locked synchronization later, remember to retain `--extra mcp`
-in that synchronization. Standard Core setup intentionally does not require
-this optional integration.
-
-## Connect any compatible MCP client
-
-Choose a client that supports local **stdio** servers. In that client's MCP
-settings, add a server named `ds60-tutor` with these values:
+Choose a client that can launch a local **stdio** process. Configure:
 
 | Setting | Value |
 | --- | --- |
 | Transport | `stdio` |
-| Command | The absolute path to the course Python interpreter printed during setup |
-| Arguments | The absolute path to `scripts/mcp_server.py`, then `--repo`, then the absolute repository directory |
+| Command | Absolute path to this environment's `.venv/bin/python` |
+| Arguments | Absolute path to `scripts/mcp_server.py`, then `--repo`, then the absolute repository root |
 | Working directory, if requested | The repository root |
 
-Enter arguments as separate values, not as one shell command. The client must
-start the interpreter on the same machine or execution environment that holds
-the repository. A Windows client cannot directly launch a Linux executable
-inside WSL without an explicit WSL launch configuration. Keep the interpreter,
-script and repository paths in the same environment.
-
-A JSON representation of the server values is shown below. This is an
-illustration of the command and argument fields, not a universal client
-configuration file. Use the wrapper and settings location documented by your
-chosen client, and replace every placeholder with a real absolute path.
+For example, the command/argument portion of a client's configuration is:
 
 ```json
 {
-  "command": "ABSOLUTE_PATH_TO_COURSE_PYTHON",
+  "command": "ABSOLUTE_REPOSITORY_PATH/.venv/bin/python",
   "args": [
-    "ABSOLUTE_PATH_TO_REPOSITORY/scripts/mcp_server.py",
+    "ABSOLUTE_REPOSITORY_PATH/scripts/mcp_server.py",
     "--repo",
-    "ABSOLUTE_PATH_TO_REPOSITORY"
+    "ABSOLUTE_REPOSITORY_PATH"
   ]
 }
 ```
 
-Do not include shell quote characters inside a JSON argument. A path containing
-spaces remains a single argument. In JSON, Windows backslashes need escaping;
-forward slashes are accepted in ordinary Python file paths on Windows.
+Replace every placeholder. This illustrates process fields, not a universal
+client settings file. Keep each argument separate; do not put shell quote
+characters inside a JSON argument. A path containing spaces remains one
+argument. Use your client's documented configuration location and reload its
+server list after saving.
 
-Refresh the client's server list after saving its settings. The server should
-advertise the course tools described below. Installing the Python extra does
-not change any client configuration. If the checkout moves, recreate its
-virtual environment and update the interpreter, script and repository paths.
+The client must launch the interpreter in the environment that holds the
+checkout. A Windows desktop client cannot execute a Linux path directly.
+Use a client running inside WSL or its documented WSL process-launch support;
+keep the interpreter, script and repository paths in that same distribution.
+Do not reintroduce a native Windows Python installation just to imitate an
+old example. Moving a checkout requires updating the client paths and
+recreating its contributor environment as needed.
 
 The [MCP stdio transport specification](https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio)
-defines the process and pipe boundary. It does not require a specific client
-brand, settings filename or command-line registration tool.
+defines this process-and-pipe interface. It does not prescribe a client brand
+or a shared settings filename. No database credential or listening classroom
+server is needed for read-only curriculum discovery.
 
 ## Begin a learning conversation
 
@@ -218,8 +198,10 @@ Guide and solution documents have a 96000-byte tutor read limit; learner source
 has a 48000-byte limit, and a response has a 384000-byte bound. Oversized content
 is rejected explicitly instead of silently truncating a lesson. Only curated
 relative content paths can be read, and each read repeats the content-path
-check. Solutions have a separate reveal-gated response and are never read by
-normal module guide, index or search calls.
+check. Practice solution documents have a separate reveal-gated response and
+are not read by normal module guide, index or search calls. The statistics
+subject is a tutorial: its chapter and complete worked example are intentionally
+available through the normal lesson read without an exam or reveal requirement.
 
 All four module tools remain read-only when `--allow-progress-writes` enables
 the separate legacy evidence tools. An older checkout without expansion plans
@@ -244,8 +226,10 @@ With that flag, two additional tools are available:
   attempt, and explanation, plus recorded prerequisites, before writing
   `.learning/progress.json`.
 
-These are the course application's local evidence and progress files. Existing
-notes in other phases are preserved. Completion is explicitly labelled
+These are host-side legacy evidence and progress files in the selected checkout.
+They are separate from the Docker classroom's named-volume state and do not
+automatically update its pads or module progress. Existing notes in other
+phases are preserved. Completion is explicitly labelled
 learner-confirmed self-report, not automatic grading. Ask an AI tutor to save only
 your actual attempt and explanation, with your consent. Keep credentials and
 private workplace data out of course notes. Neither tool edits a lesson,
@@ -255,7 +239,7 @@ starts a process, resets a database, or executes the learner's code.
 
 1. Inspect your client's saved server configuration: executable, script,
    arguments and absolute repository path must all point to this checkout.
-2. Run that interpreter with `-m pip show mcp` and check it reports SDK v2.
+2. Run that interpreter with `-c "import importlib.metadata; print(importlib.metadata.version('mcp'))"` and check it reports SDK v2.
 3. Run the script with `--help`. A missing SDK message means the package was
    installed into a different interpreter or removed by an exact sync.
 4. Launching the script with `--repo` in a terminal normally appears to wait:
@@ -271,16 +255,10 @@ database credential or a listening web service.
 
 ## Verification and source references
 
-Run the real protocol tests with the optional SDK installed:
+In the prepared contributor environment, run the real protocol tests:
 
-```powershell
-# Windows, after resolving the interpreter
-& $CoursePython -m pytest tests\test_mcp_server.py tests\test_module_mcp.py -q
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python -m pytest tests/test_mcp_server.py tests/test_module_mcp.py -q
+```sh
+uv run --no-sync python -m pytest -n 4 --dist loadgroup tests/test_mcp_server.py tests/test_module_mcp.py
 ```
 
 Tests cover a client/server stdio handshake, legacy and module discovery, lesson/guide reads,
@@ -288,9 +266,8 @@ prompts, solution gating, pagination, opt-in writes, evidence prerequisites,
 invalid requests, bounded module reads, variants, and clean protocol stdout. Module
 tests additionally forbid worker/service construction, source subprocesses,
 and progress-file access during a real stdio exchange. The client session runs with
-network connect/bind calls forbidden in the POSIX server process. Windows
-runs the same stdio exchange without that audit guard because its event loop
-may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific
+network connect/bind calls forbidden in the POSIX server process. The supported Windows development route is the same POSIX environment inside
+WSL 2. This proves the adapter protocol in the tested environment; it does not prove that a specific
 MCP client installation is configured, that an AI taught well, or that a learner
 mastered the material. No user configuration is modified by these tests.
 

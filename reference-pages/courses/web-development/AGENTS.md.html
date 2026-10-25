@@ -173,7 +173,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Live HTML and browser JavaScript/D3 rendering is explicitly enabled for the current workspace in the current page session. It debounces source edits and guards against stale frames and callbacks. It must never write immutable browser-run receipts automatically. Existing draft saving is independent. Manual Run leaves live mode and preserves its exact submitted source; explicit Save observation captures the current preview and pauses automatic updates. Navigation, source-context changes, Stop and historical-result selection cancel pending refreshes. Reload does not restore execution opt-in. Viewport and fullscreen changes alter presentation without restarting source. Preserve editor focus while an automatically refreshed page initializes.</p>
 <p>Run the permanent live acceptance script against disposable learning state:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/web-development/authoring/check_live_preview.py --url http://127.0.0.1:PORT --confirm-disposable --report work/web-live-report.json</code></pre>
-<p>Never point it at a learner&#x27;s real saved classroom. It intentionally edits test pads and creates only the explicitly requested observation records.</p></article>
+<p>Never point it at a learner&#x27;s real saved classroom. It intentionally edits test pads and creates only the explicitly requested observation records.</p>
+<p>Follow <a href="authoring/README.md.html">authoring/README.md</a> for template ownership, exact-byte generation checks and browser qualification. The unified classroom owns navigation, themes and state; a new web specialization must not introduce a second lesson-serving application.</p></article>
   </main>
 </body>
 </html>

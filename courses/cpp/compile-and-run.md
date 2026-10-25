@@ -25,14 +25,21 @@ The include supplies declarations, `main` supplies an entry point, the stream st
 
 Follow the [Docker classroom guide](../../docs/docker-classroom.md) for initial preparation. An installed local Linux-container engine and prepared classroom images replace the need for a host C++ compiler. First preparation needs network access; later prepared runs use local images. Image setup is a deliberate action, not a side effect of opening a lesson.
 
-From the course folder containing `compose.classroom.yaml`, add C++ after preparing the lab:
+From the complete course folder, select the C++ profile through the maintained
+launcher. Run the same command in a POSIX terminal on Linux, macOS or Windows
+through WSL 2:
 
-```text
-docker compose -f compose.classroom.yaml --profile cpp20 --parallel 1 --progress plain build cpp-worker
-docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 up -d --no-build --pull never --wait lab python-core-worker cpp-worker
+```sh
+./classroom --profile cpp20
 ```
 
-These commands work in Windows Command Prompt, PowerShell and POSIX terminals. Open [the local classroom](http://127.0.0.1:8765/journeys), select C++, read the guide and open the learner source. Predict, edit, save the pad, then choose Run. The worker copies the saved source into a job-owned directory as `main.cpp`, compiles and links it, then runs the resulting program under its limits.
+This selection includes Python Core and C++. It replaces the remembered profile
+selection without stopping other workers that are already running; see
+[profile selection](../../docs/docker-profiles.md) when retaining a larger set.
+Open the exact `/classroom` URL printed by the launcher rather than assuming a
+fixed host port. Select C++, read the guide and open the learner source. Predict,
+edit, save the pad, then choose Run. The worker stages the submitted source as
+`main.cpp`, compiles and links it, then runs the program under its limits.
 
 Read compilation diagnostics separately from stdout, stderr and the exit code. A syntax error means the new program was not built successfully. A timeout means the recorded phase exceeded its budget. Save the explanation as well as the source. The read-only preview is not the learner editor.
 
@@ -59,7 +66,11 @@ if [ "$compile_status" -eq 0 ]; then
 fi
 ```
 
-Windows PowerShell with a prepared GCC-compatible compiler:
+The maintained Windows contributor route uses the POSIX block in WSL 2.
+The following PowerShell comparison is self-contained for an already prepared
+native GCC-compatible compiler. Native Windows compiler installation and
+qualification are outside the classroom support contract:
+
 
 ```powershell
 Get-Location
@@ -143,11 +154,11 @@ Missing native CMake/Ninja leaves the native CMake route unavailable;the Docker-
 
 ### Docker-only CMake project route
 
-Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared `ds60sqlpy-worker-cpp20:0.4.0` image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.
+Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared `ds60sqlpy-worker-cpp20:0.4.1` image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.
 
 Choose either `record-library` or `multifile`. Make a **new copy** before editing. The example name ends in `-01`; choose a new unused suffix for another attempt. Never point the writable project mount at the whole repository, your home folder or an existing learner project. A failure to create the new directory is a stop condition, not permission to overwrite it.
 
-On macOS or Linux, use a POSIX terminal:
+On Linux, macOS or Windows through WSL 2, use a POSIX terminal:
 
 ```sh
 cpp_fixture=record-library
@@ -159,7 +170,7 @@ mkdir "$cpp_project" && cp -R "courses/cpp/fixtures/$cpp_fixture/." "$cpp_projec
 Stop if either creation or copy fails. The absolute `cpp_project` path identifies the host folder. Quoting preserves spaces. The `--mount` syntax below treats commas as separators, so choose a project path without commas. On Docker Desktop for macOS, ensure this folder is inside an already shared location. On Linux, the UID/GID arguments below keep created files owned by your current user. If the engine's configured file-sharing or security policy denies the mount, diagnose that host setup rather than making the container privileged.
 
 ```sh
-cpp_image=ds60sqlpy-worker-cpp20:0.4.0
+cpp_image=ds60sqlpy-worker-cpp20:0.4.1
 cpp_tool() {
     cpp_entrypoint="$1"
     shift
@@ -179,7 +190,7 @@ cpp_tool cmake --install /project/build/debug --prefix /project/install
 
 Each `&&` requires the preceding phase to succeed. The final command status is available immediately as `$?`. A failure stops the chain, preserving the copied source and partial diagnostics for investigation. To capture a phase separately, run one `cpp_tool` command and inspect its status before continuing.
 
-On Windows, use PowerShell with Docker Desktop or another already configured local Linux-container engine. Use the actual Windows path returned by `Join-Path`/`Resolve-Path`; do not translate it manually into `/c/...`. If you use WSL instead, use the POSIX block with paths visible to that WSL-integrated engine and keep that choice consistent for the whole build directory.
+The maintained Windows route uses the POSIX blocks above inside WSL 2. The following optional PowerShell comparison requires separately prepared native Windows engine file sharing; that host workflow is outside classroom release qualification. Use the actual Windows path returned by `Join-Path`/`Resolve-Path`; do not translate it manually into `/c/...`. If you use WSL instead, use the POSIX block with paths visible to that WSL-integrated engine and keep that choice consistent for the whole build directory.
 
 ```powershell
 $CppFixture = 'record-library'
@@ -188,7 +199,7 @@ if (Test-Path -LiteralPath $CppProject) { throw 'Choose a new unused project suf
 New-Item -ItemType Directory -Path $CppProject -ErrorAction Stop | Out-Null
 Copy-Item -Path "courses/cpp/fixtures/$CppFixture/*" -Destination $CppProject -Recurse -ErrorAction Stop
 $CppProject = (Resolve-Path -LiteralPath $CppProject).Path
-$CppImage = 'ds60sqlpy-worker-cpp20:0.4.0'
+$CppImage = 'ds60sqlpy-worker-cpp20:0.4.1'
 $CppDockerArgs = @(
     'run', '--rm', '--pull', 'never', '--network', 'none', '--read-only',
     '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',

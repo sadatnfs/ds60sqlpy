@@ -1,8 +1,9 @@
-"""Container-only identity setup and host-backed learning-data checks."""
+"""Container identity setup, course staging and durable learning-data checks."""
 
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -10,6 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
+from ds60sqlpy.course_paths import COURSE_PATHS
 from ds60sqlpy.sql_notebook import SqlNotebookError, validate_course_database_target
 from ds60sqlpy.sql_runner import default_course_database_url
 
@@ -82,7 +84,7 @@ def prepare_workspace_root(workspace: Path, settings: ContainerSettings) -> None
 def learning_environment(
     workspace: Path, environment: Mapping[str, str], settings: ContainerSettings
 ) -> dict[str, str]:
-    """Check the host bind as the application user, preserving existing content."""
+    """Check mounted learning storage as the application user, preserving content."""
 
     result = dict(environment)
     target = result.get("DS60_LAB_DATABASE_URL") or default_course_database_url(result)
@@ -93,8 +95,8 @@ def learning_environment(
     learning = workspace / ".learning"
     if not learning.is_dir():
         raise ValueError(
-            "Mount a host learning directory at /workspace/.learning. "
-            "Use the host launcher to create it before starting Compose."
+            "Mount the learning-data volume at /workspace/.learning. "
+            "Use ./classroom to prepare storage before starting Compose."
         )
     try:
         with tempfile.NamedTemporaryFile(prefix=".write-check-", dir=learning):
@@ -105,8 +107,8 @@ def learning_environment(
         home.mkdir(mode=0o700, exist_ok=True)
     except OSError as exc:
         raise ValueError(
-            "The host learning directory is not writable by the application identity. "
-            "Start with the host launcher or set DS60_UID/DS60_GID to your host user. "
+            "The mounted learning directory is not writable by the application identity. "
+            "Use ./classroom and verify the configured DS60_UID/DS60_GID. "
             "Existing progress was not changed or recursively chowned."
         ) from exc
     result.update({"HOME": str(home), "XDG_CACHE_HOME": str(home / ".cache")})
@@ -159,14 +161,57 @@ def warm_matplotlib(workspace: Path) -> bool:
     print(
         "Warning: Matplotlib startup cache did not finish within the startup check. "
         "Python and SQL remain available; a first plot may reach the coding-pad time limit. "
-        "See the plotting guidance in docs/offline-app.md.",
+        "See the plotting guidance in docs/classroom-experience.md.",
         file=sys.stderr,
     )
     return False
 
 
+def prepare_workspace(source: Path, destination: Path) -> Path:
+    """Install course assets once, preserving every existing learner file.
+
+    A valid existing course is reused as-is. Different releases should use
+    different workspaces; silently overwriting either official exercises or
+    edited learner artifacts would lose work.
+    """
+
+    source, destination = source.resolve(), destination.resolve()
+    if source == destination:
+        return source
+    if (destination / "curriculum/catalog.json").is_file():
+        return destination
+    for name in COURSE_PATHS:
+        origin = source / name
+        if origin.is_dir() and destination.is_relative_to(origin):
+            raise ValueError("Choose a workspace outside the course's copied content directories.")
+    if destination.is_dir():
+        remaining = list(destination.iterdir())
+        if any(path.name != ".learning" or not path.is_dir() for path in remaining):
+            raise ValueError("Choose an empty directory or an existing DS60 course workspace.")
+    destination.mkdir(parents=True, exist_ok=True)
+    for name in COURSE_PATHS:
+        origin, target = source / name, destination / name
+        if origin.is_dir():
+            shutil.copytree(
+                origin,
+                target,
+                ignore=shutil.ignore_patterns(
+                    "__pycache__",
+                    "*.pyc",
+                    "*.egg-info",
+                    "*.dist-info",
+                    ".DS_Store",
+                    "cache",
+                    ".ipynb_checkpoints",
+                ),
+            )
+        elif origin.is_file():
+            shutil.copy2(origin, target)
+    return destination
+
+
 def start_lab() -> int:
-    """Run the app after identity drop, storing durable work only in the bind."""
+    """Run the app after identity drop, storing durable work in the learning volume."""
 
     try:
         settings = container_settings(os.environ)
@@ -175,20 +220,12 @@ def start_lab() -> int:
             raise ValueError("The app must run through the configured gosu identity drop.")
         os.environ.update(learning_environment(WORKSPACE, os.environ, settings))
         warm_matplotlib(WORKSPACE)
-        from ds60sqlpy.desktop import main
+        from ds60sqlpy.catalog import Catalog
+        from ds60sqlpy.lab import serve_lab
 
-        return main(
-            [
-                "--repo",
-                "/opt/course",
-                "--workspace",
-                str(WORKSPACE),
-                "--container",
-                "--port",
-                str(settings.port),
-                "--no-browser",
-            ]
-        )
+        root = prepare_workspace(Path("/opt/course"), WORKSPACE)
+        serve_lab(Catalog.load(root), port=settings.port, open_browser=False, container=True)
+        return 0
     except (OSError, ValueError) as exc:
         print(f"Could not start DS60 container: {exc}", file=sys.stderr)
         return 2

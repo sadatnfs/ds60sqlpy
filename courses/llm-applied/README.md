@@ -5,26 +5,29 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 Build a subject assistant by specifying its task, sources, computation and evaluation before choosing a model update. This 24-lesson route complements the [language-model mechanisms course](../llm-theory/README.md), the [NLP foundations route](../nlp/README.md) and the [statistics book](../statistics-ml/README.md). It covers data-science extraction and analysis, grounded retrieval, actual tiny-model fine-tuning, low-rank adapters and a bounded assistant capstone.
 
-The [authored manifest](lessons.json) is the source of truth for available lesson artifacts. The [route plan](track.json) preserves stable IDs and prerequisites. There are currently24 authored lesson bundles. Authored content and runtime acceptance are separate: consult the [execution checkpoint](../../docs/implementation/llm-applied-status.md) for the exact references that have run.
+The [authored manifest](lessons.json) is the source of truth for available lesson artifacts. The [route plan](track.json) preserves stable IDs and prerequisites. There are currently 24 authored lesson bundles. Authored content and runtime acceptance are separate: consult [validation](../../docs/validation.md) and CI artifacts for the exact revision and platform to identify the references actually executed.
 
 ## Choose the right mechanism
 
 Use prompts to specify behavior and examples, retrieval to supply current and attributable knowledge, deterministic tools for exact computation, and fine-tuning for a stable measured behavior gap supported by governed examples. These mechanisms can be combined. Fine-tuning does not replace citations, per-user access control or a statistical study design. A fluent explanation cannot validate a causal conclusion or invent a missing measurement.
 
-The default code uses literal local fixtures and prepared NumPy or PyTorch CPU environments. It does not call a paid API, fetch a dataset, download a model or start a deployment. Lexical and extractive baselines are labelled as such. The tiny decoder and adapter chapters perform actual gradient updates but do not claim pretrained natural-language competence. The quantized-base chapter implements explicit uniform4-bit packing and adapter gradients; it does not claim NF4, paged optimizers or GPU-memory measurements.
+The default code uses literal local fixtures and prepared NumPy or PyTorch CPU environments. It does not call a paid API, fetch a dataset, download a model or start a deployment. Lexical and extractive baselines are labelled as such. The tiny decoder and adapter chapters perform actual gradient updates but do not claim pretrained natural-language competence. The quantized-base chapter implements explicit uniform 4-bit packing and adapter gradients; it does not claim NF4, paged optimizers or GPU-memory measurements.
 
 ## Study and execution
 
-Each guide contains detailed intuition and design tradeoffs, definitions, syntax or reasoning anatomy, three worked examples, six concrete exercises, failure diagnosis, hints and a lesson-specific the AI tutor prompt. Keep learner attempts separate from the executable and explanatory solutions. A successful reference run checks its assertions, not your independent understanding.
+Each guide contains detailed intuition and design tradeoffs, definitions, syntax or reasoning anatomy, three worked examples, six concrete exercises, failure diagnosis, hints and a lesson-specific AI tutor prompt. Keep learner attempts separate from the executable and explanatory solutions. A successful reference run checks its assertions, not your independent understanding.
 
-Use the Docker classroom Journeys page and the lesson's declared runtime. `python-core` uses the prepared NumPy/data environment. `llm-torch-cpu` uses the separately prepared PyTorch CPU worker. The optional pretrained recipe is reading mode until you deliberately prepare its separate assets and dependencies. Save work in a learner pad or your own ignored `.learning/` directory; source updates must not overwrite attempts.
+Use the Docker classroom home and the lesson's declared runtime. `python-core` uses the prepared NumPy/data environment. `llm-torch-cpu` uses the separately prepared PyTorch CPU worker. The optional pretrained recipe is reading mode until you deliberately prepare its separate assets and dependencies. Save work in a learner pad or your own ignored `.learning/` directory; source updates must not overwrite attempts.
 
-For a prepared native environment, run your copied Python file with the selected interpreter. On PowerShell use `& $CoursePython path\to\practice.py`; on POSIX use `"$DS60_COURSE_PYTHON" path/to/practice.py`. These variables denote paths supplied by setup, not automatic installers. Read the profile notice before interpreting an import error as a lesson failure.
+For direct project files, use the separately prepared environment described
+in [CONTRIBUTING](../../CONTRIBUTING.md). Host copies and Docker-volume pads
+are independent. Read the selected runtime's capability notice before treating
+an import error as a defect in the lesson.
 
 ## Route
 

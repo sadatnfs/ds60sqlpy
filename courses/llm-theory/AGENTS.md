@@ -1,8 +1,9 @@
 # Authoring Language-model mechanisms and evidence
 
 Follow root [AGENTS.md](../../AGENTS.md) and the
-[lesson contract](../../docs/content-authoring.md). The design source is
-[the reviewed track](../../docs/expansion/tracks/llm-theory.md).
+[lesson contract](../../docs/content-authoring.md). The maintained route source is
+[the core plan](../../docs/expansion/plans/llm-theory.json).
+Read [the authoring guide](authoring/README.md) for source ownership before regeneration.
 
 - Preserve the reviewed stable IDs and prerequisites. `lessons.json` inventories
   authored artifacts for the module catalog; it does not alter the legacy
@@ -27,3 +28,9 @@ Follow root [AGENTS.md](../../AGENTS.md) and the
   content tests and a real qualified-runtime probe when relevant. Report every
   unexecuted heavy-runtime surface explicitly.
 - Do not use em dashes in authored content.
+
+The early/shared ML generators and expert generator own different stable IDs;
+follow [authoring/README.md](authoring/README.md) rather than running one over the
+whole route. Preserve attention masks, shifted targets, positional treatment,
+normalization and finite-score checks. For actual accelerator execution, link
+[CUDA](../cuda/README.md) and retain this route's small offline CPU mechanism examples.

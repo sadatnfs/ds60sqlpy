@@ -3,9 +3,8 @@
 The readers typeset math and highlight source on the server. They render
 checked-in Markdown, notebooks, and source languages into escaped HTML so a learner
 can read the complete lesson over ``file://`` without a Markdown extension,
-notebook server, or network connection.  Running code still belongs in VS Code,
-Jupyter, or PostgreSQL; the optional loopback portal can launch those fixed
-targets.
+notebook server, or network connection. Code execution and saved learner work
+belong in the Docker classroom; prepared external projects follow their guides.
 """
 
 from __future__ import annotations
@@ -37,10 +36,10 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/curriculum-map.md",
     "docs/guided-sql-notebooks.md",
     "docs/lesson-readers.md",
-    "docs/learning-portal.md",
+    "docs/classroom-experience.md",
     "docs/learning-with-an-ai-tutor.md",
     "docs/professional-paths.md",
-    "docs/offline-app.md",
+    "docs/one-command-classroom.md",
     "docs/docker-beginners.md",
     "docs/mcp-tutor.md",
     "docs/learning-paths.md",
@@ -220,7 +219,7 @@ def _generated_html_reference(path: Path, root: Path) -> bool:
     """Keep existing reader navigation distinct from authored HTML source labs."""
     relative = path.relative_to(root)
     return path.suffix.lower() == ".html" and (
-        relative.as_posix() in {"START_HERE.html", "src/ds60sqlpy/assets/journey_preview.html"}
+        relative.as_posix() == "START_HERE.html"
         or relative.parts[0] in {LESSON_PAGES_DIR, REFERENCE_PAGES_DIR}
     )
 
@@ -1013,63 +1012,46 @@ def _run_copy(lesson: Lesson) -> tuple[str, str]:
         )
     if suffix == ".ipynb":
         return (
-            "Run this notebook with the course kernel",
+            "Run this lesson in the classroom",
             (
-                "Open the real notebook in VS Code or JupyterLab, select "
-                "<strong>Python (ds60sqlpy)</strong>, and run cells in order. "
-                "The preview below is intentionally read-only."
+                "Open this lesson in the Docker classroom, read its capability notice, "
+                "and run the notebook cells in order using the coding pad. "
+                "The preview below is read-only. Prepared contributors may also "
+                "use the original notebook with the course Jupyter kernel."
             ),
         )
     if suffix == ".sql":
         return (
-            "Open your guided SQL workspace",
+            "Run SQL in the classroom",
             (
-                "In private launcher mode, choose <strong>Create/open guided SQL "
-                "notebook</strong>. It opens an editable copy, a safe database-preparation "
-                "step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript "
-                "in one JupyterLab notebook. The target must be the disposable "
+                "Run <code>./classroom</code>, choose this SQL lesson, and use its coding "
+                "pad or whole-lesson controls. Whole lessons run the real "
+                "<code>psql -X -v ON_ERROR_STOP=1 -f</code> script after you prepare "
+                "the course schema. The target must be the disposable "
                 "<code>advanced_sql_training</code> database, never a shared or valuable one."
             ),
         )
     return (
-        "Run this Python file from the repository environment",
+        "Run this Python lesson in the classroom",
         (
-            "Open the source in VS Code, read the exercise contract, and run it from "
-            "the repository root with the interpreter reported by the setup checker. "
+            "Open the lesson in the Docker classroom, read the exercise contract, "
+            "and use its Python coding pad. Select the required package profile "
+            "before running an optional-library example. "
             f"The cataloged path is <code>{escaped_path}</code>."
         ),
     )
 
 
 def _static_run_help(lesson: Lesson) -> str:
-    """Explain the safest runnable handoff when no loopback launcher exists."""
+    """Keep offline reading useful and point execution to the supported classroom."""
 
     if lesson.runner == "none":
         return "Keep a written attempt and use the guide's checks before comparing solutions."
-    if lesson.runner not in {"python", "sql"}:
-        return (
-            "This is a reading preview, not an external tool launcher. Save your "
-            "attempt separately and use only the explicitly documented local setup "
-            "and cleanup for this lesson."
-        )
-    if lesson.runner == "sql":
-        return (
-            "<strong>If the green SQL-notebook button is not visible, this is reading "
-            "mode.</strong><br><strong>Windows:</strong> return to the repository folder "
-            "and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the "
-            "launcher opens a new private browser page. Find this lesson there and choose "
-            "<strong>Create/open guided SQL notebook</strong>.<br>"
-            "<strong>macOS/Linux:</strong> from the repository root run "
-            "<code>.venv/bin/python scripts/learning_portal.py</code>, then use the new "
-            "private browser page. The manual fallback is to open the real "
-            "<code>.sql</code> file in VS Code and use the guide's fixed "
-            "<code>psql -f</code> command."
-        )
     return (
-        "Static/USB mode can ask VS Code to open the real file. If your browser does "
-        "not recognize that link, open this repository in VS Code and use the printed "
-        "catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and "
-        "launcher route."
+        "This file is a reading preview. Run <code>./classroom</code> from the course "
+        "folder and select this lesson to save your attempt and use its supported runtime. "
+        "On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. "
+        "External projects follow the prerequisites and cleanup in their own guide."
     )
 
 
@@ -1080,13 +1062,13 @@ def _default_tutor_coaching_prompt(lesson: Lesson) -> str:
     if lesson.runner == "sql":
         execution_boundary = (
             "For runnable work, use only the disposable advanced_sql_training database. "
-            "Prefer the lesson reader's Create/open guided SQL notebook action, explain "
+            "Use the classroom's SQL controls, explain "
             "the expected row grain before execution, and inspect my actual psql transcript."
         )
     elif lesson.runner == "python":
         execution_boundary = (
-            "For runnable work, use the repository environment and the Python "
-            "(ds60sqlpy) kernel. Have me run cells or the cataloged source in order, "
+            "For runnable work, use the classroom Python pad and check its package "
+            "capabilities. Have me run cells or the cataloged source in order, "
             "then inspect my actual output, assertions, or error."
         )
     elif lesson.runner == "none":
@@ -1170,70 +1152,31 @@ def tutor_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
 
 
 def _sql_run_walkthrough(lesson: Lesson) -> str:
-    """Render a concrete first-run path for a SQL lesson reader."""
+    """Explain the SQL execution path without requiring a native launcher."""
 
     if lesson.runner != "sql":
         return ""
-    workspace = f".learning/sql/{lesson.id}/lesson/"
-    return f"""
-      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+    return """
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
         <p class="eyebrow">SQL beginner path</p>
         <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
-        <p>
-          The browser explains the lesson; PostgreSQL executes it. The private
-          course portal connects the two safely by creating your own ignored
-          workspace at <code>{html.escape(workspace)}</code>.
-        </p>
         <ol class="run-steps">
-          <li>
-            <strong>Start guided mode.</strong>
-            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
-            terminal open. On macOS/Linux, run
-            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
-          </li>
-          <li>
-            <strong>Check the database boundary.</strong>
-            <span>The readiness check must identify local PostgreSQL and only the
-            disposable <code>advanced_sql_training</code> database. Never substitute a
-            workplace, shared, or valuable database.</span>
-          </li>
-          <li>
-            <strong>Create the lesson workspace.</strong>
-            <span>Return to this lesson over <code>127.0.0.1</code> and click
-            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
-            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
-          </li>
-          <li>
-            <strong>Read, predict, edit, then run.</strong>
-            <span>Run the readiness cells first. Open the linked editable
-            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
-            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
-          </li>
-          <li>
-            <strong>Inspect evidence.</strong>
-            <span>Results and errors appear in the notebook transcript. Success means
-            the command exits cleanly, the course verification cell passes, and you
-            can explain the result's columns, row grain, and ordering.</span>
-          </li>
+          <li><strong>Start the classroom.</strong>
+            <span>Run <code>./classroom</code>, then choose this SQL lesson.</span></li>
+          <li><strong>Read the database preparation notice.</strong>
+            <span>Use only the disposable <code>advanced_sql_training</code> database.
+            Preparing its training schema resets course tables. Existing pad text and
+            notes remain saved separately.</span></li>
+          <li><strong>Read, predict, edit, then run.</strong>
+            <span>Use the SQL pad for a focused statement, or whole-lesson mode when
+            the source requires fixed includes or transaction sequences.</span></li>
+          <li><strong>Inspect the result.</strong>
+            <span>Explain the columns, row grain and ordering. Save the complete
+            transcript and diagnose its first error before changing the query.</span></li>
         </ol>
-        <details>
-          <summary><strong>If something fails, start with the first message</strong></summary>
-          <dl class="error-map">
-            <dt><code>psql was not found</code></dt>
-            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
-            discovered, then reopen the notebook from that same portal session.</dd>
-            <dt><code>connection refused</code></dt>
-            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
-            <dt><code>database "advanced_sql_training" does not exist</code></dt>
-            <dd>Return to setup and create only the disposable course database.</dd>
-            <dt><code>relation "training.…" does not exist</code></dt>
-            <dd>Read the reset warning, set the notebook's confirmation value to
-            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
-            <dt><code>ERROR … at line …</code></dt>
-            <dd>Fix the first reported error in the editable SQL copy, save the file,
-            and run the lesson cell again. Later errors can be consequences of the first.</dd>
-          </dl>
-        </details>
+        <p>Prepared contributors who prefer notebooks can follow the optional
+          <a href="../reference-pages/docs/guided-sql-notebooks.md.html">SQL notebook guide</a>.
+          A notebook preview alone does not run a query.</p>
       </section>
     """
 
@@ -1242,12 +1185,10 @@ def _artifact_panel(
     *,
     catalog: Catalog,
     targets: Mapping[Path, ReaderTarget],
-    lesson: Lesson,
     path_text: str,
     panel_id: str,
     label: str,
     artifact_name: str,
-    artifact_kind: str,
     selected: bool,
     output_path: str,
     solution_index: int | None = None,
@@ -1260,7 +1201,6 @@ def _artifact_panel(
         id_prefix=f"{panel_id}--",
         output_path=output_path,
     )
-    data_solution = f' data-solution-index="{solution_index}"' if solution_index is not None else ""
     solution_notice = (
         '<div class="solution-notice" role="note"><strong>Reference solution.</strong> '
         "Attempt the learner work and record your reasoning before comparing answers.</div>"
@@ -1286,24 +1226,13 @@ def _artifact_panel(
             <a class="button secondary" href="#" data-vscode-path="{html.escape(path_text, quote=True)}">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="{html.escape(artifact_name, quote=True)}"
-              data-artifact-kind="{html.escape(artifact_kind, quote=True)}"
-              {data_solution}
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         {solution_notice}
         <div class="artifact-content">{rendered}</div>
       </section>
     """
-
-
-def _safe_script_json(value: str) -> str:
-    return json.dumps(value, ensure_ascii=False).replace("</", "<\\/")
 
 
 def build_lesson_html(
@@ -1353,12 +1282,10 @@ def build_lesson_html(
         _artifact_panel(
             catalog=catalog,
             targets=artifact_map,
-            lesson=lesson,
             path_text=solution_path,
             panel_id=f"solution-{index}",
             label=f"Reference solution {index}",
             artifact_name=_path_kind(solution_path),
-            artifact_kind="solution",
             selected=False,
             output_path=output_path,
             solution_index=index - 1,
@@ -1368,45 +1295,26 @@ def build_lesson_html(
     guide_panel = _artifact_panel(
         catalog=catalog,
         targets=artifact_map,
-        lesson=lesson,
         path_text=lesson.guide_path,
         panel_id="guide",
         label="Understand the concept",
         artifact_name="Companion guide",
-        artifact_kind="guide",
         selected=True,
         output_path=output_path,
     )
     learner_panel = _artifact_panel(
         catalog=catalog,
         targets=artifact_map,
-        lesson=lesson,
         path_text=lesson.lesson_path,
         panel_id="learner",
         label="Practice actively",
         artifact_name=_path_kind(lesson.lesson_path),
-        artifact_kind="lesson",
         selected=False,
         output_path=output_path,
     )
-    lesson_id_json = _safe_script_json(lesson.id)
-    lesson_path_json = _safe_script_json(lesson.lesson_path)
     static_run_help = _static_run_help(lesson)
     tutor_prompt = html.escape(tutor_coaching_prompt(catalog, lesson))
     sql_run_walkthrough = _sql_run_walkthrough(lesson)
-    notebook_action = (
-        '<button class="button launcher-only" type="button" id="launch-jupyter" hidden>'
-        "Open this notebook in JupyterLab</button>"
-        if Path(lesson.lesson_path).suffix.lower() == ".ipynb"
-        else ""
-    )
-    sql_notebook_action = (
-        '<button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>'
-        "Create/open guided SQL notebook</button>"
-        if lesson.runner == "sql"
-        else ""
-    )
-
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1473,8 +1381,6 @@ def build_lesson_html(
       font-size: .73rem; letter-spacing: .04em;
     }}
     .top-actions {{ display: flex; align-items: center; gap: .7rem; }}
-    .completion {{ display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }}
-    .completion input {{ width: 1.05rem; height: 1.05rem; accent-color: var(--green); }}
     .hero {{ padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }}
     .eyebrow {{ margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }}
     h1, h2, h3, h4, h5, h6 {{ line-height: 1.18; text-wrap: balance; }}
@@ -1504,7 +1410,6 @@ def build_lesson_html(
     .button:hover {{ color: #fff; background: var(--green); border-color: var(--green); }}
     .button.secondary {{ color: var(--navy); background: transparent; }}
     .button.secondary:hover {{ color: #fff; background: var(--navy); }}
-    .launcher-status {{ margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }}
     .static-help {{ margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }}
     .sql-run-guide {{
       margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
@@ -1609,7 +1514,6 @@ def build_lesson_html(
     .nav-card.disabled {{ opacity: .65; }}
     footer {{ border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }}
     @media (max-width: 760px) {{
-      .top-actions .completion {{ display: none; }}
       .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav {{ grid-template-columns: 1fr; }}
       .run-steps li::before {{ margin-bottom: .15rem; }}
       .run-actions, .artifact-actions {{ justify-content: flex-start; }}
@@ -1632,10 +1536,7 @@ def build_lesson_html(
     <div class="shell">
       <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
       <div class="top-actions">
-        <label class="completion launcher-only" hidden>
-          <input id="lesson-complete" type="checkbox">
-          Mark complete
-        </label>
+
         <a class="static-only" href="../START_HERE.html#catalog">
           Track completion on the course dashboard
         </a>
@@ -1671,17 +1572,11 @@ def build_lesson_html(
           <div class="static-help">
             {static_run_help}
           </div>
-          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
           <a class="button" href="#" data-vscode-path="{html.escape(lesson.lesson_path, quote=True)}">
             Open learner artifact in VS Code
           </a>
-          <button class="button launcher-only" type="button" id="launch-learner" hidden>
-            Open with guided launcher
-          </button>
-          {notebook_action}
-          {sql_notebook_action}
           <a class="button lab-only" href="../learn?lesson={html.escape(lesson.id, quote=True)}" hidden>
             Practice and keep evidence in the coding lab
           </a>
@@ -1739,24 +1634,15 @@ def build_lesson_html(
 
   <script>
     "use strict";
-    const LESSON_ID = {lesson_id_json};
-    const LEARNER_PATH = {lesson_path_json};
-    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
     );
     if (labMode) {{
       document.querySelectorAll(".lab-only").forEach((element) => {{ element.hidden = false; }});
-      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => {{ element.hidden = true; }});
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => {{ element.hidden = true; }});
       document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
       document.querySelector("#run-guidance").textContent =
         "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
@@ -1847,111 +1733,6 @@ def build_lesson_html(
       }}
     }});
 
-    function readProgress() {{
-      try {{
-        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return value && Array.isArray(value.completed) ? value : {{ completed: [], setup: {{}}, os: "windows" }};
-      }} catch {{
-        return {{ completed: [], setup: {{}}, os: "windows" }};
-      }}
-    }}
-
-    function writeProgress(complete) {{
-      const state = readProgress();
-      const completed = new Set(state.completed);
-      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
-      state.completed = [...completed].sort();
-      try {{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }} catch {{}}
-    }}
-
-    const completion = document.querySelector("#lesson-complete");
-    if (launcherMode) {{
-      completion.checked = readProgress().completed.includes(LESSON_ID);
-      completion.addEventListener("change", async () => {{
-        writeProgress(completion.checked);
-        try {{
-          await apiRequest("/api/progress", {{
-            method: "POST",
-            body: JSON.stringify({{ lesson_id: LESSON_ID, complete: completion.checked }})
-          }});
-          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
-        }} catch (error) {{
-          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
-        }}
-      }});
-    }}
-
-    function setStatus(message, failed = false) {{
-      const status = document.querySelector("#launcher-status");
-      status.textContent = message;
-      status.style.color = failed ? "var(--red)" : "var(--muted)";
-    }}
-
-    async function apiRequest(path, options = {{}}) {{
-      const response = await fetch(path, {{
-        ...options,
-        headers: {{
-          "Content-Type": "application/json",
-          "X-DS60-Token": SERVER_TOKEN,
-          ...(options.headers || {{}})
-        }}
-      }});
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
-      return payload;
-    }}
-
-    async function launch(detail) {{
-      setStatus("Opening the allowlisted course artifact…");
-      try {{
-        const payload = await apiRequest("/api/launch", {{
-          method: "POST",
-          body: JSON.stringify(detail)
-        }});
-        setStatus(payload.action + " started.");
-      }} catch (error) {{
-        setStatus("Could not launch this artifact: " + error.message, true);
-      }}
-    }}
-
-    if (launcherMode) {{
-      document.querySelectorAll(".launcher-only").forEach((button) => {{ button.hidden = false; }});
-      document.querySelectorAll(".static-only").forEach((element) => {{ element.hidden = true; }});
-      setStatus("Guided launcher mode is ready.");
-      document.querySelector("#launch-learner").addEventListener("click", () => {{
-        void launch({{ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" }});
-      }});
-      const jupyterButton = document.querySelector("#launch-jupyter");
-      if (jupyterButton) {{
-        jupyterButton.addEventListener("click", () => {{
-          void launch({{ action: "jupyter-lesson", lesson_id: LESSON_ID }});
-        }});
-      }}
-      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
-      if (sqlNotebookButton) {{
-        sqlNotebookButton.addEventListener("click", () => {{
-          void launch({{
-            action: "jupyter-sql",
-            lesson_id: LESSON_ID,
-            artifact: "lesson",
-            solution_index: 1
-          }});
-        }});
-      }}
-      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {{
-        button.addEventListener("click", () => {{
-          const detail = {{
-            action: "open-artifact",
-            lesson_id: LESSON_ID,
-            artifact: button.dataset.artifactKind
-          }};
-          if (button.dataset.solutionIndex !== undefined) {{
-            detail.solution_index = Number(button.dataset.solutionIndex);
-          }}
-          void launch(detail);
-        }});
-      }});
-    }}
   </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # ML lesson authoring sources
 
-These original topic specifications and renderer maintain the completed TensorFlow and LLM lesson bundles. They are authoring tools, not learner runtime dependencies. The existing first8 TensorFlow and first9 LLM lessons remain independently authored and are preserved.
+These original topic specifications and renderer maintain the completed TensorFlow and LLM lesson bundles. They are authoring tools, not learner runtime dependencies. The existing first eight TensorFlow and first nine LLM lessons remain independently authored and are preserved.
 
 Run from the repository root with a prepared Python interpreter:
 
@@ -15,18 +15,19 @@ The original executable worked examples now have a standalone fresh-process cont
 ## Prose review layers
 
 `depth_reviews_tf.py` supplies the 26 topic-specific derivation and diagnosis
-additions recorded in `docs/implementation/tensorflow-depth-review.md`. The
+additions. Their durable explanations and focused content tests are authoritative. The
 `tf.py` hook applies them after the executable specifications are registered.
 Use `write_all(only=set(DEPTH_NOTES), guides_only=True)` for a prose-only pass
 and compare all Python fences and learner/reference hashes before and after.
 Do not infer executable changes from a Markdown file hash alone.
 
-`depth_reviews_llm.py` supplies the reviewed theory prose for012-015 and017-042;
-010,011 and016 retain their dedicated detailed mechanism modules. The hook also
+`depth_reviews_llm.py` supplies the reviewed theory prose for llm-012 through llm-015 and llm-017 through llm-042;
+llm-010, llm-011 and llm-016 retain their dedicated detailed mechanism modules. The hook also
 repairs selected prose spelling without touching executable exercise code.
 Reading chapters have written reasoning instructions and text examples, while
-executable worked examples retain their declared standalone contracts. The
-current content/evidence checkpoint is `docs/implementation/ml-content-status.md`.
+executable worked examples retain their declared standalone contracts. Keep runtime evidence in immutable source-bound JSON receipts or current CI
+artifacts. [The maintained checkpoint](../../../docs/implementation/CHECKPOINT.md)
+records architectural constraints rather than past session counts.
 
 ## Unified classroom presentation
 
@@ -39,3 +40,13 @@ it does not change executable fences, notebook code or the supplied statistics
 outline. The public learner entrypoint is `/classroom`, shared by every subject.
 See [the content contract](../../../docs/content-authoring.md) for the rendering
 and subject-theme requirements.
+
+## Shared maintenance gates
+
+Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and
+[validation](../../../docs/validation.md) for shared formatting, generated-reader,
+link and grouped-test gates. Run only this directory's documented generator;
+`make generate` refreshes shared views, not every subject's authoring source.
+Check the generated diff and execute changed references in their declared
+runtime. A generation pass, parser result or historical receipt is not new
+runtime evidence. Preserve learner data and immutable evidence files.

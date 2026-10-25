@@ -1,402 +1,132 @@
-# Windows setup
+# Start the classroom on Windows with WSL 2
 
-The supported course experience is the unified Linux-container Docker classroom. Every subject,
-including Python and SQL, opens from the same `/classroom` page. You only need
-a local Docker-compatible engine, Linux containers, and the documented Compose
-version. The language runtimes live inside the images.
+The classroom runs in Linux containers and opens in your usual Windows browser.
+Prepare Ubuntu in WSL 2 and a Docker-compatible engine once. The course supplies
+Python, PostgreSQL, compilers and framework libraries inside its images.
 
-On Windows, install WSL 2 with Ubuntu and enable your Docker engine's integration for that distribution. Run the command in its Ubuntu terminal.
+## 1. Install and open Ubuntu
 
-From the extracted course folder or checkout, run:
+Follow Microsoft's [WSL installation guide](https://learn.microsoft.com/en-us/windows/wsl/install).
+The usual first command, run in an administrator Windows Terminal, is:
+
+```powershell
+wsl --install -d Ubuntu
+```
+
+Restart Windows if requested, then open **Ubuntu** from Start and finish its
+Linux username and password setup. This is a Linux account for the terminal;
+it is separate from your Windows account and the course database.
+
+In Windows Terminal, inspect the installed distributions:
+
+```powershell
+wsl --list --verbose
+```
+
+Your Ubuntu distribution should show version `2`. If its name differs from
+`Ubuntu`, use the actual name shown in that list. Microsoft's
+[WSL command reference](https://learn.microsoft.com/en-us/windows/wsl/basic-commands)
+explains version conversion and selecting a default distribution. The course
+does not install, unregister or reset a distribution.
+
+## 2. Start one Linux-container engine
+
+Choose one engine and follow its current installation requirements:
+
+- **Docker Desktop:** enable the WSL 2 backend and integration for your Ubuntu
+  distribution using [Docker's WSL instructions](https://docs.docker.com/desktop/features/wsl/).
+- **Rancher Desktop:** use [dockerd/Moby](https://docs.rancherdesktop.io/ui/preferences/container-engine/general/)
+  for the Docker API and enable your distribution's integration. Its
+  [installation guide](https://docs.rancherdesktop.io/getting-started/installation/)
+  and [WSL troubleshooting](https://docs.rancherdesktop.io/troubleshooting-tips/)
+  describe engine and socket access.
+
+Having the engine's internal WSL distribution is different from having your
+own Ubuntu shell ready. Open **Ubuntu** and run:
 
 ```sh
-./classroom
+docker info --format '{{.OSType}}'
+docker compose version
+bash --version
 ```
 
-The command builds locally, starts the services, checks readiness and opens the
-actual browser address. Follow the [one-command walkthrough](../one-command-classroom.md)
-for first-time engine installation, WSL integration, stopping, backups and
-recovery. Saved work in the standard classroom uses persistent named Docker
-volumes. Use `./classroom status` to rediscover its address. The supported
-Windows wrapper is `START_DOCKER_CLASSROOM.cmd` (or `classroom.cmd`), which
-delegates to this same WSL entrypoint. Native Python, PostgreSQL and PowerShell
-backends are not required.
+The first command should print `linux`. Compose must be **2.28.0 or newer**.
+If Docker is unavailable in Ubuntu, check the running engine and its
+distribution integration. Do not install a second daemon as an automatic fix.
+Keep the same engine when returning to existing course volumes.
 
-## Optional native environment
+## 3. Get the course folder
 
-The remainder of this page is a historical host-setup reference, outside the
-supported Docker product and its release gates. Native Windows environments
-and native executable bundles are unsupported. Use Linux or WSL 2 for the
-validated contributor workflow in [CONTRIBUTING](../../CONTRIBUTING.md). Keep
-any retained native `.learning` files separate from Docker-volume state.
+Use an owner-provided starter ZIP, a repository ZIP or a Git clone. Repository
+downloads currently require GitHub access from the owner. A ZIP does not require
+Git on your machine. Extract the complete folder before launching; do not run
+files from the archive preview.
 
-## Native notebook route: double-click the guided launcher
+A Windows folder such as `C:\Users\Ada\Downloads\DS60LearningLab` appears in
+Ubuntu as `/mnt/c/Users/Ada/Downloads/DS60LearningLab`. Open that folder with:
 
-After downloading or cloning the repository, open its folder in File Explorer
-and double-click:
-
-```text
-START_DS60.cmd
+```sh
+cd "/mnt/c/Users/Ada/Downloads/DS60LearningLab"
+ls classroom README.md
 ```
 
-For a ZIP download, use **Extract All** before launching. Do not run from
-inside File Explorer's compressed-folder view. A normal user-owned local
-folder is preferable to a protected system directory or a folder whose cloud
-sync can replace files while they are running.
+Replace the example path with your actual extracted folder. A checkout inside
+Ubuntu's Linux filesystem is also supported. The correct directory contains
+`classroom`, `README.md` and `compose.classroom.yaml`.
 
-The launcher finds the repository from its own location, so the folder may
-contain spaces and you do not need to type a path. It:
+## 4. Start a first session
 
-1. Reuses either `.venv\Scripts\python.exe` or the Anaconda conda-prefix
-   `.venv\python.exe` layout.
-2. If the environment is missing or incomplete, clearly announces the
-   **connected first setup**, asks you to type `SETUP`, and delegates to the
-   safe discovery bootstrap.
-3. Finds VS Code even when its launcher is not on `PATH`, and verifies Python
-   3.11-3.12, Jupyter/IPython/JupySQL/Psycopg/SQLAlchemy, and the
-   `Python (ds60sqlpy)` kernel.
-4. Runs `course.py doctor`.
-5. Opens the private learning portal and keeps its terminal window visible.
+From Ubuntu, in that course directory:
 
-Keep the launcher window open while studying; press `Ctrl+C` there to stop the
-portal. The launcher does not ask for, store, or print a database password and
-does not create, drop, or reset data. Course doctor may make its documented
-no-prompt, read-only reachability check against only the disposable course
-database; configuration and initialization remain separate guided steps in
-section 5.
+```sh
+./classroom doctor
+./classroom --starter
+```
 
-For read-only troubleshooting without installing anything or opening a
-browser:
+The smaller starter prepares Python, PostgreSQL and the full reading library.
+The first preparation needs internet and shows build logs. To prepare all
+ordinary language/framework workers instead, use `./classroom --all`.
+Optional NVIDIA workers and owned Kubernetes clusters have separate setup.
+
+When ready, use the exact browser URL printed by the launcher. Copy it into
+your Windows browser if automatic opening is unavailable. Continue with
+[your first successful session](first-success.md).
+
+If ZIP extraction removed executable permissions, use `bash classroom` in
+place of `./classroom`. No separate host Python or compiler installation is
+needed for these commands.
+
+## Use the Windows launcher
+
+After WSL and the engine are ready, you can double-click
+**START_DOCKER_CLASSROOM.cmd**, or use `classroom.cmd` from Command Prompt.
+Both delegate to the same Bash launcher through the default WSL distribution.
+Make your normal Ubuntu distribution the default if required:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_ds60.ps1 `
-    -DiagnosticsOnly -NonInteractive
+wsl --set-default Ubuntu
 ```
 
-Preview a needed setup without changing the machine:
+Use the actual distribution name from `wsl --list --verbose`. The wrapper
+retains the selected course directory. A new default project selects all
+sixteen ordinary workers; running `./classroom --starter` once in Ubuntu saves
+the smaller selection for subsequent launches.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\start_ds60.ps1 -WhatIf
+## Return without rebuilding
+
+Start the same engine, open the same course folder in Ubuntu and run:
+
+```sh
+./classroom resume
 ```
 
-The rest of this document explains every step that the launcher coordinates
-and provides manual alternatives.
-
-## 1. Install the base tools
-
-Install:
-
-1. [Git for Windows](https://git-scm.com/download/win)
-2. [Python 3.12](https://www.python.org/downloads/windows/) or a current
-   Anaconda/Miniconda distribution. If its base Python is outside 3.11-3.12,
-   bootstrap creates a supported repository-local conda prefix.
-3. [Visual Studio Code](https://code.visualstudio.com/download)
-4. [PostgreSQL 16+](https://www.postgresql.org/download/windows/) or
-   [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
-   for the SQL track
-
-If Anaconda3 and PostgreSQL are already installed, do not reinstall them just
-because `python`, `conda`, or `psql` is missing from `PATH`. The course
-bootstrap searches the registry and common installation directories first.
-During a new Python.org installation, installing the Python launcher (`py`) is
-still useful.
-
-If you choose Docker Desktop, use its WSL 2 backend when your machine supports
-it and complete Docker's documented virtualization/WSL prerequisites before
-running the Compose commands below.
-
-Open a new PowerShell window and verify:
-
-```powershell
-git --version
-code --version
-```
-
-`py -3.12 --version`, `python --version`, and `psql --version` may fail at this
-point; that is exactly what the discovery bootstrap handles. If `code` is not
-found, open VS Code from the Start menu and use **File → Open Folder** instead.
-
-## 2. Clone and open the repository
-
-Choose a normal user-owned folder. Paths containing spaces are supported.
-
-```powershell
-git clone https://github.com/sadatnfs/ds60sqlpy.git ds60sqlpy
-Set-Location .\ds60sqlpy
-code .
-```
-
-If the repository is already cloned:
-
-```powershell
-Set-Location "C:\Users\Ada\Documents\ds60sqlpy"
-code .
-```
-
-Replace the example username and folder with your actual path. Quote paths
-with spaces, for example `Set-Location "C:\Users\Ada\Documents\ds60sqlpy"`.
-
-Confirm that PowerShell is at the root:
-
-```powershell
-Test-Path .\README.md
-```
-
-The result should be `True`.
-
-## 3. Create the Python environment
-
-Run the discovery bootstrap. This is the recommended path for a new Windows
-machine and for existing Anaconda/PostgreSQL installations that are not on
-`PATH`:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1
-```
-
-Using `&` keeps the script's process-local `PATH` discoveries available in this
-PowerShell window. The execution-policy change also applies only to the current
-window. The script creates `.venv`, installs IPython, JupyterLab, Notebook,
-ipykernel, JupySQL, SQLAlchemy, and Psycopg 3, registers
-`Python (ds60sqlpy)`, and runs verification. It never connects to PostgreSQL or
-asks for its password.
-
-Verify with the virtual environment’s interpreter:
-
-```powershell
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-
-& $CoursePython --version
-& $CoursePython scripts\course.py doctor
-& $CoursePython scripts\course.py catalog
-```
-
-Activation is optional. A normal `venv` uses
-`.venv\Scripts\python.exe`; the Anaconda fallback creates a conda prefix and
-uses `.venv\python.exe`. Resolve `$CoursePython` once in each new PowerShell
-window. Invoking it directly avoids activation-policy issues and guarantees
-that commands use the intended environment.
-
-Core setup installs notebook, data, quality, engineering-bridge, professional,
-and PostgreSQL-in-Jupyter tooling. Before lessons labeled for the larger
-machine-learning, production, deep-learning, natural-language-processing, or
-geospatial profiles, install the advanced profile while connected:
-
-```powershell
-& .\scripts\bootstrap_windows.ps1 -Profile Advanced
-```
-
-This can take substantially longer and some packages use platform-specific
-wheels. You can defer it until the catalog shows that a lesson needs an
-optional dependency. Use the
-[catalog-label mapping](../dependency-profiles.md): labels such as `core`,
-`postgres`, and `advanced` are not literal package extras.
-
-See the [one-command bootstrap reference](windows-bootstrap.md) for
-`-WhatIf`, locked dependency installation, optional user-level `PATH`
-persistence, and the explicit `-InstallMissingWithWinget` opt-in. Use the
-smaller historical `scripts\setup.ps1` only when a supported Python is already
-discoverable and you do not need PostgreSQL or Jupyter discovery. That legacy
-script always creates a standard `venv` at
-`.venv\Scripts\python.exe`; do not run it over a conda-prefix `.venv`.
-
-If you used the legacy setup or the bootstrap created a standard `venv`, you
-may activate it:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1
-python scripts\course.py doctor
-```
-
-The conda-prefix fallback does not contain that activation script. Keep using
-`& $CoursePython ...`; activation is not required.
-
-## 4. Configure VS Code
-
-1. Open the repository root.
-2. Accept the recommended extensions, or install them from [the VS Code guide](../vscode.md).
-3. Open the Command Palette with `Ctrl+Shift+P`.
-4. Run **Python: Select Interpreter**.
-5. Select the interpreter path printed by bootstrap:
-   `.venv\Scripts\python.exe` for a standard `venv`, or
-   `.venv\python.exe` for the conda-prefix fallback.
-6. Open a notebook and select the same `.venv` interpreter as its kernel.
-
-The checked-in tasks under **Terminal → Run Task** can run setup, the private
-learning portal, doctor, catalog, validation, and JupyterLab. Choose
-**Course: Guided start (Windows)** for the same readiness-and-launch sequence
-as `START_DS60.cmd`.
-
-## 5. Set up PostgreSQL
-
-### Option A: Native PostgreSQL
-
-Install PostgreSQL 16 or newer from the [official Windows installer page](https://www.postgresql.org/download/windows/). Remember the password chosen for the `postgres` role.
-
-The installer normally provides **SQL Shell (psql)** and pgAdmin. To use `psql` from PowerShell, add the PostgreSQL `bin` directory to `PATH` during installation or for the current session. Adjust the version in this example:
-
-```powershell
-$env:Path += ";C:\Program Files\PostgreSQL\17\bin"
-psql --version
-```
-
-Create the disposable training database:
-
-```powershell
-psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d postgres
-```
-
-At the `postgres=#` prompt:
-
-```sql
-CREATE DATABASE advanced_sql_training;
-\q
-```
-
-If PostgreSQL reports that the database already exists, leave it in place and continue.
-
-Load the course schema from the repository root:
-
-```powershell
-psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\00_setup.sql
-psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\00_verify.sql
-```
-
-The setup file drops and recreates the disposable `training` schema. Do not point it at a database containing valuable data. The verification file raises an error if expected counts, coverage, chronology, totals, or foreign keys are wrong.
-
-#### Let the guided notebook authenticate without a hidden prompt
-
-The native Windows installer normally requires the `postgres` password.
-Terminal `psql` can ask for it visibly, but the guided notebook intentionally
-uses `--no-password` so a Jupyter cell can never hang at an invisible prompt.
-Configure libpq (PostgreSQL's client connection library) once, outside this
-repository:
-
-1. In PowerShell, create PostgreSQL's per-user configuration directory and
-   open its password file:
-
-   ```powershell
-   $PgConfig = Join-Path $env:APPDATA "postgresql"
-   New-Item -ItemType Directory -Force $PgConfig | Out-Null
-   notepad (Join-Path $PgConfig "pgpass.conf")
-   ```
-
-2. Add exactly one line for this local disposable database, replacing the
-   final placeholder with the password chosen during PostgreSQL installation:
-
-   ```text
-   localhost:5432:advanced_sql_training:postgres:YOUR_LOCAL_POSTGRES_PASSWORD
-   ```
-
-   Save and close Notepad. `pgpass.conf` lives under your Windows profile, not
-   in the Git repository. Never copy, commit, paste into an AI assistant, or share it.
-   If the password contains `:` or `\`, prefix that character with `\` in this
-   file.
-
-3. In the PowerShell window that will start the portal, set a password-free
-   target. This tells the runner which local role and host should match the
-   password-file entry:
-
-   ```powershell
-   $env:DS60_DATABASE_URL = "postgresql://postgres@localhost:5432/advanced_sql_training"
-   & $CoursePython scripts\course.py doctor
-   ```
-
-   Doctor should report `Course database: advanced_sql_training is reachable`.
-   The setting lasts only for that PowerShell process. Start the portal from
-   this same window so Jupyter inherits it:
-
-   ```powershell
-   & $CoursePython scripts\learning_portal.py
-   ```
-
-For the repository's Docker Compose service, do not create this native
-`postgres` password-file entry. The browser container uses its own limited
-`admin` login. Host notebook users explicitly select that Docker connection as
-described in [Local PostgreSQL](postgresql.md#route-a-the-course-container).
-
-### Option B: Canonical container environment
-
-Use the [Docker beginner walkthrough](../docker-beginners.md) for the full
-browser application and WSL 2 instructions. That route runs Python and
-PostgreSQL inside containers and does not need the native setup above.
-
-For a terminal-only SQL workflow, start the local engine and run from the
-repository root in PowerShell:
-
-```powershell
-docker compose --project-name ds60-learning up -d postgres
-docker compose --project-name ds60-learning run --rm sql-runner -c "SELECT current_database(), 2 + 3 AS first_result;"
-```
-
-Expect `advanced_sql_training` and `5`. Follow
-[Local PostgreSQL](postgresql.md#route-a-the-course-container) for optional seed
-setup, verification, the exact host connection URL, ports, and preserving data.
-
-If you later want **host** VS Code/Jupyter notebooks, install the native Python
-environment separately. `bootstrap_windows.ps1 -SkipPostgreSql` prepares Python
-without requiring a host database. Guided SQL notebooks still need host
-PostgreSQL **client** tools because they launch host `psql`; the browser
-container and `sql-runner` supply their own clients.
-
-## 6. Verify a lesson
-
-Start the private course dashboard. It saves completion in ignored
-`.learning\progress.json` and can open allowlisted VS Code/Jupyter targets:
-
-```powershell
-& $CoursePython scripts\learning_portal.py
-```
-
-If you chose native PostgreSQL, run this in the same PowerShell window where
-you set the password-free `DS60_DATABASE_URL` in section 5. If you chose
-Docker Compose, make sure the `postgres` service is running.
-
-Python:
-
-```powershell
-& $CoursePython -m jupyter lab .\python\ds-60day\notebooks
-```
-
-SQL:
-
-```powershell
-psql -X -v ON_ERROR_STOP=1 -h localhost -U postgres -d advanced_sql_training -f .\sql\postgres-60day\day01_select_where_orderby.sql
-```
-
-The SQL lesson ends with `ROLLBACK`, so normal lesson examples should not persist changes.
-
-To run PostgreSQL from the course's Python notebook kernel with `%sql` and
-`%%sql`, follow [PostgreSQL in Jupyter](jupyter-postgresql.md). Its connection
-is limited to the same disposable training database.
-
-Finish the [scratch-notebook walkthrough](first-success.md#3-make-a-scratch-notebook-and-run-one-cell)
-to verify the `.venv` kernel, run `2 + 3`, and practice restarting before
-working through Python Day 1.
-
-## 7. PowerShell equivalents used in later lessons
-
-Use `Invoke-RestMethod` instead of Bash-style multiline `curl`:
-
-```powershell
-$body = @{ features = @(5.1, 3.5, 1.4, 0.2) } | ConvertTo-Json
-Invoke-RestMethod `
-    -Method Post `
-    -Uri "http://127.0.0.1:8000/predict" `
-    -ContentType "application/json" `
-    -Body $body
-```
-
-PowerShell uses the backtick for line continuation, rather than a trailing backslash.
-
-## 8. Continue offline
-
-Run each lesson that has a disclosed first-use download while connected, then follow [Offline use](offline.md). Seaborn data is cached after the first successful load. Pretrained model lessons require separate caches or an offline fallback.
-
-For common failures, see [Troubleshooting](../troubleshooting.md).
+This uses already prepared images and never builds or pulls. Use
+`./classroom stop` to pause while retaining saved work. Repeat a custom
+`--project NAME` on later commands if you chose one. Follow the
+[one-command guide](../one-command-classroom.md) for profiles, updates, ports
+and backups.
+
+If the browser cannot connect, inspect `./classroom status` and use its current
+URL. If progress appears missing, check the engine and project name before
+creating anything new. A container, an image and a named volume are different
+objects; deleting a volume deletes its saved data.

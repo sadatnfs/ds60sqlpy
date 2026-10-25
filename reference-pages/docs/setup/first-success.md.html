@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Your first successful session · DS60 reference</title>
+  <title>Your first successful classroom session · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,128 +158,84 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Your first successful session</h1>
+      <h1>Your first successful classroom session</h1>
       <p class="source-path">Generated from <code>docs/setup/first-success.md</code></p>
     </header>
-    <article class="document"><h2 id="your-first-successful-session">Your first successful session<a class="heading-anchor" href="#your-first-successful-session" aria-label="Link to this section">#</a></h2>
-<blockquote><p>The supported first session uses <a href="../one-command-classroom.md.html">the Docker/WSL walkthrough</a>: start <code>./classroom</code>, choose Python or PostgreSQL, and run a small example in its browser pad. The host-notebook walkthrough below is historical compatibility material, outside the supported product and release gates.</p></blockquote>
-<blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="../classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
-<p>You do not need to know programming, SQL, or Git before starting. Set aside a first session for getting one Python cell and one SQL query to run. Setup is part of learning. The lesson sequence starts after those two small wins.</p>
-<h3 id="understand-the-tools-before-installing-them">Understand the tools before installing them<a class="heading-anchor" href="#understand-the-tools-before-installing-them" aria-label="Link to this section">#</a></h3>
+    <article class="document"><h2 id="your-first-successful-classroom-session">Your first successful classroom session<a class="heading-anchor" href="#your-first-successful-classroom-session" aria-label="Link to this section">#</a></h2>
+<p>You can begin without knowing Python, SQL or Git. The first goal is modest: open the classroom, run one Python example, run one SQL query, save a draft and return to it after stopping the containers.</p>
+<h3 id="prepare-the-host-once">Prepare the host once<a class="heading-anchor" href="#prepare-the-host-once" aria-label="Link to this section">#</a></h3>
+<p>Follow the guide for <a href="windows.md.html">Windows with WSL 2</a>, <a href="macos.md.html">macOS</a> or <a href="linux.md.html">Linux</a>. Start the Linux-container engine and open a Bash terminal in the extracted course directory. On Windows, use Ubuntu in WSL 2 for the course commands.</p>
 <div class="table-wrap"><table><thead><tr>
-<th>Word</th>
-<th>Meaning in this course</th>
+<th>Term</th>
+<th>Meaning here</th>
 </tr></thead><tbody>
 <tr>
-<td>Repository</td>
-<td>This course folder and the files inside it</td>
+<td>Course folder</td>
+<td>The source files, guides and launcher you downloaded</td>
 </tr>
 <tr>
-<td>Terminal</td>
-<td>A window where you type commands and read their output</td>
+<td>Docker image</td>
+<td>Prepared application code and dependencies</td>
 </tr>
 <tr>
-<td>Shell</td>
-<td>The program interpreting terminal commands: PowerShell on Windows, Bash or Zsh on macOS/Linux</td>
+<td>Container</td>
+<td>A running or stopped instance created from an image</td>
 </tr>
 <tr>
-<td>Python interpreter</td>
-<td>The program that executes Python code</td>
+<td>Runtime profile</td>
+<td>The prepared environment a lesson needs, such as Python or C++</td>
 </tr>
 <tr>
-<td>Package</td>
-<td>A reusable library installed for one Python interpreter</td>
+<td>Named volume</td>
+<td>Engine-managed storage retained across container replacement</td>
 </tr>
 <tr>
-<td><code>.venv</code></td>
-<td>This repository&#x27;s isolated Python and packages</td>
+<td>Browser pad</td>
+<td>Your editable source for the selected lesson and language</td>
 </tr>
 <tr>
-<td>Notebook</td>
-<td>A file ending in <code>.ipynb</code> with text and runnable cells</td>
-</tr>
-<tr>
-<td>Kernel</td>
-<td>The Python process executing a notebook&#x27;s cells</td>
-</tr>
-<tr>
-<td>PostgreSQL server</td>
-<td>The local program storing tables and answering SQL queries</td>
-</tr>
-<tr>
-<td><code>psql</code></td>
-<td>A terminal client that sends SQL to PostgreSQL</td>
-</tr>
-<tr>
-<td>Docker container</td>
-<td>An isolated process used here to run a consistent PostgreSQL server</td>
+<td>Saved run</td>
+<td>The source and output recorded for a particular execution</td>
 </tr>
 </tbody></table></div>
-<p>VS Code is the editor. JupyterLab is an alternative notebook interface that opens in your browser. The learning portal helps you navigate lessons and launch either editor; the browser&#x27;s static lesson preview is read-only.</p>
-<h3 id="1-choose-the-matching-operating-system-guide">1. Choose the matching operating-system guide<a class="heading-anchor" href="#1-choose-the-matching-operating-system-guide" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><a href="windows.md.html">Windows with PowerShell</a></li>
-<li><a href="macos.md.html">macOS with Terminal</a></li>
-<li><a href="linux.md.html">Linux with a terminal</a></li>
-</ul>
-<p>Type only the contents of a command block, without its triple-backtick fence. Run one command at a time and wait for the prompt to return. A command can succeed without printing anything. Lines beginning with <code>#</code> explain the next command. Do not paste a PowerShell block into a Bash terminal or a SQL prompt.</p>
-<p>On Windows, open <strong>Windows PowerShell</strong> from Start. On macOS, open <strong>Terminal</strong> from Applications → Utilities. On Linux, open your desktop&#x27;s terminal app. Commands below assume you have completed the OS guide&#x27;s package setup and are in the repository root, the folder containing <code>README.md</code> and <code>pyproject.toml</code>.</p>
-<p>The first setup needs internet access. Python 3.12 is the course baseline; 3.11 is supported too. An installed newer Python can coexist with it. The course does not require you to replace your operating system&#x27;s Python.</p>
-<h3 id="2-prove-the-terminal-uses-the-course-python">2. Prove the terminal uses the course Python<a class="heading-anchor" href="#2-prove-the-terminal-uses-the-course-python" aria-label="Link to this section">#</a></h3>
-<p>Windows PowerShell, once in each new terminal:</p>
-<pre class="highlighted-code"><code class="language-powershell">$CoursePython <span class="syntax-punctuation">=</span> <span class="syntax-keyword">if</span> <span class="syntax-punctuation">(</span><span class="syntax-builtin">Test-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>Scripts<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span> <span class="syntax-keyword">else</span> <span class="syntax-punctuation">{</span>
-    <span class="syntax-punctuation">(</span><span class="syntax-builtin">Resolve-Path</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>venv<span class="syntax-punctuation">\</span>python<span class="syntax-punctuation">.</span>exe<span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>Path
-<span class="syntax-punctuation">}</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -c <span class="syntax-string">&quot;</span><span class="syntax-string">import sys; print(sys.executable); print(2 + 3)</span><span class="syntax-string">&quot;</span></code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -c <span class="syntax-string">&quot;import sys; print(sys.executable); print(2 + 3)&quot;</span></code></pre>
-<p>Expected: a Python path inside this course&#x27;s <code>.venv</code>, then <code>5</code>. Keep using that interpreter for installations and commands. Environment activation is optional.</p>
-<p>Run doctor with the same interpreter:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/course.py doctor</code></pre>
-<p>A missing optional Docker/VS Code command is a warning. A missing course package requires setup repair. A database warning is expected if you have chosen to start with Python before installing PostgreSQL. Doctor&#x27;s package discovery is not an execution test of every library or lesson.</p>
-<h3 id="3-make-a-scratch-notebook-and-run-one-cell">3. Make a scratch notebook and run one cell<a class="heading-anchor" href="#3-make-a-scratch-notebook-and-run-one-cell" aria-label="Link to this section">#</a></h3>
-<p>Start JupyterLab from this terminal:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python -m jupyter lab</code></pre>
-<p>Keep the terminal open. If a browser does not open, use the local Jupyter URL printed there. Treat a URL containing a token as private.</p>
+<h3 id="open-a-small-first-classroom">Open a small first classroom<a class="heading-anchor" href="#open-a-small-first-classroom" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom doctor
+./classroom --starter</code></pre>
+<p>The first command checks prerequisites. The second prepares the app, PostgreSQL and Python Core, then prints and opens the actual local URL. A new bare <code>./classroom</code> prepares the full ordinary set instead. Both choices keep every subject readable. Read the build output and wait for the ready address.</p>
+<p>If execution permissions were lost during ZIP extraction, use <code>bash classroom</code> in place of <code>./classroom</code>. If the browser does not open, copy the printed URL. Use <code>./classroom status</code> to retrieve it later.</p>
+<h3 id="run-python-in-its-own-workspace">Run Python in its own workspace<a class="heading-anchor" href="#run-python-in-its-own-workspace" aria-label="Link to this section">#</a></h3>
 <ol>
-<li>In JupyterLab&#x27;s file browser, create an <code>artifacts</code> folder if it does not already exist and open it. This ignored folder is for your experiments.</li>
-<li>Create a notebook with <strong>Python (ds60sqlpy)</strong>. Rename it <code>first-success.ipynb</code>.</li>
-<li>Type the following into a code cell and press <code>Shift+Enter</code>:</li>
+<li>Choose <strong>Python and data science</strong> and its first lesson.</li>
+<li>Read the guide. Use <strong>Show code and notes</strong> if reading focus hides the pad.</li>
+<li>Keep the starter or save a copy before replacing its text for this small experiment.</li>
+<li>Enter this ordinary Python program:</li>
 </ol>
-<pre class="highlighted-code"><code class="language-python">   <span class="syntax-keyword">import</span> sys
-
-   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sys<span class="syntax-operator">.</span>executable<span class="syntax-punctuation">)</span>
-   learner <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span>
-   study_minutes <span class="syntax-operator">=</span> <span class="syntax-number">20</span>
-   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, </span><span class="syntax-string">{</span>learner<span class="syntax-string">}</span><span class="syntax-string">. Today I studied for </span><span class="syntax-string">{</span>study_minutes<span class="syntax-string">}</span><span class="syntax-string"> minutes.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
-   <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
+<pre class="highlighted-code"><code class="language-python">learner <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">Ada</span><span class="syntax-string">&quot;</span>
+study_minutes <span class="syntax-operator">=</span> <span class="syntax-number">20</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">Hello, </span><span class="syntax-string">{</span>learner<span class="syntax-string">}</span><span class="syntax-string">. Today I studied for </span><span class="syntax-string">{</span>study_minutes<span class="syntax-string">}</span><span class="syntax-string"> minutes.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
 <ol>
-<li>Expect the <code>.venv</code> path, the greeting, and <code>5</code>.</li>
-<li>Change the name and minutes, predict the new output, then run it again.</li>
-<li>Restart the kernel and run all cells. The output should remain correct. Restarting removes variables remembered from earlier cell execution.</li>
+<li>Predict the output, then choose <strong>Run code</strong>. Expect the greeting and <code>5</code>.</li>
+<li>Add a note explaining which values changed and choose <strong>Save work</strong>. Wait for the saved confirmation before closing the page.</li>
 </ol>
-<p>In VS Code, the same cell works in an <code>.ipynb</code> file after <strong>Select Kernel</strong> → the repository&#x27;s Python environment. Selecting a terminal interpreter and selecting a notebook kernel are separate steps. See the <a href="https://code.visualstudio.com/docs/datascience/jupyter-notebooks">VS Code notebook documentation</a> and the <a href="../vscode.md.html">course VS Code guide</a>.</p>
-<h3 id="4-prove-sql-works">4. Prove SQL works<a class="heading-anchor" href="#4-prove-sql-works" aria-label="Link to this section">#</a></h3>
-<p>Follow <a href="postgresql.md.html">Local PostgreSQL, step by step</a> using either the native server or the course&#x27;s container. That guide includes a query returning <code>5</code>, the disposable database setup, seed verification, and the exact connection setting needed by the private learning portal.</p>
-<p>You can study the Python fundamentals first if database setup must wait. Creating a Python environment does not install or start a PostgreSQL server.</p>
-<h3 id="5-start-the-first-lesson">5. Start the first lesson<a class="heading-anchor" href="#5-start-the-first-lesson" aria-label="Link to this section">#</a></h3>
-<p>Start the dashboard from the terminal that has your database setting:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows</span>
-<span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>learning_portal<span class="syntax-punctuation">.</span>py</code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
-.venv/bin/python scripts/learning_portal.py</code></pre>
-<p>Choose Python Day 1 (<code>python-01</code>) or SQL Day 1 (<code>sql-01</code>). Read its guide, predict what the examples will do, run them, and attempt the exercises before reading solutions. SQL&#x27;s <strong>Create/open guided SQL notebook</strong> action preserves your working copy under <code>.learning/sql/</code>. Opening a lesson is a navigation step; being able to explain and reproduce its result is your learning check.</p>
-<p>At the end of the session, save your notebook and press <code>Ctrl+C</code> in the terminal to stop a server you started. Closing a browser tab alone does not stop Jupyter or the portal. Follow any visible confirmation prompt. Next time, open the repository, resolve the course interpreter, and launch the portal; you do not need to reinstall packages.</p>
-<h3 id="if-the-first-session-fails">If the first session fails<a class="heading-anchor" href="#if-the-first-session-fails" aria-label="Link to this section">#</a></h3>
-<p>Find the first failing step above and use the corresponding section in <a href="../troubleshooting.md.html">Troubleshooting</a>. Include the exact command, operating system, first error, and the interpreter path when seeking help. Remove passwords and private Jupyter URLs. Your scratch notebook, progress, and SQL working copies should be preserved during a repair.</p></article>
+<p>A Run starts a fresh process. A variable from an earlier Run is not still in memory, so retain the definitions you need in the source. Notebook-style <code># %%</code> cells share state within a single Run; the next Run starts over. Do not paste an entire <code>.ipynb</code> JSON file into the pad.</p>
+<h3 id="run-a-first-sql-query">Run a first SQL query<a class="heading-anchor" href="#run-a-first-sql-query" aria-label="Link to this section">#</a></h3>
+<p>Switch to <strong>PostgreSQL</strong> and start with <code>sql-start-01</code>. Choose <strong>SQL snippet</strong> when the workspace offers a mode selector and enter:</p>
+<pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span> <span class="syntax-number">1</span> <span class="syntax-keyword">AS</span> first_result<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span> <span class="syntax-keyword">AS</span> total<span class="syntax-punctuation">;</span></code></pre>
+<p>Expect one row with <code>first_result = 1</code> and <code>total = 5</code>. This query needs no training-table reset. The Docker classroom supplies its local database connection; you do not need a host database or a password in the SQL pad.</p>
+<p>Continue through <code>sql-start-02</code> and <code>sql-start-03</code> before <code>sql-01</code>. When a later lesson needs the training schema, read its setup instructions. Resetting that schema replaces course data and is a deliberate action, not a routine startup step.</p>
+<h3 id="save-switch-and-inspect-history">Save, switch and inspect history<a class="heading-anchor" href="#save-switch-and-inspect-history" aria-label="Link to this section">#</a></h3>
+<p>Return to the Python lesson. Its draft and notes should still be separate from SQL. <strong>Saved runs</strong> displays a run&#x27;s recorded source and output without running it again or replacing your current edit. A run can describe an older source version than the draft you are currently editing.</p>
+<p>Python/SQL workspaces also expose earlier saved pad versions where supported. Copying or restoring source is different from reading past output. Follow the button&#x27;s description before choosing either action.</p>
+<h3 id="stop-and-resume">Stop and resume<a class="heading-anchor" href="#stop-and-resume" aria-label="Link to this section">#</a></h3>
+<p>After saving, return to the terminal:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>Stopping keeps named volumes. Resume uses prepared images without rebuilding or pulling. Open the newly printed URL and return to the same lessons. If you chose a custom project, repeat its name on both commands, for example <code>./classroom resume --project my-study</code>.</p>
+<p>Your course folder, installed images and saved learning volumes are separate. Keep the same engine and project. Copying a checkout or a ZIP alone does not copy saved progress.</p>
+<h3 id="choose-the-next-useful-step">Choose the next useful step<a class="heading-anchor" href="#choose-the-next-useful-step" aria-label="Link to this section">#</a></h3>
+<p>Open <strong>All learning paths</strong> or use <strong>Switch subject</strong>. Pick a beginner lesson, review a prerequisite or combine complementary paths. HTML/CSS and browser JavaScript/D3 can use the optional Live preview studio; PHP, compiled languages and framework lessons use their declared workers. A missing worker has setup instructions in the capability notice.</p>
+<p>Use the <a href="../classroom-experience.md.html">classroom guide</a> for study habits and preview controls, and the <a href="../one-command-classroom.md.html">one-command guide</a> for updates, profiles, backups and recovery. A completed example is a starting point for learning, not a certification of mastery.</p></article>
   </main>
 </body>
 </html>

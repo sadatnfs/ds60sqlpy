@@ -1,8 +1,9 @@
 # Authoring Deep learning with TensorFlow and Keras
 
 Follow root [AGENTS.md](../../AGENTS.md) and the
-[lesson contract](../../docs/content-authoring.md). The design source is
-[the reviewed track](../../docs/expansion/tracks/deep-learning-tensorflow.md).
+[lesson contract](../../docs/content-authoring.md). The maintained route source is
+[the core plan](../../docs/expansion/plans/deep-learning-tensorflow.json).
+Read [the authoring guide](authoring/README.md) for source ownership before regeneration.
 
 - Preserve the reviewed stable IDs and prerequisites. `lessons.json` inventories
   authored artifacts for the module catalog; it does not alter the legacy
@@ -27,3 +28,9 @@ Follow root [AGENTS.md](../../AGENTS.md) and the
   content tests and a real qualified-runtime probe when relevant. Report every
   unexecuted heavy-runtime surface explicitly.
 - Do not use em dashes in authored content.
+
+Maintain comparable depth with [PyTorch](../deep-learning-pytorch/AGENTS.md),
+including shape, reduction, gradient, optimizer and checkpoint semantics. CPU
+is the ordinary framework route. Optional GPU placement, memory, mixed precision
+and synchronization have paired chapters in [CUDA](../cuda/README.md); a CPU
+reference or successful TensorFlow import does not qualify those behaviors.

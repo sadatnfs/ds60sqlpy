@@ -28,3 +28,13 @@ independently prepared, not dependencies of reading. Keep source/result historie
 separate by variant. A CPU result must never be labeled a GPU benchmark. New
 GPU verifiers require an actual trusted backend and device qualification before
 receiving a non-null verifier ID. See `../AGENTS.md` and the root authoring skill.
+
+## Shared maintenance gates
+
+Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and
+[validation](../../../docs/validation.md) for shared formatting, generated-reader,
+link and grouped-test gates. Run only this directory's documented generator;
+`make generate` refreshes shared views, not every subject's authoring source.
+Check the generated diff and execute changed references in their declared
+runtime. A generation pass, parser result or historical receipt is not new
+runtime evidence. Preserve learner data and immutable evidence files.

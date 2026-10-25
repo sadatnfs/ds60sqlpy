@@ -50,16 +50,10 @@ You will be able to:
 The learner file injects `FixedClock(12.0)` into a TTL decision. The test does
 not sleep and cannot become slow under load.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-.\.venv\Scripts\python.exe python\professional\lessons\py_test_01_architecture_generative.py
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py
+```sh
+uv run --no-sync python python/professional/lessons/py_test_01_architecture_generative.py
 ```
 
 The reference solution builds:
@@ -83,9 +77,12 @@ choose **Python** on `/classroom`. Open this lesson in the shared workspace,
 read its capability notice, and use its supported coding or reading workflow.
 The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+**Optional contributor route:** use the prepared environment in
+[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
+WSL 2. The commands below assume its packages are already installed. They are
+not prerequisites for opening this lesson in the Docker classroom. Local
+`.learning/` files and CLI progress belong to this checkout; they do not read or
+update the Docker classroom's named learning volume.
 
 Work from the repository root. First run the answer-free learner
 module named in this guide's original walkthrough. Read each TODO as a
@@ -94,16 +91,10 @@ effect before implementing it. Then run the focused test command in
 **Self-check**. Keep exploratory changes in a copy or a new test; the
 checked-in solution remains a comparison artifact.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-.\.venv\Scripts\python.exe python\professional\lessons\py_test_01_architecture_generative.py
-```
-
-macOS/Linux:
-
-```bash
-.venv/bin/python python/professional/lessons/py_test_01_architecture_generative.py
+```sh
+uv run --no-sync python python/professional/lessons/py_test_01_architecture_generative.py
 ```
 
 The focused test command is shown in **Self-check** below. The learner
@@ -311,17 +302,10 @@ Map one feature across pure unit/property tests, shared store contract, real tem
 - Interval properties verify coverage, ordering, and disjoint output.
 - A malformed JSON file fails visibly.
 
-Windows PowerShell:
+Prepared POSIX/WSL contributor terminal:
 
-```powershell
-$env:PYTHONDONTWRITEBYTECODE = "1"
-.\.venv\Scripts\python.exe -m unittest python.professional.tests.test_py_test_01_architecture_generative -v
-```
-
-macOS/Linux:
-
-```bash
-PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests.test_py_test_01_architecture_generative -v
+```sh
+PYTHONDONTWRITEBYTECODE=1 uv run --no-sync python -m unittest python.professional.tests.test_py_test_01_architecture_generative -v
 ```
 
 ## Common pitfalls

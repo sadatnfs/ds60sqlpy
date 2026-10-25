@@ -162,119 +162,101 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>AGENTS.md</code></p>
     </header>
     <article class="document"><h2 id="repository-guidance-for-coding-agents">Repository guidance for coding agents<a class="heading-anchor" href="#repository-guidance-for-coding-agents" aria-label="Link to this section">#</a></h2>
-<h3 id="mission-and-scope">Mission and scope<a class="heading-anchor" href="#mission-and-scope" aria-label="Link to this section">#</a></h3>
-<p>Maintain a self-contained, beginner-friendly learning library and one local Docker classroom at <code>/classroom</code>. Teach programming, data science, statistics, machine learning and systems through accurate explanations and reproducible examples. Historical day numbers are stable labels, not a curriculum limit.</p>
-<p>Read <a href="README.md.html">README.md</a>, <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> and the closest nested <code>AGENTS.md</code> before editing. Run <code>git status --short --branch</code> and preserve unrelated changes. Work in the requested checkout. Do not stage, commit, push, create another checkout or publish images unless that is part of the request. Use parallel agents for independent work with explicit file ownership. Do not use em dashes in authored prose.</p>
-<h3 id="find-the-maintained-source">Find the maintained source<a class="heading-anchor" href="#find-the-maintained-source" aria-label="Link to this section">#</a></h3>
+<h3 id="mission-and-first-steps">Mission and first steps<a class="heading-anchor" href="#mission-and-first-steps" aria-label="Link to this section">#</a></h3>
+<p>Maintain one local Docker classroom at <code>/classroom</code> for programming, data science, statistics, machine learning and systems. The current library has 22 subjects; derive lesson IDs, variants and readiness from the catalog loaders, not a copied inventory. Historical day numbers are stable labels, not a deadline.</p>
+<p>Read <a href="README.md.html">README.md</a>, <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a>, and the closest subject <code>AGENTS.md</code>. Inspect <code>git status --short --branch</code> and preserve unrelated work. Use the user&#x27;s requested checkout and parallel agents with explicit file ownership. Respect existing task authorization; do not add a separate approval step for ordinary authorized edits. Git publication, image publication, history rewrites and destructive cleanup have distinct scopes. Do not use em dashes.</p>
+<h3 id="choose-the-right-role">Choose the right role<a class="heading-anchor" href="#choose-the-right-role" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>For explanation, placement, debugging or resuming study, use Guide learning.</li>
+<li>For new or extended lessons, subjects or runtimes, use Add a learning path.</li>
+<li>For application work, begin with the <a href="docs/repository-tour.md.html">repository tour</a> and <a href="docs/implementation/CHECKPOINT.md.html">current architecture</a>.</li>
+</ul>
+<p>A tutoring request is not automatically a request to implement curriculum, replace a learner&#x27;s attempt, run code or mark completion. Inspect the actual lesson and learner-provided work, explain one mechanism, and offer progressive hints. Reveal practice references when requested or when the chosen review explicitly includes comparison. The statistics book exposes worked answers without exams or solution gates. A read marker or reference run is not mastery.</p>
+<p>The optional MCP adapter reads checked-in curriculum by default and does not execute code. Its module tools do not read Docker-volume pads or results. Do not claim to have inspected unseen learner state. Use a learner-provided attempt or an authorized workspace/UI interface. Progress writes need the adapter&#x27;s opt-in and the learner&#x27;s instruction. Preserve authorization already given for the current task rather than asking repeatedly.</p>
+<h3 id="maintained-sources">Maintained sources<a class="heading-anchor" href="#maintained-sources" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Concern</th>
 <th>Source</th>
 </tr></thead><tbody>
 <tr>
-<td>Learner setup and persistence</td>
-<td><code>classroom</code>, <code>scripts/classroom.sh</code>, <code>compose.classroom.yaml</code>, <code>docs/one-command-classroom.md</code></td>
+<td>Startup, resume and image selection</td>
+<td><code>classroom</code>, <code>scripts/classroom.sh</code>, <code>scripts/classroom_images.sh</code>, <code>docker/classroom-images.tsv</code></td>
 </tr>
 <tr>
-<td>Unified UI and subject directory</td>
-<td><code>src/ds60sqlpy/classroom.py</code>, <code>src/ds60sqlpy/assets/classroom.html</code>, <code>.css</code>, <code>.js</code></td>
+<td>Product composition and runtime preparation</td>
+<td><code>compose.classroom.yaml</code>, <code>compose.modules.yaml</code>, <code>docker/workers/</code>, reviewed optional overlays</td>
 </tr>
 <tr>
-<td>Legacy Python, SQL and bridge identity</td>
-<td><code>catalog_builder.py</code>, lesson artifacts, <code>curriculum/extensions/</code>, generated <code>curriculum/catalog.json</code></td>
+<td>Unified directory, editor and preview</td>
+<td><code>classroom.py</code>, <code>assets/classroom.*</code>, <code>browser_runs.py</code></td>
 </tr>
 <tr>
-<td>Module route and prerequisites</td>
-<td>Original five plans in <code>docs/expansion/plans/</code>; additive subjects in <code>courses/&lt;subject&gt;/track.json</code></td>
+<td>Historical Python/SQL/bridge identity</td>
+<td><code>catalog_builder.py</code>, source artifacts, <code>curriculum/extensions/</code>, generated <code>curriculum/catalog.json</code></td>
 </tr>
 <tr>
-<td>Authored module admission</td>
-<td><code>courses/&lt;subject&gt;/lessons.json</code>, <code>modules.py</code>, <code>module_extensions.py</code></td>
+<td>Original five module plans</td>
+<td><code>module_plans.py</code>, <code>docs/expansion/plans/</code></td>
 </tr>
 <tr>
-<td>Statistics tutorial book</td>
+<td>Additive subjects and variants</td>
+<td><code>courses/&lt;subject&gt;/track.json</code>, <code>lessons.json</code>, <code>modules.py</code>, <code>module_extensions.py</code></td>
+</tr>
+<tr>
+<td>Statistics tutorial</td>
 <td><code>courses/statistics-ml/manifest.json</code>, <code>coverage.json</code>, chapters and examples</td>
 </tr>
 <tr>
-<td>Saved work and execution</td>
-<td><code>lab.py</code>, <code>classroom_runs.py</code>, <code>module_service.py</code>, <code>module_jobs.py</code>, <code>worker_operations.py</code>, <code>browser_runs.py</code></td>
+<td>Jobs, execution and results</td>
+<td><code>module_jobs.py</code>, <code>module_service.py</code>, <code>worker_operations.py</code>, <code>classroom_runs.py</code>, <code>lab.py</code></td>
 </tr>
 <tr>
-<td>Static and live document rendering</td>
-<td><code>lesson_reader.py</code>, <code>reader_math.py</code>, <code>reader_content.py</code></td>
+<td>Static/live reading</td>
+<td><code>lesson_reader.py</code>, <code>reader_math.py</code>, <code>reader_content.py</code>, <code>classroom_http.py</code>, <code>http_server.py</code></td>
 </tr>
 <tr>
-<td>Read-only tutoring context</td>
-<td><code>mcp_server.py</code>, <code>coaching.py</code>, <code>study_plan.py</code></td>
+<td>Tutoring and legacy progress</td>
+<td><code>mcp_server.py</code>, <code>coaching.py</code>, <code>study_plan.py</code>, repository skills</td>
 </tr>
 <tr>
-<td>Content rules and expansion</td>
-<td><code>docs/content-authoring.md</code>, <code>docs/implementation/ADDING_A_MODULE.md</code></td>
+<td>Portable source packaging</td>
+<td><code>course_paths.py</code>, <code>scripts/course_payload.py</code>, <code>scripts/build_starter.py</code></td>
 </tr>
 <tr>
-<td>Architecture and current limits</td>
-<td><code>docs/implementation/CHECKPOINT.md</code></td>
-</tr>
-<tr>
-<td>Verification and CI</td>
-<td><code>docs/validation.md</code>, <code>.github/workflows/</code>, focused tests</td>
+<td>Authoring and verification</td>
+<td><a href="docs/content-authoring.md.html">content contract</a>, <a href="docs/implementation/ADDING_A_MODULE.md.html">module contract</a>, <a href="docs/validation.md.html">validation</a></td>
 </tr>
 </tbody></table></div>
-<p>Python module filenames in this table are beneath <code>src/ds60sqlpy/</code> unless a full path is given. Derive inventories from the loaders. Do not maintain a second lesson list in UI code or documentation that could be generated.</p>
-<p>Two repository skills are available:</p>
-<ul>
-<li>Guide learning for tutoring, placement, explanation and learner-directed progress.</li>
-<li>Add a learning path for adding or extending a subject, language or tutorial sequence.</li>
-</ul>
-<h3 id="act-as-a-learning-companion">Act as a learning companion<a class="heading-anchor" href="#act-as-a-learning-companion" aria-label="Link to this section">#</a></h3>
-<p>For a learner&#x27;s question, use the repository learning skill before proposing curriculum or application changes. Read the current guide, prerequisites and learner-provided attempt. Start with explanation and read-only diagnosis; do not turn a request for help into edits, execution, a reference-solution reveal or a completion write. Carry out actions the learner actually requests, while preserving their source, notes, history and chosen pace. Give progressive hints and the smallest useful next step. Read markers and successful reference runs are not mastery assessments.</p>
-<p>All registered subjects share this companion approach: Python, PostgreSQL, the engineering bridge, statistics/ML, C, C++, Go, C#, Rust, Swift, Docker, Java, JavaScript/TypeScript with D3, Kubernetes, Scala/Spark, TensorFlow, PyTorch, NLP, LLM theory, applied LLMs, GPU/CUDA and web development with HTML, CSS and PHP. Derive exact lesson IDs and capability notices from the current loaders and guides. Keep tutorial-book discussion free of mandatory exams or withheld worked answers. Do not assume the MCP adapter can read the Docker classroom&#x27;s saved pads or execute code; its module tools read checked-in curriculum only. Ask the learner to share the relevant attempt, or inspect the workspace through an authorized local interface.</p>
-<h3 id="teaching-and-authoring">Teaching and authoring<a class="heading-anchor" href="#teaching-and-authoring" aria-label="Link to this section">#</a></h3>
-<p>Keep lessons useful without an AI tutor. Define vocabulary before use, explain syntax and mechanisms, show at least two focused worked examples and their expected observations, diagnose common mistakes, and provide concrete next steps. Practice lessons progress from prediction to guided change, independent work, debugging and transfer. Keep learner artifacts, executable references and explanatory solutions separate. Give progressive hints before revealing answers, unless the learner explicitly requests the solution.</p>
-<p>The statistics/ML book has <code>learning_mode: tutorial</code>. It teaches theory, assumptions, worked code, use cases and answered interview discussion without exams, problem sets, prediction gates or hidden solutions. Its read marker is not a mastery assessment. Use coverage and numerical-example checks for this book, not practice exercise-count rules.</p>
-<p>Preserve stable lesson IDs, prerequisite graph, variant IDs and saved-state namespaces. The legacy practice baseline is immutable. New legacy catalog lessons use <code>curriculum/practice_expansion.json</code>; module subjects use their own content gates. Do not apply the legacy registry to every module or tutorial. Every practice guide has a lesson-specific <code>## Ask an AI tutor about this lesson</code> block; the source prompt must match its actual ID and artifact paths.</p>
-<p>Find an existing subject&#x27;s <code>authoring/README.md</code> before editing generated content. Edit the durable authoring source as well as its published artifact, then run only the relevant subject generator. <code>make generate</code> refreshes shared catalogs, reports and readers; it does not regenerate every subject&#x27;s prose. Never hand-edit <code>START_HERE.html</code>, <code>lesson-pages/</code> or <code>reference-pages/</code>.</p>
-<p>Use explicit <code>\(...\)</code> or <code>\[...\]</code> LaTeX for mathematics and tagged code fences. Keep literal program syntax in code. Rendering must preserve copied characters, escape source, and work without a CDN. After authoring generation, run the reviewed prose normalization before building HTML. A typography edit must not change executable reference behavior or manufacture new runtime evidence.</p>
-<h3 id="execution-and-learner-state">Execution and learner state<a class="heading-anchor" href="#execution-and-learner-state" aria-label="Link to this section">#</a></h3>
-<p>CUDA chapters have genuine reading and CPU-model paths. Neither is evidence of GPU execution. Optional CUDA workers require explicit NVIDIA device selection and a checked real kernel probe; they stay outside default and <code>--all</code> builds. Keep CPU profiles hiding GPUs. Treat compiler-only, real-device, profiler and multi-GPU evidence separately. Device fault or timeout recovery must not reset a GPU automatically. No GPU or WSL qualification follows from a macOS CPU run.</p>
-<p>HTML/CSS use the opaque, offline browser preview with separate observations. PHP uses a fixed CLI worker with PDO SQLite; browser cookies, HTTP sessions and multi-file server applications use the explicitly prepared web-project fixture. Do not claim that a PHP CLI simulation is a real browser request. Keep HTML and JavaScript source/results scoped to their actual lesson and runtime.</p>
-<p>Hub image selection is saved in <code>.classroom/&lt;project&gt;/images.env</code>, separately from learner data. <code>--from-hub</code> never falls back to building. <code>resume</code> never pulls. The publication script previews by default and requires explicit <code>--push</code>. Images are versioned by role and native architecture in one Hub repository. The manual publication workflow needs exact-revision CI, deliberate enablement and separately configured credentials. Never infer image publication authority from a request to push Git commits. See <code>docs/dockerhub.md</code>.</p>
-<p>Docker with Linux containers and Compose is the supported delivery route. Windows uses WSL 2; macOS and Linux use the same Bash launcher.</p>
-<p>Treat <code>./classroom</code> as resume-first: use the saved per-project selection and existing containers/images, building only missing images. <code>resume</code> and <code>--no-build</code> must never build or pull; <code>--rebuild</code> deliberately installs changed source/configuration. <code>build</code> updates images without starting services. The launcher saves selection before preparation, so an interrupted initial build retains its intended profiles. <code>--starter</code>, explicit <code>--profile</code> flags and <code>--all</code> replace the selection; unselected running workers remain running. Repeat the learner&#x27;s custom <code>--project</code> on every command. Never guess another project or silently change the project to repair startup.</p>
-<p>Distinguish <code>.classroom/&lt;project&gt;/</code> launcher preferences from Docker learning, PostgreSQL and private-runtime volumes. They are different storage layers. Inspect <code>./classroom status</code> and current engine state before acting. Normal resume reuses existing containers. Docker may reassign automatic host ports when the stopped database starts while retaining its ID. If the browser port changes, only the app is recreated from its existing image to preserve exact Host/Origin checks; no image build or pull is needed. Database and workers retain their IDs and all volumes remain intact. Fixed browser and database ports allow all existing IDs and the URL to remain stable on later unchanged resumes. Deliberately changing port settings needs <code>--rebuild</code>. Missing containers can be recreated from existing images while retaining volumes. A configuration mismatch needs the explicit update path. Do not recommend rebuilding every image, deleting settings, pruning containers or deleting volumes as a routine restart.</p>
-<p>No host language compiler is required for ordinary classroom profiles. Validate contributor setup on Linux, including WSL 2. Retained native setup scripts and executable builders are unsupported compatibility tooling, not release gates. Do not add native Windows backend, ACL or executable qualification requirements. Keep the Windows Docker wrappers that delegate to WSL. Supply OS-specific engine setup commands only when needed; never label Bash commands as PowerShell.</p>
-<p>The classroom executes trusted local learner code. It is not a hosted security sandbox for arbitrary users. Preserve exact Host, origin, token, request-size, output-size and filesystem checks. Native servers bind loopback; container ports publish to loopback. Manifests cannot supply shell commands, endpoints, compiler flags, cluster identities or host paths. Reviewed backend code owns runtime profiles and bounded execution. Use <code>http_server.py</code> for local and private-worker HTTP servers so startup does not depend on reverse DNS. Keep minimal worker Docker COPY lists aligned with shared imports. Repository text generators must write explicit UTF-8 and LF newlines so byte-level fixture and regeneration checks remain portable.</p>
-<p>Kubernetes host preparation and private credential handling require POSIX paths and permissions. Windows users run the companion inside WSL 2; native Windows credential APIs and named-pipe cluster endpoints are unsupported.</p>
-<p>A profile name, installed compiler, successful parse and executed lesson are different evidence. Report the actual capability and never enable Run based only on metadata. Kubernetes needs an explicitly owned disposable target, no ambient kubeconfig, and bounded UID-aware cleanup. Model downloads and external services need deliberate setup; opening a lesson must not fetch them.</p>
-<p>Preserve learner pads, source history, notes, progress, saved runs and named Docker volumes. Save or retain recoverable drafts before changing context. Keep results scoped by lesson, language and SQL mode. Reading a past result must not replace current source or run it again. If execution succeeds but saving its receipt fails, return the actual result and a storage warning.</p>
-<p>SQL automation must validate the exact local disposable <code>advanced_sql_training</code> database, reject remote or routing overrides, pass credentials through a private child environment, and use <code>psql -X -v ON_ERROR_STOP=1</code>. Resetting <code>training</code> is destructive even in a teaching project. Never reset a shared database or erase learner state as a repair step. Preserve declared multi-lesson transaction and fixture contracts.</p>
-<p>The optional stdio MCP adapter has a read-only default and no code execution. Practice solutions require explicit reveal. Progress writes require the adapter&#x27;s opt-in and the learner&#x27;s instruction. Tutorial worked answers are available directly. Native portal actions remain a fixed catalog-derived allowlist; a static page cannot start arbitrary programs.</p>
-<h3 id="check-the-work">Check the work<a class="heading-anchor" href="#check-the-work" aria-label="Link to this section">#</a></h3>
-<p>Use focused checks while iterating, then the relevant integration gates in <a href="docs/validation.md.html">validation</a>. Use <code>./scripts/format-repo</code> for maintained source formatting and <code>./scripts/format-repo --check</code> before submission. Run <code>./scripts/lint-repo</code> for the shared read-only static checks. The Docker toolchain gives every supported language the same local and CI rules; use <code>--list</code> to inspect coverage and repeat <code>--language</code> for a focused iteration. Format generated executable lesson files as well as handwritten code, then refresh shared readers through their generators. Preserve Markdown fences and literal program strings. Do not hand-format generated readers, dependency locks, third-party bundles, historical runtime receipts or learner state. Keep authored sources and their generated outputs aligned. Source-format parity receipts preserve historical byte identities and verify Python AST equivalence; they never establish a new runtime pass. A new language needs a reviewed formatting adapter and pinned toolchain alongside its runtime contract; do not silently exclude it to make the check pass. Typical commands from a prepared environment:</p>
+<p>Python filenames without a full path are beneath <code>src/ds60sqlpy/</code>. Do not recreate retired desktop executables, native editor-launch APIs or a second Python/SQL/module UI. Local contributor <code>ds60 serve</code> uses the same classroom shell; Docker remains the supported learner delivery route.</p>
+<h3 id="authoring-and-extension">Authoring and extension<a class="heading-anchor" href="#authoring-and-extension" aria-label="Link to this section">#</a></h3>
+<p>Define the learner&#x27;s starting point, direct prerequisites, observable outcome and evidence before selecting a lesson count. Teach vocabulary and syntax before using them. Include at least two explained worked cases, meaningful mistakes, bounded fixtures and concrete next steps. Practice should progress from tracing to modification, independent work, debugging and transfer. Avoid generic repeated paragraphs that merely satisfy a heading or exercise counter.</p>
+<p>Keep stable lesson IDs, prerequisite relationships, variant aliases and saved state namespaces. The legacy practice baseline is immutable; additions use its separate expansion registry. Modern modules use their own admission contracts. The statistics book is a tutorial with complete examples and answered discussion, not a practice module with hidden answers or mandatory problem sets.</p>
+<p>Read the subject&#x27;s <code>authoring/README.md</code> when present. Edit its durable source, run only the relevant generator, format generated executable code, then refresh shared readers. Directly authored subjects retain their documented artifact sources. <code>make generate</code> refreshes shared metadata and readers; it does not run every subject generator. Never hand-edit <code>START_HERE.html</code>, <code>lesson-pages/</code> or <code>reference-pages/</code>.</p>
+<p>Write mathematics with <code>\(...\)</code> or <code>\[...\]</code> and code in accurately tagged fences. Preserve literal program characters. Rendering and highlighting must work offline. Prose normalization and statistics-example fence synchronization have reviewed contracts; they cannot change executable meaning or create new runtime evidence. Use UTF-8 and LF for generated repository text.</p>
+<p>A subject, language and runtime are different concepts. Prefer an existing reviewed profile when it fits. New profiles need fixed operations, dependencies, formatting/lint support, image/launcher registration, actual failure/success checks and saved-work acceptance. A lexer or manifest alone does not create an executor. See <a href="docs/curriculum-extension-playbook.md.html">the extension playbook</a>.</p>
+<h3 id="runtime-and-learner-state-invariants">Runtime and learner-state invariants<a class="heading-anchor" href="#runtime-and-learner-state-invariants" aria-label="Link to this section">#</a></h3>
+<p>Use Linux containers on Linux/macOS and Windows through WSL 2. Ordinary learners need no host compilers or database installation. Keep the thin Docker launchers; do not add native Windows backends, ACL machinery or executable-build gates. Separately prepared contributor SQL/Jupyter tools and genuine external projects, such as Swift/Xcode, have their own documented boundaries.</p>
+<p><code>./classroom</code> is resume-first: reuse saved selection and existing images and containers, preparing only missing images. <code>resume</code> and <code>--no-build</code> never build or pull. <code>--rebuild</code> deliberately installs source/configuration updates; <code>build</code> prepares images without starting. Hub mode pulls its declared version and never falls back to a local build. Keep the same custom <code>--project NAME</code> on later commands. Do not change a project or engine to hide a startup defect.</p>
+<p>Launcher preferences under <code>.classroom/&lt;project&gt;/</code> are separate from named learning, PostgreSQL and private-runtime volumes. Preserve all learner state. A normal resume reuses containers; an automatically changed browser port can require recreating only the app from its existing image for exact Host/Origin checks. That is not an image rebuild. Fixed port choices preserve a stable URL; applying changed port settings uses the explicit update route.</p>
+<p>Save or retain recoverable drafts before changing context. Keep source, notes, results and history separate by lesson, language/variant and SQL mode. Reading a past result must not rerun code or replace the current pad. Unknown job outcomes must be reconciled without replay. A receipt-save failure must report the real execution result and a storage warning.</p>
+<p>HTML/CSS and JavaScript/D3 previews are opaque, offline browser observations. Live preview requires an explicit current-page opt-in, debounces edits, preserves editor focus and does not automatically create immutable receipts. Manual Run or explicit Save observation captures submitted source. Navigation, Stop, history selection and reload must not silently resume execution. PHP CLI uses <code>main.php</code> and PDO SQLite; real HTTP/session work belongs to the separate owned web fixture. Do not label request models as actual browser/server exchanges.</p>
+<p>CUDA reading and CPU models are useful without NVIDIA hardware. Optional GPU workers stay outside default/<code>--all</code>, require explicit device selection and a real allocation/kernel/readback probe. Compilation, GPU correctness, profiling and multi-GPU operation are separate evidence. A Mac container does not turn an Apple GPU into CUDA. GPU Spark needs compatible components and actual supported operator/plan evidence. Never reset a shared GPU automatically after a fault.</p>
+<p>The classroom runs trusted local learner code, not arbitrary hosted tenants. Preserve Host, origin, token, path, request/output-size, process and resource checks. Publish ports to loopback; use <code>http_server.py</code> to avoid reverse-DNS startup dependencies. Keep worker COPY lists aligned with imports. Manifests cannot supply shell commands, compiler flags, endpoints or host paths.</p>
+<p>Kubernetes needs explicitly owned resources, reviewed operations, no ambient kubeconfig and bounded UID-aware cleanup. Ordinary workers never receive an engine socket. Optional packages, external services and model/data downloads require deliberate preparation; opening a lesson must not fetch them.</p>
+<p>SQL automation targets only the explicitly disposable local <code>advanced_sql_training</code> database, validates routing, uses a private credential environment and invokes <code>psql -X -v ON_ERROR_STOP=1</code>. Resetting <code>training</code> is destructive. Preserve declared stateful lesson sequences and never redirect checks to shared or valuable data. Fakes prove policy, not PostgreSQL behavior.</p>
+<h3 id="verification-and-handoff">Verification and handoff<a class="heading-anchor" href="#verification-and-handoff" aria-label="Link to this section">#</a></h3>
+<p>Use focused checks during implementation and <a href="docs/validation.md.html">the release gates</a> for the actual change. The shared entrypoints are:</p>
 <pre class="highlighted-code"><code class="language-bash">./scripts/format-repo --check
 ./scripts/lint-repo
-python scripts/check_modules.py
-python scripts/normalize_lesson_prose.py
-python scripts/check_content_rendering.py
-python scripts/course.py validate
-python scripts/audit_practice.py
-python scripts/audit_lesson_depth.py
-python scripts/build_course_guide.py --check
-python scripts/build_lesson_readers.py --check
-python scripts/check_published_links.py
-node scripts/check_classroom_ui.mjs
-python -m pytest -n <span class="syntax-number">4</span> --dist loadgroup
-python scripts/scan_secrets.py --history
-python scripts/check_public_release.py
+uv run --no-sync python scripts/check_modules.py
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python -m pytest -n <span class="syntax-number">4</span> --dist loadgroup
 git diff --check</code></pre>
-<p>Keep <code>--dist loadgroup</code> with parallel tests so shared PostgreSQL fixtures stay serialized. Bound worker count to available resources; keep Docker builds sequential on constrained machines. Do not suppress failures, relax assertions or replace expected behavior to obtain a green run.</p>
-<p>Report source validation, unit tests, live runtime execution, browser delivery, and Linux-container CI separately. The release matrix covers Ubuntu core and contributor checks, PostgreSQL, ordinary Docker workers, Chromium, owned Linux Kubernetes and the portable source ZIP. A local pass does not prove hosted CI, WSL installation, a different engine configuration or a different architecture. Record skipped or unavailable surfaces. Never describe a scan as proof that the repository is bug free. Keep machine-specific logs, image IDs, ports and temporary paths out of maintained onboarding documents.</p>
-<h3 id="optional-documentation-only-ci-skip">Optional documentation-only CI skip<a class="heading-anchor" href="#optional-documentation-only-ci-skip" aria-label="Link to this section">#</a></h3>
-<p>For an authorized push containing only prose and its regenerated readers, use GitHub&#x27;s native <code>[skip ci]</code> token, with a space. <code>[skip-ci]</code> is unsupported by this native feature; do not add a custom workflow gate. Never include unvalidated code, executable lesson examples, tests, runtime/configuration, dependencies or workflow changes in that push. A skip marker in one pushed commit must not hide implementation changes in another.</p>
-<p>Regenerate readers locally and run prose, rendering, link and whitespace checks first. See <a href="docs/validation.md.html#optional-documentation-only-ci-skip">the exact commands and limitations</a> and <a href="CONTRIBUTING.md.html#optional-ci-skip-for-a-prose-only-push">commit example</a>. The marker affects push/PR triggers, not scheduled/manual or already-running jobs. Required PR checks may remain Pending; use an unmarked follow-up or an appropriate manual run under repository policy. Do not report a skip as a pass.</p>
-<h3 id="publication-and-cleanup">Publication and cleanup<a class="heading-anchor" href="#publication-and-cleanup" aria-label="Link to this section">#</a></h3>
-<p>Portable payloads must exclude <code>.learning/</code>, runtime session credentials, <code>.classroom/</code>, model caches, environment files, local logs and Git history. Preserve public source licenses and required third-party notices. Use neutral examples without workplace identifiers or private infrastructure references.</p>
-<p>Before authorized commits, review the intended public Git identity without copying private identity values into reports. See the repository-local setup in <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a>. Source and ZIP sanitation do not rewrite existing author/committer metadata or Git history. Do not change global Git configuration, rewrite history or publish rewritten branches without a separate explicit instruction from the repository owner.</p>
-<p>Cleanup must be scoped to resources created for this project. Remove containers and images only when authorized, and inspect ownership first. Keep progress volumes unless their deletion is explicitly requested. Do not stop unrelated services, reconfigure an engine or run broad pruning as an incidental cleanup.</p></article>
+<p>These <code>uv</code> commands require the prepared contributor environment from <a href="CONTRIBUTING.md.html">CONTRIBUTING</a>. Keep <code>--dist loadgroup</code> for shared database fixtures. Bound parallelism and keep large Docker builds sequential when disk or memory is constrained. Do not weaken assertions or rewrite expected behavior to conceal a failure. Do not rerun expensive successful checks without a new change or unresolved concern.</p>
+<p>Report source checks, unit tests, actual runtime execution, browser delivery, container recreation and hosted CI separately. Record exact source/revision and platform; name skips and unavailable hardware. Historical receipts and source-format parity records remain immutable. They do not qualify new behavior. Do not place machine-specific image IDs, ports, temporary paths or test-session counts into maintained onboarding instructions.</p>
+<p>For a genuinely prose-only authorized push, GitHub&#x27;s <code>[skip ci]</code> spelling is available under the <a href="docs/validation.md.html#optional-documentation-only-ci-skip">documented constraints</a>. It must not hide implementation, examples, dependencies, workflows or other unvalidated commits. A skipped check is not a passed check.</p>
+<p>Portable payloads exclude learner state, credentials, caches, local logs and Git history. Preserve source licenses and use neutral public/synthetic examples. Review the chosen repository-local public commit identity without exposing private identity values. Git pushes do not authorize Docker Hub publication. The publisher previews by default; the manual publication workflow requires all image qualification before its protected publish phase. See <a href="docs/dockerhub.md.html">Docker Hub</a>. Cleanup only owned task resources, and retain learner volumes unless their deletion was explicitly requested. Do not prune unrelated resources or rewrite history as incidental cleanup.</p></article>
   </main>
 </body>
 </html>

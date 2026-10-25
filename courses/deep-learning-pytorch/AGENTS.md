@@ -30,7 +30,14 @@ artifact contract. Consult versioned 2.9 documentation for supported APIs.
 
 Register complete authored sets only in lessons.json. Keep paired_lesson_id
 metadata and relative TensorFlow guide links aligned. Write focused tests in
-tests/test_pytorch_lessons.py and status in docs/implementation/pytorch-content-status.md.
+`tests/test_pytorch_lessons.py`. Keep durable architectural constraints in
+[the checkpoint](../../docs/implementation/CHECKPOINT.md) and runtime results in
+source-bound test/CI artifacts, not a new historical status page.
 Changes to shared runtime or Compose files need their own execution and browser
 qualification. Preserve existing source-matching receipts and report what was
 actually rerun.
+
+Use [the durable authoring map](authoring/README.md) before regeneration.
+Optional PyTorch GPU work belongs to the paired [CUDA route](../cuda/README.md)
+and its explicitly prepared profile. Keep framework CPU references available;
+GPU-labelled readiness must not silently fall back to CPU.

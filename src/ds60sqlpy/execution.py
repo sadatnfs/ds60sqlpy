@@ -1,7 +1,7 @@
 """Bounded, explicit local backend execution for the coding-pad application.
 
 This is a trusted local programming environment, not a security sandbox.
-The ordinary portal and the MCP adapter do not expose these operations.
+The read-only MCP adapter does not expose these operations.
 """
 
 from __future__ import annotations
@@ -28,12 +28,6 @@ from urllib.parse import unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
-from ds60sqlpy.runtime_environment import (
-    external_dll_directory as external_dll_directory,
-)
-from ds60sqlpy.runtime_environment import (
-    external_program_environment as external_program_environment,
-)
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
     _psql_meta_segments,
@@ -72,17 +66,7 @@ def matplotlib_cache_environment(repo_root: Path) -> dict[str, str]:
     return {"MPLBACKEND": "Agg", "MPLCONFIGDIR": str(cache)}
 
 
-# On Windows the parent assigns a Job Object before releasing this gate. A
-# short-lived learner program cannot exit before its descendants are tracked.
-WORKER_GATE = r"""
-import os, time
-while not os.path.isfile(os.environ["DS60_PAD_READY"]):
-    time.sleep(0.01)
-"""
-
-PYTHON_WORKER = (
-    WORKER_GATE
-    + r"""
+PYTHON_WORKER = r"""
 import base64, hashlib, io, sys, warnings
 from pathlib import Path
 from ds60sqlpy.notebook_execution import execute_python_file, python_cells
@@ -138,15 +122,13 @@ finally:
             save_png(image.getvalue())
         pyplot.close("all")
 """
-)
 
 SQL_WORKER = (
-    WORKER_GATE
-    + "COURSE_ROLE_QUERY = "
+    "COURSE_ROLE_QUERY = "
     + repr(COURSE_ROLE_QUERY)
     + "\n"
     + r"""
-import json, sys
+import json, os, sys
 from pathlib import Path
 try:
     import psycopg
@@ -167,7 +149,8 @@ try:
         privileged = conn.execute(COURSE_ROLE_QUERY).fetchone()
         if not privileged or privileged[0]:
             raise CourseRoleError(
-                "SQL pads require a limited course login. See docs/offline-app.md for role setup."
+                "SQL pads require a limited course login. "
+                "See docs/setup/postgresql.md for role setup."
             )
         started = conn.execute(
             'SELECT backend_start::text FROM pg_stat_activity WHERE pid=pg_backend_pid()'
@@ -222,82 +205,6 @@ with psycopg.connect("", connect_timeout=1,
 """
 
 
-class _WindowsJob:
-    """Own a Windows process tree, including descendants after the parent exits."""
-
-    def __init__(self) -> None:
-        import ctypes
-        from ctypes import wintypes
-
-        class BasicLimits(ctypes.Structure):
-            _fields_ = [
-                ("process_time", ctypes.c_longlong),
-                ("job_time", ctypes.c_longlong),
-                ("flags", wintypes.DWORD),
-                ("min_working_set", ctypes.c_size_t),
-                ("max_working_set", ctypes.c_size_t),
-                ("active_processes", wintypes.DWORD),
-                ("affinity", ctypes.c_size_t),
-                ("priority", wintypes.DWORD),
-                ("scheduling", wintypes.DWORD),
-            ]
-
-        class IoCounters(ctypes.Structure):
-            _fields_ = [
-                (name, ctypes.c_ulonglong)
-                for name in (
-                    "read_ops",
-                    "write_ops",
-                    "other_ops",
-                    "read_bytes",
-                    "write_bytes",
-                    "other_bytes",
-                )
-            ]
-
-        class ExtendedLimits(ctypes.Structure):
-            _fields_ = [
-                ("basic", BasicLimits),
-                ("io", IoCounters),
-                ("process_memory", ctypes.c_size_t),
-                ("job_memory", ctypes.c_size_t),
-                ("peak_process_memory", ctypes.c_size_t),
-                ("peak_job_memory", ctypes.c_size_t),
-            ]
-
-        windows_library = getattr(ctypes, "WinDLL")  # noqa: B009
-        self.kernel = windows_library("kernel32", use_last_error=True)
-        self.kernel.CreateJobObjectW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR]
-        self.kernel.CreateJobObjectW.restype = wintypes.HANDLE
-        self.kernel.SetInformationJobObject.argtypes = [
-            wintypes.HANDLE,
-            ctypes.c_int,
-            ctypes.c_void_p,
-            wintypes.DWORD,
-        ]
-        self.kernel.AssignProcessToJobObject.argtypes = [wintypes.HANDLE, wintypes.HANDLE]
-        self.kernel.CloseHandle.argtypes = [wintypes.HANDLE]
-        self.handle = self.kernel.CreateJobObjectW(None, None)
-        if not self.handle:
-            raise OSError("Could not create a Windows backend process job.")
-        limits = ExtendedLimits()
-        limits.basic.flags = 0x00002000  # JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
-        if not self.kernel.SetInformationJobObject(
-            self.handle, 9, ctypes.byref(limits), ctypes.sizeof(limits)
-        ):
-            self.close()
-            raise OSError("Could not set backend process-tree cleanup limits.")
-
-    def assign(self, process: subprocess.Popen[bytes]) -> None:
-        if not self.kernel.AssignProcessToJobObject(self.handle, int(getattr(process, "_handle"))):  # noqa: B009
-            raise OSError("Could not contain the Windows backend process tree.")
-
-    def close(self) -> None:
-        if self.handle:
-            self.kernel.CloseHandle(self.handle)
-            self.handle = None
-
-
 @dataclass(frozen=True, slots=True)
 class PadResult:
     """An execution transcript with bounded output and an explicit stop reason."""
@@ -332,18 +239,10 @@ class PadRunner:
         if explicit:
             candidates.append([shutil.which(explicit) or explicit])
         else:
-            if not getattr(sys, "frozen", False):
-                candidates.append([sys.executable])
+            candidates.append([sys.executable])
             if repo_root is not None:
                 candidates.extend(
-                    [
-                        [str(repo_root / relative)]
-                        for relative in (
-                            ".venv/Scripts/python.exe",
-                            ".venv/python.exe",
-                            ".venv/bin/python",
-                        )
-                    ]
+                    [[str(repo_root / relative)] for relative in (".venv/bin/python",)]
                 )
             candidates.extend(
                 [
@@ -352,24 +251,21 @@ class PadRunner:
                     if (path := shutil.which(name))
                 ]
             )
-            if os.name == "nt" and (launcher := shutil.which("py")):
-                candidates.extend([[launcher, version] for version in ("-3.12", "-3.11")])
         probe = (
             "import json,sys; print(json.dumps({'version':list(sys.version_info[:2]),"
             "'executable':sys.executable}))"
         )
         for candidate in candidates:
             try:
-                with external_dll_directory():
-                    result = subprocess.run(
-                        [*candidate, "-I", "-c", probe],
-                        stdin=subprocess.DEVNULL,
-                        capture_output=True,
-                        text=True,
-                        check=False,
-                        timeout=4,
-                        env=external_program_environment(),
-                    )
+                result = subprocess.run(
+                    [*candidate, "-I", "-c", probe],
+                    stdin=subprocess.DEVNULL,
+                    capture_output=True,
+                    text=True,
+                    check=False,
+                    timeout=4,
+                    env=dict(os.environ),
+                )
                 payload = json.loads(result.stdout)
                 if result.returncode == 0 and payload["version"] in ([3, 11], [3, 12]):
                     executable = payload["executable"]
@@ -556,7 +452,7 @@ class PadRunner:
         timeout_seconds: int | None = None,
     ) -> dict[str, Any]:
         assert self.python is not None
-        environment = external_program_environment()
+        environment = dict(os.environ)
         environment["PYTHONIOENCODING"] = "utf-8"
         environment["PYTHONUTF8"] = "1"
         if language == "python":
@@ -684,37 +580,30 @@ class PadRunner:
         timeout_seconds: int | None = None,
         truncate_output: bool = False,
     ) -> PadResult:
+        if os.name != "posix":
+            raise ValueError("Code execution requires Linux/macOS or WSL 2; use ./classroom.")
         started = time.monotonic()
         stopped = None
         captured = bytearray()
         output_limit = threading.Event()
-        job = _WindowsJob() if os.name == "nt" else None
-        assigned = False
         process: subprocess.Popen[bytes] | None = None
         reader: threading.Thread | None = None
-        with tempfile.TemporaryDirectory(prefix="ds60-pad-gate-") as gate:
+        with tempfile.TemporaryDirectory(prefix="ds60-pad-runtime-") as gate:
             environment = {
                 **environment,
-                "DS60_PAD_READY": str(Path(gate) / "ready"),
                 "DS60_PAD_BACKEND_PID": str(Path(gate) / "backend-pid"),
                 "DS60_PAD_BACKEND_START": str(Path(gate) / "backend-start"),
             }
             try:
-                with external_dll_directory():
-                    process = subprocess.Popen(
-                        command,
-                        cwd=self.catalog.repo_root,
-                        env=environment,
-                        stdin=subprocess.DEVNULL,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        start_new_session=os.name != "nt",
-                        creationflags=0x00000200 if os.name == "nt" else 0,
-                    )
-                if job:
-                    job.assign(process)
-                    assigned = True
-                Path(environment["DS60_PAD_READY"]).touch()
+                process = subprocess.Popen(
+                    command,
+                    cwd=self.catalog.repo_root,
+                    env=environment,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
                 pipe = process.stdout
                 assert pipe is not None
 
@@ -752,13 +641,8 @@ class PadRunner:
             finally:
                 if stopped and language == "sql":
                     self._cancel_sql(environment)
-                if job:
-                    job.close()
                 if process is not None:
-                    if os.name != "nt" or (process.poll() is None and not assigned):
-                        self._stop(process)
-                    elif process.poll() is None:
-                        process.kill()
+                    self._stop(process)
                     process.wait(timeout=5)
                     if reader:
                         reader.join(timeout=2)
@@ -810,16 +694,15 @@ class PadRunner:
             if len(started) > 120:
                 return
             cancel_environment = {**environment, "PGAPPNAME": "ds60-coding-pad-cancel"}
-            with external_dll_directory():
-                subprocess.run(
-                    [self.python, "-I", "-c", SQL_CANCEL, pid, started],
-                    env=cancel_environment,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    timeout=2,
-                    check=False,
-                )
+            subprocess.run(
+                [self.python, "-I", "-c", SQL_CANCEL, pid, started],
+                env=cancel_environment,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                timeout=2,
+                check=False,
+            )
         except (OSError, ValueError, subprocess.TimeoutExpired):
             # Worker/tree cleanup still runs. PostgreSQL's independent 5-second
             # statement timeout bounds a query if the cancel connection fails.
@@ -827,18 +710,7 @@ class PadRunner:
 
     @staticmethod
     def _stop(process: subprocess.Popen[bytes]) -> None:
-        if sys.platform == "win32":
-            # The Job Object normally performs tree cleanup. This fallback is
-            # used only if setup failed before assignment.
-            with contextlib.suppress(OSError, subprocess.TimeoutExpired):
-                subprocess.run(
-                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
-                    capture_output=True,
-                    check=False,
-                    timeout=5,
-                )
-        else:
-            with contextlib.suppress(ProcessLookupError, PermissionError):
-                os.killpg(process.pid, signal.SIGKILL)
+        with contextlib.suppress(ProcessLookupError, PermissionError):
+            os.killpg(process.pid, signal.SIGKILL)
         if process.poll() is None:
             process.kill()

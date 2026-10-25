@@ -35,7 +35,7 @@ saved CPU-model variants, selected framework/Spark CPU variants and optional
 NVIDIA variants. GPU workers are explicitly selected and excluded from ordinary
 default/`--all` builds. They require a real allocation/kernel/readback probe.
 CPU checks and compiler acceptance never establish device or performance
-qualification. See `docs/cuda-classroom.md` for supported preparation and limits.
+qualification. See [CUDA preparation](../cuda-classroom.md) for supported preparation and limits.
 
 The web-development subject combines 60 HTML/CSS/PHP lessons. `html-browser`
 uses the existing opaque, network-blocked preview and browser observations;
@@ -55,8 +55,10 @@ separate script and optional manual workflow, not a side effect of startup.
 The shared renderer provides offline MathML and syntax highlighting. Reviewed
 prose normalization runs before reader generation; copying a code block must
 preserve source characters. The generated static library remains available
-without the application server. Design-preview templates are developer tools,
-not a second live classroom.
+without the application server. The old design-preview renderer and native launchers are retired. The five
+original module plans remain active metadata under `docs/expansion/plans/`,
+loaded by `module_plans.load_core_plans`. Contributor `ds60 serve` exposes the
+same classroom shell using its actual prepared local capabilities.
 
 Practice lessons have progressive exercises, hints and separate solutions.
 The statistics book is a theory-and-code tutorial with directly available
@@ -88,10 +90,10 @@ the app's shared network reference and public address. Custom project names
 must be supplied explicitly on later commands; there is no global project guess. Windows uses WSL 2 with an
 integrated Linux-container engine. Host compilers and databases are unnecessary
 for the ordinary classroom route. Linux containers are the supported release
-target. Native Windows runtimes, private-ACL integration and executable bundles
-are retired from release qualification; retained helpers are compatibility
-material. Linux contributor checks and container/browser receipts govern the
-current release matrix, as described in [validation](../validation.md).
+target. Native Windows backend installers, executable bundles and editor-launch
+APIs are retired. Thin Docker wrappers and WSL 2 instructions remain. Linux
+contributor checks and container/browser receipts govern the release matrix,
+as described in [validation](../validation.md).
 
 The app preserves Python/SQL pads, coaching phases and immutable run receipts.
 Module lessons preserve source, notes, variants and job history through their
@@ -131,16 +133,71 @@ have separate preparation and capability requirements. A small offline example
 demonstrates its mechanism; it does not prove model quality, production capacity
 or safety on arbitrary infrastructure.
 
+## Operational constraints retained across refactors
+
+These constraints replace scattered historical status notes. Their live sources,
+subject guidance and tests determine exact limits; old acceptance counts do not.
+
+- **Worker isolation:** the Linux supervisor demotes learner processes and keeps
+  private credentials outside their working directory. Protect both token files
+  and their parent directories; apparent file modes on a shared mount are not a
+  substitute for actual access-denial checks. Keep narrow declared capabilities,
+  bounded process groups, combined compile/run deadlines, output and scratch
+  limits, cancellation and descendant cleanup. No ordinary worker gets an
+  engine socket. A configured limit is not proof it is enforced.
+- **Kubernetes ownership:** require a short-lived target-bound lease, exact
+  namespace/resource identity and recorded UIDs. Never use ambient kubeconfig.
+  Admission is a finite reviewed operation/verifier set. Cleanup must preserve
+  preexisting or replaced resources after failure. Optional CNI policy, storage,
+  ingress/Gateway/TLS, CRDs and Secret observation need their actual capabilities;
+  synthetic local fixtures do not establish those services. Keep secret bodies
+  and private credentials out of user-facing failure messages and exports. See
+  [the owned adapter](../../docker/kubernetes/README.md).
+- **Spark state:** use fresh owned file/checkpoint/sink roots and stop only queries
+  created by the job before cleanup. A recovery scenario must preserve compatible
+  source, query and state-store identity. Source recovery, business-event
+  deduplication and external sink idempotency are distinct. Inspect actual plans
+  and metric definitions; pushed-down filtering can change observed input counts.
+  Local Spark does not qualify distributed fault tolerance. GPU plans add a
+  separate compatible-component and supported-operator contract.
+- **Compiled and database examples:** the one-file C++/Java pads do not imply
+  arbitrary multi-file builds. Use separate prepared CMake/Java projects when
+  needed, preserving compile/link/run diagnostics. Prepared H2 JDBC fixtures
+  are not PostgreSQL. Preserve inherited JVM resource settings and distinguish
+  runtime diagnostics on stderr from application stdout. SQL stateful projects
+  must never depend on objects rolled back by earlier steps.
+- **ML and language-model evidence:** preserve train-only preprocessing, split
+  boundaries, tensor shapes, reductions and finite-value checks. CPU framework
+  comparisons teach equivalent objectives without asserting identical kernels.
+  Tiny attention, embedding, quantization or adapter examples do not establish
+  pretrained quality or production memory/performance. RAG evidence, factual
+  support, tool authorization and held-out task utility need separate evaluation;
+  code may execute successfully while quality fails. Optional models are pinned,
+  deliberately acquired and independently evaluated.
+- **Immutable source evidence:** preserve runtime JSON receipts and their hashes.
+  A prose-only or AST-equivalent formatting change may retain a documented source
+  correspondence, but changed behavior requires fresh runtime acceptance.
+  Statistics `source-outline.md` and coverage identities remain authoritative;
+  that tutorial has no mandatory exams or hidden answers.
+
+Portable source ZIPs and container workspaces share `course_paths.COURSE_PATHS`.
+Staging excludes Git history, credentials, learner state and temporary output.
+The source ZIP is built by `scripts/build_starter.py`; it contains the Docker
+launcher and source, not prebuilt images. Workspace preparation must preserve an
+existing `.learning` directory when refreshing bundled sources. Package tests
+must verify both exclusion and a complete startable source payload.
+
 ## Where to make changes
 
 | Change | Maintained source |
 | --- | --- |
 | Classroom behavior and styles | `src/ds60sqlpy/assets/classroom.*`, `classroom.py`, `lab.py` |
-| Module content and admission | `courses/<subject>/`, `modules.py`, `module_extensions.py` |
+| Module content and admission | `courses/<subject>/`, `module_plans.py`, `modules.py`, `module_extensions.py` |
 | Worker execution | `module_jobs.py`, `worker_operations.py`, reviewed adapters, `docker/workers/` |
 | Legacy identity and planner | `catalog_builder.py`, `curriculum/extensions/`, `catalog.py`, `study_plan.py` |
 | Rendering | `lesson_reader.py`, `reader_math.py`, `reader_content.py` |
-| Local build/start | `classroom`, `scripts/classroom.sh`, `compose.classroom.yaml` |
+| Local build/start and image selection | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh`, `docker/classroom-images.tsv`, Compose |
+| Source payload and prepared workspace | `course_paths.py`, `container_runtime.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
 | Tutoring integration | `mcp_server.py`, repository learning skill |
 | Future authoring | [Add a learning path skill](../../.agents/skills/add-learning-path/SKILL.md), [content contract](../content-authoring.md) |
 

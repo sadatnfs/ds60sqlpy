@@ -13,7 +13,7 @@ from typing import Any
 from ds60sqlpy.catalog import Catalog, Track, find_repo_root
 from ds60sqlpy.checks import CheckResult, run_checks
 from ds60sqlpy.doctor import Diagnostic, diagnose
-from ds60sqlpy.portal import serve_portal
+from ds60sqlpy.lab import serve_lab
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.sql_notebook import SqlNotebookError, generate_sql_notebook
 from ds60sqlpy.sql_runner import SqlRunner, SqlRunnerError
@@ -164,12 +164,12 @@ def _cmd_progress(args: argparse.Namespace, catalog: Catalog) -> int:
     return 0
 
 
-def _cmd_portal(args: argparse.Namespace, catalog: Catalog) -> int:
-    serve_portal(
+def _cmd_serve(args: argparse.Namespace, catalog: Catalog) -> int:
+    serve_lab(
         catalog,
         port=args.port,
         open_browser=not args.no_browser,
-        allow_launches=not args.no_launches,
+        python=args.python,
     )
     return 0
 
@@ -189,8 +189,8 @@ def _cmd_sql(args: argparse.Namespace, catalog: Catalog) -> int:
         print(f"Guided notebook: {workspace.notebook_path}")
         print(f"Editable SQL:    {workspace.sql_path}")
         print(
-            "Open the notebook through the course portal or start JupyterLab "
-            "from the repository root."
+            "Open this notebook with JupyterLab from a prepared contributor environment. "
+            "For the supported browser classroom, run ./classroom instead."
         )
         return 0
 
@@ -316,25 +316,24 @@ def _parser() -> argparse.ArgumentParser:
     reset_parser = progress_subparsers.add_parser("reset", help="Delete local progress.")
     reset_parser.add_argument("--yes", action="store_true")
 
-    portal_parser = subparsers.add_parser(
-        "portal",
-        help="Open the private progress dashboard on 127.0.0.1.",
+    serve_parser = subparsers.add_parser(
+        "serve",
+        help="Serve the unified classroom from a prepared POSIX contributor environment.",
     )
-    portal_parser.add_argument(
+    serve_parser.add_argument(
         "--port",
         type=int,
         default=0,
         help="Loopback port; 0 chooses a free port.",
     )
-    portal_parser.add_argument(
+    serve_parser.add_argument(
         "--no-browser",
         action="store_true",
         help="Print the URL without opening the browser.",
     )
-    portal_parser.add_argument(
-        "--no-launches",
-        action="store_true",
-        help="Disable native VS Code and Jupyter actions.",
+    serve_parser.add_argument(
+        "--python",
+        help="Executable path for the Python/SQL contributor backend.",
     )
 
     sql_parser = subparsers.add_parser("sql", help="Run PostgreSQL course scripts with psql.")
@@ -410,11 +409,11 @@ def main(argv: list[str] | None = None) -> int:
         "plan": _cmd_plan,
         "validate": _cmd_validate,
         "progress": _cmd_progress,
-        "portal": _cmd_portal,
+        "serve": _cmd_serve,
         "sql": _cmd_sql,
     }
     try:
         return handlers[args.command](args, catalog)
-    except (KeyError, ValueError) as exc:
+    except (KeyError, OSError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
         return 2

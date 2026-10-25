@@ -610,50 +610,6 @@ def build_html(payload: dict[str, Any]) -> str:
       border-radius: inherit;
       background: var(--green);
     }
-    .launcher-panel {
-      border: 2px solid var(--green);
-      background: linear-gradient(135deg, var(--surface), var(--green-soft));
-    }
-    .launcher-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-    .launcher-status { min-height: 1.35rem; margin: 0.7rem 0 0; }
-    .readiness-box {
-      margin-top: 1rem;
-      border-top: 1px solid var(--line);
-      padding-top: 1rem;
-    }
-    .readiness-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-    }
-    .readiness-head h4 { margin: 0; }
-    .readiness-results {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.45rem;
-      margin-top: 0.75rem;
-    }
-    .readiness-item {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 0.15rem 0.55rem;
-      align-items: start;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 0.55rem 0.65rem;
-      background: rgb(255 255 255 / 55%);
-    }
-    .readiness-mark {
-      grid-row: 1 / 3;
-      color: var(--green);
-      font-weight: 900;
-    }
-    .readiness-item[data-status="warn"] .readiness-mark { color: #9a5b05; }
-    .readiness-item[data-status="fail"] .readiness-mark { color: var(--red); }
-    .readiness-item strong { font-size: 0.82rem; }
-    .readiness-item span:last-child { color: var(--muted); font-size: 0.74rem; }
     .mode-badge {
       display: inline-flex;
       align-items: center;
@@ -711,7 +667,7 @@ def build_html(payload: dict[str, Any]) -> str:
       h1 { font-size: clamp(2.8rem, 17vw, 4.4rem); }
       .grid.three, .grid.two, .lesson-grid, .workflow, .sql-run-grid, .controls { grid-template-columns: 1fr; }
       .section-head { align-items: flex-start; flex-direction: column; }
-      .progress-panel, .track-progress-grid, .readiness-results { grid-template-columns: 1fr; }
+      .progress-panel, .track-progress-grid { grid-template-columns: 1fr; }
       .mode-notice { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -771,11 +727,11 @@ def build_html(payload: dict[str, Any]) -> str:
         <div class="stat"><strong>__PYTHON_COUNT__</strong><span>Python modules</span></div>
         <div class="stat"><strong>__SQL_COUNT__</strong><span>SQL modules</span></div>
         <div class="stat"><strong>__BRIDGE_COUNT__</strong><span>bridge modules</span></div>
-        <div class="stat"><strong>1×</strong><span>connected bootstrap</span></div>
+        <div class="stat"><strong>1×</strong><span>Docker setup</span></div>
       </div>
       <p class="offline-note">
         This file contains no external scripts, fonts, analytics, or internet
-        requests. Optional launcher mode talks only to its loopback server.
+        requests. When served by the classroom, it reads progress from that local server.
         Lesson code is designed for offline study after setup.
       </p>
     </aside>
@@ -788,25 +744,12 @@ def build_html(payload: dict[str, Any]) -> str:
         <strong>You are in portable reading mode.</strong>
         <p>
           Guides, notebooks, Python, and SQL are rendered here as read-only
-          lesson pages, but a normal browser page cannot safely start VS Code,
-          Jupyter, Python, or PostgreSQL. For the coding lab, extract the course
-          and double-click <code>START_DOCKER_LAB.cmd</code> on Windows, or follow
-          <a href="docs/docker-beginners.md">the container walkthrough</a> for
-          macOS/Linux. If you prefer native VS Code and Jupyter, use
-          <code>START_DS60.cmd</code> or
-          <code>.venv/bin/python scripts/learning_portal.py</code>; that separate
-          page says <em>Private launcher mode</em> and provides native launch buttons.
-        </p>
-      </div>
-    </div>
-    <div class="mode-notice private" id="private-mode-banner" hidden>
-      <span class="mode-icon" aria-hidden="true">✓</span>
-      <div>
-        <strong>Private launcher mode is active.</strong>
-        <p>
-          Buttons on this page can now open allowlisted lesson files in VS Code
-          or generate and open guided notebooks in JupyterLab. Keep the launcher
-          terminal open; it is the private bridge between this page and your apps.
+          lesson pages. To edit and execute code, run <code>./classroom</code>
+          from the course folder. Windows users run the same command in WSL 2,
+          or double-click <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup.
+          The <a href="docs/one-command-classroom.md">classroom startup guide</a>
+          explains first builds, offline use, stopping and resuming. See the
+          <a href="docs/lesson-readers.md">offline reader guide</a> for portable reading.
         </p>
       </div>
     </div>
@@ -816,6 +759,7 @@ def build_html(payload: dict[str, Any]) -> str:
         <p>Browse the complete course here, then
           <a href="/classroom" data-coding-lab-link>return to the classroom</a>
           to keep your attempt, phase evidence, and completion together.</p>
+        <p id="server-progress-status" aria-live="polite"></p>
       </div>
     </div>
   </div>
@@ -833,210 +777,71 @@ def build_html(payload: dict[str, Any]) -> str:
     <section id="setup">
       <div class="shell">
         <div class="section-head">
-          <div>
-            <p class="eyebrow">Step 1</p>
-            <h2>Prepare this machine once.</h2>
-          </div>
-          <p>
-            Choose the container route for a browser workspace with its Python
-            and PostgreSQL backends. Native VS Code and Jupyter setup remains
-            available below when you want those tools on your own computer.
-          </p>
+          <div><p class="eyebrow">Step 1</p><h2>Prepare this machine once.</h2></div>
+          <p>Install a Docker engine with Compose. The classroom supplies its Linux
+            language runtimes and PostgreSQL; ordinary learners do not need host compilers.</p>
         </div>
-
         <div class="os-tabs" role="tablist" aria-label="Operating system">
           <button class="secondary" type="button" role="tab" aria-selected="true" aria-controls="os-windows" id="tab-windows" data-os-tab="windows">Windows</button>
           <button class="secondary" type="button" role="tab" aria-selected="false" aria-controls="os-macos" id="tab-macos" data-os-tab="macos">macOS</button>
           <button class="secondary" type="button" role="tab" aria-selected="false" aria-controls="os-linux" id="tab-linux" data-os-tab="linux">Linux</button>
         </div>
-
         <div id="os-windows" class="os-panel panel" role="tabpanel" aria-labelledby="tab-windows" data-os-panel="windows">
           <div class="callout" id="windows-quick-start">
-            <p class="eyebrow">Recommended Windows route</p>
-            <h3>Extract All, then double-click <code>START_DOCKER_LAB.cmd</code>.</h3>
-            <p>
-              Download the supplied Windows Starter ZIP, use File Explorer's
-              <strong>Extract All</strong>, then open the complete extracted
-              folder. Its first-run wizard reuses a ready local engine or asks
-              before installing prerequisites, then builds the course and opens
-              the coding lab. No host Python or Git is required.
-            </p>
-            <p class="microcopy">
-              The first setup needs internet and may require installation
-              approval or a manual restart. Rerun the same starter afterward;
-              it checks the current machine state. Read the
-              <a href="docs/docker-beginners.md">beginner container guide</a>
-              for supported Windows versions, saved work, and troubleshooting.
-            </p>
+            <p class="eyebrow">Windows with WSL 2</p>
+            <h3>Set up Docker, then use the same classroom command.</h3>
+            <p>Enable WSL 2 and your engine's Linux-container integration. Download
+              or clone the complete course and extract a ZIP before starting.
+              From its folder in a WSL terminal, run <code>./classroom</code>.
+              The <code>START_DOCKER_CLASSROOM.cmd</code> wrapper can also delegate
+              to an already configured WSL environment.</p>
+            <p>Read <a href="docs/setup/windows.md">Windows setup</a> for the exact
+              prerequisite checks. The wrapper does not install a host Python or compiler.</p>
           </div>
-          <details style="margin-top: 1rem">
-            <summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
-          <h3>Windows PowerShell</h3>
-          <p>
-            If Anaconda and PostgreSQL are installed but absent from PATH, use
-            the one-off discovery bootstrap. It detects common installs,
-            prepares the process safely, creates <code>.venv</code>, installs
-            IPython/Jupyter, and registers the course kernel.
-          </p>
-          <pre><code>Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-&amp; .\scripts\bootstrap_windows.ps1
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-&amp; $CoursePython scripts\course.py doctor
-&amp; $CoursePython -m jupyter lab</code></pre>
-          <p class="microcopy">
-            Need every optional course package while connected? Add
-            <code>-Profile Advanced</code>. System-tool installation and persistent
-            PATH changes are opt-in; read
-            <a href="docs/setup/windows.md">the Windows guide</a> first.
-          </p>
-          </details>
         </div>
-
         <div id="os-macos" class="os-panel panel" role="tabpanel" aria-labelledby="tab-macos" data-os-panel="macos" hidden>
-          <h3>Browser coding lab</h3>
-          <p>After installing a local engine, double-click
-            <code>START_DOCKER_LAB.command</code>, or follow
-            <a href="docs/docker-beginners.md">the container walkthrough</a>.</p>
-          <details><summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
-          <h3>macOS terminal</h3>
-          <pre><code>bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python -m jupyter lab</code></pre>
-          <p class="microcopy">
-            See <a href="docs/setup/macos.md">the complete macOS guide</a> for
-            Python, PostgreSQL, VS Code, Apple Silicon, and shell details.
-          </p>
-          </details>
+          <h3>macOS with a local Linux-container engine</h3>
+          <p>Start your engine and confirm Compose is available. In the complete course
+            folder run <code>./classroom</code>, or open <code>START_DOCKER_CLASSROOM.command</code>.</p>
+          <p>Read <a href="docs/setup/macos.md">macOS setup</a> for Apple Silicon,
+            engine resources and browser access. GPU chapters always have CPU learning
+            routes; CUDA execution needs a separately qualified NVIDIA environment.</p>
         </div>
-
         <div id="os-linux" class="os-panel panel" role="tabpanel" aria-labelledby="tab-linux" data-os-panel="linux" hidden>
-          <h3>Browser coding lab</h3>
-          <p>After installing a local engine and Compose, run
-            <code>bash scripts/docker_lab.sh start</code>. Follow
-            <a href="docs/docker-beginners.md">the container walkthrough</a>
-            for engine installation and your first visible results.</p>
-          <details><summary><strong>Optional native VS Code/Jupyter setup</strong></summary>
-          <h3>Linux terminal</h3>
-          <pre><code>bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python -m jupyter lab</code></pre>
-          <p class="microcopy">
-            See <a href="docs/setup/linux.md">the complete Linux guide</a> for
-            supported package-manager examples and PostgreSQL service setup.
-          </p>
-          </details>
+          <h3>Linux with Docker and Compose</h3>
+          <p>Check that your user can reach the intended local engine, then run
+            <code>./classroom</code> from the course folder. Read
+            <a href="docs/setup/linux.md">Linux setup</a> for engine installation
+            and permissions, including rootless engine notes.</p>
         </div>
-
         <div class="grid three" style="margin-top: 1rem">
-          <article class="panel">
-            <span class="step-number">1</span>
-            <h3>Open the root</h3>
-            <p>
-              In VS Code, open the folder containing <code>README.md</code>,
-              <code>AGENTS.md</code>, and <code>pyproject.toml</code>.
-            </p>
-          </article>
-          <article class="panel">
-            <span class="step-number">2</span>
-            <h3>Select the kernel</h3>
-            <p>
-              Pick <strong>Python (ds60sqlpy)</strong> in the notebook kernel
-              picker. A terminal interpreter and notebook kernel can differ.
-            </p>
-          </article>
-          <article class="panel">
-            <span class="step-number">3</span>
-            <h3>Verify, then study</h3>
-            <p>
-              Run the doctor and fix failures before a lesson. Warnings identify
-              optional groups you may not need yet.
-            </p>
-          </article>
+          <article class="panel"><span class="step-number">1</span><h3>Start or resume</h3>
+            <pre><code>./classroom</code></pre><p>The launcher reuses existing containers
+            and images, and builds missing images on first setup. Its terminal shows
+            preparation logs and the exact browser URL.</p></article>
+          <article class="panel"><span class="step-number">2</span><h3>Choose any subject</h3>
+            <p>The unified classroom keeps lessons, language-specific pads, notes,
+            run history and progress together. Follow prerequisites at your own pace.</p></article>
+          <article class="panel"><span class="step-number">3</span><h3>Keep your work</h3>
+            <pre><code>./classroom stop
+./classroom resume</code></pre><p>Resume uses saved local containers and images
+            without building or pulling. Named volumes retain learner data. Keep the
+            same engine and repeat a custom <code>--project</code> name on each command.</p></article>
         </div>
-
-        <div class="grid two" style="margin-top: 1rem">
-          <div class="callout">
-            <h3>PostgreSQL inside Jupyter</h3>
-            <p>
-              The optional <code>bridge-jupyter-01</code> lab uses JupySQL
-              <code>%sql</code>/<code>%%sql</code> magics, SQLAlchemy, and
-              Psycopg 3. The database URL stays in
-              <code>DS60_DATABASE_URL</code>; it never belongs in a notebook.
-            </p>
-            <a href="docs/setup/jupyter-postgresql.md">Open the safe setup guide</a>
-          </div>
-          <div class="callout warning">
-            <h3>Database safety boundary</h3>
-            <p>
-              <code>sql/postgres-60day/00_setup.sql</code> drops and recreates
-              the course-owned <code>training</code> schema. Use only the
-              disposable <code>advanced_sql_training</code> database, never a
-              shared or valuable database.
-            </p>
-          </div>
-        </div>
-
-        <div class="panel launcher-panel" id="launcher-panel" style="margin-top: 1rem" hidden>
-          <span class="mode-badge">● Private localhost mode</span>
-          <h3>Launch your workspace from this page</h3>
-          <p>
-            This optional mode is bound only to <code>127.0.0.1</code>. It can
-            open allowlisted VS Code/Jupyter targets and saves lesson
-            completion to ignored <code>.learning/progress.json</code>. It
-            cannot run arbitrary commands or accept arbitrary file paths.
-          </p>
-          <p class="microcopy">
-            See <a href="docs/learning-portal.md">portal modes, portability,
-            and security</a>, plus the
-            <a href="docs/lesson-readers.md">offline lesson-reader guide</a>
-            for the exact static and private-mode controls.
-          </p>
-          <div class="launcher-actions">
-            <button type="button" data-launch-action="open-repo">Open repository in VS Code</button>
-            <button type="button" class="secondary" data-launch-action="jupyter-python">Launch Python JupyterLab</button>
-            <button type="button" class="secondary" data-launch-action="jupyter-sql">Open PostgreSQL magics lab</button>
-          </div>
-          <p class="microcopy launcher-status" id="launcher-status" aria-live="polite"></p>
-          <div class="readiness-box">
-            <div class="readiness-head">
-              <div>
-                <h4>This computer</h4>
-                <p class="microcopy" id="readiness-summary">
-                  Checking the repository environment…
-                </p>
-              </div>
-              <button type="button" class="secondary" id="check-readiness">
-                Run checks again
-              </button>
-            </div>
-            <div class="readiness-results" id="readiness-results"></div>
-            <p class="microcopy">
-              Docker and PostgreSQL are optional until you enter the SQL track.
-              A warning is a next-step prompt, not necessarily a blocker.
-            </p>
-          </div>
-        </div>
-
+        <p><a href="docs/docker-beginners.md">Docker, step by step</a> ·
+          <a href="docs/classroom-experience.md">Classroom controls and saved work</a> ·
+          <a href="docs/setup/first-success.md">Your first successful run</a></p>
         <div class="panel" style="margin-top: 1rem">
           <h3>Machine readiness checklist</h3>
           <ul class="checklist" id="setup-checklist">
-            <li><label><input type="checkbox" data-setup-check="root"> VS Code opened at the repository root</label></li>
-            <li><label><input type="checkbox" data-setup-check="venv"> Repository <code>.venv</code> created successfully</label></li>
-            <li><label><input type="checkbox" data-setup-check="kernel"> <strong>Python (ds60sqlpy)</strong> selected as notebook kernel</label></li>
-            <li><label><input type="checkbox" data-setup-check="doctor"> Course doctor has no unexplained failures</label></li>
-            <li><label><input type="checkbox" data-setup-check="postgres"> PostgreSQL course database verified, if studying SQL</label></li>
-            <li><label><input type="checkbox" data-setup-check="offline"> Optional packages and first-use datasets cached before going offline</label></li>
+            <li><label><input type="checkbox" data-setup-check="engine"> Intended Docker engine and Compose are available</label></li>
+            <li><label><input type="checkbox" data-setup-check="classroom"> Classroom opens at the launcher URL</label></li>
+            <li><label><input type="checkbox" data-setup-check="saved-work"> A saved pad remains after stop and resume</label></li>
+            <li><label><input type="checkbox" data-setup-check="offline"> Required images and explicit external assets are prepared before going offline</label></li>
           </ul>
-          <p class="microcopy">
-            Checklist state stays in this browser. Lesson completion is also
-            browser-local in the plain HTML file, or saved to the ignored
-            <code>.learning/progress.json</code> file in private launcher mode.
-            No machine details leave the computer.
-          </p>
+          <p class="microcopy">Checklist state stays in this browser. Static reader
+            completion is browser-local; the live classroom stores its own learner
+            state in the learning volume. No learner data is part of an image build.</p>
         </div>
       </div>
     </section>
@@ -1044,78 +849,37 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     <section id="run-sql">
       <div class="shell">
         <div class="section-head">
-          <div>
-            <p class="eyebrow">SQL beginner runway</p>
-            <h2>Run SQL in a real notebook, one statement at a time.</h2>
-          </div>
-          <p>
-            A SQL lesson uses three cooperating programs: Jupyter displays the
-            notebook, Python sends commands through the database driver, and
-            PostgreSQL executes them and returns rows. The generated notebook
-            explains and checks each boundary before you touch an exercise.
-          </p>
+          <div><p class="eyebrow">SQL beginner runway</p><h2>Run a query and understand its result.</h2></div>
+          <p>PostgreSQL executes SQL in the disposable course database. The browser
+            provides a saved editor, preparation controls and an execution transcript.</p>
         </div>
         <div class="sql-run-grid">
-          <article class="sql-run-step">
-            <h3>Start guided mode</h3>
-            <p>
-              Windows: double-click <code>START_DS60.cmd</code>. Keep its
-              terminal open until you finish studying.
-            </p>
-          </article>
-          <article class="sql-run-step">
-            <h3>Pass readiness</h3>
-            <p>
-              Confirm the course kernel, PostgreSQL tools, server connection,
-              and disposable <code>advanced_sql_training</code> database.
-            </p>
-          </article>
-          <article class="sql-run-step">
-            <h3>Choose a SQL lesson</h3>
-            <p>
-              Open its reader, study the guide, then select
-              <strong>Create/open guided SQL notebook</strong>.
-            </p>
-          </article>
-          <article class="sql-run-step">
-            <h3>Edit, save, prepare</h3>
-            <p>
-              Work in the generated copy. Save it, run the preparation cells,
-              and read every readiness message before the SQL cell.
-            </p>
-          </article>
-          <article class="sql-run-step">
-            <h3>Run and inspect</h3>
-            <p>
-              Execute one cell, inspect the transcript and returned rows, then
-              explain the row grain, columns, and ordering before continuing.
-            </p>
-          </article>
+          <article class="sql-run-step"><h3>Open the classroom</h3><p>Start <code>./classroom</code>
+            and select PostgreSQL. Begin with the three SQL starter labs before Day 1.</p></article>
+          <article class="sql-run-step"><h3>Prepare the course data</h3><p>Read the preparation
+            warning. Resetting the <code>training</code> schema changes course tables,
+            so only confirm it when the lesson requires a fresh fixture.</p></article>
+          <article class="sql-run-step"><h3>Predict, edit and run</h3><p>Use a pad for a focused
+            query. Whole-lesson mode runs the cataloged script and its fixed includes
+            with <code>psql -X -v ON_ERROR_STOP=1 -f</code>.</p></article>
+          <article class="sql-run-step"><h3>Inspect the transcript</h3><p>Explain each column,
+            row grain and ordering. Stop at the first error and save it with your notes
+            before making a small, deliberate correction.</p></article>
         </div>
         <div class="grid two" style="margin-top: 1rem">
-          <div class="callout">
-            <h3>Your first SQL launch</h3>
-            <p>
-              Begin with the three SQL starter labs, then SQL Day 1 and the training schema. Complete
-              relational design between Days 15–16 and migration engineering
-              between Days 39–40. In private
-              mode, every SQL catalog card gains an
-              <strong>Open SQL workspace</strong> button that creates the
-              lesson-specific guided notebook for you.
-            </p>
-            <a class="button" href="lesson-pages/sql-start-01.html">Start the first SQL lab</a>
-          </div>
-          <div class="callout warning">
-            <h3>If a cell fails</h3>
-            <p>
-              Stop at the first error. Check which layer named it:
-              <em>Jupyter/kernel</em>, <em>Python package or driver</em>,
-              <em>connection/database</em>, or <em>SQL statement</em>. Copy the
-              complete error into your learning notes before changing anything.
-            </p>
-            <a href="docs/guided-sql-notebooks.md">Open the guided SQL handbook</a>
-          </div>
+          <div class="callout"><h3>Your first SQL lesson</h3><p>Begin with small queries,
+            then build toward relational design between Days 15–16 and migration
+            engineering between Days 39–40.</p>
+            <a class="button" href="lesson-pages/sql-start-01.html">Start the first SQL lab</a></div>
+          <div class="callout warning"><h3>Database boundary</h3><p>Use only
+            <code>advanced_sql_training</code>. A contributor's <code>DS60_DATABASE_URL</code>
+            must never point to a shared or valuable database.</p>
+            <a href="docs/setup/postgresql.md">Understand course PostgreSQL</a></div>
         </div>
+        <p>Prepared contributors can optionally use
+          <a href="docs/guided-sql-notebooks.md">generated SQL notebooks</a> or the
+          <a href="docs/setup/jupyter-postgresql.md">JupySQL notebook workflow</a>.
+          These are separate developer tools; ordinary classroom study needs no Jupyter setup.</p>
       </div>
     </section>
 
@@ -1126,8 +890,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <p>Read a lesson, predict a result, write Python or SQL, and keep the evidence.</p></div>
         <div class="grid three">
           <article class="panel"><h3>Start the application</h3>
-            <p>Run ./classroom to build and open every subject in one browser workspace. Windows uses WSL 2 or START_DOCKER_CLASSROOM.cmd. Native users can run scripts/learning_lab.py with their course Python.</p>
-            <a href="docs/offline-app.md">Application, native builds, and Docker</a></article>
+            <p>Run ./classroom to build and open every subject in one browser workspace. Windows uses WSL 2 or START_DOCKER_CLASSROOM.cmd. Prepared contributors can run <code>python scripts/course.py serve</code> from a POSIX or WSL environment.</p>
+            <a href="docs/one-command-classroom.md">Startup, resume and rebuild commands</a></article>
           <article class="panel"><h3>Choose a useful goal</h3>
             <p>Build a route from the real prerequisites and your available time. Beginner practice and advanced projects belong at different checkpoints.</p>
             <a href="docs/learning-paths.md">Placement and goal-based learning paths</a></article>
@@ -1395,12 +1159,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
@@ -1437,8 +1195,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       }
     }
 
-    function setLauncherStatus(message, failed = false) {
-      const status = document.querySelector("#launcher-status");
+    function setProgressStatus(message, failed = false) {
+      const status = document.querySelector("#server-progress-status");
       status.textContent = message;
       status.style.color = failed ? "var(--red)" : "var(--muted)";
     }
@@ -1453,83 +1211,22 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         }
       });
       const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || `Portal request failed (${response.status})`);
+      if (!response.ok) throw new Error(payload.error || `Classroom request failed (${response.status})`);
       return payload;
     }
 
     async function loadServerProgress() {
-      if (!launcherMode && !labMode) return;
-      document.querySelector("#static-mode-banner").hidden = true;
-      document.querySelector("#private-mode-banner").hidden = !launcherMode;
-      document.querySelector("#launcher-panel").hidden = !launcherMode;
+      if (!labMode) return;
       try {
         const payload = await apiRequest("/api/status");
         state.completed = payload.completed.filter((id) => lessonById.has(id));
         saveState();
         renderCatalog();
         renderProgress();
-        renderReadiness(payload.diagnostics || []);
-        setLauncherStatus(
-          payload.launches_enabled
-            ? "Launcher ready. Progress is synchronized with .learning/progress.json."
-            : "Progress is synchronized; native launches are disabled for this session."
-        );
+        setProgressStatus("Reading-library progress loaded. Use the classroom to save new evidence.");
       } catch (error) {
-        setLauncherStatus(`Could not synchronize launcher mode: ${error.message}`, true);
+        setProgressStatus(`Could not load classroom progress: ${error.message}`, true);
       }
-    }
-
-    function renderReadiness(diagnostics) {
-      const results = document.querySelector("#readiness-results");
-      const summary = document.querySelector("#readiness-summary");
-      results.replaceChildren();
-      diagnostics.forEach((item) => {
-        const row = document.createElement("div");
-        row.className = "readiness-item";
-        row.dataset.status = item.status;
-        const mark = document.createElement("span");
-        mark.className = "readiness-mark";
-        mark.textContent = item.status === "pass" ? "✓" : item.status === "warn" ? "!" : "×";
-        const name = document.createElement("strong");
-        name.textContent = item.name;
-        const detail = document.createElement("span");
-        detail.textContent = item.detail;
-        row.append(mark, name, detail);
-        results.append(row);
-      });
-      const failed = diagnostics.filter((item) => item.status === "fail").length;
-      const warned = diagnostics.filter((item) => item.status === "warn").length;
-      summary.textContent = failed
-        ? `${failed} required check(s) need attention before lessons can run.`
-        : warned
-          ? `Core checks passed; ${warned} optional or track-specific item(s) need attention.`
-          : "Everything checked by the course is ready.";
-    }
-
-    async function syncCompletion(lessonId, complete) {
-      if (!launcherMode) return;
-      try {
-        await apiRequest("/api/progress", {
-          method: "POST",
-          body: JSON.stringify({ lesson_id: lessonId, complete })
-        });
-        setLauncherStatus(
-          `${lessonId} ${complete ? "saved as complete" : "saved as incomplete"}.`
-        );
-      } catch (error) {
-        setLauncherStatus(
-          `Browser progress changed, but the progress file was not updated: ${error.message}`,
-          true
-        );
-      }
-    }
-
-    async function replaceServerProgress() {
-      if (!launcherMode) return;
-      await apiRequest("/api/progress/replace", {
-        method: "POST",
-        body: JSON.stringify({ completed: state.completed })
-      });
     }
 
     const completedSet = () => new Set(state.completed);
@@ -1557,11 +1254,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       const solutions = lesson.solution_paths
         .map((_path, index) => `<a href="${reader}#solution-${index + 1}">Solution ${index + 1}</a>`)
         .join("");
-      const learnerLauncher = lesson.runner === "sql"
-        ? `<button type="button" class="ghost" data-open-sql="${escapeHtml(lesson.id)}">Open SQL workspace</button>`
-        : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
-          ? `<button type="button" class="ghost" data-open-notebook="${escapeHtml(lesson.id)}">Open notebook</button>`
-          : `<button type="button" class="ghost" data-open-lesson="${escapeHtml(lesson.id)}">Open in VS Code</button>`;
       return `
         <article class="lesson-card ${completed ? "complete" : ""}" data-lesson-id="${escapeHtml(lesson.id)}">
           <div class="lesson-top">
@@ -1588,7 +1280,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <a href="${reader}#guide">Guide</a>
             <a href="${reader}#learner">Learner artifact</a>
             ${solutions}
-            ${launcherMode ? learnerLauncher : ""}
           </div>
         </article>`;
     }
@@ -1663,34 +1354,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           event.currentTarget.checked ? completed.add(id) : completed.delete(id);
           state.completed = [...completed].sort();
           saveState();
-          void syncCompletion(id, event.currentTarget.checked);
           renderCatalog();
           renderProgress();
-        });
-      });
-      lessonGrid.querySelectorAll("[data-open-lesson]").forEach((button) => {
-        button.addEventListener("click", () => {
-          void launchNative("open-lesson", {
-            lesson_id: button.dataset.openLesson,
-            artifact: "lesson"
-          });
-        });
-      });
-      lessonGrid.querySelectorAll("[data-open-notebook]").forEach((button) => {
-        button.addEventListener("click", () => {
-          void launchNative("jupyter-lesson", {
-            lesson_id: button.dataset.openNotebook,
-            artifact: "lesson"
-          });
-        });
-      });
-      lessonGrid.querySelectorAll("[data-open-sql]").forEach((button) => {
-        button.addEventListener("click", () => {
-          void launchNative("jupyter-sql", {
-            lesson_id: button.dataset.openSql,
-            artifact: "lesson",
-            solution_index: 1
-          });
         });
       });
     }
@@ -1720,30 +1385,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         panel.querySelector("i").style.setProperty("--track-progress", `${trackPercentage}%`);
       });
     }
-
-    async function launchNative(action, detail = {}) {
-      if (!launcherMode) return;
-      setLauncherStatus(`Starting ${action}…`);
-      try {
-        const payload = await apiRequest("/api/launch", {
-          method: "POST",
-          body: JSON.stringify({ action, ...detail })
-        });
-        setLauncherStatus(`${payload.action} started (process ${payload.process_id}).`);
-      } catch (error) {
-        setLauncherStatus(`Could not launch ${action}: ${error.message}`, true);
-      }
-    }
-
-    document.querySelectorAll("[data-launch-action]").forEach((button) => {
-      button.addEventListener("click", () => {
-        void launchNative(button.dataset.launchAction);
-      });
-    });
-    document.querySelector("#check-readiness").addEventListener("click", () => {
-      document.querySelector("#readiness-summary").textContent = "Checking this computer…";
-      void loadServerProgress();
-    });
 
     [search, trackFilter, levelFilter, statusFilter].forEach((control) => {
       control.addEventListener(control === search ? "input" : "change", () => {
@@ -1826,6 +1467,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       document.querySelector("#progress-file").click();
     });
     document.querySelector("#progress-file").addEventListener("change", async (event) => {
+      if (labMode) return;
       const file = event.currentTarget.files[0];
       if (!file) return;
       try {
@@ -1836,7 +1478,6 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         state.completed = payload.completed.filter((id) => lessonById.has(id));
         state.setup = payload.setup && typeof payload.setup === "object" ? payload.setup : {};
         saveState();
-        await replaceServerProgress();
         document.querySelectorAll("[data-setup-check]").forEach((input) => {
           input.checked = Boolean(state.setup[input.dataset.setupCheck]);
         });
@@ -1849,13 +1490,11 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       }
     });
     document.querySelector("#clear-progress").addEventListener("click", () => {
+      if (labMode) return;
       if (!window.confirm("Clear lesson and setup progress stored by this browser?")) return;
       state.completed = [];
       state.setup = {};
       saveState();
-      void replaceServerProgress().catch((error) => {
-        setLauncherStatus(`Could not clear the progress file: ${error.message}`, true);
-      });
       document.querySelectorAll("[data-setup-check]").forEach((input) => {
         input.checked = false;
       });
@@ -1881,14 +1520,14 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         ? lesson.prerequisites.join(", ")
         : "none";
       const executionBoundary = lesson.runner === "sql"
-        ? `For runnable work, use only the local disposable advanced_sql_training database. Prefer the selected lesson reader's Create/open guided SQL notebook action. Before execution, have me state the expected row grain; afterwards, inspect my complete psql transcript and result shape.`
+        ? `For runnable work, use only the local disposable advanced_sql_training database. Use the selected lesson's classroom SQL pad or whole-lesson controls. Before execution, have me state the expected row grain; afterwards, inspect my complete psql transcript and result shape.`
         : lesson.runner === "none"
           ? `This is a reading lesson. Check my written prediction and explanation against the guide's evidence contract; no execution is required.`
         : lesson.runner !== "python"
           ? `Check this lesson's declared runner capability. Follow only the guide's explicit local setup, bounded verification, and cleanup; do not assume a language or operations adapter is implemented.`
         : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
-          ? `For runnable work, use the repository environment and select the Python (ds60sqlpy) kernel. Have me restart the kernel, run the notebook from the first cell downward, and show my actual output, assertion, or traceback.`
-          : `For runnable work, use the repository environment and run the cataloged learner artifact from the repository root. Inspect my actual output, assertion, test result, or traceback.`;
+          ? `For runnable work, use the classroom Python pad and check its package capabilities. Run the notebook cells in order and inspect my actual output, assertion, or traceback.`
+          : `For runnable work, use the classroom Python pad and its declared package profile. Inspect my actual output, assertion, test result, or traceback.`;
       document.querySelector("#tutor-prompt").value =
 `Use $guide-ds60sqlpy-learning to coach me through ${lesson.id}: ${lesson.title}.
 

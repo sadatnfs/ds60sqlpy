@@ -26,3 +26,10 @@ Teach value/reference behavior, generics, collection contracts, exceptions,
 resource ownership, concurrency and memory visibility with observable examples.
 Advanced lessons should compare alternatives and diagnose failures, not only
 introduce APIs. Test invalid and boundary inputs in the prepared Java runtime.
+
+Existing bundles and project fixtures are maintained directly unless a specific
+authoring tool explicitly owns them. Preserve prepared H2 JDBC fixtures and
+teach their database behavior as H2, not PostgreSQL. Inherited JVM resource
+settings and diagnostic stderr are part of the worker contract. Review the
+[classroom module contract](../../docs/implementation/ADDING_A_MODULE.md) before
+changing entrypoints, dependencies or multi-file expectations.

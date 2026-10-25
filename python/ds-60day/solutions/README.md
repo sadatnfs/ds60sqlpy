@@ -7,16 +7,20 @@ Current artifact coverage:
 - Markdown solution guides: Days 1–60
 - Runnable solution notebooks: Days 1–60
 
-Use `python scripts/course.py catalog --track python` from the repository root for the generated per-lesson availability view.
+The classroom lists reference availability per lesson. Prepared contributors
+can also use `uv run --no-sync python scripts/course.py catalog --track python`
+from the repository root.
 
-Conventions
+## Conventions
+
 - One subdirectory per day: `dayXX_.../`
 - Inside each: `dayXX_solutions.md` and `dayXX_solutions.ipynb`
 - Solutions assume the exercises listed in companion-guides/dayXX_*.md and the notebooks in notebooks/dayXX_*.ipynb
 
 Note: Some exercises are workflow/process oriented (e.g., creating virtualenvs). For those, the Markdown describes exact commands and reasoning; the notebook may only include small code cells where applicable.
 
-Index
+## Index
+
 - Day 01; Setup & REPL: solutions/day01_setup_and_repl/day01_solutions.md
 - Day 02; Basics & Types: solutions/day02_basics_types/day02_solutions.md
 - Day 03; Control Flow & Exceptions: solutions/day03_control_flow_exceptions/day03_solutions.md
@@ -78,3 +82,7 @@ Index
 - Day 58; Code Review, Refactoring, and Tests: solutions/day58_code_review_refactor_tests/day58_solutions.md
 - Day 59; Capstone Kickoff: solutions/day59_capstone_kickoff/day59_solutions.md
 - Day 60; Capstone Completion and Presentation: solutions/day60_capstone_completion_presentation/day60_solutions.md
+
+Open references for comparison in the [Docker classroom](../README.md).
+A successful reference run establishes that example's behavior, not completion
+of your own exercises. Keep learner attempts separate from these tracked files.

@@ -164,13 +164,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="python-curriculum-guidance">Python curriculum guidance<a class="heading-anchor" href="#python-curriculum-guidance" aria-label="Link to this section">#</a></h2>
 <p>This file extends the root <a href="../AGENTS.md.html">AGENTS.md</a> for <code>python/</code>.</p>
 <h3 id="runtime-and-commands">Runtime and commands<a class="heading-anchor" href="#runtime-and-commands" aria-label="Link to this section">#</a></h3>
-<p>Lead learner instructions with the Docker classroom. The host interpreter commands below apply to optional native development and notebook workflows. Windows Docker instructions use WSL 2 rather than native PowerShell.</p>
+<p>Lead learner instructions with the Docker classroom. The host interpreter commands below apply to the prepared contributor environment and optional Jupyter workflows, not a second learner installer. Windows uses WSL 2.</p>
 <ul>
 <li>Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.</li>
-<li>Run from the repository root.</li>
-<li>Use the repository <code>.venv</code>; prefer <code>python -m ...</code> over bare tool commands.</li>
-<li>On Windows, use <code>.\.venv\Scripts\python.exe</code>.</li>
-<li>On macOS/Linux, use <code>.venv/bin/python</code>.</li>
+<li>Run from the repository root using the environment in <a href="../CONTRIBUTING.md.html">CONTRIBUTING</a>.</li>
+<li>Prefer <code>uv run --no-sync python ...</code> or the prepared <code>.venv/bin/python</code>.</li>
+<li>Browser Python runs use a fresh process for each Run; notebook kernels have their own state. Explain the selected route rather than implying equivalence.</li>
 </ul>
 <h3 id="learner-notebooks">Learner notebooks<a class="heading-anchor" href="#learner-notebooks" aria-label="Link to this section">#</a></h3>
 <ul>

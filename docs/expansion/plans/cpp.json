@@ -1,6 +1,5 @@
 {
   "schema_version": 1,
-  "status": "planned",
   "id": "cpp",
   "title": "C++20: from first program to reliable systems",
   "summary": "42 lessons in modern C++, from first compiled programs to ownership, portable builds, testing, concurrency and performance. Learn how to compile, inspect diagnostics and verify program behavior.",
@@ -581,39 +580,7 @@
     }
   ],
   "pilot": {
-    "lesson_id": "cpp-009",
-    "guide_path": "docs/expansion/samples/cpp-pilot.md",
-    "solution_path": "docs/expansion/samples/cpp-pilot-solutions.md",
-    "language": "cpp",
-    "code": "#include <iostream>\n#include <stdexcept>\n#include <vector>\n\nint main() {\n    std::vector<int> original{4, 7, 9};\n    const auto copy = original;\n    original.at(0) = 5;\n    if (copy.at(0) != 4 || original.at(0) != 5) return 1;\n    std::cout << \"copy=\" << copy.at(0)\n              << \" original=\" << original.at(0) << '\\n';\n    try {\n        (void)original.at(original.size());\n        return 2;\n    } catch (const std::out_of_range&) {\n        std::cout << \"bounds rejected\\n\";\n    }\n}\n",
-    "concept": {
-      "title": "Owning values and borrowed access",
-      "explanation": "A vector owns its elements. Copying it creates independent values; a reference borrows an existing object and does not extend arbitrary element lifetimes. at() checks a boundary and reports out_of_range instead of allowing an unchecked access.",
-      "worked_example": "Copy {4,7,9}, change original.at(0) to 5, then observe copy=4 original=5. Access at(original.size()) must throw std::out_of_range and print bounds rejected."
-    },
-    "prediction": {
-      "prompt": "values is {3,8}; snapshot is a copy, alias is a const reference to values, then values.at(0)=4. What are snapshot.at(0) and alias.at(0)?",
-      "choices": [
-        "3 and 4: the copy is independent and the alias sees the original.",
-        "4 and 4: all vector assignments share storage.",
-        "3 and 3: const prevents any name from changing the original."
-      ],
-      "correct_index": 0,
-      "explanation": "const restricts mutation through alias; it does not freeze the original through other valid names. The vector copy owns separate elements."
-    },
-    "hint_steps": [
-      "Draw two owning vector boxes and one arrow before changing any code.",
-      "Check a signed index before converting it to a vector size; test empty input and index==size.",
-      "Keep an owned value or reacquire an element after a growth operation; never use a possibly invalidated reference to discover whether it dangles."
-    ],
-    "transfer_prompt": "Apply the same ownership/boundary reasoning to a filtered temperature batch whose output must survive later mutation of its input.",
-    "rubric": [
-      "Predict copy/reference behavior correctly before execution.",
-      "Pass14normal/boundary checks without mutating read-only inputs.",
-      "Explain an invalidated-element lifetime and two safe repair strategies.",
-      "Use CMake/CTest with explicit nonzero failures, including Release.",
-      "State which platform/compiler/sanitizer claims remain unverified."
-    ]
+    "lesson_id": "cpp-009"
   },
   "sources": [
     {

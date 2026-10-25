@@ -1,6 +1,5 @@
 {
   "schema_version": 1,
-  "status": "planned",
   "id": "scala-spark",
   "title": "Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products",
   "summary": "42 lessons in Scala and Apache Spark, with Scala and PySpark entry routes. Connect language foundations to DataFrame and SQL contracts, local batch and streaming examples, and capstone projects.",
@@ -813,36 +812,7 @@
     }
   ],
   "pilot": {
-    "lesson_id": "spark-013",
-    "guide_path": "docs/expansion/samples/scala-spark-pilot.md",
-    "solution_path": "docs/expansion/samples/scala-spark-pilot-solutions.md",
-    "language": "scala",
-    "code": "import org.apache.spark.sql.{Row, SparkSession}\nimport org.apache.spark.sql.functions._\nimport org.apache.spark.sql.types._\n\nval schema = StructType(Seq(\n  StructField(\"event_id\", LongType, false),\n  StructField(\"team\", StringType, true),\n  StructField(\"amount_cents\", LongType, true),\n  StructField(\"status\", StringType, false)\n))\nval rows = Seq(\n  Row(1L, \"A\", 100L, \"paid\"), Row(2L, \"A\", null, \"paid\"),\n  Row(3L, \"B\", 0L, \"paid\"), Row(4L, null, 50L, \"paid\"),\n  Row(5L, \"B\", 150L, \"void\"), Row(6L, \"A\", 100L, \"paid\"),\n  Row(7L, \"C\", null, \"paid\")\n)\n// Planned spark-local-scala profile supplies an owned local[2] session named spark.\nval raw = spark.createDataFrame(spark.sparkContext.parallelize(rows, 2), schema)\n// Exercise 1: preserve event identity and filter status.\n// Exercise 2: compare row count, observed-amount count and sum.\n// Exercise 3: group by team and explicitly order NULL keys last.\n// Exercise 4: distinguish missing values, zero and NULL-safe equality.\n// Exercise 5: expose projected-distinct loss and check repartition invariance.\n// Exercise 6: compare Scala, PySpark and SQL with the independent golden fixture.\n",
-    "concept": {
-      "title": "An aggregate is a contract over a bag of identified rows",
-      "explanation": "One event per event_id is the input grain. Repeated team/amount values can represent different events. count(*) counts retained rows, count(amount_cents) counts observed amounts, and sum ignores missing amounts while retaining NULL for an all-missing group. Final ordering is an explicit display contract, independent of partition layout.",
-      "worked_example": "For amounts [10, NULL, 0], row count is 3, observed-amount count is 2 and sum is 10. For [NULL, NULL], sum remains NULL; replacing it with zero adds a business assumption."
-    },
-    "prediction": {
-      "prompt": "After filtering the seven-row fixture to status paid, which (row count, observed amount count, total cents) is correct?",
-      "choices": ["(6, 6, 250)", "(6, 4, 250)", "(5, 4, 150)"],
-      "correct_index": 1,
-      "explanation": "Six events remain. IDs 2 and 7 have missing amounts, so only four amounts are observed. IDs 1 and 6 are distinct events and both contribute 100 cents."
-    },
-    "hint_steps": [
-      "Track event IDs before comparing values. Repeated team/amount pairs do not imply duplicate delivery.",
-      "Compare count of a non-null literal with count of amount_cents, then inspect the all-missing team C group before coalescing anything.",
-      "Build a canonical result with team ascending and NULL keys last; compare it with a hand-written golden list after repartitioning. Check whether a projection removed event identity before distinct."
-    ],
-    "transfer_prompt": "Replace team C with two missing-amount events and add a paid team D event worth 25 cents. Predict new row/observed/sum metrics and group rows before running either API; explain why a zero-fill report is a separate business rule.",
-    "rubric": [
-      "Preserves one-event grain and the exact paid ID set",
-      "Separately verifies row count, observed count and sum",
-      "Preserves the distinction among NULL amount, zero amount and NULL team",
-      "Uses NULL predicates and NULL-safe equality intentionally",
-      "Exposes projected-distinct loss and verifies partition-invariant content",
-      "Compares Scala, PySpark and SQL against an independent ordered golden fixture"
-    ]
+    "lesson_id": "spark-013"
   },
   "sources": [
     {

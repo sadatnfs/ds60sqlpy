@@ -56,7 +56,7 @@ def write_all(only=None, guides_only=False):
             runtime = (
                 "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
                 if reading
-                else f"Open the Docker classroom, choose **Journeys**, and select `{id}`. Start its `{p['runtime']}` worker using the [Docker classroom instructions](../../../docs/docker-classroom.md), then edit the saved coding pad and choose **Run**. The worker supplies the declared packages and runs a fresh Python process; you do not need Python or a framework installed on the host. Save your current attempt before replacing the pad with a complete worked example. These examples use literal local data and bounded operations, with no downloads or online model calls. For optional native study, use the repository's [native setup guide](../../../docs/setup/first-success.md) and the same declared dependencies. Keep editable copies under ignored `.learning/expansion/{id}/` so the checked-in worksheet remains available."
+                else f"Start or resume the Docker classroom with `./classroom` from the repository root. On Windows, run that command in WSL 2. In the shared home, choose the **{plan['title']}** subject and select `{id}`. Use its `{p['runtime']}` worker and wait for readiness before choosing **Run**; the [classroom instructions](../../../docs/one-command-classroom.md) explain how to prepare a missing profile. The worker supplies the declared packages and starts a fresh Python process, so no host Python or framework installation is needed. Save your current attempt before replacing the pad with a complete worked example. Keep the example sequence specified below together. Inputs are small local fixtures, with no package installation, dataset or model download, or online service call. For an optional contributor workflow on Linux, macOS or Windows through WSL 2, deliberately prepare an interpreter with the same declared dependencies, then invoke that interpreter on an owned copy of `{learner}` under `.learning/expansion/{id}/`. The general contributor uv environment does not imply that TensorFlow or PyTorch is installed. The Docker profile is the default execution route."
             )
             study_method = (
                 "Read both worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it."
@@ -131,7 +131,7 @@ Revisit the direct prerequisite {prereq} if the calculation cannot be reconstruc
 
 ## Sources and verification status
 
-API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/ml-content-status.md`; authored content does not imply that a heavy runtime was executed.
+API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Ask an AI tutor about this lesson
 

@@ -5,7 +5,7 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 This 36-lesson journey connects arrays, derivatives and exact scalar updates to
@@ -15,7 +15,7 @@ recovery, inference export and evidence-based model release. Start with
 explains the mechanism, gives concrete examples and six practice contracts,
 and helps diagnose plausible wrong answers.
 
-Use the browser's **Journeys** page with the `python-core` worker for NumPy
+Use the browser's **All learning paths** directory with the `python-core` worker for NumPy
 foundations and `tensorflow-cpu` for framework lessons. The
 [Docker classroom guide](../../docs/docker-classroom.md) explains how to build
 and start each profile. The host needs no Python or TensorFlow installation.
@@ -76,17 +76,16 @@ connects the attention lessons to a complete small language-model forward pass.
 | [tf-035: Comparing models with uncertainty](guides/tf-035.md) | Advanced | `python-core` |
 | [tf-036: Capstone: release a small, reproducible model](guides/tf-036.md) | Advanced | `tensorflow-cpu` |
 
-## Validation and limits
+## GPU continuation and evidence limits
 
-All runnable reference programs have successful local Linux arm64 Docker
-receipts for their current source bytes. The
-[implementation checkpoint](../../docs/implementation/CHECKPOINT.md) records
-runtime, test and platform acceptance separately. Reading lessons use reasoning
-and written evidence. Windows/WSL2 and amd64 configuration support does not by
-itself establish an observed run on those systems.
+Continue with [CUDA and GPU computing](../cuda/README.md) for explicit GPU
+placement, memory transfer, synchronization, mixed precision and performance
+measurement. The ordinary TensorFlow course remains CPU-accessible. Its tiny
+fixtures teach arithmetic, API behavior and process boundaries; they do not
+establish generalization, accelerator speed or distributed-training performance.
 
-All 36 guides received a substantive mechanism review; see the
-[TensorFlow review ledger](../../docs/implementation/tensorflow-depth-review.md).
-The small fixtures demonstrate arithmetic, API behavior and process boundaries.
-They do not establish generalization, accelerator speed or distributed-training
-performance. A failed capstone gate is a useful result to explain and repair.
+The [implementation checkpoint](../../docs/implementation/CHECKPOINT.md)
+explains current architecture and qualification boundaries. Reading worksheets,
+executed CPU references, real GPU measurements and platform-specific acceptance
+are separate evidence. A failed capstone gate is a useful result to explain
+and repair rather than a reason to conceal the failure.

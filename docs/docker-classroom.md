@@ -1,444 +1,358 @@
-# Docker-only classroom
+# Docker classroom operations
 
-> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
-> the engineering bridge and every module/book subject share one home and
-> individually themed workspaces. Choose any path and set your own pace.
-> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
-> saved work and compatibility bookmarks.
+Use `./classroom` as the shared entrypoint on Linux, macOS and Windows WSL 2.
+It prepares or resumes one project, waits for readiness and opens the unified
+browser classroom. For a first installation, use the
+[beginner guide](docker-beginners.md). This reference explains deliberate builds,
+profiles, persistence and backup without a second application launcher.
 
+## 1. Check the engine
 
-The primary workflow is one command from the course folder:
+From the repository or extracted starter folder:
 
-```sh
-./classroom
-```
-
-It resumes the same project's remembered worker selection, reuses local images,
-starts existing containers and opens the browser after actual readiness checks.
-Only missing images are built. A new project selects all sixteen ordinary
-workers; `--starter` selects Python Core. Use `./classroom resume` for strict
-no-build startup, or `./classroom --rebuild` to install source updates. The
-launcher selects available loopback host ports on first startup. Windows uses the
-same launcher through WSL 2. The thin Windows/Mac launchers delegate to it.
-See [the beginner one-command guide](one-command-classroom.md) for engine/WSL
-setup, a smaller starter, persistence, fixed ports and recovery.
-
-The remainder of this page is the **manual Compose reference**. Direct Docker
-commands remain available without the Bash wrapper. Use a local Linux-container
-engine and Docker Compose 2.28.0 or newer. Its fixed default ports may differ
-from the automatic host ports selected by `./classroom`; use the launcher's
-printed URL or `./classroom status` for its actual address.
-
-## 1. Check the engine and configuration
-
-```text
+```bash
+docker info --format '{{.OSType}}'
 docker compose version
-docker info --format "{{.OSType}}"
-docker compose -f compose.classroom.yaml config --quiet
+./classroom doctor
 ```
 
-The engine type must be `linux`; the configuration check should finish without
-an error. Select your local engine rather than a remote Docker context.
-An unknown `!reset` tag means Compose needs updating. A plain YAML validator
-does not understand every Compose tag.
+The engine must provide Linux containers and Compose **2.28.0 or newer**.
+Rancher Desktop must use Moby for Docker API compatibility. Use a local engine;
+the loopback addresses and automatic browser opening assume the engine runs on
+your computer. An unknown `!reset` tag usually indicates an older Compose.
 
-## 2. Build the starter, with visible logs
+## 2. Build with visible logs
 
-First preparation needs internet and several gigabytes of free disk. Heavy
-framework and Spark images need additional space. Build one image at a time
-and keep the terminal open until each command succeeds:
+For a small first session:
 
-```text
-docker compose -f compose.classroom.yaml pull postgres
-docker compose -f compose.classroom.yaml --parallel 1 --progress plain build lab
-docker compose -f compose.classroom.yaml --profile python-core --parallel 1 --progress plain build python-core-worker
+```bash
+./classroom --starter
 ```
 
-Build the lab first; its Python worker reuses that base. These foreground
-builds show download and package-install output; they do not publish images.
-Later starts reuse the prepared local images.
+For all sixteen ordinary workers:
 
-### If the image registry cannot be reached
-
-An `x509: certificate signed by unknown authority` error during image metadata
-or layer download is a connection/certificate problem before the lesson code
-runs. Use your organization's approved engine certificate/proxy configuration.
-Keep TLS verification enabled.
-
-The repository also includes an explicit, public
-[build-only mirror configuration](../docker/registry-mirrors.env.txt).
-It selects [Google's Docker Hub mirror](https://cloud.google.com/artifact-registry/docs/pull-cached-dockerhub-images)
-for the compiler/JVM/Node/Spark bases and
-[Astral's pinned Python image](https://docs.astral.sh/uv/guides/integration/docker/)
-on GitHub Container Registry for the Python base. It does not contain credentials, modify the engine, or publish images.
-Use the mirror configuration only when it fits your network and trust policy.
-Registry availability is separate from whether a built lesson runtime works.
-
-To build every ordinary profile with that configuration and visible logs, run
-this single line from the extracted course folder on any OS:
-
-```text
-docker compose --env-file docker/registry-mirrors.env.txt --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
+```bash
+./classroom --all
 ```
 
-Use this file for the **build** command only. An explicit `--env-file` replaces
-Compose's automatic `.env` loading, so use the normal start command below to
-retain your local port/storage settings. If you intentionally need both local
-build overrides and these mirrors, put `--env-file .env` before the mirror
-file, provided that `.env` exists. Shell environment values still take
-precedence. A mirror may not cache every upstream image; an unavailable image
-remains a build failure to resolve, not a reason to bypass certificate checks.
+These commands build missing local images and then start services. To build
+without starting, use `./classroom build --all --local-build`. To deliberately
+install updated local source and start it:
 
-## 3. Start and practice
-
-```text
-docker compose -f compose.classroom.yaml --profile python-core up -d --no-build --pull never --wait lab python-core-worker
-docker compose -f compose.classroom.yaml --profile "*" ps
+```bash
+./classroom --all --local-build --rebuild
 ```
 
-Wait for readiness, then open [the unified classroom](http://127.0.0.1:8765/classroom)
-yourself. Python, SQL and every subject share that entrypoint. No website
-account is needed. The initializer prepares private worker
-credentials and writable learner storage inside Docker volumes.
+Build output stays visible in the terminal. No command here pushes an image.
+The ordinary selection excludes optional NVIDIA GPU and owned Kubernetes
+capabilities. Avoid replacing it with Compose's wildcard profile selector,
+which can select additional capabilities.
 
-Start with a reading lesson or a `python-core` lesson such as `llm-002`.
-Read the guide, predict the result, edit and save your source, then choose Run.
-Save your explanation as well as your code. A successful example run does not
-complete the six exercises or establish mastery. Planned lessons remain planned.
+The launcher remembers local-build or Hub mode. In Hub mode, `--rebuild`
+refreshes published images rather than compiling local source. Use
+`--local-build` when the intended input is your checkout. Hub pulls require a
+publisher's actual namespace, tag and matching architecture; see
+[Docker Hub](dockerhub.md). TLS verification remains enabled for registry
+requests. Fix trusted certificate/proxy configuration or choose an approved
+registry option rather than disabling verification.
 
-If a runtime is unavailable, prepare that profile before running its lesson:
+## 3. Select runtimes and practice
 
-| Profile | Service to build/start | Used for |
-| --- | --- | --- |
-| `python-core` | `python-core-worker` | NumPy, pandas, statistics, NLP, LLM foundations |
-| `cpp20` | `cpp-worker` | C++20 compilation |
-| `c17` | `c-worker` | C17 compilation and bounded execution |
-| `go` | `go-worker` | Prepared standard-library compile/link/run |
-| `csharp-dotnet` | `csharp-worker` | C# through the immutable offline .NET project |
-| `rust-stable` | `rust-worker` | Rust 2024 edition and prepared Arrow dependency |
-| `swift-linux` | `swift-worker` | Swift 6 Linux/Foundation, with Apple SDK projects separate |
-| `tensorflow-cpu` | `tensorflow-worker` | Actual TensorFlow tensors and gradient updates |
-| `scala-jvm` | `scala-worker` | Standalone Scala/JVM |
-| `spark-local-scala` | `spark-scala-worker` | Local Spark using Scala |
-| `spark-local-python` | `spark-python-worker` | Local Spark using Python |
-| `llm-torch-cpu` | `llm-worker` | PyTorch and tensor-based LLM lessons |
-| `java21` | `java-worker` | Java 21 compilation and the prepared H2 teaching database |
-| `javascript-node` | `javascript-worker` | Node24 JavaScript ES modules |
-| `typescript-node` | `typescript-worker` | Strict TypeScript5.9 compilation and Node24 execution |
+`--starter` selects Python Core. `--all` selects the ordinary workers.
+`--profile NAME` selects Python Core plus the explicitly named profiles and
+replaces the remembered selection; repeat the option to add several:
 
-For example, add C++ after the starter:
-
-```text
-docker compose -f compose.classroom.yaml --profile cpp20 --parallel 1 --progress plain build cpp-worker
-docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 up -d --no-build --pull never --wait lab python-core-worker cpp-worker
+```bash
+./classroom --profile cpp20 --profile php-cli
 ```
 
-Use the matching profile and service names for another subject. Build selected
-workers sequentially and start only those you need. The NumPy LLM foundations
-need no pretrained model. The PyTorch route uses `llm-torch-cpu`, and its small
-teaching models train locally on CPU. Optional pretrained-model experiments
-have a separate explicit download and preparation guide.
+The website and PostgreSQL service are included. HTML/CSS and browser
+JavaScript/D3 run in the isolated browser preview, so `html-browser` and
+`javascript-browser` are not launcher worker flags. See
+[all runtime profiles](docker-profiles.md) for the actual worker names,
+source-file contracts and external-project boundaries.
 
-To build every ordinary worker locally with visible logs, use:
+Open the URL printed by the launcher. Read capability notices before running:
+not every lesson artifact is a single-file program, and a Python worker is not
+a substitute for a missing framework, cluster or GPU. The
+[classroom guide](classroom-experience.md) explains reading, code, notes,
+manual runs and live preview. The service is for a trusted local learner,
+not a public multi-user code execution service.
 
-```text
-docker compose --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
+## 4. Pause, resume and keep state
+
+```bash
+./classroom stop
+./classroom resume
+./classroom status
 ```
 
-This builds all ordinary language/framework images; it does not start them or
-push them to a registry. Building everything uses substantially more disk than
-the starter. Select the profiles you want for `up` so unused frameworks do not
-consume memory. Kubernetes cluster preparation remains a separate operation.
+`resume` never builds or pulls. It restarts retained containers and recreates
+missing ones only from existing local images. Keep the same project name on
+every command, for example `./classroom resume --project my-classroom`.
+The default is `ds60-classroom`. The browser port can change during recovery;
+use the current printed URL. See [fixed ports](one-command-classroom.md) if a
+stable address is needed.
 
-## 4. Pause, return, and keep your work
-
-```text
-docker compose -f compose.classroom.yaml --profile "*" stop
-```
-
-For the shared launcher, return with `./classroom` or the strict no-build
-`./classroom resume`. Its `.classroom/<project>/selection.env` remembers selected
-profiles and registry mode. Supply the same `--project NAME` if you used one.
-Existing containers are reused. If Docker reassigns the automatic browser port
-while restarting PostgreSQL, only the app is recreated from its existing image
-to accept the new exact address. The database and workers retain their IDs, and
-there is no image build or pull. Missing containers can also be recreated from
-local images while retaining their volumes. Fixed `--port` and `--database-port`
-settings give a stable address and let all existing IDs survive later unchanged
-resumes; apply changed port settings deliberately with `--rebuild`.
-
-For the manual Compose route shown above, start the same engine, open the same
-course folder, and repeat your Step 3 `up` command with the same profiles.
-Direct Compose does not read the launcher's saved selection or automatically
-recover its port choices. Use one route consistently, or carry the exact project,
-profiles and ports across deliberately. Replacing app containers preserves
-the named volumes. The default project is **`ds60-classroom`**:
-
-| Docker volume | What it keeps |
+| Storage | Purpose |
 | --- | --- |
-| `ds60-classroom_classroom-learning` | Pads, module drafts, notes, saved results, history, progress and caches |
-| `ds60-classroom_postgres-data` | PostgreSQL tables |
-| `ds60-classroom_classroom-runtime` | Private worker credential, excluded from learning exports |
+| `.classroom/<project>/selection.env` | Remembered worker selection and registry settings |
+| `.classroom/<project>/ports.env` | Saved port settings |
+| `.classroom/<project>/images.env` | Local-build or published-image selection |
+| `<project>_classroom-learning` Docker volume | Saved source, notes, progress, results and caches |
+| `<project>_postgres-data` Docker volume | PostgreSQL database files |
+| `<project>_classroom-runtime` Docker volume | Private runtime credentials; exclude from learner exports |
 
-This is machine-local Docker storage, usually inside the engine's Linux VM.
-It is **not** the visible `.learning` folder beside your checkout. The older
-host-folder launchers keep using their own storage; switching routes does not
-copy or merge either learning work or databases. Keep the same Docker project
-to resume the same classroom. A different project name selects different volumes.
-
-Use `stop` for ordinary pauses. **Do not use `down -v` or remove these volumes
-to troubleshoot:** that can delete saved work and database data. Engine removal
-or a factory reset can also remove volumes. Export before moving machines.
+Docker volumes are normally inside the engine's Linux VM or storage area.
+They are not the host checkout's `.learning/` folder. A different engine,
+context or project can show a different classroom. Replacing containers keeps
+named volumes; deleting volumes or factory-resetting the engine can remove
+saved work. Use `stop`, not `down -v`, for an ordinary pause.
 
 ## 5. Export learning work and the database
 
-Choose unused host filenames for every backup. The date below is just an example;
-change it for a new backup. Save all drafts and let active Runs finish first.
-With PostgreSQL still running, create and copy its ordinary dump file:
+A complete backup has two independent parts: the learning-volume archive holds
+saved source, notes, progress and run records; a PostgreSQL logical dump holds
+the course database. Neither contains the other. Save your drafts, wait for
+active runs to finish and close other tools that can change this database.
+This procedure stops the app while taking the dump, then stops the classroom
+while archiving learning files, and finally resumes the same project.
 
-```text
-docker compose -f compose.classroom.yaml exec -T postgres pg_dump -U ds60_admin -d advanced_sql_training -Fc -f /tmp/classroom-database.dump
-docker compose -f compose.classroom.yaml cp postgres:/tmp/classroom-database.dump ./classroom-database-20261022.dump
-docker compose -f compose.classroom.yaml --profile "*" stop
+Run the following complete block from the course folder in **Bash**, including
+Terminal on macOS/Linux or Ubuntu on Windows WSL 2. Change `study_project` if
+you use a custom project. The project must already be running. The block creates
+a new private backup directory under Documents, creating that parent if needed.
+Its parentheses keep `set -eu` local to the procedure: a failed command stops
+this backup instead of continuing to later steps.
+
+```bash
+(
+set -eu
+study_project=ds60-classroom
+mkdir -p "$HOME/Documents"
+backup_dir="$HOME/Documents/DS60-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -m 700 "$backup_dir"
+compose=(docker compose --project-name "$study_project" -f compose.classroom.yaml)
+db_container=$("${compose[@]}" ps -q postgres)
+app_container=$("${compose[@]}" ps -q lab)
+[ -n "$db_container" ] && [ -n "$app_container" ]
+backup_image=$(docker inspect --format '{{.Image}}' "$db_container")
+app_image=$(docker inspect --format '{{.Image}}' "$app_container")
+learning_volume="${study_project}_classroom-learning"
+docker volume inspect "$learning_volume" --format '{{.Name}}'
+"${compose[@]}" stop lab
+"${compose[@]}" exec -T postgres pg_dump -U ds60_admin -d advanced_sql_training -Fc -f /tmp/classroom-database.dump
+"${compose[@]}" cp postgres:/tmp/classroom-database.dump "$backup_dir/classroom-database.dump"
+./classroom stop --project "$study_project"
+backup_helper="${study_project}-backup-$(date +%Y%m%d-%H%M%S)"
+docker create --name "$backup_helper" --pull never --network none --mount "type=volume,source=$learning_volume,target=/learning,readonly" --entrypoint tar "$backup_image" -czf /tmp/classroom-learning.tar.gz -C /learning .
+docker start -a "$backup_helper"
+[ "$(docker inspect --format '{{.State.ExitCode}}' "$backup_helper")" = 0 ]
+docker cp "$backup_helper:/tmp/classroom-learning.tar.gz" "$backup_dir/classroom-learning.tar.gz"
+docker run --rm -i --pull never --network none --read-only --mount "type=bind,source=$backup_dir,target=/backup,readonly" --entrypoint python "$app_image" - <<'PY' > "$backup_dir/SHA256SUMS"
+from hashlib import file_digest
+from pathlib import Path
+for name in ("classroom-learning.tar.gz", "classroom-database.dump"):
+    path = Path("/backup") / name
+    if path.stat().st_size == 0:
+        raise SystemExit("Refusing an empty backup file")
+    with path.open("rb") as stream:
+        print(f"{file_digest(stream, 'sha256').hexdigest()}  {name}")
+PY
+printf 'Source project: %s\nApp image: %s\nPostgreSQL image: %s\n' "$study_project" "$app_image" "$backup_image" > "$backup_dir/backup-info.txt"
+tar -tzf "$backup_dir/classroom-learning.tar.gz" > "$backup_dir/archive-files.txt"
+docker rm "$backup_helper"
+./classroom resume --project "$study_project" --no-browser
+printf 'Export complete: %s\n' "$backup_dir"
+)
 ```
 
-Now archive only the learning volume through a temporary container. Verify the
-volume name first. If it is missing, stop and check the project name rather
-than creating an empty replacement. The helper name must also be unused:
+Read the printed export path. Inspect `archive-files.txt` for expected saved
+work and check that both backup files are nonempty. Keep the entire directory,
+including `SHA256SUMS` and `backup-info.txt`. Store a second copy somewhere that
+will survive an engine reset or loss of this computer. Backup files may contain
+your personal notes, code and database records; keep them private.
 
-```text
-docker volume inspect ds60-classroom_classroom-learning --format "{{.Name}}"
-docker create --name ds60-classroom-backup --network none --mount type=volume,source=ds60-classroom_classroom-learning,target=/learning,readonly --entrypoint tar postgres:17 -czf /tmp/classroom-learning.tar.gz -C /learning .
-docker start -a ds60-classroom-backup
-docker inspect --format "{{.State.ExitCode}}" ds60-classroom-backup
-docker cp ds60-classroom-backup:/tmp/classroom-learning.tar.gz ./classroom-learning-20261022.tar.gz
+The helpers use already installed image IDs, never pull images, and mount the
+source learning volume read-only. The private `classroom-runtime` credential
+volume is neither mounted nor exported. Checksums detect changed backup bytes;
+they do not authenticate an archive from someone else. Use backups you created
+and trust. A source ZIP, image archive or `.classroom/` settings folder is not
+a substitute for this backup.
+
+If a command fails, inspect its first error and retain the partial backup for
+diagnosis. The source volumes remain in place. The app may remain stopped;
+after addressing the failure, use `./classroom resume --project YOUR_PROJECT`
+to return to it. Do not delete source volumes merely because an export failed.
+The automatically named helper, if still present, is the only container this
+procedure creates outside the source project; remove that exact helper only
+once you have inspected the outcome.
+
+This recipe assumes the standard classroom PostgreSQL role `ds60_admin`,
+learning UID/GID `1000:1000` and PostgreSQL 17. A logical database dump does not
+include cluster-wide role definitions. If you deliberately introduced custom
+roles, ownership or external tablespaces, review those dependencies separately
+before restoring; do not conceal ownership failures with a blanket role change.
+Record the source course release and retain matching source files as well.
+
+### Restore into a new project
+
+Transfer the complete backup directory to the destination computer. Prepare
+Docker and the matching course source and local starter images **before** this
+procedure. Images must support the destination CPU architecture. Begin with the
+same course release as the backup; upgrade the restored installation separately
+after verifying it. The example tag below is this source release. Change it if
+your backup was made with another release. Do not reuse a previous classroom's
+project name.
+
+The procedure below restores only into a new project. It refuses existing
+launcher settings, project containers, networks and volumes, and checks the
+three standard volume names even if their Compose labels are absent. It also
+refuses a nonempty learning volume, bad checksums, traversal paths, archive
+links and special files. Standard classroom files are restored as the classroom
+user, with private permissions and any owner executable bit preserved. A
+backup containing intentional links requires separate review rather than
+silently following them.
+
+Edit `backup_dir` to the actual absolute backup path. The generated
+`restore_project` must be unused. Run the **entire** block from the course
+folder in Bash; do not skip the destination checks and run only `pg_restore`.
+It uses existing local images and strict `resume`, so missing image preparation
+causes a failure instead of an unexpected build or download.
+
+```bash
+(
+set -eu
+backup_dir="$HOME/Documents/REPLACE_WITH_YOUR_BACKUP_FOLDER"
+restore_project="ds60-restored-$(date +%Y%m%d-%H%M%S)"
+restore_tag=0.4.1
+[[ "$restore_project" =~ ^[a-z0-9][a-z0-9_-]*$ ]]
+docker info --format '{{.OSType}}'
+[ -d "$backup_dir" ]
+if [ -e ".classroom/$restore_project" ]; then
+  echo "Refusing existing destination settings: $restore_project" >&2
+  exit 1
+fi
+existing_containers=$(docker ps -aq --filter "label=com.docker.compose.project=$restore_project")
+existing_networks=$(docker network ls -q --filter "label=com.docker.compose.project=$restore_project")
+existing_volumes=$(docker volume ls -q --filter "label=com.docker.compose.project=$restore_project")
+if [ -n "$existing_containers$existing_networks$existing_volumes" ]; then
+  echo "Refusing existing destination Docker resources: $restore_project" >&2
+  exit 1
+fi
+for suffix in classroom-learning postgres-data classroom-runtime; do
+  if docker volume inspect "${restore_project}_${suffix}" >/dev/null 2>&1; then
+    echo "Refusing an existing destination volume: ${restore_project}_${suffix}" >&2
+    exit 1
+  fi
+done
+app_image=$(docker image inspect "ds60sqlpy-lab:$restore_tag" --format '{{.Id}}')
+restore_volume="${restore_project}_classroom-learning"
+docker volume create --label "com.docker.compose.project=$restore_project" --label com.docker.compose.volume=classroom-learning "$restore_volume"
+docker run --rm -i --pull never --network none --read-only --user 0:0 --cap-drop ALL --cap-add CHOWN --cap-add DAC_OVERRIDE --cap-add FOWNER --security-opt no-new-privileges --mount "type=bind,source=$backup_dir,target=/backup,readonly" --mount "type=volume,source=$restore_volume,target=/restore,volume-nocopy" --entrypoint python "$app_image" - <<'PY'
+import os
+import tarfile
+from hashlib import file_digest
+from pathlib import Path, PurePosixPath
+
+backup = Path('/backup')
+destination = Path('/restore')
+if any(destination.iterdir()):
+    raise SystemExit('Refusing a nonempty destination learning volume')
+expected = {}
+for line in (backup / 'SHA256SUMS').read_text().splitlines():
+    digest, name = line.split('  ', 1)
+    if name in expected:
+        raise SystemExit('Duplicate backup checksum entry')
+    expected[name] = digest
+if set(expected) != {'classroom-learning.tar.gz', 'classroom-database.dump'}:
+    raise SystemExit('Unexpected backup checksum inventory')
+for name, digest in expected.items():
+    with (backup / name).open('rb') as stream:
+        if file_digest(stream, 'sha256').hexdigest() != digest:
+            raise SystemExit('Backup checksum mismatch: ' + name)
+with tarfile.open(backup / 'classroom-learning.tar.gz', 'r:gz') as archive:
+    members = archive.getmembers()
+    names = set()
+    for member in members:
+        path = PurePosixPath(member.name)
+        if path.is_absolute() or '..' in path.parts or '\\' in member.name:
+            raise SystemExit('Unsafe archive member path')
+        if not (member.isfile() or member.isdir()):
+            raise SystemExit('Archive links and special files require separate review')
+        normalized = str(path)
+        if normalized in names:
+            raise SystemExit('Duplicate archive member path')
+        names.add(normalized)
+    archive.extractall(destination, members=members, filter='data')
+for path in (destination, *destination.rglob('*')):
+    os.chown(path, 1000, 1000, follow_symlinks=False)
+    path.chmod(0o700 if path.is_dir() else 0o600 | (path.stat().st_mode & 0o100))
+print('Checksums verified; learner files restored to the empty destination')
+PY
+./classroom resume --starter --project "$restore_project" --tag "$restore_tag" --local-build --no-browser
+restore_compose=(docker compose --project-name "$restore_project" -f compose.classroom.yaml)
+"${restore_compose[@]}" stop lab
+"${restore_compose[@]}" cp "$backup_dir/classroom-database.dump" postgres:/tmp/classroom-database.dump
+"${restore_compose[@]}" exec -T postgres pg_restore -U ds60_admin -d advanced_sql_training --clean --if-exists --exit-on-error /tmp/classroom-database.dump
+./classroom resume --project "$restore_project" --no-browser
+printf 'Restored into new project: %s\n' "$restore_project"
+)
 ```
 
-The exit-code check must print `0` before copying. Check the copied archive
-in your normal file manager or archive utility.
-It should contain the saved learning files you used, including `modules/` for
-module drafts. Keep both the learning archive and database dump in your backup
-location. After the copy succeeds, remove **only** the temporary helper:
+The `--clean --if-exists` flags replace database objects **inside that newly
+created destination database** with the dump's definitions and data. The
+original classroom and backup files are not modified. The normal initializer
+creates a new private worker credential for the destination; no source token is
+copied. Only the starter worker is enabled initially. Every saved subject and
+variant remains in the learning archive; add other runtime profiles when needed.
 
-```text
-docker rm ds60-classroom-backup
+If restoration fails after creating the destination, keep that destination for
+inspection and retain the original backup. The same block will refuse to reuse
+it. Diagnose the error, then choose another unused project for a clean retry;
+do not remove a preflight guard to overwrite a partially restored classroom.
+There is no automatic merge of two learners' histories or databases.
+
+### Verify before retiring the source
+
+Run `./classroom status --project YOUR_RESTORED_PROJECT`, open its printed URL
+and check all of the following:
+
+1. Open several familiar lessons and variants. Compare their exact source,
+   predictions and notes with your backup, and save a small new note to confirm
+   that the restored storage is writable.
+2. Open an original saved run and inspect its recorded source and output without
+   rerunning it. A preserved receipt remains evidence about its original runtime,
+   not a new execution on this computer.
+3. Query a known table or row from the original PostgreSQL database. An empty
+   training schema can be correct if that was the backed-up state; do not reset
+   the database to make a restore appear successful.
+4. Stop and resume the restored project. Recheck the same saved work and SQL
+   state. For a deliberate recovery drill, containers may be replaced while
+   retaining these new named volumes, then checked again.
+5. Keep the original backup and source project until those checks pass. Compile
+   and run new attempts using the destination's prepared workers; old compiled
+   artifacts or framework caches are not proof of portability to a new CPU/GPU.
+
+On the restored project, continue using its explicit `--project` name for
+start, stop, status and future backups. Restoring data does not make the default
+`ds60-classroom` project point to it. For a small amount of work, manually copying
+selected source and notes into a fresh browser pad is also possible, but that
+does not transfer full history or database state.
+
+## Diagnostics and direct Compose
+
+Prefer `./classroom status`, `./classroom logs` and `./classroom doctor` for
+normal diagnosis. When using Compose directly, carry the exact project name,
+file and selected profiles. Compose does not automatically read the launcher's
+remembered selection or port choices.
+
+```bash
+docker compose --project-name ds60-classroom -f compose.classroom.yaml logs --tail 100 lab postgres classroom-init
 ```
 
-The source volume was read-only; private runtime credentials were not mounted
-or exported. These commands avoid binary shell redirection and work without
-a host Python installation. The database dump and learning archive protect
-different data; neither replaces the other.
-
-To transfer, copy both exports to the new machine and retain the originals.
-An archive utility lets you inspect the exported source and notes. For a few
-exercises, copy that source into a fresh workspace and Save; this does not move
-its full history or database. The optional [host-folder route](docker-beginners.md#keep-the-same-learning-folder-across-a-future-checkout)
-has a different storage contract. Full database/volume restoration needs a
-deliberate target and ownership checks; the export commands here do not import,
-merge, or overwrite another classroom.
-
-If you chose another Compose project, substitute its actual learning-volume
-name and keep that project consistent throughout. Never include the private
-`classroom-runtime` volume or a Kubernetes session in a learning backup.
-
-## Troubleshooting and optional Kubernetes
-
-Inspect startup without deleting data:
-
-```text
-docker compose -f compose.classroom.yaml --profile "*" ps -a
-docker compose -f compose.classroom.yaml logs --tail 100 lab classroom-init postgres
-```
-
-If a port is already occupied, choose unused ports for this classroom. Create
-or edit the plain-text `.env` file beside `compose.classroom.yaml`, preserving
-any settings already present, and add these two lines:
-
-```dotenv
-DS60_LAB_PORT=8766
-DS60_POSTGRES_PORT=55433
-```
-
-Then repeat the same `up` command and open <http://127.0.0.1:8766/classroom>.
-These numbers are examples; choose other unused ports if necessary. The
-PostgreSQL container publishes both the database and classroom ports because
-they share a network namespace. An older course database can therefore hold
-port8765 even when its web app is stopped. Keeping the same Compose project
-and volume names preserves this classroom's work when changing its ports.
-
-A worker health failure needs its service log, for example
-`docker compose -f compose.classroom.yaml logs --tail 100 cpp-worker`.
-
-Kubernetes remains an extra [owned host-preparation workflow](modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab)
-with an expiring scoped lease. It is not created by these commands. No engine
-socket is mounted into the ordinary app or its language workers. The optional
-PowerShell/Bash launchers remain available for the existing host-folder route.
-
-Command semantics checked against Docker's official [Compose profiles](https://docs.docker.com/compose/how-tos/profiles/),
-[volume storage](https://docs.docker.com/engine/storage/volumes/) and
-[file-copy reference](https://docs.docker.com/reference/cli/docker/container/cp/),
-plus the [Compose merge requirements](https://docs.docker.com/reference/compose-file/merge/)
-on 22 October 2026. Runtime qualification is recorded in the
-[implementation checkpoint](implementation/CHECKPOINT.md).
-
-
-## Java, JavaScript and TypeScript workers
-
-These profiles use the same local progress volume as the other journeys. You
-need Docker with Linux containers and Compose; no host Java, Node, TypeScript
-or Python installation is needed. On Windows, use your engine's WSL 2 backend.
-Run these single-line commands from the repository folder in PowerShell,
-Command Prompt or a macOS/Linux terminal.
-
-Build the classroom and the three language profiles, showing every build step:
-
-```console
-docker compose --progress plain -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node --parallel 1 build
-```
-
-On a fresh engine, download the database image once, then start the classroom:
-
-```console
-docker compose -f compose.classroom.yaml pull postgres
-docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node up -d --no-build --pull never --wait
-```
-
-Open <http://localhost:8765/classroom>. Compose itself cannot open a host browser;
-the shared and double-click launchers open it for the project's saved selection.
-You can add the `--profile python-core` flag to both commands above to run
-statistics and LLM examples alongside the language tracks. The `--wait` flag
-checks actual worker startup probes. Read the last error if a service fails to
-become healthy; do not repeatedly delete volumes to diagnose a build.
-
-Java uses a prepared Java 21 compiler, saves the pad as `Main.java`, compiles to
-`classes/`, and runs `Main` with assertions enabled. Keep `public class Main`
-and omit a package declaration in this single-file pad. JavaScript uses Node24
-ES modules saved as `main.mjs`. TypeScript uses `main.mts`, strict TypeScript5.9
-checking and NodeNext module rules, then runs the emitted `compiled/main.mjs`.
-Compilation errors prevent execution. The pad's **How this code runs** panel
-explains the filename and lets you download the current source.
-
-Node is a JavaScript host with filesystem and server APIs. Browser `document`
-and `window` are different APIs. Browser DOM chapters disclose their separate
-browser workflow and are not executed as if those APIs existed in Node.
-External Java libraries and npm packages are not implicitly installed by a pad.
-Runtime files are temporary; the saved source, notes and job receipts persist.
-
-View running logs or stop the classroom while retaining progress:
-
-```console
-docker compose -f compose.classroom.yaml logs --follow lab java-worker javascript-worker typescript-worker
-docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node stop
-```
-
-Press Ctrl+C to leave the log view. Stopping containers retains local named
-volumes. Do not use `down -v` unless you deliberately intend to erase their data.
-
-### Reproducible language toolchain inputs
-
-The Node and Java image recipes pin multi-architecture upstream manifest
-digests. The TypeScript toolchain uses a checked-in npm lock with integrity
-hashes for TypeScript5.9.3, Node24 types and their undici-types dependency.
-The lock uses the TLS-verified Yarn registry mirror for the same upstream
-package bytes. npm lifecycle scripts are disabled during installation. Network
-access is needed while building; examples run offline after those images exist.
-Java and Node run in separate private workers with the same bounded output,
-scratch, deadline and cancellation rules as the other language profiles.
-
-
-## NLP, fine-tuning and RAG classroom
-
-Most NLP, retrieval, evaluation and statistics examples use `python-core`.
-The small neural training, LoRA, preference and embedding-adaptation examples
-use the CPU `llm-torch-cpu` profile. Build them with visible logs:
-
-```console
-docker compose --progress plain -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu --parallel 1 build
-```
-
-After the initial database-image preparation above, start both profiles:
-
-```console
-docker compose -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu up -d --no-build --pull never --wait
-```
-
-These default examples use small authored data, no paid API and no model-weight
-download. They expose mechanisms on CPU, with explicit limits on what tiny
-models demonstrate. The applied course's optional pretrained-model chapter
-has a separate download, artifact verification and offline training workflow.
-Its model assets and training outputs need the documented user-mounted folder;
-temporary classroom job files are discarded after each run. Source drafts,
-notes, read markers and job receipts persist in the learning volume.
-
-To build every ordinary profile locally, including Java, Node, TensorFlow and
-Spark, use this single-line command in any supported shell:
-
-```console
-docker compose --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
-```
-
-This can download several gigabytes on a fresh engine. It builds local images
-and does not push to a registry. Kubernetes retains its separate explicit owned
-cluster preparation. You can keep the initial classroom small and add profiles
-when a lesson needs them. The optional Makefile accepts, for example,
-`make classroom-build CLASSROOM_PROFILES="python-core llm-torch-cpu"`.
-
-
-## Optional Kubernetes inside the same classroom
-
-Kubernetes uses a separately prepared, owned disposable kind cluster. It does
-not attach to an existing personal or company cluster. Follow
-[the Kubernetes runtime preparation guide](modules-runtime.md) for the pinned
-host tools, local fixture image and owned-session workflow. That explicit host
-preparation is separate from the Docker-only ordinary classroom and may need
-host Python, kind and kubectl. Windows users run this companion inside WSL 2
-with Linux paths and a Unix-socket Docker endpoint. Native Windows credential
-preparation and named-pipe endpoints are unsupported.
-The browser and worker never receive the Docker engine socket.
-
-Finish tool preparation and all image builds before creating the fresh session.
-Build the private broker directly from the repository root, so this build does
-not require an existing lease path for Compose interpolation:
-
-```console
-docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.0 .
-```
-
-The preparation guide also gives the fixture-image build and any explicitly
-selected base-image override. Once these builds have succeeded, create the new
-owned session immediately before starting the broker. Its scoped credential
-lasts about 15 minutes; downloading or compiling after preparation can consume
-that lease before the first lesson. If it expires, release that exact session
-and prepare a new one. Do not edit its timestamps or reuse released credentials.
-
-After preparation, set `DS60_K8S_SESSION_DIR` to the exact private session path
-printed by the helper. In the same Linux, WSL 2 or macOS Bash terminal, use
-`export DS60_K8S_SESSION_DIR="printed-path"`.
-Never copy credential contents into the learning folder or a message.
-
-Start the already built private broker in the same classroom and progress volume:
-
-```console
-docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind up -d --no-build --pull never --wait lab kubernetes-worker
-```
-
-This overlay preserves the ordinary worker endpoints and adds only the scoped
-Kubernetes endpoint. It reuses the private classroom credential volume and
-mounts the prepared lease/config read-only. It does not provision a cluster,
-use an ambient kubeconfig, publish the worker port or install tools in the browser.
-The current fixture0.2 operations support the curated hello Deployment/Service,
-fixed ConfigMap inputs, finite task Job and fixed probe paths. Other Kubernetes
-lessons explicitly identify their separate reading or owned host-lab workflow.
-
-When finished, stop the broker and then release the exact owned session using
-the preparation guide. Keep the private session path until release succeeds;
-that receipt is how cleanup identifies the resources it owns.
-
-```console
-docker compose -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml --profile k8s-kind stop kubernetes-worker
-python scripts/prepare_kubernetes.py release --session "printed-path" --confirm-release
-```
-
-A normal classroom start without the overlay leaves Kubernetes unprepared.
-Existing source drafts and receipts remain available for reading. Never use
-`down -v` as a cluster cleanup shortcut; classroom volumes contain learning work.
+Use [troubleshooting](troubleshooting.md) for port conflicts, disk pressure,
+corrupted engine snapshots and missing runtimes. Optional
+[GPU/CUDA setup](cuda-classroom.md) and [Kubernetes setup](modules-runtime.md#prepare-and-run-the-owned-kubernetes-lab)
+have additional capability requirements. Ordinary classroom execution does not
+mount the engine socket into learner workers.

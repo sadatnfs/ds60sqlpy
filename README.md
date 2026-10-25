@@ -10,8 +10,12 @@ are lesson labels, not deadlines.
 
 The supported product runs entirely in **Linux Docker containers**. Windows
 uses WSL 2, macOS uses its Docker engine's Linux environment, and Linux uses a
-local Docker engine. Native Windows backends and native executable bundles are
-retained historical tooling, outside the supported delivery and release gates.
+local Docker engine. One shared launcher prepares the classroom and its
+selected runtimes on all three host platforms.
+
+Use the [documentation map](docs/README.md) to find installation, learning,
+backup, tutoring and contributor guides. The repository includes dedicated
+skills for guiding a learner and adding a new language or subject.
 
 ## Start or resume the classroom
 
@@ -29,7 +33,7 @@ to clone the repository; a ZIP download works without Git.
 
 Follow the [beginner setup guide](docs/one-command-classroom.md) for installation
 links, WSL integration and resource guidance. The course's Python, PostgreSQL,
-Java, C, C++, Go, C#, Rust, Swift, Node, TensorFlow, PyTorch and Spark tools run inside Docker, so you do
+Java, C, C++, Go, C#, Rust, Swift, Node, PHP, TensorFlow, PyTorch and Spark tools run inside Docker, so you do
 not need to install those language toolchains on your machine.
 
 Check your engine from that terminal before continuing:
@@ -117,14 +121,14 @@ those volumes.
 ./classroom stop        # Pause this classroom and keep saved work
 ./classroom             # Resume; prepare only missing images if necessary
 ./classroom resume      # Resume strictly without building or pulling
-./classroom --rebuild   # Deliberately build updated sources and restart services
+./classroom --local-build --rebuild  # Install changed local sources deliberately
 ```
 
 `resume` and `--no-build` are equivalent. They fail with an actionable message
 if a needed image is unavailable; they never start a download or build. Use
 ordinary `./classroom` after deleting an image to prepare the missing image.
 After downloading updated course sources or pulling repository changes, use
-`./classroom --rebuild` to put those changes inside the images. A normal resume
+`./classroom --local-build --rebuild` to put those changes inside local images. A normal resume
 deliberately keeps using the existing installation.
 
 The ignored `.classroom/<project>/` directory remembers profile, registry and
@@ -149,7 +153,7 @@ recovery, read the [one-command guide](docs/one-command-classroom.md) and
 The home page is the subject chooser. Every subject has its own color theme
 and a text label, so color is never the only way to identify a path. Opening a
 lesson keeps its guide, coding workspace or reading notes, and progress in the
-same classroom. Use **All subjects** to change direction without opening a
+same classroom. Use **All learning paths** to change direction without opening a
 second application.
 
 | Subject | Start here | Main direction |
@@ -200,7 +204,7 @@ Local builds remain the default. After the owner has published a matching
 release and architecture, a learner can download the images instead:
 
 ```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.0
+./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1
 ```
 
 Replace the placeholder with the actual publisher's Docker Hub namespace. The
@@ -213,7 +217,7 @@ disabled-by-default manual GitHub publication workflow.
 To install this source release locally with visible build logs:
 
 ```sh
-./classroom --all --local-build --tag 0.4.0 --rebuild
+./classroom --all --local-build --tag 0.4.1 --rebuild
 ```
 
 Keep your existing `--project NAME` on every command when using a custom project.
@@ -278,17 +282,19 @@ subject workspace. See [the classroom guide](docs/classroom-experience.md).
 The standard classroom saves learner work in named Docker volumes. Rebuilding
 or replacing containers does not erase that work. Keep these volumes when
 cleaning images, and use the documented export/backup workflow before moving
-to a different machine or storage configuration. Earlier host-folder launchers
-retain their own `.learning` state; they are compatibility alternatives, not
-an additional required classroom. See [persistence and transfer](docs/one-command-classroom.md).
+to a different machine or storage configuration. An older host-folder `.learning` backup remains separate until you
+deliberately transfer and verify it; startup does not merge storage routes. See [persistence and transfer](docs/one-command-classroom.md).
 
-## Optional tools and compatibility routes
+## Offline reading and optional study tools
 
 The static [START_HERE.html](START_HERE.html) remains an offline reading library.
-Host VS Code/Jupyter instructions remain as compatibility references for people
-who deliberately prepare them. They are outside the supported Docker product;
-native Windows environments and executable bundles are not release targets. Existing `/learn` and `/journeys` links are compatibility
-entrypoints into the unified classroom; new documentation uses `/classroom`.
+The complete source folder contains its linked readers and fixtures. Static
+pages do not launch a compiler or database. Existing `/learn` and `/journeys`
+bookmarks lead into the unified classroom; use `/classroom` for new bookmarks.
+
+A separately prepared contributor environment can use VS Code or Jupyter for
+specific notebook and multi-file project work. Those workflows are described
+where a lesson needs them and do not replace Docker onboarding.
 
 To use an assistant as a study companion, open this repository in your coding
 assistant and ask it to use the
@@ -300,8 +306,9 @@ project workflows. It can also help diagnose startup without reinstalling tools
 or resetting your workspace. Share only the source and outputs you want reviewed.
 
 The optional [MCP tutor](docs/mcp-tutor.md) can search content and help plan
-study. It is read-only by default, reveals official solutions only on request,
-and does not execute pad code. An AI tutor is optional; every lesson must explain
+study. It is read-only by default and does not execute pad code. Practice references
+require an explicit reveal request; the statistics tutorial exposes its worked
+answers directly. An AI tutor is optional; every lesson must explain
 its topic without requiring an agent.
 
 The [implementation checkpoint](docs/implementation/CHECKPOINT.md) records
@@ -323,9 +330,10 @@ The commands use a dedicated Docker toolchain, so contributors do not need every
 language compiler on their host. See [the formatting workflow](CONTRIBUTING.md#format-the-repository)
 for generation order, coverage and optional pre-commit checks.
 Running the classroom and developing its application are separate setup paths.
-Use Linux or WSL 2 for the validated contributor environment. Historical host
-notebook, SQL and editor recipes remain under [setup](docs/setup/offline.md) and
-[dependency profiles](docs/dependency-profiles.md), outside the product support contract.
+Use Linux or WSL 2 for the validated contributor environment. Optional notebook, SQL and editor workflows are documented in
+[contributor setup](CONTRIBUTING.md), [notebook guidance](docs/setup/jupyter-postgresql.md)
+and [dependency profiles](docs/dependency-profiles.md). The ordinary learner
+classroom continues to use Docker.
 
 To add a lesson or subject, start with the
 [curriculum extension playbook](docs/curriculum-extension-playbook.md) and the

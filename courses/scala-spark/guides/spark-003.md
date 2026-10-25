@@ -164,14 +164,14 @@ Returning println(...) gives Unit, not Long. Checking membership before a zero/n
 
 ## Next step
 
-The next design lesson spark004 introduces immutable collections; it is not yet assumed published. Review [the track plan](../../../docs/expansion/tracks/scala-spark.md) and retain your boundary table.
+Continue to [spark-004](spark-004.md) for immutable collections and transformations. Review the [course README](../README.md) and retain your boundary table.
 
 ## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-003.
 Read courses/scala-spark/guides/spark-003.md and courses/scala-spark/lessons/spark-003.scala.
-Direct design prerequisites: `spark-002`. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Direct design prerequisites: `spark-002`. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

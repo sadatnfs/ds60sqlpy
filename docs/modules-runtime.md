@@ -1,307 +1,334 @@
-# Optional module runtimes
+# Classroom runtime contracts
 
-> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
-> the engineering bridge and every module/book subject share one home and
-> individually themed workspaces. Choose any path and set your own pace.
-> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
-> saved work and compatibility bookmarks.
+Use `./classroom` for the supported Linux-container classroom on Linux, macOS
+or Windows through WSL 2. Every subject uses the same `/classroom` interface.
+The [startup guide](one-command-classroom.md) owns installation, image selection,
+resume and rebuild instructions; [profile selection](docker-profiles.md) explains
+how to prepare a smaller set. This reference describes what each execution
+surface actually accepts and how the optional owned Kubernetes session works.
 
+A new project prepares sixteen ordinary worker profiles. `--starter` prepares
+only the app, PostgreSQL and Python Core. Explicit `--profile` selections include
+Core and replace the remembered selection; they do not stop unselected workers
+already running. Repeat a custom `--project NAME` on later commands. `resume`
+never builds or pulls, and `--rebuild` deliberately applies changed source or
+configuration. GPU and owned-cluster preparation remain separate opt-ins.
 
-The module application sends source to explicitly prepared private workers.
-The original Python/SQL pads and the reading path continue to work without
-these profiles. Preparing one subject does not install every framework.
+## Ordinary source contracts
 
-For the supported Linux-container product, start with the [classroom walkthrough](docker-classroom.md).
-Windows runs through WSL 2. Retained native Windows launchers are compatibility
-material and are not part of release qualification.
-It uses named progress volumes and direct Compose commands. The launchers below
-are the optional host-folder route; do not mix their storage instructions.
+The app sends submitted source to a fixed private operation. It does not send
+an arbitrary shell command, compiler flags, package manifest or host path.
+The worker stages that source under the filename below. Source may create
+bounded temporary files during execution, but those files are not a project
+upload channel or durable storage.
 
-## Prepare only the profiles you need
-
-Start the ordinary Docker lab first. From the extracted complete course folder,
-use the host launcher to build and start selected workers. The launcher owns
-engine access; the browser and worker receive no Docker socket.
-
-macOS, Linux or Windows through WSL 2:
-
-```bash
-bash scripts/module_lab.sh build --profiles python-core,cpp20
-bash scripts/module_lab.sh start --profiles python-core,cpp20 --no-browser
-```
-
-
-Open `http://127.0.0.1:8765/classroom` after readiness succeeds. Use the same
-profile list and project for later `status`, `start` or `stop` actions. Profile
-preparation needs a connected bootstrap; practice uses the prepared local
-images. Nothing uploads an image or downloads a model when you press Run.
-Kubernetes uses its separate owned-cluster preparation and lease checks.
-
-| Profile | Fixed source and operation | Toolchain definition |
+| Profile | Staged source | Actual operation |
 | --- | --- | --- |
-| `python-core` | `main.py`, fresh Python process | Existing Core image and NumPy |
-| `cpp20` | `main.cpp`, compile then execute | GCC 14.3.0 with C++20, hash-locked CMake 3.28.4 and Ninja |
-| `tensorflow-cpu` | `main.py`, fresh Python process | Python 3.12, TensorFlow 2.20.0, NumPy 2.2.6 |
-| `llm-torch-cpu` | `main.py`, fresh Python process | Python 3.12, PyTorch 2.9.1 CPU, NumPy 2.2.6 |
-| `scala-jvm` | `Main.scala`, compile then `Main` | Spark distribution's matched Scala 2.13 compiler/library and JDK 17 |
-| `spark-local-scala` | `Main.scala`, compile then local Spark submit | Spark 4.0.1, matched Scala 2.13, JDK 17, `local[2]` |
-| `spark-local-python` | `main.py`, local Spark submit | Same Spark/JDK, Python 3.12, `local[2]` |
-| `java21` | `Main.java`, compile then run `Main` | Java 21, assertions enabled, prepared H2 JDBC teaching library |
-| `javascript-node` | `main.mjs`, Node ES module | Node24 with strict unhandled rejections |
-| `typescript-node` | `main.mts`, strict check/compile then execute | TypeScript5.9.3 and Node24 with NodeNext module rules |
+| `python-core` | `main.py` | Fresh Python process with the prepared Core dependencies |
+| `cpp20` | `main.cpp` | C++20 compile and link, then execute; pthread support and compiler warnings enabled |
+| `c17` | `main.c` | C17 compile and link, then execute; pthread and math libraries available |
+| `go` | `main.go` | Fixed `go tool compile` and link using the image's prepared standard-library import configuration |
+| `csharp-dotnet` | `Program.cs` | Compile inside an immutable trusted .NET project with offline package sources, then run its DLL |
+| `rust-stable` | `main.rs` | Rust 2024 compilation with the prepared Arrow library, then execute |
+| `swift-linux` | `main.swift` | Swift 6 Linux compilation with `-parse-as-library`; use the guide's explicit entry point |
+| `java21` | `Main.java` | `javac --release 21`, public `Main`, then `java -ea`; prepared H2 JDBC library available |
+| `javascript-node` | `main.mjs` | Node ES module with strict unhandled-rejection behavior |
+| `typescript-node` | `main.mts` | Strict NodeNext type checking and compilation, then execute emitted `compiled/main.mjs` |
+| `tensorflow-cpu` | `main.py` | Fresh Python process with its separately locked TensorFlow dependencies and GPU visibility disabled |
+| `llm-torch-cpu` | `main.py` | Fresh Python process with its separately locked PyTorch CPU dependencies |
+| `scala-jvm` | `Main.scala` | Compile with the prepared Scala toolchain, then run `Main` |
+| `spark-local-scala` | `Main.scala` | Compile and submit to bounded local Spark with `local[2]` |
+| `spark-local-python` | `main.py` | Submit to the prepared local PySpark environment with `local[2]` |
+| `php-cli` | `main.php` | PHP syntax check followed by CLI execution, with assertions and PDO SQLite enabled |
 
-The NumPy attention foundation uses `python-core`; it does not require PyTorch.
-A successful fixed compiler operation does not establish a CMake/CTest project
-build. The current browser operation compiles a single source file directly.
-Multi-file CMake, interactive REPL state, package resolvers, arbitrary compiler
-flags, arbitrary command lines, GPU jobs, distributed Spark and external
-model endpoints are outside this operation.
+The authoritative commands are in
+[`worker_operations.py`](../src/ds60sqlpy/worker_operations.py); image inputs and
+locks are under `docker/workers/` and
+[`compose.modules.yaml`](../compose.modules.yaml). Read the lesson's capability
+notice before assuming an additional library exists. A prepared compiler does
+not imply Maven, Cargo, Composer, CMake, a browser DOM, interactive stdin or an
+arbitrary multi-file build. Larger project fixtures have their own documented
+preparation and cleanup. SwiftUI and Apple SDKs need the separate Xcode route.
 
-## What readiness and a result mean
+The original Python and SQL classroom pads use their own bounded adapters.
+Notebook-style Python cells can share variables within one Run; a later Run
+starts a fresh process. PostgreSQL is a classroom service, not a worker profile.
+SQL snippets and **Whole SQL lesson (psql)** have different transaction and
+include-file behavior. Whole lessons use guarded cataloged source and fixed
+includes. Preparing the `training` schema is a deliberate reset of disposable
+course tables. See [PostgreSQL setup](setup/postgresql.md) and
+[classroom controls](classroom-experience.md).
 
-At worker startup, a fixed bounded probe checks identity isolation and executes
-an actual backend smoke: C++20 compilation and run, a Scala compilation and run,
-a tiny local Spark count, or a framework tensor/array sum. That probe has a
-45-second total deadline. `/health` returns its cached result and an ephemeral
-`instance_id`; health polling does not repeatedly start a JVM or import a
-framework. A failed probe leaves the service not ready. Preparation must inspect
-that failure rather than claiming that an image definition proves readiness.
+## Browser and optional GPU surfaces
 
-A submitted job moves through preparing, compiling when needed, running and
-verifying when requested. For ordinary CPU workers, compilation and execution
-share the selected total 15, 60 or 120 second deadline. A compiler invocation also has a maximum
-60-second phase deadline. Failed compilation never runs an older binary.
-Cancellation kills the owned process group and, inside the dedicated worker
-PID namespace, remaining processes with the fixed job UID. A job that creates
-a new session does not gain an unlimited background lifetime.
+`html-browser` and `javascript-browser` are browser capabilities, not launcher
+`--profile` names. They need no additional compiler worker. HTML/CSS accepts one
+complete document with embedded styles and bounded inline JavaScript. D3 uses
+the bundled library, `#chart` and `#output`, with inline offline data. Node source
+has no browser DOM. External imports, fetches and navigation are not part of the
+opaque preview contract.
 
-Execution-only success means an actual zero exit status. It does not mark
-mastery or invent checks. Registered verifiers call typed APIs against fixed
-fixtures and return named boolean checks:
+Live preview is an explicit page-session opt-in. Editing can refresh that
+preview, but it does not automatically save result receipts. Manual Run and
+**Save observation** are separate actions. Switching lessons, viewing history,
+Stop and reload must not silently rerun source. Browser observations retain the
+submitted source identity and `verified: false`; they are not server-side tests.
+The initial preview has a 120-second UI wait budget, not an operating-system CPU
+quota or a promise to interrupt arbitrary synchronous browser code. See the
+[preview studio guide](classroom-experience.md#explore-in-the-preview-studio).
 
-- `tf-gradient-v1`: three float64 gradient-step fixtures and invalid-rate cases.
-- `llm-causal-attention-v1`: numeric attention values, forbidden weights,
-  future-value perturbation and malformed-input cases.
-- `cpp-ownership-v1`: fourteen value/ownership checks through an immutable
-  compiled harness that calls the submitted functions.
-- `spark-rows-v1`: paid identities, typed schema, NULL-aware golden groups,
-  repartition invariance and a changed-input fixture.
+PHP CLI prints program output and supports prepared SQLite examples. It does
+not serve HTTP or implement real browser cookies or sessions. Those topics use
+[the separately prepared web project](../courses/web-development/fixtures/php-http-lab/README.md).
+A request simulation must not be described as an actual browser exchange.
 
-A selected verifier must produce a valid bounded check report, every reported
-check must pass, and the process must exit zero. Printed words such as
-`success` or `checks passed` do not create verification evidence. These checks
-are teaching feedback for trusted personal learner code, not a tamper-resistant
-examination system. Progress and mastery still require the learner's reasoning.
+The optional `cuda-cpp`, `cuda-python`, `pytorch-cuda` and `tensorflow-cuda`
+profiles require an explicitly selected compatible NVIDIA device. The first
+stages `main.cu`; the others stage `main.py`. Current workers target Linux amd64
+and remain outside default startup and `--all`. They perform real allocation,
+kernel/tensor computation, synchronization and readback before becoming ready.
+CPU models and compiler-only checks remain useful, separate evidence. Ordinary
+CPU profiles stay CPU profiles on an NVIDIA host. Follow
+[CUDA setup and recovery](cuda-classroom.md) for platform support, pinned
+compiler/runtime differences, device selection and actual qualification limits.
+
+## Readiness, execution, verification and recovery
+
+These observations answer different questions:
+
+| Observation | What it establishes |
+| --- | --- |
+| An image exists | Build inputs were assembled; a runtime might still fail to start |
+| A worker is ready | Its fixed startup probe passed for this worker instance |
+| A submitted program exits zero | That submitted source completed under the selected runtime and limits |
+| Registered checks pass | A named verifier observed its stated fixture invariants |
+| A saved result is readable | The earlier receipt survived; the current source has not been rerun |
+
+Ordinary startup probes have a 45-second total deadline and compile or execute
+small real examples. Health returns the cached result and instance identity;
+polling does not repeatedly import a framework or start a JVM. Identity and
+credential-isolation checks must also pass. Failure leaves the service
+unavailable. Read its diagnostic instead of inferring readiness from its name.
+
+Jobs progress through preparation, compilation when applicable, execution and
+optional verification. Compilation and execution share the selected total
+15, 60 or 120 second budget; a compile phase also has a 60-second ceiling.
+Failed compilation does not run an old executable. Cancellation and shutdown
+reap owned process groups and isolated learner descendants. A normal syntax
+error can be repaired and resubmitted. Infrastructure failures that leave
+cleanup uncertain disable readiness and require inspection.
+
+Registered verifier IDs include `tf-gradient-v1`, `llm-causal-attention-v1`,
+`cpp-ownership-v1`, `spark-rows-v1` and the dedicated `k8s-readiness-v1`.
+Their reviewed fixtures test specific numerical, ownership, row/schema or
+cluster properties. A registered verifier must produce a bounded structured
+report with passing checks and a successful exit. Printed success markers do
+not create typed checks, and passing a fixture does not establish mastery.
+
+The app saves module source, notes and source-bound receipts in the learning
+volume. Recovery polls an existing worker job; it never resubmits learner source
+automatically. A replaced worker may no longer know an earlier in-flight job.
+Preserve that interrupted receipt and inspect its outcome before deciding to
+run again. [Saved work and history](classroom-experience.md#save-work-and-understand-history)
+explains the learner controls.
+
+GPU timeout, cancellation, resource interruption, signal exit or a recognized
+serious device fault additionally requires owner review. Child-process cleanup
+does not prove device recovery. The worker keeps the receipt, rejects another
+job and never resets a GPU automatically. Ordinary compiler errors remain
+repairable. Restart an affected worker only after appropriate device inspection,
+so its real startup probe runs again.
 
 ## Resource and credential boundaries
 
-`compose.modules.yaml` attaches workers only to an internal project network.
-Worker port 8081 is not published. The app shares the PostgreSQL network
-namespace and reaches only fixed worker service names supplied by the host
-launcher. Worker credentials live in a private runtime session outside
-`.learning`; portable progress backups must exclude that session.
+Workers join the internal module network and do not publish their control
+port. `compose.classroom.yaml` mounts the private `classroom-runtime` volume
+read-only in workers. Shared service definitions supply the toolchains and
+resource limits; classroom composition owns the credential storage. That volume
+is separate from learner exports. The root-private `/run/ds60` directory and
+child-read probe protect worker credentials; learner processes use UID/GID
+65534 with supplementary groups cleared. The supervisor owns only the
+capabilities needed for identity changes and cleanup. No engine socket,
+learner-home mount or ambient cloud credentials enter an ordinary worker.
 
-The worker token is mounted inside the image-owned `/run/ds60` directory,
-which is root-owned mode 0700. This also protects token files when Windows
-file sharing expands their POSIX mode bits; it is not a general permission
-exception for arbitrary paths. The mandatory child-read probe still applies.
-The HTTP supervisor reads its private token, then each learner process runs as
-UID/GID 65534 with supplementary groups cleared. Readiness proves that this
-identity cannot open the credential and that the supervisor can terminate a
-process with that identity. Images require a private container PID namespace
-and the narrow CHOWN, SETUID, SETGID, DAC_OVERRIDE and KILL capabilities for
-this supervisor. Learner processes do not retain those capabilities. There is
-no engine socket, repository mount, learner home mount or cloud credential.
-The ordinary personal app remains a trusted-code environment, not a hostile
-multi-user sandbox.
+The classroom is for trusted personal learner code. These controls do not make
+it a hostile multi-user service. Host, origin and session-token checks protect
+the local app; private worker requests use a separate token. Keep tokens and
+Kubernetes credentials out of screenshots, notes, source and portable backups.
 
-Requests require `X-DS60-Worker-Token`, including health. Cross-origin browser
-requests are refused. A worker accepts one active job, retains at most 32
-terminal snapshots, rejects bodies above a fixed bound and source above
-256 KiB, and keeps at most 128000 bytes of output with a head/tail truncation
-notice. Output draining preserves final errors and exit status. The browser
-may impose a smaller source limit.
+Current ordinary module limits are:
 
-Each job has a disposable scratch directory, a 32 MiB total file allowance,
-a 1024-file allowance and a per-file 32 MiB limit. Container tmpfs is 128 MiB
-and explicitly permits execution of compiled job files; it is private
-disposable memory, not a host filesystem mount. Ordinary workers have a 2 GiB
-memory cap and heavy framework/Spark profiles have 3 GiB. Two CPUs and 128
-processes are the ordinary worker ceilings; Spark services allow 384 tasks
-because JVM and Python worker threads count toward that limit.
-JVMs receive ActiveProcessorCount=2 and fixed small GC thread budgets.
-Health, polling and cancellation use an existing HTTP control thread so child
-PID pressure cannot prevent creation of a request-control thread. These are
-initial small-lab budgets, not guarantees for long training or large data.
-Enable a small number of workers within the engine's available memory.
-No model, generated dataset or Spark output is exported by this initial
-worker protocol. Source, notes and bounded results are saved through the app's
-existing host-mounted learning workspace; disposable worker files are removed.
+- The browser/module editor accepts at most 48,000 UTF-8 source bytes. The worker
+  protocol independently caps source at 256 KiB; this does not enlarge the editor.
+- Worker output retains a bounded 128,000-byte head/tail transcript. Browser
+  observation output has its own 32,000-byte validation bound.
+- A worker accepts one active job and retains at most 32 terminal control
+  snapshots. Durable learner receipts live in the app's state, not that cache.
+- A job's scratch tree allows 32 MiB and 1,024 files. Per-file limits are normally
+  32 MiB; the trusted .NET compile phase permits 64 MiB per file while retaining
+  the 32 MiB monitored workspace allowance.
+- Ordinary workers have a private 128 MiB executable tmpfs, two CPUs, 2 GiB RAM
+  and a 128-process limit. TensorFlow, PyTorch and Spark use 3 GiB; Spark allows
+  384 tasks. Optional GPU workers use 4 GiB and a 256 MiB tmpfs. Kubernetes has
+  its separate smaller supervisor and cluster budgets.
 
-## Reproducibility and qualification
-
-TensorFlow and CPU PyTorch use separate Linux amd64 and arm64 requirements
-locks in `docker/workers/`, with exact transitive versions and wheel hashes.
-Builds use `--require-hashes --only-binary=:all:`. Re-resolve these locks
-intentionally, then repeat import, numeric verifier and process-cleanup proofs.
-Do not install the isolated TensorFlow tuple into the base course environment.
-Base-image version tags select the reviewed toolchain family; capture actual
-image IDs/digests and architecture from a successful build when qualifying it.
-A tag or a resolved dependency graph alone is not a runtime proof.
-
-As of 22 October 2026, the upstream TensorFlow 2.20.0 release has CPython 3.12
-Linux x86_64 and ARM64 wheels. The `tensorflow_cpu` package has no corresponding
-ARM64 wheel in that release, so the common profile uses `tensorflow` without a
-CUDA extra and disables GPU visibility. Official CPU PyTorch 2.9.1+cpu wheels
-exist for both Linux architectures. These metadata checks establish an
-available build input, not a successful import on either architecture.
-[TensorFlow installation](https://www.tensorflow.org/install/pip),
-[TensorFlow 2.20.0 release metadata](https://pypi.org/project/tensorflow/2.20.0/),
-[official PyTorch CPU wheels](https://download.pytorch.org/whl/cpu/torch/).
-
-Spark 4.0.1 requires Java 17/21 and Scala 2.13 with the same Scala version used by
-the distribution. The worker copies the official Spark distribution into its
-own Python 3.12/JDK 17 image and compiles against that distribution's jars.
-No Maven, Scala CLI or pip resolver runs during a learner job.
-[Spark 4.0.1 prerequisites](https://spark.apache.org/docs/4.0.1/),
-[Apache Spark image source](https://github.com/apache/spark-docker),
-[official GCC image architectures](https://hub.docker.com/_/gcc).
-
-Windows uses a Linux-container engine; macOS uses its engine's Linux VM.
-Native amd64 and native arm64 are separate qualification rows. A successful
-arm64 run does not prove Windows host mount behavior, amd64 execution or an
-emulated platform. Record exact runtime evidence in the implementation
-checkpoint rather than filling an untested row with a checkmark.
-
-For an explicitly trusted registry mirror, build arguments `DS60_CPP_IMAGE`,
-`DS60_PYTHON_IMAGE`, `DS60_SPARK_IMAGE` and `DS60_CORE_IMAGE` can override the
-corresponding reviewed base. Keep the same toolchain family and record the
-resolved digest and platform. Never disable TLS to repair registry access.
-An override is a new image input and needs the same runtime qualification.
+These are small-lab limits, not a promise to train a large model or run a
+production cluster. Models, Spark outputs and arbitrary worker-created files
+are not exported through the single-source protocol. Keep durable work in the
+classroom's supported source, notes, history and result channels.
 
 ## Prepare and run the owned Kubernetes lab
 
-This is an optional host preparation path. Read the lesson and complete its
-prediction before preparing a session: the scoped credential lasts 15 minutes.
-Build images first, then prepare the cluster immediately before practice. A
-paused browser does not extend the lease. The app's Run creates and proves
-only fixed owned `hello` resources; it does not select an existing cluster or
-install Kubernetes. Opening or saving a lesson never performs preparation.
+Kubernetes is an explicit host-assisted extension. `./classroom --profile
+k8s-kind` and `--k8s-session` are not supported launcher options. The ordinary
+classroom never creates a cluster. This workflow uses the self-contained
+`compose.classroom.kubernetes.yaml` overlay and one newly owned disposable kind
+node, with no ambient kubeconfig or existing cluster selection.
 
-Use the same local Linux-container engine for the entire session. The helper
-requires host Python 3.12, but it does not require a host Kubernetes package or
-an existing kubeconfig. The main Docker lab continues to need no host Python.
-Use the POSIX companion from Linux, WSL 2 or macOS. If your interpreter has
-another name, pass `--python /absolute/path/to/python` to the Bash launcher and
-use the same interpreter for `prepare_kubernetes.py` below. Native Windows
-credential handling and named-pipe endpoints are unsupported. Windows learners
-run these commands inside WSL 2 using Linux paths and its Unix-socket engine.
+Use a POSIX shell and a prepared Python 3.11 or 3.12 interpreter on Linux, WSL 2
+or macOS. The examples call it `python3`. Windows needs Linux paths and the
+WSL engine's local Unix socket; native Windows credentials and named pipes are
+unsupported. Ordinary classroom learning still needs no host Python. Review
+engine disk/RAM availability before preparing another node.
 
-1. From the extracted full course folder, build the fixture and dedicated
-   worker while connected. This can take time and does not create a cluster.
+1. Choose a dedicated project and unused fixed ports. This example deliberately
+   uses `ds60-k8s-study`, browser port 8787 and database port 55433. If a port is
+   occupied, choose another and change both the exported value and launcher
+   argument. Pin the selected local engine for every command in this shell:
 
-   ```bash
-   bash scripts/module_lab.sh build --profiles k8s-kind
-   python3 scripts/prepare_kubernetes.py tools --allow-download
-   ```
-
-   The tool helper downloads pinned kind v0.33.0 and kubectl v1.37.0 from their
-   official release locations and verifies SHA256 before publishing the files.
-   `doctor` is a read-only availability check. Neither action creates a cluster.
-   Registry/tool downloads require a connected bootstrap. No image is pushed.
-
-2. Obtain the selected local engine endpoint. In Bash:
-
-   ```bash
+   ```sh
    if [ -n "${DOCKER_HOST:-}" ]; then
-     ENGINE="$DOCKER_HOST"
+     CLASSROOM_ENGINE="$DOCKER_HOST"
    else
-     ENGINE="$(docker context inspect --format '{{.Endpoints.docker.Host}}')"
+     CLASSROOM_ENGINE="$(docker context inspect --format '{{.Endpoints.docker.Host}}')"
    fi
-   python3 scripts/prepare_kubernetes.py prepare --confirm-create --docker-host "$ENGINE" --allow-node-download
+   export DOCKER_HOST="$CLASSROOM_ENGINE"
+   unset DOCKER_CONTEXT
+   export COMPOSE_PROJECT_NAME=ds60-k8s-study
+   export DS60_CLASSROOM_PORT=8787 DS60_POSTGRES_PORT=55433 DS60_PUBLIC_PORT=8787
+   ./classroom --local-build --registry upstream --starter --project ds60-k8s-study \
+     --port 8787 --database-port 55433 --no-browser
    ```
 
-   The helper refuses remote endpoints. `--allow-node-download` explicitly
-   allows the pinned node-image bootstrap if absent; omit it for a fully
-   cached run. A reviewed TLS-preserving mirror can be selected with
-   `--node-image mirror.gcr.io/kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5`.
-   The digest is unchanged. Do not disable TLS or substitute a floating tag.
+   The preparation helper below accepts only a local `unix:///...` endpoint.
+   Do not substitute a remote context or another engine after the classroom starts.
+   This recipe uses locally built release images and the upstream registry
+   selection consistently. Hub mode and an unrelated learner project are not
+   part of this optional preparation example.
 
-3. Copy only the returned `session_dir` path into a terminal variable. The
-   helper prints no credential. The random private directory is outside the
-   course and `.learning`; do not move it into a backup, pad or export.
-   Replace the example placeholder with the actual absolute receipt path.
+2. Finish image and tool preparation before starting the short lease. The
+   fixture tag is its own protocol version; the worker tag follows the checkout's
+   package version. These builds do not create a cluster or publish images:
 
-   ```bash
-   SESSION="/absolute/private/path/from/session_dir"
-   bash scripts/module_lab.sh start --profiles k8s-kind --k8s-session "$SESSION" --no-browser
+   ```sh
+   CLASSROOM_VERSION="$(python3 -c 'import pathlib,tomllib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+   docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture \
+     -t ds60sqlpy-k8s-fixture:0.2.0 .
+   docker build --progress=plain -f docker/kubernetes/Dockerfile.worker \
+     -t "ds60sqlpy-worker-k8s-kind:$CLASSROOM_VERSION" .
+   python3 scripts/prepare_kubernetes.py tools --allow-download
+   python3 scripts/prepare_kubernetes.py doctor
    ```
 
-   Start checks the private lease, host receipt, matching local endpoint and
-   remaining lifetime before creating a worker token or starting services.
-   It uses `compose.kubernetes.yaml` and the selected `k8s-kind` profile only.
-   Remove `--no-browser` to open the local classroom page.
-   Choose `k8s-003` for Deployment-only practice or `k8s-008` for the pilot.
-   An expired session is refused. Stop/release it, then prepare a new one;
-   there is no silent renewal or switch to an ambient admin context.
+   Tools are pinned and checked against official SHA256 metadata. The helper's
+   default tool cache is `work/kubernetes-tools`; it does not install globally.
+   Both Dockerfiles accept a deliberately selected `DS60_PYTHON_IMAGE` build
+   argument when a reviewed TLS-preserving base mirror is required. See
+   [image and fixture details](../docker/kubernetes/README.md).
 
-4. Stop the selected app/worker before explicitly releasing the owned cluster.
-   Status and stop remain available when a lease has expired. They do not
-   create a cluster, refresh credentials or delete the cluster.
+3. Prepare immediately before practice. This command creates a new owned node
+   and namespace, loads the existing fixture image and requests a short-lived
+   scoped credential. `--allow-node-download` explicitly permits fetching the
+   pinned node image when absent; omit it for an already cached run:
 
-   ```bash
-   bash scripts/module_lab.sh status --profiles k8s-kind --k8s-session "$SESSION"
-   bash scripts/module_lab.sh stop --profiles k8s-kind --k8s-session "$SESSION"
-   python3 scripts/prepare_kubernetes.py release --session "$SESSION" --confirm-release
+   ```sh
+   python3 scripts/prepare_kubernetes.py prepare --confirm-create \
+     --docker-host "$DOCKER_HOST" --allow-node-download
    ```
 
-   Release validates the recorded full Docker container ID, kind owner label
-   and namespace UID. It removes only that immutable owned one-node container,
-   preserves a same-name replacement and leaves shared engine networks and
-   unrelated contexts alone. Successful exact-name and ID listings must prove
-   absence before credentials are removed. Repeating a completed release is
-   safe while its private host receipt remains. It does not delete learner
-   work or PostgreSQL data. Ambiguous/failed cleanup preserves private evidence.
+   Copy the returned `session_dir` path, not credential contents. Replace the
+   following placeholder with that exact absolute private path:
 
-The worker receives only a short-lived scoped kubeconfig in root-private
-mounts. It gets no engine socket or host admin config. The kubectl child runs
-as UID 65533, which must be unable to read supervisor credentials. Workload
-Pods run as UID 65532 without bearer-token mounts, host paths or privilege.
-The worker joins its private app network and the explicitly prepared kind
-network; no worker port is published to the host.
+   ```sh
+   export DS60_K8S_SESSION_DIR="/absolute/private/path/from/session_dir"
+   python3 scripts/prepare_kubernetes.py inspect \
+     --session "$DS60_K8S_SESSION_DIR" --docker-host "$DOCKER_HOST"
+   ```
 
-The 15/60/120-second selection bounds work. Cleanup then has a fresh independent
-15-second reserve, even after cancellation or timeout. Shutdown requests
-cancellation and waits up to 20 seconds; Compose gives the service 30 seconds.
-The fixed synthetic Pod templates use a 1-second termination grace, rather
-than the general Kubernetes default 30 seconds, because they have no durable
-state to flush. [Pod termination](https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination)
-explains this distinction. Only resource UIDs recorded or recovered with this
-Run's private nonce are eligible for cleanup. Failure to prove cleanup reports
-failed with the affected resource; it never reports an unproved clean cancel.
+   Inspection checks the lease, matching private host receipt, chosen endpoint
+   and remaining lifetime without changing the cluster. The token is requested
+   for 15 minutes; its returned expiry governs validity. A fresh session needs
+   enough time for the longest job and cleanup reserve. Do not edit timestamps,
+   move credentials into `.learning`, or treat a paused browser as a lease renewal.
 
-`k8s-readiness-v1` verifies the owned Deployment and stable Ready Pod identities,
-Service EndpointSlice UID membership, an actual in-cluster `/version` client
-and exact owned cleanup. The foundation can omit the Service and receives no
-routing grade. The pilot's rolling update, Pod deletion, second-Service tasks
-and explanations remain manual scoped/teacher activities. This one-shot Run
-does not grade the complete six-task course. Native Windows credential paths
-are outside the support contract. WSL/engine setup and other architecture rows
-require their own observed evidence.
+4. Start only the already prepared app overlay and Kubernetes worker. Existing
+   PostgreSQL, Core worker and private runtime volume remain in place:
 
-## Recorded runtime boundary
+   ```sh
+   docker compose -p "$COMPOSE_PROJECT_NAME" \
+     -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml \
+     --profile k8s-kind up -d --no-deps --no-build --pull never \
+     --wait --wait-timeout 120 lab kubernetes-worker
+   ```
 
-The private `work/modules-acceptance` receipts record actual Linux aarch64
-Ready plus positive and negative runs for `python-core`, `tensorflow-cpu`,
-`cpp20`, `scala-jvm`, `spark-local-scala` and `spark-local-python`.
-`llm-torch-cpu` currently has metadata/hash-lock evidence and remains
-unqualified. The final owned Kubernetes worker passed seven live Linux aarch64 cases:
-healthy Service/client, Deployment-only, unready timeout, wrong-selector
-timeout, namespace-escape rejection, privileged-source rejection and
-cancellation. Every applicable case confirmed owned cleanup. An actual
-SIGTERM while verifying left zero of four previously observed owned resources
-and exited zero in 6.837 seconds. Exact refreshed image and resource IDs remain
-in the root's private receipts.
-Windows WSL2/file sharing, Intel Mac, Linux amd64, rootless engines and
-emulation remain separate untested rows. Source tests and image definitions
-do not fill those rows.
+   `DS60_PUBLIC_PORT` must match the actual published browser port so exact
+   Host/Origin authentication continues to work. This overlay retains every
+   ordinary and optional GPU endpoint and adds only Kubernetes. It mounts the
+   scoped lease/config read-only, joins the owned kind network and publishes no
+   worker port. Open `http://127.0.0.1:8787/classroom` for the example ports.
+   Read the capability notice before choosing an executable Kubernetes variant.
+
+5. Inspect or stop using the same project, overlay and session variable. Status
+   and stop do not renew a lease or create a cluster and remain usable after
+   expiry:
+
+   ```sh
+   docker compose -p "$COMPOSE_PROJECT_NAME" \
+     -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml \
+     --profile k8s-kind ps --all lab kubernetes-worker
+   docker compose -p "$COMPOSE_PROJECT_NAME" \
+     -f compose.classroom.yaml -f compose.classroom.kubernetes.yaml \
+     --profile k8s-kind stop lab kubernetes-worker
+   python3 scripts/prepare_kubernetes.py release \
+     --session "$DS60_K8S_SESSION_DIR" --confirm-release
+   ```
+
+   Release checks the recorded full container ID, ownership and namespace UID.
+   It preserves same-name replacements and ambiguous resources, then proves
+   node absence before removing credentials. Keep the private receipt until
+   release succeeds. Learner volumes, unrelated containers and shared networks
+   remain intact; `down -v` is not a cluster-release shortcut.
+
+6. Restore the ordinary app configuration from its existing image, with no
+   build or pull, before using normal classroom resume again:
+
+   ```sh
+   docker compose -p "$COMPOSE_PROJECT_NAME" -f compose.classroom.yaml \
+     --profile python-core up -d --no-deps --no-build --pull never --wait lab
+   ./classroom stop --project ds60-k8s-study
+   ./classroom resume --project ds60-k8s-study
+   ```
+
+   The overlay is an explicit session configuration, not a saved launcher
+   profile. An expired or released Kubernetes session requires a new preparation
+   and inspection followed by the overlay start. Normal `./classroom resume`
+   does not recreate its cluster or credentials.
+
+The Kubernetes adapter admits reviewed Deployment/Service/ConfigMap or finite
+Job shapes, not arbitrary Kubernetes administration. It verifies owner and
+resource identities, bounded readiness, fixed in-cluster HTTP observations or
+finite-task output, then cleans only resources bound to that Run's nonce and
+UIDs. Work gets its selected deadline plus an independent 15-second cleanup
+reserve. Unproved cleanup is a failure, not a clean cancellation. The detailed
+[fixture contract](../docker/kubernetes/README.md#fixture-contract-2-and-bounded-ordinary-labs)
+defines what is and is not executed; other networking and operations chapters
+remain reading or separately prepared host labs.
+
+## Qualification evidence
+
+Use [validation](validation.md) and the current
+[implementation checkpoint](implementation/CHECKPOINT.md) for revision-specific
+acceptance. Keep source tests, image builds, startup probes, actual lesson runs,
+browser observations, hardware tests and hosted CI as separate records. A Linux
+arm64 success does not establish Linux amd64, WSL host integration, emulation or
+NVIDIA execution. A saved historical receipt does not qualify changed source.

@@ -27,3 +27,10 @@ resources. Host-dependent controller, storage and network behavior must be
 labeled and separately qualified. Preserve exact identity/ownership receipts,
 UID-aware deletion, bounded readiness and cleanup after failure. Do not put
 cluster credentials or engine access in source or portable learner exports.
+
+The [complete authoring guide](authoring/complete/README.md) identifies the
+original generated batches; its final step runs the
+[networking extension](authoring/networking/README.md). Those reading units do
+not widen adapter authority. Retain explicit network/controller capabilities,
+short-lived target-bound leases, secret-safe diagnostics and UID-aware recovery.
+The operational adapter contract lives in [docker/kubernetes](../../docker/kubernetes/README.md).

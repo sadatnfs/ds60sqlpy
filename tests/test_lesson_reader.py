@@ -88,9 +88,10 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     assert 'class="source-code language-sql"' in sql_reader
     assert "SELECT customer_id" in _visible_text(sql_reader)
     assert "psql -X -v ON_ERROR_STOP=1" in sql_reader
-    assert "START_DS60.cmd" in sql_reader
-    assert "Create/open guided SQL notebook" in sql_reader
-    assert 'action: "jupyter-sql"' in sql_reader
+    assert "./classroom" in sql_reader
+    assert "START_DOCKER_CLASSROOM.cmd" in sql_reader
+    assert "/api/launch" not in sql_reader
+    assert "START_DS60.cmd" not in sql_reader
     assert "Ask an AI tutor about this lesson" in python_reader
     assert "Copy tutor prompt" in python_reader
     assert "guide-ds60sqlpy-learning" in python_reader
@@ -373,10 +374,13 @@ def test_static_reader_defers_completion_to_dashboard() -> None:
     catalog = Catalog.load(REPO_ROOT)
     rendered = build_lesson_html(catalog, catalog.get("python-01"))
 
-    assert '<label class="completion launcher-only" hidden>' in rendered
     assert "Track completion on the course dashboard" in rendered
-    assert 'document.querySelectorAll(".static-only")' in rendered
-    assert "if (launcherMode) {" in rendered
+    assert '<a class="static-only" href="../START_HERE.html#catalog">' in rendered
+    assert 'href="../learn?lesson=python-01"' in rendered
+    assert 'id="lesson-complete"' not in rendered
+    assert "/api/progress" not in rendered
+    assert "/api/launch" not in rendered
+    assert "launcherMode" not in rendered
 
 
 def test_reader_writer_supports_external_output_and_detects_drift(tmp_path: Path) -> None:

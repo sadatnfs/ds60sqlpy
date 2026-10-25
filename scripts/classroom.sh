@@ -43,7 +43,7 @@ Windows: use Ubuntu in WSL 2 with your Docker engine's integration enabled.
   --no-build                Like resume: never build or pull missing images
   --rebuild                 Rebuild local images, or refresh Hub images; apply updates
   --from-hub USER           Pull matching architecture tags from USER/ds60sqlpy
-  --tag VERSION             Select a published/local release (default: 0.4.0)
+  --tag VERSION             Select a published/local release (default: 0.4.1)
   --local-build             Return this project to locally built images
   --gpu-device ID           Explicit NVIDIA device index/UUID for optional CUDA profiles
   --no-browser              Print the ready URL without opening it

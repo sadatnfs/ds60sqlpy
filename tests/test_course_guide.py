@@ -39,21 +39,20 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
     assert "void loadServerProgress();" in rendered
     assert "localStorage" in rendered
     assert "DS60_DATABASE_URL" in rendered
-    assert "START_DS60.cmd" in rendered
+    assert "START_DOCKER_CLASSROOM.cmd" in rendered
     assert "double-click" in rendered.casefold()
     assert "You are in portable reading mode." in rendered
     assert "rendered here as read-only" in rendered
-    assert "Private launcher mode is active." in rendered
+    assert "Private launcher mode" not in rendered
     assert "[hidden] { display: none !important; }" in rendered
     assert 'id="run-sql"' in rendered
-    assert "Open SQL workspace" in rendered
-    assert 'launchNative("jupyter-sql"' in rendered
-    assert 'launchNative("jupyter-lesson"' in rendered
-    assert "Open PostgreSQL magics lab" in rendered
+    assert "/api/launch" not in rendered
+    assert "whole-lesson" in rendered.lower()
+    assert "./classroom resume" in rendered
     assert "What the guide gives you before you ask for help" in rendered
     assert "evidence-based done condition" in rendered
     assert 'href="lesson-pages/sql-start-01.html">Start the first SQL lab' in rendered
-    assert "Extract All, then double-click <code>START_DOCKER_LAB.cmd</code>" in rendered
+    assert "Windows with WSL 2" in rendered
     assert "relational design between Days 15–16" in rendered
     assert "Companion guide: ${lesson.guide_path}" in rendered
     assert "Answer-free learner artifact: ${lesson.lesson_path}" in rendered
@@ -70,17 +69,18 @@ def test_portable_course_guide_has_no_remote_runtime_dependencies() -> None:
         assert f'href="{reference_relative_path(source_path)}"' in rendered
 
 
-def test_portable_course_guide_has_runnable_windows_resolver() -> None:
-    rendered = GUIDE.read_text(encoding="utf-8")
-
-    assert (
-        "$CoursePython = if (Test-Path .\\.venv\\Scripts\\python.exe) {\n"
-        "    (Resolve-Path .\\.venv\\Scripts\\python.exe).Path\n"
-        "} else {\n"
-        "    (Resolve-Path .\\.venv\\python.exe).Path\n"
-        "}"
-    ) in rendered
-    assert "$CoursePython = if (Test-Path .\\.venv\\Scripts\\python.exe) {{" not in rendered
+def test_portable_guide_explains_docker_persistence_and_supported_windows_route() -> None:
+    rendered = build_html(_catalog_payload())
+    assert "./classroom stop" in rendered
+    assert "./classroom resume" in rendered
+    assert "Named volumes retain learner data" in rendered
+    assert "--project" in rendered
+    assert "START_DOCKER_CLASSROOM.cmd" in rendered
+    assert "WSL 2" in rendered
+    assert "bootstrap_windows.ps1" not in rendered
+    assert "scripts/learning_portal.py" not in rendered
+    assert "START_DS60.cmd" not in rendered
+    assert "PyInstaller" not in rendered
 
 
 def test_registered_tracks_appear_in_filters_progress_and_inventory() -> None:

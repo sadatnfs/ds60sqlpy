@@ -5,14 +5,15 @@
 > subjects share this home and workspace. Each subject has its own theme;
 > prerequisites guide your choices and you set the pace. The
 > [one-command setup](../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
-> work. Native terminal/editor commands below are optional alternatives.
+> work.
 
 
 The main Python and SQL tracks teach each language well. This optional
 eight-lesson bridge teaches the engineering habits needed to use them together
-safely in an application, data pipeline, or command-line tool. Four named
+safely in an application, data pipeline, or command-line tool. Five named
 professional modules then add PostgreSQL notebooks, migration observability,
-local AI application engineering, and a local analytics-engineering project.
+local AI application engineering, a local analytics-engineering project and
+an evidence-driven integrated capstone.
 
 ## Who this is for
 
@@ -26,45 +27,23 @@ and basic data-changing SQL. If either prerequisite feels shaky, review it
 before continuing. Bridge Day 1 depends on both prerequisites; every later
 bridge day depends on the previous bridge day.
 
-## Environment
-
-- Python 3.11 or 3.12
-- PostgreSQL 16 or newer for optional live exercises
-- the repository development/quality dependencies
-- Psycopg 3 for live database exercises
-
-The code and tests use small in-memory fakes by default, so the core track is
-deterministic and runnable offline. A live PostgreSQL exercise is always marked
-**optional live-DB step**. Never substitute SQLite: its parameter syntax,
-transactions, types, and concurrency behavior differ from PostgreSQL.
-
-Install the advanced course profile once while connected:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\setup.ps1 -Advanced
-```
+## Start the classroom
 
 ```bash
-bash scripts/setup.sh --advanced
+./classroom --starter
 ```
 
-Store the disposable course connection string in `DS60_DATABASE_URL`. Do not
-commit it and do not paste it into source files.
+Choose **Python + PostgreSQL engineering** and open the intended unit. The
+classroom provides Python Core and the disposable PostgreSQL service. Most
+bridge examples use deterministic in-memory fakes; real database steps are
+explicitly identified. Never substitute SQLite for a PostgreSQL concurrency,
+type or transaction experiment.
 
-```powershell
-# Windows PowerShell
-$env:DS60_DATABASE_URL = "postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-.\.venv\Scripts\python.exe bridge\lessons\day01_config_logging_cli.py
-```
-
-```bash
-# macOS/Linux
-export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql_training"
-.venv/bin/python bridge/lessons/day01_config_logging_cli.py
-```
-
-Use only the disposable course database for live exercises. Setup and reset
-instructions live in [the PostgreSQL track](../sql/postgres-60day/README.md).
+The dedicated interactive JupySQL notebook uses a separately prepared
+[contributor notebook workflow](../docs/setup/jupyter-postgresql.md). Other
+external project steps also state their own preparation. These are extensions
+to study, not alternate product installers. Keep connection values private and
+use only the local disposable course database.
 
 ## Learning path
 
@@ -88,6 +67,9 @@ instructions live in [the PostgreSQL track](../sql/postgres-60day/README.md).
 | `bridge-ai-01` | Local AI application engineering | [lesson](professional/lessons/bridge_ai_01_application_engineering.py) | [guide](professional/companion-guides/bridge_ai_01_application_engineering.md) |
 | `bridge-analytics-01` | Local analytics engineering | [lesson](professional/lessons/bridge_analytics_01_local_project.py) | [guide](professional/companion-guides/bridge_analytics_01_local_project.md) |
 
+The fifth named unit, [bridge-capstone-01](professional/companion-guides/bridge_capstone_01_evidence_review.md),
+combines independent fixtures, correctness checks and an evidence review.
+
 The Jupyter module has its own
 [Windows/macOS/Linux setup guide](../docs/setup/jupyter-postgresql.md). It uses
 the same disposable `advanced_sql_training` database and reads the connection
@@ -108,38 +90,21 @@ For each day:
 The reference solutions are deliberately small. They show one sound design, not
 the only acceptable design.
 
-## Validation
+## Contributor validation
 
-From the repository root:
-
-```powershell
-# Windows PowerShell
-.\.venv\Scripts\python.exe -m compileall -q bridge
-.\.venv\Scripts\python.exe -m pytest bridge\tests -q
-.\.venv\Scripts\python.exe bridge\scripts\validate_bridge.py
-```
+Prepare the environment in [CONTRIBUTING](../CONTRIBUTING.md), then run from
+the repository root on Linux/macOS or Windows WSL 2:
 
 ```bash
-# macOS/Linux
-.venv/bin/python -m compileall -q bridge
-.venv/bin/python -m pytest bridge/tests -q
-.venv/bin/python bridge/scripts/validate_bridge.py
+uv run --no-sync python -m pytest bridge/tests bridge/professional/tests -q
+uv run --no-sync python bridge/scripts/validate_bridge.py
+uv run --no-sync python scripts/validate_notebooks.py
 ```
 
-`compileall` creates disposable `__pycache__` directories. They are ignored by
-Git and can be deleted at any time; they are not course content.
-
-Validate the professional bridge tests and notebook structure too:
-
-```powershell
-.\.venv\Scripts\python.exe -m pytest bridge\professional\tests -q -p no:cacheprovider
-.\.venv\Scripts\python.exe scripts\validate_notebooks.py
-```
-
-```bash
-.venv/bin/python -m pytest bridge/professional/tests -q -p no:cacheprovider
-.venv/bin/python scripts/validate_notebooks.py
-```
+Structural checks and fake-session tests do not prove a live connection or
+transaction observation. Record explicitly prepared integration results
+separately. Browser pads and results stay in the Docker learning volume;
+contributor file changes do not automatically update those pads.
 
 ## Safety rules
 

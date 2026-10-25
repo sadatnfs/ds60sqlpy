@@ -4,32 +4,67 @@
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **PostgreSQL** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+Start the Linux-container engine and run `./classroom` from the repository
+root. On Windows, use Ubuntu in WSL 2 or the thin
+`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
+`/classroom` home, then open **sql-deep-06**. The
+[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
+the saved project selection. No host Python or PostgreSQL installation is
+required for this browser route.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
+1. Read the prerequisite and fixture notes before running the file. Use only
+   the local disposable `advanced_sql_training` database. A simple snippet
+   such as `SELECT 1;` needs no training-schema reset.
+2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
+   preserves the lesson's reviewed psql directives, relative includes and
+   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
+   statements, but is not a replacement for an entire script's setup.
+3. When the lesson requires the course training data, use the explicit
+   preparation action and read its reset acknowledgement. It replaces the
+   course-owned `training` schema. Do not reset unrelated data or prepare
+   every lesson by habit; stateful sequences have their own ordering.
+4. Edit the learner copy in the classroom and save your prediction before
+   running. Its whole-script workspace is
+   `.learning/sql/sql-deep-06/lesson/workspace/sql/professional/lessons/sql_deep_06.sql`.
+   For browser work this path is inside the Docker learning volume, not a
+   newly created host folder beside your checkout. The checked-in source
+   remains the answer-free starting artifact.
+5. Run the whole script and inspect the full transcript. The runner uses
+   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
+   count; DDL/DML has command tags; intentional checks may produce NOTICE
+   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
+   even when an earlier query printed plausible values.
+6. Verify the lesson's expected grain, ordering, constraints and declared
+   transaction or cleanup outcome. Keep required ROLLBACK statements.
+   The warehouse sequence and other explicitly stateful exercises explain
+   when state is committed. Read saved output without rerunning it when
+   reviewing an earlier attempt.
 
-Use the private reader's **Create/open guided SQL notebook** action. It creates the ignored editable copy at `.learning/sql/sql-deep-06/lesson/workspace/sql/professional/lessons/sql_deep_06.sql`. Read the supplied fixture, write a prediction, edit that copy and run the complete script. The prepared target must be the local disposable `advanced_sql_training` database. These lessons never require a production connection or a new cloud service.
+If a relation is missing, inspect the lesson's required fixture and predecessor
+rather than guessing a new table definition. If authentication or runtime
+readiness fails, use `./classroom status` and the setup guide. Keep credentials
+out of SQL, notebooks, screenshots and committed files. Repair the first error
+before trusting partial output, and reveal separate solutions only when you
+want to compare after an attempt.
 
-The learner file starts a transaction, checks the database name, creates only temporary tables, runs two worked examples and ends with ROLLBACK. Your six query attempts belong before that final rollback. Re-run the complete file after an error so the fixture and transaction state are known. Output appears in the notebook or terminal as named columns and bounded rows; a command tag alone does not verify a SELECT result.
+### Optional contributor notebook route
 
-Windows PowerShell fallback, from the repository root:
+For notebook work, deliberately prepare the Linux/WSL contributor environment
+from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
+the notebook dependencies. Generate this lesson's private workspace through
+the maintained CLI:
 
-```powershell
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f "sql/professional/lessons/sql_deep_06.sql"
+```sh
+uv run --no-sync python scripts/course.py sql notebook sql-deep-06
 ```
 
-macOS/Linux fallback, from the repository root:
-
-```bash
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/lessons/sql_deep_06.sql
-```
-
-If the prepared database is unavailable, return to classroom setup rather than changing the target. Keep credentials outside lesson files and command text. Read the [learner SQL](../lessons/sql_deep_06.sql); keep [explanatory solutions](../solutions/sql_deep_06_solutions.md) and [executable solutions](../solutions/sql_deep_06_solutions.sql) closed until an attempt or an explicit worked comparison. PostgreSQL 16+ syntax is used; the canonical runtime is PostgreSQL 17.
+Open the printed notebook path in that environment's JupyterLab. It uses the
+same catalog-derived learner-copy layout in that contributor checkout and
+executes the complete script through psql. Its host-side state is separate
+from the Docker browser's named volume. Follow
+[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
+selection and kernel setup. Notebook generation does not execute SQL or
+authorize a reset.
 
 ## Level and prerequisites
 

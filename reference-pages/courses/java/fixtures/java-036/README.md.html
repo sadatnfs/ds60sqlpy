@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Java036: release artifact andoptional custom runtime · DS60 reference</title>
+  <title>Java 036: release artifact and optional custom runtime · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,27 +158,27 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Java036: release artifact andoptional custom runtime</h1>
+      <h1>Java 036: release artifact and optional custom runtime</h1>
       <p class="source-path">Generated from <code>courses/java/fixtures/java-036/README.md</code></p>
     </header>
-    <article class="document"><h2 id="java036-release-artifact-andoptional-custom-runtime">Java036: release artifact andoptional custom runtime<a class="heading-anchor" href="#java036-release-artifact-andoptional-custom-runtime" aria-label="Link to this section">#</a></h2>
-<p>The default Java036 reference compiles a tiny Java21 application,packages a JAR,checks class-file version65,executes a fresh-process self-test andproves that an altered artifact fails its hash gate. It creates only owned temporary files andcleans them up. It doesnot build a custom runtime image ordeploy a service.</p>
-<p>Use a fresh learner-owned directory for this manual version. The following JDK commands have the same argument form in PowerShell andPOSIX:</p>
+    <article class="document"><h2 id="java-036-release-artifact-and-optional-custom-runtime">Java 036: release artifact and optional custom runtime<a class="heading-anchor" href="#java-036-release-artifact-and-optional-custom-runtime" aria-label="Link to this section">#</a></h2>
+<p>The default Java 036 reference compiles a tiny Java 21 application, packages a JAR, checks class-file version 65, executes a fresh-process self-test and proves that an altered artifact fails its hash gate. It creates only owned temporary files and cleans them up. It does not build a custom runtime image or deploy a service.</p>
+<p>This manual fixture is an optional external JDK project, separate from the browser&#x27;s single-source pad and saved progress. The maintained contributor route is a prepared POSIX or WSL 2 environment with JDK 21. Use a fresh, learner-owned directory. The following JDK commands have the same argument form in POSIX shells and a separately prepared native PowerShell environment:</p>
 <pre class="highlighted-code"><code class="language-text">javac --release 21 -d .learning/java036-run1/classes courses/java/fixtures/java-036/src/App.java
 jar --create --file .learning/java036-run1/app.jar --main-class App --date=2020-01-01T00:00:02Z -C .learning/java036-run1/classes .
 java -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
-<p>Expected output is <code>release-ok</code> with exit0. An unsupported argument should produce <code>unknown argument</code> andexit2. Check the exit status through your shell&#x27;s normal mechanism rather than deciding success from whether any text appeared.</p>
+<p>Expected output is <code>release-ok</code> with exit 0. An unsupported argument should produce <code>unknown argument</code> and exit 2. Check the exit status through your shell&#x27;s normal mechanism rather than deciding success from whether any text appeared.</p>
 <h3 id="optional-jlink-step">Optional jlink step<a class="heading-anchor" href="#optional-jlink-step" aria-label="Link to this section">#</a></h3>
-<p>A custom runtime is a platform-specific artifact assembled from modules in the prepared JDK. It can be useful when distributing a controlled application, but the output is not one universal runtime for Windows,macOS,Linux andallCPUarchitectures. It also has a nontrivial disk footprint,so do not create it inside an ephemeral browser pad orunder the course source tree.</p>
-<p>This tiny fixture uses only <code>java.base</code>. After deliberately choosing an empty output directory andconfirming the prepared JDK includes <code>jlink</code> andits module files,you can build an optional runtime:</p>
+<p>A custom runtime is a platform-specific artifact assembled from modules in the prepared JDK. It can be useful when distributing a controlled application, but the output is not one universal runtime for Windows, macOS, Linux and all CPU architectures. It also has a nontrivial disk footprint, so do not create it inside an ephemeral browser pad or checked-in source. Use only an ignored, learner-owned output directory such as the one below.</p>
+<p>This tiny fixture uses only <code>java.base</code>. After deliberately choosing an empty output directory and confirming the prepared JDK includes <code>jlink</code> and its module files, you can build an optional runtime:</p>
 <pre class="highlighted-code"><code class="language-text">jlink --add-modules java.base --strip-debug --no-header-files --no-man-pages --output .learning/java036-run1/runtime</code></pre>
-<p>On POSIX,run the produced runtime with:</p>
+<p>On Linux, macOS or Windows through WSL 2, run the produced runtime with:</p>
 <pre class="highlighted-code"><code class="language-bash">.learning/java036-run1/runtime/bin/java -ea -jar .learning/java036-run1/app.jar --self-test</code></pre>
-<p>On Windows PowerShell,use:</p>
+<p>For comparison, an already prepared native Windows JDK produces <code>java.exe</code>. That separate host workflow is outside classroom release qualification:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-punctuation">&amp;</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span><span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">\</span>java036-run1<span class="syntax-punctuation">\</span>runtime<span class="syntax-punctuation">\</span>bin<span class="syntax-punctuation">\</span>java<span class="syntax-punctuation">.</span>exe -ea -jar <span class="syntax-punctuation">.</span>learning<span class="syntax-punctuation">/</span>java036-run1<span class="syntax-punctuation">/</span>app<span class="syntax-punctuation">.</span>jar <span class="syntax-punctuation">-</span>-self-test</code></pre>
-<p>This optional image build was not executed by the default lesson reference. Record the actual OS,architecture,JDKbuild,module list,output size andlaunch result if you perform it. A larger service usingHTTP,JDBC,JFR orothermodules needs its real dependency closure;copying this <code>java.base</code> command would omit required capabilities.</p>
+<p>This optional image build was not executed by the default lesson reference. Record the actual OS, architecture, JDK build, module list, output size and launch result if you perform it. A larger service using HTTP, JDBC, JFR or other modules needs its real dependency closure; copying this <code>java.base</code> command would omit required capabilities.</p>
 <h3 id="reviewable-release-evidence">Reviewable release evidence<a class="heading-anchor" href="#reviewable-release-evidence" aria-label="Link to this section">#</a></h3>
-<p>Retain source identity,compiler target,artifact hash,entrypoint,schema/configuration assumptions,normal andnegative launch checks,andthe previous artifact identity needed forrollback. A checksum match doesnot establish behavior,and a self-test doesnot establish production reliability. The application still needs representative contract tests,operational bounds andan owned deployment process. The course intentionally records those as separate gates.</p></article>
+<p>Retain source identity, compiler target, artifact hash, entrypoint, schema/configuration assumptions, normal and negative launch checks, and the previous artifact identity needed for rollback. A checksum match does not establish behavior, and a self-test does not establish production reliability. The application still needs representative contract tests, operational bounds and an owned deployment process. The course intentionally records those as separate gates.</p></article>
   </main>
 </body>
 </html>

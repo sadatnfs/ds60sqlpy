@@ -7,3 +7,13 @@ Specification order defines stable rust-001 through rust-048 IDs. Do not reorder
 Verify reproducibility by hashing the generated artifacts, rerunning build.py and comparing hashes. Project fixtures are directly authored source, not generator output. Reference compilation must use the pinned Rust/Arrow worker; a host compiler without the prepared Arrow library cannot qualify those chapters.
 
 Every reference checks both worked scenarios with always-active assertions. Independent and transfer tasks can admit several designs, so explanations focus on invariants and diagnostic reasoning. Do not present printed markers as automatic mastery verification. Use real malformed, null, boundary and ownership cases rather than weakening an assertion to get a pass.
+
+## Shared maintenance gates
+
+Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and
+[validation](../../../docs/validation.md) for shared formatting, generated-reader,
+link and grouped-test gates. Run only this directory's documented generator;
+`make generate` refreshes shared views, not every subject's authoring source.
+Check the generated diff and execute changed references in their declared
+runtime. A generation pass, parser result or historical receipt is not new
+runtime evidence. Preserve learner data and immutable evidence files.

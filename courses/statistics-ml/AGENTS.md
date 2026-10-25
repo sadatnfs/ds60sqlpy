@@ -13,3 +13,10 @@ complete Python fences after proving AST equivalence, including literal values.
 Use `--check` to detect drift without writing. A missing or ambiguous match
 requires reviewing the chapter and example together; never overwrite unrelated
 or intentionally invalid teaching snippets. The full formatter runs this step.
+
+Chapters, examples, manifest and coverage are maintained sources. Keep the
+shared renderer, source-prose normalizer and statistics fence synchronizer as
+separate owners. Use [the book's guide](README.md) and focused tests before
+changing coverage. Link related NLP/LLM/framework/CUDA explanations without
+turning the tutorial into mandatory exercises or equating code execution with
+statistical validity.

@@ -64,3 +64,11 @@ evidence but do not prove universal correctness. Do not invent timings or a
 GPU receipt. Companion help begins by reading the learner's saved attempt and
 capability notice, gives progressive hints, and reveals references only when
 requested. Reading completion does not certify practical hardware competence.
+
+See [the assembler guide](authoring/README.md) and
+[Python/Spark authoring](authoring/python_README.md) for exact generation and
+check commands. `build_catalog.py --check` validates assembled metadata without
+writing. A GPU Spark entry should require shared GPU and Spark foundations,
+not every optional dataframe elective. Current RAPIDS Accelerator/cuDF-plugin
+names are discoverability labels; the supported Spark/Scala/JDK/CUDA matrix and
+executed physical operators determine actual acceleration.

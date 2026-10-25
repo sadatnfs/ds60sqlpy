@@ -68,12 +68,15 @@ def enrich_guide(identity: str, document: str) -> str:
         if run_heading is None:
             raise ValueError("Missing pilot run instructions for " + identity)
         directions = (
-            f"Open the [Docker classroom](../../../docs/docker-classroom.md), choose **Journeys** "
+            f"Start or resume with `./classroom` (Windows uses WSL 2), then open the "
+            f"[classroom home](../../../docs/one-command-classroom.md), "
+            f"choose the LLM theory subject "
             f"and select `{identity}` with its `python-core` worker. Use the saved learner pad for "
             "your complete scratch program and keep the sequential A+B example contract below. "
             "The worker supplies Python and NumPy; no host installation is required. "
-            "The native interpreter commands below are an optional alternative "
-            "for an already prepared environment."
+            "Optional contributor work uses a separately prepared Linux/macOS or WSL 2 "
+            "interpreter with the declared NumPy dependencies; "
+            "the ordinary learner route stays in Docker."
         )
         position = run_heading.end()
         document = (

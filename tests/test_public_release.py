@@ -154,7 +154,7 @@ def test_distribution_mode_reports_private_directories_without_reading_notes(
 
 
 def test_staging_omits_nested_private_tool_metadata(tmp_path: Path) -> None:
-    from scripts.build_app import stage_course
+    from scripts.course_payload import stage_course
 
     source = tmp_path / "source"
     (source / "docs").mkdir(parents=True)

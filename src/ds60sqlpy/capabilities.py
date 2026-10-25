@@ -17,7 +17,6 @@ from ds60sqlpy.execution import (
     MAX_CODE_BYTES,
     MAX_OUTPUT_BYTES,
 )
-from ds60sqlpy.runtime_environment import external_dll_directory, external_program_environment
 from ds60sqlpy.sql_lesson import lesson_source_policy
 from ds60sqlpy.sql_notebook import (
     SqlNotebookError,
@@ -87,16 +86,15 @@ def _probe(python: str, code: str, environment: Mapping[str, str]) -> dict[str, 
     """Run only a fixed discovery script with closed stdin and a hard deadline."""
 
     try:
-        with external_dll_directory():
-            result = subprocess.run(
-                [python, "-I", "-c", code],
-                env=dict(environment),
-                stdin=subprocess.DEVNULL,
-                capture_output=True,
-                text=True,
-                timeout=4,
-                check=False,
-            )
+        result = subprocess.run(
+            [python, "-I", "-c", code],
+            env=dict(environment),
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=4,
+            check=False,
+        )
         value = json.loads(result.stdout) if result.returncode == 0 else {}
         return value if isinstance(value, dict) else {}
     except (OSError, ValueError, subprocess.TimeoutExpired):
@@ -115,7 +113,7 @@ def probe_python(python: str | None, modules: tuple[str, ...]) -> dict[str, Any]
         "print(json.dumps({'available':sys.version_info[:2] in ((3,11),(3,12)),"
         "'python_version':sys.version.split()[0],'missing_modules':missing}))\n"
     )
-    return _probe(python, code, external_program_environment())
+    return _probe(python, code, dict(os.environ))
 
 
 def probe_sql(python: str | None) -> tuple[bool, str]:
@@ -130,7 +128,7 @@ def probe_sql(python: str | None) -> tuple[bool, str]:
         )
     except SqlNotebookError:
         return False, "Select only the local disposable advanced_sql_training database."
-    environment = external_program_environment()
+    environment = dict(os.environ)
     for name in tuple(environment):
         if name.startswith("PG"):
             environment.pop(name)
@@ -255,10 +253,7 @@ class CapabilityService:
                 }
             ]
             if primary and lesson.lesson_path.endswith(".sql"):
-                supported = (
-                    shutil.which("psql", path=external_program_environment().get("PATH"))
-                    is not None
-                )
+                supported = shutil.which("psql") is not None
                 reason = (
                     "Runs the guarded learner SQL file, fixed psql directives and includes."
                     if descriptor["available"]

@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>PostgreSQL track · DS60 reference</title>
+  <title>PostgreSQL and analytical SQL · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,115 +158,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>PostgreSQL track</h1>
+      <h1>PostgreSQL and analytical SQL</h1>
       <p class="source-path">Generated from <code>sql/postgres-60day/README.md</code></p>
     </header>
-    <article class="document"><h2 id="postgresql-track">PostgreSQL track<a class="heading-anchor" href="#postgresql-track" aria-label="Link to this section">#</a></h2>
-<blockquote><p><strong>Study in the unified classroom:</strong> run <code>./classroom</code> from the repository root, then choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Python, SQL and all other subjects share this home and workspace. Each subject has its own theme; prerequisites guide your choices and you set the pace. The <a href="../../docs/one-command-classroom.md.html">one-command setup</a> prepares the Docker runtimes and preserves saved work. Native terminal/editor commands below are optional alternatives.</p></blockquote>
-<p>The historical core contains 60 ordered PostgreSQL lessons, companion guides, and projects. Complete beginners first use the three small-fixture lessons in the <a href="../professional/README.md.html#learning-path">SQL on-ramp</a>, then begin Day 1. Two named relational-engineering modules form the milestones between Days 15-16 and Days 39-40. Professional modules extend the core into deeper database responsibilities and correctness labs. The number is a sequence, not a deadline; the generated catalog defines the complete current curriculum.</p>
-<p>Start at the repository <a href="../../README.md.html">README</a>, and run every command from the repository root.</p>
-<p>Examples on this page use <code>python</code> for compactness. If the environment is not activated, use the repository interpreter instead: <code>&amp; $CoursePython scripts\course.py ...</code> in Windows PowerShell, or <code>.venv/bin/python scripts/course.py ...</code> on macOS/Linux. The Windows setup guide shows how to resolve <code>$CoursePython</code> for either supported <code>.venv</code> layout.</p>
-<h3 id="requirements">Requirements<a class="heading-anchor" href="#requirements" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>PostgreSQL 16 or newer</li>
-<li>PostgreSQL client tools, including <code>psql</code></li>
-<li>PostgreSQL 17 for the canonical Docker Compose environment</li>
-</ul>
-<p>Use the operating-system guide for native installation:</p>
-<ul>
-<li><a href="../../docs/setup/windows.md.html">Windows</a></li>
-<li><a href="../../docs/setup/macos.md.html">macOS</a></li>
-<li><a href="../../docs/setup/linux.md.html">Linux</a></li>
-</ul>
-<h3 id="safety">Safety<a class="heading-anchor" href="#safety" aria-label="Link to this section">#</a></h3>
-<blockquote><p>[!WARNING] <code>sql/postgres-60day/00_setup.sql</code> drops and recreates the course-owned <code>training</code> schema. Run it only in the disposable <code>advanced_sql_training</code> database. Never point it at production, shared, or valuable data.</p></blockquote>
-<p>Daily lessons normally start a transaction and end with <code>ROLLBACK</code>. The explicit exception is the warehouse project: Day 52 drops and rebuilds the course-owned <code>dwh</code> schema and commits it so Days 53 and 54 can use it. Run those three days in order. Do not remove <code>ROLLBACK</code> merely to make any other undeclared dependency work.</p>
-<h3 id="option-a-canonical-docker-compose-environment">Option A: Canonical Docker Compose environment<a class="heading-anchor" href="#option-a-canonical-docker-compose-environment" aria-label="Link to this section">#</a></h3>
-<p>This is the most reproducible route across operating systems:</p>
-<pre class="highlighted-code"><code class="language-text">docker compose up -d postgres
-docker compose run --rm sql-runner -f sql/postgres-60day/00_setup.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/00_verify.sql
-docker compose run --rm sql-runner -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
-<p>The Compose environment uses a local-only course role, password, database, and persistent volume. Stop containers without deleting the training volume:</p>
-<pre class="highlighted-code"><code class="language-text">docker compose down</code></pre>
-<p>Deleting the volume is a destructive reset and is not required for normal lessons.</p>
-<h3 id="option-b-native-postgresql">Option B: Native PostgreSQL<a class="heading-anchor" href="#option-b-native-postgresql" aria-label="Link to this section">#</a></h3>
-<p>Create <code>advanced_sql_training</code> using your OS guide, then reset and verify:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_setup.sql
-psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/00_verify.sql</code></pre>
-<p>Your OS guide shows the correct host and role flags. macOS and Linux installations often use a role matching the operating-system username; do not create an unnecessary <code>postgres</code> superuser merely to copy an old command.</p>
-<p>The seed is deterministic: relationships and categorical values are derived from row numbers, while dates remain relative to the day setup runs so recent date exercises stay useful. <code>00_verify.sql</code> fails immediately if expected coverage, chronology, totals, or foreign-key relationships are broken. The seed deliberately leaves BR as an event-only market and products 276–300 unsold, giving outer joins, <code>EXCEPT</code>, and <code>NOT EXISTS</code> visible examples.</p>
-<h3 id="cross-platform-course-cli">Cross-platform course CLI<a class="heading-anchor" href="#cross-platform-course-cli" aria-label="Link to this section">#</a></h3>
-<p>With <code>psql</code> on <code>PATH</code>, the course CLI avoids shell-specific pipes:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py sql setup --yes
-python scripts/course.py sql run 1</code></pre>
-<p>The explicit <code>--yes</code> acknowledges that setup resets the training schema. Override the default local Compose URL with <code>DS60_DATABASE_URL</code> or <code>--database</code>.</p>
-<p>Run all lessons only when the database has been prepared for the full sequence:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py sql all --reset</code></pre>
-<p>After attempting the exercises, run the complete executable answer track with the same fail-fast, state-aware runner:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py sql solutions --reset</code></pre>
-<p>Both <code>--reset</code> commands recreate the disposable <code>training</code> schema first.</p>
-<h3 id="study-a-lesson">Study a lesson<a class="heading-anchor" href="#study-a-lesson" aria-label="Link to this section">#</a></h3>
-<ol>
-<li>Open the private portal with <code>START_DS60.cmd</code> on Windows or <code>.venv/bin/python scripts/learning_portal.py</code> on macOS/Linux.</li>
-<li>Open the lesson reader, read the matching <a href="companion-guides/README.md.html">companion guide</a>, and choose <strong>Create/open guided SQL notebook</strong>. The ignored editable workspace under <code>.learning/sql/&lt;lesson-id&gt;/</code> is preserved when you reopen it.</li>
-<li>Run the readiness cells, explicitly confirm the disposable training-schema reset, edit the learner SQL copy, and run the fixed <code>psql -f</code> cell. Inspect its result columns, row grain, ordering, row counts, and first error.</li>
-<li>If you prefer a terminal, run the cataloged learner SQL file with the <code>psql -X -v ON_ERROR_STOP=1 ... -f &lt;file&gt;</code> form shown below. Use the host and role flags from your operating-system setup guide.</li>
-<li>Attempt exercises before opening either separate solution. A browser-rendered source preview is for reading; it does not execute SQL.</li>
-</ol>
-<p>If you are new to relational databases, begin with the <a href="../professional/README.md.html#learning-path">SQL on-ramp</a>, then use Day 1 and the supplied training schema. Add the named relational-engineering modules only after their declared prerequisites:</p>
-<ul>
-<li>after Day 15: <a href="../../../lesson-pages/sql-found-01.html#guide">relational design guide</a> and <a href="../../../lesson-pages/sql-found-01.html#learner">learner SQL</a>;</li>
-<li>after Day 39 and relational design: <a href="../../../lesson-pages/sql-found-02.html#guide">versioned migrations guide</a> and <a href="../../../lesson-pages/sql-found-02.html#learner">learner SQL</a>.</li>
-</ul>
-<p>Run a named module through the cross-platform course CLI:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py sql run-id sql-found-01
-python scripts/course.py sql run-id sql-found-02</code></pre>
-<p>Then continue with:</p>
-<ul>
-<li><a href="../../../lesson-pages/sql-01.html#guide">Day 1 guide</a></li>
-<li><a href="../../../lesson-pages/sql-01.html#learner">Day 1 SQL</a></li>
-<li><a href="../../../lesson-pages/sql-01.html#solution-1">Day 1 explanation</a></li>
-<li><a href="../../../lesson-pages/sql-01.html#solution-2">Day 1 executable solution</a></li>
-</ul>
-<p>Native example:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql</code></pre>
-<p><code>-X</code> ignores personal <code>psqlrc</code> settings; <code>ON_ERROR_STOP=1</code> prevents later statements from hiding the first error.</p>
-<h3 id="track-map">Track map<a class="heading-anchor" href="#track-map" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Foundations: relational design, integrity constraints, and versioned schema migration</li>
-<li>Days 1–15: relational querying, joins, subqueries, DML, functions, and a report project</li>
-<li>Days 16–30: windows, CTEs, recursion, pivots, JSON/XML, patterns, and a project</li>
-<li>Days 31–45: plans, indexes, optimization, partitioning, transactions, locks, quality, and operations</li>
-<li>Days 46–60: e-commerce, finance, data warehouse, BI, and capstone projects</li>
-<li>Professional modules: roles and row security, routines and triggers, PostgreSQL-native types and search, physical design and maintenance, SQL contracts, analytical patterns, recovery, extensions, replication/CDC, and temporal modelling</li>
-</ul>
-<p>See the <a href="../../docs/professional-paths.md.html">professional paths</a>, the <a href="../../docs/curriculum-map.md.html">curriculum map</a>, or:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py catalog --track sql</code></pre>
-<h3 id="artifact-coverage">Artifact coverage<a class="heading-anchor" href="#artifact-coverage" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Learner SQL scripts: 72 (two foundations, Days 1–60, and ten professional modules)</li>
-<li>Companion guides: 72</li>
-<li>Markdown solutions: 72</li>
-<li>Executable solution SQL: 72</li>
-</ul>
-<p>Use the catalog for the exact learner, guide, and solution paths.</p>
-<h3 id="connect-postgresql-with-python">Connect PostgreSQL with Python<a class="heading-anchor" href="#connect-postgresql-with-python" aria-label="Link to this section">#</a></h3>
-<p>After SQL Day 15 and Python Day 15, the optional <a href="../../bridge/README.md.html">engineering bridge</a> teaches parameterized Psycopg queries, transaction and retry ownership, database test doubles, ETL, concurrency, and production failure recovery.</p>
-<h3 id="progress-and-the-ai-tutor">Progress and the AI tutor<a class="heading-anchor" href="#progress-and-the-ai-tutor" aria-label="Link to this section">#</a></h3>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py progress show
-python scripts/course.py progress complete sql-01 --notes &quot;Explained filtering and query order.&quot;</code></pre>
-<p>Tutor prompt:</p>
-<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to guide SQL Day 1. Use the disposable training database, give hints before solutions, and explain my first failing statement.</code></pre>
-<p>See <a href="../../docs/learning-with-an-ai-tutor.md.html">Learning with an AI tutor</a>.</p>
-<h3 id="troubleshooting-and-validation">Troubleshooting and validation<a class="heading-anchor" href="#troubleshooting-and-validation" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><a href="../../docs/troubleshooting.md.html">Troubleshooting</a></li>
-<li><a href="../../docs/validation.md.html">Validation</a></li>
-</ul>
-<p>Run:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py validate</code></pre>
-<p>Structural validation is not a substitute for executing SQL against PostgreSQL.</p></article>
+    <article class="document"><h2 id="postgresql-and-analytical-sql">PostgreSQL and analytical SQL<a class="heading-anchor" href="#postgresql-and-analytical-sql" aria-label="Link to this section">#</a></h2>
+<p>Run <code>./classroom --starter</code> from the course folder and choose <strong>PostgreSQL</strong> from <strong>All learning paths</strong>. Docker supplies the PostgreSQL service and SQL runner. You do not need a host database installation. Start with the <a href="../../docs/one-command-classroom.md.html">setup guide</a> on Linux, macOS or Windows WSL 2.</p>
+<h3 id="choose-the-right-starting-point">Choose the right starting point<a class="heading-anchor" href="#choose-the-right-starting-point" aria-label="Link to this section">#</a></h3>
+<p>The SQL track contains <strong>84 learning units</strong>: the original 60 numbered lessons and 24 named units that add a gentler entry, foundations, deeper analysis and professional practice. The day numbers are labels, not deadlines.</p>
+<p>New SQL learners should begin with the three small-fixture lessons in the <a href="../professional/README.md.html">professional guide</a>: <code>sql-start-01</code> teaches tables and result grain, <code>sql-start-02</code> teaches NULL and ordering, and <code>sql-start-03</code> teaches query construction and debugging. Continue to <code>sql-01</code> when ready. Follow the catalog&#x27;s direct prerequisites, including foundation checkpoints before later windows, schema evolution and operational lessons.</p>
+<p>The numbered route develops selection, joins, grouping, subqueries, data changes, types and dates, window functions, CTEs, JSON/XML, execution plans, indexes, partitions and transaction behavior. Projects apply these mechanisms to commerce, finance, warehousing, BI and a final analytical handoff. Professional extensions cover relational design, migrations, security, routines, types, testing, analytical correctness, recovery boundaries, replication models, temporal data and concurrency. Six deeper units reinforce relational reasoning, advanced aggregation, event sequences and query evidence.</p>
+<h3 id="run-the-intended-artifact">Run the intended artifact<a class="heading-anchor" href="#run-the-intended-artifact" aria-label="Link to this section">#</a></h3>
+<p>Read the matching <a href="companion-guides/README.md.html">companion guide</a>, then select <strong>Whole SQL lesson (psql)</strong> for a full course script. These files can contain <code>psql</code> commands as well as SQL, so pasting them into a plain SQL snippet is not equivalent. Use snippet mode for small ordinary SQL experiments.</p>
+<p>The classroom keeps your editable learner copy separate from checked-in references. Save, predict, run and inspect the transcript&#x27;s first error and exit status. Preserve <code>ON_ERROR_STOP</code> behavior and declared transaction boundaries. Do not change a lesson&#x27;s rollback into a commit merely to make results persist. Follow the guide&#x27;s explicit stateful workflow where needed.</p>
+<p>The local disposable database is <code>advanced_sql_training</code>. A fresh classroom uses <code>admin</code> / <code>admin</code> for its limited learning role. Confirm the actual project and connection information through classroom status. Never point training resets or lesson scripts at a shared or valuable database.</p>
+<h3 id="training-setup-and-stateful-projects">Training setup and stateful projects<a class="heading-anchor" href="#training-setup-and-stateful-projects" aria-label="Link to this section">#</a></h3>
+<p>The explicit training reset establishes the standard fixtures. It replaces course-owned training data and is not an everyday startup action. Most lesson experiments clean up or roll back according to their own script. Warehouse Days 52 through 54 deliberately form a stateful sequence; follow those guides in order rather than resetting between steps. See <a href="../../docs/setup/postgresql.md.html">PostgreSQL setup</a> for the exact boundary.</p>
+<h3 id="keep-your-work">Keep your work<a class="heading-anchor" href="#keep-your-work" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>Resume uses the same project&#x27;s local containers/images and retained volumes. SQL pads, transcripts and progress live in the learning volume; database tables live in the PostgreSQL volume. Back up both before an engine reset or machine move using <a href="../../docs/docker-classroom.md.html#5-export-learning-work-and-the-database">the export guide</a>.</p>
+<h3 id="optional-notebook-and-engineering-work">Optional notebook and engineering work<a class="heading-anchor" href="#optional-notebook-and-engineering-work" aria-label="Link to this section">#</a></h3>
+<p>Ordinary SQL study stays inside the classroom. A separately prepared contributor can generate <a href="../../docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> through the supported CLI; they run full scripts with <code>psql</code>. The dedicated <a href="../../docs/setup/jupyter-postgresql.md.html">JupySQL lesson</a> instead teaches interactive <code>%sql</code> and <code>%%sql</code> cells. These are different execution contracts.</p>
+<p>Connect SQL to application code in the <a href="../../bridge/README.md.html">Python + PostgreSQL bridge</a>. Use <a href="../../docs/validation.md.html">validation</a> when contributing. Structural checks, one successful reference run and independent query reasoning are different forms of evidence. Use hints and reference explanations to understand why a query is correct, including cases where a plausible total hides duplicate rows.</p></article>
   </main>
 </body>
 </html>

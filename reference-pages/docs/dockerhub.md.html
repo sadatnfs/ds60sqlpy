@@ -164,17 +164,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="build-locally-publish-deliberately-and-pull-a-classroom-release">Build locally, publish deliberately, and pull a classroom release<a class="heading-anchor" href="#build-locally-publish-deliberately-and-pull-a-classroom-release" aria-label="Link to this section">#</a></h2>
 <p>The classroom still builds locally by default. Docker Hub is an optional way to distribute an already reviewed image set. Nothing in <code>./classroom</code> uploads images, signs in to an account, deletes volumes or changes Docker Hub settings.</p>
 <p>The publisher uses <strong>one repository</strong>, <code>YOUR_DOCKERHUB_USER/ds60sqlpy</code>, with a separate tag for each image and CPU architecture. For example:</p>
-<pre class="highlighted-code"><code class="language-text">YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-lab-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-python-core-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-php-cli-arm64</code></pre>
+<pre class="highlighted-code"><code class="language-text">YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-lab-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-worker-python-core-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-worker-php-cli-arm64</code></pre>
 <p>Use your actual lowercase Docker Hub username wherever this guide says <code>YOUR_DOCKERHUB_USER</code>. GitHub and Docker Hub are separate accounts. A private GitHub repository does not make a Docker Hub repository private. A public image contains the shipped application and course sources, so choose repository visibility deliberately before uploading. The build excludes learner state, Git history and private runtime credentials; still review the release payload.</p>
 <h3 id="1-build-and-try-the-release-on-your-machine">1. Build and try the release on your machine<a class="heading-anchor" href="#1-build-and-try-the-release-on-your-machine" aria-label="Link to this section">#</a></h3>
 <p>Run these commands in the repository folder using Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows. Start your Linux-container engine first. The following command shows the build logs, starts the classroom and opens the browser:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">0</span>.4.1 --rebuild</code></pre>
 <p>This includes the app, PostgreSQL and sixteen ordinary runtime workers. HTML and CSS previews run in the browser. PHP has its own worker. Optional NVIDIA workers are excluded from <code>--all</code> and from the normal publisher; see <a href="cuda-classroom.md.html">CUDA classroom setup</a> before choosing them.</p>
 <p>Use <code>--project NAME</code> on this and every later command if your existing workspace has a custom name. The default project is <code>ds60-classroom</code>. A new project has its own saved work; changing its name is not a way to recover previous progress.</p>
 <p>For a build without starting anything, use:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">0</span>.4.1</code></pre>
 <p>Check representative reading and runnable lessons, compiler errors, switching between subjects, saved drafts and prior results. Verify the normal lifecycle:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop
 ./classroom resume</code></pre>
@@ -186,10 +186,10 @@ YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-php-cli-arm64</code></pre>
 <p>At the password prompt, use a Docker Hub personal access token with the needed read/write permission. Do not put a token in a command, <code>.env</code>, Git, a screenshot or a lesson. Docker&#x27;s credential helper stores authentication separately from the classroom. <a href="https://docs.docker.com/security/access-tokens/">Docker access-token documentation</a></p>
 <h3 id="3-review-the-complete-image-mapping-then-publish">3. Review the complete image mapping, then publish<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish" aria-label="Link to this section">#</a></h3>
 <p>The first command only inspects local images and prints their destination tags:</p>
-<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.1</code></pre>
 <p>It requires the complete ordinary image set to exist locally and checks that the images are Linux images for one consistent architecture. It captures their immutable local IDs before any upload. It does not rebuild missing images or infer that an image passed the test suite.</p>
 <p>After reviewing that output and your release checks, explicitly publish:</p>
-<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.0 --push</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.1 --push</code></pre>
 <p>The script tags the inspected local IDs and pushes them sequentially. PostgreSQL is pulled from its existing upstream/mirror source and is not republished as your own image. GPU worker publication is excluded because it needs separate hardware qualification. The Docker Hub Tags page lets you confirm the uploaded set. <a href="https://docs.docker.com/docker-hub/repos/manage/hub-images/push/">Docker image publishing</a></p>
 <p>An interrupted upload can leave a partial release. Repeat the same command to finish its missing layers, but do not announce that release until every image has uploaded successfully. Treat released tags as immutable: use a new version when contents change, rather than silently overwriting a tag other learners use.</p>
 <h4 id="architecture-matters">Architecture matters<a class="heading-anchor" href="#architecture-matters" aria-label="Link to this section">#</a></h4>
@@ -197,19 +197,19 @@ YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-php-cli-arm64</code></pre>
 <p>The publisher adds the actual image architecture to every tag. The launcher selects the suffix matching the Docker engine. Publishing an <code>arm64</code> set does not provide an <code>amd64</code> set automatically. To serve both, build and qualify the same release on both architectures, or use the optional native-runner workflow below separately for each architecture. A missing platform tag fails visibly; the launcher will not silently rebuild or run an emulated release instead.</p>
 <h3 id="4-start-from-published-images">4. Start from published images<a class="heading-anchor" href="#4-start-from-published-images" aria-label="Link to this section">#</a></h3>
 <p>The learner still needs a matching checkout or starter ZIP for the launcher and Compose files. After you have published the required architecture, they run:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.1</code></pre>
 <p>This pulls missing classroom images, starts the services and opens the browser. It never falls back to a local build in Hub mode. A smaller installation is:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.1</code></pre>
 <p>The project saves its source, namespace and version in <code>.classroom/PROJECT/images.env</code>. These are declarative preferences, not shell code and not the learning database. Subsequent commands retain that selection:</p>
 <pre class="highlighted-code"><code class="language-bash">./classroom stop
 ./classroom resume</code></pre>
 <p><code>resume</code> and <code>--no-build</code> never build or pull, including in Hub mode. Missing containers may be recreated from matching local images while keeping volumes. If an image is missing, ordinary <code>./classroom</code> can prepare it according to the saved image source; <code>resume</code> instead explains what is missing.</p>
 <p>To download the selected images without starting services:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.1</code></pre>
 <p>To switch an existing locally built project to the published release, explicitly apply the configuration change while preserving its volumes:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.1 --rebuild</code></pre>
 <p>In Hub mode, <code>--rebuild</code> refreshes the selected published images and applies the update. It does not compile them. To return to local development:</p>
-<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">0</span>.4.1 --rebuild</code></pre>
 <p>Always use the matching source release and image tag. Preserve a learning backup before a version upgrade. Keep your project name unchanged. Do not delete named volumes as an image-update step.</p>
 <h3 id="5-optional-github-actions-publication">5. Optional GitHub Actions publication<a class="heading-anchor" href="#5-optional-github-actions-publication" aria-label="Link to this section">#</a></h3>
 <p>The repository includes <strong>Publish classroom images (manual)</strong>. It has no push, tag or scheduled trigger. Its default is a build/validation rehearsal without publishing. It runs only from <code>main</code>, checks the requested version and bounded architecture choice, and requires successful push runs of <code>.github/workflows/ci.yml</code> and <code>.github/workflows/app-build.yml</code> on <code>main</code> for the exact same Git revision. It checks the latest matching run and attempt, not a workflow&#x27;s display name or an older successful commit.</p>
@@ -226,7 +226,7 @@ YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-php-cli-arm64</code></pre>
 <li>In GitHub repository <strong>Settings → Secrets and variables → Actions</strong>, add the repository variable <code>DOCKERHUB_USERNAME</code> with your lowercase Docker Hub namespace.</li>
 <li>Create the GitHub environment <strong>dockerhub</strong> under repository settings. Add <code>DOCKERHUB_TOKEN</code> as an <strong>environment secret</strong>, not a plain variable. Do not place this token in the build jobs or commit it to the repository.</li>
 <li>If your GitHub plan supports the relevant environment protection rules, require a reviewer and restrict the environment to the release branch. If environments or the required protections are unavailable for your repository, retain the local publication route rather than assuming a protection exists.</li>
-<li>First run the workflow with <code>publish</code> left <strong>false</strong>, choosing <code>0.4.0</code> and one architecture. Review all build jobs and validation receipts. This needs available Actions runners and a successful exact-revision CI result.</li>
+<li>First run the workflow with <code>publish</code> left <strong>false</strong>, choosing <code>0.4.1</code> and one architecture. Review all build jobs and validation receipts. This needs available Actions runners and a successful exact-revision CI result.</li>
 <li>When ready to upload, deliberately set the repository variable <code>DOCKERHUB_PUBLISH_ENABLED</code> to the exact value <code>true</code>. Its absence or any other value blocks publication. The publish phase checks the flag again before downloading or authenticating.</li>
 <li>Run the workflow with <code>publish</code> <strong>true</strong>. Every image is built and qualified before the publication phase becomes eligible. Approve the environment only after reviewing the complete matrix. Tokens pass through standard input. Repeat for the other architecture only if you intend to support and qualify it.</li>
 </ol>

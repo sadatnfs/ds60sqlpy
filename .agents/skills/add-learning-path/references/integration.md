@@ -49,8 +49,8 @@ that loader deliberately if a new tutorial subject is requested.
 The supported runtime target is Linux Docker containers. Windows uses WSL 2;
 macOS uses its Docker engine's Linux environment. New subjects must join those
 workers and the Linux CI matrix. Retain Windows Docker wrappers, but do not add
-native Windows backend, ACL or executable-build qualification gates. Historical
-native setup documentation is outside the learner support contract. A Linux
+native Windows backend, ACL or executable-build qualification gates. Native backend installers, desktop executables and editor-launch APIs are retired.
+Contributor `ds60 serve` uses the same classroom shell with actual local capabilities. A Linux
 runtime pass does not validate a host's WSL installer or engine configuration.
 
 Inspect current definitions before declaring support:
@@ -59,7 +59,10 @@ Inspect current definitions before declaring support:
 - `module_jobs.py`: fixed services and validated worker endpoints.
 - `worker_operations.py`: source filename, fixed compile/run argv and deadlines.
 - `docker/workers/` and Compose: prepared dependencies, images and isolation.
-- `scripts/classroom.sh`: ordinary profile selection and startup sequence.
+- `scripts/classroom.sh` and `scripts/classroom_images.sh`: profile and image selection.
+- `docker/classroom-images.tsv`: ordinary image inventory and explicit distribution tags.
+- `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py`: portable source staging.
+- `scripts/format_repo.py`, `scripts/lint_repo.py`, `docker/formatting/`: prepared style and static validation.
 - `classroom.py` and `assets/classroom.js`: derived directory and accessible themes.
 
 Python filenames are under `src/ds60sqlpy/`. A new subject reusing an existing
@@ -91,6 +94,26 @@ when testing a later interaction result. Resize observers should schedule DOM
 writes outside their notification callback and clean up observers/animation
 work when the preview ends.
 
+The `html-browser` profile accepts a complete HTML document, embedded CSS and
+bounded inline JavaScript. Preserve native document parsing and lifecycle events;
+external scripts/imports and navigation metadata are rejected. Source in a reader
+stays escaped. Live preview is opt-in, debounced and cancelled on navigation,
+Stop or history selection, without automatically creating result receipts.
+Manual Run and explicit Save observation must preserve exact submitted source.
+Use the web subject's browser and live-preview checkers against disposable state.
+
+`php-cli` stages `main.php`, checks syntax then executes with PDO SQLite. It is
+not an HTTP server and has no Composer channel. The web subject's separate
+loopback HTTP fixture has its own ownership/session and lifecycle checks.
+
+CUDA uses reading and CPU variants alongside explicitly prepared `cuda-cpp`,
+`cuda-python`, `pytorch-cuda` and `tensorflow-cuda` profiles. GPU profiles remain
+outside ordinary defaults/`--all`, require explicit compatible NVIDIA devices
+and real allocation/kernel/readback probes. Preserve CPU framework routes and
+separate device correctness from compilation or profiling. The external GPU
+Spark route needs compatible versions and executed supported operators/plans;
+no ordinary worker acquires cluster credentials or downloads a plugin.
+
 Before designing an interactive CLI or a larger project, inspect the actual
 arguments, standard-input, file and multi-file channels. Existing pads submit
 source to fixed operations; arbitrary argv, interactive input, package installs
@@ -121,8 +144,9 @@ external workflows stay explicit. Use `--list-only` to review admission before
 running the corpus on disposable state. New runtime profiles also need a real
 syntax-failure case and diagnostic contract in `check_classroom_failures.py`.
 
-Update the expected subject set in `check_classroom_browser.py` when adding a
-subject, then prove it appears in Chromium and retains separate saved work.
+Update expected subject sets in `check_classroom_browser.py`,
+`check_classroom_ui.mjs` and their tests when adding a subject, then prove it
+appears in Chromium with an accessible individual theme and separate saved work.
 Browser-only language fixtures need real browser interaction checks. Kubernetes
 references belong in the separate owned-cluster workflow and its reviewed
 observation mapping. No model downloads or ambient cluster selection belong in
@@ -163,7 +187,7 @@ node scripts/check_classroom_ui.mjs
 python -m pytest -n 4 --dist loadgroup
 ```
 
-`make generate` covers the shared catalog, design preview, reports and readers,
+`make generate` covers the shared catalog, reports and readers,
 not every subject's authoring pipeline. If Make is unavailable, inspect its
 `generate` target and run those same Python commands in order. Do not edit
 HTML output by hand. Rendering checks must preserve copied code and detect

@@ -9,6 +9,30 @@ The image supports Linux `amd64` and `arm64`. Windows contributors run the same
 Linux image through WSL 2 and their Docker engine. It does not start classroom
 services or change learner volumes.
 
+## Shared entrypoints
+
+Run from the repository root with a local Linux-container engine:
+
+```sh
+./scripts/format-repo
+./scripts/format-repo --check
+./scripts/lint-repo
+./scripts/format-repo --list
+```
+
+The wrapper derives a local `ds60-formatting` image tag from the complete tool
+build-context fingerprint. First use builds it with visible logs; unchanged
+preparation reuses the existing image. `--build` explicitly rebuilds tools.
+The unfiltered format command also refreshes its owned generated views;
+`--language NAME` narrows source adapters and omits shared reader refresh.
+Check/list/lint modes mount source read-only. The wrapper requires a local
+Unix-socket context because a remote engine cannot safely interpret this
+checkout's bind path. It never mounts an engine socket inside the tool container.
+
+This README is excluded from the image build context and fingerprint. Updating
+instructions therefore reuses the same tools. Dockerfile, locks, wrappers and
+`.dockerignore` remain fingerprinted; a tool-input change selects a new image.
+
 ## Prepared tools
 
 | Sources | Tool and pinned release |
@@ -17,8 +41,9 @@ services or change learner volumes.
 | JavaScript, TypeScript, JSON, CSS, HTML and YAML | Prettier 3.6.2 |
 | Java | prettier-plugin-java 2.7.7 |
 | XML, including C# project files | @prettier/plugin-xml 3.4.2 |
+| PHP | @prettier/plugin-php 0.26.0 |
 | TOML | prettier-plugin-toml 2.0.6 |
-| C, C++ and C# | clang-format 21.1.8 |
+| C, C++, CUDA C++ and C# | clang-format 21.1.8 |
 | Go | gofmt from Go 1.27.3 |
 | Rust | rustfmt from Rust 1.99.1, edition 2024 |
 | Swift | swift-format from Swift 6.3.3 |
@@ -40,6 +65,8 @@ TypeScript 5.9.3 and globals 16.5.0. ShellCheck is supplied by Ubuntu 24.04.
 Offline source parsing uses tree-sitter-language-pack 0.13.0 with its exact
 compatible grammar dependencies. PostgreSQL parsing uses pglast 7.21.
 These syntax checks do not compile, execute or type-check every language.
+PHP parsing and CUDA C++ formatting do not qualify an HTTP server or a GPU.
+Use actual profile checks for those execution claims.
 
 The image also includes the source reader's locked latex2mathml and Pygments
 versions so the formatting script can regenerate published readers. See the
@@ -82,6 +109,7 @@ docker run --rm --network none --read-only --tmpfs /tmp \
 
 It exercises the configured syntax formatters, checks that a second pass is
 unchanged, and checks SQL literal and psql directive boundaries. Prose rendering
-and owned-fence synchronization have separate repository gates. The public root
-script manages the actual local image tag. Use the smoke command when changing
+and owned-fence synchronization have separate repository gates. Replace `<your-formatting-image>` with the actual `ds60-formatting` tag prepared
+by the wrapper and shown in the local image inventory; do not guess a version.
+The public root script manages that fingerprinted tag. Use the smoke command when changing
 the toolchain itself, alongside the repository checks.

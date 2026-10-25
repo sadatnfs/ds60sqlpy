@@ -1,78 +1,106 @@
-# Repository tour and upgrade rationale
+# Repository tour
 
-## What we built before this upgrade
+DS60 is one local classroom for programming, data, statistics, machine learning
+and systems. Start learning with [the front README](../README.md) and
+`./classroom`. Start development with [CONTRIBUTING](../CONTRIBUTING.md), then
+read the closest `AGENTS.md`. All learner subjects share `/classroom`; historical
+day numbers and module IDs remain stable labels rather than a fixed schedule.
 
-The Git history starts with the Python and SQL course in January 2026. The major July 24 to July 31 work expanded the teaching material, added the engineering bridge and named professional modules, introduced catalog-based validation and separate solutions, and built the portable HTML learning portal. The final July commits concentrated on PowerShell 5.1 compatibility, Windows interpreter discovery, diagnostics, and rendering authoring markers correctly.
+## Follow one lesson through the system
 
-The starting snapshot for this review was `3ed0a31`. It contained 154 cataloged lessons: 70 Python, 72 SQL, and 12 bridge. It was already a large curriculum, with complete numbered cores, more than brief answer files, 122 notebooks, a safe guided SQL notebook generator, an authenticated local launcher, and substantial tests. The canonical Python 3.12 environment passed 455 tests, with two PowerShell checks skipped because that parser was unavailable on the review host.
+1. **Authoring sources** define teaching, metadata, learner code and references.
+   Some subjects generate bundles from `courses/<subject>/authoring/`; others
+   maintain artifacts directly. Read that subject's guidance before editing.
+2. **Catalog loaders** validate identities, prerequisites, artifact paths and
+   admitted runtimes. Python/SQL/bridge use the legacy catalog. Modern subjects
+   use module plans and authored manifests. The statistics book has a separate
+   tutorial contract.
+3. **The shared classroom** derives its directory and navigation from those
+   loaders. It loads guides, preserves independent pads/notes/variants, and
+   exposes only the selected lesson's actual capabilities.
+4. **Execution** uses a fixed prepared worker, a bounded legacy operation, or an
+   opaque browser preview. Reading mode is a real learning mode without a Run
+   operation. Content metadata cannot choose arbitrary commands.
+5. **Results and progress** retain source identity. Reading a previous result
+   never reruns it. Browser observations, worker verification and self-reported
+   completion remain distinct evidence.
+6. **Static readers** render the same material offline. They provide navigation
+   and readable source; they do not install dependencies or launch host programs.
 
-This upgrade preserves that work. It adds a gentler beginner sequence and advanced correctness practice, then turns the materials into a usable coding application with an optional AI tutor. It does not renumber the historical days or treat a browser checkbox as proof of mastery.
+## Source map
 
-## Sources of truth and data flow
+| Area | Maintained files and directories |
+| --- | --- |
+| Learner entrypoint and resume | `classroom`, `scripts/classroom.sh`, `scripts/classroom_images.sh` |
+| Linux container composition | `compose.classroom.yaml`, `compose.modules.yaml`, `docker/` |
+| Image distribution catalog | `docker/classroom-images.tsv`, `scripts/publish-images`, [Docker Hub guide](dockerhub.md) |
+| Shared UI and directory | `src/ds60sqlpy/classroom.py`, `src/ds60sqlpy/assets/classroom.*` |
+| Browser observations | `src/ds60sqlpy/browser_runs.py` and the preview code in `classroom.js` |
+| Python/SQL/bridge artifacts | `python/`, `sql/`, `bridge/` and their subject guidance |
+| Legacy metadata | `catalog_builder.py`, `catalog.py`, `curriculum/extensions/`, generated `curriculum/catalog.json` |
+| Core module plans | `module_plans.py`, [five maintained plan files](expansion/README.md) |
+| Additive module routes | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |
+| Tutorial book | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters and examples |
+| Jobs, worker operations and limits | `module_jobs.py`, `module_service.py`, `worker_operations.py`, profile adapters |
+| Legacy classroom execution | `lab.py`, `execution.py`, `classroom_runs.py` |
+| State and learner exports | Runtime storage adapters, `state_files.py` and [backup instructions](one-command-classroom.md) |
+| Reading and HTTP boundaries | `lesson_reader.py`, `reader_math.py`, `reader_content.py`, `classroom_http.py`, `http_server.py` |
+| Contributor CLI and tutoring | `cli.py`, `mcp_server.py`, `coaching.py`, `study_plan.py`, `.agents/skills/` |
+| Source/workspace packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
+| Quality and CI | `tests/`, `scripts/check_*`, formatting/lint wrappers, `.github/workflows/` |
 
-```text
-lesson guides + learner artifacts + separate solutions
-                       |
-              catalog_builder.py
-                       |
-            curriculum/catalog.json
-             /         |         \
-       static readers  |     prerequisite planner
-                       |
-              CoachingService
-              /             \
-     browser learning lab   optional stdio MCP tutor
-       |             |             |
-   PadRunner   evidence/progress    read-only by default
-       |
-  Linux-container Python or local disposable PostgreSQL
+Bare Python filenames in the table are under `src/ds60sqlpy/`. Inspect current
+loaders instead of copying a historical lesson count:
+
+```sh
+python scripts/course.py catalog
+python scripts/check_modules.py --json
 ```
 
-The catalog records stable identity, prerequisites, level, time estimate, dependency group, network behavior, and artifact paths. Named route definitions specify terminal goals and derive the route from that graph. The course guide and lesson readers are generated views. They are rebuilt from source rather than edited by hand.
+The current library has 22 subjects, but execution profiles are not a subject
+count. Several languages share a worker; CUDA combines reading, CPU and optional
+GPU variants. HTML/CSS and JavaScript/D3 run in browser previews, while PHP CLI
+and the separately prepared HTTP fixture have different contracts.
 
-## Main components
+## Generated, maintained and private files
 
-| Location | Responsibility |
-| --- | --- |
-| `python/ds-60day/` | Historical Python/data-science notebooks, companion guides, and two solution formats |
-| `sql/postgres-60day/` | Historical SQL scripts, seed/verification scripts, companion guides, and separate SQL/Markdown solutions |
-| `bridge/` | Python/PostgreSQL engineering exercises and fake-backed behavior tests |
-| Each track's `professional/` directory | Stable named foundation, professional, advanced, and specialization modules |
-| `src/ds60sqlpy/catalog*.py` | Deterministic catalog generation, loading, and learner-facing ordering |
-| `study_plan.py` | Topological goal planning, shared prerequisite removal, ready lessons, and time arithmetic |
-| `coaching.py`, `progress.py` | Learner evidence and progress operations shared by the application and MCP |
-| `lab.py`, `execution.py` | Explicit coding app, authenticated actions, bounded Python/SQL backend runs |
-| `portal.py`, `lesson_reader.py` | Existing safe reading/navigation portal, fixed editor launches, and generated HTML |
-| `desktop.py`, `scripts/build_app.py` | Shared allowlisted course packaging and retained unsupported native entry-point code |
-| `mcp_server.py` | Optional SDK-backed local tutoring tools, resources, prompts, and explicit write/reveal boundaries |
-| `scripts/audit_*.py` | Practice-count and teaching-depth gates; these supplement semantic review |
-| `docs/setup/` | Windows/macOS/Linux, PostgreSQL, notebook, and offline setup |
-| `.github/workflows/` | Linux core/contributor/notebook/SQL checks, Docker runtime/browser checks, owned Kubernetes and the portable ZIP |
+Do not hand-edit `START_HERE.html`, `lesson-pages/`, `reference-pages/` or the
+legacy `curriculum/catalog.json`. Run a changed subject's documented generator
+first, format its source output, then use `make generate` for shared views.
+Read [content authoring](content-authoring.md) and [validation](validation.md)
+for the complete order and check modes. Not every generator supports `--check`;
+use only its documented command.
 
-## Learning gaps addressed
+`.learning/` is local learner/contributor state; Docker uses named volumes for
+its own learning data, PostgreSQL and private runtime state. `.classroom/`
+records launcher selection and image preferences, not a full data backup.
+Reuse the same project and engine to resume. Build outputs, caches, logs,
+credentials and Git history do not belong in the portable source ZIP.
+Historical runtime receipts are immutable observations. Formatting-equivalence
+records explain reviewed source drift; they are not fresh execution receipts.
 
-The early SQL sequence previously moved straight into the larger training schema. The new three-lesson on-ramp lets learners read tiny tables, state row grain, predict `NULL` and ordering behavior, and build or debug a query before that jump. Four inserted Python labs build confidence in tracing, debugging, cleaning records, and producing an auditable first investigation.
+## Select a safe development loop
 
-Advanced additions focus on mechanisms that broad topic surveys often leave under-practised: exact values and calendar boundaries; deployment-shaped group/time evaluation; restarting a file pipeline without false atomicity claims; duplicate-aware reconciliation and join fanout; compound cursors and bounded batches; concurrent visibility and optimistic version checks; and an integrated data-product incident review with independent fixtures.
+Use `./classroom` for prepared Docker behavior, `./classroom resume` for strict
+no-build/no-pull startup, and `./classroom --rebuild` for deliberate source or
+configuration updates. Optional GPU workers require compatible NVIDIA hardware
+and explicit selection. Ordinary `--all` excludes them and the owned-cluster
+adapter. A container build cannot prove hardware readiness.
 
-Every addition has a learner artifact, deep guide, executable reference, and explanatory solution. Practice moves from prediction through implementation and diagnosis to transfer. New lessons use a separate practice registry; the historical baseline remains unchanged. Structural headings, link checks, topic-specific verification contracts, and runnable behavior are all checked separately.
+A contributor can serve the same UI with
+`python scripts/course.py serve --no-browser` in the prepared Python environment.
+It reports actual local capabilities and does not create workers or import Docker
+progress. The native desktop executable, private editor-launch API and separate
+module/portal applications have been retired. Windows learners and contributors
+use WSL 2 for the Linux Docker route.
 
-## Application design decisions
+Use focused behavioral tests first, then the relevant
+[release gates](validation.md). The full Python suite uses
+`python -m pytest -n 4 --dist loadgroup` so shared database tests remain grouped.
+A UI or runtime change also needs actual prepared-worker/browser checks with
+disposable state. Preserve learner volumes and unrelated containers.
 
-The course now has three complementary delivery modes. Static HTML provides a complete offline reading library. The local coding application adds a guided route, code pads, transcripts, figures, saved evidence, and explicit solution comparison. The optional MCP server lets the AI tutor use those same lesson and prerequisite operations while retaining a read-only default and no arbitrary code execution.
-
-Docker packages the backend environments and database as the supported
-browser product. Windows uses WSL 2 and macOS uses its Docker engine's Linux
-environment. The historical native executable remains unsupported compatibility
-code and is not a release gate. A Dockerfile or workflow definition alone is
-not execution evidence for an engine configuration or architecture.
-
-The coding application is a personal trusted-code programming environment. It has authenticated local requests, bounded runs, exact course-database routing, and separate saved-work storage. It is not presented as a general security sandbox. The original reading portal keeps its smaller fixed launch allowlist. Live database examples remain distinct from fake-backed tests, and a saved completion remains distinct from automatically graded mastery.
-
-## Review scope and limits
-
-Parallel agents inventoried and inspected all historical lesson artifacts, with notebook-aware extraction and targeted semantic reads of guides, exercises, references, and solutions. Shared runtime, bootstrap, catalog, security boundaries, tests, history, generated views, and packaging were reviewed by their responsible agents. Generated HTML was checked against its source rather than treated as an independent authored curriculum. Large repeated artifact families also received structural and behavioral gates.
-
-This is a whole-repository onboarding and targeted upgrade, not a claim that every word was independently pedagogically validated or every heavy model ran on every platform. The checks distinguish parsed structure, local unit behavior, actual PostgreSQL execution, browser interaction, native bundle execution, and unavailable platform/container evidence. Current concrete results belong in [validation](validation.md).
-
-For a learner, start with [learning paths](learning-paths.md). For a contributor, follow [content authoring](content-authoring.md) and [CONTRIBUTING](../CONTRIBUTING.md). For the new delivery system, see [application builds](offline-app.md) and [MCP tutoring](mcp-tutor.md).
+For new learning paths, follow the [authoring skill](../.agents/skills/add-learning-path/SKILL.md).
+For tutoring, use [learning with a companion](learning-with-an-ai-tutor.md).
+The [implementation checkpoint](implementation/CHECKPOINT.md) records durable
+architecture and operational constraints, not a past developer's session state.

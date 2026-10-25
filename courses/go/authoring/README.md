@@ -38,3 +38,13 @@ expected observations only. Supporting helper declarations in guides are
 teaching material; the complete six-case reference remains a separate reveal.
 Use raw Python string literals for embedded Go code so escapes and struct tags
 survive regeneration exactly.
+
+## Shared maintenance gates
+
+Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and
+[validation](../../../docs/validation.md) for shared formatting, generated-reader,
+link and grouped-test gates. Run only this directory's documented generator;
+`make generate` refreshes shared views, not every subject's authoring source.
+Check the generated diff and execute changed references in their declared
+runtime. A generation pass, parser result or historical receipt is not new
+runtime evidence. Preserve learner data and immutable evidence files.

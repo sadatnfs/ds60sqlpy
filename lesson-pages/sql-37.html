@@ -64,8 +64,6 @@
       font-size: .73rem; letter-spacing: .04em;
     }
     .top-actions { display: flex; align-items: center; gap: .7rem; }
-    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
-    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
     .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
     .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
@@ -95,7 +93,6 @@
     .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
     .button.secondary { color: var(--navy); background: transparent; }
     .button.secondary:hover { color: #fff; background: var(--navy); }
-    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
     .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
     .sql-run-guide {
       margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
@@ -200,7 +197,6 @@
     .nav-card.disabled { opacity: .65; }
     footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
     @media (max-width: 760px) {
-      .top-actions .completion { display: none; }
       .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
       .run-steps li::before { margin-bottom: .15rem; }
       .run-actions, .artifact-actions { justify-content: flex-start; }
@@ -268,10 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <div class="shell">
       <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
       <div class="top-actions">
-        <label class="completion launcher-only" hidden>
-          <input id="lesson-complete" type="checkbox">
-          Mark complete
-        </label>
+
         <a class="static-only" href="../START_HERE.html#catalog">
           Track completion on the course dashboard
         </a>
@@ -302,22 +295,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <section class="run-card" aria-labelledby="run-heading">
         <div>
           <p class="eyebrow">Your working copy</p>
-          <h2 id="run-heading">Open your guided SQL workspace</h2>
-          <p id="run-guidance">In private launcher mode, choose <strong>Create/open guided SQL notebook</strong>. It opens an editable copy, a safe database-preparation step, and the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> transcript in one JupyterLab notebook. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
+          <h2 id="run-heading">Run SQL in the classroom</h2>
+          <p id="run-guidance">Run <code>./classroom</code>, choose this SQL lesson, and use its coding pad or whole-lesson controls. Whole lessons run the real <code>psql -X -v ON_ERROR_STOP=1 -f</code> script after you prepare the course schema. The target must be the disposable <code>advanced_sql_training</code> database, never a shared or valuable one.</p>
           <div class="static-help">
-            <strong>If the green SQL-notebook button is not visible, this is reading mode.</strong><br><strong>Windows:</strong> return to the repository folder and double-click <code>START_DS60.cmd</code>. Keep its terminal open; the launcher opens a new private browser page. Find this lesson there and choose <strong>Create/open guided SQL notebook</strong>.<br><strong>macOS/Linux:</strong> from the repository root run <code>.venv/bin/python scripts/learning_portal.py</code>, then use the new private browser page. The manual fallback is to open the real <code>.sql</code> file in VS Code and use the guide's fixed <code>psql -f</code> command.
+            This file is a reading preview. Run <code>./classroom</code> from the course folder and select this lesson to save your attempt and use its supported runtime. On Windows, use WSL 2 or <code>START_DOCKER_CLASSROOM.cmd</code> after engine setup. External projects follow the prerequisites and cleanup in their own guide.
           </div>
-          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
         </div>
         <div class="run-actions">
           <a class="button" href="#" data-vscode-path="sql/postgres-60day/day37_partitioning_sharding.sql">
             Open learner artifact in VS Code
           </a>
-          <button class="button launcher-only" type="button" id="launch-learner" hidden>
-            Open with guided launcher
-          </button>
-
-          <button class="button launcher-only" type="button" id="launch-sql-notebook" hidden>Create/open guided SQL notebook</button>
           <a class="button lab-only" href="../learn?lesson=sql-37" hidden>
             Practice and keep evidence in the coding lab
           </a>
@@ -325,64 +312,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       </section>
 
 
-      <section class="sql-run-guide native-only" aria-labelledby="sql-run-guide-heading">
+      <section class="sql-run-guide" aria-labelledby="sql-run-guide-heading">
         <p class="eyebrow">SQL beginner path</p>
         <h2 id="sql-run-guide-heading">From this page to a real query result</h2>
-        <p>
-          The browser explains the lesson; PostgreSQL executes it. The private
-          course portal connects the two safely by creating your own ignored
-          workspace at <code>.learning/sql/sql-37/lesson/</code>.
-        </p>
         <ol class="run-steps">
-          <li>
-            <strong>Start guided mode.</strong>
-            <span>On Windows, double-click <code>START_DS60.cmd</code> and keep its
-            terminal open. On macOS/Linux, run
-            <code>.venv/bin/python scripts/learning_portal.py</code> from the repository root.</span>
-          </li>
-          <li>
-            <strong>Check the database boundary.</strong>
-            <span>The readiness check must identify local PostgreSQL and only the
-            disposable <code>advanced_sql_training</code> database. Never substitute a
-            workplace, shared, or valuable database.</span>
-          </li>
-          <li>
-            <strong>Create the lesson workspace.</strong>
-            <span>Return to this lesson over <code>127.0.0.1</code> and click
-            <strong>Create/open guided SQL notebook</strong>. JupyterLab opens
-            <code>guided.ipynb</code> beside an editable copy of the lesson SQL.</span>
-          </li>
-          <li>
-            <strong>Read, predict, edit, then run.</strong>
-            <span>Run the readiness cells first. Open the linked editable
-            <code>.sql</code> file, complete one exercise, save it, explicitly confirm
-            the course-schema reset, then run the fixed <code>psql -f</code> cell.</span>
-          </li>
-          <li>
-            <strong>Inspect evidence.</strong>
-            <span>Results and errors appear in the notebook transcript. Success means
-            the command exits cleanly, the course verification cell passes, and you
-            can explain the result's columns, row grain, and ordering.</span>
-          </li>
+          <li><strong>Start the classroom.</strong>
+            <span>Run <code>./classroom</code>, then choose this SQL lesson.</span></li>
+          <li><strong>Read the database preparation notice.</strong>
+            <span>Use only the disposable <code>advanced_sql_training</code> database.
+            Preparing its training schema resets course tables. Existing pad text and
+            notes remain saved separately.</span></li>
+          <li><strong>Read, predict, edit, then run.</strong>
+            <span>Use the SQL pad for a focused statement, or whole-lesson mode when
+            the source requires fixed includes or transaction sequences.</span></li>
+          <li><strong>Inspect the result.</strong>
+            <span>Explain the columns, row grain and ordering. Save the complete
+            transcript and diagnose its first error before changing the query.</span></li>
         </ol>
-        <details>
-          <summary><strong>If something fails, start with the first message</strong></summary>
-          <dl class="error-map">
-            <dt><code>psql was not found</code></dt>
-            <dd>Close Jupyter, rerun the course launcher/bootstrap so PostgreSQL is
-            discovered, then reopen the notebook from that same portal session.</dd>
-            <dt><code>connection refused</code></dt>
-            <dd>Start the local PostgreSQL service and rerun the readiness check.</dd>
-            <dt><code>database "advanced_sql_training" does not exist</code></dt>
-            <dd>Return to setup and create only the disposable course database.</dd>
-            <dt><code>relation "training.…" does not exist</code></dt>
-            <dd>Read the reset warning, set the notebook's confirmation value to
-            <code>True</code>, and rerun the preparation cell before the lesson.</dd>
-            <dt><code>ERROR … at line …</code></dt>
-            <dd>Fix the first reported error in the editable SQL copy, save the file,
-            and run the lesson cell again. Later errors can be consequences of the first.</dd>
-          </dl>
-        </details>
+        <p>Prepared contributors who prefer notebooks can follow the optional
+          <a href="../reference-pages/docs/guided-sql-notebooks.md.html">SQL notebook guide</a>.
+          A notebook preview alone does not run a query.</p>
       </section>
 
 
@@ -418,14 +367,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
             <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/companion-guides/day37_partitioning_sharding.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="Companion guide"
-              data-artifact-kind="guide"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -437,28 +379,20 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Artifacts:</strong> <a href="sql-37.html#learner">learner SQL</a> · <a href="sql-37.html#solution-1">solution reasoning</a> · <a href="sql-37.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>PostgreSQL</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<p>The rendered lesson page is for reading. PostgreSQL runs the real learner SQL. For a first attempt, use the private course portal so the database check, ignored working copy, and complete <code>psql</code> transcript remain together.</p>
+<p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-37</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
 <ol>
-<li>Open a terminal in the repository root. On Windows, double-click <code>START_DS60.cmd</code> or run:</li>
+<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database. A simple snippet such as <code>SELECT 1;</code> needs no training-schema reset.</li>
+<li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
+<li>When the lesson requires the course training data, use the explicit preparation action and read its reset acknowledgement. It replaces the course-owned <code>training</code> schema. Do not reset unrelated data or prepare every lesson by habit; stateful sequences have their own ordering.</li>
+<li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
+<li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
+<li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
 </ol>
-<pre class="highlighted-code"><code class="language-powershell">   <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>START_DS60<span class="syntax-punctuation">.</span>cmd</code></pre>
-<p>On macOS or Linux, run:</p>
-<pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
-<ol>
-<li>Open <strong>SQL-37; Partitioning Sharding</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
-<li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
-<li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
-<li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
-</ol>
-<p>Manual <code>psql</code> fallback:</p>
-<pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\postgres-60day\day37_partitioning_sharding.sql</span><span class="syntax-string">&quot;</span></code></pre>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
-  -f sql/postgres-60day/day37_partitioning_sharding.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>If a relation is missing, inspect the lesson&#x27;s required fixture and predecessor rather than guessing a new table definition. If authentication or runtime readiness fails, use <code>./classroom status</code> and the setup guide. Keep credentials out of SQL, notebooks, screenshots and committed files. Repair the first error before trusting partial output, and reveal separate solutions only when you want to compare after an attempt.</p>
+<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
+<p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
+<pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-37</code></pre>
+<p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Partition bound, Partition pruning, Sharding. Its worked SQL reads or creates <code>big_events</code>, <code>big_events_2025_01</code>, <code>big_events_2025_02</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -554,7 +488,7 @@ logical order and state the expected row grain/shape before asking me to run
 anything. The guide&#x27;s lesson-specific worked-model focus is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
 
 Use only the local disposable advanced_sql_training database. Prefer the
-lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
 .learning/sql/sql-37/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
@@ -588,14 +522,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
             <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/day37_partitioning_sharding.sql">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="PostgreSQL script"
-              data-artifact-kind="lesson"
 
-              hidden
-            >Open with guided launcher</button>
           </div>
         </header>
 
@@ -707,14 +634,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
             <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day37_solutions.md">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="lesson notes"
-              data-artifact-kind="solution"
-               data-solution-index="0"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -931,14 +851,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
             <a class="button secondary" href="#" data-vscode-path="sql/postgres-60day/solutions/day37_solutions.sql">
               Open this file in VS Code
             </a>
-            <button
-              class="button launcher-only"
-              type="button"
-              data-launch-artifact="PostgreSQL script"
-              data-artifact-kind="solution"
-               data-solution-index="1"
-              hidden
-            >Open with guided launcher</button>
+
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
@@ -1085,7 +998,7 @@ logical order and state the expected row grain/shape before asking me to run
 anything. The guide&#x27;s lesson-specific worked-model focus is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect EXPLAIN to prove February is pruned rather than assuming it.
 
 Use only the local disposable advanced_sql_training database. Prefer the
-lesson reader&#x27;s Create/open guided SQL notebook action and its ignored
+Docker classroom&#x27;s Whole SQL lesson (psql) workspace and its ignored
 .learning/sql/sql-37/ working copy. Never point setup, reset, DDL, or DML
 at a shared or valuable database, and never ask me to paste a password.
 
@@ -1119,24 +1032,15 @@ transfer task that I answer without looking back. Done when I can explain the ro
 
   <script>
     "use strict";
-    const LESSON_ID = "sql-37";
-    const LEARNER_PATH = "sql/postgres-60day/day37_partitioning_sharding.sql";
-    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
     const SERVER_TOKEN = "";
     const LAB_MODE = false;
-    const launcherMode = Boolean(
-      SERVER_TOKEN &&
-      !LAB_MODE &&
-      location.protocol === "http:" &&
-      location.hostname === "127.0.0.1"
-    );
     const labMode = Boolean(
       SERVER_TOKEN && LAB_MODE &&
       location.protocol === "http:" && location.hostname === "127.0.0.1"
     );
     if (labMode) {
       document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
-      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelectorAll(".static-help, .static-only").forEach((element) => { element.hidden = true; });
       document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
       document.querySelector("#run-guidance").textContent =
         "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
@@ -1227,111 +1131,6 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    function readProgress() {
-      try {
-        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
-        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
-      } catch {
-        return { completed: [], setup: {}, os: "windows" };
-      }
-    }
-
-    function writeProgress(complete) {
-      const state = readProgress();
-      const completed = new Set(state.completed);
-      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
-      state.completed = [...completed].sort();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
-    }
-
-    const completion = document.querySelector("#lesson-complete");
-    if (launcherMode) {
-      completion.checked = readProgress().completed.includes(LESSON_ID);
-      completion.addEventListener("change", async () => {
-        writeProgress(completion.checked);
-        try {
-          await apiRequest("/api/progress", {
-            method: "POST",
-            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
-          });
-          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
-        } catch (error) {
-          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
-        }
-      });
-    }
-
-    function setStatus(message, failed = false) {
-      const status = document.querySelector("#launcher-status");
-      status.textContent = message;
-      status.style.color = failed ? "var(--red)" : "var(--muted)";
-    }
-
-    async function apiRequest(path, options = {}) {
-      const response = await fetch(path, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          "X-DS60-Token": SERVER_TOKEN,
-          ...(options.headers || {})
-        }
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
-      return payload;
-    }
-
-    async function launch(detail) {
-      setStatus("Opening the allowlisted course artifact…");
-      try {
-        const payload = await apiRequest("/api/launch", {
-          method: "POST",
-          body: JSON.stringify(detail)
-        });
-        setStatus(payload.action + " started.");
-      } catch (error) {
-        setStatus("Could not launch this artifact: " + error.message, true);
-      }
-    }
-
-    if (launcherMode) {
-      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
-      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
-      setStatus("Guided launcher mode is ready.");
-      document.querySelector("#launch-learner").addEventListener("click", () => {
-        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
-      });
-      const jupyterButton = document.querySelector("#launch-jupyter");
-      if (jupyterButton) {
-        jupyterButton.addEventListener("click", () => {
-          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
-        });
-      }
-      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
-      if (sqlNotebookButton) {
-        sqlNotebookButton.addEventListener("click", () => {
-          void launch({
-            action: "jupyter-sql",
-            lesson_id: LESSON_ID,
-            artifact: "lesson",
-            solution_index: 1
-          });
-        });
-      }
-      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const detail = {
-            action: "open-artifact",
-            lesson_id: LESSON_ID,
-            artifact: button.dataset.artifactKind
-          };
-          if (button.dataset.solutionIndex !== undefined) {
-            detail.solution_index = Number(button.dataset.solutionIndex);
-          }
-          void launch(detail);
-        });
-      });
-    }
   </script>
 </body>
 </html>

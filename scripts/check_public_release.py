@@ -183,7 +183,7 @@ def scan_text(path: str, text: str) -> list[Finding]:
                         "**/" + CREDENTIAL_DIRECTORY,
                     }:
                         continue
-                    if path == "scripts/build_app.py" and line.strip().rstrip(",") in {
+                    if path == "scripts/course_payload.py" and line.strip().rstrip(",") in {
                         repr(CREDENTIAL_DIRECTORY),
                         json.dumps(CREDENTIAL_DIRECTORY),
                     }:

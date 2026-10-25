@@ -490,14 +490,14 @@ are a separate, explicit step.
 
 ## Next step
 
-Complete planned `spark-014`, the twelve-event revenue capstone in the
-[track sequence](../../../docs/expansion/tracks/scala-spark.md#spark-014-capstone-a-reconciled-local-revenue-report).
+Continue to [spark-014](spark-014.md), the authored twelve-event revenue
+capstone. The [course README](../README.md) explains the broader track sequence.
 Use the [separate solutions](../solutions/spark-013_solutions.md) to review your
 reasoning only after an attempt or an explicit request.
 
 ## Durable worker artifacts
 
-The Scala attempt is [spark-013.scala](../lessons/spark-013.scala); the paired Python attempt is [spark-013.py](../lessons/spark-013.py). The worker stages them as Main.scala/object Main or main.py. Both expose paidEvents/paid_events and summarize functions for independent typed checks. The [standard-library oracle](../fixtures/spark013_oracle.py) and [seven-row JSON fixture](../fixtures/spark013.json) are local and require no download. The worker may finish execution without grading when verification_id is null. A registered typed verifier must check identities, schema, NULLs and a changed fixture, not stdout keywords. Prerequisite spark012 is not assumed published.
+The Scala attempt is [spark-013.scala](../lessons/spark-013.scala); the paired Python attempt is [spark-013.py](../lessons/spark-013.py). The worker stages them as Main.scala/object Main or main.py. Both expose paidEvents/paid_events and summarize functions for independent typed checks. The [standard-library oracle](../fixtures/spark013_oracle.py) and [seven-row JSON fixture](../fixtures/spark013.json) are local and require no download. The worker may finish execution without grading when verification_id is null. A registered typed verifier must check identities, schema, NULLs and a changed fixture, not stdout keywords. Review the authored [spark-012](spark-012.md) session and schema lesson before this unit.
 
 ## Ask an AI tutor about this lesson
 
@@ -510,6 +510,7 @@ My observed IDs/metrics or exact error are: <paste>.
 Help me locate a grain, NULL or ordering mistake. Ask one retrieval question,
 then give the smallest next hint. Do not open or reproduce
 ../solutions/spark-013_solutions.md until I have attempted the work or explicitly
-ask for the solution. This is a planned Spark profile: do not claim it already
-runs in the current app or install dependencies for me.
+ask for the solution. Check the selected Scala or PySpark runtime readiness
+in the current classroom before execution. Do not install dependencies or
+claim a successful run without observing its actual result.
 ```

@@ -72,3 +72,8 @@ python courses/web-development/authoring/check_live_preview.py --url http://127.
 
 Never point it at a learner's real saved classroom. It intentionally edits
 test pads and creates only the explicitly requested observation records.
+
+Follow [authoring/README.md](authoring/README.md) for template ownership,
+exact-byte generation checks and browser qualification. The unified classroom
+owns navigation, themes and state; a new web specialization must not introduce
+a second lesson-serving application.

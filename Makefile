@@ -1,22 +1,19 @@
 PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 TEST_WORKERS ?= 4
-MODULE_PROFILES ?= python-core,cpp20
 
-.PHONY: help setup generate format format-check lint journey-preview check test test-serial testserial lab mcp app windows-starter docker docker-stop docker-status modules-build modules-start modules-stop modules-check classroom classroom-build classroom-start classroom-stop
+.PHONY: help setup generate format format-check lint check test test-serial testserial serve mcp starter docker docker-stop docker-status modules-check classroom classroom-build classroom-start classroom-stop
 help:
 	@echo "classroom: resume saved containers; build only missing images (or run ./classroom)"
 	@echo "Windows: run in the WSL 2 Ubuntu shell with Docker integration enabled"
 	@echo "classroom-build: build selected updates; classroom-start: strict no-build resume; classroom-stop: pause"
 	@echo "./classroom --rebuild: install source updates; --all: select all ordinary workers"
-	@echo "windows-starter: package the portable Docker source ZIP (legacy target name)"
+	@echo "starter: package the complete Docker source ZIP for every supported host"
 	@echo "setup: install the Linux contributor environment; learners only need Docker"
+	@echo "serve: run the contributor classroom on loopback; mcp: start the optional tutor adapter"
 	@echo "generate: refresh catalog/readers/reports; check: validate source and tests"
 	@echo "format: style maintained sources with Docker; format-check: check without changing sources"
 	@echo "lint: read-only static source checks using the same Docker toolchain"
 	@echo "test: grouped parallel suite (TEST_WORKERS=4); test-serial: serial debugging"
-	@echo "journey-preview: rebuild the historical design preview"
-	@echo "modules-build/start/stop: contributor host-folder labs (MODULE_PROFILES=python-core,cpp20)"
-	@echo "Historical targets outside Docker release support: lab (native server), app (native executable)"
 
 setup:
 	bash scripts/setup.sh
@@ -24,7 +21,6 @@ setup:
 generate:
 	$(PYTHON) scripts/normalize_lesson_prose.py --write
 	$(PYTHON) scripts/build_catalog.py
-	$(PYTHON) scripts/build_journey_preview.py
 	$(PYTHON) scripts/audit_practice.py --write-report
 	$(PYTHON) scripts/audit_lesson_depth.py --write-report
 	$(PYTHON) scripts/build_course_guide.py
@@ -39,11 +35,9 @@ format-check:
 lint:
 	./scripts/lint-repo
 
-journey-preview:
-	$(PYTHON) scripts/build_journey_preview.py
-
 check: format-check lint
 	$(PYTHON) scripts/check_public_release.py
+	$(PYTHON) scripts/check_repository_guidance.py
 	$(PYTHON) scripts/normalize_lesson_prose.py
 	$(PYTHON) scripts/check_content_rendering.py
 	$(PYTHON) scripts/check_published_links.py
@@ -58,17 +52,14 @@ test-serial:
 
 testserial: test-serial
 
-lab:
-	$(PYTHON) scripts/learning_lab.py
+serve:
+	$(PYTHON) scripts/course.py serve
+
+starter: generate
+	$(PYTHON) scripts/build_starter.py
 
 mcp:
 	@$(PYTHON) scripts/mcp_server.py --repo "$(CURDIR)"
-
-app: generate
-	$(PYTHON) scripts/build_app.py
-
-windows-starter: generate
-	$(PYTHON) scripts/build_windows_starter.py
 
 docker:
 	bash classroom
@@ -78,15 +69,6 @@ docker-stop:
 
 docker-status:
 	bash classroom status
-
-modules-build:
-	bash scripts/module_lab.sh build --profiles "$(MODULE_PROFILES)"
-
-modules-start:
-	bash scripts/module_lab.sh start --profiles "$(MODULE_PROFILES)"
-
-modules-stop:
-	bash scripts/module_lab.sh stop --profiles "$(MODULE_PROFILES)"
 
 modules-check:
 	$(PYTHON) scripts/check_modules.py

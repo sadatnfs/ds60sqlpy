@@ -172,7 +172,7 @@ Continue with [spark-003](spark-003.md), which puts these expression rules behin
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-002.
 Read courses/scala-spark/guides/spark-002.md and courses/scala-spark/lessons/spark-002.scala.
-Direct design prerequisites: `spark-001`. This is authored beta content; check actual runtime capability and unpublished prerequisites.
+Direct design prerequisites: `spark-001`. This lesson is authored; check its current runtime readiness and direct prerequisites.
 Explain one mechanism, ask me to predict, let me attempt one exercise, then give one hint at a time.
 Do not read courses/scala-spark/solutions/ until I make an honest attempt or explicitly ask for a reveal.
 Review my exact values, diagnostics or written evidence; distinguish source inspection, process success and verified understanding.

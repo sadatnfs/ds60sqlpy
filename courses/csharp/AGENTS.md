@@ -8,6 +8,14 @@ The ordinary profile is `csharp-dotnet`. Keep all reference programs determinist
 
 Each practice chapter needs original mechanism teaching, vocabulary, two complete worked examples, six progressive tasks, diagnosed mistakes, an answer-free starter and a separate executable/explanatory solution. Do not use em dashes or generic topic-list filler. Do not suppress failed assertions or claim production readiness from compilation alone.
 
-Swift Apple-framework chapters use portable domain kernels in Linux and actual macOS/Xcode fixtures for UI work. Never claim SwiftUI, UIKit, Apple simulators or signing run inside Linux Docker. C# uses .NET 10 framework libraries without NuGet packages in the ordinary pad.
+The `csharp-dotnet` worker stages `Program.cs` in a fixed .NET 10 console project.
+Ordinary examples use prepared framework libraries without ad hoc NuGet packages.
+ASP.NET and multi-file application fixtures have a separate explicit project
+workflow; a successful console program does not qualify an HTTP service.
 
 Run subject generation drift checks, compiler/reference checks in the actual prepared worker, module and rendering validation, and project-specific checks. Record skipped platforms honestly. Root integration owns shared loaders, workers, themes and CI.
+
+Use [the subject authoring guide](authoring/README.md) for regeneration and
+[the module contract](../../docs/implementation/ADDING_A_MODULE.md) for shared
+runtime integration. Root guidance owns common formatting, saved-work and
+publication rules; subject changes must preserve those boundaries.

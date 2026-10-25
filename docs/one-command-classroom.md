@@ -23,13 +23,14 @@ unless you choose `--starter` or specific profiles.
 
 Repeat the same command to **resume your existing installation**. Updating the
 source folder does not automatically rebuild installed images. Use
-`./classroom --rebuild` when you deliberately want to install those updates.
+`./classroom --local-build --rebuild` when you deliberately want to install
+updated local source. Published Hub images have their own update mode below.
 
 The command uses Bash, already available on macOS and in Ubuntu/WSL. Confirm
 that `docker info` succeeds as your normal user before starting; engine access
 permissions and WSL integration belong to the engine installation. The course
 runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Go,
-.NET, Rust, Swift, Java, Node, TensorFlow, PyTorch or Spark on the host.
+.NET, Rust, Swift, Java, Node, PHP, TensorFlow, PyTorch or Spark on the host.
 First preparation needs internet and downloads several large SDK and framework
 images. For the full sixteen-worker set, budget about **60 GB of free disk**
 for images, dependencies and build cache, and start with **8 GB of engine
@@ -71,8 +72,8 @@ its Docker integration are ready. The distinction matters for the Windows
 wrapper. If Windows execution is blocked by installation policy, follow your
 organization's approved setup route. WSL installation and engine integration
 cannot be established by a macOS run; the release report states what was
-observed. The product runs in Linux containers. Native Windows Python backends
-and executable bundles are outside the supported route and release gates.
+observed. The product runs in Linux containers. Windows uses the same Bash launcher
+inside its prepared WSL 2 distribution.
 
 ## Resume, recover or update
 
@@ -109,11 +110,12 @@ are reused.
 
 | Your intention | Command | Effect |
 | --- | --- | --- |
-| Continue studying | `./classroom` | Resume the saved selection; build only missing images |
+| Continue studying | `./classroom` | Resume the saved selection; prepare only missing images using the saved local/Hub mode |
 | Continue without any downloads or builds | `./classroom resume` | Use existing containers/images or report missing preparation |
 | Pause until later | `./classroom stop` | Stop project containers; retain all volumes and settings |
-| Install changed source files | `./classroom --rebuild` | Rebuild the selected images and update containers as needed |
-| Prepare updated images for later | `./classroom build` | Build selected images without starting services |
+| Install changed local source files | `./classroom --local-build --rebuild` | Build selected local images and update containers while retaining volumes |
+| Prepare local images for later | `./classroom build --local-build` | Build selected images without starting services |
+| Download a configured Hub release for later | `./classroom pull` | Pull selected Hub images without starting services; requires saved Hub configuration |
 | Prepare every ordinary runtime | `./classroom --all` | Save the full selection and prepare its missing images |
 
 A source, container configuration or deliberate port-setting change uses the
@@ -138,33 +140,21 @@ selects different volumes, even when its images are the same.
 
 ## What a new default project prepares
 
-| Runtime | Service |
-| --- | --- |
-| Python, NumPy, pandas, statistics and NLP | `python-core-worker` |
-| C++20 compiler | `cpp-worker` |
-| C17 compiler | `c-worker` |
-| Go compiler and prepared standard library | `go-worker` |
-| C# and .NET compiler/runtime | `csharp-worker` |
-| Rust compiler and prepared Arrow dependency | `rust-worker` |
-| Swift 6 Linux/Foundation compiler | `swift-worker` |
-| Java compiler and JVM | `java-worker` |
-| JavaScript with Node | `javascript-worker` |
-| Strict TypeScript compilation | `typescript-worker` |
-| TensorFlow on CPU | `tensorflow-worker` |
-| PyTorch and tensor-based LLM lessons | `llm-worker` |
-| Scala/JVM | `scala-worker` |
-| Spark with Scala | `spark-scala-worker` |
-| PySpark | `spark-python-worker` |
+The app serves the complete library, PostgreSQL stores the disposable course
+database, and sixteen ordinary workers provide the language/framework
+runtimes. [Runtime profiles](docker-profiles.md) lists their exact names,
+filenames and boundaries. HTML/CSS and browser JavaScript/D3 need only the app's
+bundled preview. PHP uses its own CLI worker.
 
-Kubernetes cluster preparation and optional pretrained-model downloads remain
-explicit lesson workflows. Opening the classroom does not create a cluster,
-download model weights or call a paid API. The ordinary lessons are usable
-offline after their images and local fixtures are prepared.
+Kubernetes cluster preparation, pretrained-model downloads and optional
+NVIDIA GPU workers remain explicit workflows. GPU profiles are excluded from
+`--all`; a CPU-only machine can still read the CUDA subject and run its CPU
+models. Opening the classroom does not create a cluster, download model
+weights or call a paid API.
 
 A new project uses the repository's pinned/public registry alternatives by
 default, with TLS verification enabled. The chosen registry mode is remembered
-per project; it matters when an image needs preparation. This handles the
-Docker Hub CDN issue observed during local validation. Existing `.env` and shell overrides remain
+per project; it matters when an image needs preparation. Use it when the selected public base registry is the appropriate route for your network. Existing `.env` and shell overrides remain
 in effect. To use ordinary upstream image defaults instead, run:
 
 ```sh
@@ -175,6 +165,35 @@ A build log line marked `CACHED` means Docker reused an unchanged step. `RUN`
 steps install the image's dependencies; `COPY` steps place the course sources
 inside it. The image is saved to your local engine. No command pushes an image,
 prunes caches or deletes a learning volume.
+
+## Local builds and published Hub images
+
+Local builds are the default. Their source comes from your downloaded checkout,
+and normal startup builds only missing selected images. To build selected local
+images with visible logs and start them in one command, use:
+
+```sh
+./classroom --local-build --rebuild
+```
+
+After the owner publishes a compatible release, you can instead choose Hub
+images. Replace the placeholders with the actual publisher and release:
+
+```sh
+./classroom --from-hub PUBLISHER --tag VERSION
+```
+
+That setting is remembered for this project. Hub mode pulls matching native
+architecture tags and never silently falls back to a local build. Normal
+startup pulls missing selected images; `resume` never pulls. `./classroom pull`
+refreshes the selected Hub images without starting them. `--rebuild` in Hub
+mode refreshes images and applies the update; it does not compile local edits.
+
+Use `--local-build` when deliberately returning to source builds. Image source
+and base-registry choice are different: `--registry` chooses public base-image
+sources for local preparation, while `--from-hub` chooses published DS60 images.
+A successful Git push does not mean images were published. See
+[Docker Hub distribution](dockerhub.md) for tags, architectures and publication.
 
 ## Ports and saved work
 
@@ -201,8 +220,9 @@ use fixed ports; use `./classroom` for automatic port discovery.
 
 The ignored `.classroom/<project>/` directory contains `selection.env` for the
 selected runtime profiles and registry mode, `ports.env` for host-port choices,
-`classroom.url` for the last ready address, and a transient launch lock. The
-profile/registry selection and requested ports are saved before image
+`images.env` for local/Hub image selection and release, `classroom.url` for
+the last ready address, and a transient launch lock. The
+profile/registry selection, image-source settings and requested ports are saved before image
 preparation; the ready URL is written only after the browser endpoint responds.
 Existing projects without `selection.env` infer known profiles from their own worker containers;
 if neither saved selection nor recognizable workers exists, the new-project
@@ -210,8 +230,9 @@ default applies. Explicit profile flags override the remembered selection.
 
 These files are not the learning database or a backup. Keep this directory for
 convenient restarts; deleting it does not delete Docker volumes, but can lose
-profile or port preferences. It is excluded from images and archives. The older
-host-folder `.learning` workflow remains a separate storage route; follow the backup/transfer guidance before moving between them.
+profile or port preferences. It is excluded from images and archives. If you have an older host-folder `.learning` backup, keep it intact and
+separate until a deliberate transfer has been verified. Startup does not
+automatically merge it into a Docker volume.
 
 To request fixed host ports explicitly:
 
@@ -255,11 +276,11 @@ an unrelated service to obtain that port.
 # Resume the saved selection without pulling or rebuilding.
 ./classroom resume
 
-# Install source updates, retaining learning and database volumes.
-./classroom --rebuild
+# Install local source updates, retaining learning and database volumes.
+./classroom --local-build --rebuild
 
-# Build updated selected images without starting services.
-./classroom build
+# Build updated selected local images without starting services.
+./classroom build --local-build
 
 # Check prerequisites without creating state or starting services.
 ./classroom doctor
@@ -283,13 +304,34 @@ switch to a smaller running set, stop the classroom first and then start with
 selects a separate project and learning volumes; use the same name on later
 commands to resume that project.
 
+## Backup and transfer
+
+There are three separate things to retain:
+
+| Item | What it preserves |
+| --- | --- |
+| Source folder or release ZIP | Lesson content, launch scripts and build instructions |
+| Project learning-volume backup | Saved drafts, notes, source versions and run observations/receipts |
+| PostgreSQL database dump | SQL tables and other database state |
+
+The `.classroom/<project>/` folder stores selection and port preferences. It
+helps you resume, but it is not a backup of learning data. A Docker image or Hub
+pull also does not contain your saved progress.
+
+Save your drafts, let active Runs finish, and follow the
+[learning and database export procedure](docker-classroom.md#5-export-learning-work-and-the-database).
+Use a new restore project to test recovery before replacing any existing
+workspace. Exclude the private `classroom-runtime` credential volume from
+learning exports. Keep original backups until the restored drafts, notes,
+results and SQL data have been checked.
+
 ## When something fails
 
 Read the first failed step. An unavailable engine calls for starting the engine;
 a missing Docker command inside WSL calls for enabling distribution integration;
 an old Compose version calls for updating Compose. The shared launcher requires **Compose 2.28.0 or newer**, including its
-resolved-environment query. Manual Compose files alone require 2.24.4 for
-reset/override tags.
+resolved-environment query. Use that same supported baseline for this course
+even if an older Compose understands some individual configuration features.
 
 Build and startup failures stop the workflow before it opens a browser. No
 failed command silently deletes data. Fix the indicated problem and rerun the
