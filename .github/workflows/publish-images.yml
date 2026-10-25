@@ -32,7 +32,7 @@ jobs:
     outputs:
       matrix: ${{ steps.release.outputs.matrix }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Check version, credentials configuration and exact-revision CI
@@ -86,7 +86,7 @@ jobs:
       HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
       COMPOSE_PROJECT_NAME: ds60-publish-${{ matrix.profile }}
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - name: Build and exercise this image through the classroom
@@ -113,7 +113,7 @@ jobs:
         run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE" --push
       - name: Retain validation receipts
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: image-validation-${{ matrix.profile }}-${{ inputs.architecture }}
           path: work/*.json
