@@ -172,7 +172,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-text">python scripts/prepare_kubernetes.py tools --allow-download</code></pre>
 <p>Build the tiny fixture and optional worker only after the resource/download preflight is approved. Both Dockerfiles accept a previously qualified <code>DS60_PYTHON_IMAGE</code> base override. Building is a separate action; no job Run performs an image pull or dependency installation.</p>
 <pre class="highlighted-code"><code class="language-text">docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
-docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .</code></pre>
+docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.0 .</code></pre>
 <p>Use the local engine endpoint reported by the existing launcher doctor. For Rancher Desktop on macOS, the common endpoint is the user&#x27;s <code>.rd/docker.sock</code>; other engines may use a different socket. This is an example only when that is the engine you selected:</p>
 <pre class="highlighted-code"><code class="language-bash">python scripts/prepare_kubernetes.py prepare --confirm-create <span class="syntax-string">\</span>
   --docker-host <span class="syntax-string">&quot;</span><span class="syntax-string">unix://</span>$HOME<span class="syntax-string">/.rd/docker.sock</span><span class="syntax-string">&quot;</span> --allow-node-download</code></pre>

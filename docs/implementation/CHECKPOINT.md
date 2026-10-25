@@ -41,6 +41,11 @@ The web-development subject combines 60 HTML/CSS/PHP lessons. `html-browser`
 uses the existing opaque, network-blocked preview and browser observations;
 `php-cli` checks syntax then runs `main.php` with a prepared SQLite driver.
 The optional HTTP project is separate from the ordinary single-file worker.
+The preview studio supports opt-in, debounced HTML/CSS and browser JavaScript/D3
+updates, fit/desktop/tablet/phone viewports, pause and stop controls, console
+navigation and protected editor focus. Automatic updates do not create history
+receipts. Manual runs and explicit observation saves do, and navigation cancels
+queued or stale work. Reload restores the draft without enabling execution.
 
 Image distribution supports local builds or explicit Docker Hub selection.
 Per-project `images.env` stores source, namespace and version; architecture tags

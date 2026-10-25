@@ -1,33 +1,41 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Browser quality: tests, performance and independent review</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-button, #quality { display: block; margin-block: 1rem; }
-  </style>
-</head>
-<body>
-<main><h1>Quality evidence</h1><button id="run-check" type="button">Check local structure</button><output id="quality" aria-live="polite">Not checked yet.</output><ul><li>Keyboard interaction: record an observation.</li><li>Narrow width: record an observation.</li><li>Zoom and contrast: record an observation.</li></ul></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
-document.querySelector('#run-check').addEventListener('click', () => { check(document.querySelectorAll('main').length === 1, 'Expected one main'); check(document.querySelector('#run-check').textContent.trim().length > 0, 'Button label missing'); document.querySelector('#quality').textContent = 'Local structure checks passed. Manual interaction and visual review remain separate.'; });
-document.querySelector('#run-check').click(); check(document.querySelector('#quality').textContent.includes('Manual'), 'Evidence limits missing');
-document.querySelector("#reference-status").textContent = "web-030 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-030 reference checks passed");
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Browser quality: tests, performance and independent review</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      button, #quality { display: block; margin-block: 1rem; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Quality evidence</h1><button id="run-check" type="button">Check local structure</button
+      ><output id="quality" aria-live="polite">Not checked yet.</output
+      ><ul
+        ><li>Keyboard interaction: record an observation.</li
+        ><li>Narrow width: record an observation.</li
+        ><li>Zoom and contrast: record an observation.</li></ul
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
+      document.querySelector('#run-check').addEventListener('click', () => { check(document.querySelectorAll('main').length === 1, 'Expected one main'); check(document.querySelector('#run-check').textContent.trim().length > 0, 'Button label missing'); document.querySelector('#quality').textContent = 'Local structure checks passed. Manual interaction and visual review remain separate.'; });
+      document.querySelector('#run-check').click(); check(document.querySelector('#quality').textContent.includes('Manual'), 'Evidence limits missing');
+      document.querySelector("#reference-status").textContent = "web-030 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-030 reference checks passed");
+    </script>
+  </body>
 </html>

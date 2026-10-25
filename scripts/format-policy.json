@@ -267,6 +267,42 @@
   ],
   "preserve": [
     {
+      "path": "courses/web-development/track.json",
+      "reason": "Generated curriculum metadata; validate through the web authoring generator. Executable templates and published programs remain formatted."
+    },
+    {
+      "path": "courses/web-development/lessons.json",
+      "reason": "Generated admission metadata; preserve canonical authoring serialization and check regeneration."
+    },
+    {
+      "path": "courses/web-development/fixtures/reference-inventory.json",
+      "reason": "Generated reference inventory; regenerate from the maintained web authoring data."
+    },
+    {
+      "path": "courses/cuda/track.json",
+      "reason": "Generated CUDA prerequisite graph; regenerate and validate through the fragment assembler."
+    },
+    {
+      "path": "courses/cuda/lessons.json",
+      "reason": "Generated CUDA admission metadata; regenerate and validate through the fragment assembler."
+    },
+    {
+      "path": "courses/cuda/authoring/cpp_manifest.json",
+      "reason": "Generated C++ teaching fragment. The authoring data and executable output retain their formatting adapters."
+    },
+    {
+      "path": "courses/cuda/authoring/cpp_optional_gpu_variants.json",
+      "reason": "Generated optional GPU admission fragment; preserve canonical generator ownership."
+    },
+    {
+      "path": "courses/cuda/authoring/python_manifest.json",
+      "reason": "Generated Python/framework teaching fragment; regenerate from the maintained authoring sources."
+    },
+    {
+      "path": "courses/cuda/authoring/spark_manifest.json",
+      "reason": "Generated Spark teaching fragment; regenerate from the maintained authoring sources."
+    },
+    {
       "path": "START_HERE.html",
       "reason": "Generated landing guide. Rebuild with scripts/build_course_guide.py."
     },

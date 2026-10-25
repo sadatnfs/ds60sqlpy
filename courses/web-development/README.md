@@ -39,6 +39,27 @@ service. The optional HTTP lab in `fixtures/php-http-lab/` is a separately
 prepared learning project. It demonstrates real requests and persistence when
 you explicitly choose that exercise.
 
+## Explore in the preview studio
+
+HTML/CSS and browser JavaScript/D3 lessons have an optional **Live preview**
+switch. Turn it on explicitly to see the current page after a short pause in
+typing. The studio places your editor and preview beside each other on a wide
+screen and stacks them on a narrow screen. Use **Focus on editor & preview**
+to give the experiment more space, then return to the lesson layout when ready.
+
+Choose Fit to space, Desktop, Tablet or Phone to inspect the same page at a
+different width. Changing the viewport does not rerun your program. Pause
+updates keeps the last rendered version while you edit; Stop preview closes
+the frame and cancels pending updates. Console errors remain visible so you can
+repair a small example and continue.
+
+Live rendering does not fill your saved-run history. **Run** leaves live mode,
+saves the submitted source and keeps its result. **Save observation** retains
+the currently rendered source and console output, then pauses automatic updates.
+Your ordinary draft saving continues independently. Opening history, changing
+lessons or reloading never turns live execution on by itself. PHP uses its
+separate CLI worker and has no automatic browser execution.
+
 ## Choose a route
 
 | Lessons | What you build and explain |

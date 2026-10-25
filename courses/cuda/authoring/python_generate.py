@@ -278,17 +278,14 @@ def build(record):
     source_code = record["code"]
     # The learner receives an editable worked example, not answers to all six
     # reasoning exercises. Reference copy adds the same behavioral assertions.
-    starter_lines = [line for line in source_code.splitlines() if True]
+    starter_lines = source_code.splitlines()
     starter = (
         '"""Editable CPU worked example. This does not execute or simulate a GPU.\n\nComplete the six guide exercises separately; modify one bounded case at a time.\n"""\n'
         + "\n".join(starter_lines)
         + "\n"
     )
-    # Removing an assertion could empty a branch; retain complete valid code if so.
-    try:
-        ast.parse(starter)
-    except SyntaxError:
-        starter = '"""Editable CPU worked example, not GPU evidence."""\n' + source_code
+    # Reject malformed authoring data before publishing an editable example.
+    ast.parse(starter)
     put(source, starter)
     put(
         reference,

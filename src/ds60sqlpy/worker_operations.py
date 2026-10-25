@@ -126,7 +126,9 @@ class BoundedOutput:
             return text, truncated
 
 
-def child_environment(directory: Path, base: Mapping[str, str] | None = None, *, profile_id: str | None = None) -> dict[str, str]:
+def child_environment(
+    directory: Path, base: Mapping[str, str] | None = None, *, profile_id: str | None = None
+) -> dict[str, str]:
     """Do not pass service tokens, database credentials or cloud settings to code."""
 
     supplied = os.environ if base is None else base
@@ -582,9 +584,21 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
     """Reviewed single-source toolchains; source cannot supply build flags or packages."""
     node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
     if profile_id == "php-cli":
-        flags = ["php", "-d", "display_errors=stderr", "-d", "log_errors=0",
-                 "-d", "memory_limit=128M", "-d", "zend.assertions=1",
-                 "-d", "assert.exception=1", "-d", "allow_url_fopen=0"]
+        flags = [
+            "php",
+            "-d",
+            "display_errors=stderr",
+            "-d",
+            "log_errors=0",
+            "-d",
+            "memory_limit=128M",
+            "-d",
+            "zend.assertions=1",
+            "-d",
+            "assert.exception=1",
+            "-d",
+            "allow_url_fopen=0",
+        ]
         return [[*flags, "-l", "main.php"]], [*flags, "main.php"]
     if profile_id == "c17":
         return [
@@ -750,6 +764,7 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
         commands: list[list[str]]
         if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
             from ds60sqlpy.gpu_runtime import probe_commands
+
             commands = probe_commands(profile_id, directory)
         elif profile_id == "cpp20":
             compiler = _compiler()
@@ -775,7 +790,10 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
             "php-cli",
         }:
             smoke = {
-                "php-cli": "<?php declare(strict_types=1); $db = new PDO('sqlite::memory:'); assert((int)$db->query('SELECT 42')->fetchColumn() === 42); echo '42';\n",
+                "php-cli": (
+                    "<?php declare(strict_types=1); $db = new PDO('sqlite::memory:'); "
+                    "assert((int)$db->query('SELECT 42')->fetchColumn() === 42); echo '42';\n"
+                ),
                 "c17": (
                     "#include <assert.h>\n#include <stdio.h>\n"
                     'int main(void){assert(20+22==42);puts("42");return 0;}\n'
@@ -928,6 +946,7 @@ def execute_operation(
     compiling: list[list[str]] = []
     if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
         from ds60sqlpy.gpu_runtime import commands as gpu_commands
+
         compiling, command = gpu_commands(profile_id, directory)
     elif profile_id == "cpp20":
         compiler = _compiler() or "g++"

@@ -1303,3 +1303,215 @@ p:last-child {
     min-height: 160px;
   }
 }
+
+/* A local preview studio. Layout changes never restart the learner's frame. */
+.browser-live-controls {
+  padding: 1rem;
+  margin-block: 1rem 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: linear-gradient(120deg, var(--tint), var(--surface) 80%);
+}
+.browser-live-heading,
+.browser-live-actions,
+.browser-viewport-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.browser-live-heading {
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+.browser-live-heading h3 {
+  margin: 0.2rem 0 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.025em;
+}
+.browser-live-heading button,
+.browser-live-actions button,
+.browser-viewport-tools button,
+.browser-viewport-tools select {
+  font-size: 0.78rem;
+}
+.browser-live-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-weight: 650;
+  cursor: pointer;
+}
+.browser-live-switch input {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+#browser-live-help {
+  margin-block: 0.8rem 0.4rem;
+  font-size: 0.8rem;
+}
+.browser-live-state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.browser-live-state::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.browser-live-state[data-state="ready"] {
+  color: var(--accent);
+}
+.browser-live-state[data-state="error"] {
+  color: var(--error);
+}
+.browser-studio,
+#source-section,
+#browser-preview-home {
+  min-width: 0;
+}
+#browser-studio[data-browser="true"] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+.browser-viewport-tools {
+  padding-block: 0 0.8rem;
+  font-size: 0.78rem;
+}
+.browser-viewport-tools label {
+  font-weight: 650;
+}
+#browser-viewport-label {
+  font-variant-numeric: tabular-nums;
+}
+#browser-preview-stage {
+  max-width: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background-color: var(--soft);
+  background-image: radial-gradient(var(--line) 0.7px, transparent 0.7px);
+  background-size: 10px 10px;
+}
+#browser-preview {
+  max-width: none;
+  margin-inline: auto;
+}
+#browser-preview iframe {
+  border: 0;
+  border-radius: 0;
+  min-height: 500px;
+}
+#browser-preview-panel {
+  margin-block: 0;
+}
+#browser-preview-description {
+  font-size: 0.78rem;
+}
+.browser-preview-empty {
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 2rem;
+  min-height: 320px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  color: var(--muted);
+  background: var(--soft);
+}
+.browser-preview-empty > span {
+  font:
+    600 2rem/1.4 ui-monospace,
+    monospace;
+  color: var(--accent);
+}
+.browser-preview-empty h4 {
+  margin-block: 0.8rem 0;
+  color: var(--text);
+}
+.browser-preview-empty p {
+  max-width: 32ch;
+  font-size: 0.85rem;
+}
+.panes.browser-focus {
+  grid-template-columns: minmax(0, 1fr);
+}
+.browser-focus .reading-pane {
+  display: none;
+}
+.browser-focus #prediction,
+.browser-focus #prediction-label {
+  display: none;
+}
+.browser-focus #source {
+  min-height: 560px;
+  line-height: 1.65;
+  tab-size: 4;
+}
+#browser-preview-panel:fullscreen #browser-preview-stage {
+  flex: 1 1 auto;
+  min-height: 160px;
+}
+#browser-preview-panel:fullscreen #browser-preview,
+#browser-preview-panel:fullscreen iframe {
+  height: 100%;
+}
+@media (min-width: 1100px) {
+  .browser-focus #browser-studio[data-browser="true"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .browser-focus #browser-preview-home {
+    position: sticky;
+    top: 1rem;
+  }
+}
+@media (max-width: 640px) {
+  .browser-live-controls {
+    padding: 0.85rem;
+  }
+  .browser-live-heading {
+    align-items: flex-start;
+  }
+  .browser-live-heading button {
+    width: 100%;
+  }
+  .browser-focus #source {
+    min-height: 340px;
+  }
+  #browser-preview iframe {
+    min-height: 360px;
+  }
+  #browser-preview-panel:fullscreen iframe {
+    min-height: 160px;
+  }
+}
+.browser-viewport-tools select {
+  width: auto;
+  flex: 1 1 10rem;
+  min-width: 0;
+  max-width: 100%;
+}
+.browser-viewport-tools label {
+  flex: 0 0 auto;
+}
+.browser-viewport-tools #browser-viewport-label {
+  flex: 0 0 auto;
+  font-size: 0.73rem;
+}

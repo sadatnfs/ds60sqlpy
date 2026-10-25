@@ -1,33 +1,36 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Elements, attributes, nesting and text escaping</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Elements, attributes, nesting and text escaping</title>
+    <style>
+      :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+      body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+      main { max-width: 65rem; margin-inline: auto; }
+      a { color: #0753a4; }
+      button, input, select, textarea { font: inherit; }
+      button { cursor: pointer; }
+      :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+      #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Markup and data</h1
+      ><p id="note" class="note">Save <strong>before</strong> closing: 2 &lt; 3 &amp; 3 &gt; 2.</p
+      ><p class="note">A second note has no duplicate identifier.</p></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-  </style>
-</head>
-<body>
-<main><h1>Markup and data</h1><p id="note" class="note">Save <strong>before</strong> closing: 2 &lt; 3 &amp; 3 &gt; 2.</p><p class="note">A second note has no duplicate identifier.</p></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
-
-check(document.querySelector('#note').textContent.includes('2 < 3 & 3 > 2'), 'Literal text changed');
-document.querySelector("#reference-status").textContent = "web-002 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-002 reference checks passed");
-</script>
-</body>
+      check(document.querySelector('#note').textContent.includes('2 < 3 & 3 > 2'), 'Literal text changed');
+      document.querySelector("#reference-status").textContent = "web-002 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-002 reference checks passed");
+    </script>
+  </body>
 </html>

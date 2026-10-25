@@ -19,6 +19,12 @@ validate_image_selection() {
 }
 
 load_image_selection() {
+  # The caller supplies these after argument/engine/project resolution. Validate
+  # the imported contract at call time without resetting any launcher state.
+  : "${state_dir:?The launcher must resolve state_dir before loading images}" \
+    "${rebuild:?The launcher must supply its rebuild selection}" \
+    "${docker_cli:?The launcher must resolve its Docker executable}" \
+    "${repo_dir:?The launcher must resolve its repository directory}"
   local file="$state_dir/images.env" key value source='' namespace='' tag='' seen='|'
   if [ -e "$file" ] || [ -L "$file" ]; then
     [ -f "$file" ] && [ ! -L "$file" ] || fail 'Saved image settings must be a regular file.'
@@ -33,7 +39,10 @@ load_image_selection() {
       esac
     done <"$file"
     [ -n "$source" ] && [ -n "$tag" ] && [[ "$seen" == *'|DS60_IMAGE_NAMESPACE|'* ]] || fail 'Saved image settings are incomplete.'
-    if [ "$image_source_explicit" -eq 0 ]; then image_source="$source"; image_namespace="$namespace"; fi
+    if [ "$image_source_explicit" -eq 0 ]; then
+      image_source="$source"
+      image_namespace="$namespace"
+    fi
     if [ "$image_tag_explicit" -eq 0 ]; then
       if [ "$image_source" = local ] && { [ "$rebuild" -eq 1 ] || [ "$image_source_explicit" -eq 1 ]; }; then
         image_tag="$release_version"
@@ -47,8 +56,8 @@ load_image_selection() {
     image_arch="$("$docker_cli" info --format '{{.Architecture}}')"
     case "$image_arch" in x86_64 | amd64) image_arch=amd64 ;; aarch64 | arm64) image_arch=arm64 ;; *) fail 'Published classroom images support only Linux amd64 and arm64.' ;; esac
   fi
-  local profile service local_name suffix variable kind
-  while read -r profile service local_name suffix variable kind; do
+  local profile _service local_name suffix variable _kind
+  while read -r profile _service local_name suffix variable _kind; do
     [[ "$profile" == \#* ]] && continue
     [ -n "$profile" ] || continue
     if [ "$image_source" = hub ]; then
@@ -60,6 +69,8 @@ load_image_selection() {
 }
 
 save_image_selection() {
+  # Saving uses the same caller-owned project directory established by load.
+  : "${state_dir:?The launcher must resolve state_dir before saving images}"
   local temporary
   temporary="$(mktemp "$state_dir/images.XXXXXX")"
   printf 'DS60_IMAGE_SOURCE=%s\nDS60_IMAGE_NAMESPACE=%s\nDS60_IMAGE_TAG=%s\n' "$image_source" "$image_namespace" "$image_tag" >"$temporary"

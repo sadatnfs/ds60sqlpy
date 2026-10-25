@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Build locally, publish deliberately, and pull a classroom release · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Build locally, publish deliberately, and pull a classroom release</h1>
+      <p class="source-path">Generated from <code>docs/dockerhub.md</code></p>
+    </header>
+    <article class="document"><h2 id="build-locally-publish-deliberately-and-pull-a-classroom-release">Build locally, publish deliberately, and pull a classroom release<a class="heading-anchor" href="#build-locally-publish-deliberately-and-pull-a-classroom-release" aria-label="Link to this section">#</a></h2>
+<p>The classroom still builds locally by default. Docker Hub is an optional way to distribute an already reviewed image set. Nothing in <code>./classroom</code> uploads images, signs in to an account, deletes volumes or changes Docker Hub settings.</p>
+<p>The publisher uses <strong>one repository</strong>, <code>YOUR_DOCKERHUB_USER/ds60sqlpy</code>, with a separate tag for each image and CPU architecture. For example:</p>
+<pre class="highlighted-code"><code class="language-text">YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-lab-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-python-core-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.0-worker-php-cli-arm64</code></pre>
+<p>Use your actual lowercase Docker Hub username wherever this guide says <code>YOUR_DOCKERHUB_USER</code>. GitHub and Docker Hub are separate accounts. A private GitHub repository does not make a Docker Hub repository private. A public image contains the shipped application and course sources, so choose repository visibility deliberately before uploading. The build excludes learner state, Git history and private runtime credentials; still review the release payload.</p>
+<h3 id="1-build-and-try-the-release-on-your-machine">1. Build and try the release on your machine<a class="heading-anchor" href="#1-build-and-try-the-release-on-your-machine" aria-label="Link to this section">#</a></h3>
+<p>Run these commands in the repository folder using Terminal on macOS, a Linux terminal, or Ubuntu inside WSL 2 on Windows. Start your Linux-container engine first. The following command shows the build logs, starts the classroom and opens the browser:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --all --local-build --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<p>This includes the app, PostgreSQL and sixteen ordinary runtime workers. HTML and CSS previews run in the browser. PHP has its own worker. Optional NVIDIA workers are excluded from <code>--all</code> and from the normal publisher; see <a href="cuda-classroom.md.html">CUDA classroom setup</a> before choosing them.</p>
+<p>Use <code>--project NAME</code> on this and every later command if your existing workspace has a custom name. The default project is <code>ds60-classroom</code>. A new project has its own saved work; changing its name is not a way to recover previous progress.</p>
+<p>For a build without starting anything, use:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom build --all --local-build --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<p>Check representative reading and runnable lessons, compiler errors, switching between subjects, saved drafts and prior results. Verify the normal lifecycle:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p>The repository&#x27;s <a href="validation.md.html">validation guide</a> describes contributor checks and runtime acceptance. Passing a finite test suite is useful release evidence; it cannot prove zero defects or qualify hardware that was never tested. Keep a record of the Git revision, image set, architecture and checks used for release.</p>
+<h3 id="2-prepare-your-docker-hub-account">2. Prepare your Docker Hub account<a class="heading-anchor" href="#2-prepare-your-docker-hub-account" aria-label="Link to this section">#</a></h3>
+<p>Sign in through Docker Hub and create a repository called <code>ds60sqlpy</code>. Choose public or private visibility according to who should be able to download it. Check your current account&#x27;s repository and transfer limits before sharing a large image set. A private repository requires learners to authenticate too.</p>
+<p>Authenticate the local Docker CLI:</p>
+<pre class="highlighted-code"><code class="language-bash">docker login --username YOUR_DOCKERHUB_USER</code></pre>
+<p>At the password prompt, use a Docker Hub personal access token with the needed read/write permission. Do not put a token in a command, <code>.env</code>, Git, a screenshot or a lesson. Docker&#x27;s credential helper stores authentication separately from the classroom. <a href="https://docs.docker.com/security/access-tokens/">Docker access-token documentation</a></p>
+<h3 id="3-review-the-complete-image-mapping-then-publish">3. Review the complete image mapping, then publish<a class="heading-anchor" href="#3-review-the-complete-image-mapping-then-publish" aria-label="Link to this section">#</a></h3>
+<p>The first command only inspects local images and prints their destination tags:</p>
+<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.0</code></pre>
+<p>It requires the complete ordinary image set to exist locally and checks that the images are Linux images for one consistent architecture. It captures their immutable local IDs before any upload. It does not rebuild missing images or infer that an image passed the test suite.</p>
+<p>After reviewing that output and your release checks, explicitly publish:</p>
+<pre class="highlighted-code"><code class="language-bash">./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version <span class="syntax-number">0</span>.4.0 --push</code></pre>
+<p>The script tags the inspected local IDs and pushes them sequentially. PostgreSQL is pulled from its existing upstream/mirror source and is not republished as your own image. GPU worker publication is excluded because it needs separate hardware qualification. The Docker Hub Tags page lets you confirm the uploaded set. <a href="https://docs.docker.com/docker-hub/repos/manage/hub-images/push/">Docker image publishing</a></p>
+<p>An interrupted upload can leave a partial release. Repeat the same command to finish its missing layers, but do not announce that release until every image has uploaded successfully. Treat released tags as immutable: use a new version when contents change, rather than silently overwriting a tag other learners use.</p>
+<h4 id="architecture-matters">Architecture matters<a class="heading-anchor" href="#architecture-matters" aria-label="Link to this section">#</a></h4>
+<p>A normal build on Apple Silicon produces Linux <code>arm64</code> images. A normal build on an Intel/AMD computer produces Linux <code>amd64</code> images. These are different from the host OS name: Windows WSL 2 usually uses Linux <code>amd64</code> containers.</p>
+<p>The publisher adds the actual image architecture to every tag. The launcher selects the suffix matching the Docker engine. Publishing an <code>arm64</code> set does not provide an <code>amd64</code> set automatically. To serve both, build and qualify the same release on both architectures, or use the optional native-runner workflow below separately for each architecture. A missing platform tag fails visibly; the launcher will not silently rebuild or run an emulated release instead.</p>
+<h3 id="4-start-from-published-images">4. Start from published images<a class="heading-anchor" href="#4-start-from-published-images" aria-label="Link to this section">#</a></h3>
+<p>The learner still needs a matching checkout or starter ZIP for the launcher and Compose files. After you have published the required architecture, they run:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<p>This pulls missing classroom images, starts the services and opens the browser. It never falls back to a local build in Hub mode. A smaller installation is:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<p>The project saves its source, namespace and version in <code>.classroom/PROJECT/images.env</code>. These are declarative preferences, not shell code and not the learning database. Subsequent commands retain that selection:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom stop
+./classroom resume</code></pre>
+<p><code>resume</code> and <code>--no-build</code> never build or pull, including in Hub mode. Missing containers may be recreated from matching local images while keeping volumes. If an image is missing, ordinary <code>./classroom</code> can prepare it according to the saved image source; <code>resume</code> instead explains what is missing.</p>
+<p>To download the selected images without starting services:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0</code></pre>
+<p>To switch an existing locally built project to the published release, explicitly apply the configuration change while preserving its volumes:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --from-hub YOUR_DOCKERHUB_USER --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<p>In Hub mode, <code>--rebuild</code> refreshes the selected published images and applies the update. It does not compile them. To return to local development:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --local-build --tag <span class="syntax-number">0</span>.4.0 --rebuild</code></pre>
+<p>Always use the matching source release and image tag. Preserve a learning backup before a version upgrade. Keep your project name unchanged. Do not delete named volumes as an image-update step.</p>
+<h3 id="5-optional-github-actions-publication">5. Optional GitHub Actions publication<a class="heading-anchor" href="#5-optional-github-actions-publication" aria-label="Link to this section">#</a></h3>
+<p>The repository includes <strong>Publish classroom images (manual)</strong>. It has no push, tag or scheduled trigger. Its default is a build/validation rehearsal without publishing. It runs only from <code>main</code>, checks the requested version and bounded architecture choice, and requires successful push runs of <code>.github/workflows/ci.yml</code> and <code>.github/workflows/app-build.yml</code> on <code>main</code> for the exact same Git revision. It checks the latest matching run and attempt, not a workflow&#x27;s display name or an older successful commit.</p>
+<p>Publication has two separate phases:</p>
+<ol>
+<li><strong>Build and qualify every image.</strong> All seventeen ordinary images are built and exercised on the selected native architecture, with at most two image jobs running together. Each worker writes a source-bound runtime receipt. No job in this phase receives the Docker Hub token or logs in to Docker Hub.</li>
+<li><strong>Publish only after the entire build matrix succeeds.</strong> The publish matrix depends on both the initial gate and all image jobs. If any image build, qualification or required archive upload fails, no publish job can begin. The <code>dockerhub</code> environment and its secret are used only in this phase.</li>
+</ol>
+<p>With <code>publish</code> <strong>false</strong>, the workflow does not export or upload large Docker image archives, log in to Docker Hub, or push images. It can retain small validation receipts. This is the recommended first run.</p>
+<p>With <code>publish</code> <strong>true</strong>, each qualified image is saved by its immutable image ID into an archive with SHA-256, file size, platform, source tag, profile, release, namespace, Git revision and workflow-run metadata. These checked-image artifacts have a <strong>one-day retention period</strong>. The publish jobs download only the selected profile/architecture artifact from the <strong>same workflow run ID</strong> using GitHub CLI. They verify the metadata and archive hash before loading, then inspect the loaded image ID and platform before registry login. The existing publisher tags the verified local ID and pushes it. This is an integrity and provenance handoff; it is not a cryptographic image-signing or supply-chain attestation service.</p>
+<p>No Docker Hub secret, account configuration or hosted publication has been set up for you. When you are ready:</p>
+<ol>
+<li>Create a Docker Hub access token with read/write permission. Keep the value private and revoke it if exposed.</li>
+<li>In GitHub repository <strong>Settings → Secrets and variables → Actions</strong>, add the repository variable <code>DOCKERHUB_USERNAME</code> with your lowercase Docker Hub namespace.</li>
+<li>Create the GitHub environment <strong>dockerhub</strong> under repository settings. Add <code>DOCKERHUB_TOKEN</code> as an <strong>environment secret</strong>, not a plain variable. Do not place this token in the build jobs or commit it to the repository.</li>
+<li>If your GitHub plan supports the relevant environment protection rules, require a reviewer and restrict the environment to the release branch. If environments or the required protections are unavailable for your repository, retain the local publication route rather than assuming a protection exists.</li>
+<li>First run the workflow with <code>publish</code> left <strong>false</strong>, choosing <code>0.4.0</code> and one architecture. Review all build jobs and validation receipts. This needs available Actions runners and a successful exact-revision CI result.</li>
+<li>When ready to upload, deliberately set the repository variable <code>DOCKERHUB_PUBLISH_ENABLED</code> to the exact value <code>true</code>. Its absence or any other value blocks publication. The publish phase checks the flag again before downloading or authenticating.</li>
+<li>Run the workflow with <code>publish</code> <strong>true</strong>. Every image is built and qualified before the publication phase becomes eligible. Approve the environment only after reviewing the complete matrix. Tokens pass through standard input. Repeat for the other architecture only if you intend to support and qualify it.</li>
+</ol>
+<h4 id="storage-time-and-retry-expectations">Storage, time and retry expectations<a class="heading-anchor" href="#storage-time-and-retry-expectations" aria-label="Link to this section">#</a></h4>
+<p>A full image set can consume many gigabytes of <strong>temporary Actions artifact storage</strong>. Each archived image can repeat base layers, so the total archive size can exceed the final registry&#x27;s deduplicated storage. One-day retention limits how long these archives remain; it does not make their upload, download or storage free. Small validation receipts use seven-day retention. The separate publish jobs also consume runner minutes while downloading, hashing, loading and pushing. Check current account allowances and billing settings before a publication run, especially for a private repository. The local publisher avoids this GitHub artifact-transfer route. <a href="https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions">GitHub Actions billing</a></p>
+<p>Environment approval can take long enough for a one-day artifact to expire. An expired, missing, ambiguous or mismatched artifact fails safely before login. Start a fresh complete qualification run when required archives have expired. Within one workflow run, retries select the latest unexpired artifact attempt for each exact profile and architecture and verify that attempt&#x27;s metadata. They cannot silently fetch an archive from another workflow run or revision. <a href="https://cli.github.com/manual/gh_run_download">GitHub artifact downloads</a></p>
+<p>The build gate prevents a failed qualification from publishing a partial set. <strong>Registry transport is still not atomic across image tags.</strong> An upload failure, expired credential or interruption during the later publish matrix can leave some already uploaded tags. Do not announce the release until every publish job succeeds and the architecture&#x27;s complete tag set is visible in Docker Hub. Retry failed publication jobs while their verified archives remain available; otherwise perform a fresh complete run for the same intended revision. Preserve released tags when contents change by choosing a new version.</p>
+<p>GPU images remain outside this workflow because they need real hardware qualification. Hosted CI, a dry run, archive verification and a successful registry push are separate observations. None establishes that all possible hardware or user workloads are defect free.</p>
+<h3 id="troubleshooting-without-losing-progress">Troubleshooting without losing progress<a class="heading-anchor" href="#troubleshooting-without-losing-progress" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Observation</th>
+<th>Smallest useful next step</th>
+</tr></thead><tbody>
+<tr>
+<td><code>manifest unknown</code></td>
+<td>Check namespace, release, image suffix and engine architecture. Confirm publication finished.</td>
+</tr>
+<tr>
+<td><code>unauthorized</code> or <code>denied</code></td>
+<td>Check repository visibility and Docker login in this terminal. Keep tokens out of logs.</td>
+</tr>
+<tr>
+<td>Hub rate or account limit</td>
+<td>Check the current Docker Hub account limits; local-build mode remains available.</td>
+</tr>
+<tr>
+<td>Configuration mismatch during resume</td>
+<td>Keep the project name and volumes; use the explicit matching-version update command.</td>
+</tr>
+<tr>
+<td>Missing local image during resume</td>
+<td>Run ordinary <code>./classroom</code> to prepare missing images from the saved source.</td>
+</tr>
+<tr>
+<td>Snapshot/layer extraction errors</td>
+<td>Inspect the engine&#x27;s storage health. Source changes and tag retries do not repair corrupted storage. Back up saved work before destructive engine recovery.</td>
+</tr>
+<tr>
+<td>GPU worker unavailable</td>
+<td>Use CPU/reading variants and the separate CUDA setup guide. Ordinary Hub images do not establish GPU readiness.</td>
+</tr>
+</tbody></table></div></article>
+  </main>
+</body>
+</html>

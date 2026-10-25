@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>web-001: A web page: source, browser and server · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>web-001: A web page: source, browser and server</h1>
+      <p class="source-path">Generated from <code>courses/web-development/guides/web-001.md</code></p>
+    </header>
+    <article class="document"><h2 id="web-001-a-web-page-source-browser-and-server">web-001: A web page: source, browser and server<a class="heading-anchor" href="#web-001-a-web-page-source-browser-and-server" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; allow about 90 minutes, with extra time for independent practice. Direct prerequisites: None. This lesson explains the necessary vocabulary.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Build a complete document with a title, one heading and two paragraphs. Trace a requested page from source to visible output. Explain the mechanism, a normal case and a failure case in your own words, then retain source and observations separately.</p>
+<h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>HTML is a markup language: it names the structure and meaning of a document. CSS is a style language that controls how that structure is presented. JavaScript is a programming language executed by the browser or another host. PHP is a programming language commonly executed by a server. A visitor receives the server&#x27;s response, not the PHP source that generated it. These layers can cooperate without becoming interchangeable.</p>
+<p>A browser parses HTML into a document tree, applies style rules and paints pixels. A server accepts a request and returns a response. Opening a local preview exercises the browser portion; it does not demonstrate a network request, authentication or a server database. Our first document is deliberately small enough to inspect every character and every visible element.</p>
+<h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
+<p>An element such as <code>&lt;p&gt;Hello&lt;/p&gt;</code> has an opening tag, content and a closing tag. The tag names the kind of content. A document begins with <code>&lt;!doctype html&gt;</code> to request standards rendering, then an <code>html</code> root containing <code>head</code> metadata and <code>body</code> visible content. The <code>title</code> labels the browser document, while an <code>h1</code> labels the visible topic. Whitespace in ordinary text is generally collapsed, so source indentation helps humans without creating layout.</p>
+<h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
+<p>Choose <strong>HTML browser preview</strong> in the classroom. The pad is one complete HTML document with embedded CSS and, where taught, embedded JavaScript. Its preview is isolated from the classroom and recreated on each run. It does not contact a server, submit real forms, read cookies, fetch assets or load a CDN. All fixtures are inline and synthetic. The browser uses its native HTML parser, so classic-script ordering, shared lexical bindings, inline modules and real DOMContentLoaded/load events keep their browser semantics. External module imports remain blocked. Navigation metadata such as base and meta http-equiv is rejected explicitly. On any supported host, the browser renders the document while Docker serves the classroom. No host compiler is needed.</p>
+<p>Run your own source after implementing the task. A reference&#x27;s checks inspect only the named initial conditions. Its success message is not a full accessibility audit, proof of responsive behavior at every size, or evidence that you implemented the solution yourself. Inspect actual output after keyboard input, resizing and changes. Save your source before comparing with a reference. For visual experiments, explicitly turn on Live preview: the page refreshes after a short pause in typing, while Pause updates keeps the last rendered version and Stop preview cancels pending refreshes. Desktop, tablet and phone presets resize the same preview without rerunning it. Automatic previews do not create saved runs; choose Save observation or Run when you want to retain an exact source-and-output record. Changing lessons, opening history or reloading turns live execution off. The document and its CSS share one saved pad; HTML and CSS remain different languages within that artifact.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1-one-paragraph">Worked example 1: One paragraph<a class="heading-anchor" href="#worked-example-1-one-paragraph" aria-label="Link to this section">#</a></h4>
+<p>Read the tag boundaries before considering appearance.</p>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span>Hello, web.<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">p</span><span class="syntax-punctuation">&gt;</span></code></pre>
+<p><strong>Expected observation:</strong> One text paragraph; the angle-bracket markup is not shown.</p>
+<h4 id="worked-example-2-metadata-and-visible-content">Worked example 2: Metadata and visible content<a class="heading-anchor" href="#worked-example-2-metadata-and-visible-content" aria-label="Link to this section">#</a></h4>
+<p>Both titles matter, but they occupy different places.</p>
+<pre class="highlighted-code"><code class="language-html"><span class="syntax-punctuation">&lt;</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>My course notes<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">title</span><span class="syntax-punctuation">&gt;</span>
+<span class="syntax-punctuation">&lt;</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span>Learning the web<span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">h1</span><span class="syntax-punctuation">&gt;</span></code></pre>
+<p><strong>Expected observation:</strong> The document title and visible heading can differ.</p>
+<h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-predict-which-text-from-the-first-example-is-visible">Exercise 1: Predict which text from the first example is visible.<a class="heading-anchor" href="#exercise-1-predict-which-text-from-the-first-example-is-visible" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Only Hello, web. appears as paragraph text.</p>
+<p><strong>Progressive hint:</strong> Trace the smallest example before editing. Name which values are source and which are observations.</p>
+<h4 id="exercise-2-change-a-paragraph-without-changing-the-document-title">Exercise 2: Change a paragraph without changing the document title.<a class="heading-anchor" href="#exercise-2-change-a-paragraph-without-changing-the-document-title" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> The visible body changes while the browser document title remains the same.</p>
+<p><strong>Progressive hint:</strong> Change only the named feature. Compare with the unchanged example and explain any unaffected behavior.</p>
+<h4 id="exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs">Exercise 3: Build a complete document with a title, one heading and two paragraphs.<a class="heading-anchor" href="#exercise-3-build-a-complete-document-with-a-title-one-heading-and-two-paragraphs" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> The preview contains one main heading and two paragraphs in a main region.</p>
+<p><strong>Progressive hint:</strong> Sketch the structure or data contract first. Reuse the mechanism from the examples without copying the reference.</p>
+<h4 id="exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server">Exercise 4: Explain why PHP source pasted into an HTML page does not execute on a PHP server.<a class="heading-anchor" href="#exercise-4-explain-why-php-source-pasted-into-an-html-page-does-not-execute-on-a-php-server" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> A browser preview parses HTML; no PHP interpreter or server request was involved.</p>
+<p><strong>Progressive hint:</strong> Keep the failing input. Identify the first layer where the observed result differs from the intended contract.</p>
+<h4 id="exercise-5-remove-the-styling-and-inspect-what-remains-useful">Exercise 5: Remove the styling and inspect what remains useful.<a class="heading-anchor" href="#exercise-5-remove-the-styling-and-inspect-what-remains-useful" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Document structure and readable text remain; meaning does not depend on CSS.</p>
+<p><strong>Progressive hint:</strong> Predict the boundary before running it. Add an explicit check or manual observation that would detect a regression.</p>
+<h4 id="exercise-6-trace-a-requested-page-from-source-to-visible-output">Exercise 6: Trace a requested page from source to visible output.<a class="heading-anchor" href="#exercise-6-trace-a-requested-page-from-source-to-visible-output" aria-label="Link to this section">#</a></h4>
+<p><strong>Expected evidence:</strong> Distinguish server response bytes, parsed document tree, applied style and painted output.</p>
+<p><strong>Progressive hint:</strong> Explain your choice to someone who has not seen the code. Include one limitation and the evidence needed to remove it.</p>
+<h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
+<p>Do not call every file a website or every successful preview a deployed server. Inspect the actual title and body separately. Closing a paragraph with the wrong tag may be repaired by the parser, producing a different tree than the source suggests.</p>
+<p>Keep the source that produced the failure, the relevant input or viewport, and the actual observation. Repair one cause and repeat the original case before adding a new one. A browser can recover malformed HTML, silently ignore a CSS declaration or display a plausible layout with the wrong reading order. PHP can produce correct-looking text while missing an invalid-input branch. A successful parse or an initial reference marker therefore answers a narrower question than the full lesson objective.</p>
+<h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
+<p>Close the worked answers and explain HTML, CSS, HTTP without using their names as definitions. Reconstruct the central example from a blank pad or worksheet. Use one new value, one empty or missing case and one adversarial or unusual boundary. State which result would disprove your explanation. When a behavior belongs to the browser, observe it in the browser; when it belongs to an HTTP server, keep that evidence separate from a CLI simulation.</p>
+<p>Before moving on, keep a short learning record: your prediction, source revision, actual result, explanation and unresolved limitation. Revisit a direct prerequisite if you can reproduce output but cannot explain the mechanism. The path has milestones, not a fixed daily schedule, and a saved completion marker is a personal progress record rather than a professional certification.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax">HTML syntax</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Getting_started/Web_standards/How_the_web_works">How the web works</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for web-001: A web page: source, browser and server.
+Read courses/web-development/guides/web-001.md and courses/web-development/lessons/web-001.html. Direct prerequisites: None. This lesson explains the necessary vocabulary.
+Ask what I predict, inspect my attempt and give one progressive hint.
+Keep courses/web-development/solutions/ closed until I attempt or explicitly request comparison.
+Distinguish browser observation, PHP CLI output and actual HTTP server evidence.
+Do not install packages, start servers, transmit data or mark completion without my request.
+Finish with a new boundary case and ask me to explain the mechanism in my own words.</code></pre></article>
+  </main>
+</body>
+</html>

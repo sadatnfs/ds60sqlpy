@@ -216,6 +216,15 @@ def _markdown_link_sources(path: Path) -> Iterable[str]:
         yield "".join(map(str, raw_source)) if isinstance(raw_source, list) else str(raw_source)
 
 
+def _generated_html_reference(path: Path, root: Path) -> bool:
+    """Keep existing reader navigation distinct from authored HTML source labs."""
+    relative = path.relative_to(root)
+    return path.suffix.lower() == ".html" and (
+        relative.as_posix() in {"START_HERE.html", "src/ds60sqlpy/assets/journey_preview.html"}
+        or relative.parts[0] in {LESSON_PAGES_DIR, REFERENCE_PAGES_DIR}
+    )
+
+
 def _linked_reference_sources(
     source_path: Path,
     source: str,
@@ -240,6 +249,7 @@ def _linked_reference_sources(
         if (
             candidate.is_relative_to(repo_root)
             and candidate.is_file()
+            and not _generated_html_reference(candidate, repo_root)
             and (candidate.suffix.lower() in _REFERENCE_SUFFIXES or candidate.name == "LICENSE")
             and not any(
                 part.startswith(".") or part.lower() in _PRIVATE_REFERENCE_PARTS
@@ -265,6 +275,7 @@ def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
         if (
             not resolved.is_relative_to(repo_root)
             or not resolved.is_file()
+            or _generated_html_reference(resolved, repo_root)
             or (resolved.suffix.lower() not in _REFERENCE_SUFFIXES and resolved.name != "LICENSE")
             or any(
                 part.startswith(".") or part.lower() in _PRIVATE_REFERENCE_PARTS

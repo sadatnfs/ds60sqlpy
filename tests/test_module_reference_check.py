@@ -94,7 +94,7 @@ def test_corpus_covers_all_admitted_runnable_implementations_and_book_examples()
     assert {case.lesson_id for case in cases} == {
         key
         for key, lesson in catalog.lessons.items()
-        if lesson.runtime_profile not in {"reading", "k8s-kind", "javascript-browser"}
+        if lesson.runtime_profile in probe.ORDINARY_PROFILES
     }
     by_id = {case.lesson_id: case for case in cases}
     assert by_id["statistics-001"].learning_mode == "tutorial"
@@ -108,8 +108,24 @@ def test_corpus_covers_all_admitted_runnable_implementations_and_book_examples()
         "reading",
         "k8s-kind",
         "javascript-browser",
+        "html-browser",
+        "cuda-cpp",
+        "cuda-python",
+        "pytorch-cuda",
+        "tensorflow-cuda",
     }
     assert all(case.source.strip() for case in cases)
+
+
+@pytest.mark.parametrize(
+    "profile", ["html-browser", "cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"]
+)
+def test_specialized_backends_are_not_silently_qualified_as_ordinary_cpu_workers(
+    profile: str,
+) -> None:
+    assert profile not in probe.ORDINARY_PROFILES
+    with pytest.raises(ValueError, match="ordinary"):
+        probe.collect_cases(ROOT, [profile])
 
 
 def test_browser_exclusions_have_complete_real_ui_qualification_and_retained_reports() -> None:

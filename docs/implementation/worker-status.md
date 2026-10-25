@@ -5,9 +5,10 @@
 > Native Windows ACLs/backends and native executable builds are not supported
 > targets or release gates. Current checks are defined in [validation](../validation.md).
 
-The current registry contains fifteen ordinary Linux worker profiles, including
-C17, Go, C#, Rust and Swift, plus the separate browser D3 runtime and explicitly
-prepared Kubernetes adapter. Inspect [validation](../validation.md), the current
+The current registry contains sixteen ordinary Linux worker profiles, including
+C17, Go, C#, Rust, Swift and PHP, plus separate HTML/CSS/JavaScript/D3 browser runtimes,
+optional NVIDIA profiles and an explicitly prepared Kubernetes adapter.
+Inspect [validation](../validation.md), the current
 workflow artifacts and the exact revision's runtime receipts for acceptance.
 The browser preview records client observations and does not claim worker
 verification. Swift Apple UI projects and advanced Docker/cluster host labs

@@ -131,9 +131,11 @@ Do not describe a skipped platform as validated.
 
 ## What hosted workflows check
 
-The workflow files are the executable source of truth. They use read-only
-repository permissions, pinned action revisions and local image builds. They
-do not publish Docker images. Linux core jobs use UTF-8 and create their test
+The workflow files are the executable source of truth. Routine validation uses
+read-only repository permissions, pinned action revisions and local image builds.
+The separate, opt-in [image publication workflow](dockerhub.md) requires manual
+dispatch, successful CI for the exact revision, deliberate repository enablement
+and protected credentials before it can publish. Linux core jobs use UTF-8 and create their test
 workspace before starting four grouped pytest workers. Native Windows ACLs,
 PowerShell backend diagnostics and native executable bundles are not release
 gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
@@ -147,16 +149,19 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 | Course validation: Advanced imports | Manual dispatch and weekly schedule; Ubuntu Python 3.12 | Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training |
 | Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch; Ubuntu | A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners |
 | Application builds: Docker classroom | Same triggers; isolated Linux groups covering all ordinary profiles | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
-| Application builds: Chromium acceptance | Python Core Docker group, after container replacement | Real browser navigation, isolated pads/results, saved progress, output and prose contrast, mathematical rendering, the three original browser JavaScript fixtures and all 24 D3 classroom references work |
+| Application builds: Chromium acceptance | Python Core Docker group, with container replacement checks | Real browser navigation, isolated pads/results, saved progress, output and prose contrast, mathematical rendering, HTML/CSS/JavaScript live previews, the original browser JavaScript fixtures and all 24 D3 classroom references work |
 | Owned Kubernetes runtime | Manual dispatch and weekly schedule; disposable Linux kind cluster | Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup |
 
 The Docker groups cover Python Core, C, C++, Go, C#, Rust, Swift, Java,
-JavaScript/TypeScript, Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book,
+JavaScript/TypeScript, PHP, Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book,
 NLP and compatible LLM examples once; the framework groups execute their own
 TensorFlow, PyTorch and LLM references. PySpark and tutorial example variants
 are discovered from the same catalog used by the classroom. There is no second
 hand-maintained lesson list. Reading/manual lessons and owned-cluster operations
 appear as explicit exclusions from the ordinary corpus, never successful runs.
+CUDA CPU models and the selected CPU framework/Spark variants run in those ordinary
+groups. Optional NVIDIA profiles remain explicitly excluded: CPU execution,
+compiler-only acceptance and GPU device execution require separate receipts.
 
 Each group owns a disposable project. At most four Docker groups run together,
 and each worker executes one reference at a time. The corpus records failures,
@@ -248,7 +253,7 @@ disposable project's loopback URL:
 
 ```text
 python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --reset-sql
-python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux" --report work/release-runtime-receipts.json
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli" --report work/release-runtime-receipts.json
 ```
 
 To run the complete admitted module corpus for selected prepared profiles:
@@ -277,7 +282,7 @@ run both checks in persistence mode against the newly printed URL:
 
 ```text
 python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --check-persistence
-python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux" --report work/release-runtime-receipts.json --check-persistence
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli" --report work/release-runtime-receipts.json --check-persistence
 ```
 
 Persistence verification must read the original receipt rather than rerun code
@@ -313,6 +318,24 @@ disposable pads and progress; do not point it at a learner workspace.
 Use a separate browser profile and disposable classroom state for checks that
 edit code or notes. Inspect the actual running page at desktop and narrow
 widths, in light and dark modes, using keyboard navigation as well as a mouse.
+
+The web-development checks exercise all 30 HTML reference pages, real script
+lifecycle and module behavior, opaque-origin isolation, HTML/CSS and browser
+JavaScript/D3 live updates, viewport controls, focus, pause/stop and explicit
+observation saving:
+
+```sh
+python courses/web-development/authoring/check_browser.py --url CLASSROOM_URL --confirm-disposable --report work/web-browser-receipts.json
+python courses/web-development/authoring/check_live_preview.py --url CLASSROOM_URL --confirm-disposable --report work/live-preview-receipts.json
+```
+
+Run them before the full D3 checker because both use some D3 lesson workspaces.
+Automatic preview updates must create no saved-run receipts. A manual run or
+explicit observation save records the exact submitted source. These client
+observations are not independent server verification. The separate
+[PHP HTTP fixture](../courses/web-development/fixtures/php-http-lab/README.md)
+qualifies cookies, sessions, CSRF handling and persistence through real requests;
+PHP CLI success alone does not establish those behaviors.
 
 Check these user journeys:
 

@@ -237,6 +237,12 @@ HTTP sessions and multi-file applications use the web subject's separate,
 loopback-only Docker project. The pad and the web server are explicitly different
 execution environments.
 
+Turn on **Live preview** in an HTML/CSS or browser JavaScript/D3 workspace to
+see edits after a short pause. Switch between desktop, tablet and phone widths,
+inspect the console, and pause or stop the preview whenever you need. Automatic
+updates preserve your draft without filling run history; use Run or explicitly
+save an observation when you want a durable result.
+
 The 128-chapter CUDA subject is useful on CPU-only machines: read the theory,
 save reasoning and run small CPU models. Selected C++, CuPy, PyTorch and
 TensorFlow variants can use optional NVIDIA workers after explicit setup and

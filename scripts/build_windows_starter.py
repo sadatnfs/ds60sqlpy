@@ -33,7 +33,7 @@ No host Python, PostgreSQL,
 PowerShell tutorial or Git installation is needed for the ordinary module route.
 The first build needs internet. No image is pushed to a registry.
 
-A new default project prepares all fifteen ordinary language/framework workers.
+A new default project prepares all sixteen ordinary language/framework workers.
 Use ./classroom --starter in WSL for a smaller Python/SQL start. That selection
 is remembered; ./classroom --all selects the full set later. ./classroom resume
 never builds or pulls. Use ./classroom --rebuild to install updated source files.

@@ -1,5 +1,10 @@
 # CUDA, web and image distribution checkpoint
 
+> Historical record for Git checkpoint `a6e92bd`. The pending list below describes
+> that snapshot. Live preview, publication workflow safeguards and later validation
+> have since progressed; use the [maintained checkpoint](CHECKPOINT.md) and
+> [current validation instructions](../validation.md) for continuing work.
+
 This is an **in-progress checkpoint**, not a release qualification. Version
 0.4.0 is being prepared. The owner requested this Git checkpoint while work
 continues. Do not publish images based on this file.

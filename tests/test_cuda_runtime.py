@@ -16,7 +16,7 @@ import pytest
 
 from ds60sqlpy import gpu_runtime, worker_operations
 from ds60sqlpy.module_worker import WorkerRequestError, WorkerState
-from ds60sqlpy.worker_operations import OperationResult
+from ds60sqlpy.worker_operations import BoundedOutput, OperationResult
 
 
 @pytest.mark.parametrize("profile", sorted(gpu_runtime.GPU_PROFILES))
@@ -125,9 +125,9 @@ def test_real_probe_failure_never_becomes_ready(
         environment: dict[str, str],
         deadline: float,
         cancel: threading.Event,
-        output: Any,
+        output: BoundedOutput,
         **limits: Any,
-    ):
+    ) -> tuple[int | None, str | None]:
         calls.append(argv)
         assert environment["CUDA_VISIBLE_DEVICES"] == "0"
         assert deadline > 0 and not cancel.is_set()
@@ -147,7 +147,15 @@ def test_real_probe_failure_never_becomes_ready(
 def test_probe_compile_error_prevents_execution(monkeypatch: pytest.MonkeyPatch) -> None:
     calls: list[list[str]] = []
 
-    def fake_process(argv, directory, environment, deadline, cancel, output, **limits):
+    def fake_process(
+        argv: list[str],
+        directory: Path,
+        environment: dict[str, str],
+        deadline: float,
+        cancel: threading.Event,
+        output: BoundedOutput,
+        **limits: Any,
+    ) -> tuple[int | None, str | None]:
         calls.append(argv)
         output.append(b"nvcc compile failure\n")
         return 1, None
@@ -213,11 +221,19 @@ def test_cuda_execution_uses_one_total_deadline_and_stages_literal_source(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
 ) -> None:
-    calls = []
+    calls: list[tuple[list[str], float]] = []
     source = "// learner text is source, never shell argv\nint main(){return 0;}\n"
-    statuses = []
+    statuses: list[str] = []
 
-    def fake_process(argv, directory, environment, deadline, cancel, output, **limits):
+    def fake_process(
+        argv: list[str],
+        directory: Path,
+        environment: dict[str, str],
+        deadline: float,
+        cancel: threading.Event,
+        output: BoundedOutput,
+        **limits: Any,
+    ) -> tuple[int | None, str | None]:
         calls.append((argv, deadline))
         assert (directory / "main.cu").read_text() == source
         assert environment["CUDA_VISIBLE_DEVICES"] == "0"
@@ -309,11 +325,11 @@ def test_device_fault_quarantine_blocks_next_job_but_retains_result(
     detail: str,
     quarantined: bool,
 ) -> None:
-    def executor(*args, **kwargs):
+    def executor(*args: Any, **kwargs: Any) -> OperationResult:
         return OperationResult(0 if status == "succeeded" else 1, output, False, status, detail)
 
     state = WorkerState(profile, executor=executor, ready=True, isolate_jobs=False)
-    payload = {
+    payload: dict[str, Any] = {
         "job_id": uuid.uuid4().hex,
         "profile": profile,
         "operation": "execute",
@@ -357,11 +373,11 @@ def test_gpu_resource_or_signal_interruption_requires_review_unless_compile_only
     returncode: int,
     quarantined: bool,
 ) -> None:
-    def executor(*args, **kwargs):
+    def executor(*args: Any, **kwargs: Any) -> OperationResult:
         return OperationResult(returncode, "retained diagnostic", False, "failed", detail)
 
     state = WorkerState("cuda-cpp", executor=executor, ready=True, isolate_jobs=False)
-    payload = {
+    payload: dict[str, Any] = {
         "job_id": uuid.uuid4().hex,
         "profile": "cuda-cpp",
         "operation": "execute",
@@ -392,3 +408,46 @@ def test_cpp_probe_reports_device_failure_phase_for_beginner_diagnosis() -> None
     assert "CUDA device discovery" in source
     assert "No NVIDIA CUDA device is visible" in source
     assert "CUDA readback did not match the expected result" in source
+
+
+@pytest.mark.parametrize("profile", sorted(gpu_runtime.GPU_PROFILES))
+def test_successful_error_explanation_does_not_quarantine_gpu_worker(profile: str) -> None:
+    explanation = (
+        "Examples to recognize: illegal memory access; device-side assert; "
+        "unspecified launch failure; context is destroyed; cudaErrorIllegalAddress.\n"
+        "This program explained diagnostics and completed successfully.\n"
+    )
+
+    def executor(*args: Any, **kwargs: Any) -> OperationResult:
+        return OperationResult(0, explanation, False, "succeeded", "Execution completed.")
+
+    state = WorkerState(profile, executor=executor, ready=True, isolate_jobs=False)
+    job_id = uuid.uuid4().hex
+    payload: dict[str, Any] = {
+        "job_id": job_id,
+        "profile": profile,
+        "operation": "execute",
+        "source": "# A successful diagnostic-teaching program",
+        "language": worker_operations.PROFILES[profile].language,
+        "timeout_seconds": 15,
+        "verification_id": None,
+    }
+    try:
+        state.submit(payload)
+        assert state.thread is not None
+        state.thread.join(timeout=3)
+        assert not state.thread.is_alive()
+        receipt = state.get(job_id)
+        assert receipt["status"] == "succeeded" and receipt["returncode"] == 0
+        assert receipt["output"] == explanation
+        assert state.ready is True
+        # The learner can submit the next exercise without an unnecessary restart.
+        next_job_id = uuid.uuid4().hex
+        state.submit({**payload, "job_id": next_job_id})
+        assert state.thread is not None
+        state.thread.join(timeout=3)
+        assert not state.thread.is_alive()
+        assert state.get(next_job_id)["status"] == "succeeded"
+        assert state.get(job_id)["output"] == explanation
+    finally:
+        state.close()

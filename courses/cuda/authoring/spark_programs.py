@@ -73,7 +73,8 @@ println("CPU Scala ETL capstone: " + actual)""",
 
 def pyspark_program(n):
     header = '''"""Bounded CPU Spark parity lab; no GPU plugin, downloads or external cluster."""
-from pyspark.sql import SparkSession, functions as F, types as T
+from pyspark.sql import SparkSession
+from pyspark.sql import types as T
 
 spark = (SparkSession.builder.master("local[2]").appName("cuda-spark-cpu-parity")
     .config("spark.ui.enabled", "false")
@@ -86,6 +87,11 @@ spark = (SparkSession.builder.master("local[2]").appName("cuda-spark-cpu-parity"
 try:
     assert spark.sparkContext.master == "local[2]"
 '''
+    if "F." in PYSPARK_BODY[n]:
+        header = header.replace(
+            "from pyspark.sql import SparkSession\n",
+            "from pyspark.sql import SparkSession\nfrom pyspark.sql import functions as F\n",
+        )
     return (
         header
         + "\n".join("    " + line for line in PYSPARK_BODY[n].splitlines())

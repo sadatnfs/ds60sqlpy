@@ -19,5 +19,5 @@ optimizer.step()
 assert base.grad is None
 assert a.numel() + b.numel() == 8 and base.numel() == 16
 assert torch.isfinite(a).all() and torch.isfinite(b).all()
-print("PyTorch adapter census: base16 frozen; trainable8; base storage remains")
+print("PyTorch adapter census: base 16 frozen; trainable 8; base storage remains")
 torch.cuda.synchronize()

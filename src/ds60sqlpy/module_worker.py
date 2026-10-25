@@ -295,12 +295,17 @@ class WorkerState:
                 job.detail = result.detail
                 if self.profile in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
                     from ds60sqlpy.gpu_runtime import needs_device_review
-                    if needs_device_review(result.status, result.output, result.detail, result.returncode):
+
+                    if needs_device_review(
+                        result.status, result.output, result.detail, result.returncode
+                    ):
                         self.ready = False
                         self.detail = (
-                            "GPU health needs owner review after an interrupted or failed device operation. "
-                            "Child-process cleanup does not prove device recovery. Inspect the GPU, then "
-                            "restart this worker to repeat its real kernel probe. No GPU reset was attempted."
+                            "GPU health needs owner review after an interrupted or "
+                            "failed device operation. Child-process cleanup does not "
+                            "prove device recovery. Inspect the GPU, then restart this "
+                            "worker to repeat its real kernel probe. "
+                            "No GPU reset was attempted."
                         )
                         job.detail += " " + self.detail
         except Exception:

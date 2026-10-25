@@ -1053,7 +1053,7 @@ def test_running_container_without_healthcheck_is_ready(launcher: Any) -> None:
 
 
 def _image_state(launcher: Any, source: str, namespace: str, tag: str) -> Path:
-    state = launcher.directory / ".classroom/ds60-classroom/images.env"
+    state = Path(launcher.directory) / ".classroom/ds60-classroom/images.env"
     state.parent.mkdir(parents=True, exist_ok=True)
     state.write_text(
         f"DS60_IMAGE_SOURCE={source}\nDS60_IMAGE_NAMESPACE={namespace}\nDS60_IMAGE_TAG={tag}\n"

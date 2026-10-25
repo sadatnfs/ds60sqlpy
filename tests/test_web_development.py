@@ -89,7 +89,7 @@ def test_reference_reader_displays_source_without_executing_it(
         repo_root=ROOT,
         targets={},
     )
-    assert f'language-{language}' in rendered
+    assert f"language-{language}" in rendered
     assert "This page does not execute source code" in rendered
     structure = Structure()
     structure.feed(rendered)
@@ -107,7 +107,12 @@ def test_html_draft_and_observation_survive_reload_without_cross_language_overwr
     store = BrowserRunStore(state)
     receipt = store.record(
         "web-025",
-        {"source": original, "output": "Observed original", "status": "succeeded", "elapsed_seconds": 0.1},
+        {
+            "source": original,
+            "output": "Observed original",
+            "status": "succeeded",
+            "elapsed_seconds": 0.1,
+        },
     )
     state.save("web-025", {"source": newest})
     state.save("web-031", {"source": php_source})
@@ -129,7 +134,15 @@ def test_php_cannot_receive_browser_observations_or_forged_verifiers(
 ) -> None:
     store = BrowserRunStore(ModuleState(catalog, tmp_path / "modules"))
     with pytest.raises(ValueError, match="browser lesson"):
-        store.record("web-031", {"source": "<?php echo 1;", "output": "1", "status": "succeeded", "elapsed_seconds": 0.1})
+        store.record(
+            "web-031",
+            {
+                "source": "<?php echo 1;",
+                "output": "1",
+                "status": "succeeded",
+                "elapsed_seconds": 0.1,
+            },
+        )
     validate_operation("php-cli", "php", None)
     with pytest.raises(ValueError):
         validate_operation("php-cli", "php", "cpp-ownership-v1")
@@ -150,5 +163,5 @@ def test_server_models_and_optional_lab_do_not_claim_http_execution_from_cli() -
     assert "anonymous session ownership" in readme
     assert "127.0.0.1:18088" in readme
     compose = (fixture / "compose.yaml").read_text(encoding="utf-8")
-    assert '127.0.0.1:18088:8080' in compose
-    assert 'docker.sock' not in compose
+    assert "127.0.0.1:18088:8080" in compose
+    assert "docker.sock" not in compose

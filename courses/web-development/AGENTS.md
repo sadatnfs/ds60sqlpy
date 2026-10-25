@@ -50,3 +50,25 @@ references in the prepared worker and include invalid inputs. The reference
 inventory describes expected observations, never an invented runtime receipt.
 Link to JavaScript/D3, SQL and Docker paths where they add depth instead of
 repeating those subjects shallowly. Do not use em dashes.
+
+## Live preview state contract
+
+Live HTML and browser JavaScript/D3 rendering is explicitly enabled for the
+current workspace in the current page session. It debounces source edits and
+guards against stale frames and callbacks. It must never write immutable
+browser-run receipts automatically. Existing draft saving is independent.
+Manual Run leaves live mode and preserves its exact submitted source; explicit
+Save observation captures the current preview and pauses automatic updates.
+Navigation, source-context changes, Stop and historical-result selection cancel
+pending refreshes. Reload does not restore execution opt-in. Viewport and
+fullscreen changes alter presentation without restarting source. Preserve
+editor focus while an automatically refreshed page initializes.
+
+Run the permanent live acceptance script against disposable learning state:
+
+```sh
+python courses/web-development/authoring/check_live_preview.py --url http://127.0.0.1:PORT --confirm-disposable --report work/web-live-report.json
+```
+
+Never point it at a learner's real saved classroom. It intentionally edits
+test pads and creates only the explicitly requested observation records.

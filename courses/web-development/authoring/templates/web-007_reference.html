@@ -1,33 +1,51 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Data tables, captions and header relationships</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-.table-region { overflow-x: auto; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #64748b; padding: .6rem; text-align: start; } td { text-align: end; }
-  </style>
-</head>
-<body>
-<main><h1>Study record</h1><div class="table-region" tabindex="0" role="region" aria-label="Scrollable weekly study table"><table><caption>Study time this week, in minutes</caption><thead><tr><th scope="col">Subject</th><th scope="col">Minutes</th></tr></thead><tbody><tr><th scope="row">HTML</th><td>40</td></tr><tr><th scope="row">CSS</th><td>55</td></tr><tr><th scope="row">PHP</th><td>35</td></tr></tbody></table></div></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data tables, captions and header relationships</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      .table-region { overflow-x: auto; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #64748b; padding: .6rem; text-align: start; } td { text-align: end; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Study record</h1
+      ><div
+        class="table-region"
+        tabindex="0"
+        role="region"
+        aria-label="Scrollable weekly study table"
+        ><table
+          ><caption>Study time this week, in minutes</caption
+          ><thead
+            ><tr><th scope="col">Subject</th><th scope="col">Minutes</th></tr></thead
+          ><tbody
+            ><tr><th scope="row">HTML</th><td>40</td></tr
+            ><tr><th scope="row">CSS</th><td>55</td></tr
+            ><tr><th scope="row">PHP</th><td>35</td></tr></tbody
+          ></table
+        ></div
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelectorAll('tbody th[scope=row]').length === 3, 'Row headers missing');
-document.querySelector("#reference-status").textContent = "web-007 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-007 reference checks passed");
-</script>
-</body>
+      check(document.querySelectorAll('tbody th[scope=row]').length === 3, 'Row headers missing');
+      document.querySelector("#reference-status").textContent = "web-007 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-007 reference checks passed");
+    </script>
+  </body>
 </html>

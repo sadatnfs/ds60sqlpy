@@ -178,36 +178,97 @@ volumes as an image-update step.
 
 The repository includes **Publish classroom images (manual)**. It has no push,
 tag or scheduled trigger. Its default is a build/validation rehearsal without
-publishing. It only runs from `main`, checks that the requested version matches
-the source, and requires successful **Course validation** and **Application
-builds** push runs for the exact same Git revision.
+publishing. It runs only from `main`, checks the requested version and bounded
+architecture choice, and requires successful push runs of
+`.github/workflows/ci.yml` and `.github/workflows/app-build.yml` on `main` for the
+exact same Git revision. It checks the latest matching run and attempt, not a
+workflow's display name or an older successful commit.
 
-No Docker Hub secret or account configuration has been created for you. When
-you are ready:
+Publication has two separate phases:
+
+1. **Build and qualify every image.** All seventeen ordinary images are built
+   and exercised on the selected native architecture, with at most two image
+   jobs running together. Each worker writes a source-bound runtime receipt.
+   No job in this phase receives the Docker Hub token or logs in to Docker Hub.
+2. **Publish only after the entire build matrix succeeds.** The publish matrix
+   depends on both the initial gate and all image jobs. If any image build,
+   qualification or required archive upload fails, no publish job can begin.
+   The `dockerhub` environment and its secret are used only in this phase.
+
+With `publish` **false**, the workflow does not export or upload large Docker
+image archives, log in to Docker Hub, or push images. It can retain small
+validation receipts. This is the recommended first run.
+
+With `publish` **true**, each qualified image is saved by its immutable image ID
+into an archive with SHA-256, file size, platform, source tag, profile, release,
+namespace, Git revision and workflow-run metadata. These checked-image artifacts
+have a **one-day retention period**. The publish jobs download only the selected
+profile/architecture artifact from the **same workflow run ID** using GitHub CLI.
+They verify the metadata and archive hash before loading, then inspect the loaded
+image ID and platform before registry login. The existing publisher tags the
+verified local ID and pushes it. This is an integrity and provenance handoff;
+it is not a cryptographic image-signing or supply-chain attestation service.
+
+No Docker Hub secret, account configuration or hosted publication has been set
+up for you. When you are ready:
 
 1. Create a Docker Hub access token with read/write permission. Keep the value
-   private and revoke it if it is exposed.
+   private and revoke it if exposed.
 2. In GitHub repository **Settings → Secrets and variables → Actions**, add the
-   repository variable `DOCKERHUB_USERNAME` with your Docker Hub namespace.
-3. Add the secret `DOCKERHUB_TOKEN` containing the token value. Do not create a
-   plain variable for the token.
-4. Create a `dockerhub` environment. If your GitHub plan supports the relevant
-   protection rules, require a reviewer and restrict it to the release branch.
+   repository variable `DOCKERHUB_USERNAME` with your lowercase Docker Hub namespace.
+3. Create the GitHub environment **dockerhub** under repository settings. Add
+   `DOCKERHUB_TOKEN` as an **environment secret**, not a plain variable. Do not
+   place this token in the build jobs or commit it to the repository.
+4. If your GitHub plan supports the relevant environment protection rules,
+   require a reviewer and restrict the environment to the release branch. If
+   environments or the required protections are unavailable for your repository,
+   retain the local publication route rather than assuming a protection exists.
 5. First run the workflow with `publish` left **false**, choosing `0.4.0` and
-   one architecture. It rebuilds and exercises each ordinary image on a native
-   runner. The jobs are limited to two at a time, but the full set still consumes
-   substantial Actions minutes and needs available runners.
-6. Review all jobs. Then deliberately set the repository variable
-   `DOCKERHUB_PUBLISH_ENABLED` to the exact value `true`.
-7. Run the same workflow with `publish` **true**. Login occurs only after that
-   image's checks, and tokens are passed through standard input. Repeat for the
-   other architecture only if you intend to support and qualify it.
+   one architecture. Review all build jobs and validation receipts. This needs
+   available Actions runners and a successful exact-revision CI result.
+6. When ready to upload, deliberately set the repository variable
+   `DOCKERHUB_PUBLISH_ENABLED` to the exact value `true`. Its absence or any other
+   value blocks publication. The publish phase checks the flag again before
+   downloading or authenticating.
+7. Run the workflow with `publish` **true**. Every image is built and qualified
+   before the publication phase becomes eligible. Approve the environment only
+   after reviewing the complete matrix. Tokens pass through standard input.
+   Repeat for the other architecture only if you intend to support and qualify it.
 
-The workflow can publish individual image tags before other jobs finish. A
-partially failed workflow is not a complete release. Do not distribute its
-version as ready until the whole architecture set succeeds. GPU images remain
-outside this workflow. Hosted CI, a dry run and a successful registry push are
-three different results; record them separately.
+### Storage, time and retry expectations
+
+A full image set can consume many gigabytes of **temporary Actions artifact
+storage**. Each archived image can repeat base layers, so the total archive size
+can exceed the final registry's deduplicated storage. One-day retention limits
+how long these archives remain; it does not make their upload, download or
+storage free. Small validation receipts use seven-day retention. The separate
+publish jobs also consume runner minutes while downloading, hashing, loading
+and pushing. Check current account allowances and billing settings before a
+publication run, especially for a private repository. The local publisher avoids
+this GitHub artifact-transfer route.
+[GitHub Actions billing](https://docs.github.com/en/billing/managing-billing-for-your-products/managing-billing-for-github-actions/about-billing-for-github-actions)
+
+Environment approval can take long enough for a one-day artifact to expire.
+An expired, missing, ambiguous or mismatched artifact fails safely before login.
+Start a fresh complete qualification run when required archives have expired.
+Within one workflow run, retries select the latest unexpired artifact attempt
+for each exact profile and architecture and verify that attempt's metadata.
+They cannot silently fetch an archive from another workflow run or revision.
+[GitHub artifact downloads](https://cli.github.com/manual/gh_run_download)
+
+The build gate prevents a failed qualification from publishing a partial set.
+**Registry transport is still not atomic across image tags.** An upload failure,
+expired credential or interruption during the later publish matrix can leave
+some already uploaded tags. Do not announce the release until every publish job
+succeeds and the architecture's complete tag set is visible in Docker Hub.
+Retry failed publication jobs while their verified archives remain available;
+otherwise perform a fresh complete run for the same intended revision. Preserve
+released tags when contents change by choosing a new version.
+
+GPU images remain outside this workflow because they need real hardware
+qualification. Hosted CI, a dry run, archive verification and a successful
+registry push are separate observations. None establishes that all possible
+hardware or user workloads are defect free.
 
 ## Troubleshooting without losing progress
 

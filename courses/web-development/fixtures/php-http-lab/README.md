@@ -25,7 +25,7 @@ The commands below assume the project name `ds60-web-study` and loopback port
 
 ```sh
 docker context show
-docker compose --project ds60-web-study ps --all
+docker compose --project-name ds60-web-study ps --all
 ```
 
 Stop if the context is a remote engine you did not intend to use, if this
@@ -41,8 +41,8 @@ application itself makes no external request and installs no Composer package.
 The image checks that PDO SQLite is available during its build.
 
 ```sh
-docker compose --project ds60-web-study --progress plain build
-docker compose --project ds60-web-study up --detach --wait
+docker compose --project-name ds60-web-study --progress plain build
+docker compose --project-name ds60-web-study up --detach --wait
 curl --fail http://127.0.0.1:18088/health
 ```
 
@@ -76,15 +76,15 @@ built-in server is a development tool, not a production architecture.
 ## Stop, resume and preserve data
 
 ```sh
-docker compose --project ds60-web-study stop
-docker compose --project ds60-web-study start
+docker compose --project-name ds60-web-study stop
+docker compose --project-name ds60-web-study start
 ```
 
 The `ds60-web-study_notes-data` named volume contains the SQLite file and server
 sessions. Container replacement retains it too:
 
 ```sh
-docker compose --project ds60-web-study up --detach --force-recreate --wait
+docker compose --project-name ds60-web-study up --detach --force-recreate --wait
 ```
 
 Keep the same browser cookie and project name when testing session continuity.
@@ -98,7 +98,7 @@ copy a live SQLite file casually and assume the copy is transactionally sound.
 To remove this lab's container and network while retaining its named volume:
 
 ```sh
-docker compose --project ds60-web-study down
+docker compose --project-name ds60-web-study down
 ```
 
 A reset that includes `--volumes` deletes this lab's notes and sessions. Do that
@@ -107,7 +107,7 @@ Docker pruning as the normal way to stop a lesson.
 
 ## Troubleshooting and production boundary
 
-Use `docker compose --project ds60-web-study logs --tail 80 web` for the owned
+Use `docker compose --project-name ds60-web-study logs --tail 80 web` for the owned
 server logs. A 400 Host error means the browser URL disagrees with the explicit
 allowlist. A 403 means the token or origin did not match. A 422 means the note
 failed validation. A 500 needs local server diagnosis; public responses do not

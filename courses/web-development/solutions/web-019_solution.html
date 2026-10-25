@@ -1,33 +1,43 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pseudo-classes, pseudo-elements and stateful styling</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-.field { display: block; padding: .75rem; margin-block: .5rem; border: 2px solid #64748b; } .field:focus-within { border-color: #0753a4; } input:checked + span { font-weight: 700; }
-  </style>
-</head>
-<body>
-<main><h1>Visible preferences</h1><fieldset><legend>Practice reminders</legend><label class="field"><input type="checkbox" checked><span>Include a boundary case</span></label><label class="field"><input type="checkbox"><span>Review earlier notes</span></label></fieldset></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pseudo-classes, pseudo-elements and stateful styling</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      .field { display: block; padding: .75rem; margin-block: .5rem; border: 2px solid #64748b; } .field:focus-within { border-color: #0753a4; } input:checked + span { font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Visible preferences</h1
+      ><fieldset
+        ><legend>Practice reminders</legend
+        ><label class="field"
+          ><input type="checkbox" checked /><span>Include a boundary case</span></label
+        ><label class="field"
+          ><input type="checkbox" /><span>Review earlier notes</span></label
+        ></fieldset
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelectorAll('input:checked').length === 1, 'One initial selection expected');
-document.querySelector("#reference-status").textContent = "web-019 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-019 reference checks passed");
-</script>
-</body>
+      check(document.querySelectorAll('input:checked').length === 1, 'One initial selection expected');
+      document.querySelector("#reference-status").textContent = "web-019 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-019 reference checks passed");
+    </script>
+  </body>
 </html>

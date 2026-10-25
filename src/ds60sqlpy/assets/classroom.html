@@ -213,59 +213,162 @@
                     maxlength="12000"
                     placeholder="What do you expect to happen, and why?"
                   ></textarea>
-                  <div id="source-section">
-                    <div class="source-heading">
-                      <label for="source">Source or worksheet</label>
-                      <div>
-                        <button
-                          id="syntax-toggle"
-                          class="quiet"
-                          aria-pressed="false"
-                          aria-controls="syntax-preview"
-                        >
-                          Syntax preview</button
-                        ><button id="download-source" class="quiet"> Download </button>
+                  <section
+                    id="browser-live-controls"
+                    class="browser-live-controls"
+                    aria-label="Browser preview controls"
+                    hidden
+                  >
+                    <div class="browser-live-heading">
+                      <div
+                        ><span class="tiny-heading">MAKE IT YOURS</span><h3>Preview studio</h3></div
+                      >
+                      <button
+                        id="browser-studio-toggle"
+                        type="button"
+                        aria-pressed="false"
+                        aria-controls="authored"
+                        >Focus on editor &amp; preview</button
+                      >
+                    </div>
+                    <div class="browser-live-actions">
+                      <label class="browser-live-switch" for="browser-live-toggle"
+                        ><input
+                          id="browser-live-toggle"
+                          type="checkbox"
+                          aria-describedby="browser-live-help"
+                        />
+                        Live preview</label
+                      >
+                      <button id="browser-live-pause" type="button" disabled>Pause updates</button>
+                      <button id="browser-live-stop" type="button" disabled>Stop preview</button>
+                    </div>
+                    <p id="browser-live-help" class="muted"
+                      >Turn it on to see changes as you type. Live previews stay out of saved runs
+                      until you choose Save observation or Run.</p
+                    >
+                    <p
+                      id="browser-live-state"
+                      class="browser-live-state"
+                      role="status"
+                      aria-live="polite"
+                      >Live preview is off. Your code runs only when you choose.</p
+                    >
+                  </section>
+                  <div id="browser-studio" class="browser-studio" data-browser="false">
+                    <div id="source-section">
+                      <div class="source-heading">
+                        <label for="source">Source or worksheet</label>
+                        <div>
+                          <button
+                            id="syntax-toggle"
+                            class="quiet"
+                            aria-pressed="false"
+                            aria-controls="syntax-preview"
+                          >
+                            Syntax preview</button
+                          ><button id="download-source" class="quiet"> Download </button>
+                        </div>
+                      </div>
+                      <textarea
+                        id="source"
+                        class="source"
+                        spellcheck="false"
+                        autocapitalize="off"
+                        autocomplete="off"
+                        aria-describedby="source-help"
+                      ></textarea>
+                      <div id="syntax-preview" hidden>
+                        <p id="preview-status" class="muted" role="status"></p>
+                        <div id="syntax-code"></div>
+                      </div>
+                      <p id="source-help" class="muted">
+                        Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves;
+                        Ctrl/Cmd+Enter runs.
+                      </p>
+                      <details id="runtime-details">
+                        <summary>How this code runs</summary>
+                        <p id="runtime-guidance"></p>
+                      </details>
+                      <div id="legacy-pad-tools" hidden>
+                        <button id="starter">Load lesson starter</button>
+                        <details class="history">
+                          <summary>Recover an earlier saved pad</summary>
+                          <label for="pad-history">Earlier version</label
+                          ><select id="pad-history"></select>
+                          <div class="toolbar">
+                            <button id="load-history" disabled>Load a copy</button
+                            ><button id="refresh-history"> Refresh versions </button>
+                          </div>
+                        </details>
+                        <details id="sql-setup" class="notice" hidden>
+                          <summary>Prepare SQL training data</summary>
+                          <p>
+                            This resets only the disposable course training schema in
+                            advanced_sql_training. Saved pads remain in your workspace.
+                          </p>
+                          <button id="prepare-sql"> Reset and verify training schema </button>
+                        </details>
                       </div>
                     </div>
-                    <textarea
-                      id="source"
-                      class="source"
-                      spellcheck="false"
-                      autocapitalize="off"
-                      autocomplete="off"
-                      aria-describedby="source-help"
-                    ></textarea>
-                    <div id="syntax-preview" hidden>
-                      <p id="preview-status" class="muted" role="status"></p>
-                      <div id="syntax-code"></div>
-                    </div>
-                    <p id="source-help" class="muted">
-                      Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves;
-                      Ctrl/Cmd+Enter runs.
-                    </p>
-                    <details id="runtime-details">
-                      <summary>How this code runs</summary>
-                      <p id="runtime-guidance"></p>
-                    </details>
-                    <div id="legacy-pad-tools" hidden>
-                      <button id="starter">Load lesson starter</button>
-                      <details class="history">
-                        <summary>Recover an earlier saved pad</summary>
-                        <label for="pad-history">Earlier version</label
-                        ><select id="pad-history"></select>
-                        <div class="toolbar">
-                          <button id="load-history" disabled>Load a copy</button
-                          ><button id="refresh-history"> Refresh versions </button>
+                    <div id="browser-preview-home" hidden>
+                      <div class="browser-viewport-tools">
+                        <label for="browser-viewport">Preview width</label>
+                        <select id="browser-viewport">
+                          <option value="fit">Fit to space</option>
+                          <option value="1280">Desktop · 1280 px</option>
+                          <option value="768">Tablet · 768 px</option>
+                          <option value="390">Phone · 390 px</option>
+                        </select>
+                        <span id="browser-viewport-label" class="muted">Fit to space</span>
+                        <button id="browser-console-focus" type="button" class="quiet"
+                          >View console</button
+                        >
+                      </div>
+                      <div id="browser-preview-empty" class="browser-preview-empty">
+                        <span aria-hidden="true">&lt;/&gt;</span>
+                        <h4>Your next idea, on screen.</h4>
+                        <p
+                          >Run once to explore, or turn on Live preview and watch your page change
+                          as you type.</p
+                        >
+                      </div>
+                      <section
+                        id="browser-preview-panel"
+                        hidden
+                        aria-label="Interactive browser preview"
+                      >
+                        <div class="browser-preview-toolbar">
+                          <h4 id="browser-preview-title">Page preview</h4>
+                          <button
+                            id="browser-fullscreen"
+                            type="button"
+                            hidden
+                            aria-controls="browser-preview-panel"
+                            aria-pressed="false"
+                          >
+                            Fullscreen preview
+                          </button>
                         </div>
-                      </details>
-                      <details id="sql-setup" class="notice" hidden>
-                        <summary>Prepare SQL training data</summary>
-                        <p>
-                          This resets only the disposable course training schema in
-                          advanced_sql_training. Saved pads remain in your workspace.
-                        </p>
-                        <button id="prepare-sql"> Reset and verify training schema </button>
-                      </details>
+                        <p id="browser-preview-description" class="muted"
+                          >Your preview stays separate from the classroom. Choose a width to explore
+                          the layout. Save an observation when you want to keep its output and
+                          source.</p
+                        >
+                        <p
+                          id="browser-fullscreen-status"
+                          class="muted"
+                          role="status"
+                          aria-live="polite"
+                        ></p>
+                        <div
+                          id="browser-preview-stage"
+                          tabindex="0"
+                          aria-label="Preview viewport. Scroll horizontally when the selected width exceeds the available space."
+                          ><div id="browser-preview"></div
+                        ></div>
+                        <button id="browser-observation-save" disabled>Save observation</button>
+                      </section>
                     </div>
                   </div>
                   <p id="save-state" class="save-state" role="status" aria-live="polite"></p>
@@ -316,39 +419,7 @@
                 <section class="results" aria-labelledby="results-title">
                   <h3 id="results-title">What actually happened</h3>
                   <p id="job-status" class="muted"> No run yet for this lesson. </p>
-                  <section
-                    id="browser-preview-panel"
-                    hidden
-                    aria-label="Interactive browser preview"
-                  >
-                    <div class="browser-preview-toolbar">
-                      <h4>Visualization preview</h4>
-                      <button
-                        id="browser-fullscreen"
-                        type="button"
-                        hidden
-                        aria-controls="browser-preview-panel"
-                        aria-pressed="false"
-                      >
-                        Fullscreen preview
-                      </button>
-                    </div>
-                    <p id="browser-preview-description" class="muted"
-                      >The visualization runs in an isolated browser frame. Stop it or leave the
-                      lesson to close it. Saved observations contain console output and the
-                      submitted source; viewing history never reruns a chart.</p
-                    >
-                    <p
-                      id="browser-fullscreen-status"
-                      class="muted"
-                      role="status"
-                      aria-live="polite"
-                    ></p>
-                    <div id="browser-preview"></div>
-                    <button id="browser-observation-save" disabled
-                      >Save latest console observation</button
-                    >
-                  </section>
+
                   <pre id="output" class="result-log" tabindex="0" aria-label="Runtime output">
 Your output and compiler diagnostics will appear here.</pre
                   >

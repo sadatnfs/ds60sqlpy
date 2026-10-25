@@ -121,7 +121,7 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
             reviewed_native_runner = (
                 "${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}"
             )
-            assert runners == ["ubuntu-latest", reviewed_native_runner]
+            assert runners == ["ubuntu-latest", reviewed_native_runner, reviewed_native_runner]
             architecture = workflow.split("      architecture:", maxsplit=1)[1].split(
                 "      publish:", maxsplit=1
             )[0]

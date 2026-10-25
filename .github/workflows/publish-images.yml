@@ -13,7 +13,7 @@ on:
         options: [amd64, arm64]
         default: amd64
       publish:
-        description: Publish after validation (also requires the repository enable flag)
+        description: Publish only after every image passes (also requires the repository enable flag)
         type: boolean
         default: false
 
@@ -34,11 +34,13 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Check version, credentials configuration and exact-revision CI
+      - name: Check version, bounded inputs and exact-revision CI
         id: release
         env:
           RELEASE_VERSION: ${{ inputs.version }}
+          ARCHITECTURE: ${{ inputs.architecture }}
           PUBLISH: ${{ inputs.publish }}
           ENABLED: ${{ vars.DOCKERHUB_PUBLISH_ENABLED }}
           HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
@@ -51,22 +53,30 @@ jobs:
           version = os.environ['RELEASE_VERSION']
           assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version), 'Use a stable release version'
           assert tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'] == version
+          assert os.environ['ARCHITECTURE'] in {'amd64', 'arm64'}, 'Unsupported architecture'
+          assert os.environ['PUBLISH'] in {'true', 'false'}, 'Invalid publication choice'
           assert re.fullmatch(r'[a-z0-9][a-z0-9_-]{1,38}', os.environ['HUB_USER']), 'Set DOCKERHUB_USERNAME'
           if os.environ['PUBLISH'] == 'true':
               assert os.environ['ENABLED'] == 'true', 'Publishing is disabled; set DOCKERHUB_PUBLISH_ENABLED deliberately'
-          runs = json.loads(subprocess.check_output([
-              'gh', 'api', f"repos/{os.environ['REPOSITORY']}/actions/runs?head_sha={os.environ['REVISION']}&per_page=100"
-          ]))['workflow_runs']
-          for name in ['Course validation', 'Application builds']:
-              matches = [run for run in runs if run['name'] == name and run['event'] == 'push']
-              assert matches, f'No push qualification for this revision: {name}'
+          pages = json.loads(subprocess.check_output([
+              'gh', 'api', '--paginate', '--slurp',
+              f"repos/{os.environ['REPOSITORY']}/actions/runs?head_sha={os.environ['REVISION']}&per_page=100"
+          ]))
+          runs = [run for page in pages for run in page['workflow_runs']]
+          for path in ['.github/workflows/ci.yml', '.github/workflows/app-build.yml']:
+              allowed_paths = {path, path + '@main', path + '@refs/heads/main', path + '@' + os.environ['REVISION']}
+              matches = [run for run in runs if run['path'] in allowed_paths
+                         and run['event'] == 'push' and run['head_branch'] == 'main'
+                         and run['head_sha'] == os.environ['REVISION']]
+              assert matches, f'No main-branch push qualification for this revision: {path}'
               latest = max(matches, key=lambda run: (run['id'], run['run_attempt']))
-              assert latest['status'] == 'completed' and latest['conclusion'] == 'success', f'{name} is not successful for this revision'
+              assert latest['status'] == 'completed' and latest['conclusion'] == 'success', f'{path} is not successful for this revision'
           rows = []
           for line in pathlib.Path('docker/classroom-images.tsv').read_text().splitlines():
               if not line or line.startswith('#'): continue
               profile, service, image, suffix, variable, kind = line.split()
-              if kind != 'gpu': rows.append({'profile': profile})
+              if kind in {'app', 'ordinary'}: rows.append({'profile': profile})
+          assert rows and len({row['profile'] for row in rows}) == len(rows)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('matrix=' + json.dumps({'include': rows}) + '\n')
           PY
@@ -74,7 +84,6 @@ jobs:
   images:
     needs: gate
     runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    environment: dockerhub
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -83,11 +92,17 @@ jobs:
     env:
       PROFILE: ${{ matrix.profile }}
       RELEASE_VERSION: ${{ inputs.version }}
+      ARCHITECTURE: ${{ inputs.architecture }}
       HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+      REPOSITORY: ${{ github.repository }}
+      REVISION: ${{ github.sha }}
+      RUN_ID: ${{ github.run_id }}
+      RUN_ATTEMPT: ${{ github.run_attempt }}
       COMPOSE_PROJECT_NAME: ds60-publish-${{ matrix.profile }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - name: Build and exercise this image through the classroom
         run: |
@@ -97,29 +112,179 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           python3 scripts/check_lab_http.py --url "$url" --confirm-disposable --reset-sql
           if [ "$PROFILE" != app ]; then
-            python3 scripts/check_classroom_profiles.py --url "$url" --confirm-disposable --profiles "$PROFILE"
+            python3 scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
+              --profiles "$PROFILE" --report "work/runtime-receipts-$PROFILE.json"
           fi
       - name: Inspect proposed tags without publishing
         run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE"
-      - name: Authenticate to Docker Hub
+      - name: Export the tested immutable image and platform metadata
+        id: export
         if: inputs.publish
-        env:
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          test -n "$DOCKERHUB_TOKEN" || { echo 'Set the DOCKERHUB_TOKEN secret before publishing.' >&2; exit 2; }
-          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$HUB_USER" --password-stdin
-      - name: Publish the tested native architecture image
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess
+          profile, version = os.environ['PROFILE'], os.environ['RELEASE_VERSION']
+          rows = [line.split() for line in pathlib.Path('docker/classroom-images.tsv').read_text().splitlines()
+                  if line and not line.startswith('#')]
+          selected = [row for row in rows if row[0] == profile and row[5] in {'app', 'ordinary'}]
+          assert len(selected) == 1, 'Choose one declared ordinary image'
+          source = selected[0][2] + ':' + version
+          assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip() == os.environ['REVISION']
+          image = json.loads(subprocess.check_output(['docker', 'image', 'inspect', '--format', '{{json .}}', source]))
+          assert image['Os'] == 'linux' and image['Architecture'] == os.environ['ARCHITECTURE']
+          assert re.fullmatch(r'sha256:[a-f0-9]{64}', image['Id']), 'Invalid immutable image ID'
+          target = pathlib.Path('work/release-image')
+          target.mkdir(parents=True, exist_ok=False)
+          archive = target / 'image.tar'
+          subprocess.run(['docker', 'image', 'save', '--output', str(archive), image['Id']], check=True)
+          with archive.open('rb') as stream:
+              digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+          metadata = {
+              'schema_version': 1, 'repository': os.environ['REPOSITORY'], 'revision': os.environ['REVISION'],
+              'run_id': os.environ['RUN_ID'], 'run_attempt': os.environ['RUN_ATTEMPT'],
+              'profile': profile, 'release_version': version, 'namespace': os.environ['HUB_USER'],
+              'source_image': source, 'image_id': image['Id'], 'os': image['Os'],
+              'architecture': image['Architecture'], 'archive_sha256': digest,
+              'archive_bytes': archive.stat().st_size,
+          }
+          (target / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
+          print('Saved tested image', image['Id'], 'for', profile, image['Architecture'])
+          PY
+      - name: Retain the checked image for the gated publish phase
         if: inputs.publish
-        run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE" --push
-      - name: Retain validation receipts
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: qualified-image-${{ matrix.profile }}-${{ inputs.architecture }}-attempt-${{ github.run_attempt }}
+          path: |
+            work/release-image/image.tar
+            work/release-image/metadata.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Retain small validation receipts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
-          name: image-validation-${{ matrix.profile }}-${{ inputs.architecture }}
-          path: work/*.json
+          name: image-validation-${{ matrix.profile }}-${{ inputs.architecture }}-attempt-${{ github.run_attempt }}
+          path: work/runtime-receipts-*.json
           if-no-files-found: ignore
-      - name: Stop owned containers and remove ephemeral login
+          retention-days: 7
+      - name: Stop owned containers
         if: always()
+        run: ./classroom stop || true
+
+  publish:
+    needs: [gate, images]
+    if: inputs.publish && needs.gate.result == 'success' && needs.images.result == 'success'
+    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    environment: dockerhub
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.gate.outputs.matrix) }}
+    env:
+      PROFILE: ${{ matrix.profile }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      ARCHITECTURE: ${{ inputs.architecture }}
+      HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+      ENABLED: ${{ vars.DOCKERHUB_PUBLISH_ENABLED }}
+      REPOSITORY: ${{ github.repository }}
+      REVISION: ${{ github.sha }}
+      RUN_ID: ${{ github.run_id }}
+      RUN_ATTEMPT: ${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Confirm publication remains enabled
+        run: test "$ENABLED" = true || { echo 'Publication is disabled.' >&2; exit 2; }
+      - name: Download only this workflow run's qualified image
+        id: archive
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          ./classroom stop || true
-          docker logout || true
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess
+          run_id = os.environ['RUN_ID']
+          assert run_id.isdecimal() and os.environ['RUN_ATTEMPT'].isdecimal()
+          prefix = f"qualified-image-{os.environ['PROFILE']}-{os.environ['ARCHITECTURE']}-attempt-"
+          pages = json.loads(subprocess.check_output([
+              'gh', 'api', '--paginate', '--slurp',
+              f"repos/{os.environ['REPOSITORY']}/actions/runs/{run_id}/artifacts?per_page=100"
+          ]))
+          candidates = []
+          for page in pages:
+              for artifact in page['artifacts']:
+                  match = re.fullmatch(re.escape(prefix) + r'([1-9][0-9]*)', artifact['name'])
+                  if match and not artifact['expired'] and int(match[1]) <= int(os.environ['RUN_ATTEMPT']):
+                      candidates.append((int(match[1]), artifact['name']))
+          assert candidates, 'This run has no unexpired checked image; rerun qualification'
+          attempt = max(item[0] for item in candidates)
+          selected = [name for number, name in candidates if number == attempt]
+          assert len(selected) == 1, 'Ambiguous checked-image artifact'
+          target = pathlib.Path('work/checked-image')
+          target.mkdir(parents=True, exist_ok=False)
+          subprocess.run(['gh', 'run', 'download', run_id, '--repo', os.environ['REPOSITORY'],
+                          '--name', selected[0], '--dir', str(target)], check=True)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'attempt={attempt}\n')
+          PY
+      - name: Verify archive, provenance, immutable ID and platform before login
+        env:
+          ARTIFACT_ATTEMPT: ${{ steps.archive.outputs.attempt }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess
+          target = pathlib.Path('work/checked-image')
+          assert {path.name for path in target.iterdir()} == {'image.tar', 'metadata.json'}
+          archive, metadata_path = target / 'image.tar', target / 'metadata.json'
+          assert all(path.is_file() and not path.is_symlink() for path in [archive, metadata_path])
+          assert metadata_path.stat().st_size <= 65536, 'Unexpected metadata size'
+          def unique_fields(pairs):
+              result = {}
+              for key, value in pairs:
+                  assert key not in result, 'Duplicate artifact metadata field'
+                  result[key] = value
+              return result
+          metadata = json.loads(metadata_path.read_text(encoding='utf-8'), object_pairs_hook=unique_fields)
+          assert set(metadata) == {'schema_version', 'repository', 'revision', 'run_id', 'run_attempt',
+                                   'profile', 'release_version', 'namespace', 'source_image', 'image_id',
+                                   'os', 'architecture', 'archive_sha256', 'archive_bytes'}
+          assert type(metadata['schema_version']) is int and metadata['schema_version'] == 1
+          for key, variable in {'repository':'REPOSITORY', 'revision':'REVISION', 'run_id':'RUN_ID',
+                                'run_attempt':'ARTIFACT_ATTEMPT', 'profile':'PROFILE',
+                                'release_version':'RELEASE_VERSION', 'namespace':'HUB_USER',
+                                'architecture':'ARCHITECTURE'}.items():
+              assert metadata[key] == os.environ[variable], f'Artifact identity mismatch: {key}'
+          assert metadata['os'] == 'linux' and metadata['architecture'] in {'amd64', 'arm64'}
+          assert re.fullmatch(r'sha256:[a-f0-9]{64}', metadata['image_id'])
+          assert re.fullmatch(r'[a-f0-9]{64}', metadata['archive_sha256'])
+          assert type(metadata['archive_bytes']) is int and metadata['archive_bytes'] > 0
+          assert archive.stat().st_size == metadata['archive_bytes'], 'Archive size mismatch'
+          rows = [line.split() for line in pathlib.Path('docker/classroom-images.tsv').read_text().splitlines()
+                  if line and not line.startswith('#')]
+          selected = [row for row in rows if row[0] == os.environ['PROFILE'] and row[5] in {'app', 'ordinary'}]
+          assert len(selected) == 1
+          expected_source = selected[0][2] + ':' + os.environ['RELEASE_VERSION']
+          assert metadata['source_image'] == expected_source, 'Unexpected image tag'
+          with archive.open('rb') as stream:
+              assert hashlib.file_digest(stream, 'sha256').hexdigest() == metadata['archive_sha256'], 'Archive SHA-256 mismatch'
+          subprocess.run(['docker', 'image', 'load', '--input', str(archive)], check=True)
+          image = json.loads(subprocess.check_output(['docker', 'image', 'inspect', '--format', '{{json .}}', metadata['image_id']]))
+          assert (image['Id'], image['Os'], image['Architecture']) == (metadata['image_id'], metadata['os'], metadata['architecture']), 'Loaded image identity/platform mismatch'
+          subprocess.run(['docker', 'image', 'tag', metadata['image_id'], expected_source], check=True)
+          print('Verified checked image', metadata['image_id'], 'from workflow run', metadata['run_id'])
+          PY
+      - name: Authenticate to Docker Hub after every image passed
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_TOKEN" || { echo 'Set the dockerhub environment token before publishing.' >&2; exit 2; }
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$HUB_USER" --password-stdin
+      - name: Publish the verified native architecture image
+        run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE" --push
+      - name: Remove the ephemeral registry login
+        if: always()
+        run: docker logout || true

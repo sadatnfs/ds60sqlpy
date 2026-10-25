@@ -212,11 +212,15 @@ class ModuleService:
                     lesson.runtime_profile, "notes.md"
                 ),
                 "setup_commands": (
-                    [f"./classroom --profile {lesson.runtime_profile}" + (
-                        " --gpu-device 0" if lesson.runtime_profile in {
-                            "cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"
-                        } else ""
-                    )]
+                    [
+                        f"./classroom --profile {lesson.runtime_profile}"
+                        + (
+                            " --gpu-device 0"
+                            if lesson.runtime_profile
+                            in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}
+                            else ""
+                        )
+                    ]
                     if lesson.runtime_profile in SERVICES and lesson.runtime_profile != "k8s-kind"
                     else []
                 ),

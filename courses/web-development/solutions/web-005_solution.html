@@ -1,33 +1,48 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lists, quotations, code and meaningful text</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-pre { overflow-x: auto; padding: 1rem; background: #e2e8f0; }
-  </style>
-</head>
-<body>
-<main><h1>A repeatable study process</h1><ol><li>Predict.</li><li>Run.<ul><li>Keep the input.</li><li>Keep the output.</li></ul></li><li>Explain.</li></ol><dl><dt>Source</dt><dd>The authored document.</dd><dt>DOM</dt><dd>The parsed document tree.</dd></dl><pre><code>&lt;p&gt;Hello&lt;/p&gt;</code></pre></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lists, quotations, code and meaningful text</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      pre { overflow-x: auto; padding: 1rem; background: #e2e8f0; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>A repeatable study process</h1
+      ><ol
+        ><li>Predict.</li
+        ><li
+          >Run.<ul
+            ><li>Keep the input.</li
+            ><li>Keep the output.</li></ul
+          ></li
+        ><li>Explain.</li></ol
+      ><dl
+        ><dt>Source</dt><dd>The authored document.</dd><dt>DOM</dt
+        ><dd>The parsed document tree.</dd></dl
+      >
+      <pre><code>&lt;p&gt;Hello&lt;/p&gt;</code></pre>
+    </main>
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelectorAll('dl dt').length === 2, 'Two glossary terms expected');
-document.querySelector("#reference-status").textContent = "web-005 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-005 reference checks passed");
-</script>
-</body>
+      check(document.querySelectorAll('dl dt').length === 2, 'Two glossary terms expected');
+      document.querySelector("#reference-status").textContent = "web-005 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-005 reference checks passed");
+    </script>
+  </body>
 </html>

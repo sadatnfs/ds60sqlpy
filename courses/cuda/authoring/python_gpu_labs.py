@@ -1,7 +1,5 @@
 """Small opt-in CUDA labs. Hardware-required programs never fall back silently."""
 
-import textwrap
-
 CUPY = {
     1: """x = cp.asarray([1.0, 2.0, 3.0], dtype=cp.float32)
 y = cp.sum(x)
@@ -165,7 +163,7 @@ optimizer.step()
 assert base.grad is None
 assert a.numel()+b.numel() == 8 and base.numel() == 16
 assert torch.isfinite(a).all() and torch.isfinite(b).all()
-print("PyTorch adapter census: base16 frozen; trainable8; base storage remains")""",
+print("PyTorch adapter census: base 16 frozen; trainable 8; base storage remains")""",
 }
 
 TENSORFLOW = {
@@ -284,29 +282,27 @@ print("TensorFlow causal attention:", actual.numpy().tolist(), "; no fused-backe
     tf.debugging.assert_all_finite(b, "b finite")
 assert int(tf.size(a).numpy()+tf.size(b).numpy()) == 8
 assert int(tf.size(base).numpy()) == 16
-print("TensorFlow adapter census: base16 frozen; trainable8; base storage remains")""",
+print("TensorFlow adapter census: base 16 frozen; trainable 8; base storage remains")""",
 }
 
 
 def cupy_program(n):
-    return (
-        textwrap.dedent('''\
-        """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
-        import math
-        import cupy as cp
-
-        if cp.cuda.runtime.getDeviceCount() < 1:
-            raise RuntimeError("This variant requires an explicitly prepared NVIDIA CUDA GPU")
-        cp.cuda.Device(0).use()
-        ''')
-        + "\n"
-        + CUPY[n].strip()
-        + "\n"
-    )
+    header = '"""Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""\n\n'
+    if n == 13:
+        header += "import math\n\n"
+    header += "import cupy as cp\n\n"
+    header += 'if cp.cuda.runtime.getDeviceCount() < 1:\n    raise RuntimeError("This variant requires an explicitly prepared NVIDIA CUDA GPU")\ncp.cuda.Device(0).use()\n'
+    return header + "\n" + CUPY[n].strip() + "\n"
 
 
 def torch_program(n, gpu):
-    header = '"""Bounded PyTorch lesson with explicit execution device."""\nimport copy\nimport torch\nfrom torch.utils.data import DataLoader, TensorDataset\n\ntorch.set_num_threads(1)\n'
+    header = '"""Bounded PyTorch lesson with explicit execution device."""\n\n'
+    if n == 30:
+        header += "import copy\n\n"
+    header += "import torch\n"
+    if n == 24:
+        header += "from torch.utils.data import DataLoader, TensorDataset\n"
+    header += "\ntorch.set_num_threads(1)\n"
     if gpu:
         header += 'if not torch.cuda.is_available() or torch.version.hip is not None:\n    raise RuntimeError("This variant requires NVIDIA CUDA, not CPU or ROCm fallback")\ndevice = torch.device("cuda:0")\n'
     else:

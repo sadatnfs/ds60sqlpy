@@ -75,3 +75,9 @@ python courses/web-development/authoring/check_browser.py --url http://127.0.0.1
 ```
 
 Replace PORT with that disposable server's actual loopback port. The script writes test drafts and observations, so do not point it at a learner's saved classroom. It checks all 30 references, real interactions, narrow layout, HTML/PHP pad separation, reload behavior, native script/lifecycle semantics and the retained preview isolation. It does not build or start a server.
+
+The live studio has a separate acceptance script, check_live_preview.py, with
+the same URL, disposable-state and report arguments. It checks rapid typing,
+pause/stop/navigation cancellation, exact manual source receipts, no automatic
+receipt writes, focus retention, real viewport sizes and browser JavaScript/D3
+error recovery. Run it after changes to preview scheduling or workspace layout.

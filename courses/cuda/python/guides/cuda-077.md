@@ -52,6 +52,7 @@ The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in t
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
 
 import math
+
 import cupy as cp
 
 if cp.cuda.runtime.getDeviceCount() < 1:

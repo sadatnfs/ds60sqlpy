@@ -1,10 +1,13 @@
 # Optional Python package sets and Docker runtime profiles
 
-The supported startup route is `./classroom`, with fifteen ordinary Linux
-workers and the bundled D3 browser preview. Select worker profiles through the
+The supported startup route is `./classroom`, with sixteen ordinary Linux
+workers and bundled HTML/CSS/JavaScript/D3 browser previews. Select worker profiles through the
 [one-command guide](one-command-classroom.md). C, Go, C#, Rust and Swift use
 their dedicated prepared workers, while D3 needs no compiler worker. Docker
 lessons and advanced Kubernetes host labs retain explicit ownership boundaries.
+PHP uses its prepared CLI worker. Optional NVIDIA profiles are separate from the
+ordinary workers; see [CUDA preparation](cuda-classroom.md) for explicit device
+selection, reading/CPU alternatives and hardware limits.
 
 The package-set configuration below describes optional Python dependencies and
 retained compatibility launchers. It is not an additional prerequisite for the

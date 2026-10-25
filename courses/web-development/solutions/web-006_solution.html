@@ -1,33 +1,43 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Images, SVG, alternatives and media decisions</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-svg { display: block; width: min(100%, 25rem); height: auto; }
-  </style>
-</head>
-<body>
-<main><h1>Study progress</h1><figure><svg viewBox="0 0 200 40" role="img" aria-labelledby="progress-title progress-desc"><title id="progress-title">Three of five lessons complete</title><desc id="progress-desc">A bar filled to sixty percent.</desc><rect width="200" height="30" fill="#cbd5e1"/><rect width="120" height="30" fill="#0753a4"/></svg><figcaption>Completed: 3 of 5 lessons.</figcaption></figure></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Images, SVG, alternatives and media decisions</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      svg { display: block; width: min(100%, 25rem); height: auto; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Study progress</h1
+      ><figure
+        ><svg viewBox="0 0 200 40" role="img" aria-labelledby="progress-title progress-desc">
+          <title id="progress-title">Three of five lessons complete</title>
+          <desc id="progress-desc">A bar filled to sixty percent.</desc>
+          <rect width="200" height="30" fill="#cbd5e1" />
+          <rect width="120" height="30" fill="#0753a4" /></svg
+        ><figcaption>Completed: 3 of 5 lessons.</figcaption></figure
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelector('svg title').textContent.includes('Three'), 'Accessible title missing');
-document.querySelector("#reference-status").textContent = "web-006 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-006 reference checks passed");
-</script>
-</body>
+      check(document.querySelector('svg title').textContent.includes('Three'), 'Accessible title missing');
+      document.querySelector("#reference-status").textContent = "web-006 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-006 reference checks passed");
+    </script>
+  </body>
 </html>

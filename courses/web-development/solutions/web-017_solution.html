@@ -1,33 +1,45 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Responsive layouts and content-driven breakpoints</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-.layout { display: grid; gap: 1rem; } nav { padding: 1rem; background: #e0f2fe; } article { min-inline-size: 0; } @media (min-width: 48rem) { .layout { grid-template-columns: 15rem minmax(0, 1fr); } }
-  </style>
-</head>
-<body>
-<main><h1>A responsive lesson</h1><div class="layout"><nav aria-label="Lesson outline"><a href="#content">Read the article</a></nav><article id="content"><h2>Content first</h2><p>This article remains readable when the navigation stacks above it. The breakpoint responds to available space rather than a named device.</p></article></div></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Responsive layouts and content-driven breakpoints</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      .layout { display: grid; gap: 1rem; } nav { padding: 1rem; background: #e0f2fe; } article { min-inline-size: 0; } @media (min-width: 48rem) { .layout { grid-template-columns: 15rem minmax(0, 1fr); } }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>A responsive lesson</h1
+      ><div class="layout"
+        ><nav aria-label="Lesson outline"><a href="#content">Read the article</a></nav
+        ><article id="content"
+          ><h2>Content first</h2
+          ><p
+            >This article remains readable when the navigation stacks above it. The breakpoint
+            responds to available space rather than a named device.</p
+          ></article
+        ></div
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelector('meta[name=viewport]'), 'Viewport metadata missing');
-document.querySelector("#reference-status").textContent = "web-017 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-017 reference checks passed");
-</script>
-</body>
+      check(document.querySelector('meta[name=viewport]'), 'Viewport metadata missing');
+      document.querySelector("#reference-status").textContent = "web-017 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-017 reference checks passed");
+    </script>
+  </body>
 </html>

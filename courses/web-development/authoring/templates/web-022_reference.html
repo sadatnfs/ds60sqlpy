@@ -1,33 +1,39 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CSS architecture, layers and maintainable components</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-@layer base, components, utilities; @layer base { p { color: #172033; } } @layer components { .lesson-card { padding: 1rem; border: 1px solid #64748b; } .lesson-card p { color: #0753a4; } } @layer utilities { .text-muted { color: #475569; } }
-  </style>
-</head>
-<body>
-<main><h1>Readable CSS ownership</h1><article class="lesson-card"><h2>One component</h2><p>A normal description.</p><p class="text-muted">An intentionally muted note.</p></article></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSS architecture, layers and maintainable components</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      @layer base, components, utilities; @layer base { p { color: #172033; } } @layer components { .lesson-card { padding: 1rem; border: 1px solid #64748b; } .lesson-card p { color: #0753a4; } } @layer utilities { .text-muted { color: #475569; } }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Readable CSS ownership</h1
+      ><article class="lesson-card"
+        ><h2>One component</h2><p>A normal description.</p
+        ><p class="text-muted">An intentionally muted note.</p></article
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(getComputedStyle(document.querySelector('.text-muted')).color === 'rgb(71, 85, 105)', 'Utility layer did not win');
-document.querySelector("#reference-status").textContent = "web-022 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-022 reference checks passed");
-</script>
-</body>
+      check(getComputedStyle(document.querySelector('.text-muted')).color === 'rgb(71, 85, 105)', 'Utility layer did not win');
+      document.querySelector("#reference-status").textContent = "web-022 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-022 reference checks passed");
+    </script>
+  </body>
 </html>

@@ -66,6 +66,168 @@ const browserPreview =
     ? new globalThis.DS60BrowserPreview($("browser-preview"))
     : null;
 let browserPreviewContext = null;
+let browserLiveKey = null,
+  browserLivePaused = false,
+  browserLiveTimer = null,
+  browserLiveGeneration = 0,
+  browserStudioFocused = false,
+  browserLiveFocus = null;
+
+function isBrowserLesson() {
+  return Boolean(
+    current && ["html-browser", "javascript-browser"].includes(current.runtime_profile),
+  );
+}
+function browserLiveEnabled() {
+  return isBrowserLesson() && browserLiveKey === workspaceKey();
+}
+function browserLiveStatus(message, state = "idle") {
+  if ($("browser-live-state").textContent !== message)
+    $("browser-live-state").textContent = message;
+  $("browser-live-state").dataset.state = state;
+}
+function clearBrowserLive() {
+  clearTimeout(browserLiveTimer);
+  browserLiveTimer = null;
+  browserLiveGeneration++;
+  browserLiveKey = null;
+  browserLivePaused = false;
+  browserLiveFocus = null;
+  $("browser-live-toggle").checked = false;
+  browserLiveStatus("Live preview is off. Your code runs only when you choose.");
+}
+function preserveBrowserEditorFocus() {
+  if (
+    browserLiveFocus?.editor &&
+    browserLiveEnabled() &&
+    browserLiveFocus.generation === browserLiveGeneration &&
+    browserPreviewContext === browserLiveFocus.context &&
+    document.activeElement === browserPreview?.frame
+  )
+    $("source").focus({ preventScroll: true });
+}
+function updateBrowserLayout() {
+  $("authored").className =
+    "panes" +
+    (readingFocused ? " reading-focus" : "") +
+    (browserStudioFocused && isBrowserLesson() ? " browser-focus" : "");
+  $("browser-studio-toggle").setAttribute("aria-pressed", String(browserStudioFocused));
+  $("browser-studio-toggle").textContent = browserStudioFocused
+    ? "Return to lesson layout"
+    : "Focus on editor & preview";
+}
+function updateBrowserViewport() {
+  const value = $("browser-viewport").value;
+  const width = ["1280", "768", "390"].includes(value) ? Number(value) : null;
+  $("browser-preview").style.width = width ? width + "px" : "100%";
+  const measured = width || Math.round($("browser-preview").clientWidth || 0);
+  $("browser-viewport-label").textContent = measured ? measured + " px viewport" : "Fit to space";
+}
+function updateBrowserLiveControls() {
+  const eligible = isBrowserLesson();
+  $("browser-live-controls").hidden = !eligible;
+  $("browser-preview-home").hidden = !eligible;
+  $("browser-studio").dataset.browser = String(eligible);
+  $("browser-live-toggle").checked = browserLiveEnabled();
+  $("browser-live-toggle").disabled =
+    !eligible ||
+    !browserPreview ||
+    !current?.capability?.ready ||
+    Boolean(activeJob) ||
+    submitInFlight ||
+    legacyRunActive;
+  $("browser-live-pause").disabled = !browserLiveEnabled();
+  $("browser-live-pause").textContent = browserLivePaused ? "Resume updates" : "Pause updates";
+  $("browser-live-pause").setAttribute("aria-pressed", String(browserLivePaused));
+  $("browser-live-stop").disabled = !browserLiveEnabled() && !browserPreview?.active;
+  $("browser-preview-empty").hidden = Boolean(browserPreview?.active);
+  $("browser-preview-title").textContent =
+    current?.runtime_profile === "html-browser" ? "Page preview" : "Visualization preview";
+  if (!eligible) browserStudioFocused = false;
+  updateBrowserLayout();
+  updateBrowserViewport();
+}
+function scheduleBrowserLive(delay = 650) {
+  if (!browserLiveEnabled() || browserLivePaused || submitInFlight) return;
+  clearTimeout(browserLiveTimer);
+  const generation = ++browserLiveGeneration;
+  const context = contextOf();
+  browserLiveStatus("Waiting for a pause in typing...", "pending");
+  browserLiveTimer = setTimeout(() => {
+    browserLiveTimer = null;
+    if (
+      !browserLiveEnabled() ||
+      browserLivePaused ||
+      generation !== browserLiveGeneration ||
+      workspaceKey() !== context.key
+    )
+      return;
+    void renderBrowserLive(context, generation, $("source").value);
+  }, delay);
+  updateControls();
+}
+async function renderBrowserLive(context, generation, source) {
+  if (!browserPreview || !browserLiveEnabled() || generation !== browserLiveGeneration) return;
+  const stillCurrent = () =>
+    browserLiveEnabled() &&
+    generation === browserLiveGeneration &&
+    workspaceKey() === context.key &&
+    browserPreviewContext === context;
+  resetResult();
+  browserPreviewContext = context;
+  browserLiveFocus = {
+    context,
+    generation,
+    editor: document.activeElement === $("source"),
+  };
+  $("browser-preview-panel").hidden = false;
+  $("browser-fullscreen-status").textContent = "";
+  $("job-status").textContent = "Live preview is updating...";
+  $("output").textContent = "Refreshing your preview...";
+  $("browser-observation-save").disabled = true;
+  browserLiveStatus("Refreshing your preview...", "pending");
+  try {
+    const promise = browserPreview.start(
+      source,
+      (snapshot, type) => {
+        if (!stillCurrent()) return;
+        $("output").textContent = snapshot.output || "(No console output.)";
+        if (type === "interaction-error") {
+          $("job-status").textContent = "Live preview: failed";
+          browserLiveStatus("The preview needs attention. Check the console.", "error");
+          $("browser-observation-save").disabled = false;
+        }
+      },
+      current.runtime_profile === "html-browser" ? "html" : "javascript",
+    );
+    updateBrowserFullscreenControls();
+    updateControls();
+    const observation = await promise;
+    if (!stillCurrent()) return;
+    preserveBrowserEditorFocus();
+    $("job-status").textContent = "Live preview: " + observation.status;
+    $("output").textContent = observation.output || "(No console output.)";
+    $("run-storage-status").textContent =
+      "Live preview is not added to saved runs. Choose Save observation to keep this output and its source.";
+    $("browser-observation-save").disabled = !browserPreview.active;
+    browserLiveStatus(
+      browserLivePaused
+        ? "Updates are paused. The preview shows the last rendered version."
+        : observation.status === "failed"
+          ? "The preview needs attention. Edit your code to try again."
+          : "Up to date. Keep exploring.",
+      observation.status === "failed" ? "error" : "ready",
+    );
+  } catch (error) {
+    if (!stillCurrent()) return;
+    $("job-status").textContent = "Live preview: failed";
+    $("output").textContent = error.message;
+    browserLiveStatus("The preview needs attention. Check the console.", "error");
+  } finally {
+    if (browserLiveFocus?.context === context) browserLiveFocus = null;
+    if (stillCurrent()) updateControls();
+  }
+}
 let browserFullscreenPending = false,
   browserFullscreenSequence = 0,
   browserWasFullscreen = false;
@@ -156,6 +318,7 @@ function syncBrowserFullscreen() {
   updateBrowserFullscreenControls();
 }
 function stopBrowserPreview(reason = "Preview stopped.") {
+  clearBrowserLive();
   ++browserFullscreenSequence;
   void exitBrowserPreviewFullscreen();
   browserPreview?.stop(reason);
@@ -163,6 +326,8 @@ function stopBrowserPreview(reason = "Preview stopped.") {
   $("browser-observation-save").disabled = true;
   // Keep the Exit control visible until native fullscreen has actually ended.
   $("browser-preview-panel").hidden = !browserPreviewIsFullscreen();
+  $("browser-preview-empty").hidden = false;
+  updateBrowserLiveControls();
   updateBrowserFullscreenControls();
 }
 function showBrowserObservation(receipt) {
@@ -204,7 +369,7 @@ async function saveBrowserObservation(context, observation, show = true) {
     },
   });
   if (workspaceKey() === context.key) {
-    if (show) showBrowserObservation(result.receipt);
+    if (show && browserPreviewContext === context) showBrowserObservation(result.receipt);
     const latest = await api("module-browser-history", { lesson_id: context.id });
     if (workspaceKey() === context.key) renderHistory(latest.history);
   }
@@ -219,19 +384,24 @@ async function runBrowserPreview(context, intent) {
   $("browser-preview-panel").hidden = false;
   $("browser-fullscreen-status").textContent = "";
   $("output").textContent = "Starting the isolated browser preview...";
-  const observationPromise = browserPreview.start(intent.source, (snapshot, type) => {
-    if (workspaceKey() !== context.key || browserPreviewContext !== context) return;
-    $("output").textContent = snapshot.output || "(No console output.)";
-    if (type === "interaction-error") {
-      $("job-status").textContent = "An interaction raised a browser error after the initial run.";
-      $("run-storage-status").textContent =
-        "Inspect the console, then save the latest observation if useful. Earlier receipts stay unchanged.";
-    }
-  }, current.runtime_profile === "html-browser" ? "html" : "javascript");
+  const observationPromise = browserPreview.start(
+    intent.source,
+    (snapshot, type) => {
+      if (workspaceKey() !== context.key || browserPreviewContext !== context) return;
+      $("output").textContent = snapshot.output || "(No console output.)";
+      if (type === "interaction-error") {
+        $("job-status").textContent =
+          "An interaction raised a browser error after the initial run.";
+        $("run-storage-status").textContent =
+          "Inspect the console, then save the latest observation if useful. Earlier receipts stay unchanged.";
+      }
+    },
+    current.runtime_profile === "html-browser" ? "html" : "javascript",
+  );
   updateBrowserFullscreenControls();
   updateControls();
   const observation = await observationPromise;
-  if (workspaceKey() === context.key) {
+  if (workspaceKey() === context.key && browserPreviewContext === context) {
     $("job-status").textContent = "Browser observation: " + observation.status;
     $("output").textContent = observation.output || "(No console output.)";
     $("browser-observation-save").disabled = !browserPreview.active;
@@ -572,6 +742,7 @@ function migratedRecent() {
   }
 }
 async function showHome(historyMode = "push") {
+  clearBrowserLive();
   const version = ++intentVersion;
   await flushSave();
   if (version !== intentVersion) return;
@@ -805,6 +976,7 @@ function renderLegacyControls(data) {
   $("phase-label").textContent = "Reading notes";
 }
 async function openLesson(id, save = true, requested = {}) {
+  clearBrowserLive();
   requested = {
     ...pref("context." + id, {}),
     ...Object.fromEntries(
@@ -882,6 +1054,7 @@ async function openLesson(id, save = true, requested = {}) {
   }
   stopBrowserPreview("Stopped when leaving the visualization workspace.");
   current = data;
+  browserStudioFocused = false;
   trackId = found.subject.id;
   lessonId = id;
   theme(found.subject);
@@ -1058,7 +1231,11 @@ function preferredReadingView(tutorial = false) {
 }
 function setReadingView(focused) {
   readingFocused = focused;
-  $("authored").className = "panes" + (focused ? " reading-focus" : "");
+  if (focused) {
+    browserStudioFocused = false;
+    if (browserLiveEnabled()) stopBrowserPreview("Paused while focusing on the lesson.");
+  }
+  updateBrowserLayout();
   $("reading-toggle").setAttribute("aria-pressed", String(focused));
   $("reading-toggle").textContent = focused ? "Show code and notes" : "Focus on reading";
 }
@@ -1078,13 +1255,15 @@ function renderSections() {
   }
 }
 function updateControls() {
-  $("cancel").disabled = !activeJob && !browserPreview?.active;
+  $("cancel").disabled = !activeJob && !browserPreview?.active && !browserLiveEnabled();
   $("cancel").hidden = current?.engine === "legacy" && !activeJob;
-  $("cancel").textContent = browserPreview?.active
-    ? "Stop preview"
-    : activeJobRecord
-      ? "Cancel " + activeJobRecord.lesson_id + " job"
-      : "Cancel job";
+  $("cancel").textContent =
+    browserPreview?.active || browserLiveEnabled()
+      ? "Stop preview"
+      : activeJobRecord
+        ? "Cancel " + activeJobRecord.lesson_id + " job"
+        : "Cancel job";
+  updateBrowserLiveControls();
   if (!current) return;
   showCapability(current.capability);
 }
@@ -1675,6 +1854,7 @@ async function runCode() {
     legacyRunActive
   )
     return;
+  if (isBrowserLesson()) stopBrowserPreview("Preparing a saved preview.");
   submitInFlight = true;
   updateControls();
   const context = contextOf(),
@@ -1904,6 +2084,61 @@ $("source").addEventListener("keydown", (event) => {
     input.dispatchEvent(new Event("input"));
   } else editorEscape = false;
 });
+
+$("browser-live-toggle").addEventListener("change", () => {
+  if (!isBrowserLesson() || !browserPreview) return;
+  if (!$("browser-live-toggle").checked) {
+    stopBrowserPreview("Live preview turned off.");
+    updateControls();
+    return;
+  }
+  browserLiveKey = workspaceKey();
+  browserLivePaused = false;
+  browserStudioFocused = true;
+  setReadingView(false);
+  updateBrowserLiveControls();
+  scheduleBrowserLive(0);
+});
+$("browser-live-pause").addEventListener("click", () => {
+  if (!browserLiveEnabled()) return;
+  browserLivePaused = !browserLivePaused;
+  clearTimeout(browserLiveTimer);
+  browserLiveTimer = null;
+  browserLiveStatus(
+    browserLivePaused
+      ? "Updates are paused. The preview shows the last rendered version."
+      : "Resuming live preview...",
+    browserLivePaused ? "paused" : "pending",
+  );
+  updateBrowserLiveControls();
+  if (!browserLivePaused) scheduleBrowserLive(0);
+});
+$("browser-live-stop").addEventListener("click", () => {
+  stopBrowserPreview("Stopped by the learner.");
+  updateControls();
+  status("The preview is stopped. Your draft and saved observations are kept.");
+});
+$("browser-studio-toggle").addEventListener("click", () => {
+  if (!isBrowserLesson()) return;
+  browserStudioFocused = !browserStudioFocused;
+  setReadingView(false);
+  updateBrowserLiveControls();
+  $("source").focus({ preventScroll: true });
+  $("browser-live-controls").scrollIntoView({ block: "start" });
+});
+$("browser-viewport").addEventListener("change", updateBrowserViewport);
+$("browser-console-focus").addEventListener("click", () => {
+  $("output").scrollIntoView({ block: "center" });
+  $("output").focus({ preventScroll: true });
+});
+$("source").addEventListener("input", () => scheduleBrowserLive());
+window.addEventListener("resize", updateBrowserViewport);
+// Restore on a new task, after the browser completes its focus transition.
+// Synchronous refocusing from blur can leave keyboard routing in the old frame.
+window.addEventListener("blur", () => setTimeout(preserveBrowserEditorFocus, 0));
+if (typeof ResizeObserver === "function")
+  new ResizeObserver(updateBrowserViewport).observe($("browser-preview-stage"));
+
 $("run").addEventListener("click", runCode);
 $("browser-fullscreen").addEventListener("click", toggleBrowserFullscreen);
 document.addEventListener("fullscreenchange", syncBrowserFullscreen);
@@ -1916,15 +2151,22 @@ $("browser-observation-save").addEventListener("click", async () => {
     snapshot = browserPreview?.snapshot();
   if (!context || !snapshot || snapshot.status === "running" || workspaceKey() !== context.key)
     return;
+  if (browserLiveEnabled()) {
+    clearTimeout(browserLiveTimer);
+    browserLiveTimer = null;
+    browserLivePaused = true;
+    browserLiveStatus("Updates are paused while you keep this observation.", "paused");
+    updateBrowserLiveControls();
+  }
   try {
     await saveBrowserObservation(context, snapshot);
-    status("The latest console observation was saved without rerunning the chart.");
+    status("The latest console observation was saved without rerunning the preview.");
   } catch (error) {
     status("Could not save the observation. " + error.message, true);
   }
 });
 $("cancel").addEventListener("click", async () => {
-  if (browserPreview?.active) {
+  if (browserPreview?.active || browserLiveEnabled()) {
     stopBrowserPreview("Stopped by the learner.");
     updateControls();
     status("The preview was closed. Source and saved observations were retained.");

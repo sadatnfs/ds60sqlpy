@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>CUDA architecture and C++ study workflow · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>CUDA architecture and C++ study workflow</h1>
+      <p class="source-path">Generated from <code>courses/cuda/cpp/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="cuda-architecture-and-c-study-workflow">CUDA architecture and C++ study workflow<a class="heading-anchor" href="#cuda-architecture-and-c-study-workflow" aria-label="Link to this section">#</a></h2>
+<p>The 64 chapters in this branch run from GPU mental models to kernels, numerical engineering, profiling, asynchronous pipelines, libraries and independent projects. Open the CUDA subject in the single <code>/classroom</code> interface. Its default reading worksheet saves your explanation, notes and progress on every supported classroom host. GPU availability never blocks reading.</p>
+<h3 id="what-each-learning-surface-establishes">What each learning surface establishes<a class="heading-anchor" href="#what-each-learning-surface-establishes" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Surface</th>
+<th>Available work</th>
+<th>What it does not establish</th>
+</tr></thead><tbody>
+<tr>
+<td>Reading worksheet</td>
+<td>Architecture diagrams, exact arithmetic, dependency/lifetime analysis and design decisions</td>
+<td>Device execution or hardware performance</td>
+</tr>
+<tr>
+<td>CPU Python reference</td>
+<td>Standard-library calculations with real assertions</td>
+<td>CUDA scheduling, memory visibility, instruction timing or GPU execution</td>
+</tr>
+<tr>
+<td>CUDA compilation</td>
+<td>A toolkit accepts a source/target configuration and produces an artifact</td>
+<td>Device availability or correct returned values</td>
+</tr>
+<tr>
+<td>Actual NVIDIA run</td>
+<td>Checked allocation, launch, completion and host validation on a named device</td>
+<td>Universal correctness, every architecture or a speedup</td>
+</tr>
+<tr>
+<td>Sanitizer/profiling</td>
+<td>Tool-specific observations on a stated fixture and configuration</td>
+<td>Every possible defect or a universally optimal implementation</td>
+</tr>
+</tbody></table></div>
+<p>Apple Silicon, AMD/Intel GPU and CPU-only learners can complete reading and CPU work. A Docker image cannot manufacture an NVIDIA GPU. Optional GPU work needs a separately prepared supported NVIDIA Linux host or supported Windows WSL 2 setup. Use <a href="../../../docs/cuda-classroom.md.html">the classroom GPU guide</a> for platform and profile details. Other GPU APIs, such as Metal/MPS or ROCm, are separate optional learning environments and do not execute these <code>.cu</code> programs automatically.</p>
+<h3 id="run-a-bounded-cpu-reference">Run a bounded CPU reference<a class="heading-anchor" href="#run-a-bounded-cpu-reference" aria-label="Link to this section">#</a></h3>
+<p>Every chapter links its own <code>references/cuda-NNN_cpu.py</code>. It uses the Python standard library and no package/model downloads. In a prepared Python shell, from the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-020_cpu.py</code></pre>
+<p>Select <strong>CPU model (Python)</strong> inside the CUDA chapter to keep practice source and results scoped to that lesson. Its starter is deliberately incomplete; implement the model and boundary assertions before replacing its error. You can explicitly reveal the separate reference for comparison. Assertions check the exact small model, and the output identifies its surface in the guide. Hypothetical hardware parameters and synthetic timing samples are labelled as models, not measured benchmark results. Retain the worksheet as your own work; viewing an answer should not replace your saved source or mark mastery.</p>
+<h3 id="optional-single-source-cuda-c-lab">Optional single-source CUDA C++ lab<a class="heading-anchor" href="#optional-single-source-cuda-c-lab" aria-label="Link to this section">#</a></h3>
+<p>Complete <code>.cu</code> references accompany cuda-012, cuda-014, cuda-015, cuda-020, cuda-022, cuda-023, cuda-039 and cuda-043. Separate learner harnesses have the same IDs under <code>lessons/</code>. They intentionally report incomplete work until you implement the bounded algorithm and checks. The reference does not substitute CPU arithmetic when a device is absent.</p>
+<p>If the classroom offers the optional NVIDIA CUDA C++ variant, select it only after its runtime capability notice confirms readiness. Its one-source worker stages the selected source as <code>main.cu</code>; the original checked-in filename is not an executable path. The worker&#x27;s reviewed compiler flags and bounded job policy are described in the GPU guide. Your worksheet and each language variant retain separate saved work.</p>
+<p>For a deliberate external lab, use an owned scratch directory on a supported NVIDIA host with a compatible CUDA toolkit, host compiler and driver already prepared. The following Bash commands copy only this project&#x27;s one lesson file and compile it locally. Run from the repository root. This directory is learner scratch and must not be committed with experiment logs or personal machine data.</p>
+<pre class="highlighted-code"><code class="language-bash">mkdir -p .learning/cuda-cpp/cuda-020
+cp courses/cuda/cpp/references/cuda-020_gpu.cu .learning/cuda-cpp/cuda-020/main.cu
+<span class="syntax-builtin">cd</span> .learning/cuda-cpp/cuda-020
+nvcc -std<span class="syntax-operator">=</span>c++17 -O2 -lineinfo main.cu -o main
+./main</code></pre>
+<p>The input <code>main.cu</code> contains host code, kernels and <code>main</code>. <code>-o main</code> names the compiled host executable; <code>./main</code> runs it from this directory. These examples use C++17-compatible language features. The classroom can deliberately compile them under its supported newer standard. The manual command uses the toolkit&#x27;s default architecture target; confirm that it supports your actual device. A production binary needs an explicitly reviewed architecture/PTX policy, not a copied target value from an unrelated GPU.</p>
+<p>Success prints the actual CUDA device and reports that host comparisons passed. No-device, compilation, launch, completion and numerical failures are failures or unavailable capability, not successful CUDA observations. The fixtures cap sizes and repetitions; do not replace them with infinite loops or arbitrary memory exhaustion experiments on a shared or display GPU.</p>
+<p>For a separately prepared Compute Sanitizer workflow, run a bounded reference:</p>
+<pre class="highlighted-code"><code class="language-bash">compute-sanitizer --tool memcheck --error-exitcode <span class="syntax-number">99</span> ./main
+compute-sanitizer --tool racecheck --error-exitcode <span class="syntax-number">99</span> ./main
+compute-sanitizer --tool initcheck --error-exitcode <span class="syntax-number">99</span> ./main
+compute-sanitizer --tool synccheck --error-exitcode <span class="syntax-number">99</span> ./main</code></pre>
+<p>Each tool has a different scope and overhead. Preserve the diagnostic and exit status. A clean run is not a speed measurement or a proof about every input. Do not run deliberate hanging kernels, reset a shared GPU or delete classroom volumes as an exercise. If device state needs review, the resource owner decides how to recover it after learner source and observations are preserved.</p>
+<h3 id="advanced-projects-and-honest-scope">Advanced projects and honest scope<a class="heading-anchor" href="#advanced-projects-and-honest-scope" aria-label="Link to this section">#</a></h3>
+<p>The chapters on cuBLAS, cuFFT, cuSPARSE, cuSOLVER, random generators, cooperative launch, architecture-specific copy mechanisms, CUTLASS, PTX/SASS and multiple GPUs provide concrete worked models and design practice. Their optional specialized execution requires its named library, tool or hardware preparation. The general CUDA C++ pad does not grant arbitrary library installation, multi-file project builds, profiling permissions or multi-GPU qualification.</p>
+<p>cuda-061 explains a larger CMake project as an explicit external workflow. cuda-063 and cuda-064 ask for a numerical application and a custom ML operator with evidence-based acceptance. They include CPU baselines and honest decisions to keep a CPU or library implementation when a custom kernel does not help.</p>
+<p>Sources: <a href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a>, <a href="https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html">NVCC reference</a>, <a href="https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html">Compute Sanitizer</a>.</p></article>
+  </main>
+</body>
+</html>

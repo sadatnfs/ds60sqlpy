@@ -92,7 +92,7 @@ assert len(values)==3
 assert sum(v is not None for v in values)==2
 assert sum(v for v in values if v is not None)==7
 assert Decimal("1.10")+Decimal("2.20")==Decimal("3.30")
-print("CPU SQL-semantics oracle: rows3 nonnull2 sum7 decimal3.30")""",
+print("CPU SQL-semantics oracle: rows 3, nonnull 2, sum 7, decimal 3.30")""",
     "Rows 3, non-null 2, sum 7 and exact decimal 3.30.",
 )
 

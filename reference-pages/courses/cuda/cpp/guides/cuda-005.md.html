@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cuda-005: Memory as addresses, ownership, shape and stride · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cuda-005: Memory as addresses, ownership, shape and stride</h1>
+      <p class="source-path">Generated from <code>courses/cuda/cpp/guides/cuda-005.md</code></p>
+    </header>
+    <article class="document"><h2 id="cuda-005-memory-as-addresses-ownership-shape-and-stride">cuda-005: Memory as addresses, ownership, shape and stride<a class="heading-anchor" href="#cuda-005-memory-as-addresses-ownership-shape-and-stride" aria-label="Link to this section">#</a></h2>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-004</code></p>
+<p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain memory as addresses, ownership, shape and stride using the concrete cases below. Produce a correct offset table and explicit ownership/lifetime diagram. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
+<h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A shape says how many logical coordinates exist. A stride says how far to move in storage when a coordinate increases by one. A row-major two-dimensional float array with row stride s elements places coordinate (r,c) at element offset r*s+c, then multiplies by the element size to obtain a byte offset. Padded rows use s greater than their logical width. A view can change shape and strides while borrowing the same allocation. Copying an address does not extend the allocation&#x27;s lifetime or create independent data. Device and host pointers also carry an accessibility contract beyond their printed numeric value.</p>
+<h3 id="mathematical-contract">Mathematical contract<a class="heading-anchor" href="#mathematical-contract" aria-label="Link to this section">#</a></h3>
+<div class="math-display"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mo>byteOffset</mo><mo stretchy="false">(</mo><mi>r</mi><mo>,</mo><mi>c</mi><mo stretchy="false">)</mo><mo>=</mo><mo stretchy="false">(</mo><mi>r</mi><mi>s</mi><mo>+</mo><mi>c</mi><mo stretchy="false">)</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">\operatorname{byteOffset}(r,c)=(r s+c)b</annotation></semantics></math></div>
+<p>Here r is row, c is column, s is row stride in elements, and b is bytes per element. All indices must satisfy logical bounds.</p>
+<h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open this chapter in <code>/classroom</code> and use its saved reading worksheet. The primary reading pad does not execute CUDA. The two examples, six tasks and separate explanations are usable offline on macOS, Linux and Windows through WSL 2 with the ordinary classroom. An AMD, Intel or Apple GPU does not make this CUDA C++ source executable through Docker.</p>
+<p>For the bounded CPU calculation, select <strong>CPU model (Python)</strong> in this lesson. That variant keeps its own source and result history under the same chapter. Its answer-free starter supplies literal fixtures and the task contract; implement the model and assertions before replacing its deliberate incomplete-work error. The separate <a href="../references/cuda-005_cpu.py.html">CPU reference</a> uses only Python&#x27;s standard library. For an optional terminal workflow, run this from the repository root in a prepared Python environment:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-005_cpu.py</code></pre>
+<p>The assertions check the stated numerical result or model invariant. Console text is evidence of this CPU reference only. The <a href="../README.md.html">CUDA C++ study workflow</a> explains optional GPU compilation, paths, hardware requirements and evidence labels. No lesson opening downloads a model, installs a driver or starts a GPU job.</p>
+<h3 id="worked-example-1-trace-the-mechanism">Worked example 1: trace the mechanism<a class="heading-anchor" href="#worked-example-1-trace-the-mechanism" aria-label="Link to this section">#</a></h3>
+<p>Take a 2-by-3 float32 matrix with five stored elements per row. Coordinate (1,2) has element offset <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>×</mo><mn>5</mn><mo>+</mo><mn>2</mn><mo>=</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">1\times 5+2=7</annotation></semantics></math> and byte offset 28. The logical six values occupy a padded allocation of ten floats, or 40 bytes. Multiplying by logical width would read element 5 instead, a different location.</p>
+<p>The complete CPU model below intentionally models only the named arithmetic, layout, dependency or capability decision. It does not model GPU scheduling, caches, instruction timing or device memory visibility.</p>
+<pre class="highlighted-code"><code class="language-python">rows<span class="syntax-punctuation">,</span> cols<span class="syntax-punctuation">,</span> stride<span class="syntax-punctuation">,</span> itemsize <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span> <span class="syntax-operator">*</span> stride <span class="syntax-operator">+</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> itemsize<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">28</span>
+storage <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span>
+transposed <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>storage<span class="syntax-punctuation">[</span>r <span class="syntax-operator">+</span> c <span class="syntax-operator">*</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> r <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> transposed <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">offset_bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">28</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">transpose_view_values</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> transposed<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> Every assertion succeeds. A representative CPU output is:</p>
+<pre class="highlighted-code"><code class="language-text">{&#x27;offset_bytes&#x27;: 28, &#x27;transpose_view_values&#x27;: [[1, 4], [2, 5], [3, 6]]}</code></pre>
+<p>Tiny floating-point display differences across platforms are acceptable only where the explicit assertions use a tolerance; integers, shapes and ordering must still satisfy their exact contracts. A printed hypothetical duration is a model output, not a measured GPU benchmark.</p>
+<h3 id="worked-example-2-change-a-meaningful-condition">Worked example 2: change a meaningful condition<a class="heading-anchor" href="#worked-example-2-change-a-meaningful-condition" aria-label="Link to this section">#</a></h3>
+<p>For contiguous <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mo stretchy="false">[</mo><mo stretchy="false">[</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo stretchy="false">]</mo><mo>,</mo><mo stretchy="false">[</mo><mn>4</mn><mo>,</mo><mn>5</mn><mo>,</mo><mn>6</mn><mo stretchy="false">]</mo><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[[1,2,3],[4,5,6]]</annotation></semantics></math>, the row-major strides are (3,1) elements. A transposed view has shape (3,2) and strides (1,3). Coordinate (2,1) still refers to underlying element 5, value 6. There was no mandatory movement of bytes, and writing through the view can change the original owner.</p>
+<p>Before applying this example to your own program, write down which inputs are read, which result is produced, and the condition that makes the comparison valid. Keep the original case as a regression check when changing a boundary.</p>
+<h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
+<p>Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> Start with the literal input and intermediate quantities in worked example 1.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
+<p>Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> Identify exactly which condition changes in worked example 2.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
+<p>Compute the byte offset of (2,3) in a padded float64 matrix with row stride 8.</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> Use the first worked example to establish the relevant quantities, then change only the requested input.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
+<p>A kernel receives only shape (3,2) for a transposed view and assumes contiguous rows. Diagnose the failure.</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> Locate the failed phase or violated dependency before proposing a repair.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
+<p>What changes for a one-column matrix with padding?</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> Check what the algorithm is allowed to read, write or assume at this boundary.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
+<p>Compare particle position reads in array-of-structures and structure-of-arrays.</p>
+<p><strong>Self-check:</strong> Retain the requested calculation, output, diagram or explicit failure policy so another reader can compare it with the worked cases.</p>
+<p><strong>Hint 1:</strong> State the output contract and which observations are needed in the new application.</p>
+<p><strong>Hint 2:</strong> Review the mechanism paragraph and the relevant bounded CPU assertion; separate mathematical reasoning from optional device evidence.</p>
+<h3 id="common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>A tempting but incorrect claim in this chapter is: <strong>two arrays with the same shape necessarily have the same layout or independent storage.</strong></p>
+<p>For the concrete failure exercise, a kernel receives only shape (3,2) for a transposed view and assumes contiguous rows. Diagnose the failure. Preserve the original input and the stage where behavior diverged. Compare with the CPU model or dependency diagram before changing hardware configuration. A compiler result, synthetic timing model, profiler counter and returned numeric answer support different claims. Record unavailable hardware honestly.</p>
+<h3 id="self-check-retrieval-and-transfer">Self-check, retrieval and transfer<a class="heading-anchor" href="#self-check-retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Explain the first example without its code, then use the second example to state one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to diagnose a plausible defect, check the boundary in Exercise 5, and retain the application contract from Exercise 6. Compare the <a href="../solutions/cuda-005_solutions.md.html">separate explanations</a> only after your attempt or a deliberate reveal. A reading marker records your choice; it does not certify hardware qualification or expert mastery.</p>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<p>These are further technical references. The chapter and local CPU model remain readable offline. Check the documentation matching your deliberately prepared toolkit before optional hardware execution.</p>
+<ul>
+<li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a></li>
+</ul>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for cuda-005: Memory as addresses, ownership, shape and stride.
+Read courses/cuda/cpp/guides/cuda-005.md and courses/cuda/cpp/lessons/cuda-005.md.
+Direct prerequisites: `cuda-004`
+Review my own explanation and worksheet; give one progressive hint at a time.
+Keep courses/cuda/cpp/solutions/cuda-005_solutions.md and GPU references closed until I request comparison.
+Treat courses/cuda/cpp/references/cuda-005_cpu.py as CPU model evidence, never a CUDA execution receipt.
+Do not install drivers, download packages, run external jobs, reset devices or change my saved work without my instruction.
+Ask me to explain the boundary case and which observation would disprove my answer.</code></pre></article>
+  </main>
+</body>
+</html>

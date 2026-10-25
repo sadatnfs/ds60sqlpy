@@ -1,33 +1,44 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Disclosures, dialogs and focus management</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-dialog { max-inline-size: min(90vw, 30rem); border: 2px solid #0753a4; } dialog::backdrop { background: rgb(15 23 42 / .5); } summary { cursor: pointer; }
-  </style>
-</head>
-<body>
-<main><h1>Explain without interrupting</h1><details><summary>Why use native controls?</summary><p>They provide established keyboard and semantic behavior.</p></details><button id="open" type="button">Review local study settings</button><dialog aria-labelledby="dialog-title"><h2 id="dialog-title">Study settings</h2><p>This is a local demonstration. No preference is sent.</p><button id="close" type="button">Close settings</button></dialog></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
-const dialog = document.querySelector('dialog'); const opener = document.querySelector('#open'); opener.addEventListener('click', () => dialog.showModal()); document.querySelector('#close').addEventListener('click', () => dialog.close()); dialog.addEventListener('close', () => opener.focus());
-check(document.querySelector('details summary'), 'Disclosure label missing'); check(dialog.getAttribute('aria-labelledby') === 'dialog-title', 'Dialog name missing');
-document.querySelector("#reference-status").textContent = "web-026 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-026 reference checks passed");
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Disclosures, dialogs and focus management</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      dialog { max-inline-size: min(90vw, 30rem); border: 2px solid #0753a4; } dialog::backdrop { background: rgb(15 23 42 / .5); } summary { cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Explain without interrupting</h1
+      ><details
+        ><summary>Why use native controls?</summary
+        ><p>They provide established keyboard and semantic behavior.</p></details
+      ><button id="open" type="button">Review local study settings</button
+      ><dialog aria-labelledby="dialog-title"
+        ><h2 id="dialog-title">Study settings</h2
+        ><p>This is a local demonstration. No preference is sent.</p
+        ><button id="close" type="button">Close settings</button></dialog
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
+      const dialog = document.querySelector('dialog'); const opener = document.querySelector('#open'); opener.addEventListener('click', () => dialog.showModal()); document.querySelector('#close').addEventListener('click', () => dialog.close()); dialog.addEventListener('close', () => opener.focus());
+      check(document.querySelector('details summary'), 'Disclosure label missing'); check(dialog.getAttribute('aria-labelledby') === 'dialog-title', 'Dialog name missing');
+      document.querySelector("#reference-status").textContent = "web-026 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-026 reference checks passed");
+    </script>
+  </body>
 </html>

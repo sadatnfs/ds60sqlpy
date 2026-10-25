@@ -1,33 +1,41 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Grid: tracks, gaps and two-dimensional alignment</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; } article { border: 1px solid #64748b; padding: 1rem; overflow-wrap: anywhere; }
-  </style>
-</head>
-<body>
-<main><h1>Topic grid</h1><div class="cards"><article><h2>HTML</h2><p>Structure and meaning.</p></article><article><h2>CSS</h2><p>Layout and readability.</p></article><article><h2>PHP</h2><p>Data and requests.</p></article><article><h2>JavaScript</h2><p>Browser interaction.</p></article></div></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Grid: tracks, gaps and two-dimensional alignment</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: 1rem; } article { border: 1px solid #64748b; padding: 1rem; overflow-wrap: anywhere; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Topic grid</h1
+      ><div class="cards"
+        ><article><h2>HTML</h2><p>Structure and meaning.</p></article
+        ><article><h2>CSS</h2><p>Layout and readability.</p></article
+        ><article><h2>PHP</h2><p>Data and requests.</p></article
+        ><article><h2>JavaScript</h2><p>Browser interaction.</p></article></div
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(getComputedStyle(document.querySelector('.cards')).display === 'grid', 'Grid layout missing');
-document.querySelector("#reference-status").textContent = "web-016 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-016 reference checks passed");
-</script>
-</body>
+      check(getComputedStyle(document.querySelector('.cards')).display === 'grid', 'Grid layout missing');
+      document.querySelector("#reference-status").textContent = "web-016 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-016 reference checks passed");
+    </script>
+  </body>
 </html>

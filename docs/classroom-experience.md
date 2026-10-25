@@ -57,13 +57,26 @@ verification. History does not recreate or rerun the chart. Framework and Spark 
 use their declared Docker workers. A readiness failure identifies an unavailable
 runtime; it does not mean your written answer is wrong.
 
-A new default project prepares all fifteen ordinary workers. For a smaller build,
+A new default project prepares all sixteen ordinary workers. For a smaller build,
 use `./classroom --starter` and follow a lesson's runtime preparation notice
 when you need another profile. Later `./classroom` starts remember that
 selection, reuse images and resume existing containers. Use `./classroom --all`
-to select all workers, `./classroom resume` to prohibit builds and pulls, or
+to select all ordinary workers, `./classroom resume` to prohibit builds and pulls, or
 `./classroom --rebuild` to install updated sources. The
 [startup guide](one-command-classroom.md) explains selection, logs and saved work.
+
+HTML/CSS and browser JavaScript/D3 workspaces also offer an opt-in **Live preview**.
+Edit the source to update the preview after a short pause, choose a viewport size,
+and use Pause or Stop when you want to inspect or leave a result. Automatic updates
+do not fill saved history. Use a manual Run or explicitly save an observation when
+you want a durable record of the submitted source and console output. Reloading a
+page restores your draft with live execution turned off. Node and TypeScript
+compiler workspaces retain their explicit Run behavior.
+
+PHP examples run as CLI programs with SQLite support. Real cookies, HTTP sessions
+and multi-file server applications use the separate project fixture described in
+the web course. CUDA chapters remain readable without an NVIDIA GPU and include
+portable CPU models; optional GPU execution requires its own explicit setup.
 
 ## Keep your own evidence and pace
 

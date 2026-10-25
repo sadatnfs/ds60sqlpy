@@ -4,13 +4,7 @@
     {
       "n": 1,
       "title": "A web page: source, browser and server",
-      "terms": [
-        "HTML",
-        "CSS",
-        "HTTP",
-        "browser",
-        "server"
-      ],
+      "terms": ["HTML", "CSS", "HTTP", "browser", "server"],
       "mental": "HTML is a markup language: it names the structure and meaning of a document. CSS is a style language that controls how that structure is presented. JavaScript is a programming language executed by the browser or another host. PHP is a programming language commonly executed by a server. A visitor receives the server's response, not the PHP source that generated it. These layers can cooperate without becoming interchangeable.\n\nA browser parses HTML into a document tree, applies style rules and paints pixels. A server accepts a request and returns a response. Opening a local preview exercises the browser portion; it does not demonstrate a network request, authentication or a server database. Our first document is deliberately small enough to inspect every character and every visible element.",
       "anatomy": "An element such as `<p>Hello</p>` has an opening tag, content and a closing tag. The tag names the kind of content. A document begins with `<!doctype html>` to request standards rendering, then an `html` root containing `head` metadata and `body` visible content. The `title` labels the browser document, while an `h1` labels the visible topic. Whitespace in ordinary text is generally collapsed, so source indentation helps humans without creating layout.",
       "examples": [
@@ -70,12 +64,7 @@
     {
       "n": 2,
       "title": "Elements, attributes, nesting and text escaping",
-      "terms": [
-        "element",
-        "attribute",
-        "nesting",
-        "character reference"
-      ],
+      "terms": ["element", "attribute", "nesting", "character reference"],
       "mental": "An attribute adds information to an opening tag. In `<html lang=\"en\">`, the attribute name is lang and its value identifies the document language. Attribute values should be quoted consistently. Nesting means one element's content contains another element; the resulting parent-child relationship matters to styling, accessibility and scripts. A paragraph can contain emphasized text, but a list does not belong inside that paragraph.\n\nHTML has special syntax characters. A less-than sign begins markup, so literal comparison text may need `&lt;`. An ampersand begins a character reference and is commonly represented as `&amp;`. Escaping means representing text so a parser treats it as data. It is different from deleting characters and different from making an unsafe URL safe.",
       "anatomy": "Close nested elements in reverse order: open paragraph, open strong, close strong, close paragraph. Void elements such as `br` and `img` have no closing tag. A `data-*` attribute stores page-specific metadata; it does not create a visible label. `id` must uniquely identify an element in the document. Class names may repeat because they group related elements.",
       "examples": [
@@ -135,13 +124,7 @@
     {
       "n": 3,
       "title": "Semantic structure, headings and landmarks",
-      "terms": [
-        "semantics",
-        "heading hierarchy",
-        "landmark",
-        "main",
-        "section"
-      ],
+      "terms": ["semantics", "heading hierarchy", "landmark", "main", "section"],
       "mental": "Semantic markup tells the browser and reader what a piece of content is. A main region contains the page's primary content. Navigation groups major navigation links; a header introduces a page or section; a footer provides related closing information. These elements are not a promise of any particular position on screen. A header can appear inside an article and need not be a fixed top bar.\n\nHeadings provide a hierarchy that a screen reader and a visual reader can use to scan. Use the main topic as h1 and its major subdivisions as h2, with h3 for nested detail. Choose levels for structure, not because the browser's default font size looks attractive. A section normally benefits from a heading; a generic div is appropriate when there is no additional semantic meaning.",
       "anatomy": "Draw the content outline before assigning tags. Use one visible main region for the primary task. Give repeated navigation regions distinct accessible labels such as `aria-label=\"Course\"`. A skip link points to the main region's id and lets a keyboard user bypass repeated controls. Native HTML supplies roles automatically; redundant roles rarely add value.",
       "examples": [
@@ -201,12 +184,7 @@
     {
       "n": 4,
       "title": "Links, paths, navigation and usable destinations",
-      "terms": [
-        "URL",
-        "relative path",
-        "fragment",
-        "link purpose"
-      ],
+      "terms": ["URL", "relative path", "fragment", "link purpose"],
       "mental": "A URL identifies a resource and can contain a scheme, host, path, query and fragment. A relative path is resolved against a base URL; it is not resolved against the author's mental picture of a folder. A fragment such as #methods identifies a location within the current document and does not require another document to exist. An anchor with href provides navigation semantics and keyboard behavior automatically.\n\nGood link text tells a reader the destination or action. A page full of links named click here loses meaning when links are read as a list. A link navigates; a button changes application state or submits an action. Styling a paragraph blue does not create link behavior, and adding a click listener does not automatically provide keyboard support.",
       "anatomy": "Use `href=\"#details\"` with a unique `id=\"details\"` for this offline lesson. A leading slash means a path from the origin root, while `../` moves one directory upward relative to the base path. Production external links may need a new-window notice and suitable rel values; do not open new tabs by default merely to keep a user on your site.",
       "examples": [
@@ -266,13 +244,7 @@
     {
       "n": 5,
       "title": "Lists, quotations, code and meaningful text",
-      "terms": [
-        "ordered list",
-        "unordered list",
-        "description list",
-        "quotation",
-        "code"
-      ],
+      "terms": ["ordered list", "unordered list", "description list", "quotation", "code"],
       "mental": "Lists express relationships that paragraphs do not. An ordered list describes a sequence where position matters. An unordered list groups peers without requiring order. A description list pairs terms with explanations. These structures help reading tools announce item counts and relationships. A row of hyphens in plain text may look like a list but does not expose that structure.\n\nA quotation identifies borrowed language and should have a source when appropriate. Code identifies literal program text, while pre preserves whitespace. The combination pre and code is useful for multiline snippets. Long lines still need an overflow policy. Never use a quotation element simply to indent text or a list merely to create a visual column.",
       "anatomy": "A list contains li elements; nested lists belong inside the parent li they elaborate. A description list contains dt terms and dd explanations. A short inline token uses code without pre. Literal less-than signs in displayed code must be escaped because the containing HTML still has to parse correctly.",
       "examples": [
@@ -296,10 +268,7 @@
           "Choose a list type for steps and an unordered tool collection.",
           "Steps use ol; interchangeable peer tools use ul."
         ],
-        [
-          "Add two vocabulary terms with definitions.",
-          "A dl contains paired dt and dd elements."
-        ],
+        ["Add two vocabulary terms with definitions.", "A dl contains paired dt and dd elements."],
         [
           "Build a study checklist with a code example and glossary.",
           "The page exposes list, code and definition structures without relying on spacing."
@@ -332,13 +301,7 @@
     {
       "n": 6,
       "title": "Images, SVG, alternatives and media decisions",
-      "terms": [
-        "alternative text",
-        "figure",
-        "caption",
-        "SVG",
-        "intrinsic size"
-      ],
+      "terms": ["alternative text", "figure", "caption", "SVG", "intrinsic size"],
       "mental": "Alternative text communicates an image's purpose in its context. A decorative image may use empty alt text so it does not add noise. An informative image needs a concise equivalent; a complex chart usually needs surrounding explanation or a data table as well. A filename is rarely useful alternative text. The same picture can need different alternatives in different contexts because the task differs.\n\nA figure groups self-contained media with a caption. A caption is visible to everyone, while an alternative serves when the image is unavailable or not visually perceived. SVG describes vector geometry and can be written inline, which keeps our fixtures offline. A viewBox defines internal coordinates; CSS controls the displayed dimensions. Width and height reserve space and reduce unexpected layout movement.",
       "anatomy": "For inline SVG, connect a title and description using `aria-labelledby`, and use `role=\"img\"` for a meaningful standalone illustration. Decorative SVG can be hidden from assistive technology. Use a textual list when exact values matter. Audio and video require captions or transcripts, appropriate controls and deliberate autoplay decisions; no media downloads are required by this lesson.",
       "examples": [
@@ -389,22 +352,13 @@
           "HTML images",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/HTML_images"
         ],
-        [
-          "SVG element",
-          "https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/svg"
-        ]
+        ["SVG element", "https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/svg"]
       ]
     },
     {
       "n": 7,
       "title": "Data tables, captions and header relationships",
-      "terms": [
-        "table",
-        "caption",
-        "column header",
-        "row header",
-        "scope"
-      ],
+      "terms": ["table", "caption", "column header", "row header", "scope"],
       "mental": "A table represents data whose meaning depends on row and column relationships. It should not be the default layout tool for unrelated page regions. A caption identifies the table's topic, units or scope. Header cells identify a column or row so a reading tool can associate values with their context. Visual boldness alone cannot establish that relationship.\n\nKeep a table simple when possible. A dataset with two independent header axes can use column and row scope. More complex spans may require explicit header associations and careful testing. For a narrow screen, preserve the relationships instead of hiding important columns. A scrollable region can keep the table intact when the data genuinely needs two dimensions.",
       "anatomy": "Use thead for the header group, tbody for records, th for headers and td for values. `scope=\"col\"` identifies a column header and `scope=\"row\"` identifies a row header. Numeric alignment is presentation, while the units belong in the content. Tables must remain useful when colors or zebra stripes are unavailable.",
       "examples": [
@@ -464,13 +418,7 @@
     {
       "n": 8,
       "title": "Forms: labels, controls and successful values",
-      "terms": [
-        "form",
-        "label",
-        "name",
-        "value",
-        "fieldset"
-      ],
+      "terms": ["form", "label", "name", "value", "fieldset"],
       "mental": "A form collects values for an action. A label names a control; a placeholder offers a short example and disappears during entry, so it cannot replace a label. A control's id connects it to a label. Its name identifies the value when a browser constructs form data. These are different responsibilities, and a visible input without a name may not be submitted.\n\nChoose the native control that matches the task. A select presents a bounded choice, a textarea accepts multiline text, and checkboxes represent independent choices. A radio group represents one choice among alternatives and shares a name. A fieldset and legend describe a related group. Native controls provide interaction and accessibility behavior that a custom drawing would need to recreate.",
       "anatomy": "Connect `label for=\"topic\"` with `input id=\"topic\" name=\"topic\"`. A button inside a form defaults to submission, so specify its type. Disabled controls are not included in submitted form data; readonly text controls can still contribute values. This offline preview prevents real submission. Inspect control values and labels without contacting a backend.",
       "examples": [
@@ -521,21 +469,13 @@
           "Your first form",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Your_first_form"
         ],
-        [
-          "FormData",
-          "https://developer.mozilla.org/en-US/docs/Web/API/FormData"
-        ]
+        ["FormData", "https://developer.mozilla.org/en-US/docs/Web/API/FormData"]
       ]
     },
     {
       "n": 9,
       "title": "Form constraints, errors and helpful recovery",
-      "terms": [
-        "constraint validation",
-        "required",
-        "minlength",
-        "error message"
-      ],
+      "terms": ["constraint validation", "required", "minlength", "error message"],
       "mental": "Validation checks whether input satisfies a contract. Browser constraint validation gives immediate feedback through attributes such as required, type, min and maxlength. It improves the interaction but is not a security boundary because a client can bypass it or send a request without using the form at all. A server must repeat the relevant validation and authorization decisions.\n\nAn error message should identify the field, explain the problem and offer a useful correction without losing the user's work. Color alone is insufficient. Connect instructions and errors with aria-describedby, and use aria-invalid when an actual invalid state has been identified. Do not mark every untouched field invalid when the page first opens.",
       "anatomy": "`checkValidity()` reports whether a control meets its constraints. `reportValidity()` also requests the browser's feedback interface. An empty required field is invalid, while a non-required empty email field may be valid. Email type checks syntax, not whether the mailbox exists or belongs to the user. This lesson uses native constraints and explicit explanatory text; it does not send data.",
       "examples": [
@@ -595,13 +535,7 @@
     {
       "n": 10,
       "title": "CSS rules, selectors and the cascade",
-      "terms": [
-        "selector",
-        "declaration",
-        "cascade",
-        "specificity",
-        "inheritance"
-      ],
+      "terms": ["selector", "declaration", "cascade", "specificity", "inheritance"],
       "mental": "A CSS rule has a selector and a declaration block. The selector chooses elements; each declaration sets a property to a value. Several rules can match the same element. The cascade resolves conflicts using origin, importance, layer order, specificity, scoping proximity where applicable and source order. Specificity is not the entire algorithm. A later rule wins only after the earlier priorities tie.\n\nInheritance is another mechanism: some properties, such as text color, naturally pass from a parent to children unless overridden. Other properties, such as margins, normally do not. A value inherited from a parent does not beat a declaration directly targeting the child just because the parent selector is more specific. Browser developer tools reveal which rule won and which declaration was crossed out.",
       "anatomy": "Start with low-specificity class selectors for reusable components. `.note` targets a class, `#summary` targets one id, and `p` targets an element type. `color: #17324d` is a declaration. Use the computed-style view to inspect the resolved value. Avoid adding important flags repeatedly to fight a conflict whose origin you have not identified.",
       "examples": [
@@ -652,23 +586,13 @@
           "Handling conflicts",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Styling_basics/Handling_conflicts"
         ],
-        [
-          "Cascade",
-          "https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction"
-        ]
+        ["Cascade", "https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascade/Introduction"]
       ]
     },
     {
       "n": 11,
       "title": "The box model, sizing and overflow",
-      "terms": [
-        "content box",
-        "padding",
-        "border",
-        "margin",
-        "box-sizing",
-        "overflow"
-      ],
+      "terms": ["content box", "padding", "border", "margin", "box-sizing", "overflow"],
       "mental": "Every rendered box has content, optional padding, a border and an outside margin. With the default content-box sizing, a declared width describes the content, so padding and borders add to the outer width. With border-box sizing, the declared width includes the content, padding and borders. Margins remain outside either calculation. This distinction explains many layouts that unexpectedly exceed a parent.\n\nOverflow occurs when content needs more room than the available box. Hiding overflow can conceal essential information; scrolling or wrapping may preserve it. Long unbroken strings and images are frequent sources of overflow. A fixed height can clip translated text, enlarged fonts or error messages, so prefer content-driven height unless the interaction truly requires a bounded region.",
       "anatomy": "For a 200px content-box with 20px left and right padding and 2px borders, outer width is 244px. For a 200px border-box, the content width becomes 156px. Set a consistent box-sizing rule on all elements and pseudo-elements. Use max-inline-size to constrain readable width without assuming the writing direction.",
       "examples": [
@@ -728,14 +652,7 @@
     {
       "n": 12,
       "title": "Typography, units and readable content",
-      "terms": [
-        "rem",
-        "em",
-        "line-height",
-        "measure",
-        "font stack",
-        "relative units"
-      ],
+      "terms": ["rem", "em", "line-height", "measure", "font stack", "relative units"],
       "mental": "Typography controls the effort required to read. A font stack lists preferred fonts followed by a generic fallback, so text remains usable when a particular font is absent. This course uses system fonts and makes no external font request. Relative units allow the design to respond to user settings. A rem is relative to the root font size; em often depends on the current element's font size, with property-specific details.\n\nLine length, line height and spacing interact. Very long lines make it difficult to find the next line; very short lines create constant interruptions. A max-width expressed in ch can approximate a readable character measure, though it is based on the zero glyph width rather than an exact count of all characters. A unitless line-height scales naturally with the element's font size.",
       "anatomy": "Use `font: 1rem/1.6 system-ui, sans-serif` to set size, unitless line-height and family. Avoid fixing the root to a tiny pixel size to make arithmetic convenient. Preserve user zoom. Headings can use a bounded fluid size with clamp, while body text should remain comfortable and predictable. Text alignment is content-sensitive; full justification can create distracting gaps in narrow columns.",
       "examples": [
@@ -795,12 +712,7 @@
     {
       "n": 13,
       "title": "Color, contrast, focus and accessible states",
-      "terms": [
-        "contrast",
-        "focus-visible",
-        "state",
-        "color independence"
-      ],
+      "terms": ["contrast", "focus-visible", "state", "color independence"],
       "mental": "Color can group information, but it cannot be the only carrier of an essential distinction. A failed status should have words or an icon with an accessible name as well as a color. Contrast is the difference in luminance that makes foreground content distinguishable from its background. A pleasing palette does not automatically provide readable text or usable controls. Test the actual foreground-background pair in each state, including hover, focus, disabled and error.\n\nFocus identifies the element receiving keyboard input. Removing the browser's outline without a replacement makes navigation difficult or impossible for many users. The focus-visible pseudo-class lets the browser apply its heuristics for when focus needs a visible indicator. A control can also require an adequately sized target and enough spacing from neighboring controls.",
       "anatomy": "Define a small set of tokens for text, background, accent and borders, then inspect their combinations. Use an outline with an offset so it is not hidden by the border. A status element can contain the word Ready or Needs attention; color reinforces that label. Prefer explicit text to a legend that a reader must memorize.",
       "examples": [
@@ -860,13 +772,7 @@
     {
       "n": 14,
       "title": "Normal flow, display and positioning",
-      "terms": [
-        "normal flow",
-        "block",
-        "inline",
-        "position",
-        "containing block"
-      ],
+      "terms": ["normal flow", "block", "inline", "position", "containing block"],
       "mental": "Normal flow is the browser's default arrangement of content. Block boxes generally stack in the block direction and inline content flows within lines. Understanding this default prevents unnecessary positioning. Display changes how an element participates in layout; it does not change its underlying HTML meaning. A paragraph made display:flex remains a paragraph semantically.\n\nPositioning modifies placement relative to a containing block or scroll container. Relative positioning keeps the element's original space while offsetting its painted position. Absolute positioning removes it from ordinary flow and uses a containing block, often the nearest positioned ancestor. Fixed positioning is often tied to the viewport but transformed ancestors can affect that behavior. Sticky positioning depends on a scroll container and an inset threshold.",
       "anatomy": "Use position:relative on a card only when it intentionally establishes the containing block for an absolute badge. Keep the main article content in flow. A sticky section label needs an inset such as top:0 and sufficient scroll space. Avoid putting every element at exact pixel coordinates; content length and viewport width will change.",
       "examples": [
@@ -926,13 +832,7 @@
     {
       "n": 15,
       "title": "Flexbox: one-dimensional layout and resilient navigation",
-      "terms": [
-        "flex container",
-        "main axis",
-        "cross axis",
-        "flex basis",
-        "wrap"
-      ],
+      "terms": ["flex container", "main axis", "cross axis", "flex basis", "wrap"],
       "mental": "Flexbox distributes space among items primarily along one axis. The main axis follows flex-direction, while the cross axis is perpendicular. justify-content distributes available space along the main axis; align-items aligns items along the cross axis. The names do not permanently mean horizontal and vertical because direction can change.\n\nFlexible items have a basis and rules for growing or shrinking. A row of long labels may overflow if wrapping is disabled or if an item's automatic minimum size prevents shrinking. `min-inline-size:0` is often useful for a flex child that must allow its text to wrap or truncate deliberately. Flexbox is a layout tool, not permission to reorder content into a confusing keyboard sequence.",
       "anatomy": "Use display:flex, gap and flex-wrap:wrap for a simple responsive group. `flex: 1 1 12rem` gives an initial basis and permits growth and shrinkage. Set `align-items:stretch` when equal cross-axis size supports the component. Keep DOM order aligned with intended reading and focus order rather than using order to create a contradictory visual sequence.",
       "examples": [
@@ -992,13 +892,7 @@
     {
       "n": 16,
       "title": "Grid: tracks, gaps and two-dimensional alignment",
-      "terms": [
-        "grid",
-        "track",
-        "fr",
-        "minmax",
-        "auto-fit"
-      ],
+      "terms": ["grid", "track", "fr", "minmax", "auto-fit"],
       "mental": "Grid arranges items along rows and columns. A track is the space between two adjacent grid lines. Fractional fr units share remaining space after fixed sizes and gaps have been considered. They are not a fixed percentage of the full container. An item's minimum content contribution can still affect track size, which explains why a long unbroken value may widen an apparently equal grid.\n\nGrid is useful when rows and columns must align across a collection. An auto-fit repeat with minmax can create as many columns as fit a preferred minimum, then distribute remaining room. The minimum must still fit a narrow viewport. A layout should adapt to its content, not depend on one device model or a fixed card count.",
       "anatomy": "Use `grid-template-columns:repeat(auto-fit,minmax(min(100%,14rem),1fr))` for a resilient card collection. The inner min permits a track to fit a container narrower than the preferred minimum. `gap` adds separation without changing source order. Named grid areas are useful for a page shell, but the source order must remain understandable when the layout collapses.",
       "examples": [
@@ -1049,22 +943,13 @@
           "CSS Grid",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Grids"
         ],
-        [
-          "minmax",
-          "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/minmax"
-        ]
+        ["minmax", "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/minmax"]
       ]
     },
     {
       "n": 17,
       "title": "Responsive layouts and content-driven breakpoints",
-      "terms": [
-        "responsive design",
-        "media query",
-        "viewport",
-        "breakpoint",
-        "mobile first"
-      ],
+      "terms": ["responsive design", "media query", "viewport", "breakpoint", "mobile first"],
       "mental": "Responsive design lets one document work across available sizes and user settings. A breakpoint is a condition where a layout needs to change, not a permanent name for a device. A phone can have a wide landscape viewport; a desktop window can be narrow. Start with content that works in a small space and add more complex arrangements only when enough room exists.\n\nThe viewport metadata tells mobile browsers to use the device's layout width rather than a historical wide page assumption. Flexible widths, wrapping and content-driven heights solve many problems before a media query is necessary. A responsive page must also survive enlarged text, translations and long values, not merely a list of screen widths.",
       "anatomy": "Use a base single-column layout and a min-width media query for a wider arrangement. Relative units in queries support a design tied to text scale. Inspect where the content becomes cramped and choose the breakpoint from that evidence. Keep the navigation visible or provide a fully accessible disclosure rather than simply hiding it on small screens.",
       "examples": [
@@ -1084,10 +969,7 @@
         ]
       ],
       "tasks": [
-        [
-          "Predict the base layout below the breakpoint.",
-          "The layout stays in one column."
-        ],
+        ["Predict the base layout below the breakpoint.", "The layout stays in one column."],
         [
           "Choose a breakpoint by resizing actual content.",
           "Record where labels or article width become uncomfortable rather than choosing a device name."
@@ -1124,13 +1006,7 @@
     {
       "n": 18,
       "title": "Custom properties, tokens and component themes",
-      "terms": [
-        "custom property",
-        "design token",
-        "fallback",
-        "scope",
-        "theme"
-      ],
+      "terms": ["custom property", "design token", "fallback", "scope", "theme"],
       "mental": "A design token names a recurring design decision such as a spacing step, text color or border radius. CSS custom properties store values that participate in the cascade and can be scoped to a component. A variable name should communicate its purpose, such as --surface or --space-small, rather than merely its current value. That allows the value to change while the role remains stable.\n\nCustom properties are resolved where they are used and usually inherit. A card can override a small set of tokens while retaining the same component rules. A fallback in var supplies a value when a variable is missing or invalid in the relevant way, but a custom property can still produce an invalid declaration at computed-value time. Test the final computed result instead of assuming any string is suitable for any property.",
       "anatomy": "Define shared defaults at :root and override them on a component class. `background:var(--surface,white)` uses the current scope's value. Keep semantic text labels independent of theme color. A theme change must preserve contrast and focus behavior, not merely update an accent swatch.",
       "examples": [
@@ -1181,21 +1057,13 @@
           "Custom properties",
           "https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Cascading_variables/Using_custom_properties"
         ],
-        [
-          "var",
-          "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/var"
-        ]
+        ["var", "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/var"]
       ]
     },
     {
       "n": 19,
       "title": "Pseudo-classes, pseudo-elements and stateful styling",
-      "terms": [
-        "pseudo-class",
-        "pseudo-element",
-        "attribute selector",
-        "focus-within"
-      ],
+      "terms": ["pseudo-class", "pseudo-element", "attribute selector", "focus-within"],
       "mental": "A pseudo-class selects an element based on a condition such as focus, checked state or its position among siblings. A pseudo-element represents a stylable part associated with an element, such as before or after. Generated decorative content can enrich presentation, but essential instructions should exist as real document content because generated content has inconsistent accessibility implications.\n\nState should remain grounded in a real control or application contract. Styling a checkbox's checked state makes use of built-in behavior. A decorative class named active does not prove that a control is selected, and CSS cannot perform server authorization. Use native state first and add custom state only with a clear interaction model.",
       "anatomy": "`:focus-within` matches a container while one of its descendants has focus. `input:checked + span` selects a neighboring label fragment after a checked input. Attribute selectors can target a declared state, but the application is responsible for keeping that state accurate. Hover must be an enhancement because touch and keyboard interactions may not provide the same hover behavior.",
       "examples": [
@@ -1255,12 +1123,7 @@
     {
       "n": 20,
       "title": "Transitions, motion and reduced-motion preferences",
-      "terms": [
-        "transition",
-        "transform",
-        "animation",
-        "reduced motion"
-      ],
+      "terms": ["transition", "transform", "animation", "reduced motion"],
       "mental": "Motion can explain a change, but it can also distract, delay a task or cause discomfort. A transition interpolates between property values when state changes. An animation uses named keyframes over time. Neither should be required to understand essential content. Begin with the static usable state and add restrained motion only when it improves orientation.\n\nAnimating layout-affecting properties can trigger repeated layout work, while transform and opacity often allow more efficient compositing. This is not a guarantee of smooth performance because element size, painting and the device still matter. Measure actual behavior rather than assuming that a property name proves efficiency. Continuous decorative motion rarely helps a reading task.",
       "anatomy": "Specify the properties to transition instead of transition:all, which can animate unrelated future changes. The prefers-reduced-motion media query lets a page respond to a user's preference. A reduced-motion rule can remove movement while retaining a color or outline change. Do not use a tiny but nonzero duration as a universal accessibility strategy; understand the interaction's required events and states.",
       "examples": [
@@ -1320,12 +1183,7 @@
     {
       "n": 21,
       "title": "Container queries and reusable responsive components",
-      "terms": [
-        "container query",
-        "inline-size containment",
-        "component",
-        "fallback"
-      ],
+      "terms": ["container query", "inline-size containment", "component", "fallback"],
       "mental": "A media query responds to the viewport or device environment. A container query can respond to an ancestor container's size, which is useful when the same component appears in a wide article and a narrow sidebar on the same page. The component should adapt to the space it receives instead of assuming it always spans the viewport.\n\nSize containment changes how a container participates in sizing. Declare it deliberately on an appropriate wrapper, not on every element. A size query targets an eligible ancestor, not the queried element itself. Keep a useful base layout so the component remains readable in environments where the query is unsupported or never matches.",
       "anatomy": "Set `container-type:inline-size` on a wrapper, optionally with a container-name. Inside `@container`, adjust the descendant component when its wrapper is wide enough. Prefer logical dimensions so the design does not unnecessarily assume a writing direction. This chapter demonstrates progressive enhancement; the unqueried stacked card remains functional.",
       "examples": [
@@ -1385,12 +1243,7 @@
     {
       "n": 22,
       "title": "CSS architecture, layers and maintainable components",
-      "terms": [
-        "cascade layer",
-        "component boundary",
-        "utility",
-        "specificity budget"
-      ],
+      "terms": ["cascade layer", "component boundary", "utility", "specificity budget"],
       "mental": "A stylesheet is easier to change when responsibilities are visible. Base rules describe document defaults, component rules describe reusable structures, and narrowly named utilities make deliberate local adjustments. These categories are a design choice, not a browser feature by themselves. Cascade layers let authors establish an explicit ordering among groups of declarations without continually increasing selector specificity.\n\nFor normal author declarations, later layers take priority over earlier layers, and unlayered normal declarations have priority over layered normal declarations. Important declarations reverse layer priority, which is one reason indiscriminate important usage makes reasoning harder. A good architecture keeps selectors understandable and limits the area a change can affect.",
       "anatomy": "Declare the layer order once with `@layer base, components, utilities`. Put actual rules inside those layers. Keep component names tied to a useful responsibility such as lesson-card, not a visual accident such as left-blue-box. Test a component in more than one surrounding context to expose accidental ancestor dependencies.",
       "examples": [
@@ -1450,12 +1303,7 @@
     {
       "n": 23,
       "title": "Print styles, progressive enhancement and resilient delivery",
-      "terms": [
-        "print stylesheet",
-        "progressive enhancement",
-        "feature query",
-        "fallback"
-      ],
+      "terms": ["print stylesheet", "progressive enhancement", "feature query", "fallback"],
       "mental": "Progressive enhancement starts from useful content and adds capabilities when the environment supports them. A document should communicate its core information before advanced styling or scripts run. This does not mean every application must offer identical features in every environment; it means essential requirements and fallbacks are deliberate rather than accidental.\n\nPrint is a different presentation context. Navigation controls that are useful on screen can waste space on paper, while a visible URL or document title may become more valuable. A print stylesheet can remove decoration, preserve contrast and avoid splitting small related blocks. It cannot guarantee the printer, paper size or user settings, so inspect the browser's print preview before making claims.",
       "anatomy": "Use `@media print` for print-specific rules and `@supports` for a feature-dependent enhancement. Keep the base rule valid independently. Avoid hiding the actual article while removing navigation. `break-inside:avoid` is a request to the fragmentation system, not a promise that an arbitrarily large element fits on one page.",
       "examples": [
@@ -1567,10 +1415,7 @@
       ],
       "mistakes": "Do not invent working progress persistence in static HTML. Avoid screenshots as the sole accessibility evidence. A capstone should explain choices and limitations, not just imitate a reference's colors.",
       "refs": [
-        [
-          "MDN curriculum",
-          "https://developer.mozilla.org/en-US/curriculum/core/"
-        ],
+        ["MDN curriculum", "https://developer.mozilla.org/en-US/curriculum/core/"],
         [
           "Accessibility",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility"
@@ -1581,13 +1426,7 @@
     {
       "n": 25,
       "title": "Connect HTML to JavaScript: DOM, events and safe text",
-      "terms": [
-        "DOM",
-        "event listener",
-        "textContent",
-        "state",
-        "rendering"
-      ],
+      "terms": ["DOM", "event listener", "textContent", "state", "rendering"],
       "mental": "The document object model is the browser's live tree of elements. JavaScript can select a node, observe an event and update content. HTML supplies the structure, CSS supplies presentation, and JavaScript handles behavior. Start with a native button so keyboard activation and focus work without reimplementation. The event listener is a function called when a matching event occurs; it is not the same as calling the function immediately while registering it.\n\nKeep state separate from the text that displays it. A numeric count in a variable is the source of truth; a render function translates it into a label. Reading the current label and repeatedly parsing it back into a number couples business state to presentation. Use textContent for plain user text because it creates text rather than parsing markup.",
       "anatomy": "`document.querySelector('#add')` returns a matching element or null. `addEventListener('click', handler)` registers a function. Update the number, then render the new value to an output element. Query elements after they exist, for example with a script at the end of the body. For JavaScript syntax, revisit the JavaScript foundations and browser chapters rather than treating this lesson as a substitute for that route.\n\nA classic inline script runs when the parser reaches it. A script in the head cannot assume that later body elements already exist. Separate classic script tags share the document's global lexical environment, while a module has its own scope and strict semantics. DOMContentLoaded fires after parsing and the relevant deferred script work; it does not mean every image has loaded. The load event describes the later document load boundary. Register a listener before its event occurs, or inspect readyState when code can be loaded at different times.\n\nAn external classic script with defer preserves document order and waits for parsing. Async scripts do not provide that same ordering guarantee. Defer does not turn an inline classic script into a deferred one. Inline modules use real module semantics, including top-level this being undefined. The classroom supports inline modules but blocks external script files and imports. Study multi-file loading in a separately prepared local project rather than weakening the preview policy.",
       "examples": [
@@ -1638,26 +1477,14 @@
           "DOM scripting",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/DOM_scripting"
         ],
-        [
-          "textContent",
-          "https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent"
-        ]
+        ["textContent", "https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent"]
       ],
-      "prerequisites": [
-        "web-024",
-        "js-029"
-      ]
+      "prerequisites": ["web-024", "js-029"]
     },
     {
       "n": 26,
       "title": "Disclosures, dialogs and focus management",
-      "terms": [
-        "disclosure",
-        "dialog",
-        "focus management",
-        "expanded state",
-        "native control"
-      ],
+      "terms": ["disclosure", "dialog", "focus management", "expanded state", "native control"],
       "mental": "A disclosure reveals content in the current document, while a dialog creates a focused interaction context. These are different patterns and should not be chosen only for visual style. Native details and summary elements provide a useful disclosure without JavaScript. A modal dialog changes which content can be interacted with and needs a clear way to close, an accessible name and sensible focus restoration.\n\nFocus is part of the interaction's state. When a dialog opens, the user should land in a meaningful place. When it closes, focus usually returns to the control that opened it if that control still exists. Keyboard users must not become trapped in an accidental custom implementation. Native dialog behavior supplies important mechanics, but authors still own labeling, content order and testing.",
       "anatomy": "Use details with summary for optional explanation. Use a dialog element and showModal when a true modal task is justified. A form with method=dialog can close the dialog; this local behavior is distinct from a network form submission. The offline preview may restrict submission APIs, so this reference closes explicitly through the dialog API and keeps all state local.",
       "examples": [
@@ -1783,13 +1610,7 @@
     {
       "n": 28,
       "title": "Data interfaces: filtering tables and honest visual summaries",
-      "terms": [
-        "derived data",
-        "filter",
-        "table",
-        "empty state",
-        "visual encoding"
-      ],
+      "terms": ["derived data", "filter", "table", "empty state", "visual encoding"],
       "mental": "A data interface connects records to a representation. Keep the original records separate from the filtered view so a user can clear a filter without reconstructing lost input. A table is useful for exact values; a chart emphasizes patterns. Both need labels, units and a declared handling of missing values. A visually impressive chart can still tell an incorrect story if its filtering or scale is wrong.\n\nThis lesson uses a tiny local array and a semantic table. A select changes the derived records, then one render function replaces the table body with safely created cells. An empty result receives an explicit message rather than an unexplained blank area. The JavaScript D3 specialization builds on the same principles for richer scales, joins and interaction; it is a continuation, not a replacement for data validation.",
       "anatomy": "Use array.filter to derive records without mutating the source array. Create cells with createElement and textContent. Count the resulting rows and compare with the stated filter. For later D3 work, preserve stable record identities and separate data transformation from visual encoding. Never imply that a client-side filter is access control over confidential data already sent to the browser.",
       "examples": [
@@ -1840,22 +1661,13 @@
           "Array filter",
           "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter"
         ],
-        [
-          "D3 selection data",
-          "https://d3js.org/d3-selection/joining"
-        ]
+        ["D3 selection data", "https://d3js.org/d3-selection/joining"]
       ]
     },
     {
       "n": 29,
       "title": "Browser trust boundaries: text, origins and policy",
-      "terms": [
-        "origin",
-        "same-origin policy",
-        "CSP",
-        "injection",
-        "sandbox"
-      ],
+      "terms": ["origin", "same-origin policy", "CSP", "injection", "sandbox"],
       "mental": "An origin is generally a combination of scheme, host and port. The browser uses origins to separate access to data and documents. The same-origin policy is not a complete application security system; a server still needs authentication, authorization and deliberate cross-origin behavior. CORS is a protocol for relaxing some browser response-reading restrictions, not a mechanism that makes an unsafe endpoint safe.\n\nInjection occurs when data is interpreted as code or structure in a context where it should remain data. textContent avoids HTML parsing for text, while building an href still requires a separate URL policy. Content Security Policy can reduce what a document may load or execute, but it is a defense layer rather than a replacement for correct output handling. The classroom preview is deliberately isolated and network restricted.",
       "anatomy": "Treat rendering contexts separately: HTML text, quoted HTML attribute, URL, JavaScript and CSS each have different rules. This reference renders an attack-shaped string only as text. No attack is performed against another site. A sandboxed iframe can have an opaque origin, so do not assume localStorage, cookies or a same-origin parent API exists inside the preview.",
       "examples": [
@@ -1906,10 +1718,7 @@
           "Same-origin policy",
           "https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy"
         ],
-        [
-          "Content Security Policy",
-          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP"
-        ]
+        ["Content Security Policy", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP"]
       ]
     },
     {
@@ -1968,10 +1777,7 @@
       ],
       "mistakes": "Avoid tests that merely search for a success string without exercising behavior. Do not erase a failure transcript when retrying. A successful browser run applies to that tested browser and source, not automatically to all devices.",
       "refs": [
-        [
-          "Performance",
-          "https://developer.mozilla.org/en-US/docs/Web/Performance"
-        ],
+        ["Performance", "https://developer.mozilla.org/en-US/docs/Web/Performance"],
         [
           "Accessibility testing",
           "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/Tooling"
@@ -1981,13 +1787,7 @@
     {
       "n": 31,
       "title": "PHP begins: interpreter, CLI and server execution",
-      "terms": [
-        "PHP",
-        "interpreter",
-        "CLI",
-        "statement",
-        "server response"
-      ],
+      "terms": ["PHP", "interpreter", "CLI", "statement", "server response"],
       "mental": "PHP is a programming language whose interpreter executes source instructions. In the classroom, a Linux CLI worker runs one file and captures its output. On a web server, a PHP runtime can instead receive request context and produce an HTTP response. These environments share language syntax but expose different inputs and lifecycle behavior. Printing a string that looks like HTML does not turn a CLI process into a web server.\n\nPHP source begins with an opening tag, and statements commonly end with semicolons. Variables begin with a dollar sign. A comment explains source without executing it. Echo writes output; it does not return a value from a function or save data to a database. We start with literal strings and a tiny computed value so each step is visible.",
       "anatomy": "Use a pure PHP file beginning with `<?php`, followed by `declare(strict_types=1);` before other statements. Strict typing affects certain scalar type coercions at function call boundaries; it does not turn PHP into a statically typed language. Omit the closing tag in a pure PHP file to avoid accidental trailing output. Syntax errors occur before the intended program can run, while runtime errors occur during execution.",
       "examples": [
@@ -2034,31 +1834,15 @@
       ],
       "mistakes": "Do not paste PHP into an HTML-only preview expecting a server interpreter. A closing tag can introduce accidental whitespace output. Keep a syntax failure separate from a successful execution that produced the wrong value.",
       "refs": [
-        [
-          "Basic syntax",
-          "https://www.php.net/manual/en/language.basic-syntax.php"
-        ],
-        [
-          "CLI usage",
-          "https://www.php.net/manual/en/features.commandline.php"
-        ]
+        ["Basic syntax", "https://www.php.net/manual/en/language.basic-syntax.php"],
+        ["CLI usage", "https://www.php.net/manual/en/features.commandline.php"]
       ],
-      "prerequisites": [
-        "web-001",
-        "web-009"
-      ]
+      "prerequisites": ["web-001", "web-009"]
     },
     {
       "n": 32,
       "title": "Values, types, strict comparisons and null",
-      "terms": [
-        "integer",
-        "float",
-        "string",
-        "boolean",
-        "null",
-        "strict comparison"
-      ],
+      "terms": ["integer", "float", "string", "boolean", "null", "strict comparison"],
       "mental": "A value has a type that influences allowed operations and comparison behavior. PHP provides integers, floating-point numbers, strings, booleans, arrays, objects and null among its types. Null commonly represents absence, but its meaning belongs to the application's contract. Zero, an empty string and false are different values and should not be casually treated as interchangeable missing data.\n\nLoose comparison can coerce values before comparison; strict comparison checks both type and value. The string '0' and integer 0 may look similar when printed but are different under strict equality. A form normally supplies strings, so validation and explicit conversion are necessary before treating them as trusted numeric data. Strict typing at function boundaries does not validate arbitrary request arrays.",
       "anatomy": "Use `===` and `!==` when type distinctions are part of the contract. `get_debug_type` helps inspect the type. The null-coalescing operator `??` supplies a default for an absent or null value, while `array_key_exists` can distinguish a present null entry from a missing key. Floating-point values approximate many decimal fractions, so financial examples later use integer minor units.",
       "examples": [
@@ -2105,26 +1889,14 @@
       ],
       "mistakes": "Do not use empty() as a universal validation rule because it treats several distinct values as empty. Compare floating-point results with an appropriate tolerance when approximation is expected. A type declaration is not an input sanitizer.",
       "refs": [
-        [
-          "Types",
-          "https://www.php.net/manual/en/language.types.php"
-        ],
-        [
-          "Comparison operators",
-          "https://www.php.net/manual/en/language.operators.comparison.php"
-        ]
+        ["Types", "https://www.php.net/manual/en/language.types.php"],
+        ["Comparison operators", "https://www.php.net/manual/en/language.operators.comparison.php"]
       ]
     },
     {
       "n": 33,
       "title": "Expressions, integer money and deliberate conversion",
-      "terms": [
-        "expression",
-        "operator",
-        "integer minor units",
-        "conversion",
-        "overflow"
-      ],
+      "terms": ["expression", "operator", "integer minor units", "conversion", "overflow"],
       "mental": "An expression produces a value. Arithmetic operators combine numbers, concatenation joins strings, and logical operators combine conditions. Parentheses make intended grouping clear when an expression mixes operations. Do not assume that familiar-looking operators have the same precedence in every language or version. A readable intermediate variable is often safer than a dense one-line formula.\n\nMany decimal fractions cannot be represented exactly by binary floating point. For a small money example, represent amounts as integer cents and define rounding when converting from external decimal text. This avoids accidentally treating a display string as a precise numeric representation. Integer arithmetic still has limits: values outside the supported range need a different numeric representation or library.",
       "anatomy": "Compute subtotal cents as unit cents times quantity, then add a fixed fee. Validate quantity before multiplication. Use intdiv for deliberate integer division and the remainder operator for the remaining cents. This lesson does not accept arbitrary decimal currency strings; that parser would need explicit scale, sign, range and rounding rules.",
       "examples": [
@@ -2144,10 +1916,7 @@
         ]
       ],
       "tasks": [
-        [
-          "Predict 125 cents times three units.",
-          "The result is 375 cents."
-        ],
+        ["Predict 125 cents times three units.", "The result is 375 cents."],
         [
           "Add a fixed 50-cent fee with a named intermediate value.",
           "The new total is 425 cents and the unit remains explicit."
@@ -2171,26 +1940,14 @@
       ],
       "mistakes": "Do not convert a formatted currency label back into a number by deleting random characters. Avoid claiming floating point is universally bad; it is appropriate for many approximate scientific calculations. Define the precision contract first.",
       "refs": [
-        [
-          "Arithmetic operators",
-          "https://www.php.net/manual/en/language.operators.arithmetic.php"
-        ],
-        [
-          "Floating point",
-          "https://www.php.net/manual/en/language.types.float.php"
-        ]
+        ["Arithmetic operators", "https://www.php.net/manual/en/language.operators.arithmetic.php"],
+        ["Floating point", "https://www.php.net/manual/en/language.types.float.php"]
       ]
     },
     {
       "n": 34,
       "title": "Conditions, loops and bounded control flow",
-      "terms": [
-        "branch",
-        "loop",
-        "guard clause",
-        "match",
-        "termination"
-      ],
+      "terms": ["branch", "loop", "guard clause", "match", "termination"],
       "mental": "Control flow determines which statements execute and how often. A branch chooses among alternatives, while a loop repeats a body for a sequence or condition. A loop needs a termination argument: a bounded collection, an advancing counter or another condition that is guaranteed to change. The classroom enforces execution limits, but a good program should still have its own understandable bound.\n\nGuard clauses reject invalid conditions before the main computation. They reduce nesting and make accepted input clearer. A match expression compares strictly and returns a value; it differs from a switch statement's traditional loose comparison behavior and fall-through possibilities. Use the construct whose semantics fit the task rather than choosing the shortest spelling.",
       "anatomy": "A foreach loop visits array values and can also expose keys. A for loop makes initialization, condition and update explicit. In a match expression, each arm maps a condition to a result, and a default arm handles other values when that is appropriate. Do not silently map invalid input to a valid default if the contract requires rejection.",
       "examples": [
@@ -2210,10 +1967,7 @@
         ]
       ],
       "tasks": [
-        [
-          "Trace the accumulator after each iteration.",
-          "It progresses through 20, 50 and 65."
-        ],
+        ["Trace the accumulator after each iteration.", "It progresses through 20, 50 and 65."],
         [
           "Add a guard against negative durations.",
           "Invalid values fail before they enter the total."
@@ -2226,10 +1980,7 @@
           "Diagnose a while loop whose condition never changes.",
           "Identify the missing progress step and replace it with a bounded iteration where possible."
         ],
-        [
-          "Test an empty collection.",
-          "The total is zero without a special invalid array access."
-        ],
+        ["Test an empty collection.", "The total is zero without a special invalid array access."],
         [
           "Explain match versus switch for a typed mapping.",
           "Match returns a value and compares strictly; switch has different comparison and fall-through rules."
@@ -2237,27 +1988,14 @@
       ],
       "mistakes": "Do not rely on a worker timeout as the algorithm's termination strategy. Avoid changing the collection unexpectedly while iterating. A default arm should not conceal an unknown state that needs an error.",
       "refs": [
-        [
-          "Control structures",
-          "https://www.php.net/manual/en/language.control-structures.php"
-        ],
-        [
-          "Match",
-          "https://www.php.net/manual/en/control-structures.match.php"
-        ]
+        ["Control structures", "https://www.php.net/manual/en/language.control-structures.php"],
+        ["Match", "https://www.php.net/manual/en/control-structures.match.php"]
       ]
     },
     {
       "n": 35,
       "title": "Arrays, records, keys and transformations",
-      "terms": [
-        "array",
-        "ordered map",
-        "key",
-        "record",
-        "filter",
-        "mapping"
-      ],
+      "terms": ["array", "ordered map", "key", "record", "filter", "mapping"],
       "mental": "PHP's array is an ordered map: it associates keys with values and preserves an iteration order. It can represent a list or a keyed record, but these are different data contracts. A list of study rows should not accidentally become an object-shaped JSON value because filtered numeric keys were left nonconsecutive. Key coercion can also matter, so avoid treating arbitrary external strings as interchangeable with integer indices.\n\nTransformations are easier to reason about when they do not mutate the original data unexpectedly. Map computes a derived value for each record; filter keeps records satisfying a predicate. Validate expected fields before arithmetic. A missing key is different from a known null field and should be handled according to the record contract.",
       "anatomy": "Use explicit string keys for records, such as subject and minutes. `array_filter` preserves keys, so `array_values` is useful when the intended result is a fresh list. `array_map` applies a function to values. A foreach by reference can leave a lingering reference to the last item; avoid it unless mutation is necessary and understood.",
       "examples": [
@@ -2304,26 +2042,14 @@
       ],
       "mistakes": "Do not assume every array is a list. Avoid weakly typed mixed records whose missing fields become warnings during rendering. Keep mutation deliberate and test the original data after transformations.",
       "refs": [
-        [
-          "Arrays",
-          "https://www.php.net/manual/en/language.types.array.php"
-        ],
-        [
-          "array_filter",
-          "https://www.php.net/manual/en/function.array-filter.php"
-        ]
+        ["Arrays", "https://www.php.net/manual/en/language.types.array.php"],
+        ["array_filter", "https://www.php.net/manual/en/function.array-filter.php"]
       ]
     },
     {
       "n": 36,
       "title": "Functions, contracts, closures and reusable logic",
-      "terms": [
-        "function",
-        "parameter",
-        "return type",
-        "closure",
-        "pure function"
-      ],
+      "terms": ["function", "parameter", "return type", "closure", "pure function"],
       "mental": "A function gives a named operation explicit inputs and an output. A useful contract states accepted values, returned meaning and failure behavior. Type declarations communicate and enforce part of that contract at runtime, but a positive duration requirement needs an explicit value check in addition to an int type. Small pure functions are easy to test because their result depends on inputs rather than hidden global state.\n\nA closure is a function value that can be passed to another function. Arrow functions capture variables from their surrounding scope by value automatically, while ordinary anonymous functions use an explicit use clause for capture. Avoid hidden mutable dependencies when a simple parameter would make the relationship clearer.",
       "anatomy": "Separate formatting from calculation so each can be tested independently. Return values are not the same as echo output. A function that echoes a result may be difficult to compose, while a function that returns a value lets a caller choose how to display it. Use exceptions for invalid inputs when the contract treats them as errors, and document predictable alternate results when absence is normal.",
       "examples": [
@@ -2370,26 +2096,14 @@
       ],
       "mistakes": "Do not hide output, database access and validation inside one large function merely to reduce file count. A type declaration cannot enforce every domain rule. Keep function names aligned with the actual responsibility.",
       "refs": [
-        [
-          "Functions",
-          "https://www.php.net/manual/en/language.functions.php"
-        ],
-        [
-          "Arrow functions",
-          "https://www.php.net/manual/en/functions.arrow.php"
-        ]
+        ["Functions", "https://www.php.net/manual/en/language.functions.php"],
+        ["Arrow functions", "https://www.php.net/manual/en/functions.arrow.php"]
       ]
     },
     {
       "n": 37,
       "title": "Strings, UTF-8, bytes and contextual encoding",
-      "terms": [
-        "UTF-8",
-        "byte length",
-        "code point",
-        "grapheme",
-        "encoding"
-      ],
+      "terms": ["UTF-8", "byte length", "code point", "grapheme", "encoding"],
       "mental": "A PHP string is a sequence of bytes. UTF-8 is an encoding that represents characters using one or more bytes, so strlen counts bytes rather than user-perceived characters. A visible character can also consist of multiple code points, such as a letter with a combining mark. Code-point count and grapheme count are therefore different concepts. Choose the measure that matches the product requirement.\n\nThis worker does not assume every optional internationalization extension. The examples use valid UTF-8 and demonstrate byte-level behavior plus a Unicode-aware regular expression. Production text normalization, locale-aware sorting and grapheme handling need deliberate library and extension choices. Do not truncate arbitrary UTF-8 bytes and then assume the result remains valid text.",
       "anatomy": "Use explicit UTF-8 when escaping HTML output. JSON requires valid Unicode data and can fail on invalid UTF-8. A Unicode regular expression with the u modifier interprets the pattern as UTF-8, but it is not a universal grapheme library. Keep validation, normalization and output encoding separate because they solve different problems.",
       "examples": [
@@ -2436,26 +2150,14 @@
       ],
       "mistakes": "Do not promise that a regex character count equals a user's perceived character count. Avoid silently replacing invalid data without a declared policy. Text encoding matters before both rendering and storage.",
       "refs": [
-        [
-          "Strings",
-          "https://www.php.net/manual/en/language.types.string.php"
-        ],
-        [
-          "JSON encoding",
-          "https://www.php.net/manual/en/function.json-encode.php"
-        ]
+        ["Strings", "https://www.php.net/manual/en/language.types.string.php"],
+        ["JSON encoding", "https://www.php.net/manual/en/function.json-encode.php"]
       ]
     },
     {
       "n": 38,
       "title": "Structured data, streams and bounded file handling",
-      "terms": [
-        "JSON",
-        "stream",
-        "resource",
-        "schema",
-        "bounded input"
-      ],
+      "terms": ["JSON", "stream", "resource", "schema", "bounded input"],
       "mental": "JSON is a data format, not a PHP object model or a validation system. Decoding can produce syntactically valid data with the wrong fields, wrong types or an unexpectedly deep structure. Treat parsing and contract validation as separate steps. The examples use tiny inline JSON and a temporary stream so no host path or persistent file is required.\n\nA stream represents a readable or writable sequence of bytes. File operations can fail, return partial results or expose sensitive data if paths are chosen carelessly. In an application, accept an identifier and map it to an owned location instead of accepting an arbitrary user-supplied filesystem path. Bound size before reading untrusted content into memory, and close resources when finished.",
       "anatomy": "Use JSON_THROW_ON_ERROR so invalid JSON becomes an exception instead of an ambiguous null result. Pass true when an associative-array representation is intended, then validate each required field. `php://temp` provides a temporary stream suitable for this local demonstration. Check resource creation and write results, rewind before reading, and close in a finally block.",
       "examples": [
@@ -2502,26 +2204,14 @@
       ],
       "mistakes": "Do not disable warnings to hide failed I/O. A file existing does not prove that its content matches the schema. The lesson's temporary stream does not establish durable persistence across worker runs.",
       "refs": [
-        [
-          "JSON decoding",
-          "https://www.php.net/manual/en/function.json-decode.php"
-        ],
-        [
-          "Streams",
-          "https://www.php.net/manual/en/book.stream.php"
-        ]
+        ["JSON decoding", "https://www.php.net/manual/en/function.json-decode.php"],
+        ["Streams", "https://www.php.net/manual/en/book.stream.php"]
       ]
     },
     {
       "n": 39,
       "title": "Exceptions, errors and useful failure boundaries",
-      "terms": [
-        "exception",
-        "Throwable",
-        "try-catch",
-        "finally",
-        "error boundary"
-      ],
+      "terms": ["exception", "Throwable", "try-catch", "finally", "error boundary"],
       "mental": "An exception interrupts the ordinary flow and can be handled by a matching catch block. It is useful when a function cannot fulfill its contract. A catch block should either recover meaningfully, translate the error into an appropriate boundary response or rethrow it. Catching every failure and returning a normal-looking value can corrupt downstream reasoning.\n\nPHP has different error categories, and not every warning automatically becomes an exception. Runtime configuration and library behavior matter. A production error boundary should avoid exposing stack traces, secrets or internal paths to visitors while retaining an appropriate diagnostic record for maintainers. The local classroom output is a teaching surface, not a production logging policy.",
       "anatomy": "Catch specific exceptions near an operation when a specific recovery exists. Use finally for cleanup that should happen whether the operation succeeds or fails. Keep validation errors distinct from unexpected internal failures. An invalid user field can produce a clear correction; an unavailable database may require a generic retry message and internal diagnosis.",
       "examples": [
@@ -2568,27 +2258,14 @@
       ],
       "mistakes": "Do not catch Throwable merely to print success. Avoid including secrets in exception messages. A handler that returns a valid-looking fallback must have a genuine domain reason and an observable warning where appropriate.",
       "refs": [
-        [
-          "Exceptions",
-          "https://www.php.net/manual/en/language.exceptions.php"
-        ],
-        [
-          "Errors",
-          "https://www.php.net/manual/en/language.errors.php"
-        ]
+        ["Exceptions", "https://www.php.net/manual/en/language.exceptions.php"],
+        ["Errors", "https://www.php.net/manual/en/language.errors.php"]
       ]
     },
     {
       "n": 40,
       "title": "Objects, constructors and immutable value boundaries",
-      "terms": [
-        "class",
-        "object",
-        "constructor",
-        "property",
-        "invariant",
-        "readonly"
-      ],
+      "terms": ["class", "object", "constructor", "property", "invariant", "readonly"],
       "mental": "A class defines a kind of object, and an object combines state with behavior. Use an object when it makes a domain boundary clearer, not merely because the program has grown. A constructor establishes the initial state. An invariant is a condition that should remain true throughout the object's useful lifetime, such as a nonempty topic and nonnegative duration.\n\nPublicly mutable properties can let callers bypass a carefully checked constructor. A small immutable value object can preserve its contract by validating once and exposing readonly data. Readonly does not make every nested object deeply immutable, and it does not replace validation. Understand the specific language guarantee rather than treating the keyword as a complete architecture.",
       "anatomy": "Constructor property promotion can declare and initialize properties directly in the parameter list. Use explicit types and meaningful names. A method can derive a display label from the stored values without changing them. Prefer composition of small responsibilities over a deep inheritance hierarchy built before requirements are known.",
       "examples": [
@@ -2635,25 +2312,14 @@
       ],
       "mistakes": "Do not build an inheritance tree for every noun. A readonly array cannot be changed through that property, but a readonly property referring to an object does not freeze that object's internals. Keep the claimed guarantee precise.",
       "refs": [
-        [
-          "Classes and objects",
-          "https://www.php.net/manual/en/language.oop5.php"
-        ],
-        [
-          "Properties",
-          "https://www.php.net/manual/en/language.oop5.properties.php"
-        ]
+        ["Classes and objects", "https://www.php.net/manual/en/language.oop5.php"],
+        ["Properties", "https://www.php.net/manual/en/language.oop5.properties.php"]
       ]
     },
     {
       "n": 41,
       "title": "Interfaces, composition and replaceable dependencies",
-      "terms": [
-        "interface",
-        "composition",
-        "dependency injection",
-        "test double"
-      ],
+      "terms": ["interface", "composition", "dependency injection", "test double"],
       "mental": "An interface describes operations a caller can rely on without selecting a specific implementation. Composition builds behavior from collaborating objects. Dependency injection means supplying a dependency rather than constructing an unknown global dependency inside the operation. These techniques help when a real boundary varies, such as storage or time, but unnecessary interfaces can add ceremony to a tiny fixed calculation.\n\nA test double supplies a controlled implementation for a test. An in-memory repository can verify application behavior without a database, but it does not prove SQL syntax, transactions or connection recovery. Keep unit evidence separate from integration evidence. The same interface can make both tests possible without pretending they are identical.",
       "anatomy": "Define a repository interface with a narrow operation such as countCompleted. The service receives that interface through its constructor. A memory implementation holds synthetic records for this lesson. The service can then be tested with known data and no network. Later PDO lessons qualify the database boundary separately.",
       "examples": [
@@ -2700,26 +2366,14 @@
       ],
       "mistakes": "Do not claim database acceptance from a mock. Avoid injecting a giant container that hides dependencies again. Use an interface only when it clarifies a meaningful boundary.",
       "refs": [
-        [
-          "Interfaces",
-          "https://www.php.net/manual/en/language.oop5.interfaces.php"
-        ],
-        [
-          "Object basics",
-          "https://www.php.net/manual/en/language.oop5.basic.php"
-        ]
+        ["Interfaces", "https://www.php.net/manual/en/language.oop5.interfaces.php"],
+        ["Object basics", "https://www.php.net/manual/en/language.oop5.basic.php"]
       ]
     },
     {
       "n": 42,
       "title": "Namespaces, project layout and Composer boundaries",
-      "terms": [
-        "namespace",
-        "autoloading",
-        "Composer",
-        "lockfile",
-        "dependency boundary"
-      ],
+      "terms": ["namespace", "autoloading", "Composer", "lockfile", "dependency boundary"],
       "mental": "A namespace groups names so two libraries can use similar class names without colliding. It is a naming mechanism, not a directory, a security sandbox or an automatic package installer. Autoloading is a separate mechanism that resolves a class name to source when needed. Composer commonly manages package dependencies and generates an autoloader for a project.\n\nA dependency manifest describes requirements, while a lockfile records a resolved dependency set. Reproducible deployment uses the reviewed lockfile and installed artifacts, with an explicit update process for security and compatibility. Opening a lesson must not download packages. The classroom single-file PHP worker has no arbitrary Composer project support, so the runnable example demonstrates namespaces in one file and the project workflow remains an external design.",
       "anatomy": "PHP namespace declarations have placement rules. A bracketed namespace block can coexist with an explicitly bracketed global namespace in a single-file teaching program. Production projects should use a coherent autoloading convention rather than a manual chain of untrusted includes. A user-controlled include path can become code execution, so package and file resolution belong to reviewed application code.",
       "examples": [
@@ -2766,26 +2420,14 @@
       ],
       "mistakes": "Do not paste a namespace declaration after arbitrary executable code and expect it to work. The runnable reference illustrates qualified built-in naming and layout data, not an installed Composer project. A lockfile does not eliminate the need for ongoing dependency review.",
       "refs": [
-        [
-          "Namespaces",
-          "https://www.php.net/manual/en/language.namespaces.php"
-        ],
-        [
-          "Autoloading",
-          "https://www.php.net/manual/en/language.oop5.autoload.php"
-        ]
+        ["Namespaces", "https://www.php.net/manual/en/language.namespaces.php"],
+        ["Autoloading", "https://www.php.net/manual/en/language.oop5.autoload.php"]
       ]
     },
     {
       "n": 43,
       "title": "Dates, time zones and deterministic clocks",
-      "terms": [
-        "instant",
-        "time zone",
-        "DateTimeImmutable",
-        "clock",
-        "duration"
-      ],
+      "terms": ["instant", "time zone", "DateTimeImmutable", "clock", "duration"],
       "mental": "An instant identifies a point on the timeline. A local date and time require a time zone and can be ambiguous or nonexistent around daylight-saving transitions. A fixed offset such as +00:00 is not the same as a named region with changing rules. Store and communicate the representation deliberately instead of assuming every day has exactly twenty-four local hours.\n\nDateTimeImmutable returns a new object when modified, which reduces accidental changes to a shared value. Deterministic tests use a fixed clock or an injected instant rather than the current wall time. Otherwise a test can change result at midnight or fail only in another developer's time zone. User-facing formatting belongs at the presentation boundary.",
       "anatomy": "Parse a documented ISO-like timestamp with an explicit offset for the basic example. Convert to another zone for display without changing the represented instant. A duration measured in elapsed seconds differs from a calendar operation such as next day in a region. Validate parsing failures and inspect warnings when accepting externally formatted dates.",
       "examples": [
@@ -2832,26 +2474,14 @@
       ],
       "mistakes": "Do not hardcode a region's current offset as a permanent rule. Avoid using the current date in a test that claims deterministic output. Parsing a date-looking string successfully does not prove it matched the application's intended format.",
       "refs": [
-        [
-          "DateTimeImmutable",
-          "https://www.php.net/manual/en/class.datetimeimmutable.php"
-        ],
-        [
-          "DateTimeZone",
-          "https://www.php.net/manual/en/class.datetimezone.php"
-        ]
+        ["DateTimeImmutable", "https://www.php.net/manual/en/class.datetimeimmutable.php"],
+        ["DateTimeZone", "https://www.php.net/manual/en/class.datetimezone.php"]
       ]
     },
     {
       "n": 44,
       "title": "Testing PHP: examples, boundaries and contract evidence",
-      "terms": [
-        "unit test",
-        "integration test",
-        "assertion",
-        "boundary",
-        "regression"
-      ],
+      "terms": ["unit test", "integration test", "assertion", "boundary", "regression"],
       "mental": "A test compares an observation with an expected contract. A unit test isolates a small behavior; an integration test exercises a boundary such as a database or HTTP server. Both are useful, and neither should be mislabeled as the other. A reference program that prints a success marker without checking the relevant behavior provides weak evidence.\n\nGood cases include ordinary input, an empty or zero boundary, invalid types or ranges, and a previously observed failure. Tests should explain why the expected result is correct instead of repeating the implementation's internal steps. A function and its test can share the same bug if the expected value is computed using the same faulty algorithm.",
       "anatomy": "This course uses a tiny check function that throws RuntimeException on failure, making behavior independent of whether PHP assertions are enabled. Test exceptions by recording whether the expected exception occurred, then check that flag. Do not catch every exception and treat it as the expected one. Full projects can adopt a prepared testing framework, but no dependency installation is needed here.",
       "examples": [
@@ -2898,26 +2528,14 @@
       ],
       "mistakes": "Do not disable checks to preserve a success marker. Avoid tests tied only to private implementation details. Record skipped surfaces honestly, especially when CLI logic stands in for an HTTP workflow.",
       "refs": [
-        [
-          "Exceptions",
-          "https://www.php.net/manual/en/language.exceptions.php"
-        ],
-        [
-          "Assertions",
-          "https://www.php.net/manual/en/function.assert.php"
-        ]
+        ["Exceptions", "https://www.php.net/manual/en/language.exceptions.php"],
+        ["Assertions", "https://www.php.net/manual/en/function.assert.php"]
       ]
     },
     {
       "n": 45,
       "title": "Templates and context-specific output escaping",
-      "terms": [
-        "template",
-        "HTML text context",
-        "escaping",
-        "URL validation",
-        "XSS"
-      ],
+      "terms": ["template", "HTML text context", "escaping", "URL validation", "XSS"],
       "mental": "A template combines trusted structure with data. If a visitor's text is inserted directly into HTML, the browser may interpret it as elements or script-capable attributes. Output escaping represents the data so it remains data in a particular destination context. It is not a one-time cleanup that makes a value safe everywhere. Keep the original validated value and encode it when crossing the output boundary.\n\nFor HTML text and ordinary quoted attribute values, htmlspecialchars with explicit flags and UTF-8 is a useful primitive. It is not a JavaScript-string encoder, a CSS sanitizer or a URL policy. A URL in an href needs a separate scheme and destination decision before attribute escaping. Avoid dynamic inline scripts and styles when a simpler data boundary is available.",
       "anatomy": "Define a small e function that calls htmlspecialchars with ENT_QUOTES, ENT_SUBSTITUTE and UTF-8. Use it only for the contexts described by its contract. The CLI reference prints an HTML string as text so you can inspect the escaped bytes; it does not execute that string in a browser. A server template later uses the same contextual boundary before returning a response.",
       "examples": [
@@ -2964,32 +2582,18 @@
       ],
       "mistakes": "Do not escape data once on input and assume it is safe for SQL, JavaScript and HTML alike. Double escaping can corrupt display while still failing another context. Never label an arbitrary strip-tags operation a complete XSS defense.",
       "refs": [
-        [
-          "htmlspecialchars",
-          "https://www.php.net/manual/en/function.htmlspecialchars.php"
-        ],
+        ["htmlspecialchars", "https://www.php.net/manual/en/function.htmlspecialchars.php"],
         [
           "Contextual XSS prevention",
           "https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html"
         ]
       ],
-      "prerequisites": [
-        "web-002",
-        "web-037",
-        "web-044"
-      ]
+      "prerequisites": ["web-002", "web-037", "web-044"]
     },
     {
       "n": 46,
       "title": "HTTP requests, response models and routing",
-      "terms": [
-        "request method",
-        "path",
-        "status code",
-        "header",
-        "response body",
-        "route"
-      ],
+      "terms": ["request method", "path", "status code", "header", "response body", "route"],
       "mental": "HTTP separates a request from its response. A request includes a method, target and headers, and may contain a body. A response includes a status code, headers and body. The method expresses intended semantics: GET should retrieve a representation without requesting a state change, while POST commonly submits data for processing. The server must still enforce its own rules regardless of a client-supplied method or path.\n\nRouting selects application behavior from the request method and path. Keep routing separate from the domain calculation so logic can be tested without a live server. A 404 means the requested resource or route is not found; a 405 means the resource exists but the method is unsupported. The application should not return 200 for every failure merely because it produced a page.",
       "anatomy": "The CLI reference receives a synthetic request array and returns a response array. This is a model of an HTTP boundary, not an actual network exchange. A real adapter would read the server-provided environment, validate it, set status and headers before body output, and send the body. Content-Type should describe the response representation, and error bodies should match the declared format.",
       "examples": [
@@ -3036,26 +2640,14 @@
       ],
       "mistakes": "Do not trust a route parameter as an authorized identity. Avoid state changes triggered by GET. A printed response array cannot establish that a real server sent those headers.",
       "refs": [
-        [
-          "HTTP overview",
-          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview"
-        ],
-        [
-          "PHP headers",
-          "https://www.php.net/manual/en/function.header.php"
-        ]
+        ["HTTP overview", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview"],
+        ["PHP headers", "https://www.php.net/manual/en/function.header.php"]
       ]
     },
     {
       "n": 47,
       "title": "Server form validation and redisplay without data loss",
-      "terms": [
-        "server validation",
-        "allowlist",
-        "field error",
-        "redisplay",
-        "POST redirect GET"
-      ],
+      "terms": ["server validation", "allowlist", "field error", "redisplay", "POST redirect GET"],
       "mental": "A server receives untrusted input even when the page supplied a constrained control. A caller can omit fields, send an array where a string was expected, alter a hidden value or bypass the browser entirely. Validate shape, type, length and domain rules before using values. An allowlist defines accepted choices; rejecting only known bad strings is usually harder to reason about.\n\nSeparate raw input, validated domain values and rendered output. Keep useful user input for redisplay after a validation error, but escape it in the HTML context. After a successful state-changing POST, a redirect to a GET page can reduce accidental resubmission on refresh. That pattern does not by itself provide idempotency, CSRF protection or authorization.",
       "anatomy": "A pure validator returns a value and an error map. Check is_string before trim or numeric parsing because request fields can be arrays. For an integer text field, define an accepted syntax and range explicitly. The example uses a bounded decimal digit pattern, then converts only after it passes. The CLI inputs model POST data; no form is submitted.",
       "examples": [
@@ -3102,26 +2694,14 @@
       ],
       "mistakes": "Do not use hidden inputs as trusted prices or identities. Browser constraints are a convenience, not server enforcement. Avoid silently accepting partially validated records because one field looked correct.",
       "refs": [
-        [
-          "External variables",
-          "https://www.php.net/manual/en/language.variables.external.php"
-        ],
-        [
-          "Form handling",
-          "https://www.php.net/manual/en/tutorial.forms.php"
-        ]
+        ["External variables", "https://www.php.net/manual/en/language.variables.external.php"],
+        ["Form handling", "https://www.php.net/manual/en/tutorial.forms.php"]
       ]
     },
     {
       "n": 48,
       "title": "Cookies, sessions and a request-to-request lifecycle",
-      "terms": [
-        "cookie",
-        "session identifier",
-        "session state",
-        "fixation",
-        "lifecycle"
-      ],
+      "terms": ["cookie", "session identifier", "session state", "fixation", "lifecycle"],
       "mental": "A cookie is a small value the browser stores and sends according to its scope and attributes. A common session design stores an unpredictable session identifier in a cookie and keeps application state on the server. The identifier is a bearer credential: possession may allow the server to associate a request with that session. Do not put sensitive application state into an unsigned client value and treat it as trusted.\n\nSession lifetime involves creation, authentication transitions, inactivity, absolute expiry and logout. Regenerating the identifier after privilege changes helps address fixation, but safe concurrency and invalidation policies still matter. HttpOnly limits script access to a cookie, Secure restricts transport to HTTPS, and SameSite controls some cross-site sending behavior. These attributes support different defenses and do not replace authorization.",
       "anatomy": "Configure session behavior before session_start and before output. Prefer cookie-only identifiers and strict session handling. Real session storage can lock during a request, so write-close when the required state update is complete in applications that support concurrent requests. The CLI reference uses a pure state transition to demonstrate expiry; it does not claim to create or test a browser session.",
       "examples": [
@@ -3168,26 +2748,14 @@
       ],
       "mistakes": "Do not claim a session works because an array update passed. Secure cookies need HTTPS in the real deployment; a local HTTP teaching fixture must explain its different transport boundary. Never log live session identifiers.",
       "refs": [
-        [
-          "Session security",
-          "https://www.php.net/manual/en/session.security.php"
-        ],
-        [
-          "Session settings",
-          "https://www.php.net/manual/en/session.security.ini.php"
-        ]
+        ["Session security", "https://www.php.net/manual/en/session.security.php"],
+        ["Session settings", "https://www.php.net/manual/en/session.security.ini.php"]
       ]
     },
     {
       "n": 49,
       "title": "CSRF defenses and deliberate state-changing requests",
-      "terms": [
-        "CSRF",
-        "synchronizer token",
-        "constant-time comparison",
-        "SameSite",
-        "origin"
-      ],
+      "terms": ["CSRF", "synchronizer token", "constant-time comparison", "SameSite", "origin"],
       "mental": "Cross-site request forgery exploits a browser's ability to send credentials with a request that the user did not intend. A state-changing endpoint must distinguish an authorized user's deliberate action from a request induced by another site. A synchronizer-token design stores an unpredictable token in the user's server session and requires the same token in the submitted form or appropriate request header.\n\nThe token must be generated with a cryptographically secure source, kept out of URLs and checked before changing state. SameSite cookies and origin checks can add protection but do not eliminate the need to understand the application's request paths. XSS can undermine CSRF defenses because malicious script running in the application's own origin may access tokens or perform actions.",
       "anatomy": "Generate token bytes with random_bytes and encode them for transport. Compare a validated submitted string with the known session token using hash_equals. Reject absent, wrong-type and empty values before a state change. The deterministic CLI fixture uses a clearly fake fixed token to test comparison logic; it is not a production token generator or proof of a browser defense.",
       "examples": [
@@ -3234,14 +2802,8 @@
       ],
       "mistakes": "Do not reuse the fixed teaching token in a live server. Do not let a CSRF pass stand in for authorization. Never mutate state before completing the token decision and then try to undo it afterward.",
       "refs": [
-        [
-          "random_bytes",
-          "https://www.php.net/manual/en/function.random-bytes.php"
-        ],
-        [
-          "hash_equals",
-          "https://www.php.net/manual/en/function.hash-equals.php"
-        ],
+        ["random_bytes", "https://www.php.net/manual/en/function.random-bytes.php"],
+        ["hash_equals", "https://www.php.net/manual/en/function.hash-equals.php"],
         [
           "CSRF prevention",
           "https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html"
@@ -3251,13 +2813,7 @@
     {
       "n": 50,
       "title": "Password hashing and authentication boundaries",
-      "terms": [
-        "password hash",
-        "salt",
-        "verification",
-        "rehash",
-        "authentication"
-      ],
+      "terms": ["password hash", "salt", "verification", "rehash", "authentication"],
       "mental": "Passwords should not be stored as plaintext or encrypted with a reversible key merely so the application can compare them. A password hash is designed to make verification possible without retaining the original password and to impose a computational cost on guessing. Use a maintained password-hashing API rather than inventing a hash-plus-salt scheme. The encoded result records the algorithm and parameters needed for verification.\n\nAuthentication establishes an identity claim; it does not decide which objects that identity may access. A complete login flow also needs transport security, rate limiting, useful but nonrevealing errors, session rotation and account-recovery design. One successful hash comparison is only a primitive test, not a complete authentication system.",
       "anatomy": "Use password_hash and password_verify. Allow storage large enough for future encoded formats, and use password_needs_rehash during a deliberate migration policy. Algorithm support and cost depend on the prepared runtime; the example uses bcrypt with an explicit bounded teaching cost. Production parameters require current guidance and measurement. Bcrypt has a byte-length limit that must not be ignored when designing input policy.",
       "examples": [
@@ -3304,14 +2860,8 @@
       ],
       "mistakes": "Never copy the teaching passphrase into a real account or print password hashes as routine diagnostics. Do not invent a manual salt. A stronger hashing parameter cannot compensate for an unbounded public login endpoint.",
       "refs": [
-        [
-          "password_hash",
-          "https://www.php.net/manual/en/function.password-hash.php"
-        ],
-        [
-          "password_verify",
-          "https://www.php.net/manual/en/function.password-verify.php"
-        ],
+        ["password_hash", "https://www.php.net/manual/en/function.password-hash.php"],
+        ["password_verify", "https://www.php.net/manual/en/function.password-verify.php"],
         [
           "Password storage",
           "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html"
@@ -3321,13 +2871,7 @@
     {
       "n": 51,
       "title": "PDO, prepared statements and the value-query boundary",
-      "terms": [
-        "PDO",
-        "prepared statement",
-        "parameter",
-        "SQL injection",
-        "schema"
-      ],
+      "terms": ["PDO", "prepared statement", "parameter", "SQL injection", "schema"],
       "mental": "PDO is a database access interface with drivers for particular engines. The classroom prepares PDO SQLite so examples can use an in-memory database without credentials or network access. PostgreSQL and SQLite differ in types, SQL features and concurrency, so a SQLite pass does not prove PostgreSQL behavior. Revisit the SQL route for relational design and engine-specific queries.\n\nA prepared statement separates the fixed query structure from parameter values. A value containing a quote or SQL-looking text remains a value when bound correctly. Parameters cannot stand in for arbitrary identifiers, keywords or sort directions. Dynamic column selection needs an explicit allowlist that maps a choice to trusted SQL structure. Escaping HTML output is a separate boundary after fetching data.",
       "anatomy": "Create a PDO connection with exception error mode, create a tiny schema and prepare an INSERT. Execute it with a parameter map, then prepare a SELECT using a value predicate. Keep the database handle local to this run. The example's table is disposable in-memory state, not the learner's persistent classroom database.",
       "examples": [
@@ -3374,31 +2918,15 @@
       ],
       "mistakes": "Do not concatenate values into SQL and call the result prepared merely because prepare() is used afterward. Avoid copying SQLite-specific assumptions into PostgreSQL without checking them. Database binding does not make fetched text safe for HTML.",
       "refs": [
-        [
-          "PDO",
-          "https://www.php.net/manual/en/book.pdo.php"
-        ],
-        [
-          "Prepared statements",
-          "https://www.php.net/manual/en/pdo.prepared-statements.php"
-        ]
+        ["PDO", "https://www.php.net/manual/en/book.pdo.php"],
+        ["Prepared statements", "https://www.php.net/manual/en/pdo.prepared-statements.php"]
       ],
-      "prerequisites": [
-        "web-035",
-        "web-044",
-        "web-047"
-      ]
+      "prerequisites": ["web-035", "web-044", "web-047"]
     },
     {
       "n": 52,
       "title": "Transactions, constraints and concurrent changes",
-      "terms": [
-        "transaction",
-        "atomicity",
-        "constraint",
-        "rollback",
-        "optimistic concurrency"
-      ],
+      "terms": ["transaction", "atomicity", "constraint", "rollback", "optimistic concurrency"],
       "mental": "A transaction groups operations into a unit that can commit or roll back. Atomicity means the unit is not partially applied when the transaction aborts under the database's contract. Constraints enforce invariants close to the stored data, where every writer must encounter them. Application checks alone can race when two requests read the same state and then both attempt an update.\n\nConcurrency requires more than wrapping code in begin and commit. Isolation levels, locking and the chosen database determine what other transactions can observe. An optimistic update includes an expected version in its WHERE clause and checks the affected-row count. A zero-row update can mean the record changed or was not accessible; the application must decide how to report and retry safely.",
       "anatomy": "Begin a transaction, perform related writes, commit only after all succeed, and roll back on failure if still in a transaction. Use a database CHECK or UNIQUE constraint where it expresses a durable invariant. The SQLite example demonstrates rollback and a version predicate in one connection; it does not simulate real parallel requests or qualify PostgreSQL isolation.",
       "examples": [
@@ -3445,14 +2973,8 @@
       ],
       "mistakes": "Do not blindly retry a non-idempotent operation after an ambiguous commit result. A transaction does not eliminate all races under every isolation level. Keep affected-row checks tied to a documented driver and statement contract.",
       "refs": [
-        [
-          "PDO transactions",
-          "https://www.php.net/manual/en/pdo.transactions.php"
-        ],
-        [
-          "rowCount",
-          "https://www.php.net/manual/en/pdostatement.rowcount.php"
-        ]
+        ["PDO transactions", "https://www.php.net/manual/en/pdo.transactions.php"],
+        ["rowCount", "https://www.php.net/manual/en/pdostatement.rowcount.php"]
       ]
     },
     {
@@ -3511,10 +3033,7 @@
       ],
       "mistakes": "Do not confuse an unpredictable id with an authorization check. Avoid logging sensitive returned data during denied requests. Ensure update and delete paths have the same ownership discipline as reads.",
       "refs": [
-        [
-          "PDO preparation",
-          "https://www.php.net/manual/en/pdo.prepare.php"
-        ],
+        ["PDO preparation", "https://www.php.net/manual/en/pdo.prepare.php"],
         [
           "Authorization",
           "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html"
@@ -3524,13 +3043,7 @@
     {
       "n": 54,
       "title": "JSON APIs, schemas and consistent error responses",
-      "terms": [
-        "API contract",
-        "JSON response",
-        "schema",
-        "status mapping",
-        "content type"
-      ],
+      "terms": ["API contract", "JSON response", "schema", "status mapping", "content type"],
       "mental": "An API contract describes inputs, outputs, error behavior and relevant operational limits. JSON is only the serialization format. A client needs to know whether minutes is an integer, whether a field can be null, which errors are recoverable and whether an operation changes state. Adding a field can be compatible for some clients while changing its meaning or type can break them.\n\nError responses should be structured and consistent without exposing internal exceptions. A validation error can identify fields; an unexpected internal error should provide a safe message and a correlation mechanism in a real deployment. Status codes, headers and body must agree. Returning a JSON error object with an unconditional 200 status makes clients and monitoring misinterpret failures.",
       "anatomy": "Keep a response builder separate from the domain function. Encode with JSON_THROW_ON_ERROR and declare application/json in the real HTTP adapter. Decode test output and inspect types rather than comparing arbitrary whitespace. This CLI lesson models the response; the external HTTP fixture later checks actual status and headers. It does not enable cross-origin access automatically.",
       "examples": [
@@ -3577,27 +3090,14 @@
       ],
       "mistakes": "Do not append debugging output before or after a JSON body. Avoid exposing raw exception messages. A local encode/decode test does not prove actual Content-Type or status headers on a server.",
       "refs": [
-        [
-          "JSON functions",
-          "https://www.php.net/manual/en/book.json.php"
-        ],
-        [
-          "HTTP status",
-          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status"
-        ]
+        ["JSON functions", "https://www.php.net/manual/en/book.json.php"],
+        ["HTTP status", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status"]
       ]
     },
     {
       "n": 55,
       "title": "Pagination, caching and bounded application workloads",
-      "terms": [
-        "pagination",
-        "cursor",
-        "stable ordering",
-        "cache key",
-        "invalidation",
-        "budget"
-      ],
+      "terms": ["pagination", "cursor", "stable ordering", "cache key", "invalidation", "budget"],
       "mental": "An endpoint should not assume its dataset will remain small. Bound the amount of work and the response size. Pagination returns a portion of a collection under a documented order. Offset pagination is simple but can shift as records are inserted or removed. Cursor pagination identifies a position in a stable ordering and needs a tie-breaker when the primary sort value is not unique.\n\nCaching reuses a previous result, but the cache key and invalidation policy are part of correctness. A key that omits user identity or authorization scope can expose another user's data. A stale result may be acceptable for one display and harmful for another. Define freshness, ownership and failure behavior before using a cache to hide an expensive query.",
       "anatomy": "The reference demonstrates a bounded in-memory cursor over unique increasing ids. It validates the page size, selects ids greater than the cursor and takes only the requested count. This is an algorithm model, not a database query plan or distributed cache. A production query needs a matching index and engine-specific measurement.",
       "examples": [
@@ -3621,10 +3121,7 @@
           "Explain why pagination needs an explicit stable order.",
           "Without it, page boundaries can duplicate or omit records unpredictably."
         ],
-        [
-          "Add a maximum page-size rule.",
-          "A caller cannot request an unbounded result."
-        ],
+        ["Add a maximum page-size rule.", "A caller cannot request an unbounded result."],
         [
           "Implement a cursor-based slice over synthetic records.",
           "The second page continues after the last id and the final page can be shorter."
@@ -3644,14 +3141,8 @@
       ],
       "mistakes": "Do not claim a cursor guarantees a snapshot while records change unless the storage contract provides that guarantee. A cache hit can still be wrong. Bound work even for authenticated clients.",
       "refs": [
-        [
-          "PDO fetch modes",
-          "https://www.php.net/manual/en/pdostatement.fetch.php"
-        ],
-        [
-          "HTTP caching",
-          "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching"
-        ]
+        ["PDO fetch modes", "https://www.php.net/manual/en/pdostatement.fetch.php"],
+        ["HTTP caching", "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching"]
       ]
     },
     {
@@ -3710,14 +3201,8 @@
       ],
       "mistakes": "Do not add a success banner that claims the user now has a production service. Preserve invalid cases in the test suite. A synthetic trusted actor is a testing input, not an authentication implementation.",
       "refs": [
-        [
-          "PDO transactions",
-          "https://www.php.net/manual/en/pdo.transactions.php"
-        ],
-        [
-          "PHP security",
-          "https://www.php.net/manual/en/security.php"
-        ]
+        ["PDO transactions", "https://www.php.net/manual/en/pdo.transactions.php"],
+        ["PHP security", "https://www.php.net/manual/en/security.php"]
       ],
       "minutes": 180
     },
@@ -3738,7 +3223,7 @@
           "Prepare the owned lab",
           "Run from a new learner copy of the fixture after reading its README.",
           "bash",
-          "docker compose --project ds60-web-study up --build --detach\ncurl --fail http://127.0.0.1:18088/health",
+          "docker compose --project-name ds60-web-study up --build --detach\ncurl --fail http://127.0.0.1:18088/health",
           "An actual bounded HTTP request returns the lab's health response."
         ],
         [
@@ -3781,10 +3266,7 @@
           "PHP development server limits",
           "https://www.php.net/manual/en/features.commandline.webserver.php"
         ],
-        [
-          "Compose project names",
-          "https://docs.docker.com/compose/how-tos/project-name/"
-        ]
+        ["Compose project names", "https://docs.docker.com/compose/how-tos/project-name/"]
       ],
       "minutes": 150
     },
@@ -3845,10 +3327,7 @@
       ],
       "mistakes": "Do not copy this lesson's fragments into a live upload service without the full surrounding contract. Avoid teaching extensions as proof of content type. Never send real email, credentials or files while merely reading a lesson.",
       "refs": [
-        [
-          "PHP file uploads",
-          "https://www.php.net/manual/en/features.file-upload.php"
-        ],
+        ["PHP file uploads", "https://www.php.net/manual/en/features.file-upload.php"],
         [
           "File upload security",
           "https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html"
@@ -3859,14 +3338,7 @@
     {
       "n": 59,
       "title": "Deploying PHP: containers, web servers and operations",
-      "terms": [
-        "PHP-FPM",
-        "reverse proxy",
-        "document root",
-        "secret",
-        "migration",
-        "backup"
-      ],
+      "terms": ["PHP-FPM", "reverse proxy", "document root", "secret", "migration", "backup"],
       "mental": "A production PHP deployment commonly separates an HTTP server or reverse proxy from a PHP process manager. PHP-FPM manages FastCGI workers; it is not itself a general browser-facing HTTP server. A web server routes appropriate requests to the runtime and serves approved static assets. The public document root should contain only files intended for delivery, keeping source configuration, dependency metadata, private data and secrets outside that boundary.\n\nA container packages a runtime and application, while volumes or external storage hold durable state. Rebuilding an image does not migrate a database automatically. A release needs a plan for schema changes, compatibility, rollback, backup and restore. A backup job reporting success is weaker evidence than an actual restore that recreates the expected data and application behavior.",
       "anatomy": "Use reviewed locked dependencies and a deliberate image tag or digest policy. Supply secrets through a controlled runtime mechanism rather than baking them into images or committing them. Enable appropriate error logging without displaying internal stack traces publicly. TLS termination and trusted proxy headers require an explicit network ownership policy; do not trust forwarded identity or scheme headers from arbitrary clients.",
       "examples": [
@@ -3913,18 +3385,12 @@
       ],
       "mistakes": "Do not expose the PHP built-in learning server to the public internet and call it a production architecture. Avoid broad prune commands as deployment recovery. A successful image build cannot establish application correctness or backup recoverability.",
       "refs": [
-        [
-          "PHP-FPM",
-          "https://www.php.net/manual/en/install.fpm.php"
-        ],
+        ["PHP-FPM", "https://www.php.net/manual/en/install.fpm.php"],
         [
           "Development server limitations",
           "https://www.php.net/manual/en/features.commandline.webserver.php"
         ],
-        [
-          "Docker build guidance",
-          "https://docs.docker.com/build/building/best-practices/"
-        ]
+        ["Docker build guidance", "https://docs.docker.com/build/building/best-practices/"]
       ],
       "minutes": 150
     },
@@ -3984,14 +3450,8 @@
       ],
       "mistakes": "Do not let a polished interface hide an unfinished trust boundary. Avoid copying a reference without explaining its limitations. Expert practice means selecting evidence and handling tradeoffs, not merely finishing every chapter or using a popular framework.",
       "refs": [
-        [
-          "MDN curriculum",
-          "https://developer.mozilla.org/en-US/curriculum/core/"
-        ],
-        [
-          "PHP security",
-          "https://www.php.net/manual/en/security.php"
-        ],
+        ["MDN curriculum", "https://developer.mozilla.org/en-US/curriculum/core/"],
+        ["PHP security", "https://www.php.net/manual/en/security.php"],
         [
           "OWASP application verification",
           "https://owasp.org/www-project-application-security-verification-standard/"

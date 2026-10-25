@@ -21,4 +21,4 @@ with tf.device(device):
     tf.debugging.assert_all_finite(b, "b finite")
 assert int(tf.size(a).numpy() + tf.size(b).numpy()) == 8
 assert int(tf.size(base).numpy()) == 16
-print("TensorFlow adapter census: base16 frozen; trainable8; base storage remains")
+print("TensorFlow adapter census: base 16 frozen; trainable 8; base storage remains")

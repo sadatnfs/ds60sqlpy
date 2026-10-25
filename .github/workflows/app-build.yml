@@ -159,6 +159,15 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           work/browser-env/bin/python scripts/check_classroom_browser.py --url "$url" \
             --confirm-disposable --report work/browser-receipts.json
+      - name: Exercise HTML and JavaScript live previews and saved-work boundaries
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python courses/web-development/authoring/check_browser.py \
+            --url "$url" --confirm-disposable --report work/web-browser-receipts.json
+          work/browser-env/bin/python courses/web-development/authoring/check_live_preview.py \
+            --url "$url" --confirm-disposable --report work/live-preview-receipts.json
       - name: Execute all D3 references through the isolated classroom preview
         if: matrix.group == 'python-core'
         shell: bash
@@ -166,7 +175,7 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           work/browser-env/bin/python scripts/check_d3_browser.py --url "$url" \
             --confirm-disposable --report work/d3-browser-receipts.json
-      - name: Replace Core containers after saving D3 browser observations
+      - name: Replace Core containers after saving browser observations
         if: matrix.group == 'python-core'
         shell: bash
         run: |
@@ -193,6 +202,8 @@ jobs:
             work/module-reference-results.json
             work/browser-receipts.json
             work/d3-browser-receipts.json
+            work/web-browser-receipts.json
+            work/live-preview-receipts.json
             work/browser-screenshots/*.png
           if-no-files-found: ignore
           retention-days: 14

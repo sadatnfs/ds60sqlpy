@@ -117,7 +117,10 @@ while [ "$#" -gt 0 ]; do
           image_namespace="$2"
           image_source_explicit=1
           ;;
-        --tag) image_tag="$2"; image_tag_explicit=1 ;;
+        --tag)
+          image_tag="$2"
+          image_tag_explicit=1
+          ;;
         --registry)
           registry="$2"
           registry_explicit=1

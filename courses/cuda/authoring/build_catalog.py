@@ -54,7 +54,8 @@ def artifacts() -> dict[Path, str]:
     }
     return {
         ROOT / "courses/cuda/track.json": json.dumps(plan, indent=2, ensure_ascii=False) + "\n",
-        ROOT / "courses/cuda/lessons.json": json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+        ROOT / "courses/cuda/lessons.json": json.dumps(manifest, indent=2, ensure_ascii=False)
+        + "\n",
     }
 
 

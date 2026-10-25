@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 function check(bool $condition, string $message): void
 {
-    if (!$condition) {
-        throw new RuntimeException($message);
-    }
+  if (!$condition) {
+    throw new RuntimeException($message);
+  }
 }
 
 $topic = "HTML and PHP";

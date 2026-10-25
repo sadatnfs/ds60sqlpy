@@ -9,47 +9,85 @@ selected_profile=''
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --namespace | --version | --profile)
-      [ "$#" -ge 2 ] || { printf 'Missing option value.\n' >&2; exit 2; }
+      [ "$#" -ge 2 ] || {
+        printf 'Missing option value.\n' >&2
+        exit 2
+      }
       case "$1" in --namespace) namespace="$2" ;; --version) version="$2" ;; --profile) selected_profile="$2" ;; esac
-      shift 2 ;;
-    --push) push=1; shift ;;
+      shift 2
+      ;;
+    --push)
+      push=1
+      shift
+      ;;
     -h | --help)
       printf 'Usage: ./scripts/publish-images --namespace USER [--version 0.4.0] [--profile NAME] [--push]\nWithout --push: inspect and print image mappings only. Default: all ordinary images.\n--profile selects one image (app selects the classroom). GPU images are excluded.\nBuild and test the complete release first.\n'
-      exit 0 ;;
-    *) printf 'Unknown option: %s\n' "$1" >&2; exit 2 ;;
+      exit 0
+      ;;
+    *)
+      printf 'Unknown option: %s\n' "$1" >&2
+      exit 2
+      ;;
   esac
 done
-[[ "$namespace" =~ ^[a-z0-9][a-z0-9_-]{1,38}$ ]] || { printf 'Supply a Docker Hub username/organization with --namespace.\n' >&2; exit 2; }
-[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9][a-zA-Z0-9.-]*)?$ ]] || { printf 'Supply a versioned release, not latest.\n' >&2; exit 2; }
-command -v docker >/dev/null || { printf 'Docker CLI is required.\n' >&2; exit 2; }
+[[ "$namespace" =~ ^[a-z0-9][a-z0-9_-]{1,38}$ ]] || {
+  printf 'Supply a Docker Hub username/organization with --namespace.\n' >&2
+  exit 2
+}
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9][a-zA-Z0-9.-]*)?$ ]] || {
+  printf 'Supply a versioned release, not latest.\n' >&2
+  exit 2
+}
+command -v docker >/dev/null || {
+  printf 'Docker CLI is required.\n' >&2
+  exit 2
+}
 source_version="$(awk -F '"' '/^version = / {print $2; exit}' "$repo_dir/pyproject.toml")"
-[ "$version" = "$source_version" ] || { printf 'Publish the version matching this checkout (%s), or check out the matching release first.\n' "$source_version" >&2; exit 2; }
-sources=(); targets=(); digests=(); architecture=''
-while read -r profile service repository suffix variable kind; do
+[ "$version" = "$source_version" ] || {
+  printf 'Publish the version matching this checkout (%s), or check out the matching release first.\n' "$source_version" >&2
+  exit 2
+}
+sources=()
+targets=()
+digests=()
+architecture=''
+while read -r profile _service repository suffix _variable kind; do
   [[ "$profile" == \#* ]] && continue
   [ -n "$profile" ] || continue
   [ "$kind" != gpu ] || continue
   [ -z "$selected_profile" ] || [ "$selected_profile" = "$profile" ] || continue
   source="$repository:$version"
   info="$(docker image inspect --format '{{.Os}} {{.Architecture}} {{.Id}}' "$source")" || {
-    printf 'Missing %s. Build all ordinary profiles before publication. Nothing has been pushed.\n' "$source" >&2; exit 2;
+    printf 'Missing %s. Build all ordinary profiles before publication. Nothing has been pushed.\n' "$source" >&2
+    exit 2
   }
   read -r os arch digest extra <<<"$info"
-  [ "$os" = linux ] && [[ "$arch" =~ ^(amd64|arm64)$ ]] && [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] && [ -z "${extra:-}" ] || { printf 'Unexpected platform or image identity for %s.\n' "$source" >&2; exit 2; }
-  [ -z "$architecture" ] || [ "$architecture" = "$arch" ] || { printf 'The image set mixes architectures. Build one complete architecture at a time.\n' >&2; exit 2; }
+  [ "$os" = linux ] && [[ "$arch" =~ ^(amd64|arm64)$ ]] && [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] && [ -z "${extra:-}" ] || {
+    printf 'Unexpected platform or image identity for %s.\n' "$source" >&2
+    exit 2
+  }
+  [ -z "$architecture" ] || [ "$architecture" = "$arch" ] || {
+    printf 'The image set mixes architectures. Build one complete architecture at a time.\n' >&2
+    exit 2
+  }
   architecture="$arch"
   target="$namespace/ds60sqlpy:$version-$suffix-$arch"
-  sources+=("$source"); targets+=("$target"); digests+=("$digest")
+  sources+=("$source")
+  targets+=("$target")
+  digests+=("$digest")
   printf '%s -> %s\n' "$source" "$target"
 done <"$repo_dir/docker/classroom-images.tsv"
-[ "${#sources[@]}" -gt 0 ] || { printf 'Empty image catalog.\n' >&2; exit 2; }
+[ "${#sources[@]}" -gt 0 ] || {
+  printf 'Empty image catalog.\n' >&2
+  exit 2
+}
 if [ "$push" -eq 0 ]; then
   printf '\nPreview only. %s Linux %s images exist locally. Review, docker login, then repeat with --push.\n' "${#sources[@]}" "$architecture"
   exit 0
 fi
 # The explicit --push is the operator's publication action. Pin each inspected
 # local image ID so another build cannot silently change the intended payload.
-for ((i=0; i<${#sources[@]}; i++)); do
+for ((i = 0; i < ${#sources[@]}; i++)); do
   docker image tag "${digests[$i]}" "${targets[$i]}"
   docker image push "${targets[$i]}"
 done

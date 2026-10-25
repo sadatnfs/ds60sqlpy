@@ -24,12 +24,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT))
 
+from ds60sqlpy.browser_runs import BROWSER_PROFILES  # noqa: E402
+from ds60sqlpy.gpu_runtime import GPU_PROFILES  # noqa: E402
 from ds60sqlpy.modules import LANGUAGES, MAX_SOURCE_BYTES, ModuleCatalog, ModuleLesson  # noqa: E402
 from scripts.check_classroom_profiles import TERMINAL, ClassroomClient  # noqa: E402
 
-ORDINARY_PROFILES = frozenset(LANGUAGES) - {"reading", "k8s-kind", "javascript-browser"}
+ORDINARY_PROFILES = (
+    frozenset(LANGUAGES) - {"reading", "k8s-kind"} - BROWSER_PROFILES.keys() - GPU_PROFILES
+)
 CONFIRMED_TERMINAL = TERMINAL - {"blocked", "interrupted"}
 EXTERNAL_REASONS = {
+    "html-browser": "HTML/CSS browser execution; qualified by the real Chromium web workflow.",
+    **dict.fromkeys(
+        GPU_PROFILES,
+        "Optional NVIDIA execution needs separate real GPU qualification; "
+        "CPU CI is not a GPU pass.",
+    ),
     "javascript-browser": "Browser execution; qualified by the real Chromium D3 workflow.",
     "reading": "Reading or separately documented manual workflow; no ordinary worker execution.",
     "k8s-kind": "Owned-cluster operation; qualified by the separate Kubernetes workflow.",

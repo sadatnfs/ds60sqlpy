@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cuda-074: One-dimensional indexing and tails · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+    /* Shared offline reader rendering. Code retains a dark surface in both themes. */
+pre.highlighted-code, pre.source-code {
+  color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
+  border: 1px solid #35435c; border-radius: .7rem; overflow-x: auto;
+  padding: 1rem 1.1rem; font-size: .9rem; line-height: 1.65; white-space: pre;
+  tab-size: 4; text-align: left; font-weight: 400;
+}
+pre.highlighted-code code, pre.source-code code {
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+  font-weight: 400; padding: 0; color: inherit; background: transparent;
+  font-size: inherit; line-height: inherit; white-space: inherit;
+}
+pre.source-code { padding: 1rem 0; }
+pre.source-code code { display: block; counter-reset: source-line; white-space: normal; }
+pre.source-code code > .source-line {
+  display: block; white-space: pre; min-height: 1.65em;
+  padding: 0 1rem 0 4.2rem; position: relative;
+}
+pre.source-code code > .source-line::before {
+  counter-increment: source-line; content: counter(source-line);
+  position: absolute; float: none; margin-left: 0; left: .75rem; width: 2.5rem; text-align: right;
+  color: #97a7be; user-select: none; pointer-events: none;
+}
+pre .syntax-keyword { color: #cbb5ff; font-weight: 650; }
+pre .syntax-string { color: #a9e6b1; }
+pre .syntax-number { color: #ffd39b; }
+pre .syntax-comment { color: #a4b3ca; font-style: italic; }
+pre .syntax-function, pre .syntax-builtin { color: #91d8fc; }
+pre .syntax-class, pre .syntax-tag { color: #f8b6d5; }
+pre .syntax-attribute, pre .syntax-decorator { color: #f7df96; }
+pre .syntax-operator { color: #b6e4f5; }
+pre .syntax-punctuation { color: #c5cfe0; }
+pre .syntax-generic { color: #e5edf8; }
+math { color: inherit; font-size: 1.08em; font-weight: normal; }
+math[display="inline"] { margin-inline: .12em; }
+.math-display {
+  max-width: 100%; overflow-x: auto; overflow-y: hidden;
+  margin: 1.3rem 0; padding: .7rem .3rem; color: inherit;
+}
+.math-display math { margin: 0 auto; min-width: min-content; }
+code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
+@media print {
+  pre.highlighted-code, pre.source-code { background: #fff; color: #172033; border-color: #777; }
+  pre [class^="syntax-"] { color: #172033; }
+  .math-display { overflow: visible; }
+}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cuda-074: One-dimensional indexing and tails</h1>
+      <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-074.md</code></p>
+    </header>
+    <article class="document"><h2 id="cuda-074-one-dimensional-indexing-and-tails">cuda-074: One-dimensional indexing and tails<a class="heading-anchor" href="#cuda-074-one-dimensional-indexing-and-tails" aria-label="Link to this section">#</a></h2>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-004</code>, <code>cuda-073</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
+<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
+<p>By the end, you can <strong>compute launch size for n=17</strong>, <strong>implement grid-stride coverage</strong>, and <strong>specify a sanitizer check</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
+<p>A launch creates blocks containing threads. For one-dimensional indexing, global index equals block index times threads per block plus thread index. The last block often contains lanes beyond the input length. Guard every load and store that would otherwise access those lanes. Ceiling division creates enough blocks, while floor division silently omits a tail.</p>
+<p>A grid-stride loop lets a bounded launch cover larger arrays: after processing index i, advance by the total number of launched threads. Every valid index should be visited exactly once for an elementwise operation. Test zero, one, block size minus one, block size, block size plus one and a nonmultiple. CPU scheduling models can prove the intended integer mapping, but cannot prove race freedom or GPU memory safety.</p>
+<h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<p>For n=10 and block size 4, three blocks launch 12 lanes. Indices 0 through 9 are valid, while 10 and 11 must not access the buffer.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<p>With six total threads and n=14, thread zero visits 0,6,12 and thread one visits 1,7,13. The union contains every valid index exactly once.</p>
+<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
+<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<pre class="highlighted-code"><code class="language-python">n<span class="syntax-punctuation">,</span> block <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span>
+blocks <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">+</span> block <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> block
+visits <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>b <span class="syntax-operator">*</span> block <span class="syntax-operator">+</span> t <span class="syntax-keyword">for</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>blocks<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>block<span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> b <span class="syntax-operator">*</span> block <span class="syntax-operator">+</span> t <span class="syntax-operator">&lt;</span> n<span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> visits <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+strided <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>i <span class="syntax-keyword">for</span> t <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>t<span class="syntax-punctuation">,</span> <span class="syntax-number">14</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
+<span class="syntax-keyword">assert</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>strided<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">14</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU indexing model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> visits<span class="syntax-punctuation">)</span></code></pre>
+<p><strong>Expected observation:</strong> Every valid index appears exactly once.</p>
+<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
+<h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
+<p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
+<pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Optional NVIDIA CUDA lab. No CPU fallback or external dataset.&quot;&quot;&quot;</span>
+
+<span class="syntax-keyword">import</span> cupy <span class="syntax-keyword">as</span> cp
+
+<span class="syntax-keyword">if</span> cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>runtime<span class="syntax-operator">.</span>getDeviceCount<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
+    <span class="syntax-keyword">raise</span> RuntimeError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">This variant requires an explicitly prepared NVIDIA CUDA GPU</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
+cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>Device<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>use<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+
+kernel <span class="syntax-operator">=</span> cp<span class="syntax-operator">.</span>RawKernel<span class="syntax-punctuation">(</span>
+    <span class="syntax-string">r</span><span class="syntax-string">&quot;&quot;&quot;</span>
+<span class="syntax-string">extern &quot;C&quot; __global__ void twice(const float* x, float* y, int n) {</span>
+<span class="syntax-string">    int i = blockIdx.x * blockDim.x + threadIdx.x;</span>
+<span class="syntax-string">    if (i &lt; n) y[i] = 2.0f * x[i];</span>
+<span class="syntax-string">}</span>
+<span class="syntax-string">&quot;&quot;&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;</span><span class="syntax-string">twice</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
+<span class="syntax-punctuation">)</span>
+<span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">127</span><span class="syntax-punctuation">,</span> <span class="syntax-number">128</span><span class="syntax-punctuation">,</span> <span class="syntax-number">129</span><span class="syntax-punctuation">,</span> <span class="syntax-number">257</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
+    x <span class="syntax-operator">=</span> cp<span class="syntax-operator">.</span>arange<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span>cp<span class="syntax-operator">.</span>float32<span class="syntax-punctuation">)</span>
+    y <span class="syntax-operator">=</span> cp<span class="syntax-operator">.</span>empty_like<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
+    <span class="syntax-keyword">if</span> n<span class="syntax-punctuation">:</span>
+        kernel<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">+</span> <span class="syntax-number">127</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">128</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">128</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> cp<span class="syntax-operator">.</span>int32<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
+    cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>get_current_stream<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>synchronize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
+    cp<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_array_equal<span class="syntax-punctuation">(</span>y<span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x<span class="syntax-punctuation">)</span>
+<span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA tail tests passed for zero, singleton and nonmultiples</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
+<h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-compute-launch-size-for-n-17">Exercise 1: Compute launch size for n=17<a class="heading-anchor" href="#exercise-1-compute-launch-size-for-n-17" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 1 targets <strong>compute launch size for n=17</strong> in the examples above.</p>
+<h4 id="exercise-2-trace-the-last-block">Exercise 2: Trace the last block<a class="heading-anchor" href="#exercise-2-trace-the-last-block" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 2 targets <strong>trace the last block</strong> in the examples above.</p>
+<h4 id="exercise-3-test-zero-without-launching">Exercise 3: Test zero without launching<a class="heading-anchor" href="#exercise-3-test-zero-without-launching" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 3 targets <strong>test zero without launching</strong> in the examples above.</p>
+<h4 id="exercise-4-implement-grid-stride-coverage">Exercise 4: Implement grid-stride coverage<a class="heading-anchor" href="#exercise-4-implement-grid-stride-coverage" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 4 targets <strong>implement grid-stride coverage</strong> in the examples above.</p>
+<h4 id="exercise-5-find-floor-division-data-loss">Exercise 5: Find floor-division data loss<a class="heading-anchor" href="#exercise-5-find-floor-division-data-loss" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 5 targets <strong>find floor-division data loss</strong> in the examples above.</p>
+<h4 id="exercise-6-specify-a-sanitizer-check">Exercise 6: Specify a sanitizer check<a class="heading-anchor" href="#exercise-6-specify-a-sanitizer-check" aria-label="Link to this section">#</a></h4>
+<p>Write your prediction and reasoning in the worksheet. Where numerical, show intermediate values and units; where architectural, draw the boundary and state the observable evidence. Exercise 6 targets <strong>specify a sanitizer check</strong> in the examples above.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<ol>
+<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute launch size for n=17&quot;.</li>
+<li>Change one assumption in worked example 2 while preserving the declared contract: trace the last block.</li>
+<li>Trace the CPU program&#x27;s variables before adding hardware behavior: test zero without launching.</li>
+<li>Draw producers, consumers and the exact operation boundary for the task &quot;Implement grid-stride coverage&quot;.</li>
+<li>Separate what the small fixture establishes from what the real runtime must show: find floor-division data loss.</li>
+<li>Write a counterexample to an overbroad claim before you specify a sanitizer check.</li>
+</ol>
+<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
+<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
+<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute launch size for n=17</code>. For the final claim use <code>Specify a sanitizer check</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
+<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
+<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
+<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
+<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<blockquote><p>I am studying <code>cuda-074</code> using <code>courses/cuda/python/guides/cuda-074.md</code> and <code>courses/cuda/python/lessons/cuda-074.md</code>. Help me reason about One-dimensional indexing and tails. Start with my current attempt and the two worked examples. Ask which backend actually ran, give one progressive hint, and do not reveal the separate solution or mark progress unless I request it.</p></blockquote>
+<h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
+<li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
+</ul>
+<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p></article>
+  </main>
+</body>
+</html>

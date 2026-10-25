@@ -377,7 +377,7 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
     results = []
     for batch in batches(paths):
         passed = run_formatter(command + batch, batch, root, check)
-        if passed and not check and language in {"web", "java", "toml", "xml"}:
+        if passed and not check and language in {"web", "java", "toml", "xml", "php"}:
             # Some complex TypeScript layouts need one additional Prettier pass.
             # Bound convergence and never report a write pass as stable without a check.
             verify = ["--check" if part == "--write" else part for part in command]
@@ -521,6 +521,8 @@ def main(argv: list[str] | None = None) -> int:
         "java": "prettier",
         "c": "clang-format",
         "cpp": "clang-format",
+        "cuda": "clang-format",
+        "php": "prettier",
         "csharp": "clang-format",
         "go": "gofmt",
         "rust": "rustfmt",

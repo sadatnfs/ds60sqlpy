@@ -1,33 +1,39 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Custom properties, tokens and component themes</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-:root { --surface: white; --ink: #172033; --space: 1rem; } .card { background: var(--surface, white); color: var(--ink, #172033); padding: var(--space, 1rem); margin-block: 1rem; border: 1px solid #64748b; } .featured { --surface: #e0f2fe; --space: 1.5rem; }
-  </style>
-</head>
-<body>
-<main><h1>Shared component decisions</h1><article class="card"><h2>Standard lesson</h2><p>Core reading.</p></article><article class="card featured"><h2>Featured lesson</h2><p>Optional project practice.</p></article></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Custom properties, tokens and component themes</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      :root { --surface: white; --ink: #172033; --space: 1rem; } .card { background: var(--surface, white); color: var(--ink, #172033); padding: var(--space, 1rem); margin-block: 1rem; border: 1px solid #64748b; } .featured { --surface: #e0f2fe; --space: 1.5rem; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Shared component decisions</h1
+      ><article class="card"><h2>Standard lesson</h2><p>Core reading.</p></article
+      ><article class="card featured"
+        ><h2>Featured lesson</h2><p>Optional project practice.</p></article
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(getComputedStyle(document.querySelector('.featured')).getPropertyValue('--surface').trim() === '#e0f2fe', 'Scoped theme missing');
-document.querySelector("#reference-status").textContent = "web-018 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-018 reference checks passed");
-</script>
-</body>
+      check(getComputedStyle(document.querySelector('.featured')).getPropertyValue('--surface').trim() === '#e0f2fe', 'Scoped theme missing');
+      document.querySelector("#reference-status").textContent = "web-018 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-018 reference checks passed");
+    </script>
+  </body>
 </html>

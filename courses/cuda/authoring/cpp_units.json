@@ -34,9 +34,7 @@
   {
     "n": 2,
     "title": "Meet the hardware without memorizing a product catalog",
-    "prerequisites": [
-      "cuda-001"
-    ],
+    "prerequisites": ["cuda-001"],
     "theory": "CPU cores, GPU streaming multiprocessors, warps, arithmetic pipelines, registers, shared memory, caches, device memory, copy engines and host interconnect. Distinguish a programming thread from a physical arithmetic lane and an SM from a CPU core. Introduce compute capability as a feature contract, not the installed toolkit number.",
     "evidence": "labeled hardware/software map and a capability report if hardware exists.",
     "mistake": "every launched thread occupies its own permanent physical core.",
@@ -68,9 +66,7 @@
   {
     "n": 3,
     "title": "The software stack from application to driver",
-    "prerequisites": [
-      "cuda-002"
-    ],
+    "prerequisites": ["cuda-002"],
     "theory": "host driver, CUDA runtime and driver APIs, toolkit, compiler, user-space libraries, framework packages and container image. Explain what `nvcc`, a framework CUDA build and `nvidia-smi` each tell us, including what none proves alone. Separate the host operating-system boundary from container contents.",
     "evidence": "correctly place six failure messages at their responsible layer.",
     "mistake": "installing a CUDA Python package or compiler installs a usable NVIDIA GPU.",
@@ -102,10 +98,7 @@
   {
     "n": 4,
     "title": "Parallel decomposition before launch syntax",
-    "prerequisites": [
-      "cuda-001",
-      "cuda-002"
-    ],
+    "prerequisites": ["cuda-001", "cuda-002"],
     "theory": "domain decomposition, task decomposition, work, dependency depth, granularity, load balance and boundary work. Introduce map, reduce, scan, gather and scatter as reusable patterns. Distinguish the mathematical operation from its scheduling.",
     "evidence": "a decomposition that covers every element once and states synchronization requirements.",
     "mistake": "an evenly divisible toy size proves the indexing scheme works generally.",
@@ -137,9 +130,7 @@
   {
     "n": 5,
     "title": "Memory as addresses, ownership, shape and stride",
-    "prerequisites": [
-      "cuda-004"
-    ],
+    "prerequisites": ["cuda-004"],
     "theory": "bytes versus elements, dtype, alignment, contiguous storage, row-major and column-major layout, strides, views, aliasing and ownership. Distinguish a pointer value from the authority to dereference that address on a particular processor.",
     "evidence": "a correct offset table and explicit ownership/lifetime diagram.",
     "mistake": "two arrays with the same shape necessarily have the same layout or independent storage.",
@@ -171,18 +162,11 @@
   {
     "n": 6,
     "title": "Numbers, units and a trustworthy answer",
-    "prerequisites": [
-      "cuda-005"
-    ],
+    "prerequisites": ["cuda-005"],
     "theory": "finite precision, integer overflow, floating-point reduction order, cancellation, absolute versus relative error, NaN/Inf and problem conditioning. Explain why a tolerance belongs to an algorithm and input range. Use explicit rendered math for reference error and units.",
     "evidence": "a testing policy specifying reference precision, tolerance and adversarial cases.",
     "mistake": "bitwise CPU/GPU equality is always necessary, or a loose tolerance makes any result acceptable. .",
-    "sources": [
-      [
-        "Numerical background",
-        "https://docs.nvidia.com/cuda/floating-point/index.html"
-      ]
-    ],
+    "sources": [["Numerical background", "https://docs.nvidia.com/cuda/floating-point/index.html"]],
     "mechanism": "Floating-point arithmetic stores a finite approximation to a real number. Adding a small quantity to a large one may round away the small quantity; subtracting similar large values can expose that loss. Relative error scales with a reference magnitude, while absolute error remains meaningful near zero. A common comparison accepts an error no larger than absolute tolerance plus relative tolerance times reference magnitude. The tolerances must come from input ranges, precision and the calculation, not from repeatedly widening them until a broken index passes. Check finite output explicitly, and use exact comparison for integer counts that cannot overflow.",
     "example1": "The exact sum of \\([10^{16},1,-10^{16}]\\) is 1. A sequential binary64 addition can return 0 because \\(10^{16}+1\\) rounds back to \\(10^{16}\\). Python's compensated `math.fsum` recovers 1 for this fixture. Different summation order is a numerical mechanism, not proof that either processor is faulty.",
     "example2": "Compare output 0.00000004 with reference zero under absolute tolerance 0.0000001. It passes. A relative-only rule with zero reference would reject every nonzero result. Conversely, output 4 where reference is 3 cannot be excused as ordinary small rounding under those tolerances; first investigate shape, indexing and the mathematical contract.",
@@ -210,11 +194,7 @@
   {
     "n": 7,
     "title": "From elapsed time to a performance model",
-    "prerequisites": [
-      "cuda-001",
-      "cuda-005",
-      "cuda-006"
-    ],
+    "prerequisites": ["cuda-001", "cuda-005", "cuda-006"],
     "theory": "FLOPs, bytes moved, arithmetic intensity, bandwidth, launch overhead, warm versus cold state, and kernel time versus end-to-end time. Derive a simple roofline bound using clearly hypothetical hardware parameters before showing a captured report. Explain what the bound omits.",
     "evidence": "a units-correct model and an experiment that could disprove it.",
     "mistake": "peak TFLOPS predicts every kernel, or a kernel speedup is automatically an application speedup.",
@@ -246,11 +226,7 @@
   {
     "n": 8,
     "title": "Reproducibility, safety and the first evidence notebook",
-    "prerequisites": [
-      "cuda-003",
-      "cuda-006",
-      "cuda-007"
-    ],
+    "prerequisites": ["cuda-003", "cuda-006", "cuda-007"],
     "theory": "record input generation, seed, shape, dtype, hardware, software, launch parameters, warm-up, repetitions and timing scope. Separate scientific reproducibility from byte-identical parallel floating-point output. Explain memory budgets and why arbitrary infinite GPU loops are inappropriate on a shared or display device.",
     "evidence": "a reusable experiment template and correctly labeled capability status.",
     "mistake": "a screenshot of a timing or a driver version is sufficient runtime evidence.",
@@ -282,9 +258,7 @@
   {
     "n": 9,
     "title": "C++ essentials specifically needed at the GPU boundary",
-    "prerequisites": [
-      "cuda-005"
-    ],
+    "prerequisites": ["cuda-005"],
     "theory": "fixed-width types, references and pointers, `const`, contiguous containers, `size_t`, conversions, function parameters and compile-time versus runtime values. Keep this a bridge, linking to existing C++ teaching for full language explanations.",
     "evidence": "CPU reference tests and a lifetime explanation.",
     "mistake": "copying a pointer copies the data, or a host container can be passed to device code unchanged.",
@@ -316,9 +290,7 @@
   {
     "n": 10,
     "title": "Resource ownership and failure-safe cleanup",
-    "prerequisites": [
-      "cuda-009"
-    ],
+    "prerequisites": ["cuda-009"],
     "theory": "allocation ownership, move-only handles, destructors, exception boundaries and status-returning APIs. Design a simple device-buffer owner on paper before implementing the real device allocation later. Explain cleanup on a partially completed initialization.",
     "evidence": "no double release, no leaked first allocation, and clear owner/borrower relationships.",
     "mistake": "adding a destructor alone guarantees correctness when copies are still allowed.",
@@ -350,10 +322,7 @@
   {
     "n": 11,
     "title": "The `.cu` file, compiler driver and executable",
-    "prerequisites": [
-      "cuda-003",
-      "cuda-009"
-    ],
+    "prerequisites": ["cuda-003", "cuda-009"],
     "theory": "host and device compilation, `.cu`/`.cuh`, host compiler compatibility, runtime linking, PTX, cubin, fatbinary and just-in-time loading. Show each artifact's purpose. Start with one `main.cu`, a fixed reviewed compile command, visible diagnostics and a clear output executable path.",
     "evidence": "preserved compiler output plus a source-to-executable diagram.",
     "mistake": "an executable containing device code proves the device can execute it. .",
@@ -390,11 +359,7 @@
   {
     "n": 12,
     "title": "The first bounded kernel and the truth about completion",
-    "prerequisites": [
-      "cuda-008",
-      "cuda-010",
-      "cuda-011"
-    ],
+    "prerequisites": ["cuda-008", "cuda-010", "cuda-011"],
     "theory": "`__global__`, `__device__`, `__host__`, launch configuration and asynchronous launch. Teach every token in the first example, the distinction between launch failure and execution failure, and explicit completion before reading results or exiting.",
     "evidence": "host validates the returned values and reports both launch and completion status.",
     "mistake": "returning from the launch expression means the kernel finished. .",
@@ -431,10 +396,7 @@
   {
     "n": 13,
     "title": "Explicit device allocation and transfer",
-    "prerequisites": [
-      "cuda-010",
-      "cuda-012"
-    ],
+    "prerequisites": ["cuda-010", "cuda-012"],
     "theory": "allocation sizes, error checking, host/device memory spaces, transfer directions, buffer lifetimes and zero-length behavior. Introduce deliberate cleanup on every exit without hiding the sequence behind a large helper framework.",
     "evidence": "unchanged guard values, correct output, checked statuses and cleanup after an injected host-side failure.",
     "mistake": "equal numerical addresses imply interchangeable host and device pointers.",
@@ -466,10 +428,7 @@
   {
     "n": 14,
     "title": "One-dimensional indexing that survives awkward sizes",
-    "prerequisites": [
-      "cuda-004",
-      "cuda-013"
-    ],
+    "prerequisites": ["cuda-004", "cuda-013"],
     "theory": "global thread index, ceiling division, bounds predicates and grid-stride loops. Derive the coverage proof for the indexing pattern. Explain integer overflow risk in products and use appropriately sized indexing.",
     "evidence": "every output element is written exactly once and tails match the CPU reference.",
     "mistake": "removing the bounds condition is harmless because a chosen demo length is divisible by the block size.",
@@ -501,10 +460,7 @@
   {
     "n": 15,
     "title": "Two-dimensional indexing and image kernels",
-    "prerequisites": [
-      "cuda-005",
-      "cuda-014"
-    ],
+    "prerequisites": ["cuda-005", "cuda-014"],
     "theory": "`dim3`, row/column mapping, leading dimensions, rectangular shapes, pitches and boundary policy. Carefully separate logical coordinates from byte addresses.",
     "evidence": "correct non-square results, preserved padding and explicit edge behavior.",
     "mistake": "swapping grid axes only changes performance rather than which elements are touched.",
@@ -536,10 +492,7 @@
   {
     "n": 16,
     "title": "GPU memory spaces in one working program",
-    "prerequisites": [
-      "cuda-013",
-      "cuda-015"
-    ],
+    "prerequisites": ["cuda-013", "cuda-015"],
     "theory": "registers, local memory, global memory, shared memory, constant memory and caches; storage scope and lifetime versus hardware location. Explain that local memory is a compiler storage category, not necessarily fast on-chip storage.",
     "evidence": "a justified storage choice for each variable and a correct result across two input shapes.",
     "mistake": "every local variable stays in a register, or shared memory is shared across all blocks.",
@@ -571,10 +524,7 @@
   {
     "n": 17,
     "title": "Shared memory and block synchronization",
-    "prerequisites": [
-      "cuda-014",
-      "cuda-016"
-    ],
+    "prerequisites": ["cuda-014", "cuda-016"],
     "theory": "cooperative loads, visibility, barriers, race conditions and divergent barrier hazards. Explain all participating threads' responsibilities before showing a shared-memory optimization. Distinguish a block barrier from a grid barrier.",
     "evidence": "correct boundary behavior and a synchronization explanation naming producer and consumer threads.",
     "mistake": "a memory fence and a barrier are interchangeable.",
@@ -606,11 +556,7 @@
   {
     "n": 18,
     "title": "A simple matrix multiplication with a complete specification",
-    "prerequisites": [
-      "cuda-015",
-      "cuda-017",
-      "cuda-006"
-    ],
+    "prerequisites": ["cuda-015", "cuda-017", "cuda-006"],
     "theory": "matrix dimensions, contraction, row-major offsets, accumulation type and numerical tolerance. Derive the scalar algorithm first and map one output element to a thread.",
     "evidence": "correctness across the shape suite and a transparent operation/byte estimate.",
     "mistake": "passing a square all-ones example establishes layout correctness.",
@@ -642,10 +588,7 @@
   {
     "n": 19,
     "title": "Tiled matrix multiplication and reuse",
-    "prerequisites": [
-      "cuda-018",
-      "cuda-017"
-    ],
+    "prerequisites": ["cuda-018", "cuda-017"],
     "theory": "tile loading, shared-memory reuse, synchronization between phases, tail predicates and resource costs. Derive why a tile reduces repeated global reads, while explaining that more reuse may consume more shared memory and registers.",
     "evidence": "correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input.",
     "mistake": "shared memory automatically makes a kernel faster.",
@@ -677,10 +620,7 @@
   {
     "n": 20,
     "title": "Parallel reductions and the order of arithmetic",
-    "prerequisites": [
-      "cuda-017",
-      "cuda-006"
-    ],
+    "prerequisites": ["cuda-017", "cuda-006"],
     "theory": "tree reduction, partial sums, neutral elements, non-power-of-two lengths and numerical ordering. Use separate kernel stages for the first cross-block reduction rather than an improvised global barrier.",
     "evidence": "correct tails and a justified tolerance, with no assumption of a fixed block completion order.",
     "mistake": "floating-point addition is associative or one block can safely wait for every other block in an ordinary launch.",
@@ -712,10 +652,7 @@
   {
     "n": 21,
     "title": "Scans and stream compaction",
-    "prerequisites": [
-      "cuda-020",
-      "cuda-004"
-    ],
+    "prerequisites": ["cuda-020", "cuda-004"],
     "theory": "inclusive versus exclusive prefix sums, local scan and block offsets, work-efficient design, stable compaction and allocation of output positions. Explain the link between scan and parallel data structure construction.",
     "evidence": "exact output counts and element order for empty, all-match and no-match cases.",
     "mistake": "a parallel sum is enough to recover every element's output position.",
@@ -747,10 +684,7 @@
   {
     "n": 22,
     "title": "Histograms, atomics and contention",
-    "prerequisites": [
-      "cuda-017",
-      "cuda-020"
-    ],
+    "prerequisites": ["cuda-017", "cuda-020"],
     "theory": "conflicting writes, atomic updates, collision probability and block privatization. Separate atomicity from ordering and discuss why a skewed input is an essential performance test.",
     "evidence": "exact counts and a contention-based explanation of two timing regimes.",
     "mistake": "an atomic operation is either always fast or always slow, independent of access pattern.",
@@ -782,10 +716,7 @@
   {
     "n": 23,
     "title": "Stencils and boundary conditions",
-    "prerequisites": [
-      "cuda-015",
-      "cuda-017"
-    ],
+    "prerequisites": ["cuda-015", "cuda-017"],
     "theory": "neighborhood reuse, halo cells, read/write separation, time steps and physical versus computational boundaries. Define clamp, periodic and fixed-value policies before coding.",
     "evidence": "correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model.",
     "mistake": "a visually plausible image proves the indexing and update ordering are correct.",
@@ -817,13 +748,7 @@
   {
     "n": 24,
     "title": "First capstone: a reliable GPU data pipeline",
-    "prerequisites": [
-      "cuda-014",
-      "cuda-020",
-      "cuda-021",
-      "cuda-022",
-      "cuda-008"
-    ],
+    "prerequisites": ["cuda-014", "cuda-020", "cuda-021", "cuda-022", "cuda-008"],
     "theory": "composition of validated kernels, data ownership across stages, bounded input contracts and meaningful application timing.",
     "evidence": "a specification, CPU oracle, adversarial fixtures, checked error paths, actual GPU output and honest end-to-end report.",
     "mistake": "individual correct kernels necessarily compose correctly when buffers, shapes or ownership differ.",
@@ -855,12 +780,7 @@
   {
     "n": 25,
     "title": "A disciplined CUDA error taxonomy",
-    "prerequisites": [
-      "cuda-012",
-      "cuda-013",
-      "cuda-014",
-      "cuda-024"
-    ],
+    "prerequisites": ["cuda-012", "cuda-013", "cuda-014", "cuda-024"],
     "theory": "compilation, linking, loading, invalid launch, allocation, asynchronous execution and application-validation failures. Teach how earlier asynchronous errors can be observed by later API calls, and why a clean status at one point is not whole-program proof.",
     "evidence": "a useful bug report that includes the smallest reproducer and the responsible phase.",
     "mistake": "every error is fixed by reinstalling CUDA or rebuilding every image.",
@@ -892,18 +812,12 @@
   {
     "n": 26,
     "title": "Compute Sanitizer as evidence, with its limits",
-    "prerequisites": [
-      "cuda-017",
-      "cuda-025"
-    ],
+    "prerequisites": ["cuda-017", "cuda-025"],
     "theory": "distinguish memory-access, shared-memory hazard, initialization and synchronization checks. Explain overhead, tool-specific scope and meaningful nonzero exit policy. Sanitizer success is one check, not a proof of all race freedom or mathematical correctness.",
     "evidence": "the broken fixture produces the intended diagnostic, the repair passes that check and numerical tests still pass.",
     "mistake": "a sanitizer pass proves speed, all global ordering, or correctness for every input. .",
     "sources": [
-      [
-        "Compute Sanitizer",
-        "https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html"
-      ]
+      ["Compute Sanitizer", "https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html"]
     ],
     "mechanism": "Compute Sanitizer provides several checks with different scopes. Memcheck investigates invalid and misaligned memory accesses; racecheck investigates shared-memory hazards; initcheck investigates uninitialized global-memory reads; synccheck investigates invalid synchronization use. Their observations complement mathematical tests. Instrumentation can be expensive and can change timing, so sanitizer runs are not performance samples. An automated command should select a nonzero error-exitcode, because a tool diagnostic must make the check fail even if the application itself returns success. Never conclude that one clean run proves race freedom for every input or validates unsupported global protocols.",
     "example1": "For an array of four elements, valid indices are 0 through 3. A kernel that accesses index four has an off-by-one defect even if the returned allocation happens to contain readable bytes nearby. Memcheck is an appropriate additional diagnostic, while a CPU bounds model pinpoints the invalid logical access without a GPU.",
@@ -932,11 +846,7 @@
   {
     "n": 27,
     "title": "Race reasoning, masks and warp cooperation",
-    "prerequisites": [
-      "cuda-017",
-      "cuda-020",
-      "cuda-026"
-    ],
+    "prerequisites": ["cuda-017", "cuda-020", "cuda-026"],
     "theory": "warp participation, active masks, collective operations, shuffle exchanges and explicit synchronization. Independent thread scheduling means old implicit lockstep assumptions are unsafe as a general correctness argument.",
     "evidence": "correct results across all tail sizes and a written participation invariant.",
     "mistake": "a full bit mask is automatically correct for a collective executed by only some lanes.",
@@ -968,10 +878,7 @@
   {
     "n": 28,
     "title": "Memory ordering and atomic scope",
-    "prerequisites": [
-      "cuda-022",
-      "cuda-027"
-    ],
+    "prerequisites": ["cuda-022", "cuda-027"],
     "theory": "atomicity, visibility, ordering, acquire/release, memory fences and thread/block/device/system scope. Teach happens-before diagrams and avoid presenting spin-wait patterns as a safe general grid barrier.",
     "evidence": "the learner can explain what each synchronization operation establishes and what it does not.",
     "mistake": "incrementing an atomic flag automatically publishes all other writes to every possible observer.",
@@ -1003,11 +910,7 @@
   {
     "n": 29,
     "title": "Floating point under optimization",
-    "prerequisites": [
-      "cuda-006",
-      "cuda-020",
-      "cuda-025"
-    ],
+    "prerequisites": ["cuda-006", "cuda-020", "cuda-025"],
     "theory": "fused multiply-add, accumulation precision, fast-math tradeoffs, denormals, condition number, reproducibility and deterministic algorithms. Introduce a numerical error budget before optimization changes.",
     "evidence": "a documented policy for accepted error and rejected non-finite output, plus measured differences under reviewed compiler configurations.",
     "mistake": "a faster approximate operation is an interchangeable implementation for every application.",
@@ -1039,11 +942,7 @@
   {
     "n": 30,
     "title": "Debugging difficult failures without harming the session",
-    "prerequisites": [
-      "cuda-025",
-      "cuda-026",
-      "cuda-028"
-    ],
+    "prerequisites": ["cuda-025", "cuda-026", "cuda-028"],
     "theory": "minimal reproductions, deterministic fixtures, launch parameter minimization, line information, debug-build effects and context failure. Introduce CUDA-GDB as a separate prepared external workflow if browser support is not implemented. Explain that killing a host process is not a universal recovery guarantee for a hung GPU.",
     "evidence": "a repair with a regression case and preserved learner source/results.",
     "mistake": "adding arbitrary sleeps fixes synchronization or resetting a shared GPU is an acceptable first diagnostic action.",
@@ -1075,12 +974,7 @@
   {
     "n": 31,
     "title": "Timing asynchronous work correctly",
-    "prerequisites": [
-      "cuda-007",
-      "cuda-008",
-      "cuda-014",
-      "cuda-024"
-    ],
+    "prerequisites": ["cuda-007", "cuda-008", "cuda-014", "cuda-024"],
     "theory": "host clocks, device events, synchronization boundaries, warm-up, JIT costs, repetitions, variance and timing scope. Explain that profiling can perturb execution and that cold-start behavior still matters separately.",
     "evidence": "raw samples, a reported distribution and an honest comparison with CPU execution.",
     "mistake": "measuring the launch call measures the GPU's work or excluding transfers is always representative.",
@@ -1112,18 +1006,12 @@
   {
     "n": 32,
     "title": "Nsight Systems: understand the application's timeline",
-    "prerequisites": [
-      "cuda-031",
-      "cuda-025"
-    ],
+    "prerequisites": ["cuda-031", "cuda-025"],
     "theory": "CPU submission, transfers, GPU kernels, idle gaps, synchronization, NVTX ranges and capture scope. Teach the whole application before a low-level kernel counter deep dive.",
     "evidence": "a timeline-supported bottleneck hypothesis and one experiment that tests it.",
     "mistake": "the slowest-looking kernel is necessarily the greatest end-to-end optimization opportunity. .",
     "sources": [
-      [
-        "Nsight Systems guide",
-        "https://docs.nvidia.com/nsight-systems/UserGuide/index.html"
-      ]
+      ["Nsight Systems guide", "https://docs.nvidia.com/nsight-systems/UserGuide/index.html"]
     ],
     "mechanism": "A timeline shows when the CPU submits work, when copies and kernels execute, and where synchronization or idle gaps occur. Begin with the application's critical path before optimizing an individual instruction. NVTX ranges can name phases such as upload, transform and download, but annotations must match real code boundaries. Nsight Systems collection needs an explicitly prepared environment and appropriate permissions. A captured or synthetic trace remains useful for reasoning on a CPU-only machine, provided its provenance is clear. A timeline suggests a hypothesis; a controlled change tests whether that hypothesis improves the desired metric.",
     "example1": "A synthetic request contains upload 3 ms, kernel 2 ms, download 3 ms and host processing 2 ms, sequentially. Halving the kernel saves only 1 ms, changing total time from 10 to 9 ms. Eliminating an unnecessary round trip could offer a larger opportunity if semantics permit data to stay resident.",
@@ -1152,11 +1040,7 @@
   {
     "n": 33,
     "title": "Nsight Compute: interpret kernel counters carefully",
-    "prerequisites": [
-      "cuda-002",
-      "cuda-007",
-      "cuda-031"
-    ],
+    "prerequisites": ["cuda-002", "cuda-007", "cuda-031"],
     "theory": "requested versus measured work, memory throughput, occupancy, eligible warps, instruction mix, replay and sampling overhead. Explain counter availability and permissions as capabilities separate from ordinary kernel execution.",
     "evidence": "two supported claims and one explicitly unresolved hypothesis.",
     "mistake": "a high utilization percentage proves the algorithm is efficient or any single metric diagnoses all bottlenecks. .",
@@ -1193,11 +1077,7 @@
   {
     "n": 34,
     "title": "Coalescing, layouts and useful bandwidth",
-    "prerequisites": [
-      "cuda-005",
-      "cuda-016",
-      "cuda-033"
-    ],
+    "prerequisites": ["cuda-005", "cuda-016", "cuda-033"],
     "theory": "neighboring lane addresses, memory transactions, alignment, strides and useful bytes versus transferred bytes. Tie the reasoning back to the address tables from C05.",
     "evidence": "address diagrams, correctness, and a bandwidth interpretation using the actual input and timing scope.",
     "mistake": "sequential-looking source code guarantees coalesced device accesses.",
@@ -1229,11 +1109,7 @@
   {
     "n": 35,
     "title": "Shared-memory banks and a transpose case study",
-    "prerequisites": [
-      "cuda-015",
-      "cuda-017",
-      "cuda-034"
-    ],
+    "prerequisites": ["cuda-015", "cuda-017", "cuda-034"],
     "theory": "shared-memory access patterns, bank conflicts, broadcasts, padding, and tiling. Treat details as architecture-dependent instead of teaching an unconditional magic padding rule.",
     "evidence": "correct output and a measured explanation of the selected layout.",
     "mistake": "padding every shared array is universally faster or bank conflicts and global-memory coalescing are the same issue.",
@@ -1265,11 +1141,7 @@
   {
     "n": 36,
     "title": "Occupancy, registers and latency hiding",
-    "prerequisites": [
-      "cuda-002",
-      "cuda-019",
-      "cuda-033"
-    ],
+    "prerequisites": ["cuda-002", "cuda-019", "cuda-033"],
     "theory": "occupancy, active versus eligible warps, registers, shared-memory allocation, spills, instruction-level parallelism and work per thread. Explain resource granularity and why occupancy is a means, not the objective.",
     "evidence": "a justified configuration choice for a stated workload and device, including an explanation when the highest-occupancy setting loses.",
     "mistake": "100 percent occupancy is always the best target.",
@@ -1301,11 +1173,7 @@
   {
     "n": 37,
     "title": "Divergence, irregular work and algorithm choice",
-    "prerequisites": [
-      "cuda-021",
-      "cuda-027",
-      "cuda-033"
-    ],
+    "prerequisites": ["cuda-021", "cuda-027", "cuda-033"],
     "theory": "divergent paths within warps, variable work lengths, predication, data ordering and compaction overhead. Explore the cost of improving balance, not just the imbalance itself.",
     "evidence": "a correctness-preserving strategy and end-to-end evidence that includes sorting or compaction when used.",
     "mistake": "branches are forbidden on GPUs, or removing every branch necessarily improves execution.",
@@ -1378,11 +1246,7 @@
   {
     "n": 39,
     "title": "Streams as dependency-ordered work queues",
-    "prerequisites": [
-      "cuda-012",
-      "cuda-028",
-      "cuda-031"
-    ],
+    "prerequisites": ["cuda-012", "cuda-028", "cuda-031"],
     "theory": "ordering within a stream, dependencies across streams, events and host synchronization. Explain default-stream behavior in the selected runtime configuration instead of relying on invisible implicit synchronization.",
     "evidence": "correct results with explicit dependencies and an annotated timeline.",
     "mistake": "using two streams guarantees simultaneous execution or guarantees isolation between their buffers.",
@@ -1414,11 +1278,7 @@
   {
     "n": 40,
     "title": "Pinned memory and overlapping transfer with compute",
-    "prerequisites": [
-      "cuda-013",
-      "cuda-032",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-013", "cuda-032", "cuda-039"],
     "theory": "pageable versus pinned host memory, asynchronous transfer requirements, copy-engine limits, transfer directions and host-memory pressure. Explain why pinning is a bounded resource choice.",
     "evidence": "correct chunk boundaries and a timeline that either demonstrates overlap or explains why the current device/workload does not overlap.",
     "mistake": "an API with `Async` in its name guarantees all useful work overlaps.",
@@ -1450,11 +1310,7 @@
   {
     "n": 41,
     "title": "Stream-ordered allocation and memory pools",
-    "prerequisites": [
-      "cuda-010",
-      "cuda-028",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-010", "cuda-028", "cuda-039"],
     "theory": "allocation/free order, pool reuse, cross-stream lifetime, allocation overhead and memory retained for reuse. Connect allocation ownership to outstanding asynchronous consumers.",
     "evidence": "no use-after-free, correct event ordering and an explained retained-versus-live memory report.",
     "mistake": "returning memory to a pool means the GPU's visible memory usage must immediately fall to zero. .",
@@ -1491,11 +1347,7 @@
   {
     "n": 42,
     "title": "Unified memory, residency and migration",
-    "prerequisites": [
-      "cuda-005",
-      "cuda-032",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-005", "cuda-032", "cuda-039"],
     "theory": "unified virtual addressing versus managed allocation, residency, migration, first touch, prefetch and oversubscription. Distinguish discrete GPU behavior from coherent systems and platform-specific restrictions.",
     "evidence": "correctness and a report tied to actual memory capabilities and observed movement.",
     "mistake": "one pointer means one physically uniform memory pool or that managed allocation eliminates data-movement cost. .",
@@ -1532,12 +1384,7 @@
   {
     "n": 43,
     "title": "CUDA Graphs for repeated workflows",
-    "prerequisites": [
-      "cuda-020",
-      "cuda-031",
-      "cuda-039",
-      "cuda-041"
-    ],
+    "prerequisites": ["cuda-020", "cuda-031", "cuda-039", "cuda-041"],
     "theory": "define, instantiate and replay a dependency graph; stream capture, lifetime of referenced resources, launch overhead and update constraints. Explain the difference from a framework's autograd graph.",
     "evidence": "correct replay, safe resource lifetimes, a scoped comparison and explicit unsupported changes.",
     "mistake": "a graph automatically fuses kernels or accepts arbitrary dynamic control flow without further design. .",
@@ -1574,14 +1421,7 @@
   {
     "n": 44,
     "title": "Second capstone: a streaming numerical service core",
-    "prerequisites": [
-      "cuda-038",
-      "cuda-039",
-      "cuda-040",
-      "cuda-041",
-      "cuda-042",
-      "cuda-043"
-    ],
+    "prerequisites": ["cuda-038", "cuda-039", "cuda-040", "cuda-041", "cuda-042", "cuda-043"],
     "theory": "bounded queues, backpressure, chunk ownership, latency versus throughput, batching and cancellation. This is a compute pipeline exercise, not permission to open an arbitrary web server in a worker.",
     "evidence": "all outputs match, no chunk is dropped or reused early, memory stays within the budget, and the report separates request latency from throughput.",
     "mistake": "maximizing batch size automatically gives the best user experience.",
@@ -1613,12 +1453,7 @@
   {
     "n": 45,
     "title": "CCCL, Thrust and CUB before writing everything by hand",
-    "prerequisites": [
-      "cuda-020",
-      "cuda-021",
-      "cuda-022",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-020", "cuda-021", "cuda-022", "cuda-039"],
     "theory": "standard parallel algorithms, execution policies, temporary storage, iterators, ownership and custom operators. Contrast a learning implementation with a maintained production primitive.",
     "evidence": "equivalent semantics, stated temporary-memory needs and a justified library/custom decision.",
     "mistake": "library calls remove the need to understand allocation, synchronization or data layout.  should be replaced by the pinned release's docs at implementation time.",
@@ -1650,20 +1485,11 @@
   {
     "n": 46,
     "title": "cuBLAS and cuBLASLt without layout confusion",
-    "prerequisites": [
-      "cuda-018",
-      "cuda-029",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-018", "cuda-029", "cuda-039"],
     "theory": "GEMM parameters, leading dimensions, transpose flags, handles, streams, accumulation types, batching, workspace and algorithm selection. Contrast conventional cuBLAS layout conventions with explicit cuBLASLt layout descriptors.",
     "evidence": "correct shapes/layouts and a fair comparison including setup where relevant.",
     "mistake": "swapping dimensions until a test passes is an acceptable layout strategy. .",
-    "sources": [
-      [
-        "cuBLAS documentation",
-        "https://docs.nvidia.com/cuda/cublas/index.html"
-      ]
-    ],
+    "sources": [["cuBLAS documentation", "https://docs.nvidia.com/cuda/cublas/index.html"]],
     "mechanism": "GEMM computes scaled matrix multiplication plus an existing output contribution. In conventional notation, C becomes alpha times A*B plus beta times C. Classic cuBLAS uses column-major conventions, so leading dimensions and transpose flags must be interpreted accordingly. cuBLASLt provides more explicit layout and algorithm descriptors, with workspace and compute-type choices. A handle has lifecycle and stream configuration. Check library status separately from CUDA completion. A successful call with wrong dimensions can produce plausible but incorrect data, especially when symmetric inputs conceal transposition mistakes.",
     "example1": "Use the rectangular A and B from cuda-018, whose product is \\([[7,4],[16,13]]\\). With \\(\\alpha=2\\), \\(\\beta=3\\) and initial C all ones, the result becomes \\([[17,11],[35,29]]\\). This catches implementations that ignore beta or assume the output is initially zero.",
     "example2": "For column-major storage, a 2-by-3 matrix \\([[1,2,3],[4,5,6]]\\) is flattened \\([1,4,2,5,3,6]\\), with leading dimension two. Row-major flattening is \\([1,2,3,4,5,6]\\). Passing one while describing the other changes the interpretation rather than merely the speed.",
@@ -1691,19 +1517,11 @@
   {
     "n": 47,
     "title": "cuFFT and a complete signal-processing example",
-    "prerequisites": [
-      "cuda-006",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-006", "cuda-039"],
     "theory": "transform conventions, inverse normalization, real/complex storage, plan creation, batch layout and workspace. Explain circular versus linear convolution and padding.",
     "evidence": "correct frequencies and round-trip error, explicit normalization and measured plan-versus-execution cost.",
     "mistake": "a visually plausible spectrum proves correct scaling or an FFT automatically computes linear convolution. .",
-    "sources": [
-      [
-        "cuFFT documentation",
-        "https://docs.nvidia.com/cuda/cufft/index.html"
-      ]
-    ],
+    "sources": [["cuFFT documentation", "https://docs.nvidia.com/cuda/cufft/index.html"]],
     "mechanism": "The discrete Fourier transform rewrites samples as frequency components with an explicit sign and normalization convention. An inverse transform must use the matching convention. cuFFT uses plans to prepare a transform shape/layout and may need workspace; plan creation is separate from execution. Multiplication in frequency space corresponds to circular convolution unless padding supplies enough length for the desired linear convolution. Real-to-complex storage has a special output shape and, for some in-place workflows, padding requirements. Define those layouts before moving data rather than treating all transforms as same-size arrays.",
     "example1": "The four-sample signal \\([0,1,0,-1]\\) has energy at the positive and negative one-cycle frequency components. A direct CPU DFT gives approximately [0,-2i,0,2i]. Small real roundoff terms are expected. This is a tiny semantic reference, not a fast FFT implementation.",
     "example2": "Linear convolution of \\([1,2]\\) and \\([3,4]\\) is \\([3,10,8]\\), requiring length three. A length-two circular convolution wraps the final eight into the first position, giving \\([11,10]\\). Zero-pad to at least the required linear-convolution length before comparing an FFT workflow.",
@@ -1731,20 +1549,11 @@
   {
     "n": 48,
     "title": "cuSPARSE and sparsity as a data structure",
-    "prerequisites": [
-      "cuda-005",
-      "cuda-018",
-      "cuda-037"
-    ],
+    "prerequisites": ["cuda-005", "cuda-018", "cuda-037"],
     "theory": "CSR/COO representations, index bases, duplicates, irregular rows, format conversion, fill ratio and preprocessing cost. Separate arbitrary sparsity from hardware-specific structured sparsity.",
     "evidence": "correct result and a reasoned choice considering conversion, reuse and distribution.",
     "mistake": "a matrix containing many zero values is automatically stored sparsely or always runs faster. .",
-    "sources": [
-      [
-        "cuSPARSE documentation",
-        "https://docs.nvidia.com/cuda/cusparse/index.html"
-      ]
-    ],
+    "sources": [["cuSPARSE documentation", "https://docs.nvidia.com/cuda/cusparse/index.html"]],
     "mechanism": "Sparse storage represents selected entries and their coordinates instead of storing every zero. Compressed sparse row, CSR, stores row offsets, column indices and values. Row offsets delimit each row's entries; the final offset equals the stored-entry count. Specify index base, sortedness and duplicate handling. A sparse multiply can save arithmetic and storage but introduces indirect reads and uneven row work. Conversion and preprocessing costs matter, especially for one-shot operations. Arbitrary sparsity is different from structured sparsity supported by certain hardware/library modes.",
     "example1": "Matrix \\([[2,0,1],[0,3,0]]\\) has CSR offsets \\([0,2,3]\\), columns \\([0,2,1]\\) and values \\([2,1,3]\\). Multiplying by \\([4,5,6]\\) gives \\([14,15]\\). The first row reads two entries; the second reads one. Offsets are boundaries, not per-row counts.",
     "example2": "An empty middle row repeats an offset. For lengths \\([2,0,1]\\), row boundaries are \\([0,2,2,3]\\). Repeated offsets are valid. A descending offset or a column outside the matrix width is invalid and must be rejected before device access.",
@@ -1772,20 +1581,11 @@
   {
     "n": 49,
     "title": "cuSOLVER, conditioning and robust linear algebra",
-    "prerequisites": [
-      "cuda-006",
-      "cuda-029",
-      "cuda-046"
-    ],
+    "prerequisites": ["cuda-006", "cuda-029", "cuda-046"],
     "theory": "factorization versus explicit inversion, solver status, workspace, residuals, rank and conditioning. Explain why a small residual and small forward error are not interchangeable without considering the problem.",
     "evidence": "checked solver status, residual report and a numerically justified interpretation.",
     "mistake": "obtaining a vector from a solver proves that the original problem was well-posed. .",
-    "sources": [
-      [
-        "cuSOLVER documentation",
-        "https://docs.nvidia.com/cuda/cusolver/index.html"
-      ]
-    ],
+    "sources": [["cuSOLVER documentation", "https://docs.nvidia.com/cuda/cusolver/index.html"]],
     "mechanism": "A linear solver seeks x such that A*x approximates b. Factorization usually avoids the unnecessary work and numerical costs of explicitly constructing an inverse. Library status tells whether the requested procedure completed; a residual checks how well the returned vector satisfies the equation. A small residual does not guarantee a small error in x when A is ill-conditioned, meaning small input changes can greatly change the solution. Report both the residual and a conditioning interpretation. Workspace, matrix layout, pivoting and rank assumptions belong to the solver contract rather than being incidental implementation details.",
     "example1": "For A=\\([[3,1],[1,2]]\\) and b=\\([9,8]\\), x=\\([2,3]\\) gives A*x=\\([9,8]\\), so residual is zero in this exact fixture. This is a good first layout and status test, but it does not exercise singular or poorly conditioned problems.",
     "example2": "For A=\\([[1,1],[1,1.000001]]\\), small changes in the second component of b can produce large changes in the two components of x. The nearly dependent rows provide little independent information. A solver returning numbers cannot remove that uncertainty; inspect conditioning and the problem specification.",
@@ -1813,20 +1613,11 @@
   {
     "n": 50,
     "title": "Randomness and parallel Monte Carlo",
-    "prerequisites": [
-      "cuda-006",
-      "cuda-020",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-006", "cuda-020", "cuda-039"],
     "theory": "seed, stream/subsequence, state, independence assumptions, parallel reproducibility, sampling error and numerical error. Treat RNG setup cost separately from steady-state sampling.",
     "evidence": "reproducible setup metadata, uncertainty intervals and correct stream partitioning.",
     "mistake": "giving every thread the same seed creates independent samples, or statistical disagreement alone proves a coding defect. .",
-    "sources": [
-      [
-        "cuRAND documentation",
-        "https://docs.nvidia.com/cuda/curand/index.html"
-      ]
-    ],
+    "sources": [["cuRAND documentation", "https://docs.nvidia.com/cuda/curand/index.html"]],
     "mechanism": "Parallel random-number generation needs a reproducible mapping from logical samples to independent streams or subsequences. Giving every thread identical initial state can repeat the same draws and destroy effective sample size. A seed identifies an experiment, but the generator, stream partition and sample-count mapping are also part of it. Monte Carlo error is sampling uncertainty, distinct from floating-point error or a bug. Increasing independent sample count usually reduces standard error at a square-root rate. RNG initialization can be expensive, so report setup separately from sustained generation when evaluating performance.",
     "example1": "Estimate the integral of x squared on \\([0,1]\\) by averaging squared uniform samples. The exact answer is one third. A fixed CPU seed produces a reproducible educational estimate; its closeness is not evidence about cuRAND or independent GPU streams. Keep a broad deterministic sanity check separate from statistical claims.",
     "example2": "Four workers initialized with exactly the same stream each draw \\([0.1,0.7]\\). Concatenating gives eight entries but only two distinct draws repeated four times. Treating them as eight independent observations understates uncertainty. A correct design gives workers nonoverlapping documented subsequences.",
@@ -1854,11 +1645,7 @@
   {
     "n": 51,
     "title": "Softmax and reductions for model workloads",
-    "prerequisites": [
-      "cuda-020",
-      "cuda-029",
-      "cuda-036"
-    ],
+    "prerequisites": ["cuda-020", "cuda-029", "cuda-036"],
     "theory": "numerically stable softmax, max subtraction, row reductions, normalization and shape-dependent strategies. Derive the stability improvement, then identify memory traffic and reduction dependencies.",
     "evidence": "finite outputs, row sums within justified tolerance and comparison with the CPU reference.",
     "mistake": "replacing the expression with a mathematically equivalent floating-point formula always preserves stability.",
@@ -1890,12 +1677,7 @@
   {
     "n": 52,
     "title": "Normalization, fusion and memory traffic",
-    "prerequisites": [
-      "cuda-019",
-      "cuda-029",
-      "cuda-034",
-      "cuda-051"
-    ],
+    "prerequisites": ["cuda-019", "cuda-029", "cuda-034", "cuda-051"],
     "theory": "mean/variance versus RMS normalization, epsilon semantics, accumulation precision, fused elementwise work and reduction limits. Explain increased registers and lost reuse opportunities as possible fusion costs.",
     "evidence": "an error-budgeted result plus measured bytes/launch reduction and an honest performance comparison.",
     "mistake": "fusion is always faster or the same epsilon convention is interchangeable across formulas.",
@@ -1927,12 +1709,7 @@
   {
     "n": 53,
     "title": "Tensor cores and mixed precision from first principles",
-    "prerequisites": [
-      "cuda-019",
-      "cuda-029",
-      "cuda-036",
-      "cuda-046"
-    ],
+    "prerequisites": ["cuda-019", "cuda-029", "cuda-036", "cuda-046"],
     "theory": "matrix multiply-accumulate tiles, supported operand and accumulator types, alignment/layout constraints, range versus precision, and the difference between a tensor core operation and an ordinary scalar instruction. Present FP16/BF16/TF32/FP8 families with hardware and library support labels rather than a universal table of promises.",
     "evidence": "reported type and compute mode, numerical error and confirmed execution path where available.",
     "mistake": "every NVIDIA GPU supports every tensor format or lower precision is free accuracy-wise.",
@@ -1964,12 +1741,7 @@
   {
     "n": 54,
     "title": "Attention and memory-aware algorithm design",
-    "prerequisites": [
-      "cuda-046",
-      "cuda-051",
-      "cuda-052",
-      "cuda-053"
-    ],
+    "prerequisites": ["cuda-046", "cuda-051", "cuda-052", "cuda-053"],
     "theory": "queries, keys, values, score matrix size, stable softmax, tiling, online normalization and recomputation. Derive why avoiding a materialized intermediate changes memory traffic. Discuss training versus inference needs and causal masking.",
     "evidence": "agreement with the reference and a memory/time report that states supported shapes and masks.",
     "mistake": "a short educational attention kernel is a production FlashAttention replacement or validates a complete Transformer.",
@@ -2001,11 +1773,7 @@
   {
     "n": 55,
     "title": "Cooperative Groups and global coordination",
-    "prerequisites": [
-      "cuda-027",
-      "cuda-028",
-      "cuda-036"
-    ],
+    "prerequisites": ["cuda-027", "cuda-028", "cuda-036"],
     "theory": "group membership, collective contracts, block and tile groups, cooperative launch restrictions and residency. Explain why a valid grid synchronization design has launch constraints that an ordinary grid does not.",
     "evidence": "a correct participation argument and runtime capability report.",
     "mistake": "calling a grid barrier makes an ordinary launch globally synchronized. .",
@@ -2042,12 +1810,7 @@
   {
     "n": 56,
     "title": "Asynchronous copies, barriers and software pipelines",
-    "prerequisites": [
-      "cuda-019",
-      "cuda-028",
-      "cuda-036",
-      "cuda-039"
-    ],
+    "prerequisites": ["cuda-019", "cuda-028", "cuda-036", "cuda-039"],
     "theory": "producer/consumer stages, completion tokens, shared-memory lifetime, double buffering and alignment. Distinguish host/device asynchronous copy from within-GPU global-to-shared mechanisms. Hardware-accelerated LDGSTS is documented for CC 8.0+, while higher-level API support and fallback must be checked independently.",
     "evidence": "correct tails, synchronization checks and a measured explanation of whether overlap helped.",
     "mistake": "initiating a copy makes its destination immediately readable. .",
@@ -2084,10 +1847,7 @@
   {
     "n": 57,
     "title": "Clusters, TMA and newer GPU execution features",
-    "prerequisites": [
-      "cuda-055",
-      "cuda-056"
-    ],
+    "prerequisites": ["cuda-055", "cuda-056"],
     "theory": "thread-block clusters, distributed shared memory, tensor memory accelerator transfers, architecture-specific barriers and warpgroup work. Teach a capability matrix and a portable fallback before any tuned implementation. Clusters require CC 9.0+; exact TMA, warpgroup and architecture-suffixed target requirements depend on the selected operation and toolchain.",
     "evidence": "a feature-gated implementation with fallback and a correct explanation of data visibility.",
     "mistake": "a later-looking architecture name automatically supports every architecture-specific instruction variant.",
@@ -2119,20 +1879,12 @@
   {
     "n": 58,
     "title": "CUTLASS, CuTe and tile abstractions",
-    "prerequisites": [
-      "cuda-019",
-      "cuda-046",
-      "cuda-053",
-      "cuda-056"
-    ],
+    "prerequisites": ["cuda-019", "cuda-046", "cuda-053", "cuda-056"],
     "theory": "layout composition, tile shapes, operation atoms, epilogues and policy choices. Compare a clear educational GEMM with a library-based specialized implementation. Introduce C++ templates gradually and connect to Python CuTe DSL work in the companion branch.",
     "evidence": "correct layouts, supported feature declaration and benchmark against an appropriate library baseline.",
     "mistake": "a template library removes the need to understand layout or architecture support. , .",
     "sources": [
-      [
-        "CUTLASS",
-        "https://docs.nvidia.com/cutlass/latest/overview.html"
-      ],
+      ["CUTLASS", "https://docs.nvidia.com/cutlass/latest/overview.html"],
       [
         "CUDA Tile chapter",
         "https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-tile-kernels.html"
@@ -2165,24 +1917,13 @@
   {
     "n": 59,
     "title": "PTX, SASS, JIT and inspecting generated code",
-    "prerequisites": [
-      "cuda-011",
-      "cuda-033",
-      "cuda-036",
-      "cuda-056"
-    ],
+    "prerequisites": ["cuda-011", "cuda-033", "cuda-036", "cuda-056"],
     "theory": "virtual versus hardware instruction sets, compiler resource reports, fat binaries, architecture targets, disassembly and JIT startup. Teach inspection before inline assembly. Include a short optional runtime/driver API and NVRTC comparison with fixed reviewed source paths.",
     "evidence": "explain a selected instruction sequence and validate any optimization with the existing tests.",
     "mistake": "PTX instruction count equals executed hardware instruction count or fewer instructions always means faster. , .",
     "sources": [
-      [
-        "NVCC reference",
-        "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html"
-      ],
-      [
-        "PTX reference",
-        "https://docs.nvidia.com/cuda/parallel-thread-execution/index.html"
-      ]
+      ["NVCC reference", "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html"],
+      ["PTX reference", "https://docs.nvidia.com/cuda/parallel-thread-execution/index.html"]
     ],
     "mechanism": "PTX is a virtual instruction language, while SASS describes machine instructions for a particular GPU architecture. The driver or toolchain can translate PTX differently across targets and versions. A fat binary can contain native device images and PTX fallback according to a deliberate policy. JIT can introduce cold-start cost and compatibility constraints. Inspect compiler resource reports and generated code to test a hypothesis, such as unexpected local-memory traffic, before attempting inline assembly. Counting PTX instructions does not directly count executed hardware operations or predict runtime.",
     "example1": "A high-level multiply-plus-add may become a fused instruction depending on types, options and target. If generated code changes, retain the numerical test because one rounding differs from two. A shorter instruction sequence is useful evidence only in combination with the workload's actual behavior.",
@@ -2211,12 +1952,7 @@
   {
     "n": 60,
     "title": "Multiple GPUs, topology and collective communication",
-    "prerequisites": [
-      "cuda-028",
-      "cuda-039",
-      "cuda-040",
-      "cuda-044"
-    ],
+    "prerequisites": ["cuda-028", "cuda-039", "cuda-040", "cuda-044"],
     "theory": "device selection, separate contexts/address spaces, peer access, PCIe/NVLink topology, decomposition, halo exchange, collectives and failure propagation. Teach NCCL collective ordering and the distinction between more devices and efficient scaling.",
     "evidence": "correct combined result, observed topology, collective completion and strong/weak scaling interpretation where meaningful.",
     "mistake": "two GPUs share memory automatically or multi-GPU execution proves multi-node readiness. , .",
@@ -2225,10 +1961,7 @@
         "Multi-GPU programming",
         "https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/multi-gpu-systems.html"
       ],
-      [
-        "NCCL",
-        "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html"
-      ]
+      ["NCCL", "https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html"]
     ],
     "mechanism": "Multiple GPUs have distinct allocations, execution contexts and communication paths. Peer access may be available for a pair, but it must be supported and explicitly configured under the platform's rules. Topology affects whether traffic uses PCIe, NVLink or other paths. A collective such as all-reduce combines values and makes the result available to every participant. Participants must agree on communicator, datatype, count and collective order; mismatches can hang or fail. Multi-GPU within one machine does not prove multi-node operation, which adds network, process-launch and failure concerns.",
     "example1": "Split \\([1,2,3,4,5]\\) across two devices as \\([1,2,3]\\) and \\([4,5]\\). Local sums are six and nine; a combined sum is fifteen. A gather gives the final result to one destination, whereas all-reduce gives fifteen to both participants. A CPU partition model demonstrates semantics only.",
@@ -2257,12 +1990,7 @@
   {
     "n": 61,
     "title": "From one pad to a maintainable CUDA project",
-    "prerequisites": [
-      "cuda-010",
-      "cuda-011",
-      "cuda-024",
-      "cuda-025"
-    ],
+    "prerequisites": ["cuda-010", "cuda-011", "cuda-024", "cuda-025"],
     "theory": "`.cu` versus host `.cpp` translation units, headers, separable compilation, device linking, CMake targets, architecture lists, dependencies, tests and installable artifacts. Distinguish user-facing application paths from compiler outputs. Explain compiler/runtime/driver compatibility without adding arbitrary flags to lesson metadata.",
     "evidence": "a clean reproducible build and actual runtime tests on a declared target.",
     "mistake": "a Makefile or CMake project can simply be pasted into the existing single-source pad.",
@@ -2294,12 +2022,7 @@
   {
     "n": 62,
     "title": "Portability, operations and the cost of a GPU dependency",
-    "prerequisites": [
-      "cuda-003",
-      "cuda-008",
-      "cuda-030",
-      "cuda-061"
-    ],
+    "prerequisites": ["cuda-003", "cuda-008", "cuda-030", "cuda-061"],
     "theory": "feature detection, compatible driver/toolkit/library combinations, binary targets, runtime fallbacks, architecture-specific code, memory budgets, warm-up, diagnostics and fault reporting. Describe MIG/MPS, device sharing and GPU resets as operator-governed topics, not learner-controlled shortcuts. Explain that container boundaries do not guarantee safe isolation of arbitrary GPU code.",
     "evidence": "a deployment checklist tied to supported evidence tiers and graceful failures.",
     "mistake": "one container tag makes every NVIDIA device and driver equivalent.",
@@ -2331,12 +2054,7 @@
   {
     "n": 63,
     "title": "Capstone: a measured scientific or data application",
-    "prerequisites": [
-      "cuda-038",
-      "cuda-039",
-      "cuda-040",
-      "cuda-044"
-    ],
+    "prerequisites": ["cuda-038", "cuda-039", "cuda-040", "cuda-044"],
     "theory": "requirements, numerical specification, correctness oracle, resource budget, profile-guided optimization and communication of tradeoffs.",
     "evidence": "CPU baseline, adversarial tests, sanitizer results where applicable, profiling artifacts, reproducible benchmark, failure behavior and a report stating when CPU is preferable.",
     "mistake": "a performance demo without documented assumptions is a deliverable someone else can maintain.",
@@ -2368,13 +2086,7 @@
   {
     "n": 64,
     "title": "Capstone: a custom ML operator that earns its existence",
-    "prerequisites": [
-      "cuda-051",
-      "cuda-052",
-      "cuda-061",
-      "cuda-097",
-      "cuda-098"
-    ],
+    "prerequisites": ["cuda-051", "cuda-052", "cuda-061", "cuda-097", "cuda-098"],
     "theory": "custom kernels versus existing framework operations, forward/backward contracts, shapes, strides, dtypes, devices, stream semantics, error propagation, packaging and regression coverage. Include framework gradcheck or a justified equivalent where differentiability is relevant.",
     "evidence": "supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel.",
     "mistake": "faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.",

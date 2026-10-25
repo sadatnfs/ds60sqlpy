@@ -1,33 +1,48 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Forms: labels, controls and successful values</title>
-  <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
-    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
-    main { max-width: 65rem; margin-inline: auto; }
-    a { color: #0753a4; }
-    button, input, select, textarea { font: inherit; }
-    button { cursor: pointer; }
-    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
-    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
-label { margin-inline-end: .5rem; } input, select { padding: .4rem; }
-  </style>
-</head>
-<body>
-<main><h1>Study preferences</h1><form><p><label for="topic">Topic</label><input id="topic" name="topic" value="HTML"></p><p><label for="pace">Pace</label><select id="pace" name="pace"><option>Flexible</option><option>Weekly</option></select></p><fieldset><legend>Reminders</legend><label><input type="checkbox" name="reminder">Show a reminder</label></fieldset><button type="button">Local preview only</button></form></main>
-<output id="reference-status" aria-live="polite">Reference checks pending.</output>
-<script>
-"use strict";
-function check(condition, message) {
-  if (!condition) throw new Error(message);
-}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forms: labels, controls and successful values</title>
+    <style>
+          :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+          body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+          main { max-width: 65rem; margin-inline: auto; }
+          a { color: #0753a4; }
+          button, input, select, textarea { font: inherit; }
+          button { cursor: pointer; }
+          :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+          #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+      label { margin-inline-end: .5rem; } input, select { padding: .4rem; }
+    </style>
+  </head>
+  <body>
+    <main
+      ><h1>Study preferences</h1
+      ><form
+        ><p><label for="topic">Topic</label><input id="topic" name="topic" value="HTML" /></p
+        ><p
+          ><label for="pace">Pace</label
+          ><select id="pace" name="pace"
+            ><option>Flexible</option
+            ><option>Weekly</option></select
+          ></p
+        ><fieldset
+          ><legend>Reminders</legend
+          ><label><input type="checkbox" name="reminder" />Show a reminder</label></fieldset
+        ><button type="button">Local preview only</button></form
+      ></main
+    >
+    <output id="reference-status" aria-live="polite">Reference checks pending.</output>
+    <script>
+      "use strict";
+      function check(condition, message) {
+        if (!condition) throw new Error(message);
+      }
 
-check(document.querySelector('#topic').labels.length === 1, 'Input label missing');
-document.querySelector("#reference-status").textContent = "web-008 reference checks passed. Complete the manual observations in the guide.";
-console.log("web-008 reference checks passed");
-</script>
-</body>
+      check(document.querySelector('#topic').labels.length === 1, 'Input label missing');
+      document.querySelector("#reference-status").textContent = "web-008 reference checks passed. Complete the manual observations in the guide.";
+      console.log("web-008 reference checks passed");
+    </script>
+  </body>
 </html>
