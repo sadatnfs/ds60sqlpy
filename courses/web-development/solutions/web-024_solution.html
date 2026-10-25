@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML and CSS milestone: an accessible learning portal</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+:root { --space: 1rem; } .topics { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: var(--space); } article { padding: var(--space); border: 1px solid #64748b; background: white; } section { margin-block: 2rem; }
+  </style>
+</head>
+<body>
+<a href="#content">Skip to learning paths</a><main id="content" tabindex="-1"><h1>Choose your learning path</h1><p>Study at your own pace. These progress labels are sample content.</p><div class="topics"><article><h2>HTML foundations</h2><p>Beginner. No prerequisites.</p><p>Status: ready to begin.</p><a href="#html">Read HTML notes</a></article><article><h2>CSS layouts</h2><p>Requires HTML structure.</p><p>Status: optional next step.</p><a href="#css">Read CSS notes</a></article><article><h2>PHP applications</h2><p>Requires request and data concepts.</p><p>Status: later path.</p><a href="#php">Read PHP notes</a></article></div><section id="html"><h2>HTML notes</h2><p>Start with meaning and structure.</p></section><section id="css"><h2>CSS notes</h2><p>Make content resilient and readable.</p></section><section id="php"><h2>PHP notes</h2><p>Handle input and output deliberately.</p></section></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(document.querySelectorAll('.topics article').length === 3, 'Three paths expected'); for (const link of document.querySelectorAll('a')) check(document.querySelector(link.hash), 'Broken local destination');
+document.querySelector("#reference-status").textContent = "web-024 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-024 reference checks passed");
+</script>
+</body>
+</html>

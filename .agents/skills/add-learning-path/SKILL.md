@@ -124,6 +124,20 @@ or a bug-free product.
 
 ## Current reference implementations
 
+Use `courses/cuda/authoring/` for a mixed reading/CPU/optional-GPU subject.
+The fragment assembler owns `courses/cuda/track.json` and `lessons.json`.
+Preserve each chapter's separate CPU model and optional GPU evidence. New GPU
+APIs, packages, architectures and Spark plugins require independent qualification;
+do not copy a CPU result into a GPU receipt. CUDA C++ uses a profile-specific
+`.cu` suffix and fixed `main.cu`; headers and project builds remain separate.
+
+Use `courses/web-development/authoring/` for integrated HTML/CSS/PHP pedagogy.
+Prose data and canonical executable templates generate complete bundles. The
+`html-browser` profile previews one document with inline assets; `php-cli`
+executes one server-language file, not an HTTP server. Add a real scoped project
+fixture when teaching request/session behavior that cannot occur in a CLI pad.
+New file types belong in the shared formatting, syntax and reader mappings.
+
 Use the C, Go, C#, Rust and Swift subjects for single-source compiled-language
 contracts and staged filenames. Use JavaScript js-043 through js-066 for an
 offline browser-library specialization with actual D3 interaction and saved

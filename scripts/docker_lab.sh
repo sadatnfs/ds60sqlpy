@@ -119,7 +119,7 @@ case "$action" in
     exit $?
     ;;
 esac
-if [ "$action" = build ] || [ "$force_build" = 1 ] || ! "$docker_cli" image inspect ds60sqlpy-lab:0.3.0 >/dev/null 2>&1; then
+if [ "$action" = build ] || [ "$force_build" = 1 ] || ! "$docker_cli" image inspect ds60sqlpy-lab:0.4.0 >/dev/null 2>&1; then
   echo 'Building locally. The first build downloads public images/packages. Nothing is pushed.'
   build_args=(build)
   if [ -n "${DS60_BASE_IMAGE:-}" ]; then build_args+=(--build-arg "DS60_BASE_IMAGE=$DS60_BASE_IMAGE"); fi

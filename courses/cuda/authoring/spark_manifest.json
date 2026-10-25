@@ -1,0 +1,810 @@
+{
+  "schema_version": 1,
+  "track_lessons": [
+    {
+      "id": "cuda-113",
+      "title": "RAPIDS, cuDF and the Spark execution boundary",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-003",
+        "cuda-005",
+        "spark-013"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "RAPIDS",
+        "cuDF and the Spark execution boundary"
+      ],
+      "outcome": "Classify four execution layers and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Grouped totals A 6 and B 14; no GPU execution claimed. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-114",
+      "title": "Compatibility is a tested matrix, not a jar name",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-113"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Compatibility is a tested matrix",
+        "not a jar name"
+      ],
+      "outcome": "List matrix axes and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-115",
+      "title": "From Catalyst plans to actual GPU operators",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-113",
+        "cuda-114"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "From Catalyst plans to actual GPU operators"
+      ],
+      "outcome": "Draw logical versus physical plan and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Synthetic plan has two GPU nodes and two backend transitions. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-116",
+      "title": "Supported operations, fallback and semantic boundaries",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-115"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Supported operations",
+        "fallback and semantic boundaries"
+      ],
+      "outcome": "Classify fallback versus unavailable device and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "CPU-only baseline and per-operator fallback are modeled separately. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-117",
+      "title": "Nulls, decimals, timestamps and equality contracts",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-116"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Nulls",
+        "decimals",
+        "timestamps and equality contracts"
+      ],
+      "outcome": "Calculate both counts and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Rows 3, non-null 2, sum 7 and exact decimal 3.30. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-118",
+      "title": "Columnar batches, Arrow and data movement",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-113",
+        "cuda-117"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Columnar batches",
+        "Arrow and data movement"
+      ],
+      "outcome": "Count fixed-width payload and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-119",
+      "title": "GPU resources, executor ownership and task concurrency",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-114",
+        "cuda-115"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "GPU resources",
+        "executor ownership and task concurrency"
+      ],
+      "outcome": "Compute resource-share slots and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Four scheduling shares with a two-task plugin admission bound. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-120",
+      "title": "Memory pools, batch sizing and bounded spills",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-118",
+        "cuda-119"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Memory pools",
+        "batch sizing and bounded spills"
+      ],
+      "outcome": "Compute concurrent live memory and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "One through three tasks fit the simplified budget; four do not. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-121",
+      "title": "Joins, skew and broadcast decisions",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-117",
+        "cuda-120"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Joins",
+        "skew and broadcast decisions"
+      ],
+      "outcome": "Calculate duplicate join output and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Four A matches from two-by-two duplicate keys. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-122",
+      "title": "Shuffle, transport and network bottlenecks",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-118",
+        "cuda-119",
+        "cuda-120"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Shuffle",
+        "transport and network bottlenecks"
+      ],
+      "outcome": "Compute transfer lower bound and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-123",
+      "title": "AQE, partition sizes and a fair benchmark",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-115",
+        "cuda-121",
+        "cuda-122"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "AQE",
+        "partition sizes and a fair benchmark"
+      ],
+      "outcome": "Calculate partition averages and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Partition averages 10000 and 100000; unmatched cache states rejected. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-124",
+      "title": "Python UDFs, pandas APIs and GPU-aware ML boundaries",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-116",
+        "cuda-118"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Python UDFs",
+        "pandas APIs and GPU-aware ML boundaries"
+      ],
+      "outcome": "Classify four APIs and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Null-preserving expression produces [2, None,6]. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-125",
+      "title": "GPU Spark on an explicitly owned Kubernetes cluster",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-114",
+        "cuda-119",
+        "cuda-122"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "GPU Spark on an explicitly owned Kubernetes cluster"
+      ],
+      "outcome": "Draw scheduler layers and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Only the illustrative GPU node is eligible; no cluster operation occurs. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-126",
+      "title": "Operational diagnosis, metrics and recovery",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-120",
+        "cuda-122",
+        "cuda-125"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Operational diagnosis",
+        "metrics and recovery"
+      ],
+      "outcome": "Classify failure layers and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Two attempts can target one logical output key. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-127",
+      "title": "Capstone: the same analytical pipeline in Scala and PySpark",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-117",
+        "cuda-121",
+        "cuda-123",
+        "cuda-124"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Capstone",
+        "the same analytical pipeline in Scala and PySpark"
+      ],
+      "outcome": "Derive expected revenue and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "Sorted revenue [(A,60),(B,60)]. GPU and external cluster evidence must be recorded separately."
+    },
+    {
+      "id": "cuda-128",
+      "title": "When GPU Spark is the wrong tool",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "cuda-123",
+        "cuda-126",
+        "cuda-127"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "When GPU Spark is the wrong tool"
+      ],
+      "outcome": "Compute end-to-end tradeoff and justify the backend evidence.",
+      "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
+      "verification": "GPU candidate adds 10 modeled seconds end to end. GPU and external cluster evidence must be recorded separately."
+    }
+  ],
+  "admissions": [
+    {
+      "id": "cuda-113",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-113.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-113.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-113_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_cpu.py",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-114",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-114.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-114.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-114_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-114_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-114_cpu.py",
+            "courses/cuda/spark/solutions/cuda-114_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-115",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-115.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-115.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-115_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-115_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-115_cpu.py",
+            "courses/cuda/spark/solutions/cuda-115_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-116",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-116.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-116.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-116_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-116_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-116_cpu.py",
+            "courses/cuda/spark/solutions/cuda-116_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-117",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-117.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-117.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-117_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_cpu.py",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-118",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-118.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-118.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-118_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-118_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-118_cpu.py",
+            "courses/cuda/spark/solutions/cuda-118_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-119",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-119.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-119.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-119_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-119_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-119_cpu.py",
+            "courses/cuda/spark/solutions/cuda-119_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-120",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-120.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-120.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-120_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-120_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-120_cpu.py",
+            "courses/cuda/spark/solutions/cuda-120_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-121",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-121.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-121.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-121_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_cpu.py",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-122",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-122.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-122.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-122_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-122_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-122_cpu.py",
+            "courses/cuda/spark/solutions/cuda-122_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-123",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-123.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-123.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-123_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-123_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-123_cpu.py",
+            "courses/cuda/spark/solutions/cuda-123_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-124",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-124.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-124.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-124_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-124_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-124_cpu.py",
+            "courses/cuda/spark/solutions/cuda-124_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-125",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-125.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-125.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-125_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-125_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-125_cpu.py",
+            "courses/cuda/spark/solutions/cuda-125_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-126",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-126.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-126.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-126_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-126_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-126_cpu.py",
+            "courses/cuda/spark/solutions/cuda-126_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-127",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-127.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-127.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-127_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_cpu.py",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-128",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-128.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-128.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-128_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-128_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-128_cpu.py",
+            "courses/cuda/spark/solutions/cuda-128_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    }
+  ]
+}

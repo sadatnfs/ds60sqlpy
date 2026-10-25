@@ -52,19 +52,19 @@ services:
           create_host_path: false
   python-core-worker:
     <<: *worker
-    image: ds60sqlpy-worker-python-core:0.3.0
+    image: ${DS60_WORKER_PYTHON_CORE_IMAGE:-ds60sqlpy-worker-python-core:0.4.0}
     profiles: [python-core]
     build:
       context: .
       dockerfile: docker/workers/Dockerfile.python-core
       args:
-        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:0.3.0}
+        DS60_CORE_IMAGE: ${DS60_CORE_IMAGE:-ds60sqlpy-lab:0.4.0}
     environment:
       <<: *worker-env
       DS60_WORKER_PROFILE: python-core
   cpp-worker:
     <<: *worker
-    image: ds60sqlpy-worker-cpp20:0.3.0
+    image: ${DS60_WORKER_CPP20_IMAGE:-ds60sqlpy-worker-cpp20:0.4.0}
     profiles: [cpp20]
     build:
       context: .
@@ -76,7 +76,7 @@ services:
       DS60_WORKER_PROFILE: cpp20
   tensorflow-worker:
     <<: *worker
-    image: ds60sqlpy-worker-tensorflow-cpu:0.3.0
+    image: ${DS60_WORKER_TENSORFLOW_CPU_IMAGE:-ds60sqlpy-worker-tensorflow-cpu:0.4.0}
     profiles: [tensorflow-cpu]
     mem_limit: 3g
     build:
@@ -89,7 +89,7 @@ services:
       DS60_WORKER_PROFILE: tensorflow-cpu
   llm-worker:
     <<: *worker
-    image: ds60sqlpy-worker-llm-torch-cpu:0.3.0
+    image: ${DS60_WORKER_LLM_TORCH_CPU_IMAGE:-ds60sqlpy-worker-llm-torch-cpu:0.4.0}
     profiles: [llm-torch-cpu]
     mem_limit: 3g
     build:
@@ -102,7 +102,7 @@ services:
       DS60_WORKER_PROFILE: llm-torch-cpu
   scala-worker:
     <<: *worker
-    image: ds60sqlpy-worker-scala-jvm:0.3.0
+    image: ${DS60_WORKER_SCALA_JVM_IMAGE:-ds60sqlpy-worker-scala-jvm:0.4.0}
     profiles: [scala-jvm]
     build:
       context: .
@@ -115,7 +115,7 @@ services:
       DS60_WORKER_PROFILE: scala-jvm
   spark-scala-worker:
     <<: *worker
-    image: ds60sqlpy-worker-spark-local-scala:0.3.0
+    image: ${DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE:-ds60sqlpy-worker-spark-local-scala:0.4.0}
     profiles: [spark-local-scala]
     mem_limit: 3g
     pids_limit: 384
@@ -130,7 +130,7 @@ services:
       DS60_WORKER_PROFILE: spark-local-scala
   spark-python-worker:
     <<: *worker
-    image: ds60sqlpy-worker-spark-local-python:0.3.0
+    image: ${DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE:-ds60sqlpy-worker-spark-local-python:0.4.0}
     profiles: [spark-local-python]
     mem_limit: 3g
     pids_limit: 384
@@ -146,7 +146,7 @@ services:
 
   java-worker:
     <<: *worker
-    image: ds60sqlpy-worker-java21:0.3.0
+    image: ${DS60_WORKER_JAVA21_IMAGE:-ds60sqlpy-worker-java21:0.4.0}
     profiles: [java21]
     build:
       context: .
@@ -159,7 +159,7 @@ services:
       DS60_WORKER_PROFILE: java21
   javascript-worker:
     <<: *worker
-    image: ds60sqlpy-worker-javascript-node:0.3.0
+    image: ${DS60_WORKER_JAVASCRIPT_NODE_IMAGE:-ds60sqlpy-worker-javascript-node:0.4.0}
     profiles: [javascript-node]
     build:
       context: .
@@ -172,7 +172,7 @@ services:
       DS60_WORKER_PROFILE: javascript-node
   typescript-worker:
     <<: *worker
-    image: ds60sqlpy-worker-typescript-node:0.3.0
+    image: ${DS60_WORKER_TYPESCRIPT_NODE_IMAGE:-ds60sqlpy-worker-typescript-node:0.4.0}
     profiles: [typescript-node]
     build:
       context: .
@@ -186,7 +186,7 @@ services:
 
   c-worker:
     <<: *worker
-    image: ds60sqlpy-worker-c17:0.3.0
+    image: ${DS60_WORKER_C17_IMAGE:-ds60sqlpy-worker-c17:0.4.0}
     profiles: [c17]
     build:
       context: .
@@ -199,7 +199,7 @@ services:
 
   go-worker:
     <<: *worker
-    image: ds60sqlpy-worker-go:0.3.0
+    image: ${DS60_WORKER_GO_IMAGE:-ds60sqlpy-worker-go:0.4.0}
     profiles: [go]
     build:
       context: .
@@ -212,7 +212,7 @@ services:
 
   csharp-worker:
     <<: *worker
-    image: ds60sqlpy-worker-csharp-dotnet:0.3.0
+    image: ${DS60_WORKER_CSHARP_DOTNET_IMAGE:-ds60sqlpy-worker-csharp-dotnet:0.4.0}
     profiles: [csharp-dotnet]
     build:
       context: .
@@ -225,7 +225,7 @@ services:
 
   rust-worker:
     <<: *worker
-    image: ds60sqlpy-worker-rust-stable:0.3.0
+    image: ${DS60_WORKER_RUST_STABLE_IMAGE:-ds60sqlpy-worker-rust-stable:0.4.0}
     profiles: [rust-stable]
     build:
       context: .
@@ -238,7 +238,7 @@ services:
 
   swift-worker:
     <<: *worker
-    image: ds60sqlpy-worker-swift-linux:0.3.0
+    image: ${DS60_WORKER_SWIFT_LINUX_IMAGE:-ds60sqlpy-worker-swift-linux:0.4.0}
     profiles: [swift-linux]
     build:
       context: .
@@ -248,6 +248,86 @@ services:
     environment:
       <<: *worker-env
       DS60_WORKER_PROFILE: swift-linux
+
+  php-worker:
+    <<: *worker
+    image: ${DS60_WORKER_PHP_CLI_IMAGE:-ds60sqlpy-worker-php-cli:0.4.0}
+    profiles: [php-cli]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.php
+      args:
+        DS60_PHP_IMAGE: ${DS60_PHP_IMAGE:-php:8.4.27-cli-bookworm@sha256:496b5e02fe9fe44fcfb715023b931048111dc4e0bc719789d83c906be9f04b05}
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: php-cli
+
+  cuda-cpp-worker: &gpu-worker
+    <<: *worker
+    image: ${DS60_WORKER_CUDA_CPP_IMAGE:-ds60sqlpy-worker-cuda-cpp:0.4.0}
+    platform: linux/amd64
+    profiles: [cuda-cpp]
+    mem_limit: 4g
+    tmpfs:
+      - /tmp:size=256m,mode=1777,exec
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["${DS60_GPU_DEVICE:-0}"]
+              capabilities: [gpu]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cuda
+      args:
+        DS60_CUDA_IMAGE: ${DS60_CUDA_IMAGE:-nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:520292dbb4f755fd360766059e62956e9379485d9e073bbd2f6e3c20c270ed66}
+        DS60_GPU_PROFILE: cuda-cpp
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: cuda-cpp
+
+  cuda-python-worker:
+    <<: *gpu-worker
+    image: ${DS60_WORKER_CUDA_PYTHON_IMAGE:-ds60sqlpy-worker-cuda-python:0.4.0}
+    profiles: [cuda-python]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cuda
+      args:
+        DS60_CUDA_IMAGE: ${DS60_CUDA_IMAGE:-nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:520292dbb4f755fd360766059e62956e9379485d9e073bbd2f6e3c20c270ed66}
+        DS60_GPU_PROFILE: cuda-python
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: cuda-python
+
+  pytorch-cuda-worker:
+    <<: *gpu-worker
+    image: ${DS60_WORKER_PYTORCH_CUDA_IMAGE:-ds60sqlpy-worker-pytorch-cuda:0.4.0}
+    profiles: [pytorch-cuda]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cuda
+      args:
+        DS60_CUDA_IMAGE: ${DS60_CUDA_IMAGE:-nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:520292dbb4f755fd360766059e62956e9379485d9e073bbd2f6e3c20c270ed66}
+        DS60_GPU_PROFILE: pytorch-cuda
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: pytorch-cuda
+
+  tensorflow-cuda-worker:
+    <<: *gpu-worker
+    image: ${DS60_WORKER_TENSORFLOW_CUDA_IMAGE:-ds60sqlpy-worker-tensorflow-cuda:0.4.0}
+    profiles: [tensorflow-cuda]
+    build:
+      context: .
+      dockerfile: docker/workers/Dockerfile.cuda
+      args:
+        DS60_CUDA_IMAGE: ${DS60_TF_CUDA_IMAGE:-nvidia/cuda:12.9.1-devel-ubuntu24.04@sha256:020bc241a628776338f4d4053fed4c38f6f7f3d7eb5919fecb8de313bb8ba47c}
+        DS60_GPU_PROFILE: tensorflow-cuda
+    environment:
+      <<: *worker-env
+      DS60_WORKER_PROFILE: tensorflow-cuda
 
 networks:
   default: {}

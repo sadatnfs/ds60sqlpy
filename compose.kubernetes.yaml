@@ -2,7 +2,7 @@
 # Host preparation owns the kind cluster and private runtime files.
 services:
   kubernetes-worker:
-    image: ds60sqlpy-worker-k8s-kind:0.3.0
+    image: ds60sqlpy-worker-k8s-kind:0.4.0
     pull_policy: never
     profiles: [k8s-kind]
     build:

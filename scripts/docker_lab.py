@@ -17,7 +17,7 @@ from pathlib import Path
 from urllib.request import ProxyHandler, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
-IMAGE = "ds60sqlpy-lab:0.3.0"
+IMAGE = "ds60sqlpy-lab:0.4.0"
 
 
 class LaunchError(RuntimeError):

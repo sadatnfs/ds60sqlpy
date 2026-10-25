@@ -34,6 +34,7 @@ from scripts.check_classroom_profiles import (  # noqa: E402
 )
 
 INVALID_SOURCE = {
+    "php-cli": "<?php $broken = ;\n",
     "python-core": "def broken(:\n    pass\n",
     "tensorflow-cpu": "def broken(:\n    pass\n",
     "llm-torch-cpu": "def broken(:\n    pass\n",
@@ -51,6 +52,7 @@ INVALID_SOURCE = {
     "spark-local-scala": "object Main { def main(args: Array[String]): Unit = { val broken = } }\n",
 }
 DIAGNOSTICS = {
+    "php-cli": ("main.php", "parse error"),
     "python-core": ("main.py", "syntaxerror"),
     "tensorflow-cpu": ("main.py", "syntaxerror"),
     "llm-torch-cpu": ("main.py", "syntaxerror"),

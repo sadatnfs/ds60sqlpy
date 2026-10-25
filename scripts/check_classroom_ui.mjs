@@ -1495,6 +1495,8 @@ await test("all registered subject accents meet text contrast in both appearance
       "rust",
       "swift",
       "docker",
+      "cuda",
+      "web-development",
       "javascript-typescript",
       "scala-spark",
       "deep-learning-tensorflow",

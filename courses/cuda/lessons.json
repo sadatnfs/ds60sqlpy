@@ -1,0 +1,4090 @@
+{
+  "schema_version": 1,
+  "track_id": "cuda",
+  "lessons": [
+    {
+      "id": "cuda-001",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-001.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-001.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-001_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-001_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-001_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-001_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-002",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-002.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-002.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-002_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-002_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-002_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-002_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-003",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-003.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-003.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-003_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-003_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-003_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-003_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-004",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-004.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-004.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-004_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-004_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-004_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-004_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-005",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-005.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-005.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-005_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-005_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-005_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-005_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-006",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-006.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-006.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-006_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-006_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-006_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-006_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-007",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-007.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-007.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-007_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-007_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-007_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-007_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-008",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-008.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-008.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-008_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-008_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-008_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-008_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-009",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-009.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-009.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-009_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-009_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-009_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-009_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-010",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-010.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-010.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-010_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-010_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-010_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-010_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-011",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-011.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-011.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-011_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-011_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-011_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-011_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-012",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-012.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-012.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-012_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-012_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-012_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-012_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-012_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-012_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-012_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-013",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-013.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-013.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-013_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-013_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-013_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-013_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-014",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-014.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-014.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-014_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-014_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-014_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-014_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-014_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-014_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-014_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-015",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-015.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-015.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-015_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-015_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-015_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-015_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-015_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-015_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-015_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-016",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-016.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-016.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-016_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-016_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-016_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-016_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-017",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-017.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-017.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-017_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-017_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-017_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-017_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-018",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-018.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-018.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-018_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-018_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-018_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-018_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-019",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-019.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-019.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-019_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-019_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-019_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-019_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-020",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-020.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-020.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-020_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-020_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-020_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-020_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-020_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-020_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-020_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-021",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-021.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-021.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-021_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-021_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-021_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-021_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-022",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-022.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-022.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-022_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-022_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-022_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-022_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-022_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-022_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-022_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-023",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-023.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-023.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-023_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-023_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-023_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-023_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-023_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-023_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-023_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-024",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-024.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-024.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-024_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-024_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-024_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-024_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-025",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-025.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-025.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-025_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-025_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-025_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-025_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-026",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-026.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-026.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-026_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-026_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-026_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-026_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-027",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-027.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-027.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-027_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-027_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-027_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-027_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-028",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-028.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-028.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-028_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-028_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-028_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-028_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-029.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-029.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-029_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-029_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-029_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-029_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-030.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-030.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-030_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-030_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-030_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-030_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-031",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-031.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-031.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-031_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-031_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-031_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-031_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-032",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-032.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-032.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-032_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-032_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-032_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-032_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-033",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-033.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-033.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-033_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-033_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-033_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-033_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-034",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-034.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-034.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-034_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-034_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-034_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-034_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-035",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-035.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-035.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-035_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-035_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-035_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-035_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-036",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-036.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-036.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-036_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-036_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-036_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-036_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-037",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-037.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-037.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-037_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-037_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-037_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-037_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-038",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-038.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-038.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-038_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-038_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-038_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-038_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-039",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-039.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-039.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-039_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-039_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-039_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-039_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-039_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-039_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-039_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-040",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-040.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-040.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-040_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-040_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-040_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-040_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-041",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-041.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-041.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-041_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-041_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-041_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-041_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-042",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-042.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-042.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-042_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-042_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-042_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-042_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-043",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-043.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-043.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-043_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-043_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-043_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-043_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cuda-cpp",
+          "title": "Optional NVIDIA CUDA C++",
+          "language": "cpp",
+          "runtime_profile": "cuda-cpp",
+          "source_path": "courses/cuda/cpp/lessons/cuda-043_gpu.cu",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-043_gpu.cu",
+            "courses/cuda/cpp/solutions/cuda-043_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-044",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-044.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-044.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-044_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-044_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-044_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-044_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-045",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-045.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-045.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-045_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-045_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-045_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-045_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-046",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-046.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-046.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-046_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-046_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-046_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-046_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-047",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-047.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-047.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-047_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-047_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-047_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-047_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-048",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-048.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-048.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-048_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-048_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-048_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-048_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-049",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-049.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-049.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-049_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-049_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-049_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-049_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-050",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-050.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-050.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-050_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-050_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-050_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-050_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-051",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-051.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-051.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-051_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-051_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-051_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-051_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-052",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-052.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-052.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-052_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-052_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-052_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-052_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-053",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-053.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-053.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-053_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-053_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-053_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-053_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-054",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-054.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-054.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-054_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-054_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-054_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-054_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-055",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-055.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-055.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-055_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-055_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-055_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-055_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-056",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-056.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-056.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-056_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-056_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-056_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-056_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-057",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-057.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-057.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-057_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-057_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-057_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-057_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-058",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-058.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-058.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-058_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-058_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-058_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-058_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-059",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-059.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-059.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-059_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-059_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-059_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-059_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-060",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-060.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-060.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-060_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-060_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-060_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-060_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-061",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-061.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-061.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-061_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-061_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-061_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-061_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-062",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-062.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-062.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-062_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-062_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-062_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-062_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-063",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-063.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-063.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-063_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-063_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-063_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-063_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-064",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/cpp/guides/cuda-064.md",
+      "source_path": "courses/cuda/cpp/lessons/cuda-064.md",
+      "solution_paths": [
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU model (Python)",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/cpp/lessons/cuda-064_cpu.py",
+          "solution_paths": [
+            "courses/cuda/cpp/references/cuda-064_cpu.py",
+            "courses/cuda/cpp/solutions/cuda-064_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-065",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-065.md",
+      "source_path": "courses/cuda/python/lessons/cuda-065.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-065_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-065_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-065_cpu.py",
+            "courses/cuda/python/solutions/cuda-065_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-065_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-065_cupy.py",
+            "courses/cuda/python/solutions/cuda-065_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-066",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-066.md",
+      "source_path": "courses/cuda/python/lessons/cuda-066.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-066_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-066_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-066_cpu.py",
+            "courses/cuda/python/solutions/cuda-066_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-066_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-066_cupy.py",
+            "courses/cuda/python/solutions/cuda-066_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-067",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-067.md",
+      "source_path": "courses/cuda/python/lessons/cuda-067.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-067_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-067_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-067_cpu.py",
+            "courses/cuda/python/solutions/cuda-067_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-068",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-068.md",
+      "source_path": "courses/cuda/python/lessons/cuda-068.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-068_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-068_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-068_cpu.py",
+            "courses/cuda/python/solutions/cuda-068_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-068_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-068_cupy.py",
+            "courses/cuda/python/solutions/cuda-068_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-069",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-069.md",
+      "source_path": "courses/cuda/python/lessons/cuda-069.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-069_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-069_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-069_cpu.py",
+            "courses/cuda/python/solutions/cuda-069_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-070",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-070.md",
+      "source_path": "courses/cuda/python/lessons/cuda-070.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-070_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-070_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-070_cpu.py",
+            "courses/cuda/python/solutions/cuda-070_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-071",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-071.md",
+      "source_path": "courses/cuda/python/lessons/cuda-071.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-071_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-071_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-071_cpu.py",
+            "courses/cuda/python/solutions/cuda-071_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-071_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-071_cupy.py",
+            "courses/cuda/python/solutions/cuda-071_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-072",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-072.md",
+      "source_path": "courses/cuda/python/lessons/cuda-072.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-072_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-072_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-072_cpu.py",
+            "courses/cuda/python/solutions/cuda-072_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-073",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-073.md",
+      "source_path": "courses/cuda/python/lessons/cuda-073.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-073_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-073_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-073_cpu.py",
+            "courses/cuda/python/solutions/cuda-073_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-074",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-074.md",
+      "source_path": "courses/cuda/python/lessons/cuda-074.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-074_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-074_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-074_cpu.py",
+            "courses/cuda/python/solutions/cuda-074_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-074_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-074_cupy.py",
+            "courses/cuda/python/solutions/cuda-074_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-075",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-075.md",
+      "source_path": "courses/cuda/python/lessons/cuda-075.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-075_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-075_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-075_cpu.py",
+            "courses/cuda/python/solutions/cuda-075_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-076",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-076.md",
+      "source_path": "courses/cuda/python/lessons/cuda-076.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-076_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-076_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-076_cpu.py",
+            "courses/cuda/python/solutions/cuda-076_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-077",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-077.md",
+      "source_path": "courses/cuda/python/lessons/cuda-077.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-077_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-077_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-077_cpu.py",
+            "courses/cuda/python/solutions/cuda-077_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-077_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-077_cupy.py",
+            "courses/cuda/python/solutions/cuda-077_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-078",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-078.md",
+      "source_path": "courses/cuda/python/lessons/cuda-078.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-078_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-078_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-078_cpu.py",
+            "courses/cuda/python/solutions/cuda-078_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-079",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-079.md",
+      "source_path": "courses/cuda/python/lessons/cuda-079.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-079_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-079_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-079_cpu.py",
+            "courses/cuda/python/solutions/cuda-079_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-080",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-080.md",
+      "source_path": "courses/cuda/python/lessons/cuda-080.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-080_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-080_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-080_cpu.py",
+            "courses/cuda/python/solutions/cuda-080_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-081",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-081.md",
+      "source_path": "courses/cuda/python/lessons/cuda-081.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-081_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-081_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-081_cpu.py",
+            "courses/cuda/python/solutions/cuda-081_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-082",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-082.md",
+      "source_path": "courses/cuda/python/lessons/cuda-082.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-082_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-082_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-082_cpu.py",
+            "courses/cuda/python/solutions/cuda-082_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-083",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-083.md",
+      "source_path": "courses/cuda/python/lessons/cuda-083.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-083_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-083_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-083_cpu.py",
+            "courses/cuda/python/solutions/cuda-083_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-084",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-084.md",
+      "source_path": "courses/cuda/python/lessons/cuda-084.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-084_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-084_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-084_cpu.py",
+            "courses/cuda/python/solutions/cuda-084_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "cupy-cuda",
+          "title": "CuPy on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "cuda-python",
+          "source_path": "courses/cuda/python/lessons/cuda-084_cupy.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-084_cupy.py",
+            "courses/cuda/python/solutions/cuda-084_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-085",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-085.md",
+      "source_path": "courses/cuda/python/lessons/cuda-085.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-085_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-085_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-085_cpu.py",
+            "courses/cuda/python/solutions/cuda-085_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-086",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-086.md",
+      "source_path": "courses/cuda/python/lessons/cuda-086.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-086_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-086_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-086_cpu.py",
+            "courses/cuda/python/solutions/cuda-086_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-087",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-087.md",
+      "source_path": "courses/cuda/python/lessons/cuda-087.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-087_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-087_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-087_cpu.py",
+            "courses/cuda/python/solutions/cuda-087_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-087_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-087_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-087_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-087_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-087_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-087_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-087_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-087_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-087_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-087_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-087_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-087_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-088",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-088.md",
+      "source_path": "courses/cuda/python/lessons/cuda-088.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-088_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-088_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-088_cpu.py",
+            "courses/cuda/python/solutions/cuda-088_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-088_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-088_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-088_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-088_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-088_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-088_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-088_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-088_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-088_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-088_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-088_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-088_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-089",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-089.md",
+      "source_path": "courses/cuda/python/lessons/cuda-089.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-089_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-089_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-089_cpu.py",
+            "courses/cuda/python/solutions/cuda-089_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-089_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-089_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-089_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-089_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-089_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-089_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-089_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-089_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-089_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-089_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-089_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-089_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-090",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-090.md",
+      "source_path": "courses/cuda/python/lessons/cuda-090.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-090_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-090_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-090_cpu.py",
+            "courses/cuda/python/solutions/cuda-090_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-091",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-091.md",
+      "source_path": "courses/cuda/python/lessons/cuda-091.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-091_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-091_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-091_cpu.py",
+            "courses/cuda/python/solutions/cuda-091_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-091_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-091_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-091_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-091_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-091_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-091_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-091_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-091_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-091_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-091_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-091_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-091_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-092",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-092.md",
+      "source_path": "courses/cuda/python/lessons/cuda-092.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-092_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-092_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-092_cpu.py",
+            "courses/cuda/python/solutions/cuda-092_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-093",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-093.md",
+      "source_path": "courses/cuda/python/lessons/cuda-093.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-093_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-093_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-093_cpu.py",
+            "courses/cuda/python/solutions/cuda-093_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-094",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-094.md",
+      "source_path": "courses/cuda/python/lessons/cuda-094.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-094_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-094_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-094_cpu.py",
+            "courses/cuda/python/solutions/cuda-094_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-094_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-094_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-094_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-094_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-094_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-094_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-094_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-094_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-094_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-094_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-094_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-094_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-095",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-095.md",
+      "source_path": "courses/cuda/python/lessons/cuda-095.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-095_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-095_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-095_cpu.py",
+            "courses/cuda/python/solutions/cuda-095_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-095_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-095_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-095_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-095_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-095_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-095_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-095_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-095_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-095_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-095_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-095_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-095_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-096",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-096.md",
+      "source_path": "courses/cuda/python/lessons/cuda-096.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-096_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-096_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-096_cpu.py",
+            "courses/cuda/python/solutions/cuda-096_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-097",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-097.md",
+      "source_path": "courses/cuda/python/lessons/cuda-097.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-097_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-097_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-097_cpu.py",
+            "courses/cuda/python/solutions/cuda-097_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-098",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-098.md",
+      "source_path": "courses/cuda/python/lessons/cuda-098.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-098_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-098_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-098_cpu.py",
+            "courses/cuda/python/solutions/cuda-098_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-098_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-098_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-098_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-098_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-098_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-098_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-098_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-098_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-098_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-098_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-098_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-098_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-099",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-099.md",
+      "source_path": "courses/cuda/python/lessons/cuda-099.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-099_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-099_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-099_cpu.py",
+            "courses/cuda/python/solutions/cuda-099_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-099_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-099_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-099_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-099_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-099_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-099_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-099_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-099_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-099_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-099_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-099_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-099_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-100",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-100.md",
+      "source_path": "courses/cuda/python/lessons/cuda-100.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-100_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-100_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-100_cpu.py",
+            "courses/cuda/python/solutions/cuda-100_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-100_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-100_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-100_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-100_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-100_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-100_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-100_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-100_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-100_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-100_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-100_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-100_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-101",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-101.md",
+      "source_path": "courses/cuda/python/lessons/cuda-101.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-101_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-101_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-101_cpu.py",
+            "courses/cuda/python/solutions/cuda-101_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cpu",
+          "title": "PyTorch on CPU",
+          "language": "python",
+          "runtime_profile": "llm-torch-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-101_torch-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-101_torch-cpu.py",
+            "courses/cuda/python/solutions/cuda-101_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "torch-cuda",
+          "title": "PyTorch on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "pytorch-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-101_torch-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-101_torch-cuda.py",
+            "courses/cuda/python/solutions/cuda-101_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cpu",
+          "title": "TensorFlow on CPU",
+          "language": "python",
+          "runtime_profile": "tensorflow-cpu",
+          "source_path": "courses/cuda/python/lessons/cuda-101_tensorflow-cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-101_tensorflow-cpu.py",
+            "courses/cuda/python/solutions/cuda-101_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "tensorflow-cuda",
+          "title": "TensorFlow on NVIDIA CUDA",
+          "language": "python",
+          "runtime_profile": "tensorflow-cuda",
+          "source_path": "courses/cuda/python/lessons/cuda-101_tensorflow-cuda.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-101_tensorflow-cuda.py",
+            "courses/cuda/python/solutions/cuda-101_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-102",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-102.md",
+      "source_path": "courses/cuda/python/lessons/cuda-102.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-102_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-102_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-102_cpu.py",
+            "courses/cuda/python/solutions/cuda-102_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-103",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-103.md",
+      "source_path": "courses/cuda/python/lessons/cuda-103.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-103_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-103_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-103_cpu.py",
+            "courses/cuda/python/solutions/cuda-103_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-104",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-104.md",
+      "source_path": "courses/cuda/python/lessons/cuda-104.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-104_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-104_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-104_cpu.py",
+            "courses/cuda/python/solutions/cuda-104_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-105",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-105.md",
+      "source_path": "courses/cuda/python/lessons/cuda-105.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-105_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-105_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-105_cpu.py",
+            "courses/cuda/python/solutions/cuda-105_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-106",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-106.md",
+      "source_path": "courses/cuda/python/lessons/cuda-106.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-106_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-106_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-106_cpu.py",
+            "courses/cuda/python/solutions/cuda-106_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-107",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-107.md",
+      "source_path": "courses/cuda/python/lessons/cuda-107.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-107_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-107_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-107_cpu.py",
+            "courses/cuda/python/solutions/cuda-107_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-108",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-108.md",
+      "source_path": "courses/cuda/python/lessons/cuda-108.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-108_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-108_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-108_cpu.py",
+            "courses/cuda/python/solutions/cuda-108_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-109",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-109.md",
+      "source_path": "courses/cuda/python/lessons/cuda-109.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-109_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-109_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-109_cpu.py",
+            "courses/cuda/python/solutions/cuda-109_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-110",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-110.md",
+      "source_path": "courses/cuda/python/lessons/cuda-110.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-110_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-110_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-110_cpu.py",
+            "courses/cuda/python/solutions/cuda-110_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-111",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-111.md",
+      "source_path": "courses/cuda/python/lessons/cuda-111.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-111_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-111_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-111_cpu.py",
+            "courses/cuda/python/solutions/cuda-111_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-112",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/python/guides/cuda-112.md",
+      "source_path": "courses/cuda/python/lessons/cuda-112.md",
+      "solution_paths": [
+        "courses/cuda/python/solutions/cuda-112_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/python/lessons/cuda-112_cpu.py",
+          "solution_paths": [
+            "courses/cuda/python/references/cuda-112_cpu.py",
+            "courses/cuda/python/solutions/cuda-112_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-113",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-113.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-113.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-113_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_cpu.py",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-113_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-113_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-113_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-114",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-114.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-114.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-114_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-114_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-114_cpu.py",
+            "courses/cuda/spark/solutions/cuda-114_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-115",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-115.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-115.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-115_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-115_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-115_cpu.py",
+            "courses/cuda/spark/solutions/cuda-115_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-116",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-116.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-116.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-116_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-116_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-116_cpu.py",
+            "courses/cuda/spark/solutions/cuda-116_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-117",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-117.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-117.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-117_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_cpu.py",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-117_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-117_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-117_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-118",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-118.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-118.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-118_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-118_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-118_cpu.py",
+            "courses/cuda/spark/solutions/cuda-118_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-119",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-119.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-119.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-119_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-119_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-119_cpu.py",
+            "courses/cuda/spark/solutions/cuda-119_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-120",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-120.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-120.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-120_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-120_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-120_cpu.py",
+            "courses/cuda/spark/solutions/cuda-120_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-121",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-121.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-121.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-121_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_cpu.py",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-121_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-121_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-121_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-122",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-122.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-122.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-122_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-122_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-122_cpu.py",
+            "courses/cuda/spark/solutions/cuda-122_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-123",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-123.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-123.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-123_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-123_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-123_cpu.py",
+            "courses/cuda/spark/solutions/cuda-123_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-124",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-124.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-124.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-124_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-124_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-124_cpu.py",
+            "courses/cuda/spark/solutions/cuda-124_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-125",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-125.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-125.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-125_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-125_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-125_cpu.py",
+            "courses/cuda/spark/solutions/cuda-125_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-126",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-126.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-126.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-126_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-126_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-126_cpu.py",
+            "courses/cuda/spark/solutions/cuda-126_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-127",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-127.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-127.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-127_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_cpu.py",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "pyspark-cpu",
+          "title": "PySpark on CPU",
+          "language": "python",
+          "runtime_profile": "spark-local-python",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_pyspark-cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_pyspark-cpu.py",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        },
+        {
+          "id": "scala-cpu",
+          "title": "Scala Spark on CPU",
+          "language": "scala",
+          "runtime_profile": "spark-local-scala",
+          "source_path": "courses/cuda/spark/lessons/cuda-127_scala-cpu.scala",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-127_scala-cpu.scala",
+            "courses/cuda/spark/solutions/cuda-127_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    },
+    {
+      "id": "cuda-128",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/cuda/spark/guides/cuda-128.md",
+      "source_path": "courses/cuda/spark/lessons/cuda-128.md",
+      "solution_paths": [
+        "courses/cuda/spark/solutions/cuda-128_solutions.md"
+      ],
+      "verification_id": null,
+      "variants": [
+        {
+          "id": "cpu-model",
+          "title": "CPU reference model",
+          "language": "python",
+          "runtime_profile": "python-core",
+          "source_path": "courses/cuda/spark/lessons/cuda-128_cpu.py",
+          "solution_paths": [
+            "courses/cuda/spark/references/cuda-128_cpu.py",
+            "courses/cuda/spark/solutions/cuda-128_solutions.md"
+          ],
+          "verification_id": null
+        }
+      ]
+    }
+  ]
+}

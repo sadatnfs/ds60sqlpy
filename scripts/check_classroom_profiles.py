@@ -20,6 +20,7 @@ from urllib.request import ProxyHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = {
+    "php-cli": ("web-development", "web-031"),
     "python-core": ("llm-theory", "llm-011"),
     "cpp20": ("cpp", "cpp-009"),
     "c17": ("c", "c-001"),
@@ -39,6 +40,7 @@ CASES = {
 # These are outputs from the exact catalog references above, after their own
 # assertions. Generic run receipts do not claim independent typed worker checks.
 EXPECTED_OUTPUT = {
+    "php-cli": ("web-031 reference checks passed",),
     "python-core": ("{'checks': 6, 'status': 'passed'}",),
     "java21": ("Hello, Java",),
     "c17": ("All lesson checks passed.",),

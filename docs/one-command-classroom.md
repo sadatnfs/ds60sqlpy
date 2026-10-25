@@ -18,7 +18,7 @@ That is the complete ordinary startup command on **macOS, Linux and Windows
 through WSL 2**. It checks the engine and Compose version, reuses the current
 project's saved selection, starts existing containers, waits for health checks,
 verifies the web page and opens its actual local address. It builds only missing
-images. A new project selects the classroom and all fifteen ordinary workers
+images. A new project selects the classroom and all sixteen ordinary workers
 unless you choose `--starter` or specific profiles.
 
 Repeat the same command to **resume your existing installation**. Updating the
@@ -31,7 +31,7 @@ permissions and WSL integration belong to the engine installation. The course
 runtimes run inside Docker: you do not install Python, PostgreSQL, GCC, Go,
 .NET, Rust, Swift, Java, Node, TensorFlow, PyTorch or Spark on the host.
 First preparation needs internet and downloads several large SDK and framework
-images. For the full fifteen-worker set, budget about **60 GB of free disk**
+images. For the full sixteen-worker set, budget about **60 GB of free disk**
 for images, dependencies and build cache, and start with **8 GB of engine
 memory**. This is planning guidance, not a measured minimum or a guarantee:
 architecture, selected profiles and retained builds change storage use.
@@ -274,7 +274,7 @@ an unrelated service to obtain that port.
 
 `--starter` replaces the remembered selection with Python Core. Explicit
 `--profile` flags replace it with Core plus exactly the listed profiles; include
-every optional profile you want in that selection. `--all` selects all fifteen.
+every optional profile you want in that selection. `--all` selects all sixteen.
 A later bare `./classroom` reuses your last selection.
 
 Starting a subset does not stop other workers that are already running. To

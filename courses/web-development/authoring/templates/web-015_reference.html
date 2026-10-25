@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flexbox: one-dimensional layout and resilient navigation</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+nav ul, .cards { display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; list-style: none; } .card { flex: 1 1 12rem; min-inline-size: 0; padding: 1rem; border: 1px solid #64748b; }
+  </style>
+</head>
+<body>
+<main><h1>Flexible navigation</h1><nav aria-label="Topics"><ul><li><a href="#html">HTML foundations</a></li><li><a href="#css">Responsive CSS</a></li><li><a href="#php">PHP applications</a></li></ul></nav><div class="cards"><article class="card" id="html"><h2>HTML</h2><p>Structure.</p></article><article class="card" id="css"><h2>CSS</h2><p>Presentation.</p></article><article class="card" id="php"><h2>PHP</h2><p>Server logic.</p></article></div></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(getComputedStyle(document.querySelector('.cards')).display === 'flex', 'Flex layout missing');
+document.querySelector("#reference-status").textContent = "web-015 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-015 reference checks passed");
+</script>
+</body>
+</html>

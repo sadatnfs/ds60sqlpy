@@ -79,11 +79,24 @@ Choose from the current inventory:
 - Tutorial book: use its `learning_mode: tutorial` contract and complete worked
   chapter/example pairs.
 
-The current shared experience spans twenty subjects: Python, PostgreSQL, the
+The shared experience includes Python, PostgreSQL, the
 engineering bridge, statistics/ML, C, C++, Go, C#, Rust, Swift, Docker, Java,
 JavaScript/TypeScript with D3, Kubernetes, Scala/Spark, TensorFlow, PyTorch, NLP,
-LLM theory and applied LLMs. Use the live catalog rather than treating that
+LLM theory, applied LLMs, CUDA/GPU computing and HTML/CSS/PHP web development.
+Use the live catalog rather than treating that
 list or a historical lesson count as an alternate source of IDs.
+
+CUDA reading worksheets and CPU models are useful without an NVIDIA device.
+Identify the actual selected variant and evidence before discussing GPU results.
+An installed toolkit, a CPU calculation, a compiled CUDA artifact and a checked
+real-device run establish different facts. Explain optional ROCm/Metal routes as
+separate backends, never as CUDA provided by a Mac container. GPU Spark needs
+supported operators, a compatible plugin/runtime and actual plans/metrics.
+
+HTML/CSS previews are opaque, offline browser observations. PHP CLI examples
+do not create an HTTP session; the separate web-project fixture does that.
+Keep the learner's pads and observations scoped to each language/variant, and
+explain which environment a proposed snippet requires before suggesting Run.
 
 A new SQL learner starts with `sql-start-01` through `sql-start-03` before
 `sql-01`. Elsewhere derive prerequisites from metadata rather than filename

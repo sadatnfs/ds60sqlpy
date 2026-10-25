@@ -1,0 +1,485 @@
+{
+  "schema_version": 1,
+  "lessons": [
+    {
+      "id": "web-001",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-001_solution.html",
+      "marker": "web-001 reference checks passed",
+      "expected_observation": "The preview contains one main heading and two paragraphs in a main region.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-002",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-002_solution.html",
+      "marker": "web-002 reference checks passed",
+      "expected_observation": "The structure remains a paragraph and the comparison is text rather than an element.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-003",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-003_solution.html",
+      "marker": "web-003 reference checks passed",
+      "expected_observation": "Header, labeled navigation, one main and footer have meaningful content; the skip target exists.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-004",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-004_solution.html",
+      "marker": "web-004 reference checks passed",
+      "expected_observation": "Every fragment matches one unique section id and works with keyboard activation.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-005",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-005_solution.html",
+      "marker": "web-005 reference checks passed",
+      "expected_observation": "The page exposes list, code and definition structures without relying on spacing.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-006",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-006_solution.html",
+      "marker": "web-006 reference checks passed",
+      "expected_observation": "The image has an accessible name and the numeric progress is visible as text.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-007",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-007_solution.html",
+      "marker": "web-007 reference checks passed",
+      "expected_observation": "The caption, row headers and column headers identify every value.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-008",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-008_solution.html",
+      "marker": "web-008 reference checks passed",
+      "expected_observation": "Every control has a useful label, stable name and suitable type.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-009",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-009_solution.html",
+      "marker": "web-009 reference checks passed",
+      "expected_observation": "The user can identify the rule, enter a valid value and retain it after a failed attempt.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-010",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-010_solution.html",
+      "marker": "web-010 reference checks passed",
+      "expected_observation": "Both cards share styling without duplicate ids or inline declarations.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-011",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-011_solution.html",
+      "marker": "web-011 reference checks passed",
+      "expected_observation": "The identifier wraps or scrolls locally without overflowing the page.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-012",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-012_solution.html",
+      "marker": "web-012 reference checks passed",
+      "expected_observation": "Text stays comfortable at wide and narrow sizes without fixed-height clipping.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-013",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-013_solution.html",
+      "marker": "web-013 reference checks passed",
+      "expected_observation": "Each card contains a clear label, readable text and visible interactive focus.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-014",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-014_solution.html",
+      "marker": "web-014 reference checks passed",
+      "expected_observation": "Long body text expands the card while the badge stays in its reserved corner.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-015",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-015_solution.html",
+      "marker": "web-015 reference checks passed",
+      "expected_observation": "Long labels stay reachable at narrow widths and DOM order remains logical.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-016",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-016_solution.html",
+      "marker": "web-016 reference checks passed",
+      "expected_observation": "Cards change column count while preserving reading order and avoiding page overflow.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-017",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-017_solution.html",
+      "marker": "web-017 reference checks passed",
+      "expected_observation": "The page adapts between stacked and two-column layouts without losing content.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-018",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-018_solution.html",
+      "marker": "web-018 reference checks passed",
+      "expected_observation": "The variants preserve content labels, contrast and focus while sharing structure.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-019",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-019_solution.html",
+      "marker": "web-019 reference checks passed",
+      "expected_observation": "Native checkboxes carry the state and text styling reinforces it.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-020",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-020_solution.html",
+      "marker": "web-020 reference checks passed",
+      "expected_observation": "The card remains understandable and usable without movement.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-021",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-021_solution.html",
+      "marker": "web-021 reference checks passed",
+      "expected_observation": "Each instance adapts independently while preserving its content.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-022",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-022_solution.html",
+      "marker": "web-022 reference checks passed",
+      "expected_observation": "The intended overrides work without escalating ids or important flags.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-023",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-023_solution.html",
+      "marker": "web-023 reference checks passed",
+      "expected_observation": "Screen and print views preserve meaning with appropriate presentation.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-024",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-024_solution.html",
+      "marker": "web-024 reference checks passed",
+      "expected_observation": "All cards, navigation and headings are meaningful, keyboard reachable and responsive.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-025",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-025_solution.html",
+      "marker": "web-025 reference checks passed",
+      "expected_observation": "Increment and reset work by keyboard and pointer, with a visible announced result.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-026",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-026_solution.html",
+      "marker": "web-026 reference checks passed",
+      "expected_observation": "Both are labeled, keyboard operable and can be closed without losing the task.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-027",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-027_solution.html",
+      "marker": "web-027 reference checks passed",
+      "expected_observation": "A failed attempt identifies the problem without clearing the user's value.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-028",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-028_solution.html",
+      "marker": "web-028 reference checks passed",
+      "expected_observation": "Changing the selection updates rows and count while preserving the original data.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-029",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-029_solution.html",
+      "marker": "web-029 reference checks passed",
+      "expected_observation": "Plain text remains data and navigation candidates pass an explicit scheme decision.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-030",
+      "runtime_profile": "html-browser",
+      "reference_path": "courses/web-development/solutions/web-030_solution.html",
+      "marker": "web-030 reference checks passed",
+      "expected_observation": "The report records source revision, tested conditions, observations and remaining limitations.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-031",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-031_solution.php",
+      "marker": "web-031 reference checks passed",
+      "expected_observation": "The program runs in the CLI worker and produces two clearly labeled values.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-032",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-032_solution.php",
+      "marker": "web-032 reference checks passed",
+      "expected_observation": "The program documents and checks the chosen interpretation of each state.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-033",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-033_solution.php",
+      "marker": "web-033 reference checks passed",
+      "expected_observation": "Valid quantities produce exact integer totals and two-digit fractional display.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-034",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-034_solution.php",
+      "marker": "web-034 reference checks passed",
+      "expected_observation": "The total and label follow the declared cases and terminate predictably.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-035",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-035_solution.php",
+      "marker": "web-035 reference checks passed",
+      "expected_observation": "The derived list contains only qualifying rows and retains consecutive indices.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-036",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-036_solution.php",
+      "marker": "web-036 reference checks passed",
+      "expected_observation": "Calculations can be tested without capturing output, then formatted at the boundary.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-037",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-037_solution.php",
+      "marker": "web-037 reference checks passed",
+      "expected_observation": "The program does not present strlen as a count of user-perceived characters.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-038",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-038_solution.php",
+      "marker": "web-038 reference checks passed",
+      "expected_observation": "The field contract passes and the returned bytes match the encoded value.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-039",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-039_solution.php",
+      "marker": "web-039 reference checks passed",
+      "expected_observation": "Valid data returns a result; invalid data produces a clear classified failure.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-040",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-040_solution.php",
+      "marker": "web-040 reference checks passed",
+      "expected_observation": "Its topic and duration satisfy explicit constructor checks and remain readonly.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-041",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-041_solution.php",
+      "marker": "web-041 reference checks passed",
+      "expected_observation": "The same service works with two controlled implementations that satisfy the interface.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-042",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-042_solution.php",
+      "marker": "web-042 reference checks passed",
+      "expected_observation": "Application code and tests stay separate from the server's public document root.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-043",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-043_solution.php",
+      "marker": "web-043 reference checks passed",
+      "expected_observation": "The output uses explicit time zones and a fixed input suitable for repeatable tests.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-044",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-044_solution.php",
+      "marker": "web-044 reference checks passed",
+      "expected_observation": "Normal, zero, invalid and boundary cases have independently justified outcomes.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-045",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-045_solution.php",
+      "marker": "web-045 reference checks passed",
+      "expected_observation": "The structure stays fixed while labels are escaped at output.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-046",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-046_solution.php",
+      "marker": "web-046 reference checks passed",
+      "expected_observation": "Known GET routes return their declared representations and unsupported requests are rejected.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-047",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-047_solution.php",
+      "marker": "web-047 reference checks passed",
+      "expected_observation": "Valid data has a complete domain value; invalid data has actionable errors and no partial write.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-048",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-048_solution.php",
+      "marker": "web-048 reference checks passed",
+      "expected_observation": "An expired session is rejected and a valid activity update preserves the declared identity.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-049",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-049_solution.php",
+      "marker": "web-049 reference checks passed",
+      "expected_observation": "Only a deliberate allowed POST with matching token can reach the mutation branch.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-050",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-050_solution.php",
+      "marker": "web-050 reference checks passed",
+      "expected_observation": "The output reports the test result while keeping credential-shaped values out of logs.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-051",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-051_solution.php",
+      "marker": "web-051 reference checks passed",
+      "expected_observation": "The expected record is retrieved and SQL-looking text remains data.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-052",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-052_solution.php",
+      "marker": "web-052 reference checks passed",
+      "expected_observation": "The first expected version succeeds and the repeated stale version affects zero rows.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-053",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-053_solution.php",
+      "marker": "web-053 reference checks passed",
+      "expected_observation": "The owner can read the record and a different actor receives no record.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-054",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-054_solution.php",
+      "marker": "web-054 reference checks passed",
+      "expected_observation": "Status, content type and JSON body agree with the declared contract.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-055",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-055_solution.php",
+      "marker": "web-055 reference checks passed",
+      "expected_observation": "The second page continues after the last id and the final page can be shorter.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-056",
+      "runtime_profile": "php-cli",
+      "reference_path": "courses/web-development/solutions/web-056_solution.php",
+      "marker": "web-056 reference checks passed",
+      "expected_observation": "Accepted plans persist in the disposable database and rejected inputs create no rows.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-057",
+      "runtime_profile": "reading",
+      "reference_path": null,
+      "marker": null,
+      "expected_observation": "The note survives a page reload and appears after a successful POST-redirect-GET sequence.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-058",
+      "runtime_profile": "reading",
+      "reference_path": null,
+      "marker": null,
+      "expected_observation": "Files receive generated names, stay outside executable public paths and have ownership and retention rules.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-059",
+      "runtime_profile": "reading",
+      "reference_path": null,
+      "marker": null,
+      "expected_observation": "The plan covers configuration, secrets, migration, health, write/read acceptance, backup and rollback.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    },
+    {
+      "id": "web-060",
+      "runtime_profile": "reading",
+      "reference_path": null,
+      "marker": null,
+      "expected_observation": "The extension has coherent HTML/CSS, tested PHP behavior and a bounded reproducible setup.",
+      "qualification": "Requires actual runtime and manual observations; this inventory is not a receipt."
+    }
+  ]
+}

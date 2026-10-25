@@ -1,0 +1,98 @@
+{
+  "cuda-012": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-012_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-012_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-012_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-014": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-014_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-014_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-014_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-015": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-015_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-015_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-015_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-020": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-020_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-020_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-020_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-022": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-022_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-022_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-022_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-023": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-023_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-023_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-023_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-039": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-039_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-039_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-039_solutions.md"
+    ],
+    "verification_id": null
+  },
+  "cuda-043": {
+    "id": "cuda-cpp",
+    "title": "Optional NVIDIA CUDA C++",
+    "language": "cpp",
+    "runtime_profile": "cuda-cpp",
+    "source_path": "courses/cuda/cpp/lessons/cuda-043_gpu.cu",
+    "solution_paths": [
+      "courses/cuda/cpp/references/cuda-043_gpu.cu",
+      "courses/cuda/cpp/solutions/cuda-043_solutions.md"
+    ],
+    "verification_id": null
+  }
+}

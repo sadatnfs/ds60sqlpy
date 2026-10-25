@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Normal flow, display and positioning</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+.card { position: relative; padding: 2.5rem 1rem 1rem; border: 1px solid #64748b; } .badge { position: absolute; inset-block-start: .5rem; inset-inline-end: .5rem; background: #e0f2fe; padding: .2rem .5rem; }
+  </style>
+</head>
+<body>
+<main><h1>Flow before coordinates</h1><article class="card"><span class="badge">New</span><h2>HTML notes</h2><p>This content remains in normal flow. Adding another paragraph increases the card's height.</p></article></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(getComputedStyle(document.querySelector('.card')).position === 'relative', 'Containing block missing');
+document.querySelector("#reference-status").textContent = "web-014 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-014 reference checks passed");
+</script>
+</body>
+</html>

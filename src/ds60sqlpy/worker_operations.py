@@ -52,6 +52,11 @@ PROFILES = {
     "javascript-node": WorkerProfile("javascript-node", "javascript", "main.mjs"),
     "typescript-node": WorkerProfile("typescript-node", "typescript", "main.mts"),
     "cpp20": WorkerProfile("cpp20", "cpp", "main.cpp", ("cpp-ownership-v1",)),
+    "php-cli": WorkerProfile("php-cli", "php", "main.php"),
+    "cuda-cpp": WorkerProfile("cuda-cpp", "cpp", "main.cu"),
+    "cuda-python": WorkerProfile("cuda-python", "python", "main.py"),
+    "pytorch-cuda": WorkerProfile("pytorch-cuda", "python", "main.py"),
+    "tensorflow-cuda": WorkerProfile("tensorflow-cuda", "python", "main.py"),
     "k8s-kind": WorkerProfile("k8s-kind", "yaml", "lesson.yaml", ("k8s-readiness-v1",)),
     "scala-jvm": WorkerProfile("scala-jvm", "scala", "Main.scala"),
     "spark-local-scala": WorkerProfile(
@@ -121,7 +126,7 @@ class BoundedOutput:
             return text, truncated
 
 
-def child_environment(directory: Path, base: Mapping[str, str] | None = None) -> dict[str, str]:
+def child_environment(directory: Path, base: Mapping[str, str] | None = None, *, profile_id: str | None = None) -> dict[str, str]:
     """Do not pass service tokens, database credentials or cloud settings to code."""
 
     supplied = os.environ if base is None else base
@@ -172,6 +177,14 @@ def child_environment(directory: Path, base: Mapping[str, str] | None = None) ->
         PYSPARK_PYTHON=sys.executable,
         PYSPARK_DRIVER_PYTHON=sys.executable,
     )
+    if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
+        environment.update(
+            CUDA_VISIBLE_DEVICES="0",
+            CUDA_CACHE_PATH=str(directory / "cuda-cache"),
+            CUPY_CACHE_DIR=str(directory / "cupy-cache"),
+            NUMBA_CACHE_DIR=str(directory / "numba-cache"),
+            TF_FORCE_GPU_ALLOW_GROWTH="true",
+        )
     return environment
 
 
@@ -568,6 +581,11 @@ def validate_operation(profile_id: str, language: str, verification_id: str | No
 def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]], list[str]]:
     """Reviewed single-source toolchains; source cannot supply build flags or packages."""
     node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
+    if profile_id == "php-cli":
+        flags = ["php", "-d", "display_errors=stderr", "-d", "log_errors=0",
+                 "-d", "memory_limit=128M", "-d", "zend.assertions=1",
+                 "-d", "assert.exception=1", "-d", "allow_url_fopen=0"]
+        return [[*flags, "-l", "main.php"]], [*flags, "main.php"]
     if profile_id == "c17":
         return [
             [
@@ -709,7 +727,7 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
 
 
 def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool, str]:
-    """Execute one fixed startup smoke under a45-second total deadline.
+    """Execute one fixed startup smoke under a 45-second total deadline.
 
     HTTP health uses the cached result; it does not re-import frameworks or
     start a Spark JVM on every poll.
@@ -730,7 +748,10 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
     with tempfile.TemporaryDirectory(prefix="ds60-worker-probe-") as temporary:
         directory = Path(temporary)
         commands: list[list[str]]
-        if profile_id == "cpp20":
+        if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
+            from ds60sqlpy.gpu_runtime import probe_commands
+            commands = probe_commands(profile_id, directory)
+        elif profile_id == "cpp20":
             compiler = _compiler()
             if compiler is None:
                 return False, "The registered C++ compiler is missing."
@@ -751,8 +772,10 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
             "java21",
             "javascript-node",
             "typescript-node",
+            "php-cli",
         }:
             smoke = {
+                "php-cli": "<?php declare(strict_types=1); $db = new PDO('sqlite::memory:'); assert((int)$db->query('SELECT 42')->fetchColumn() === 42); echo '42';\n",
                 "c17": (
                     "#include <assert.h>\n#include <stdio.h>\n"
                     'int main(void){assert(20+22==42);puts("42");return 0;}\n'
@@ -845,7 +868,7 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
                 "torch": "import torch as m; assert int(m.tensor([20,22]).sum())==42",
             }[module]
             commands = [[sys.executable, "-c", smoke + "; print(m.__version__)"]]
-        environment = child_environment(directory)
+        environment = child_environment(directory, profile_id=profile_id)
         if isolate_user:
             if sys.platform != "linux" or os.geteuid() != 0:
                 return False, "A Linux root supervisor is required for the isolated backend probe."
@@ -892,7 +915,7 @@ def execute_operation(
         raise ValueError("Source exceeds the 256 KiB limit.")
     directory.mkdir(parents=True, exist_ok=True, mode=0o700)
     (directory / profile.filename).write_text(source, encoding="utf-8", newline="\n")
-    environment = child_environment(directory)
+    environment = child_environment(directory, profile_id=profile_id)
     if isolate_user:
         if sys.platform != "linux" or os.geteuid() != 0:
             raise ValueError("A Linux root supervisor is required for job identity isolation.")
@@ -903,7 +926,10 @@ def execute_operation(
     output = BoundedOutput(observer=on_output)
     deadline = time.monotonic() + timeout_seconds
     compiling: list[list[str]] = []
-    if profile_id == "cpp20":
+    if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
+        from ds60sqlpy.gpu_runtime import commands as gpu_commands
+        compiling, command = gpu_commands(profile_id, directory)
+    elif profile_id == "cpp20":
         compiler = _compiler() or "g++"
         compiling = [
             [
@@ -949,6 +975,7 @@ def execute_operation(
         "java21",
         "javascript-node",
         "typescript-node",
+        "php-cli",
     }:
         compiling, command = language_commands(profile_id, directory)
         if isolate_user:

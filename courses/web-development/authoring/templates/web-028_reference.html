@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Data interfaces: filtering tables and honest visual summaries</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+table { border-collapse: collapse; } th, td { border: 1px solid #64748b; padding: .5rem; }
+  </style>
+</head>
+<body>
+<main><h1>Study minutes</h1><label for="threshold">Minimum minutes</label><select id="threshold"><option value="0">All records</option><option value="40">40 minutes</option><option value="100">100 minutes</option></select><p id="summary" role="status"></p><table><caption>Local synthetic study records</caption><thead><tr><th scope="col">Subject</th><th scope="col">Minutes</th></tr></thead><tbody></tbody></table></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+const rows = [{subject:'HTML', minutes:40},{subject:'CSS', minutes:55},{subject:'PHP', minutes:35}]; const threshold = document.querySelector('#threshold'); function render() { const visible = rows.filter(row => row.minutes >= Number(threshold.value)); const body = document.querySelector('tbody'); body.replaceChildren(); for (const row of visible) { const tr = document.createElement('tr'); for (const value of [row.subject, row.minutes]) { const td = document.createElement('td'); td.textContent = String(value); tr.append(td); } body.append(tr); } document.querySelector('#summary').textContent = visible.length ? `${visible.length} records shown.` : 'No records match. Choose a lower threshold.'; } threshold.addEventListener('change', render); render();
+check(document.querySelectorAll('tbody tr').length === 3, 'Initial records missing'); threshold.value = '100'; render(); check(document.querySelectorAll('tbody tr').length === 0, 'Empty filter failed'); threshold.value = '0'; render();
+document.querySelector("#reference-status").textContent = "web-028 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-028 reference checks passed");
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Links, paths, navigation and usable destinations</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+section { margin-block: 2rem; }
+  </style>
+</head>
+<body>
+<main><h1>Contents</h1><nav aria-label="On this page"><ul><li><a href="#intro">Introduction</a></li><li><a href="#methods">Methods</a></li><li><a href="#results">Results</a></li></ul></nav><section id="intro"><h2>Introduction</h2><p>The question.</p></section><section id="methods"><h2>Methods</h2><p>The procedure.</p></section><section id="results"><h2>Results</h2><p>The observations.</p></section></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+for (const link of document.querySelectorAll('nav a')) check(document.querySelector(link.hash), 'Broken fragment');
+document.querySelector("#reference-status").textContent = "web-004 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-004 reference checks passed");
+</script>
+</body>
+</html>

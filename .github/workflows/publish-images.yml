@@ -1,0 +1,125 @@
+name: Publish classroom images (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version matching this checkout
+        required: true
+        default: "0.4.0"
+      architecture:
+        description: Architecture to build and qualify on a native runner
+        type: choice
+        options: [amd64, arm64]
+        default: amd64
+      publish:
+        description: Publish after validation (also requires the repository enable flag)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: dockerhub-${{ inputs.version }}-${{ inputs.architecture }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.release.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Check version, credentials configuration and exact-revision CI
+        id: release
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          PUBLISH: ${{ inputs.publish }}
+          ENABLED: ${{ vars.DOCKERHUB_PUBLISH_ENABLED }}
+          HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          REVISION: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, re, subprocess, tomllib
+          version = os.environ['RELEASE_VERSION']
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version), 'Use a stable release version'
+          assert tomllib.loads(pathlib.Path('pyproject.toml').read_text())['project']['version'] == version
+          assert re.fullmatch(r'[a-z0-9][a-z0-9_-]{1,38}', os.environ['HUB_USER']), 'Set DOCKERHUB_USERNAME'
+          if os.environ['PUBLISH'] == 'true':
+              assert os.environ['ENABLED'] == 'true', 'Publishing is disabled; set DOCKERHUB_PUBLISH_ENABLED deliberately'
+          runs = json.loads(subprocess.check_output([
+              'gh', 'api', f"repos/{os.environ['REPOSITORY']}/actions/runs?head_sha={os.environ['REVISION']}&per_page=100"
+          ]))['workflow_runs']
+          for name in ['Course validation', 'Application builds']:
+              matches = [run for run in runs if run['name'] == name and run['event'] == 'push']
+              assert matches, f'No push qualification for this revision: {name}'
+              latest = max(matches, key=lambda run: (run['id'], run['run_attempt']))
+              assert latest['status'] == 'completed' and latest['conclusion'] == 'success', f'{name} is not successful for this revision'
+          rows = []
+          for line in pathlib.Path('docker/classroom-images.tsv').read_text().splitlines():
+              if not line or line.startswith('#'): continue
+              profile, service, image, suffix, variable, kind = line.split()
+              if kind != 'gpu': rows.append({'profile': profile})
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('matrix=' + json.dumps({'include': rows}) + '\n')
+          PY
+
+  images:
+    needs: gate
+    runs-on: ${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    environment: dockerhub
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.gate.outputs.matrix) }}
+    env:
+      PROFILE: ${{ matrix.profile }}
+      RELEASE_VERSION: ${{ inputs.version }}
+      HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+      COMPOSE_PROJECT_NAME: ds60-publish-${{ matrix.profile }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Build and exercise this image through the classroom
+        run: |
+          options=(--starter)
+          if [ "$PROFILE" != app ]; then options=(--profile "$PROFILE"); fi
+          ./classroom --registry upstream --local-build --tag "$RELEASE_VERSION" --no-browser "${options[@]}"
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python3 scripts/check_lab_http.py --url "$url" --confirm-disposable --reset-sql
+          if [ "$PROFILE" != app ]; then
+            python3 scripts/check_classroom_profiles.py --url "$url" --confirm-disposable --profiles "$PROFILE"
+          fi
+      - name: Inspect proposed tags without publishing
+        run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE"
+      - name: Authenticate to Docker Hub
+        if: inputs.publish
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKERHUB_TOKEN" || { echo 'Set the DOCKERHUB_TOKEN secret before publishing.' >&2; exit 2; }
+          printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$HUB_USER" --password-stdin
+      - name: Publish the tested native architecture image
+        if: inputs.publish
+        run: ./scripts/publish-images --namespace "$HUB_USER" --version "$RELEASE_VERSION" --profile "$PROFILE" --push
+      - name: Retain validation receipts
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: image-validation-${{ matrix.profile }}-${{ inputs.architecture }}
+          path: work/*.json
+          if-no-files-found: ignore
+      - name: Stop owned containers and remove ephemeral login
+        if: always()
+        run: |
+          ./classroom stop || true
+          docker logout || true

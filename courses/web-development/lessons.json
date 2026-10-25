@@ -1,0 +1,782 @@
+{
+  "schema_version": 1,
+  "track_id": "web-development",
+  "lessons": [
+    {
+      "id": "web-001",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-001.md",
+      "source_path": "courses/web-development/lessons/web-001.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-001_solution.html",
+        "courses/web-development/solutions/web-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-002",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-002.md",
+      "source_path": "courses/web-development/lessons/web-002.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-002_solution.html",
+        "courses/web-development/solutions/web-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-003",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-003.md",
+      "source_path": "courses/web-development/lessons/web-003.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-003_solution.html",
+        "courses/web-development/solutions/web-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-004",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-004.md",
+      "source_path": "courses/web-development/lessons/web-004.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-004_solution.html",
+        "courses/web-development/solutions/web-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-005",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-005.md",
+      "source_path": "courses/web-development/lessons/web-005.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-005_solution.html",
+        "courses/web-development/solutions/web-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-006",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-006.md",
+      "source_path": "courses/web-development/lessons/web-006.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-006_solution.html",
+        "courses/web-development/solutions/web-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-007",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-007.md",
+      "source_path": "courses/web-development/lessons/web-007.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-007_solution.html",
+        "courses/web-development/solutions/web-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-008",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-008.md",
+      "source_path": "courses/web-development/lessons/web-008.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-008_solution.html",
+        "courses/web-development/solutions/web-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-009",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-009.md",
+      "source_path": "courses/web-development/lessons/web-009.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-009_solution.html",
+        "courses/web-development/solutions/web-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-010",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-010.md",
+      "source_path": "courses/web-development/lessons/web-010.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-010_solution.html",
+        "courses/web-development/solutions/web-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-011",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-011.md",
+      "source_path": "courses/web-development/lessons/web-011.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-011_solution.html",
+        "courses/web-development/solutions/web-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-012",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-012.md",
+      "source_path": "courses/web-development/lessons/web-012.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-012_solution.html",
+        "courses/web-development/solutions/web-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-013",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-013.md",
+      "source_path": "courses/web-development/lessons/web-013.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-013_solution.html",
+        "courses/web-development/solutions/web-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-014",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-014.md",
+      "source_path": "courses/web-development/lessons/web-014.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-014_solution.html",
+        "courses/web-development/solutions/web-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-015",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-015.md",
+      "source_path": "courses/web-development/lessons/web-015.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-015_solution.html",
+        "courses/web-development/solutions/web-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-016",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-016.md",
+      "source_path": "courses/web-development/lessons/web-016.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-016_solution.html",
+        "courses/web-development/solutions/web-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-017",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-017.md",
+      "source_path": "courses/web-development/lessons/web-017.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-017_solution.html",
+        "courses/web-development/solutions/web-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-018",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-018.md",
+      "source_path": "courses/web-development/lessons/web-018.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-018_solution.html",
+        "courses/web-development/solutions/web-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-019",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-019.md",
+      "source_path": "courses/web-development/lessons/web-019.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-019_solution.html",
+        "courses/web-development/solutions/web-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-020",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-020.md",
+      "source_path": "courses/web-development/lessons/web-020.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-020_solution.html",
+        "courses/web-development/solutions/web-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-021",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-021.md",
+      "source_path": "courses/web-development/lessons/web-021.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-021_solution.html",
+        "courses/web-development/solutions/web-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-022",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-022.md",
+      "source_path": "courses/web-development/lessons/web-022.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-022_solution.html",
+        "courses/web-development/solutions/web-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-023",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-023.md",
+      "source_path": "courses/web-development/lessons/web-023.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-023_solution.html",
+        "courses/web-development/solutions/web-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-024",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-024.md",
+      "source_path": "courses/web-development/lessons/web-024.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-024_solution.html",
+        "courses/web-development/solutions/web-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-025",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-025.md",
+      "source_path": "courses/web-development/lessons/web-025.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-025_solution.html",
+        "courses/web-development/solutions/web-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-026",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-026.md",
+      "source_path": "courses/web-development/lessons/web-026.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-026_solution.html",
+        "courses/web-development/solutions/web-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-027",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-027.md",
+      "source_path": "courses/web-development/lessons/web-027.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-027_solution.html",
+        "courses/web-development/solutions/web-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-028",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-028.md",
+      "source_path": "courses/web-development/lessons/web-028.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-028_solution.html",
+        "courses/web-development/solutions/web-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-029",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-029.md",
+      "source_path": "courses/web-development/lessons/web-029.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-029_solution.html",
+        "courses/web-development/solutions/web-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-030",
+      "status": "authored",
+      "language": "html",
+      "runtime_profile": "html-browser",
+      "guide_path": "courses/web-development/guides/web-030.md",
+      "source_path": "courses/web-development/lessons/web-030.html",
+      "solution_paths": [
+        "courses/web-development/solutions/web-030_solution.html",
+        "courses/web-development/solutions/web-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-031",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-031.md",
+      "source_path": "courses/web-development/lessons/web-031.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-031_solution.php",
+        "courses/web-development/solutions/web-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-032",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-032.md",
+      "source_path": "courses/web-development/lessons/web-032.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-032_solution.php",
+        "courses/web-development/solutions/web-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-033",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-033.md",
+      "source_path": "courses/web-development/lessons/web-033.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-033_solution.php",
+        "courses/web-development/solutions/web-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-034",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-034.md",
+      "source_path": "courses/web-development/lessons/web-034.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-034_solution.php",
+        "courses/web-development/solutions/web-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-035",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-035.md",
+      "source_path": "courses/web-development/lessons/web-035.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-035_solution.php",
+        "courses/web-development/solutions/web-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-036",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-036.md",
+      "source_path": "courses/web-development/lessons/web-036.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-036_solution.php",
+        "courses/web-development/solutions/web-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-037",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-037.md",
+      "source_path": "courses/web-development/lessons/web-037.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-037_solution.php",
+        "courses/web-development/solutions/web-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-038",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-038.md",
+      "source_path": "courses/web-development/lessons/web-038.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-038_solution.php",
+        "courses/web-development/solutions/web-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-039",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-039.md",
+      "source_path": "courses/web-development/lessons/web-039.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-039_solution.php",
+        "courses/web-development/solutions/web-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-040",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-040.md",
+      "source_path": "courses/web-development/lessons/web-040.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-040_solution.php",
+        "courses/web-development/solutions/web-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-041",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-041.md",
+      "source_path": "courses/web-development/lessons/web-041.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-041_solution.php",
+        "courses/web-development/solutions/web-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-042",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-042.md",
+      "source_path": "courses/web-development/lessons/web-042.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-042_solution.php",
+        "courses/web-development/solutions/web-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-043",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-043.md",
+      "source_path": "courses/web-development/lessons/web-043.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-043_solution.php",
+        "courses/web-development/solutions/web-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-044",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-044.md",
+      "source_path": "courses/web-development/lessons/web-044.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-044_solution.php",
+        "courses/web-development/solutions/web-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-045",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-045.md",
+      "source_path": "courses/web-development/lessons/web-045.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-045_solution.php",
+        "courses/web-development/solutions/web-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-046",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-046.md",
+      "source_path": "courses/web-development/lessons/web-046.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-046_solution.php",
+        "courses/web-development/solutions/web-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-047",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-047.md",
+      "source_path": "courses/web-development/lessons/web-047.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-047_solution.php",
+        "courses/web-development/solutions/web-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-048",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-048.md",
+      "source_path": "courses/web-development/lessons/web-048.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-048_solution.php",
+        "courses/web-development/solutions/web-048_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-049",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-049.md",
+      "source_path": "courses/web-development/lessons/web-049.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-049_solution.php",
+        "courses/web-development/solutions/web-049_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-050",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-050.md",
+      "source_path": "courses/web-development/lessons/web-050.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-050_solution.php",
+        "courses/web-development/solutions/web-050_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-051",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-051.md",
+      "source_path": "courses/web-development/lessons/web-051.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-051_solution.php",
+        "courses/web-development/solutions/web-051_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-052",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-052.md",
+      "source_path": "courses/web-development/lessons/web-052.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-052_solution.php",
+        "courses/web-development/solutions/web-052_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-053",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-053.md",
+      "source_path": "courses/web-development/lessons/web-053.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-053_solution.php",
+        "courses/web-development/solutions/web-053_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-054",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-054.md",
+      "source_path": "courses/web-development/lessons/web-054.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-054_solution.php",
+        "courses/web-development/solutions/web-054_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-055",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-055.md",
+      "source_path": "courses/web-development/lessons/web-055.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-055_solution.php",
+        "courses/web-development/solutions/web-055_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-056",
+      "status": "authored",
+      "language": "php",
+      "runtime_profile": "php-cli",
+      "guide_path": "courses/web-development/guides/web-056.md",
+      "source_path": "courses/web-development/lessons/web-056.php",
+      "solution_paths": [
+        "courses/web-development/solutions/web-056_solution.php",
+        "courses/web-development/solutions/web-056_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-057",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/web-development/guides/web-057.md",
+      "source_path": "courses/web-development/lessons/web-057.md",
+      "solution_paths": [
+        "courses/web-development/solutions/web-057_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-058",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/web-development/guides/web-058.md",
+      "source_path": "courses/web-development/lessons/web-058.md",
+      "solution_paths": [
+        "courses/web-development/solutions/web-058_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-059",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/web-development/guides/web-059.md",
+      "source_path": "courses/web-development/lessons/web-059.md",
+      "solution_paths": [
+        "courses/web-development/solutions/web-059_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "web-060",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/web-development/guides/web-060.md",
+      "source_path": "courses/web-development/lessons/web-060.md",
+      "solution_paths": [
+        "courses/web-development/solutions/web-060_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

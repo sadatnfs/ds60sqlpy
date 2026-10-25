@@ -30,6 +30,23 @@ choosing where an extension belongs.
 
 ## Presentation and learning modes
 
+The CUDA subject adds 128 chapters with default reading workspaces, separately
+saved CPU-model variants, selected framework/Spark CPU variants and optional
+NVIDIA variants. GPU workers are explicitly selected and excluded from ordinary
+default/`--all` builds. They require a real allocation/kernel/readback probe.
+CPU checks and compiler acceptance never establish device or performance
+qualification. See `docs/cuda-classroom.md` for supported preparation and limits.
+
+The web-development subject combines 60 HTML/CSS/PHP lessons. `html-browser`
+uses the existing opaque, network-blocked preview and browser observations;
+`php-cli` checks syntax then runs `main.php` with a prepared SQLite driver.
+The optional HTTP project is separate from the ordinary single-file worker.
+
+Image distribution supports local builds or explicit Docker Hub selection.
+Per-project `images.env` stores source, namespace and version; architecture tags
+match the engine. Resume never pulls or builds. Publication is an explicit
+separate script and optional manual workflow, not a side effect of startup.
+
 The shared renderer provides offline MathML and syntax highlighting. Reviewed
 prose normalization runs before reader generation; copying a code block must
 preserve source characters. The generated static library remains available

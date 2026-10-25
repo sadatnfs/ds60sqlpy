@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typography, units and readable content</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+.prose { max-inline-size: 65ch; font-size: 1rem; line-height: 1.65; } h1 { font-size: clamp(1.75rem, 4vw, 3rem); line-height: 1.15; }
+  </style>
+</head>
+<body>
+<main class="prose"><h1>Readable notes at your pace</h1><p>A learning page should remain comfortable when the window narrows, the text grows or a preferred font is unavailable. Start with the words and their relationships.</p><p>Choose a bounded line length, useful paragraph spacing and a font stack that works offline.</p></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(getComputedStyle(document.querySelector('.prose')).maxInlineSize !== 'none', 'Reading measure missing');
+document.querySelector("#reference-status").textContent = "web-012 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-012 reference checks passed");
+</script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Browser trust boundaries: text, origins and policy</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; border: 1px solid #64748b; padding: 1rem; }
+  </style>
+</head>
+<body>
+<main><h1>Keep data as data</h1><p>The following value is displayed literally:</p><pre id="untrusted"></pre><p id="url-policy"></p></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+const value = '<img src=x onerror=alert(1)>'; document.querySelector('#untrusted').textContent = value; const candidate = new URL('https://example.invalid/notes'); document.querySelector('#url-policy').textContent = candidate.protocol === 'https:' ? 'Candidate uses the allowed https scheme. No request was sent.' : 'Rejected scheme.';
+check(document.querySelector('#untrusted').children.length === 0, 'Untrusted data became markup'); check(document.querySelectorAll('img').length === 0, 'Unexpected image element');
+document.querySelector("#reference-status").textContent = "web-029 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-029 reference checks passed");
+</script>
+</body>
+</html>

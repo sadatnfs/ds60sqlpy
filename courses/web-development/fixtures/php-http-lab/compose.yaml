@@ -1,0 +1,28 @@
+services:
+  web:
+    build: .
+    image: ds60-web-study:local
+    ports:
+      - "127.0.0.1:18088:8080"
+    volumes:
+      - notes-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 192m
+    pids_limit: 64
+    labels:
+      org.ds60sqlpy.lab: web-development-http
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8080/health') === \"ds60 web study lab ready\\n\" ? 0 : 1);"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+volumes:
+  notes-data:
+    labels:
+      org.ds60sqlpy.lab: web-development-http

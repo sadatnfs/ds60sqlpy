@@ -1,0 +1,1210 @@
+{
+  "schema_version": 1,
+  "id": "web-development",
+  "title": "Web development: HTML, CSS and PHP",
+  "summary": "60 lessons build accessible documents, responsive interfaces and tested PHP applications, from a first page to secure request handling and a deliberate deployment plan. HTML/CSS previews run offline; PHP examples use an isolated Linux CLI worker.",
+  "lessons": [
+    {
+      "id": "web-001",
+      "title": "A web page: source, browser and server",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "html-browser",
+      "concepts": [
+        "HTML",
+        "CSS",
+        "HTTP",
+        "browser",
+        "server"
+      ],
+      "outcome": "Trace a requested page from source to visible output.",
+      "lab": "Build a complete document with a title, one heading and two paragraphs.",
+      "verification": "The preview contains one main heading and two paragraphs in a main region."
+    },
+    {
+      "id": "web-002",
+      "title": "Elements, attributes, nesting and text escaping",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-001"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "element",
+        "attribute",
+        "nesting",
+        "character reference"
+      ],
+      "outcome": "Explain escaping versus validation with a text and URL example.",
+      "lab": "Build a notes paragraph with nested importance and literal angle brackets.",
+      "verification": "The structure remains a paragraph and the comparison is text rather than an element."
+    },
+    {
+      "id": "web-003",
+      "title": "Semantic structure, headings and landmarks",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-002"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "semantics",
+        "heading hierarchy",
+        "landmark",
+        "main",
+        "section"
+      ],
+      "outcome": "Explain when a div is more appropriate than section.",
+      "lab": "Build a study page with landmarks and a working skip link.",
+      "verification": "Header, labeled navigation, one main and footer have meaningful content; the skip target exists."
+    },
+    {
+      "id": "web-004",
+      "title": "Links, paths, navigation and usable destinations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-003"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "URL",
+        "relative path",
+        "fragment",
+        "link purpose"
+      ],
+      "outcome": "Explain the difference between absolute, root-relative and document-relative paths.",
+      "lab": "Build a contents list that navigates to three local sections.",
+      "verification": "Every fragment matches one unique section id and works with keyboard activation."
+    },
+    {
+      "id": "web-005",
+      "title": "Lists, quotations, code and meaningful text",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-004"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "ordered list",
+        "unordered list",
+        "description list",
+        "quotation",
+        "code"
+      ],
+      "outcome": "Explain the difference between preserving whitespace and preserving meaning.",
+      "lab": "Build a study checklist with a code example and glossary.",
+      "verification": "The page exposes list, code and definition structures without relying on spacing."
+    },
+    {
+      "id": "web-006",
+      "title": "Images, SVG, alternatives and media decisions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-005"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "alternative text",
+        "figure",
+        "caption",
+        "SVG",
+        "intrinsic size"
+      ],
+      "outcome": "Plan an accessible video lesson without autoplay.",
+      "lab": "Create an offline SVG progress illustration with a textual equivalent.",
+      "verification": "The image has an accessible name and the numeric progress is visible as text."
+    },
+    {
+      "id": "web-007",
+      "title": "Data tables, captions and header relationships",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-006"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "table",
+        "caption",
+        "column header",
+        "row header",
+        "scope"
+      ],
+      "outcome": "Explain when a chart should keep a supporting table.",
+      "lab": "Build a three-row study table with correct header relationships.",
+      "verification": "The caption, row headers and column headers identify every value."
+    },
+    {
+      "id": "web-008",
+      "title": "Forms: labels, controls and successful values",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-007"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "form",
+        "label",
+        "name",
+        "value",
+        "fieldset"
+      ],
+      "outcome": "Explain why form appearance cannot establish server validation.",
+      "lab": "Build a study-preferences form with three native control types.",
+      "verification": "Every control has a useful label, stable name and suitable type."
+    },
+    {
+      "id": "web-009",
+      "title": "Form constraints, errors and helpful recovery",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-008"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "constraint validation",
+        "required",
+        "minlength",
+        "error message"
+      ],
+      "outcome": "Separate client feedback from server-side acceptance.",
+      "lab": "Build a bounded study-time form with linked help.",
+      "verification": "The user can identify the rule, enter a valid value and retain it after a failed attempt."
+    },
+    {
+      "id": "web-010",
+      "title": "CSS rules, selectors and the cascade",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-009"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "selector",
+        "declaration",
+        "cascade",
+        "specificity",
+        "inheritance"
+      ],
+      "outcome": "Explain why specificity alone does not describe the cascade.",
+      "lab": "Style two note cards using one low-specificity class.",
+      "verification": "Both cards share styling without duplicate ids or inline declarations."
+    },
+    {
+      "id": "web-011",
+      "title": "The box model, sizing and overflow",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-010"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "content box",
+        "padding",
+        "border",
+        "margin",
+        "box-sizing",
+        "overflow"
+      ],
+      "outcome": "Explain which dimensions margin does and does not affect.",
+      "lab": "Build a readable card that contains a long identifier.",
+      "verification": "The identifier wraps or scrolls locally without overflowing the page."
+    },
+    {
+      "id": "web-012",
+      "title": "Typography, units and readable content",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-011"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "rem",
+        "em",
+        "line-height",
+        "measure",
+        "font stack",
+        "relative units"
+      ],
+      "outcome": "Explain why ch is a useful approximation rather than a word-count guarantee.",
+      "lab": "Build a reading page with bounded measure and scalable headings.",
+      "verification": "Text stays comfortable at wide and narrow sizes without fixed-height clipping."
+    },
+    {
+      "id": "web-013",
+      "title": "Color, contrast, focus and accessible states",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-012"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "contrast",
+        "focus-visible",
+        "state",
+        "color independence"
+      ],
+      "outcome": "Explain why one palette check does not qualify every interaction state.",
+      "lab": "Build status cards whose meaning does not depend on color.",
+      "verification": "Each card contains a clear label, readable text and visible interactive focus."
+    },
+    {
+      "id": "web-014",
+      "title": "Normal flow, display and positioning",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-013"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "normal flow",
+        "block",
+        "inline",
+        "position",
+        "containing block"
+      ],
+      "outcome": "Explain the containing block used by an absolute element.",
+      "lab": "Build a card with an intentional positioned badge and flowing content.",
+      "verification": "Long body text expands the card while the badge stays in its reserved corner."
+    },
+    {
+      "id": "web-015",
+      "title": "Flexbox: one-dimensional layout and resilient navigation",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-014"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "flex container",
+        "main axis",
+        "cross axis",
+        "flex basis",
+        "wrap"
+      ],
+      "outcome": "Explain when Flexbox fits better than Grid.",
+      "lab": "Build a wrapping navigation bar and flexible card row.",
+      "verification": "Long labels stay reachable at narrow widths and DOM order remains logical."
+    },
+    {
+      "id": "web-016",
+      "title": "Grid: tracks, gaps and two-dimensional alignment",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-015"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "grid",
+        "track",
+        "fr",
+        "minmax",
+        "auto-fit"
+      ],
+      "outcome": "Explain auto-fit versus auto-fill at a high level.",
+      "lab": "Build an adaptive topic grid that survives a narrow container.",
+      "verification": "Cards change column count while preserving reading order and avoiding page overflow."
+    },
+    {
+      "id": "web-017",
+      "title": "Responsive layouts and content-driven breakpoints",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-016"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "responsive design",
+        "media query",
+        "viewport",
+        "breakpoint",
+        "mobile first"
+      ],
+      "outcome": "Explain why responsive design is more than media queries.",
+      "lab": "Build a responsive course outline with a readable article.",
+      "verification": "The page adapts between stacked and two-column layouts without losing content."
+    },
+    {
+      "id": "web-018",
+      "title": "Custom properties, tokens and component themes",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-017"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "custom property",
+        "design token",
+        "fallback",
+        "scope",
+        "theme"
+      ],
+      "outcome": "Explain a token name that survives a palette change.",
+      "lab": "Build two themed cards using one component rule.",
+      "verification": "The variants preserve content labels, contrast and focus while sharing structure."
+    },
+    {
+      "id": "web-019",
+      "title": "Pseudo-classes, pseudo-elements and stateful styling",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-018"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "pseudo-class",
+        "pseudo-element",
+        "attribute selector",
+        "focus-within"
+      ],
+      "outcome": "Explain why CSS state cannot authorize a server action.",
+      "lab": "Build a preferences list whose selected state is visible and semantic.",
+      "verification": "Native checkboxes carry the state and text styling reinforces it."
+    },
+    {
+      "id": "web-020",
+      "title": "Transitions, motion and reduced-motion preferences",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-019"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "transition",
+        "transform",
+        "animation",
+        "reduced motion"
+      ],
+      "outcome": "Explain why transform does not guarantee a fast page.",
+      "lab": "Build a card interaction with a static reduced-motion alternative.",
+      "verification": "The card remains understandable and usable without movement."
+    },
+    {
+      "id": "web-021",
+      "title": "Container queries and reusable responsive components",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-020"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "container query",
+        "inline-size containment",
+        "component",
+        "fallback"
+      ],
+      "outcome": "Choose between a viewport query and a container query for a sidebar card.",
+      "lab": "Render the same component in wide and narrow slots.",
+      "verification": "Each instance adapts independently while preserving its content."
+    },
+    {
+      "id": "web-022",
+      "title": "CSS architecture, layers and maintainable components",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-021"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "cascade layer",
+        "component boundary",
+        "utility",
+        "specificity budget"
+      ],
+      "outcome": "Explain why important declarations complicate layer reasoning.",
+      "lab": "Build a small layered stylesheet with base, component and utility rules.",
+      "verification": "The intended overrides work without escalating ids or important flags."
+    },
+    {
+      "id": "web-023",
+      "title": "Print styles, progressive enhancement and resilient delivery",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-022"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "print stylesheet",
+        "progressive enhancement",
+        "feature query",
+        "fallback"
+      ],
+      "outcome": "Explain what a feature query proves and what it does not.",
+      "lab": "Build printable study notes with a useful baseline layout.",
+      "verification": "Screen and print views preserve meaning with appropriate presentation."
+    },
+    {
+      "id": "web-024",
+      "title": "HTML and CSS milestone: an accessible learning portal",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "web-023"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "information architecture",
+        "component system",
+        "responsive audit",
+        "acceptance criteria"
+      ],
+      "outcome": "Explain the portal's remaining backend requirements.",
+      "lab": "Build a complete offline portal with three paths and local destinations.",
+      "verification": "All cards, navigation and headings are meaningful, keyboard reachable and responsive."
+    },
+    {
+      "id": "web-025",
+      "title": "Connect HTML to JavaScript: DOM, events and safe text",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-024",
+        "js-029"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "DOM",
+        "event listener",
+        "textContent",
+        "state",
+        "rendering"
+      ],
+      "outcome": "Explain why reading state back from formatted text is fragile.",
+      "lab": "Build a native-button counter with a reset action and output.",
+      "verification": "Increment and reset work by keyboard and pointer, with a visible announced result."
+    },
+    {
+      "id": "web-026",
+      "title": "Disclosures, dialogs and focus management",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-025"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "disclosure",
+        "dialog",
+        "focus management",
+        "expanded state",
+        "native control"
+      ],
+      "outcome": "Explain why a modal is inappropriate for every small message.",
+      "lab": "Build a disclosure and a deliberately opened local dialog.",
+      "verification": "Both are labeled, keyboard operable and can be closed without losing the task."
+    },
+    {
+      "id": "web-027",
+      "title": "Accessible form feedback with a pure validation function",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-026"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "validation function",
+        "error summary",
+        "aria-invalid",
+        "recovery",
+        "pure function"
+      ],
+      "outcome": "Explain which validation logic must be repeated on the server.",
+      "lab": "Build a local form with preserved input and linked validation feedback.",
+      "verification": "A failed attempt identifies the problem without clearing the user's value."
+    },
+    {
+      "id": "web-028",
+      "title": "Data interfaces: filtering tables and honest visual summaries",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-027"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "derived data",
+        "filter",
+        "table",
+        "empty state",
+        "visual encoding"
+      ],
+      "outcome": "Explain how this table connects to D3 without changing the statistical claim.",
+      "lab": "Build a filterable local study table with an explicit empty state.",
+      "verification": "Changing the selection updates rows and count while preserving the original data."
+    },
+    {
+      "id": "web-029",
+      "title": "Browser trust boundaries: text, origins and policy",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-028"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "origin",
+        "same-origin policy",
+        "CSP",
+        "injection",
+        "sandbox"
+      ],
+      "outcome": "Explain the separate roles of escaping, validation, CSP and sandboxing.",
+      "lab": "Build a small rendering demo that separates text handling from URL policy.",
+      "verification": "Plain text remains data and navigation candidates pass an explicit scheme decision."
+    },
+    {
+      "id": "web-030",
+      "title": "Browser quality: tests, performance and independent review",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-029"
+      ],
+      "runtime": "html-browser",
+      "concepts": [
+        "acceptance test",
+        "rendering pipeline",
+        "performance measurement",
+        "regression",
+        "evidence"
+      ],
+      "outcome": "Explain what evidence would justify a production readiness claim.",
+      "lab": "Create a quality report for the portal from web-024.",
+      "verification": "The report records source revision, tested conditions, observations and remaining limitations."
+    },
+    {
+      "id": "web-031",
+      "title": "PHP begins: interpreter, CLI and server execution",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-001",
+        "web-009"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "PHP",
+        "interpreter",
+        "CLI",
+        "statement",
+        "server response"
+      ],
+      "outcome": "Compare the CLI lifecycle with a server request lifecycle.",
+      "lab": "Write a PHP program that prints a study topic and computed duration.",
+      "verification": "The program runs in the CLI worker and produces two clearly labeled values."
+    },
+    {
+      "id": "web-032",
+      "title": "Values, types, strict comparisons and null",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-031"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "integer",
+        "float",
+        "string",
+        "boolean",
+        "null",
+        "strict comparison"
+      ],
+      "outcome": "Explain the limited scope of strict_types.",
+      "lab": "Model an optional note without confusing missing, empty and null.",
+      "verification": "The program documents and checks the chosen interpretation of each state."
+    },
+    {
+      "id": "web-033",
+      "title": "Expressions, integer money and deliberate conversion",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-032"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "expression",
+        "operator",
+        "integer minor units",
+        "conversion",
+        "overflow"
+      ],
+      "outcome": "Explain when integer cents are insufficient.",
+      "lab": "Implement a bounded quantity calculation and cents formatter.",
+      "verification": "Valid quantities produce exact integer totals and two-digit fractional display."
+    },
+    {
+      "id": "web-034",
+      "title": "Conditions, loops and bounded control flow",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-033"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "branch",
+        "loop",
+        "guard clause",
+        "match",
+        "termination"
+      ],
+      "outcome": "Explain match versus switch for a typed mapping.",
+      "lab": "Build a bounded weekly-duration summary with a route label.",
+      "verification": "The total and label follow the declared cases and terminate predictably."
+    },
+    {
+      "id": "web-035",
+      "title": "Arrays, records, keys and transformations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-034"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "array",
+        "ordered map",
+        "key",
+        "record",
+        "filter",
+        "mapping"
+      ],
+      "outcome": "Explain the risk of a lingering foreach reference.",
+      "lab": "Filter and summarize study records without changing the originals.",
+      "verification": "The derived list contains only qualifying rows and retains consecutive indices."
+    },
+    {
+      "id": "web-036",
+      "title": "Functions, contracts, closures and reusable logic",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "web-035"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "function",
+        "parameter",
+        "return type",
+        "closure",
+        "pure function"
+      ],
+      "outcome": "Explain when a closure improves a transformation.",
+      "lab": "Build reusable duration calculation and display functions.",
+      "verification": "Calculations can be tested without capturing output, then formatted at the boundary."
+    },
+    {
+      "id": "web-037",
+      "title": "Strings, UTF-8, bytes and contextual encoding",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-036"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "UTF-8",
+        "byte length",
+        "code point",
+        "grapheme",
+        "encoding"
+      ],
+      "outcome": "Explain validation, normalization and output escaping separately.",
+      "lab": "Build a text inspection report that labels bytes honestly.",
+      "verification": "The program does not present strlen as a count of user-perceived characters."
+    },
+    {
+      "id": "web-038",
+      "title": "Structured data, streams and bounded file handling",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-037"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "JSON",
+        "stream",
+        "resource",
+        "schema",
+        "bounded input"
+      ],
+      "outcome": "Explain why user-controlled paths need an ownership policy.",
+      "lab": "Parse a small study record and round-trip it through a temporary stream.",
+      "verification": "The field contract passes and the returned bytes match the encoded value."
+    },
+    {
+      "id": "web-039",
+      "title": "Exceptions, errors and useful failure boundaries",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-038"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "exception",
+        "Throwable",
+        "try-catch",
+        "finally",
+        "error boundary"
+      ],
+      "outcome": "Explain the difference between learner diagnostics and public production errors.",
+      "lab": "Build a failure-aware parser with explicit success and error paths.",
+      "verification": "Valid data returns a result; invalid data produces a clear classified failure."
+    },
+    {
+      "id": "web-040",
+      "title": "Objects, constructors and immutable value boundaries",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-039"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "class",
+        "object",
+        "constructor",
+        "property",
+        "invariant",
+        "readonly"
+      ],
+      "outcome": "Explain shallow readonly versus deep immutability.",
+      "lab": "Build a validated study-session value object.",
+      "verification": "Its topic and duration satisfy explicit constructor checks and remain readonly."
+    },
+    {
+      "id": "web-041",
+      "title": "Interfaces, composition and replaceable dependencies",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-040"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "interface",
+        "composition",
+        "dependency injection",
+        "test double"
+      ],
+      "outcome": "Explain what remains untested by an in-memory repository.",
+      "lab": "Build a summary service with an injected repository.",
+      "verification": "The same service works with two controlled implementations that satisfy the interface."
+    },
+    {
+      "id": "web-042",
+      "title": "Namespaces, project layout and Composer boundaries",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-041"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "namespace",
+        "autoloading",
+        "Composer",
+        "lockfile",
+        "dependency boundary"
+      ],
+      "outcome": "Describe a deliberate dependency update and lockfile review.",
+      "lab": "Design a small project layout with source, tests and a public entrypoint.",
+      "verification": "Application code and tests stay separate from the server's public document root."
+    },
+    {
+      "id": "web-043",
+      "title": "Dates, time zones and deterministic clocks",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-042"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "instant",
+        "time zone",
+        "DateTimeImmutable",
+        "clock",
+        "duration"
+      ],
+      "outcome": "Explain why a numeric offset is not a complete regional time-zone rule.",
+      "lab": "Build a deterministic study-session time report.",
+      "verification": "The output uses explicit time zones and a fixed input suitable for repeatable tests."
+    },
+    {
+      "id": "web-044",
+      "title": "Testing PHP: examples, boundaries and contract evidence",
+      "level": "intermediate",
+      "minutes": 110,
+      "prerequisites": [
+        "web-043"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "unit test",
+        "integration test",
+        "assertion",
+        "boundary",
+        "regression"
+      ],
+      "outcome": "Explain why a passing reference is not a bug-free guarantee.",
+      "lab": "Create a test table for a bounded study-duration function.",
+      "verification": "Normal, zero, invalid and boundary cases have independently justified outcomes."
+    },
+    {
+      "id": "web-045",
+      "title": "Templates and context-specific output escaping",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-002",
+        "web-037",
+        "web-044"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "template",
+        "HTML text context",
+        "escaping",
+        "URL validation",
+        "XSS"
+      ],
+      "outcome": "Explain why validated text still needs output escaping.",
+      "lab": "Render a study-card template from synthetic untrusted labels.",
+      "verification": "The structure stays fixed while labels are escaped at output."
+    },
+    {
+      "id": "web-046",
+      "title": "HTTP requests, response models and routing",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-045"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "request method",
+        "path",
+        "status code",
+        "header",
+        "response body",
+        "route"
+      ],
+      "outcome": "Explain what a CLI response model does not prove.",
+      "lab": "Build a pure router for health and lesson-summary requests.",
+      "verification": "Known GET routes return their declared representations and unsupported requests are rejected."
+    },
+    {
+      "id": "web-047",
+      "title": "Server form validation and redisplay without data loss",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-046"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "server validation",
+        "allowlist",
+        "field error",
+        "redisplay",
+        "POST redirect GET"
+      ],
+      "outcome": "Explain the limits of POST redirect GET.",
+      "lab": "Build a validator returning cleaned values and field-specific errors.",
+      "verification": "Valid data has a complete domain value; invalid data has actionable errors and no partial write."
+    },
+    {
+      "id": "web-048",
+      "title": "Cookies, sessions and a request-to-request lifecycle",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-047"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "cookie",
+        "session identifier",
+        "session state",
+        "fixation",
+        "lifecycle"
+      ],
+      "outcome": "Describe a real HTTP session acceptance test.",
+      "lab": "Model session activity and expiry with explicit state transitions.",
+      "verification": "An expired session is rejected and a valid activity update preserves the declared identity."
+    },
+    {
+      "id": "web-049",
+      "title": "CSRF defenses and deliberate state-changing requests",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-048"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "CSRF",
+        "synchronizer token",
+        "constant-time comparison",
+        "SameSite",
+        "origin"
+      ],
+      "outcome": "Explain the relationship between CSRF, SameSite and XSS.",
+      "lab": "Build a state-change decision that checks method, token and authorization.",
+      "verification": "Only a deliberate allowed POST with matching token can reach the mutation branch."
+    },
+    {
+      "id": "web-050",
+      "title": "Password hashing and authentication boundaries",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-049"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "password hash",
+        "salt",
+        "verification",
+        "rehash",
+        "authentication"
+      ],
+      "outcome": "List the additional controls required around a real login.",
+      "lab": "Build a password-verification demonstration without printing the hash or secret.",
+      "verification": "The output reports the test result while keeping credential-shaped values out of logs."
+    },
+    {
+      "id": "web-051",
+      "title": "PDO, prepared statements and the value-query boundary",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-035",
+        "web-044",
+        "web-047"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "PDO",
+        "prepared statement",
+        "parameter",
+        "SQL injection",
+        "schema"
+      ],
+      "outcome": "Explain which checks must be repeated when moving to PostgreSQL.",
+      "lab": "Build a local PDO note store with prepared insert and lookup.",
+      "verification": "The expected record is retrieved and SQL-looking text remains data."
+    },
+    {
+      "id": "web-052",
+      "title": "Transactions, constraints and concurrent changes",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-051"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "transaction",
+        "atomicity",
+        "constraint",
+        "rollback",
+        "optimistic concurrency"
+      ],
+      "outcome": "Explain the limits of the single-connection concurrency demonstration.",
+      "lab": "Implement a version-checked update in a disposable database.",
+      "verification": "The first expected version succeeds and the repeated stale version affects zero rows."
+    },
+    {
+      "id": "web-053",
+      "title": "Authorization, ownership and object-level access",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-052"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "authorization",
+        "ownership",
+        "least privilege",
+        "object access",
+        "deny by default"
+      ],
+      "outcome": "Explain why hiding an edit button is only a user-interface convenience.",
+      "lab": "Build an object-access function with separate trusted actor and requested id inputs.",
+      "verification": "The owner can read the record and a different actor receives no record."
+    },
+    {
+      "id": "web-054",
+      "title": "JSON APIs, schemas and consistent error responses",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-053"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "API contract",
+        "JSON response",
+        "schema",
+        "status mapping",
+        "content type"
+      ],
+      "outcome": "Explain a backward-compatible versus breaking API change.",
+      "lab": "Build a response model that maps success and validation failure consistently.",
+      "verification": "Status, content type and JSON body agree with the declared contract."
+    },
+    {
+      "id": "web-055",
+      "title": "Pagination, caching and bounded application workloads",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "web-054"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "pagination",
+        "cursor",
+        "stable ordering",
+        "cache key",
+        "invalidation",
+        "budget"
+      ],
+      "outcome": "Explain what must be measured before claiming a faster database endpoint.",
+      "lab": "Implement a cursor-based slice over synthetic records.",
+      "verification": "The second page continues after the last id and the final page can be shorter."
+    },
+    {
+      "id": "web-056",
+      "title": "PHP milestone: a tested study-planner application core",
+      "level": "advanced",
+      "minutes": 180,
+      "prerequisites": [
+        "web-055"
+      ],
+      "runtime": "php-cli",
+      "concepts": [
+        "application service",
+        "validation",
+        "repository",
+        "transaction",
+        "presentation boundary"
+      ],
+      "outcome": "Explain the remaining work before this core becomes a deployed application.",
+      "lab": "Build a tested planner core with validation and prepared storage.",
+      "verification": "Accepted plans persist in the disposable database and rejected inputs create no rows."
+    },
+    {
+      "id": "web-057",
+      "title": "A real local HTTP lab: sessions, forms and persistent notes",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "web-056"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "HTTP integration",
+        "cookie jar",
+        "session storage",
+        "redirect",
+        "persistent volume"
+      ],
+      "outcome": "Explain which properties this local server has not qualified.",
+      "lab": "Run the owned lab and create one synthetic note through the browser.",
+      "verification": "The note survives a page reload and appears after a successful POST-redirect-GET sequence."
+    },
+    {
+      "id": "web-058",
+      "title": "Uploads, filesystem ownership and outbound side effects",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "web-057"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "upload boundary",
+        "MIME validation",
+        "path traversal",
+        "quota",
+        "side effect",
+        "outbox"
+      ],
+      "outcome": "Explain which tests are needed before enabling uploads or email.",
+      "lab": "Write an upload design with separate validation, storage and retrieval boundaries.",
+      "verification": "Files receive generated names, stay outside executable public paths and have ownership and retention rules."
+    },
+    {
+      "id": "web-059",
+      "title": "Deploying PHP: containers, web servers and operations",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "web-058"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "PHP-FPM",
+        "reverse proxy",
+        "document root",
+        "secret",
+        "migration",
+        "backup"
+      ],
+      "outcome": "Explain what evidence is needed before publishing an image as ready.",
+      "lab": "Design a release plan for the study planner with durable storage.",
+      "verification": "The plan covers configuration, secrets, migration, health, write/read acceptance, backup and rollback."
+    },
+    {
+      "id": "web-060",
+      "title": "Integrated capstone: accessible, tested and recoverable web learning",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "web-059"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "capstone",
+        "threat model",
+        "acceptance matrix",
+        "cross-language boundary",
+        "operational evidence"
+      ],
+      "outcome": "Present a release-readiness review with explicit limits and next actions.",
+      "lab": "Build and review a learner-owned extension of the supplied local lab.",
+      "verification": "The extension has coherent HTML/CSS, tested PHP behavior and a bounded reproducible setup."
+    }
+  ]
+}

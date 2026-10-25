@@ -4,6 +4,7 @@
   "private": true,
   "description": "Pinned source formatters for the Docker contributor toolchain",
   "dependencies": {
+    "@prettier/plugin-php": "0.26.0",
     "@eslint/js": "9.39.1",
     "@prettier/plugin-xml": "3.4.2",
     "eslint": "9.39.1",

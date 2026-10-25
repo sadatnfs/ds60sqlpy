@@ -21,6 +21,11 @@ from ds60sqlpy.modules import MAX_SOURCE_BYTES, ModuleCatalog, ModuleState
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 SERVICES = {
+    "php-cli": "php-worker",
+    "cuda-cpp": "cuda-cpp-worker",
+    "cuda-python": "cuda-python-worker",
+    "pytorch-cuda": "pytorch-cuda-worker",
+    "tensorflow-cuda": "tensorflow-cuda-worker",
     "python-core": "python-core-worker",
     "cpp20": "cpp-worker",
     "c17": "c-worker",

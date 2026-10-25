@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transitions, motion and reduced-motion preferences</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+.card { display: inline-block; padding: 1rem; border: 2px solid #0753a4; transition: transform 120ms ease; } .card:hover { transform: translateY(-2px); } @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+  </style>
+</head>
+<body>
+<main><h1>Motion as an optional cue</h1><a class="card" href="#notes">Read the notes</a><section id="notes"><h2>Notes</h2><p>The destination remains available without animation.</p></section></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(document.querySelector('.card').getAttribute('href') === '#notes', 'Usable static destination missing');
+document.querySelector("#reference-status").textContent = "web-020 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-020 reference checks passed");
+</script>
+</body>
+</html>

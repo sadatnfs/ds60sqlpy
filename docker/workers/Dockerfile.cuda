@@ -1,0 +1,16 @@
+# Optional NVIDIA teaching workers. Ordinary classroom builds exclude these.
+ARG DS60_CUDA_IMAGE=nvidia/cuda:12.8.1-devel-ubuntu24.04@sha256:520292dbb4f755fd360766059e62956e9379485d9e073bbd2f6e3c20c270ed66
+FROM ${DS60_CUDA_IMAGE}
+ARG DS60_GPU_PROFILE=cuda-cpp
+ENV TZ=Etc/UTC
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends python3 python3-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && python3 -m venv /opt/gpu \
+    && install -d -m 0700 /run/ds60
+COPY docker/workers/gpu/requirements-${DS60_GPU_PROFILE}.lock /tmp/gpu-requirements.txt
+RUN /opt/gpu/bin/python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/gpu-requirements.txt
+ENV PATH=/opt/gpu/bin:${PATH} PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /opt/worker
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/gpu_runtime.py /opt/worker/src/ds60sqlpy/
+ENV DS60_WORKER_PROFILE=${DS60_GPU_PROFILE}
+ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

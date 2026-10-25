@@ -29,6 +29,8 @@ from scripts.sql_formatting import sql_for_parser as sql_for_parser  # noqa: E40
 GRAMMARS = {
     "c": "c",
     "cpp": "cpp",
+    "cuda": "cuda",
+    "php": "php",
     "csharp": "csharp",
     "go": "go",
     "rust": "rust",

@@ -5,7 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ds60sqlpy.browser_runs import BrowserRunStore, browser_capability
+from ds60sqlpy.browser_runs import BROWSER_PROFILES, BrowserRunStore, browser_capability
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import reference_relative_path, render_artifact, rendered_targets
 from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
@@ -13,6 +13,43 @@ from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE = {
+    "cuda-cpp": (
+        "Optional NVIDIA Linux amd64 worker: main.cu is compiled by nvcc as C++20, "
+        "then executed on the explicitly selected GPU. Readiness requires a real kernel "
+        "and checked readback. CPU/reading variants remain available on every classroom. "
+        "Single-source, 32 MiB scratch and 120-second maximum; larger projects and "
+        "profiler workflows follow the separate guide. GPU execution has not been "
+        "qualified on every device or operating system."
+    ),
+    "cuda-python": (
+        "Optional NVIDIA worker with pinned CuPy and NumPy. The worker probes an actual "
+        "CUDA operation before admitting jobs. CuPy examples run here; Numba and other "
+        "optional packages use their separate preparation instructions. No downloads "
+        "occur during a lesson. A CPU model is different from a real GPU result."
+    ),
+    "pytorch-cuda": (
+        "Optional NVIDIA PyTorch and CuPy worker. Tiny synthetic GPU labs run in a fresh "
+        "process with a checked device probe. No model-hub downloads or persisted live "
+        "GPU context. Large models and multi-GPU jobs use a separately prepared workflow."
+    ),
+    "tensorflow-cuda": (
+        "Optional NVIDIA TensorFlow worker with independently locked CUDA dependencies. "
+        "Startup checks a tensor operation on GPU with CPU soft placement disabled. "
+        "Use tiny bounded examples; external model downloads and multi-GPU jobs are separate."
+    ),
+    "html-browser": (
+        "Edit one complete main.html document with inline CSS and inline JavaScript. "
+        "Run opens an isolated, offline browser preview. External scripts, stylesheets, "
+        "network requests and form submission are unavailable. Save observations separately "
+        "from your source. PHP executes on the server-side PHP profile, not in this preview."
+    ),
+    "php-cli": (
+        "The worker saves main.php, checks PHP syntax, then executes it as a fresh CLI "
+        "process with assertions enabled. Start with <?php. PDO SQLite is prepared for "
+        "temporary local database examples. Output is text, including generated HTML. "
+        "HTTP requests, browser cookies, persistent sessions and multi-file web servers "
+        "use the separate project workflow explained in the guide."
+    ),
     "c17": (
         "The worker saves main.c, compiles C17 with GCC and warnings, links math and "
         "POSIX threads, then runs the program in a fresh Linux job folder. Use "
@@ -143,10 +180,10 @@ class ModuleService:
             }
         if action == "module-readiness":
             profiles = {lesson.runtime_profile for lesson in self.catalog.lessons.values()}
-            ordinary = profiles - {"javascript-browser"}
+            ordinary = profiles - BROWSER_PROFILES.keys()
             capabilities = profile_readiness(self.jobs.client, ordinary)
-            if "javascript-browser" in profiles:
-                capabilities.append(browser_capability())
+            for browser_profile in profiles & BROWSER_PROFILES.keys():
+                capabilities.append(browser_capability(browser_profile))
             return {"profiles": sorted(capabilities, key=lambda row: row["profile"])}
         if action == "module-job":
             return self.jobs.get(payload.get("job_id"))
@@ -171,9 +208,15 @@ class ModuleService:
                 "learning_mode": lesson.learning_mode,
                 "source_filename": PROFILES[lesson.runtime_profile].filename
                 if lesson.runtime_profile in PROFILES
-                else ("main.js" if lesson.runtime_profile == "javascript-browser" else "notes.md"),
+                else {"javascript-browser": "main.js", "html-browser": "main.html"}.get(
+                    lesson.runtime_profile, "notes.md"
+                ),
                 "setup_commands": (
-                    [f"./classroom --profile {lesson.runtime_profile}"]
+                    [f"./classroom --profile {lesson.runtime_profile}" + (
+                        " --gpu-device 0" if lesson.runtime_profile in {
+                            "cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"
+                        } else ""
+                    )]
                     if lesson.runtime_profile in SERVICES and lesson.runtime_profile != "k8s-kind"
                     else []
                 ),
@@ -192,16 +235,16 @@ class ModuleService:
                 "source": session["source"] if "source" in session else self.catalog.source(lesson),
                 "session": session,
                 "history": self.browser_runs.history(lesson.id)
-                if lesson.runtime_profile == "javascript-browser"
+                if lesson.runtime_profile in BROWSER_PROFILES
                 else self.jobs.history(lesson.id),
-                "capability": browser_capability()
-                if lesson.runtime_profile == "javascript-browser"
+                "capability": browser_capability(lesson.runtime_profile)
+                if lesson.runtime_profile in BROWSER_PROFILES
                 else self.jobs.client.readiness(lesson.runtime_profile),
             }
         if action == "module-save":
             return {"session": self.state.save(lesson.id, payload.get("fields"))}
         if action == "module-run":
-            if lesson.runtime_profile == "javascript-browser":
+            if lesson.runtime_profile in BROWSER_PROFILES:
                 raise ValueError("Use the browser preview for this lesson, not a worker job.")
             return self.jobs.start(
                 lesson.id,

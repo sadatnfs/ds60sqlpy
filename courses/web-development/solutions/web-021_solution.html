@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Container queries and reusable responsive components</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+.slot { container-type: inline-size; margin-block: 1rem; } .wide { max-inline-size: 45rem; } .narrow { max-inline-size: 20rem; } .card { display: grid; gap: 1rem; padding: 1rem; border: 1px solid #64748b; } @container (min-width: 28rem) { .card { grid-template-columns: 8rem minmax(0, 1fr); } }
+  </style>
+</head>
+<body>
+<main><h1>One component, different spaces</h1><div class="slot wide"><article class="card"><strong>HTML</strong><p>A reusable lesson summary in a wide slot.</p></article></div><div class="slot narrow"><article class="card"><strong>HTML</strong><p>The same structure in a narrow slot.</p></article></div></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(getComputedStyle(document.querySelector('.slot')).containerType === 'inline-size', 'Query container missing');
+document.querySelector("#reference-status").textContent = "web-021 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-021 reference checks passed");
+</script>
+</body>
+</html>

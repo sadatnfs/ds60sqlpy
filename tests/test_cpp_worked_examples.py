@@ -99,7 +99,7 @@ def test_docker_project_guide_has_real_install_targets_and_scoped_persistent_mou
     guide = (BASE / "compile-and-run.md").read_text()
     for fragment in (
         "Docker-only CMake project route",
-        "ds60sqlpy-worker-cpp20:0.3.0",
+        "ds60sqlpy-worker-cpp20:0.4.0",
         "--network none",
         "--pull never",
         "--entrypoint",

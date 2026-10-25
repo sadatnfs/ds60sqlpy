@@ -26,7 +26,7 @@ services:
       - "127.0.0.1:${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}:${DS60_LAB_PORT:-8765}"
 
   classroom-init:
-    image: ds60sqlpy-lab:0.3.0
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:0.4.0}
     pull_policy: never
     build:
       context: .
@@ -63,7 +63,17 @@ services:
       DS60_ROOTLESS: "0"
       DS60_PUBLIC_PORT: ${DS60_PUBLIC_PORT:-${DS60_CLASSROOM_PORT:-${DS60_LAB_PORT:-8765}}}
       DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token/token
-      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081","c17":"http://c-worker:8081","go":"http://go-worker:8081","csharp-dotnet":"http://csharp-worker:8081","rust-stable":"http://rust-worker:8081","swift-linux":"http://swift-worker:8081"}'
+      DS60_MODULE_ENDPOINTS: >-
+        {"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081",
+        "tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081",
+        "spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081",
+        "llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081",
+        "javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081",
+        "c17":"http://c-worker:8081","go":"http://go-worker:8081","csharp-dotnet":"http://csharp-worker:8081",
+        "rust-stable":"http://rust-worker:8081","swift-linux":"http://swift-worker:8081",
+        "php-cli":"http://php-worker:8081","cuda-cpp":"http://cuda-cpp-worker:8081",
+        "cuda-python":"http://cuda-python-worker:8081","pytorch-cuda":"http://pytorch-cuda-worker:8081",
+        "tensorflow-cuda":"http://tensorflow-cuda-worker:8081"}
     volumes:
       - type: volume
         source: classroom-learning
@@ -144,6 +154,26 @@ services:
   swift-worker:
     <<: *classroom-worker
     extends: { file: compose.modules.yaml, service: swift-worker }
+
+  php-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: php-worker }
+
+  cuda-cpp-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: cuda-cpp-worker }
+
+  cuda-python-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: cuda-python-worker }
+
+  pytorch-cuda-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: pytorch-cuda-worker }
+
+  tensorflow-cuda-worker:
+    <<: *classroom-worker
+    extends: { file: compose.modules.yaml, service: tensorflow-cuda-worker }
 
 volumes:
   postgres-data: {}

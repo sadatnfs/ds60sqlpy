@@ -53,7 +53,7 @@ try {
     if ($Action -eq 'doctor') { Write-Host 'Docker and Compose are ready. No data folder was created.'; exit 0 }
     if ($Action -eq 'status') { & $Docker @Compose ps; exit $LASTEXITCODE }
     if ($Action -eq 'stop') { & $Docker @Compose stop; exit $LASTEXITCODE }
-    $ExistingImage = & $Docker image ls --quiet 'ds60sqlpy-lab:0.3.0'
+    $ExistingImage = & $Docker image ls --quiet 'ds60sqlpy-lab:0.4.0'
     if ($LASTEXITCODE -ne 0) { throw 'Could not inspect local images.' }
     $NeedsBuild = -not $ExistingImage
     if ($Action -eq 'build' -or $Build -or $NeedsBuild) {

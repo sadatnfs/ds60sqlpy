@@ -18,13 +18,23 @@ MAX_BROWSER_OUTPUT_BYTES = 32_000
 MAX_BROWSER_RECORD_BYTES = 512 * 1024
 BROWSER_HISTORY_LIMIT = 20
 BROWSER_STATUSES = frozenset({"succeeded", "failed", "cancelled"})
+BROWSER_PROFILES = {
+    "javascript-browser": ("javascript", "d3@7.9.0"),
+    "html-browser": ("html", "html-css-dom"),
+}
 
 
-def browser_capability() -> dict[str, Any]:
+def browser_capability(profile: str = "javascript-browser") -> dict[str, Any]:
+    if profile not in BROWSER_PROFILES:
+        raise ValueError("Unknown browser profile.")
     return {
-        "profile": "javascript-browser",
+        "profile": profile,
         "ready": True,
-        "detail": "Runs in the isolated browser preview with bundled D3 7.9.0.",
+        "detail": (
+            "Renders HTML, inline CSS and inline JavaScript in the isolated offline preview."
+            if profile == "html-browser"
+            else "Runs in the isolated browser preview with bundled D3 7.9.0."
+        ),
         "execution_location": "browser",
         "verification_kind": "browser_observation",
     }
@@ -38,8 +48,8 @@ class BrowserRunStore:
 
     def _directory(self, lesson_id: object) -> Path:
         lesson = self.state.catalog.get(lesson_id)
-        if lesson.runtime_profile != "javascript-browser":
-            raise ValueError("Browser observations require a browser JavaScript lesson.")
+        if lesson.runtime_profile not in BROWSER_PROFILES:
+            raise ValueError("Browser observations require a browser lesson.")
         return self.state.safe_path(self.state.directory / "browser-runs" / lesson.id)
 
     @staticmethod
@@ -66,6 +76,8 @@ class BrowserRunStore:
         return fields
 
     def _read(self, path: Path, lesson_id: str) -> dict[str, Any]:
+        lesson = self.state.catalog.get(lesson_id)
+        expected_language, expected_library = BROWSER_PROFILES[lesson.runtime_profile]
         safe = self.state.safe_path(path)
         if safe.stat().st_size > MAX_BROWSER_RECORD_BYTES:
             raise ValueError("Browser history contains an oversized record; preserve it.")
@@ -98,9 +110,9 @@ class BrowserRunStore:
             or record["job_id"] + ".json" != path.name
             or re.fullmatch(r"[0-9a-f]{32}", str(record["job_id"])) is None
             or record["lesson_id"] != lesson_id
-            or record["profile"] != "javascript-browser"
-            or record["language"] != "javascript"
-            or record["library"] != "d3@7.9.0"
+            or record["profile"] != lesson.runtime_profile
+            or record["language"] != expected_language
+            or record["library"] != expected_library
             or record["verification_kind"] != "browser_observation"
             or record["verified"] is not False
             or record["checks"] != []
@@ -150,14 +162,16 @@ class BrowserRunStore:
     def record(self, lesson_id: str, fields: object) -> dict[str, Any]:
         values = self._validate_inputs(fields)
         directory = self._directory(lesson_id)
+        lesson = self.state.catalog.get(lesson_id)
+        language, library = BROWSER_PROFILES[lesson.runtime_profile]
         record = {
             "schema_version": 1,
             "kind": "browser_observation",
             "job_id": uuid.uuid4().hex,
             "lesson_id": lesson_id,
-            "profile": "javascript-browser",
-            "language": "javascript",
-            "library": "d3@7.9.0",
+            "profile": lesson.runtime_profile,
+            "language": language,
+            "library": library,
             "created_at": datetime.now(UTC).isoformat(),
             **values,
             "source_sha256": hashlib.sha256(values["source"].encode("utf-8")).hexdigest(),

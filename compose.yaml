@@ -44,7 +44,7 @@ services:
       - advanced_sql_training
 
   lab:
-    image: ds60sqlpy-lab:0.3.0
+    image: ${DS60_LAB_IMAGE:-ds60sqlpy-lab:0.4.0}
     pull_policy: never
     build:
       context: .

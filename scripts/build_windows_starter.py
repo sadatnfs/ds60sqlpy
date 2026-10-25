@@ -104,7 +104,7 @@ def build_archive(output: Path, *, source_root: Path = ROOT) -> int:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--output", type=Path, default=ROOT / "dist/DS60LearningLab-0.3.0-Windows-Starter.zip"
+        "--output", type=Path, default=ROOT / "dist/DS60LearningLab-0.4.0-Windows-Starter.zip"
     )
     args = parser.parse_args(argv)
     checks = (

@@ -15,7 +15,7 @@ The primary workflow is one command from the course folder:
 
 It resumes the same project's remembered worker selection, reuses local images,
 starts existing containers and opens the browser after actual readiness checks.
-Only missing images are built. A new project selects all fifteen ordinary
+Only missing images are built. A new project selects all sixteen ordinary
 workers; `--starter` selects Python Core. Use `./classroom resume` for strict
 no-build startup, or `./classroom --rebuild` to install source updates. The
 launcher selects available loopback host ports on first startup. Windows uses the
@@ -401,7 +401,7 @@ Build the private broker directly from the repository root, so this build does
 not require an existing lease path for Compose interpolation:
 
 ```console
-docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .
+docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.4.0 .
 ```
 
 The preparation guide also gives the fixture-image build and any explicitly

@@ -30,6 +30,12 @@ LANGUAGES = {
     "rust-stable": frozenset({"rust"}),
     "swift-linux": frozenset({"swift"}),
     "javascript-browser": frozenset({"javascript"}),
+    "html-browser": frozenset({"html"}),
+    "php-cli": frozenset({"php"}),
+    "cuda-cpp": frozenset({"cpp"}),
+    "cuda-python": frozenset({"python"}),
+    "pytorch-cuda": frozenset({"python"}),
+    "tensorflow-cuda": frozenset({"python"}),
     "java21": frozenset({"java"}),
     "javascript-node": frozenset({"javascript"}),
     "typescript-node": frozenset({"typescript"}),
@@ -118,6 +124,8 @@ class ModuleCatalog:
                     "swift": "Swift",
                     "java": "Java",
                     "javascript": "JavaScript",
+                    "html": "HTML and CSS",
+                    "php": "PHP",
                     "typescript": "TypeScript",
                     "yaml": "YAML",
                     "markdown": "Reading",
@@ -249,9 +257,11 @@ class ModuleCatalog:
                     "typescript": {".mts", ".ts"},
                     "yaml": {".yaml", ".yml"},
                     "markdown": {".md"},
+                    "html": {".html"},
+                    "php": {".php"},
                 }
                 if (
-                    source.suffix not in suffixes[language]
+                    source.suffix not in ({".cu"} if profile == "cuda-cpp" else suffixes[language])
                     or source.stat().st_size > MAX_SOURCE_BYTES
                 ):
                     raise ValueError(f"Invalid source format/size for {key}.")

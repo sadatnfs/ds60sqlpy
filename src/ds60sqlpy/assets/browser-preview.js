@@ -42,7 +42,9 @@
       }
       this.startedAt = null;
     }
-    start(source, onOutput = () => {}) {
+    start(source, onOutput = () => {}, language = "javascript") {
+      if (!["javascript", "html"].includes(language))
+        throw new Error("Choose an HTML or JavaScript browser preview.");
       this.stop("Replaced by another preview.");
       const sequence = ++this.sequence;
       const began = performance.now();
@@ -50,7 +52,7 @@
       this.latest = { source, output: "", status: "running", elapsed_seconds: 0 };
       const frame = document.createElement("iframe");
       this.frame = frame;
-      frame.title = "Interactive D3 visualization preview";
+      frame.title = language === "html" ? "HTML and CSS lesson preview" : "Interactive D3 visualization preview";
       frame.setAttribute("sandbox", "allow-scripts");
       frame.setAttribute("referrerpolicy", "no-referrer");
       frame.src = "/browser-sandbox";
@@ -96,7 +98,7 @@
           () => {
             if (sequence !== this.sequence || frame !== this.frame) return;
             try {
-              frame.contentWindow.postMessage({ type: "ds60-browser-connect", source }, "*", [
+              frame.contentWindow.postMessage({ type: "ds60-browser-connect", source, language }, "*", [
                 channel.port2,
               ]);
             } catch (error) {

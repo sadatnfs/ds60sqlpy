@@ -32,6 +32,8 @@ LANGUAGES = (
     "java",
     "c",
     "cpp",
+    "cuda",
+    "php",
     "csharp",
     "go",
     "rust",
@@ -70,6 +72,9 @@ SUFFIXES = {
     ".cc": "cpp",
     ".cxx": "cpp",
     ".hpp": "cpp",
+    ".cu": "cuda",
+    ".cuh": "cuda",
+    ".php": "php",
     ".hh": "cpp",
     ".cs": "csharp",
     ".go": "go",
@@ -126,7 +131,7 @@ def language_for(path: str) -> str | None:
         return "docker"
     if name == "CMakeLists.txt":
         return "cmake"
-    if path in {"classroom", "scripts/format-repo", "scripts/lint-repo"}:
+    if path in {"classroom", "scripts/format-repo", "scripts/lint-repo", "scripts/publish-images"}:
         return "shell"
     return SUFFIXES.get(Path(path).suffix.lower())
 
@@ -329,7 +334,7 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
         command = ["ruff", "format", "--no-cache", "--config", str(root / "pyproject.toml")]
         if check:
             command += ["--check"]
-    elif language in {"web", "java", "toml", "xml"}:
+    elif language in {"web", "java", "toml", "xml", "php"}:
         command = [
             "prettier",
             "--config",
@@ -340,7 +345,7 @@ def format_group(language: str, paths: list[str], root: Path, check: bool) -> bo
         ]
         if language == "xml":
             command += ["--parser", "xml"]
-    elif language in {"c", "cpp", "csharp"}:
+    elif language in {"c", "cpp", "csharp", "cuda"}:
         command = ["clang-format", f"--style=file:{config / 'clang-format.yaml'}"]
         command += ["--dry-run", "--Werror"] if check else ["-i"]
     elif language == "go":

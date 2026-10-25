@@ -62,7 +62,7 @@ cd ds60sqlpy
 ```
 
 `doctor` checks the local engine and configuration without starting services.
-On a new project, the final command prepares PostgreSQL and all fifteen ordinary
+On a new project, the final command prepares PostgreSQL and all sixteen ordinary
 runtime workers. It builds **only missing images**, with visible logs, starts the
 services, waits for readiness and opens the browser. Keep the terminal open while
 it works. First preparation needs internet, several gigabytes of downloads and
@@ -174,9 +174,11 @@ second application.
 | Natural language processing | [NLP](courses/nlp/README.md) | Text representation, classical baselines, neural methods and evaluation |
 | LLM mechanisms | [LLM theory](courses/llm-theory/README.md) | Tokens, Transformers, attention, generation and adaptation mechanics |
 | Applied LLM systems | [Applied LLMs](courses/llm-applied/README.md) | RAG, evaluation, fine-tuning, tools and subject assistants |
+| GPU computing and CUDA | [CUDA, Python and GPU Spark](courses/cuda/README.md) | GPU architecture, C++ kernels, Python, PyTorch/TensorFlow and RAPIDS/Spark, with portable CPU study paths |
+| Web development | [HTML, CSS and PHP](courses/web-development/README.md) | Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications |
 
-The library contains **922 canonical lessons and chapters across 20 subjects**,
-with 30 additional PySpark implementations. The statistics book maps its chapters to 1,005 topics in the source outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
+The library contains **1,110 canonical lessons and chapters across 22 subjects**,
+with separately saved language and framework variants. The statistics book maps its chapters to 1,005 topics in the source outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
 connects mechanisms to a running subject-assistant case study; [Inside a
 Transformer](docs/learning/inside-a-transformer.md) provides a connected
 numerical explanation of the architecture.
@@ -192,6 +194,32 @@ choice; running a sample or opening an answer does not certify mastery.
 
 ## Read, code and keep your work
 
+### Optional Docker Hub distribution
+
+Local builds remain the default. After the owner has published a matching
+release and architecture, a learner can download the images instead:
+
+```sh
+./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.0
+```
+
+Replace the placeholder with the actual publisher's Docker Hub namespace. The
+project remembers that choice; later `./classroom resume` still performs no
+builds or pulls. No public image release is implied by the command above.
+See [building, testing, publishing and pulling images](docs/dockerhub.md) for
+step-by-step instructions, account authentication, architecture tags and the
+disabled-by-default manual GitHub publication workflow.
+
+To install this source release locally with visible build logs:
+
+```sh
+./classroom --all --local-build --tag 0.4.0 --rebuild
+```
+
+Keep your existing `--project NAME` on every command when using a custom project.
+
+### Reading and execution
+
 Mathematical explanations render as typeset equations, including fractions,
 subscripts, vectors and matrices. Fenced code examples carry language-aware
 syntax highlighting. Both work from bundled local rendering resources without
@@ -202,6 +230,19 @@ C, C++, Go, C#, Rust, Swift and Java compile in Linux Docker workers. JavaScript
 uses Node for server-side lessons and an isolated browser preview for the D3
 specialization. TypeScript is checked and compiled before Node execution.
 Python, TensorFlow, PyTorch and Spark use their declared profiles.
+
+HTML and CSS render in an isolated offline browser preview, including inline
+JavaScript interactions. PHP runs in its own CLI worker with PDO SQLite. Real
+HTTP sessions and multi-file applications use the web subject's separate,
+loopback-only Docker project. The pad and the web server are explicitly different
+execution environments.
+
+The 128-chapter CUDA subject is useful on CPU-only machines: read the theory,
+save reasoning and run small CPU models. Selected C++, CuPy, PyTorch and
+TensorFlow variants can use optional NVIDIA workers after explicit setup and
+a real device probe. GPU images are excluded from `--all`; Apple, AMD and Intel
+GPUs are not made CUDA-compatible by Docker. See the
+[platform and evidence guide](docs/cuda-classroom.md), including non-CUDA options.
 
 D3 7.9.0 is bundled locally. Its 24 lessons render real SVG or Canvas charts in
 the classroom, including accessible controls, brushing, zooming and dashboards.

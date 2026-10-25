@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Color, contrast, focus and accessible states</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+.status { padding: 1rem; border: 2px solid #0753a4; background: #e0f2fe; color: #172033; } .warning { border-color: #9c3200; background: #fff4e5; } button { min-block-size: 2.75rem; padding: .5rem 1rem; }
+  </style>
+</head>
+<body>
+<main><h1>Clear status</h1><p class="status"><strong>Status:</strong> Ready for practice</p><p class="status warning"><strong>Status:</strong> Needs review</p><button type="button">Review lesson</button></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(document.querySelectorAll('.status strong').length === 2, 'Status labels missing');
+document.querySelector("#reference-status").textContent = "web-013 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-013 reference checks passed");
+</script>
+</body>
+</html>

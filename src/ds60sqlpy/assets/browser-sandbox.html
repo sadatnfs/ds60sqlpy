@@ -31,6 +31,7 @@
           if (connected || event.source !== parent || event.origin !== expectedOrigin ||
               event.data?.type !== "ds60-browser-connect" || event.ports.length !== 1 ||
               typeof event.data.source !== "string" ||
+              !["javascript", "html"].includes(event.data.language || "javascript") ||
               new TextEncoder().encode(event.data.source).length > 48000) return;
           connected = true;
           const port = event.ports[0], source = event.data.source;
@@ -78,7 +79,43 @@
             const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
             // Use ordinary browser globals. Binding chart/output as parameters would
             // incorrectly reject learner declarations such as const output = ... .
-            await new AsyncFunction(source)();
+            if (event.data.language === "html") {
+              const parsed = new DOMParser().parseFromString(source, "text/html");
+              if (parsed.querySelector("script[src]"))
+                throw new Error("External scripts are blocked. Use inline JavaScript for this offline preview.");
+              if (parsed.querySelector("base, meta[http-equiv]"))
+                throw new Error("Navigation metadata and embedded HTTP policies are unavailable in this preview.");
+              // Feed the source to the real HTML parser. Importing a fully parsed
+              // DOM and evaluating scripts afterward changes head-script timing,
+              // classic lexical scope, module semantics and lifecycle events.
+              // The response CSP and opaque iframe sandbox remain in force.
+              // document.open clears document/window listeners, but this active
+              // closure, its MessagePort and the captured console survive.
+              document.open();
+              window.addEventListener("error", (event) => {
+                event.preventDefault();
+                fail(event.error || event.message || "A script or resource could not execute.");
+              }, true);
+              window.addEventListener("unhandledrejection", (event) => {
+                event.preventDefault();
+                fail(event.reason);
+              });
+              window.addEventListener("load", () => {
+                // Let learner load handlers and their immediate microtasks finish
+                // before saving the initial observation. Later errors still use
+                // the existing interaction-error channel.
+                setTimeout(() => {
+                  if (!finished) {
+                    log("HTML/CSS preview rendered. Inspect layout, semantics and keyboard interactions.");
+                    finished = true;
+                    send("complete", { status: "succeeded" });
+                  }
+                }, 0);
+              }, { once: true });
+              document.write(source);
+              document.close();
+              return;
+            } else await new AsyncFunction(source)();
             if (!finished) { finished=true;send("complete",{status:"succeeded"}); }
           } catch (error) { fail(error); }
         });

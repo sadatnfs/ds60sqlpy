@@ -62,6 +62,8 @@ jobs:
             profiles: cpp20
           - group: java
             profiles: java21
+          - group: php
+            profiles: php-cli
           - group: c-go
             profiles: c17 go
           - group: csharp

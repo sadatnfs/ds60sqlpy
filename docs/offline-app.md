@@ -469,7 +469,7 @@ between computers instead of concurrently editing a network-mounted copy.
 
 ## Local image names, ports, and Rancher Desktop
 
-Compose builds the application as the local image `ds60sqlpy-lab:0.3.0`. Its
+Compose builds the application as the local image `ds60sqlpy-lab:0.4.0`. Its
 `pull_policy: never` prevents an application-image registry pull. Building or
 tagging that image does not publish it. Once it is built and the public PostgreSQL base is cached, use the shell
 launcher for an ordinary start. A manual Compose start additionally needs the

@@ -387,6 +387,11 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
         "scala-jvm": "scala-worker",
         "spark-local-scala": "spark-scala-worker",
         "spark-local-python": "spark-python-worker",
+        "php-cli": "php-worker",
+        "cuda-cpp": "cuda-cpp-worker",
+        "cuda-python": "cuda-python-worker",
+        "pytorch-cuda": "pytorch-cuda-worker",
+        "tensorflow-cuda": "tensorflow-cuda-worker",
     }
     assert endpoints == {profile: f"http://{service}:8081" for profile, service in expected.items()}
     assert config["networks"]["module-private"]["internal"] is True
@@ -435,3 +440,12 @@ def test_kubernetes_overlay_reuses_classroom_state_and_never_mounts_engine() -> 
 
     endpoints = json.loads(overlay["services"]["lab"]["environment"]["DS60_MODULE_ENDPOINTS"])
     assert endpoints == {profile: f"http://{service}:8081" for profile, service in SERVICES.items()}
+    # The overlay replaces this environment value, so it must retain every
+    # ordinary and optional endpoint while adding only the owned kind adapter.
+    ComposeLoader: Any = type("ComposeLoader", (yaml.SafeLoader,), {})
+    for tag in ("!reset", "!override"):
+        ComposeLoader.add_constructor(tag, lambda loader, node: loader.construct_sequence(node))
+    main = yaml.load((ROOT / "compose.classroom.yaml").read_text(), Loader=ComposeLoader)
+    main_endpoints = json.loads(main["services"]["lab"]["environment"]["DS60_MODULE_ENDPOINTS"])
+    assert endpoints == {**main_endpoints, "k8s-kind": "http://kubernetes-worker:8081"}
+    assert set(endpoints) - set(main_endpoints) == {"k8s-kind"}

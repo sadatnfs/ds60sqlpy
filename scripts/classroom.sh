@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Shared host entrypoint for macOS, Linux and Windows through WSL 2.
-set -euo pipefail
+set -Eeuo pipefail
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 cd "$repo_dir"
 action=up
 if [ "$#" -gt 0 ]; then
-  case "$1" in up | start | resume | build | stop | status | logs | doctor)
+  case "$1" in up | start | resume | build | pull | stop | status | logs | doctor)
     action="$1"
     shift
     ;;
@@ -21,24 +21,31 @@ profiles_explicit=0
 project_option=''
 requested_port=''
 requested_db_port=''
+gpu_device=''
 profiles=()
-all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux)
-all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker)
+all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli)
+all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker)
+known_profiles=("${all_profiles[@]}" cuda-cpp cuda-python pytorch-cuda tensorflow-cuda)
+known_services=("${all_services[@]}" cuda-cpp-worker cuda-python-worker pytorch-cuda-worker tensorflow-cuda-worker)
 usage() {
   cat <<'HELP'
-Usage: ./classroom [up|resume|build|stop|status|logs|doctor] [options]
+Usage: ./classroom [up|resume|build|pull|stop|status|logs|doctor] [options]
 
 With no arguments: resume this project's containers and saved profile selection.
-A first launch prepares all fifteen ordinary workers, building only missing images.
+A first launch prepares all sixteen ordinary workers, building only missing images.
 Progress stays in this project's Docker volumes. Updates require --rebuild.
 The host needs Bash and a local Linux-container Docker engine with Compose 2.28.0+.
 Windows: use Ubuntu in WSL 2 with your Docker engine's integration enabled.
 
   --starter                 Select only the app, PostgreSQL and Python Core
-  --all                     Select all fifteen ordinary workers
+  --all                     Select all sixteen ordinary workers
   --profile PROFILE         Add a selected profile (repeatable; includes Core)
   --no-build                Like resume: never build or pull missing images
-  --rebuild                 Rebuild selected images and apply configuration updates
+  --rebuild                 Rebuild local images, or refresh Hub images; apply updates
+  --from-hub USER           Pull matching architecture tags from USER/ds60sqlpy
+  --tag VERSION             Select a published/local release (default: 0.4.0)
+  --local-build             Return this project to locally built images
+  --gpu-device ID           Explicit NVIDIA device index/UUID for optional CUDA profiles
   --no-browser              Print the ready URL without opening it
   --port PORT               Browser host port; 0 lets Docker select a free port
   --database-port PORT      PostgreSQL host port; 0 selects a free port
@@ -62,6 +69,8 @@ fail() {
   printf '\n%s\n' "$*" >&2
   exit 2
 }
+# shellcheck source=scripts/classroom_images.sh
+source "$repo_dir/scripts/classroom_images.sh"
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --starter)
@@ -86,7 +95,13 @@ while [ "$#" -gt 0 ]; do
       no_browser=1
       shift
       ;;
-    --profile | --port | --database-port | --project | --registry)
+    --local-build)
+      image_source=local
+      image_namespace=''
+      image_source_explicit=1
+      shift
+      ;;
+    --profile | --port | --database-port | --project | --registry | --from-hub | --tag | --gpu-device)
       [ "$#" -ge 2 ] || fail "Missing value after $1. Use ./classroom --help."
       case "$1" in
         --profile)
@@ -96,6 +111,13 @@ while [ "$#" -gt 0 ]; do
         --port) requested_port="$2" ;;
         --database-port) requested_db_port="$2" ;;
         --project) project_option="$2" ;;
+        --gpu-device) gpu_device="$2" ;;
+        --from-hub)
+          image_source=hub
+          image_namespace="$2"
+          image_source_explicit=1
+          ;;
+        --tag) image_tag="$2"; image_tag_explicit=1 ;;
         --registry)
           registry="$2"
           registry_explicit=1
@@ -116,13 +138,14 @@ for port in "$requested_port" "$requested_db_port"; do
   [ -z "$port" ] || valid_port "$port" || fail 'Ports must be integers from 0 through 65535.'
 done
 if [ -n "$project_option" ] && ! [[ "$project_option" =~ ^[a-z0-9][a-z0-9_-]{0,48}$ ]]; then fail 'Use a lowercase project name with letters, digits, hyphens or underscores.'; fi
-case "$action" in resume) no_build=1 ;; build) rebuild=1 ;; esac
+case "$action" in resume) no_build=1 ;; build | pull) rebuild=1 ;; esac
+validate_image_selection
 [ "$no_build" -eq 0 ] || [ "$rebuild" -eq 0 ] || fail 'Use resume/--no-build or --rebuild/build, not both.'
 # Reject misspelled profiles before contacting the engine.
 for profile in ${profiles[@]+"${profiles[@]}"}; do
   found=0
-  for known in "${all_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
-  [ "$found" -eq 1 ] || fail "Unknown ordinary profile: $profile. Use ./classroom --help."
+  for known in "${known_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
+  [ "$found" -eq 1 ] || fail "Unknown profile: $profile. Use ./classroom --help."
 done
 case "$(uname -s)" in MINGW* | MSYS* | CYGWIN*) fail 'Run ./classroom from a WSL 2 Linux terminal, or double-click START_DOCKER_CLASSROOM.cmd.' ;; esac
 if command -v docker >/dev/null 2>&1; then
@@ -179,6 +202,9 @@ valid_port "$internal_port" && [ "$((10#$internal_port))" -gt 0 ] || fail 'DS60_
 [ "$((10#$internal_port))" -ne 5432 ] || fail 'DS60_LAB_PORT cannot be 5432 because the app shares the PostgreSQL network namespace.'
 state_dir="$repo_dir/.classroom/$project_name"
 [ ! -L "$repo_dir/.classroom" ] && [ ! -L "$state_dir" ] || fail 'The launcher state directory must not be a symbolic link.'
+load_image_selection
+[ "$action" != pull ] || [ "$image_source" = hub ] || fail 'Use pull with --from-hub USER, or a project that has saved Hub settings.'
+[ "$action" != build ] || [ "$image_source" = local ] || fail 'This project uses Hub images. Use pull to download them, or build --local-build to build locally.'
 # Store declarative values only. No shell evaluation, paths or private environment data.
 saved_profiles=''
 saved_registry=''
@@ -207,7 +233,7 @@ if [ -e "$state_dir/selection.env" ] || [ -L "$state_dir/selection.env" ]; then
   IFS=',' read -r -a saved_profile_list <<<"$saved_profiles"
   for profile in "${saved_profile_list[@]}"; do
     found=0
-    for known in "${all_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
+    for known in "${known_profiles[@]}"; do [ "$profile" != "$known" ] || found=1; done
     [ "$found" -eq 1 ] || fail "Unknown saved profile: $profile. Inspect .classroom for this project."
   done
   [ "$registry_explicit" -eq 1 ] || registry="$saved_registry"
@@ -224,8 +250,8 @@ if [ "$profiles_explicit" -eq 0 ]; then
     # classroom into every optional SDK merely because selection.env is new.
     existing_services="$("${compose[@]}" --profile '*' ps --all --services)"
     while IFS= read -r service; do
-      for ((i = 0; i < ${#all_services[@]}; i++)); do
-        [ "$service" != "${all_services[$i]}" ] || profiles+=("${all_profiles[$i]}")
+      for ((i = 0; i < ${#known_services[@]}; i++)); do
+        [ "$service" != "${known_services[$i]}" ] || profiles+=("${known_profiles[$i]}")
       done
     done <<<"$existing_services"
     if [ "${#profiles[@]}" -eq 0 ]; then
@@ -242,14 +268,36 @@ for profile in ${profiles[@]+"${profiles[@]}"}; do
   duplicate=0
   for known in ${selected_profiles[@]+"${selected_profiles[@]}"}; do [ "$profile" != "$known" ] || duplicate=1; done
   if [ "$duplicate" -eq 0 ]; then
-    for ((i = 0; i < ${#all_profiles[@]}; i++)); do
-      if [ "$profile" = "${all_profiles[$i]}" ]; then
+    for ((i = 0; i < ${#known_profiles[@]}; i++)); do
+      if [ "$profile" = "${known_profiles[$i]}" ]; then
         selected_profiles+=("$profile")
-        services+=("${all_services[$i]}")
+        services+=("${known_services[$i]}")
         break
       fi
     done
   fi
+done
+if [ -e "$state_dir/gpu.env" ] || [ -L "$state_dir/gpu.env" ]; then
+  [ -f "$state_dir/gpu.env" ] && [ ! -L "$state_dir/gpu.env" ] || fail 'GPU selection must be a regular file.'
+  saved_gpu=''
+  while IFS='=' read -r key value || [ -n "$key$value" ]; do
+    [ "$key" = DS60_GPU_DEVICE ] && [ -z "$saved_gpu" ] || fail 'Invalid saved GPU selection.'
+    saved_gpu="$value"
+  done <"$state_dir/gpu.env"
+  gpu_device="${gpu_device:-$saved_gpu}"
+fi
+if [ -n "$gpu_device" ]; then
+  [[ "$gpu_device" =~ ^([0-9]{1,3}|GPU-[a-fA-F0-9-]{8,80}|MIG-[a-fA-F0-9-]{8,80})$ ]] || fail 'Choose one NVIDIA device index, GPU UUID or MIG UUID.'
+  export DS60_GPU_DEVICE="$gpu_device"
+fi
+for profile in "${selected_profiles[@]}"; do
+  case "$profile:$action" in
+    cuda-*:up | cuda-*:resume | pytorch-cuda:up | pytorch-cuda:resume | tensorflow-cuda:up | tensorflow-cuda:resume)
+      [ -n "$gpu_device" ] || fail 'CUDA execution needs an explicitly chosen NVIDIA GPU. Add --gpu-device 0 or its GPU UUID. CPU/reading variants need no GPU.'
+      gpu_arch="$("$docker_cli" info --format '{{.Architecture}}')"
+      case "$gpu_arch" in amd64 | x86_64) ;; *) fail 'Optional CUDA workers currently target Linux amd64 NVIDIA hosts. Use the CPU/reading route here; Apple GPUs are not CUDA devices.' ;; esac
+      ;;
+  esac
 done
 make_compose
 saved_port=''
@@ -338,6 +386,7 @@ if [ "$action" = stop ]; then
   exit 0
 fi
 printf '\nDS60 Classroom | %s\nProfiles: %s\n' "$project_name" "${selected_profiles[*]}"
+printf 'Images: %s (release %s)\n' "$image_source" "$image_tag"
 # Persist the chosen intent before preparation so Ctrl+C or a failed download does
 # not lose a small selection. Writes remain atomic and protected by the project lock.
 selection_temp="$(mktemp "$state_dir/selection.XXXXXX")"
@@ -347,6 +396,12 @@ profile_csv="$(
 )"
 printf 'DS60_PROFILES=%s\nDS60_REGISTRY=%s\n' "$profile_csv" "$registry" >"$selection_temp"
 mv -f "$selection_temp" "$state_dir/selection.env"
+save_image_selection
+if [ -n "$gpu_device" ]; then
+  gpu_temp="$(mktemp "$state_dir/gpu.XXXXXX")"
+  printf 'DS60_GPU_DEVICE=%s\n' "$gpu_device" >"$gpu_temp"
+  mv -f "$gpu_temp" "$state_dir/gpu.env"
+fi
 container_id() {
   local id
   id="$("${compose[@]}" ps --all --quiet "$1")" || return 1
@@ -461,6 +516,11 @@ if [ "$no_build" -eq 1 ] && { [ "$need_database" -eq 1 ] || [ "${#build_services
 fi
 if [ "$need_database" -eq 1 ]; then "${compose[@]}" pull postgres; fi
 for service in ${build_services[@]+"${build_services[@]}"}; do
+  if [ "$image_source" = hub ]; then
+    printf '\nPulling published %s for %s...\n' "$service" "$image_arch"
+    "${compose[@]}" pull --policy always "$service"
+    continue
+  fi
   printf '\nBuilding missing/requested %s locally...\n' "$service"
   if [ "$service" = python-core-worker ]; then
     # The Compose service:lab additional context would rebuild the app as a
@@ -471,8 +531,8 @@ for service in ${build_services[@]+"${build_services[@]}"}; do
     "${compose[@]}" build "$service"
   fi
 done
-if [ "$action" = build ]; then
-  printf 'Local images are ready. Apply the prepared images with ./classroom --rebuild, or resume the existing containers with ./classroom resume.\n'
+if [ "$action" = build ] || [ "$action" = pull ]; then
+  printf 'Selected images are ready. Use ./classroom --rebuild to apply an update, or ./classroom resume to retain existing containers.\n'
   exit 0
 fi
 wait_for_container() {

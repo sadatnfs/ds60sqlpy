@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connect HTML to JavaScript: DOM, events and safe text</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+button { margin: .25rem; padding: .5rem; }
+  </style>
+</head>
+<body>
+<main><h1>Practice counter</h1><button id="add" type="button">Add one practice step</button><button id="reset" type="button">Reset</button><p>Steps: <output id="count" aria-live="polite">0</output></p><p id="label"></p></main>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+let count = 0; const output = document.querySelector('#count'); function render() { output.textContent = String(count); } document.querySelector('#add').addEventListener('click', () => { count += 1; render(); }); document.querySelector('#reset').addEventListener('click', () => { count = 0; render(); }); document.querySelector('#label').textContent = '<new learner>';
+document.querySelector('#add').click(); check(output.textContent === '1', 'Increment failed'); document.querySelector('#reset').click(); check(output.textContent === '0', 'Reset failed'); check(document.querySelector('#label').children.length === 0, 'Text became markup');
+document.querySelector("#reference-status").textContent = "web-025 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-025 reference checks passed");
+</script>
+</body>
+</html>

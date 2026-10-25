@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Semantic structure, headings and landmarks</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; line-height: 1.6; }
+    body { margin: 0; padding: 1.5rem; color: #172033; background: #f8fafc; }
+    main { max-width: 65rem; margin-inline: auto; }
+    a { color: #0753a4; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :focus-visible { outline: 3px solid #a34000; outline-offset: 3px; }
+    #reference-status { display: block; margin-block-start: 2rem; border-block-start: 1px solid #64748b; padding-block-start: 1rem; }
+
+  </style>
+</head>
+<body>
+<a href="#content">Skip to content</a><header><p>Learning library</p><nav aria-label="Course"><a href="#html">HTML notes</a></nav></header><main id="content" tabindex="-1"><h1>Study notes</h1><section id="html"><h2>HTML</h2><p>Use structure to communicate meaning.</p></section><section><h2>CSS</h2><p>Make that structure readable.</p></section></main><footer><p>Local learning example.</p></footer>
+<output id="reference-status" aria-live="polite">Reference checks pending.</output>
+<script>
+"use strict";
+function check(condition, message) {
+  if (!condition) throw new Error(message);
+}
+
+check(document.querySelectorAll('main').length === 1, 'One main region required'); check(document.querySelector('a').hash === '#content', 'Skip target missing');
+document.querySelector("#reference-status").textContent = "web-003 reference checks passed. Complete the manual observations in the guide.";
+console.log("web-003 reference checks passed");
+</script>
+</body>
+</html>

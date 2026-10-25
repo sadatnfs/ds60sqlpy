@@ -143,7 +143,7 @@ Missing native CMake/Ninja leaves the native CMake route unavailable;the Docker-
 
 ### Docker-only CMake project route
 
-Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared `ds60sqlpy-worker-cpp20:0.3.0` image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.
+Use this route when the host has Docker but no C++ compiler, CMake or Ninja. The already prepared `ds60sqlpy-worker-cpp20:0.4.0` image contains those tools. The commands override its worker entry point for a short, offline project operation. They do not require starting the classroom broker or mounting its token. Run from the repository root and use a local Linux-container engine. A remote Docker daemon cannot bind a folder from your local computer.
 
 Choose either `record-library` or `multifile`. Make a **new copy** before editing. The example name ends in `-01`; choose a new unused suffix for another attempt. Never point the writable project mount at the whole repository, your home folder or an existing learner project. A failure to create the new directory is a stop condition, not permission to overwrite it.
 
@@ -159,7 +159,7 @@ mkdir "$cpp_project" && cp -R "courses/cpp/fixtures/$cpp_fixture/." "$cpp_projec
 Stop if either creation or copy fails. The absolute `cpp_project` path identifies the host folder. Quoting preserves spaces. The `--mount` syntax below treats commas as separators, so choose a project path without commas. On Docker Desktop for macOS, ensure this folder is inside an already shared location. On Linux, the UID/GID arguments below keep created files owned by your current user. If the engine's configured file-sharing or security policy denies the mount, diagnose that host setup rather than making the container privileged.
 
 ```sh
-cpp_image=ds60sqlpy-worker-cpp20:0.3.0
+cpp_image=ds60sqlpy-worker-cpp20:0.4.0
 cpp_tool() {
     cpp_entrypoint="$1"
     shift
@@ -188,7 +188,7 @@ if (Test-Path -LiteralPath $CppProject) { throw 'Choose a new unused project suf
 New-Item -ItemType Directory -Path $CppProject -ErrorAction Stop | Out-Null
 Copy-Item -Path "courses/cpp/fixtures/$CppFixture/*" -Destination $CppProject -Recurse -ErrorAction Stop
 $CppProject = (Resolve-Path -LiteralPath $CppProject).Path
-$CppImage = 'ds60sqlpy-worker-cpp20:0.3.0'
+$CppImage = 'ds60sqlpy-worker-cpp20:0.4.0'
 $CppDockerArgs = @(
     'run', '--rm', '--pull', 'never', '--network', 'none', '--read-only',
     '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges',

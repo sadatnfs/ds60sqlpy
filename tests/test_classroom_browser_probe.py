@@ -36,6 +36,8 @@ def test_browser_chooser_baseline_matches_the_current_catalog_sources() -> None:
         json.loads(path.read_text())["track_id"]
         for path in (root / "courses").glob("*/lessons.json")
     }
+    assert {"cuda", "web-development"} <= modules
+    assert len(browser.SUBJECTS) == 22
     assert set(legacy) | modules | {"statistics-ml"} == browser.SUBJECTS
 
 

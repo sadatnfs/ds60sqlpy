@@ -117,7 +117,21 @@ def test_release_jobs_target_linux_containers_and_contributor_tooling() -> None:
     for path in WORKFLOW.parent.glob("*.yml"):
         workflow = path.read_text(encoding="utf-8")
         runners = re.findall(r"(?m)^    runs-on: (.+)$", workflow)
-        assert runners and set(runners) == {"ubuntu-latest"}, path.name
+        if path.name == "publish-images.yml":
+            reviewed_native_runner = (
+                "${{ inputs.architecture == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}"
+            )
+            assert runners == ["ubuntu-latest", reviewed_native_runner]
+            architecture = workflow.split("      architecture:", maxsplit=1)[1].split(
+                "      publish:", maxsplit=1
+            )[0]
+            assert re.findall(r"(?m)^        type: (.+)$", architecture) == ["choice"]
+            assert re.findall(r"(?m)^        options: (.+)$", architecture) == ["[amd64, arm64]"]
+            assert re.findall(r"(?m)^        default: (.+)$", architecture) == ["amd64"]
+            assert "  workflow_dispatch:" in workflow
+            assert not re.search(r"(?m)^  (push|pull_request|schedule):", workflow)
+        else:
+            assert runners and set(runners) == {"ubuntu-latest"}, path.name
         assert "windows-latest" not in workflow and "macos-latest" not in workflow
         assert "scripts/build_app.py" not in workflow
         assert "scripts/check_windows_private_acl.py" not in workflow

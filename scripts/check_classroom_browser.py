@@ -44,6 +44,8 @@ SUBJECTS = {
     "rust",
     "swift",
     "docker",
+    "cuda",
+    "web-development",
     "java",
     "javascript-typescript",
     "scala-spark",

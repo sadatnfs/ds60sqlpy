@@ -1,0 +1,22 @@
+# profile service local-repository published-suffix image-variable kind
+app lab ds60sqlpy-lab lab DS60_LAB_IMAGE app
+python-core python-core-worker ds60sqlpy-worker-python-core worker-python-core DS60_WORKER_PYTHON_CORE_IMAGE ordinary
+cpp20 cpp-worker ds60sqlpy-worker-cpp20 worker-cpp20 DS60_WORKER_CPP20_IMAGE ordinary
+java21 java-worker ds60sqlpy-worker-java21 worker-java21 DS60_WORKER_JAVA21_IMAGE ordinary
+javascript-node javascript-worker ds60sqlpy-worker-javascript-node worker-javascript-node DS60_WORKER_JAVASCRIPT_NODE_IMAGE ordinary
+typescript-node typescript-worker ds60sqlpy-worker-typescript-node worker-typescript-node DS60_WORKER_TYPESCRIPT_NODE_IMAGE ordinary
+tensorflow-cpu tensorflow-worker ds60sqlpy-worker-tensorflow-cpu worker-tensorflow-cpu DS60_WORKER_TENSORFLOW_CPU_IMAGE ordinary
+llm-torch-cpu llm-worker ds60sqlpy-worker-llm-torch-cpu worker-llm-torch-cpu DS60_WORKER_LLM_TORCH_CPU_IMAGE ordinary
+scala-jvm scala-worker ds60sqlpy-worker-scala-jvm worker-scala-jvm DS60_WORKER_SCALA_JVM_IMAGE ordinary
+spark-local-scala spark-scala-worker ds60sqlpy-worker-spark-local-scala worker-spark-local-scala DS60_WORKER_SPARK_LOCAL_SCALA_IMAGE ordinary
+spark-local-python spark-python-worker ds60sqlpy-worker-spark-local-python worker-spark-local-python DS60_WORKER_SPARK_LOCAL_PYTHON_IMAGE ordinary
+c17 c-worker ds60sqlpy-worker-c17 worker-c17 DS60_WORKER_C17_IMAGE ordinary
+go go-worker ds60sqlpy-worker-go worker-go DS60_WORKER_GO_IMAGE ordinary
+csharp-dotnet csharp-worker ds60sqlpy-worker-csharp-dotnet worker-csharp-dotnet DS60_WORKER_CSHARP_DOTNET_IMAGE ordinary
+rust-stable rust-worker ds60sqlpy-worker-rust-stable worker-rust-stable DS60_WORKER_RUST_STABLE_IMAGE ordinary
+swift-linux swift-worker ds60sqlpy-worker-swift-linux worker-swift-linux DS60_WORKER_SWIFT_LINUX_IMAGE ordinary
+php-cli php-worker ds60sqlpy-worker-php-cli worker-php-cli DS60_WORKER_PHP_CLI_IMAGE ordinary
+cuda-cpp cuda-cpp-worker ds60sqlpy-worker-cuda-cpp worker-cuda-cpp DS60_WORKER_CUDA_CPP_IMAGE gpu
+cuda-python cuda-python-worker ds60sqlpy-worker-cuda-python worker-cuda-python DS60_WORKER_CUDA_PYTHON_IMAGE gpu
+pytorch-cuda pytorch-cuda-worker ds60sqlpy-worker-pytorch-cuda worker-pytorch-cuda DS60_WORKER_PYTORCH_CUDA_IMAGE gpu
+tensorflow-cuda tensorflow-cuda-worker ds60sqlpy-worker-tensorflow-cuda worker-tensorflow-cuda DS60_WORKER_TENSORFLOW_CUDA_IMAGE gpu

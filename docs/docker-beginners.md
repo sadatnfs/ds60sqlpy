@@ -70,7 +70,7 @@ An existing compatible local engine can be reused without reinstalling it.
 Use an internet connection for initial downloads; other architectures or
 managed installation policies use the manual vendor/IT route below.
 
-1. Download the supplied **`DS60LearningLab-0.3.0-Windows-Starter.zip`**.
+1. Download the supplied **`DS60LearningLab-0.4.0-Windows-Starter.zip`**.
    Alternatively, use **Code**, then **Download ZIP** on a
    [repository version](https://github.com/sadatnfs/ds60sqlpy) that includes
    `START_DOCKER_LAB.cmd` and `scripts/start_docker_windows.ps1`. Sign in if

@@ -53,10 +53,11 @@ preserving their source, notes, history and chosen pace. Give progressive hints
 and the smallest useful next step. Read markers and successful reference runs
 are not mastery assessments.
 
-All twenty registered subjects share this companion approach: Python,
+All registered subjects share this companion approach: Python,
 PostgreSQL, the engineering bridge, statistics/ML, C, C++, Go, C#, Rust, Swift,
 Docker, Java, JavaScript/TypeScript with D3, Kubernetes, Scala/Spark, TensorFlow,
-PyTorch, NLP, LLM theory and applied LLMs. Derive exact lesson IDs and capability
+PyTorch, NLP, LLM theory, applied LLMs, GPU/CUDA and web development with HTML,
+CSS and PHP. Derive exact lesson IDs and capability
 notices from the current loaders and guides. Keep tutorial-book discussion free
 of mandatory exams or withheld worked answers. Do not assume the MCP adapter
 can read the Docker classroom's saved pads or execute code; its module tools
@@ -99,6 +100,27 @@ reviewed prose normalization before building HTML. A typography edit must not
 change executable reference behavior or manufacture new runtime evidence.
 
 ## Execution and learner state
+
+CUDA chapters have genuine reading and CPU-model paths. Neither is evidence of
+GPU execution. Optional CUDA workers require explicit NVIDIA device selection
+and a checked real kernel probe; they stay outside default and `--all` builds.
+Keep CPU profiles hiding GPUs. Treat compiler-only, real-device, profiler and
+multi-GPU evidence separately. Device fault or timeout recovery must not reset a
+GPU automatically. No GPU or WSL qualification follows from a macOS CPU run.
+
+HTML/CSS use the opaque, offline browser preview with separate observations.
+PHP uses a fixed CLI worker with PDO SQLite; browser cookies, HTTP sessions and
+multi-file server applications use the explicitly prepared web-project fixture.
+Do not claim that a PHP CLI simulation is a real browser request. Keep HTML and
+JavaScript source/results scoped to their actual lesson and runtime.
+
+Hub image selection is saved in `.classroom/<project>/images.env`, separately
+from learner data. `--from-hub` never falls back to building. `resume` never pulls.
+The publication script previews by default and requires explicit `--push`.
+Images are versioned by role and native architecture in one Hub repository.
+The manual publication workflow needs exact-revision CI, deliberate enablement
+and separately configured credentials. Never infer image publication authority
+from a request to push Git commits. See `docs/dockerhub.md`.
 
 Docker with Linux containers and Compose is the supported delivery route.
 Windows uses WSL 2; macOS and Linux use the same Bash launcher.

@@ -16,6 +16,8 @@ const themes = {
   rust: ["#914b24", "#fff0e4", "#efc29a", "#423426", "Rs"],
   swift: ["#a23d12", "#fff0e5", "#ffb89c", "#482f27", "Sw"],
   docker: ["#0063a8", "#e7f5ff", "#9bd5ff", "#213b50", "Dc"],
+  cuda: ["#785516", "#fff3d8", "#ffd47e", "#3e3421", "GPU"],
+  "web-development": ["#8b3563", "#ffedf5", "#f5b8d7", "#472d3d", "Web"],
   "javascript-typescript": ["#735700", "#fff4ca", "#f1d778", "#3d3522", "JS"],
   "scala-spark": ["#9a3043", "#ffeaf0", "#ffb1c0", "#482b35", "Sp"],
   "deep-learning-tensorflow": ["#934412", "#fff0df", "#ffc18a", "#433327", "TF"],
@@ -181,7 +183,7 @@ function showBrowserObservation(receipt) {
   const submitted = highlightedSourceBlock(receipt.source);
   $("receipt-source").replaceChildren(submitted.pre);
   const revision = resultRevision;
-  classroom("classroom-highlight", { source: receipt.source, language: "javascript" })
+  classroom("classroom-highlight", { source: receipt.source, language: receipt.language })
     .then((data) => {
       if (resultRevision === revision && current?.id === receipt.lesson_id)
         submitted.code.innerHTML = data.html;
@@ -225,7 +227,7 @@ async function runBrowserPreview(context, intent) {
       $("run-storage-status").textContent =
         "Inspect the console, then save the latest observation if useful. Earlier receipts stay unchanged.";
     }
-  });
+  }, current.runtime_profile === "html-browser" ? "html" : "javascript");
   updateBrowserFullscreenControls();
   updateControls();
   const observation = await observationPromise;
@@ -1088,7 +1090,7 @@ function updateControls() {
 }
 function showCapability(cap) {
   const reading = current.runtime_profile === "reading";
-  const browser = current.runtime_profile === "javascript-browser";
+  const browser = ["javascript-browser", "html-browser"].includes(current.runtime_profile);
   const activity = activeJobRecord
     ? " A job for " + activeJobRecord.lesson_id + " is active or awaiting confirmation."
     : legacyRunActive
@@ -1692,7 +1694,7 @@ async function runCode() {
       status("The lesson or draft changed while saving. Review it and press Run again.");
       return;
     }
-    if (current.runtime_profile === "javascript-browser") {
+    if (["javascript-browser", "html-browser"].includes(current.runtime_profile)) {
       await runBrowserPreview(context, intent);
     } else if (context.engine === "legacy") {
       legacyRunActive = true;
