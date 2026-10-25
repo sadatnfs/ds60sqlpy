@@ -18,40 +18,40 @@ examples actually teach the named topic.
 
 | Lesson | Guide words | Examples | Terms | Exercises checked | Solution words | Notebook | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| `python-01` | 2422 | 10 | 20 | 10/10 | 2836 | 37 cells / 15 code / 2867 words | PASS |
-| `python-foundations-01` | 1725 | 5 | 12 | 8/8 | 925 | notebook gate n/a | PASS |
-| `python-02` | 2051 | 8 | 22 | 8/8 | 2012 | 30 cells / 13 code / 2031 words | PASS |
-| `python-03` | 2059 | 8 | 21 | 8/8 | 2047 | 28 cells / 12 code / 2013 words | PASS |
-| `python-foundations-02` | 1732 | 5 | 12 | 8/8 | 936 | notebook gate n/a | PASS |
-| `python-04` | 2158 | 8 | 20 | 8/8 | 2207 | 28 cells / 12 code / 2147 words | PASS |
-| `python-05` | 2141 | 8 | 23 | 8/8 | 2153 | 26 cells / 11 code / 2054 words | PASS |
-| `python-06` | 2040 | 8 | 24 | 7/7 | 1897 | 24 cells / 10 code / 1897 words | PASS |
-| `python-07` | 1986 | 8 | 22 | 7/7 | 2078 | 24 cells / 10 code / 1819 words | PASS |
-| `python-08` | 2048 | 8 | 21 | 7/7 | 2014 | 24 cells / 10 code / 1859 words | PASS |
-| `python-foundations-03` | 1720 | 5 | 12 | 8/8 | 972 | notebook gate n/a | PASS |
-| `python-09` | 2055 | 11 | 22 | 7/7 | 1847 | 25 cells / 10 code / 1942 words | PASS |
-| `python-10` | 2009 | 10 | 20 | 7/7 | 1787 | 24 cells / 10 code / 1812 words | PASS |
-| `python-foundations-04` | 1789 | 5 | 12 | 8/8 | 976 | notebook gate n/a | PASS |
-| `python-11` | 2159 | 8 | 22 | 8/8 | 2293 | 27 cells / 11 code / 2110 words | PASS |
-| `python-12` | 2017 | 8 | 21 | 7/7 | 2025 | 24 cells / 10 code / 1862 words | PASS |
-| `python-13` | 1991 | 8 | 25 | 7/7 | 1797 | 24 cells / 10 code / 1842 words | PASS |
-| `python-14` | 2051 | 10 | 22 | 7/7 | 1873 | 24 cells / 9 code / 1982 words | PASS |
-| `python-15` | 2234 | 11 | 23 | 10/10 | 2636 | 31 cells / 12 code / 2466 words | PASS |
-| `python-16` | 2052 | 8 | 21 | 8/8 | 2015 | 28 cells / 12 code / 2003 words | PASS |
-| `python-17` | 2084 | 8 | 22 | 8/8 | 2059 | 29 cells / 13 code / 2007 words | PASS |
-| `python-18` | 2164 | 8 | 24 | 8/8 | 2308 | 30 cells / 13 code / 2087 words | PASS |
-| `python-19` | 1945 | 8 | 22 | 7/7 | 1830 | 24 cells / 10 code / 1805 words | PASS |
-| `python-20` | 2086 | 8 | 23 | 8/8 | 2192 | 26 cells / 11 code / 2040 words | PASS |
-| `python-21` | 1959 | 8 | 24 | 7/7 | 1825 | 24 cells / 10 code / 1759 words | PASS |
-| `python-22` | 2037 | 8 | 23 | 7/7 | 2035 | 24 cells / 10 code / 1865 words | PASS |
-| `python-23` | 2087 | 8 | 21 | 7/7 | 2205 | 24 cells / 10 code / 1855 words | PASS |
-| `python-24` | 2027 | 8 | 23 | 7/7 | 2160 | 24 cells / 10 code / 1811 words | PASS |
-| `python-25` | 2112 | 8 | 23 | 7/7 | 2018 | 24 cells / 10 code / 1851 words | PASS |
-| `python-26` | 2089 | 8 | 21 | 7/7 | 1947 | 24 cells / 10 code / 1854 words | PASS |
-| `python-27` | 2101 | 10 | 23 | 7/7 | 2015 | 24 cells / 10 code / 1840 words | PASS |
-| `python-28` | 2013 | 8 | 23 | 7/7 | 2029 | 24 cells / 10 code / 1829 words | PASS |
-| `python-29` | 2050 | 8 | 23 | 7/7 | 2280 | 24 cells / 10 code / 1838 words | PASS |
-| `python-30` | 2297 | 8 | 25 | 10/10 | 3190 | 31 cells / 12 code / 2411 words | PASS |
+| `python-01` | 2588 | 9 | 19 | 10/10 | 2846 | 37 cells / 15 code / 2990 words | PASS |
+| `python-foundations-01` | 1736 | 4 | 12 | 8/8 | 925 | notebook gate n/a | PASS |
+| `python-02` | 2177 | 8 | 21 | 8/8 | 2012 | 30 cells / 13 code / 2031 words | PASS |
+| `python-03` | 2185 | 8 | 20 | 8/8 | 2047 | 28 cells / 12 code / 2013 words | PASS |
+| `python-foundations-02` | 1743 | 4 | 12 | 8/8 | 936 | notebook gate n/a | PASS |
+| `python-04` | 2284 | 8 | 19 | 8/8 | 2207 | 28 cells / 12 code / 2147 words | PASS |
+| `python-05` | 2267 | 8 | 22 | 8/8 | 2153 | 26 cells / 11 code / 2054 words | PASS |
+| `python-06` | 2166 | 8 | 23 | 7/7 | 1897 | 24 cells / 10 code / 1897 words | PASS |
+| `python-07` | 2112 | 8 | 21 | 7/7 | 2078 | 24 cells / 10 code / 1819 words | PASS |
+| `python-08` | 2174 | 8 | 20 | 7/7 | 2014 | 24 cells / 10 code / 1859 words | PASS |
+| `python-foundations-03` | 1731 | 4 | 12 | 8/8 | 972 | notebook gate n/a | PASS |
+| `python-09` | 2181 | 11 | 21 | 7/7 | 1847 | 25 cells / 10 code / 1942 words | PASS |
+| `python-10` | 2135 | 10 | 19 | 7/7 | 1787 | 24 cells / 10 code / 1812 words | PASS |
+| `python-foundations-04` | 1800 | 4 | 12 | 8/8 | 976 | notebook gate n/a | PASS |
+| `python-11` | 2285 | 8 | 21 | 8/8 | 2293 | 27 cells / 11 code / 2110 words | PASS |
+| `python-12` | 2143 | 8 | 20 | 7/7 | 2025 | 24 cells / 10 code / 1862 words | PASS |
+| `python-13` | 2117 | 8 | 24 | 7/7 | 1797 | 24 cells / 10 code / 1842 words | PASS |
+| `python-14` | 2177 | 10 | 21 | 7/7 | 1873 | 24 cells / 9 code / 1982 words | PASS |
+| `python-15` | 2360 | 11 | 22 | 10/10 | 2699 | 31 cells / 12 code / 2466 words | PASS |
+| `python-16` | 2178 | 8 | 20 | 8/8 | 2015 | 28 cells / 12 code / 2003 words | PASS |
+| `python-17` | 2210 | 8 | 21 | 8/8 | 2059 | 29 cells / 13 code / 2007 words | PASS |
+| `python-18` | 2290 | 8 | 23 | 8/8 | 2308 | 30 cells / 13 code / 2087 words | PASS |
+| `python-19` | 2071 | 8 | 21 | 7/7 | 1830 | 24 cells / 10 code / 1805 words | PASS |
+| `python-20` | 2212 | 8 | 22 | 8/8 | 2192 | 26 cells / 11 code / 2040 words | PASS |
+| `python-21` | 2085 | 8 | 23 | 7/7 | 1825 | 24 cells / 10 code / 1759 words | PASS |
+| `python-22` | 2163 | 8 | 22 | 7/7 | 2035 | 24 cells / 10 code / 1865 words | PASS |
+| `python-23` | 2213 | 8 | 20 | 7/7 | 2205 | 24 cells / 10 code / 1855 words | PASS |
+| `python-24` | 2153 | 8 | 22 | 7/7 | 2160 | 24 cells / 10 code / 1811 words | PASS |
+| `python-25` | 2238 | 8 | 22 | 7/7 | 2018 | 24 cells / 10 code / 1851 words | PASS |
+| `python-26` | 2215 | 8 | 20 | 7/7 | 1947 | 24 cells / 10 code / 1854 words | PASS |
+| `python-27` | 2329 | 10 | 22 | 7/7 | 2015 | 24 cells / 10 code / 1840 words | PASS |
+| `python-28` | 2139 | 8 | 22 | 7/7 | 2029 | 24 cells / 10 code / 1829 words | PASS |
+| `python-29` | 2176 | 8 | 22 | 7/7 | 2280 | 24 cells / 10 code / 1838 words | PASS |
+| `python-30` | 2423 | 8 | 24 | 10/10 | 3190 | 31 cells / 12 code / 2411 words | PASS |
 | `python-31` | 2379 | 6 | 13 | 6/6 | 1896 | 11 cells / 4 code / 1218 words | PASS |
 | `python-32` | 2296 | 6 | 12 | 6/6 | 1726 | 12 cells / 5 code / 1159 words | PASS |
 | `python-33` | 2261 | 6 | 13 | 6/6 | 1675 | 11 cells / 4 code / 1169 words | PASS |
@@ -82,31 +82,31 @@ examples actually teach the named topic.
 | `python-58` | 2235 | 8 | 13 | 6/6 | 1494 | 13 cells / 4 code / 1299 words | PASS |
 | `python-59` | 2292 | 6 | 21 | 6/6 | 1335 | 11 cells / 3 code / 1206 words | PASS |
 | `python-60` | 2789 | 7 | 13 | 10/10 | 2114 | 13 cells / 3 code / 1656 words | PASS |
-| `python-pro-01` | 2743 | 11 | 32 | 0/0 | 2903 | notebook gate n/a | PASS |
-| `python-svc-01` | 2945 | 13 | 39 | 0/0 | 3611 | notebook gate n/a | PASS |
-| `python-pro-02` | 2891 | 14 | 38 | 0/0 | 3329 | notebook gate n/a | PASS |
-| `python-data-01` | 2971 | 13 | 35 | 0/0 | 3558 | notebook gate n/a | PASS |
-| `python-test-01` | 2483 | 11 | 34 | 0/0 | 2886 | notebook gate n/a | PASS |
-| `python-lang-01` | 2680 | 11 | 35 | 0/0 | 3520 | notebook gate n/a | PASS |
-| `python-stats-01` | 2922 | 9 | 37 | 0/0 | 3897 | notebook gate n/a | PASS |
-| `python-ml-01` | 2792 | 10 | 35 | 1/1 | 3695 | notebook gate n/a | PASS |
-| `python-svc-02` | 3081 | 10 | 38 | 0/0 | 4330 | notebook gate n/a | PASS |
-| `python-perf-01` | 3040 | 12 | 39 | 0/0 | 4067 | notebook gate n/a | PASS |
-| `python-data-02` | 1791 | 5 | 13 | 8/8 | 975 | notebook gate n/a | PASS |
-| `python-ml-02` | 1892 | 5 | 13 | 8/8 | 983 | notebook gate n/a | PASS |
-| `python-pro-03` | 1986 | 5 | 12 | 8/8 | 975 | notebook gate n/a | PASS |
-| `python-numpy-01` | 1644 | 5 | 9 | 6/6 | 1475 | notebook gate n/a | PASS |
-| `python-numpy-02` | 1702 | 5 | 9 | 6/6 | 1752 | notebook gate n/a | PASS |
-| `python-numpy-03` | 1650 | 5 | 9 | 6/6 | 1622 | notebook gate n/a | PASS |
-| `python-numpy-04` | 1702 | 5 | 9 | 6/6 | 1688 | notebook gate n/a | PASS |
-| `python-pandas-01` | 1716 | 5 | 9 | 6/6 | 1571 | notebook gate n/a | PASS |
-| `python-pandas-02` | 1718 | 5 | 9 | 6/6 | 1732 | notebook gate n/a | PASS |
-| `python-pandas-03` | 1755 | 5 | 9 | 6/6 | 1845 | notebook gate n/a | PASS |
-| `python-pandas-04` | 1749 | 5 | 9 | 6/6 | 1873 | notebook gate n/a | PASS |
-| `python-algo-01` | 1612 | 5 | 9 | 6/6 | 1277 | notebook gate n/a | PASS |
-| `python-algo-02` | 1686 | 5 | 9 | 6/6 | 1402 | notebook gate n/a | PASS |
-| `python-algo-03` | 1715 | 5 | 9 | 6/6 | 1693 | notebook gate n/a | PASS |
-| `python-algo-04` | 1765 | 5 | 9 | 6/6 | 1773 | notebook gate n/a | PASS |
+| `python-pro-01` | 2721 | 7 | 32 | 0/0 | 2903 | notebook gate n/a | PASS |
+| `python-svc-01` | 2943 | 9 | 39 | 0/0 | 3611 | notebook gate n/a | PASS |
+| `python-pro-02` | 2889 | 10 | 38 | 0/0 | 3329 | notebook gate n/a | PASS |
+| `python-data-01` | 2969 | 9 | 35 | 0/0 | 3558 | notebook gate n/a | PASS |
+| `python-test-01` | 2489 | 8 | 34 | 0/0 | 2886 | notebook gate n/a | PASS |
+| `python-lang-01` | 2686 | 8 | 35 | 0/0 | 3520 | notebook gate n/a | PASS |
+| `python-stats-01` | 2928 | 6 | 37 | 0/0 | 3897 | notebook gate n/a | PASS |
+| `python-ml-01` | 2798 | 7 | 35 | 1/1 | 3695 | notebook gate n/a | PASS |
+| `python-svc-02` | 3087 | 7 | 38 | 0/0 | 4330 | notebook gate n/a | PASS |
+| `python-perf-01` | 3038 | 8 | 39 | 0/0 | 4067 | notebook gate n/a | PASS |
+| `python-data-02` | 1802 | 4 | 13 | 8/8 | 975 | notebook gate n/a | PASS |
+| `python-ml-02` | 1903 | 4 | 13 | 8/8 | 983 | notebook gate n/a | PASS |
+| `python-pro-03` | 1997 | 4 | 12 | 8/8 | 975 | notebook gate n/a | PASS |
+| `python-numpy-01` | 1655 | 4 | 9 | 6/6 | 1475 | notebook gate n/a | PASS |
+| `python-numpy-02` | 1713 | 4 | 9 | 6/6 | 1752 | notebook gate n/a | PASS |
+| `python-numpy-03` | 1661 | 4 | 9 | 6/6 | 1622 | notebook gate n/a | PASS |
+| `python-numpy-04` | 1713 | 4 | 9 | 6/6 | 1688 | notebook gate n/a | PASS |
+| `python-pandas-01` | 1727 | 4 | 9 | 6/6 | 1571 | notebook gate n/a | PASS |
+| `python-pandas-02` | 1729 | 4 | 9 | 6/6 | 1732 | notebook gate n/a | PASS |
+| `python-pandas-03` | 1766 | 4 | 9 | 6/6 | 1845 | notebook gate n/a | PASS |
+| `python-pandas-04` | 1760 | 4 | 9 | 6/6 | 1873 | notebook gate n/a | PASS |
+| `python-algo-01` | 1623 | 4 | 9 | 6/6 | 1277 | notebook gate n/a | PASS |
+| `python-algo-02` | 1697 | 4 | 9 | 6/6 | 1402 | notebook gate n/a | PASS |
+| `python-algo-03` | 1726 | 4 | 9 | 6/6 | 1693 | notebook gate n/a | PASS |
+| `python-algo-04` | 1776 | 4 | 9 | 6/6 | 1773 | notebook gate n/a | PASS |
 | `sql-start-01` | 2444 | 4 | 15 | 6/6 | 1567 | notebook gate n/a | PASS |
 | `sql-start-02` | 2450 | 4 | 14 | 6/6 | 1602 | notebook gate n/a | PASS |
 | `sql-start-03` | 2430 | 4 | 14 | 6/6 | 1584 | notebook gate n/a | PASS |
@@ -203,7 +203,7 @@ examples actually teach the named topic.
 | `bridge-ops-01` | 3218 | 10 | 22 | 20/20 | 2574 | notebook gate n/a | PASS |
 | `bridge-ai-01` | 3308 | 11 | 24 | 22/22 | 2464 | notebook gate n/a | PASS |
 | `bridge-analytics-01` | 3509 | 11 | 24 | 24/24 | 2536 | notebook gate n/a | PASS |
-| `bridge-capstone-01` | 2491 | 5 | 13 | 8/8 | 2494 | notebook gate n/a | PASS |
+| `bridge-capstone-01` | 2505 | 4 | 13 | 8/8 | 2494 | notebook gate n/a | PASS |
 
 Regenerate from the repository root:
 
