@@ -1,0 +1,58 @@
+[
+  {
+    "id": "viz-001",
+    "python_reference": "courses/data-visualization/references/viz-001.py",
+    "javascript_reference": "courses/data-visualization/references/viz-001.js",
+    "marker": "viz-001 Plotly complete",
+    "expected_table_rows": 3
+  },
+  {
+    "id": "viz-002",
+    "python_reference": "courses/data-visualization/references/viz-002.py",
+    "javascript_reference": "courses/data-visualization/references/viz-002.js",
+    "marker": "viz-002 Plotly complete",
+    "expected_table_rows": 4
+  },
+  {
+    "id": "viz-003",
+    "python_reference": "courses/data-visualization/references/viz-003.py",
+    "javascript_reference": "courses/data-visualization/references/viz-003.js",
+    "marker": "viz-003 Plotly complete",
+    "expected_table_rows": 3
+  },
+  {
+    "id": "viz-004",
+    "python_reference": "courses/data-visualization/references/viz-004.py",
+    "javascript_reference": "courses/data-visualization/references/viz-004.js",
+    "marker": "viz-004 Plotly complete",
+    "expected_table_rows": 8
+  },
+  {
+    "id": "viz-005",
+    "python_reference": "courses/data-visualization/references/viz-005.py",
+    "javascript_reference": "courses/data-visualization/references/viz-005.js",
+    "marker": "viz-005 Plotly complete",
+    "expected_table_rows": 3
+  },
+  {
+    "id": "viz-006",
+    "python_reference": "courses/data-visualization/references/viz-006.py",
+    "javascript_reference": "courses/data-visualization/references/viz-006.js",
+    "marker": "viz-006 Plotly complete",
+    "expected_table_rows": 8
+  },
+  {
+    "id": "viz-007",
+    "python_reference": "courses/data-visualization/references/viz-007.py",
+    "javascript_reference": "courses/data-visualization/references/viz-007.js",
+    "marker": "viz-007 Plotly complete",
+    "expected_table_rows": 3
+  },
+  {
+    "id": "viz-008",
+    "python_reference": "courses/data-visualization/references/viz-008.py",
+    "javascript_reference": "courses/data-visualization/references/viz-008.js",
+    "marker": "viz-008 Plotly complete",
+    "expected_table_rows": 3
+  }
+]

@@ -1,0 +1,11 @@
+// dax-043 learner draft: Measure composition, dependency graphs and numeric formatting
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Build a small reusable measure family with explicit units and dependency boundaries.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Draw the dependency graph and annotate units.
+
+DEFINE
+    MEASURE Sales[DraftCost] = BLANK()
+    MEASURE Sales[DraftProfit] = BLANK()
+EVALUATE ROW ( "Cost", [DraftCost], "Profit", [DraftProfit] )

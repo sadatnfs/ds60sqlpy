@@ -134,8 +134,8 @@
         "Gradient mode"
       ],
       "outcome": "PyTorch distinguishes graph tracking from gradient storage.",
-      "lab": "Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and backpropagate its sum.",
-      "verification": "w leaf True; intermediate False; gradients 2 and 1. output still requires_grad True.",
+      "lab": "Create a leaf tensor \\(w=0\\) and intermediate tensor \\(u=2w\\), retain the intermediate gradient and backpropagate its sum.",
+      "verification": "`w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \\(w\\) and \\(u\\) are 2 and 1. the output still has `requires_grad=True`.",
       "paired_lesson_id": "tf-007"
     },
     {

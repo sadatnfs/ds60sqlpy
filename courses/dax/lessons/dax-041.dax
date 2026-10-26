@@ -1,0 +1,9 @@
+// dax-041 learner draft: Budget comparisons require compatible grains
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Align actuals with a monthly category budget without copying a whole-month target into a daily metric.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Specify a uniform daily allocation for January Paper.
+
+EVALUATE
+ROW ( "Actual", BLANK(), "Budget at matching grain", BLANK(), "Variance", BLANK() )

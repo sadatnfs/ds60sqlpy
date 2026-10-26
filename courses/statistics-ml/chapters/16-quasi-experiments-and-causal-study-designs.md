@@ -270,6 +270,10 @@ if __name__ == "__main__":
 
 - [Lee and Lemieux, Regression Discontinuity Designs in Economics](https://www.nber.org/papers/w14723).
 
+## Connected worked tutorial
+
+[Align longitudinal targets](../tutorials/science/08-longitudinal-regimes-and-target-trials.md). Distinguish sustained-regime effects from direct regression coefficients and align target-trial timing.
+
 ## Reading connections
 
 [Previous chapter](15-causal-inference-foundations.md) | [Book contents](../README.md) | [Next chapter](17-causal-estimation-heterogeneous-effects-and-policy-learning.md)

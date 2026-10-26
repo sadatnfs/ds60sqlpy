@@ -16,13 +16,13 @@ Record IDs should travel with features and targets. A final short batch is retai
 
 ## Reading the implementation
 
-Slice the leading observation axis into batches. For each independent update, call zero_grad(set_to_none=True), compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.
+Slice the leading observation axis into batches. For each independent update, call `zero_grad(set_to_none=True)`, compute the current mean loss, backward and step. Log parameter values after each step and counts separately from epochs. A shared index permutation preserves x/y pairing. Changing only one side creates a different learning task even when marginal distributions remain unchanged.
 
 ## Trace every update at the state where its gradient was computed
 
 Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.
 
-For this scalar fixture, y=2x and each batch mean loss has derivative 2 \(\operatorname{mean}({x}^{2})\)(w-2). With rate 0.01, the exact correct trajectory is:
+For this scalar fixture, \(y=2x\) and each batch mean loss has derivative \(2\operatorname{mean}(x^2)(w-2)\). With learning rate \(\eta=0.01\), the exact correct trajectory is:
 
 | Batch inputs | \(\operatorname{mean}({x}^{2})\) | Weight before | Fresh gradient | Weight after |
 | --- | --- | --- | --- | --- |

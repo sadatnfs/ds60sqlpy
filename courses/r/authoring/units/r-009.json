@@ -1,0 +1,94 @@
+{
+  "id": "r-009",
+  "title": "Lists and nested records without accidental flattening",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-005", "r-006", "r-007"],
+  "concepts": ["List", "Single-bracket extraction", "Double-bracket extraction", "Schema"],
+  "outcome": "Read and update nested records while preserving heterogeneous fields and validating required components.",
+  "mechanism": "A list can contain a character ID, a numeric vector and another list without coercing them into one atomic type. It is therefore useful for structured records, model outputs and configuration. The structure itself is not a validated schema: fields can be absent, misspelled, duplicated or contain an unexpected object. Validate the pieces a function actually requires.\n\nThe operators [ and [[ have different container behavior. record[\"values\"] returns a one-element list, while record[[\"values\"]] returns the contained numeric vector. The $ syntax is convenient for literal field names, but exact double-bracket indexing is preferable when a name comes from a variable. Avoid relying on partial matching of a misspelled field.\n\nNULL has a special role in list updates. Assigning record$note <- NULL removes that component. To retain a component whose value is NULL, use single-bracket replacement with list(NULL). This is useful when a schema distinguishes an explicitly absent value from a completely missing field. The difference affects later names and length checks.\n\nFlattening with unlist can discard structural distinctions and coerce values. It is appropriate only when the flattened representation is the actual intended output. A model result containing coefficients, diagnostics and labels should usually remain structured so each part can retain its type and meaning. Inspect str before writing extraction code around an unfamiliar return object.",
+  "vocabulary": [
+    {
+      "term": "List",
+      "definition": "A vector whose elements can be objects of different types."
+    },
+    {
+      "term": "Single-bracket extraction",
+      "definition": "An extraction that retains a list container."
+    },
+    {
+      "term": "Double-bracket extraction",
+      "definition": "An extraction that returns one contained object."
+    },
+    {
+      "term": "Schema",
+      "definition": "A stated contract for required fields and their types."
+    }
+  ],
+  "anatomy": "Use record[[key]] for an exact variable field name, names(record) to inspect fields and is.list/is.numeric to validate structure. Nested extraction can be staged into named intermediate values for clear errors.",
+  "worked_examples": [
+    {
+      "title": "Container versus contained value",
+      "code": "record <- list(id = \"A\", values = c(2, 4), metadata = list(unit = \"kg\"))\nstopifnot(is.list(record[\"values\"]), is.numeric(record[[\"values\"]]))\nstopifnot(record[[\"metadata\"]][[\"unit\"]] == \"kg\")\nprint(record[[\"values\"]])\n",
+      "explanation": "The one-element list and the numeric measurement vector are different objects. Exact nested names retain the unit contract.",
+      "expected": "2,4."
+    },
+    {
+      "title": "Retain or remove a NULL component",
+      "code": "record <- list(id = \"A\", note = \"draft\")\nrecord[\"note\"] <- list(NULL)\nstopifnot(\"note\" %in% names(record), is.null(record[[\"note\"]]))\nrecord$note <- NULL\nstopifnot(!(\"note\" %in% names(record)))\nprint(names(record))\n",
+      "explanation": "Single-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.",
+      "expected": "Only id remains after deletion."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict is.list(x[1]) for a list x.",
+      "hint": "Single brackets retain the container.",
+      "answer": "It is TRUE.",
+      "expected": "It is TRUE."
+    },
+    {
+      "prompt": "Extract the first number from a values field.",
+      "hint": "First extract the vector, then its element.",
+      "answer": "Use record[[\"values\"]][[1]].",
+      "expected": "Use record[[\"values\"]][[1]]."
+    },
+    {
+      "prompt": "Validate required id and values fields.",
+      "hint": "Check names before checking types.",
+      "answer": "Require both names, one character ID and a numeric values vector.",
+      "expected": "Require both names, one character ID and a numeric values vector."
+    },
+    {
+      "prompt": "Diagnose an accidental one-element list passed to mean.",
+      "hint": "The intended numeric vector was not extracted.",
+      "answer": "Use [[ to obtain the numeric field.",
+      "expected": "Use [[ to obtain the numeric field."
+    },
+    {
+      "prompt": "Retain an explicitly NULL note field.",
+      "hint": "Replacement must retain the list element.",
+      "answer": "Use record[\"note\"] <- list(NULL).",
+      "expected": "Use record[\"note\"] <- list(NULL)."
+    },
+    {
+      "prompt": "Explain a risk of unlist on a mixed record.",
+      "hint": "One atomic output needs a common type.",
+      "answer": "A text ID can coerce numeric measurements to character and erase field structure.",
+      "expected": "A text ID can coerce numeric measurements to character and erase field structure."
+    }
+  ],
+  "starter": "# r-009: Lists and nested records without accidental flattening\n# Complete the six guide tasks using these local inputs.\nrecord <- list(id = \"A\", values = c(2, 4), metadata = list(unit = \"kg\"))\n# TODO: validate and extract fields without flattening the record.\nstr(record)\n",
+  "reference": "record <- list(id = \"A\", values = c(2, 4))\nstopifnot(is.list(record[1]), record[[\"values\"]][[1]] == 2)\nstopifnot(all(c(\"id\", \"values\") %in% names(record)))\nstopifnot(is.character(record$id), length(record$id) == 1, is.numeric(record$values))\nstopifnot(mean(record[[\"values\"]]) == 3)\nrecord[\"note\"] <- list(NULL)\nstopifnot(\"note\" %in% names(record), is.null(record$note))\nstopifnot(is.character(unlist(record[c(\"id\", \"values\")])))\ncat(\"r-009 reference checks passed\\n\")\n",
+  "solution_explanation": "The one-element list and the numeric measurement vector are different objects. Exact nested names retain the unit contract.\n\nSingle-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.",
+  "sources": [
+    {
+      "title": "R lists",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/list.html"
+    },
+    {
+      "title": "R extraction",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.html"
+    }
+  ]
+}

@@ -5,7 +5,8 @@ description: Help a learner start, resume, understand, practice or review regist
 
 # Guide the DS60 classroom
 
-Teach from the actual guide and the learner's work. Keep the course useful
+Teach from the actual guide and the learner's work. Use professional, factual
+explanations and avoid motivational slogans. Keep the course useful
 without an AI account or hosted model. Identify a missing explanation as a
 curriculum defect rather than quietly replacing the route with an invented one.
 
@@ -105,6 +106,16 @@ different things. Opening a lesson must not install packages or fetch models.
   requires an explicit page-session opt-in and does not automatically save run
   receipts. Manual Run and explicit Save observation are distinct actions.
   History, navigation, Stop and reload must not silently replay code.
+- DAX is an offline editable draft. Explain row/filter context and compare the
+  named reference/model and worked table. A draft edit does not recalculate that
+  table. Do not request a Power BI account or invent an execution result.
+- R scripts explicitly print ggplot2 and Plotly objects. JAX uses CPU by default;
+  PyMC uses its separately pinned Bayesian environment. Explain the actual
+  diagnostics and state boundaries rather than equating a successful exit with
+  reliable inference.
+- Python/R figure history contains captured images or chart data from the named
+  source. Viewing it does not rerun code. Compare the edited draft separately,
+  and report a capture warning without discarding a real calculation result.
 - PHP CLI supports its prepared SQLite examples. Real HTTP cookies/sessions use
   the separately owned web fixture; a request model is not a real web exchange.
 - CUDA reading, CPU models, device compilation, GPU execution and profiling are

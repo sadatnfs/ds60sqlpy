@@ -1,0 +1,20 @@
+// dax-046: DAX UDFs: explicit parameters and a reusable scalar rule
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+    MEASURE Sales[GrossRevenue] = SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+    FUNCTION Course.NetAfterFee = ( amount : NUMERIC, feeRate : NUMERIC = 0.1 ) =>
+        IF ( feeRate >= 0 && feeRate <= 1, amount * ( 1 - feeRate ), BLANK() )
+
+// dax-046-a: Default and explicit rates
+// Context: All-row revenue 187; fee-rate domain 0..1; default rate 0.1.
+EVALUATE ROW ( "DefaultFee", Course.NetAfterFee ( [NetRevenue] ), "ExplicitTwentyPercent", Course.NetAfterFee ( [NetRevenue], 0.2 ) )
+
+// dax-046-b: A valid zero and an invalid rate
+// Context: Same function; compare boundary rate 1 with out-of-domain rate 1.2.
+EVALUATE ROW ( "FullFee", Course.NetAfterFee ( 100, 1 ), "InvalidRate", Course.NetAfterFee ( 100, 1.2 ) )

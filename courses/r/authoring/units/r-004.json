@@ -1,0 +1,99 @@
+{
+  "id": "r-004",
+  "title": "Logical vectors, comparisons and three-valued reasoning",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-003"],
+  "concepts": [
+    "Logical vector",
+    "Elementwise conjunction",
+    "Short-circuit condition",
+    "Unknown predicate"
+  ],
+  "outcome": "Build explicit selection predicates and handle unknown values without turning them into false evidence.",
+  "mechanism": "Comparisons produce logical values. A vector such as amount >= 10 describes one predicate result per amount. Combining conditions with & or | works element by element. This is useful for constructing a row mask, but it differs from a single control-flow decision about the entire vector. The functions any and all reduce a logical vector to a question about at least one or every entry.\n\nMissing data introduces an unknown truth value. NA > 10 is NA, not FALSE. TRUE | NA is TRUE because one known true branch suffices, while FALSE | NA stays unknown. Similarly FALSE & NA is FALSE, but TRUE & NA remains unknown. Treating all unknowns as false may be an intentional eligibility rule, but that rule should be expressed and explained.\n\nUse is.na rather than x == NA to detect missingness. An ordinary equality comparison with NA cannot establish which values are missing. A complete numeric eligibility mask can combine !is.na(x) with x >= 10, retaining only known qualifying values. Keep the count of excluded unknowns available for reporting.\n\nScalar control flow uses a length-one condition. The short-circuit operators && and || evaluate their right-hand side only when needed; they are useful for a guard such as length(x) > 0 && x[[1]] > 0. They are not replacements for vector & and |. Confusing those roles can silently change a row selection into one scalar decision.",
+  "vocabulary": [
+    {
+      "term": "Logical vector",
+      "definition": "Values TRUE, FALSE or NA used to state predicates."
+    },
+    {
+      "term": "Elementwise conjunction",
+      "definition": "The & operation combining corresponding logical entries."
+    },
+    {
+      "term": "Short-circuit condition",
+      "definition": "The scalar && or || operation that can skip a second expression."
+    },
+    {
+      "term": "Unknown predicate",
+      "definition": "An NA comparison result whose truth is not established."
+    }
+  ],
+  "anatomy": "Use parentheses to make a combined predicate readable. ! negates a logical value, & and | combine vectors, and any/all reduce them. isTRUE produces FALSE for an unknown scalar, so use it only when that explicit policy fits.",
+  "worked_examples": [
+    {
+      "title": "Retain known qualifying observations",
+      "code": "amount <- c(5, 12, NA_real_, 20)\nkeep <- !is.na(amount) & amount >= 10\nstopifnot(identical(keep, c(FALSE, TRUE, FALSE, TRUE)))\nstopifnot(identical(amount[keep], c(12, 20)))\nprint(keep)\n",
+      "explanation": "The mask explicitly excludes missing amounts and separately tests the threshold. Unknown values are counted, not interpreted as measured failures.",
+      "expected": "FALSE, TRUE, FALSE, TRUE."
+    },
+    {
+      "title": "Unknown truth and short-circuit guards",
+      "code": "stopifnot(isTRUE(TRUE | NA), identical(FALSE & NA, FALSE))\nstopifnot(is.na(FALSE | NA), is.na(TRUE & NA))\nx <- numeric(0)\nfirst_positive <- length(x) > 0 && x[[1]] > 0\nstopifnot(identical(first_positive, FALSE))\nprint(first_positive)\n",
+      "explanation": "The first condition prevents an invalid extraction from an empty vector. The truth-table checks explain when uncertainty does and does not affect the combined answer.",
+      "expected": "FALSE; no empty-vector extraction error."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict TRUE & NA and FALSE & NA.",
+      "hint": "Ask whether the known operand already determines conjunction.",
+      "answer": "The first is NA; the second is FALSE.",
+      "expected": "The first is NA; the second is FALSE."
+    },
+    {
+      "prompt": "Change the threshold from ten to fifteen.",
+      "hint": "Keep the missingness policy unchanged.",
+      "answer": "Only the amount twenty remains.",
+      "expected": "Only the amount twenty remains."
+    },
+    {
+      "prompt": "Construct a mask for known amounts from ten through twenty inclusive.",
+      "hint": "Combine lower and upper bounds with &.",
+      "answer": "Use !is.na(x) & x >= 10 & x <= 20.",
+      "expected": "Use !is.na(x) & x >= 10 & x <= 20."
+    },
+    {
+      "prompt": "Diagnose x == NA.",
+      "hint": "A comparison with unknown data stays unknown.",
+      "answer": "Use is.na(x) to test missingness.",
+      "expected": "Use is.na(x) to test missingness."
+    },
+    {
+      "prompt": "Guard an empty vector before extracting its first element.",
+      "hint": "Use scalar short-circuit evaluation.",
+      "answer": "length(x) > 0 && x[[1]] > 0 safely returns FALSE for an empty vector.",
+      "expected": "length(x) > 0 && x[[1]] > 0 safely returns FALSE for an empty vector."
+    },
+    {
+      "prompt": "Separate an all-known claim from all(..., na.rm=TRUE).",
+      "hint": "Removing missing predicates changes the population.",
+      "answer": "Report missingness and state that the reduced claim concerns observed predicates only.",
+      "expected": "Report missingness and state that the reduced claim concerns observed predicates only."
+    }
+  ],
+  "starter": "# r-004: Logical vectors, comparisons and three-valued reasoning\n# Complete the six guide tasks using these local inputs.\namount <- c(5, 12, NA_real_, 20)\n# TODO: retain known amounts under a documented threshold policy.\nprint(is.na(amount))\n",
+  "reference": "stopifnot(is.na(TRUE & NA), identical(FALSE & NA, FALSE))\nx <- c(5, 12, NA_real_, 20)\nstopifnot(identical(x[!is.na(x) & x >= 15], 20))\nmask <- !is.na(x) & x >= 10 & x <= 20\nstopifnot(identical(x[mask], c(12, 20)))\nstopifnot(identical(is.na(x), c(FALSE, FALSE, TRUE, FALSE)))\nempty <- numeric(0)\nstopifnot(!(length(empty) > 0 && empty[[1]] > 0))\nstopifnot(is.na(all(c(TRUE, NA))), isTRUE(all(c(TRUE, NA), na.rm = TRUE)))\ncat(\"r-004 reference checks passed\\n\")\n",
+  "solution_explanation": "The mask explicitly excludes missing amounts and separately tests the threshold. Unknown values are counted, not interpreted as measured failures.\n\nThe first condition prevents an invalid extraction from an empty vector. The truth-table checks explain when uncertainty does and does not affect the combined answer.",
+  "sources": [
+    {
+      "title": "R logical operations",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Logic.html"
+    },
+    {
+      "title": "R missing values",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html"
+    }
+  ]
+}

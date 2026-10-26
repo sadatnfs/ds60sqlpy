@@ -1,0 +1,22 @@
+// dax-047: UDF value versus expression parameters
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+    MEASURE Sales[GrossRevenue] = SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+    FUNCTION Course.BlueValue = ( amount : SCALAR NUMERIC VAL ) =>
+        CALCULATE ( amount, Product[Color] = "Blue" )
+    FUNCTION Course.BlueExpression = ( amount : SCALAR NUMERIC EXPR ) =>
+        CALCULATE ( amount, Product[Color] = "Blue" )
+
+// dax-047-a: Unfiltered caller
+// Context: No incoming filter; both calls receive the same written measure argument with different parameter modes.
+EVALUATE ROW ( "EagerValue", Course.BlueValue ( [NetRevenue] ), "DeferredExpression", Course.BlueExpression ( [NetRevenue] ) )
+
+// dax-047-b: Red caller and a Blue-transforming function
+// Context: Incoming Color=Red; the function body requests Color=Blue.
+EVALUATE CALCULATETABLE ( ROW ( "EagerValue", Course.BlueValue ( [NetRevenue] ), "DeferredExpression", Course.BlueExpression ( [NetRevenue] ) ), Product[Color] = "Red" )

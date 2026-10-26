@@ -32,7 +32,7 @@ README = """DS60 Classroom: complete Docker source starter
    and opens the actual local /classroom address. No image is published.
 
 No host Python, compiler or PostgreSQL installation is required. Git is optional.
-The first preparation needs internet and substantial disk space. All sixteen
+The first preparation needs internet and substantial disk space. The catalog's
 ordinary workers are selected on a new project. For a smaller start, use
 ./classroom --starter. Every lesson remains readable; add its runtime later.
 Optional NVIDIA GPU and owned Kubernetes runtimes require separate setup.

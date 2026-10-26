@@ -707,7 +707,7 @@ def build_html(payload: dict[str, Any]) -> str:
   <div id="top" class="shell hero">
     <div>
       <p class="eyebrow">Python · PostgreSQL · Engineering</p>
-      <h1>Learn by doing, one honest attempt at a time.</h1>
+      <h1>Programming, data science and systems.</h1>
       <p class="hero-copy">
         This is the portable front door to the DS60 repository. Set up a new
         machine, choose a route, open the right artifacts, track local progress,
@@ -821,7 +821,7 @@ def build_html(payload: dict[str, Any]) -> str:
             preparation logs and the exact browser URL.</p></article>
           <article class="panel"><span class="step-number">2</span><h3>Choose any subject</h3>
             <p>The unified classroom keeps lessons, language-specific pads, notes,
-            run history and progress together. Follow prerequisites at your own pace.</p></article>
+            run history and progress together. Prerequisites identify the concepts used in each lesson.</p></article>
           <article class="panel"><span class="step-number">3</span><h3>Keep your work</h3>
             <pre><code>./classroom stop
 ./classroom resume</code></pre><p>Resume uses saved local containers and images
@@ -886,7 +886,7 @@ def build_html(payload: dict[str, Any]) -> str:
     <section id="coding-lab">
       <div class="shell">
         <div class="section-head"><div><p class="eyebrow">Work the course</p>
-          <h2>Your own guided coding workspace.</h2></div>
+          <h2>Classroom workspace.</h2></div>
           <p>Read a lesson, predict a result, write Python or SQL, and keep the evidence.</p></div>
         <div class="grid three">
           <article class="panel"><h3>Start the application</h3>
@@ -971,11 +971,11 @@ def build_html(payload: dict[str, Any]) -> str:
         <div class="section-head">
           <div>
             <p class="eyebrow">Step 3</p>
-            <h2>Use the same learning loop every time.</h2>
+            <h2>Recommended study sequence.</h2>
           </div>
           <p>
             The course separates explanation, active work, and solutions on
-            purpose. Keep that friction: it is where learning happens.
+            purpose. Use the companion guide and worked examples to investigate errors.
           </p>
         </div>
         <div class="workflow">

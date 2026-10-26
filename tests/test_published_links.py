@@ -254,3 +254,33 @@ def test_linked_asset_ancestor_is_checked_before_file_stat_or_read(
         *ASSETS.values(),
     }
     assert all(failure["kind"] == "linked_published_source" for failure in report["failures"])
+
+
+def test_registered_textbook_font_stylesheet_resolves_only_when_present(site: Path) -> None:
+    route = "/src/ds60sqlpy/assets/vendor/textbook/fonts.css"
+    relative = "src/ds60sqlpy/assets/vendor/textbook/fonts.css"
+    assert ASSETS[route] == relative
+    font_source = site / relative
+    font_source.write_text("body { font-family: monospace; }", encoding="utf-8")
+    write_page(site, "START_HERE.html", f'<link rel="stylesheet" href="{route}">')
+    write_page(
+        site,
+        "lesson-pages/python-01.html",
+        f'<link rel="stylesheet" href="..{route}">',
+    )
+    present = inspect_published(site)
+    assert present["failure_count"] == 0
+    assert present["local_links_checked"] == 2
+
+    font_source.unlink()
+    missing = inspect_published(site)
+    assert missing["failure_count"] == 3
+    assert any(
+        failure["path"] == relative and failure["kind"] == "missing_published_source"
+        for failure in missing["failures"]
+    )
+    assert {
+        failure["target"]
+        for failure in missing["failures"]
+        if failure["kind"] == "missing_local_target"
+    } == {route, ".." + route}

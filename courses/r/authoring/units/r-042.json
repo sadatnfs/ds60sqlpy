@@ -1,0 +1,98 @@
+{
+  "id": "r-042",
+  "title": "Estimation, standard errors and resampling targets",
+  "level": "intermediate",
+  "minutes": 140,
+  "prerequisites": ["r-041"],
+  "concepts": ["estimator", "standard error", "bootstrap", "confidence interval"],
+  "outcome": "Calculate and interpret distinct uncertainty quantities while keeping the resampling population and assumptions explicit.",
+  "mechanism": "An estimate is a statistic calculated from observed data. A standard error describes variation of an estimator under a sampling or resampling model. It is not the spread of the raw observations, and a small standard error does not repair a biased collection process.\n\nFor independent observations with a suitable finite variance, the usual estimated standard error of a sample mean is the sample standard deviation divided by the square root of the sample count. R's sd uses the sample-variance convention with divisor n-1. Retain the count and explain the independence assumption before using this formula for clustered or serially dependent observations.\n\nThe nonparametric bootstrap samples from the empirical distribution of the observed values. Its conditional target is not identical to the unknown population sampling distribution. The tiny fixture here enumerates all possible bootstrap samples, so there is no Monte Carlo approximation error in that conditional calculation. There is still uncertainty about how well the empirical distribution represents the population.\n\nFor four observations 2,4,6,8, the empirical distribution has variance five using divisor four. A four-draw mean from that distribution therefore has conditional variance 5/4. The usual estimated sampling variance from the unbiased sample variance is 5/3. Both calculations are internally coherent, but they answer different finite-sample questions. Treating their numerical difference as an automatic coding defect would lose that distinction.\n\nA confidence interval additionally depends on a coverage argument. A Student t interval for a mean relies on its specified sampling/model assumptions; a percentile bootstrap interval has different approximation behavior. Neither is a prediction interval for a new observation. A narrow interval also says nothing by itself about whether the measured outcome matches the scientific question.",
+  "vocabulary": [
+    {
+      "term": "Estimator",
+      "definition": "A rule mapping a sample to a target estimate."
+    },
+    {
+      "term": "Standard error",
+      "definition": "A standard deviation of an estimator under a declared sampling or resampling model."
+    },
+    {
+      "term": "Empirical distribution",
+      "definition": "The discrete distribution assigning mass to the observed values."
+    },
+    {
+      "term": "Coverage",
+      "definition": "The long-run inclusion property of an interval procedure under stated assumptions."
+    }
+  ],
+  "anatomy": "Calculate mean(x), sd(x), length(x) and sd(x)/sqrt(length(x)) separately. expand.grid enumerates the index choices for a small exact bootstrap; apply computes one mean per resample. Compare the population variance of those enumerated means with the analytic conditional target. qt supplies a Student t critical value, while quantile requires a declared probability and interpolation convention.",
+  "worked_examples": [
+    {
+      "title": "Sample spread versus uncertainty of a mean",
+      "code": "x <- c(2, 4, 6, 8)\nse <- sd(x) / sqrt(length(x))\nstopifnot(mean(x) == 5, isTRUE(all.equal(var(x), 20 / 3)))\nstopifnot(isTRUE(all.equal(se^2, 5 / 3)))\ninterval <- mean(x) + c(-1, 1) * qt(0.975, df = length(x) - 1) * se\nstopifnot(interval[1] < 5, interval[2] > 5)\nprint(c(mean = mean(x), sample_sd = sd(x), mean_se = se))\nprint(interval)\n",
+      "explanation": "The observation standard deviation and the mean standard error differ by the square root of four. The interval is a model-dependent procedure, not a guarantee about this one realized dataset.",
+      "expected": "Mean 5; sample variance 20/3; squared SE 5/3."
+    },
+    {
+      "title": "Enumerate the conditional bootstrap",
+      "code": "x <- c(2, 4, 6, 8)\nindices <- expand.grid(rep(list(seq_along(x)), length(x)))\nmeans <- apply(indices, 1, function(i) mean(x[as.integer(i)]))\nconditional_variance <- mean((means - mean(means))^2)\nstopifnot(length(means) == 256, mean(means) == 5)\nstopifnot(isTRUE(all.equal(conditional_variance, 5 / 4)))\nprint(c(bootstrap_mean = mean(means), conditional_variance = conditional_variance))\n",
+      "explanation": "All 256 ordered resamples are equally weighted. Using mean squared deviations gives the exact variance of that finite conditional distribution; sd(means) would apply a sample divisor to a different object.",
+      "expected": "256 resamples; mean 5; conditional variance 1.25."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Derive the sample mean and estimated SE for c(2,4,6,8).",
+      "hint": "Separate variance of observations from variance of their mean.",
+      "answer": "The mean is 5; sample variance 20/3; estimated SE is sqrt(5/3).",
+      "expected": "Mean 5, SE squared 5/3."
+    },
+    {
+      "prompt": "Add three to every observation and compare the estimate and SE.",
+      "hint": "A common shift changes location but not centered deviations.",
+      "answer": "The mean becomes 8 while the standard error is unchanged.",
+      "expected": "Mean 8; same SE."
+    },
+    {
+      "prompt": "Enumerate all four-draw bootstrap samples and verify their conditional variance.",
+      "hint": "Keep each ordered index tuple equally weighted.",
+      "answer": "The empirical variance is 5 and four independent draws produce mean variance 5/4.",
+      "expected": "256 means; conditional variance 1.25."
+    },
+    {
+      "prompt": "Diagnose dividing the observation standard deviation by n instead of sqrt(n).",
+      "hint": "Square both candidate standard errors.",
+      "answer": "The wrong formula shrinks uncertainty too quickly. For n4 it is half the correct SE.",
+      "expected": "Wrong SE equals correct SE/2."
+    },
+    {
+      "prompt": "State a policy for estimating this SE from zero or one observation.",
+      "hint": "The sample variance requires at least two values.",
+      "answer": "Reject the request explicitly instead of presenting NA as a successful uncertainty estimate.",
+      "expected": "A defined error for count below 2."
+    },
+    {
+      "prompt": "Compare a Student t mean interval with a percentile interval from the exact bootstrap distribution.",
+      "hint": "State assumptions and interval targets before comparing endpoints.",
+      "answer": "Both describe uncertainty of a mean under different procedures; their agreement or disagreement on this fixture does not establish population coverage or a future-observation prediction interval.",
+      "expected": "Correctly labeled intervals with declared quantile convention."
+    }
+  ],
+  "starter": "# r-042: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nx <- c(2, 4, 6, 8)\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Derive the sample mean and estimated SE for c(2,4,6,8).\n# TODO: Separate variance of observations from variance of their mean.\n# Exercise 2: Add three to every observation and compare the estimate and SE.\n# TODO: A common shift changes location but not centered deviations.\n# Exercise 3: Enumerate all four-draw bootstrap samples and verify their conditional variance.\n# TODO: Keep each ordered index tuple equally weighted.\n# Exercise 4: Diagnose dividing the observation standard deviation by n instead of sqrt(n).\n# TODO: Square both candidate standard errors.\n# Exercise 5: State a policy for estimating this SE from zero or one observation.\n# TODO: The sample variance requires at least two values.\n# Exercise 6: Compare a Student t mean interval with a percentile interval from the exact bootstrap distribution.\n# TODO: State assumptions and interval targets before comparing endpoints.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "mean_se <- function(x) {\n  if (length(x) < 2L || anyNA(x) || any(!is.finite(x))) stop(\"at least two finite observations required\")\n  sd(x) / sqrt(length(x))\n}\nx <- c(2, 4, 6, 8)\nstopifnot(mean(x) == 5, isTRUE(all.equal(mean_se(x)^2, 5 / 3)))\nstopifnot(mean(x + 3) == 8, isTRUE(all.equal(mean_se(x + 3), mean_se(x))))\nindices <- expand.grid(rep(list(seq_along(x)), length(x)))\nmeans <- apply(indices, 1, function(i) mean(x[as.integer(i)]))\nstopifnot(length(means) == 256, mean(means) == 5)\nstopifnot(isTRUE(all.equal(mean((means - 5)^2), 5 / 4)))\nstopifnot(isTRUE(all.equal(sd(x) / length(x), mean_se(x) / 2)))\nstopifnot(inherits(try(mean_se(1), silent = TRUE), \"try-error\"))\nt_interval <- mean(x) + c(-1, 1) * qt(0.975, 3) * mean_se(x)\npercentile <- quantile(means, c(0.025, 0.975), type = 7, names = FALSE)\nstopifnot(t_interval[1] < 5, t_interval[2] > 5, percentile[1] <= 5, percentile[2] >= 5)\nprint(list(t_mean_interval = t_interval, exact_empirical_percentile = percentile))\ncat(\"r-042 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference uses different variance conventions for different objects. sd(x) estimates population spread from a sample, whereas the enumeration treats all bootstrap means as the complete conditional distribution. Neither result should be silently substituted for the other.\n\nThe shift test checks an invariant of centered spread. The count guard prevents an undefined sample-variance calculation from being interpreted as a usable estimate. Interval construction is shown explicitly, with its target and assumptions retained; no coverage claim is inferred from one synthetic realization.",
+  "sources": [
+    {
+      "title": "R standard deviation",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/sd.html"
+    },
+    {
+      "title": "R Student t distribution",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TDist.html"
+    },
+    {
+      "title": "R quantiles",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html"
+    }
+  ]
+}

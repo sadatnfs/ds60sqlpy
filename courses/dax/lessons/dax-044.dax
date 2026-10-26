@@ -1,0 +1,9 @@
+// dax-044 learner draft: Calculation items transform selected measures
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Describe a reusable transformation while preventing it from changing incompatible measures.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the calculation-item expression and its applicability contract.
+
+// Draft a calculation-item definition separately from this query expansion.
+EVALUATE ROW ( "Transformed revenue", BLANK(), "Unaffected quantity", BLANK() )

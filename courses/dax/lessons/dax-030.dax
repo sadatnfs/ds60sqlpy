@@ -1,0 +1,9 @@
+// dax-030 learner draft: Bridge tables and overlapping audiences
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Model overlapping customer groups and reconcile unique reach without enabling ambiguous filter paths.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a reconciliation for the two audience totals.
+
+EVALUATE
+ROW ( "Newsletter", BLANK(), "Prospects", BLANK(), "Distinct union", BLANK() )

@@ -1,0 +1,19 @@
+// dax-018: Measure predicates need an explicit candidate table
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-018-a: Products above fifty
+// Context: No incoming filters; consider each visible ProductKey independently.
+EVALUATE
+VAR Qualifying = FILTER ( VALUES ( Product[ProductKey] ), [NetRevenue] > 50 )
+RETURN ROW ( "Products", COUNTROWS ( Qualifying ), "Revenue", CALCULATE ( [NetRevenue], Qualifying ) )
+
+// dax-018-b: A stricter threshold
+// Context: Same candidate population, threshold changed from 50 to 90.
+EVALUATE
+VAR Qualifying = FILTER ( VALUES ( Product[ProductKey] ), [NetRevenue] > 90 )
+RETURN ROW ( "Products", COUNTROWS ( Qualifying ), "Revenue", CALCULATE ( [NetRevenue], Qualifying ) )

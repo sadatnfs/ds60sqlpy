@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Saved interactive chart</title>
+    <style>
+      html,
+      body { width: 100%; height: 100%; margin: 0; }
+      body { background: white; color: #18212f; font: 15px/1.5 system-ui; overflow: hidden; }
+      #plot { width: 100%; height: 100%; min-width: 0; min-height: 0; }
+      #error { margin: 0; padding: 1rem; }
+      #error:empty { display: none; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="plot"
+      role="img"
+      aria-label="Interactive chart. Additional descriptions and data tables are shown when supplied by the example."
+    ></div>
+    <p id="error" role="status"></p>
+    <script>
+      __DS60_PLOTLY_BUNDLE__
+    </script>
+    <script>
+      (() => {
+        const expectedOrigin = __DS60_BROWSER_ORIGIN__;
+        const plot = document.getElementById("plot");
+        let connected = false, resizeObserver = null, resizeFrame = null;
+        let resizing = false, resizeAgain = false;
+        function scheduleResize() {
+          if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+          resizeFrame = requestAnimationFrame(async () => {
+            resizeFrame = null;
+            if (!plot.isConnected || !plot._fullLayout ||
+                plot.clientWidth <= 0 || plot.clientHeight <= 0) return;
+            if (resizing) { resizeAgain = true; return; }
+            if (Math.abs(plot._fullLayout.width - plot.clientWidth) < 1 &&
+                Math.abs(plot._fullLayout.height - plot.clientHeight) < 1) return;
+            resizing = true;
+            try { await Plotly.Plots.resize(plot); }
+            catch (error) {
+              if (plot.isConnected && plot.clientWidth > 0 && plot.clientHeight > 0) {
+                plot.hidden = true;
+                document.getElementById("error").textContent =
+                  "Chart resizing failed: " + String(error.message).slice(0,500);
+              }
+            }
+            finally {
+              resizing = false;
+              if (resizeAgain) { resizeAgain = false; scheduleResize(); }
+            }
+          });
+        }
+        window.addEventListener("pagehide", () => {
+          if (resizeFrame !== null) cancelAnimationFrame(resizeFrame);
+          resizeObserver?.disconnect();
+          window.removeEventListener("resize", scheduleResize);
+        });
+        window.addEventListener("message", async (event) => {
+          if (connected || event.source !== parent || event.origin !== expectedOrigin ||
+              event.data?.type !== "ds60-plot-connect" || event.ports.length !== 1) return;
+          connected = true;
+          const port = event.ports[0]; port.start();
+          try {
+            const figure = event.data.figure;
+            if (!figure || JSON.stringify(figure).length > 180000 || !Array.isArray(figure.data))
+              throw new Error("Invalid or oversized saved chart.");
+            // Fit only the rendering copy. The parent's saved figure and export stay exact.
+            const layout = {...figure.layout, autosize:true};
+            delete layout.width;
+            delete layout.height;
+            await Plotly.newPlot("plot", figure.data, layout,
+              {responsive:true, displaylogo:false, showLink:false, toImageButtonOptions:{format:"svg"}});
+            if (figure.frames?.length) await Plotly.addFrames("plot", figure.frames);
+            window.addEventListener("resize", scheduleResize);
+            if (typeof ResizeObserver === "function") {
+              resizeObserver = new ResizeObserver(scheduleResize);
+              resizeObserver.observe(plot);
+            }
+            scheduleResize();
+            port.postMessage({type:"ready"});
+          } catch (error) {
+            plot.hidden = true;
+            document.getElementById("error").textContent = "Chart rendering failed: " + error.message;
+            port.postMessage({type:"error",message:String(error.message).slice(0,500)});
+          }
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,94 @@
+{
+  "id": "r-035",
+  "title": "Validate ingestion and preserve rejected-record evidence",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-015", "r-019", "r-031", "r-033"],
+  "concepts": ["Validation rule", "Quarantine", "Reason code", "Schema drift"],
+  "outcome": "Validate a small ingestion boundary without silently coercing, dropping or repairing invalid records.",
+  "mechanism": "An ingestion boundary turns external representations into an analytical table. A successful file read only establishes that the bytes were parsed; it does not establish valid identifiers, ranges, dates or relationships. Separate structural validation from record-level admission. A missing required column can invalidate the entire batch, while an invalid measurement might be quarantined under a documented policy.\n\nReason codes make rejection auditable. A row with a missing ID and a negative amount may violate more than one rule. Retain all relevant flags or state a deliberate precedence for the reported primary reason. Do not let the arbitrary order of if statements become an undocumented data-quality policy.\n\nCoercion is not repair. Turning a malformed numeric string into NA, then replacing NA with zero, creates a measured value the source never supplied. Preserve the original field and parse status where debugging requires them. A rejection report can retain only the bounded synthetic fields necessary for the lesson; a real system should also apply its privacy and retention policy.\n\nAdmission counts should reconcile. Input rows equal admitted plus quarantined rows when the sets are disjoint and exhaustive. That invariant catches accidental loss or duplication. Batch validity is still scoped to the implemented rules: a table can satisfy local range checks and remain biased, stale or scientifically unsuitable. Validation is one layer of evidence, not a guarantee of truth.",
+  "vocabulary": [
+    {
+      "term": "Validation rule",
+      "definition": "An explicit predicate describing an admissible record."
+    },
+    {
+      "term": "Quarantine",
+      "definition": "A retained diagnostic set of records that fail admission."
+    },
+    {
+      "term": "Reason code",
+      "definition": "A stable explanation of a validation failure."
+    },
+    {
+      "term": "Schema drift",
+      "definition": "An unexpected change in fields, types or meaning."
+    }
+  ],
+  "anatomy": "Build separate logical rule flags, then a complete admitted mask. Return data and diagnostics as named fields. Require declared column names/types before evaluating row expressions, and check the input=admitted+rejected reconciliation.",
+  "worked_examples": [
+    {
+      "title": "Retain multiple failure flags",
+      "code": "raw <- data.frame(id = c(\"A\", \"\", \"C\", \"D\"), amount = c(2, 3, -1, NA_real_))\nflags <- data.frame(missing_id = is.na(raw$id) | raw$id == \"\", invalid_amount = !is.finite(raw$amount) | raw$amount < 0)\nadmitted <- !flags$missing_id & !flags$invalid_amount\nstopifnot(identical(admitted, c(TRUE, FALSE, FALSE, FALSE)))\nstopifnot(sum(admitted) + sum(!admitted) == nrow(raw))\nprint(cbind(raw, flags))\n",
+      "explanation": "The negative and missing amounts remain distinct original inputs, even though both violate the same finite-nonnegative amount rule.",
+      "expected": "One admitted row, three rejected rows."
+    },
+    {
+      "title": "A structural error rejects the batch",
+      "code": "validate_columns <- function(data) {\n  required <- c(\"id\", \"amount\")\n  if (!all(required %in% names(data))) stop(\"missing required columns\", call. = FALSE)\n  if (!is.character(data$id) || !is.numeric(data$amount)) stop(\"invalid column types\", call. = FALSE)\n  TRUE\n}\nstopifnot(validate_columns(data.frame(id = \"A\", amount = 2)))\nbad <- tryCatch(\n  {\n    validate_columns(data.frame(id = \"A\", value = 2)); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad)\nprint(bad)\n",
+      "explanation": "The validator does not silently rename an unexpected field or guess that value must mean amount. Structural drift gets an explicit failure.",
+      "expected": "The malformed batch is rejected."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Count admitted records in the first example.",
+      "hint": "Every rule must pass for admission.",
+      "answer": "Only A is admitted.",
+      "expected": "Only A is admitted."
+    },
+    {
+      "prompt": "Make the empty-ID row also have a negative amount.",
+      "hint": "Both rule flags should remain visible.",
+      "answer": "The row has both missing_id and invalid_amount flags.",
+      "expected": "The row has both missing_id and invalid_amount flags."
+    },
+    {
+      "prompt": "Return admitted and quarantined tables with stable IDs.",
+      "hint": "Keep disjoint sets and the original reason flags.",
+      "answer": "Their counts reconcile to the input count.",
+      "expected": "Their counts reconcile to the input count."
+    },
+    {
+      "prompt": "Diagnose replacing every invalid numeric parse with zero.",
+      "hint": "An unparseable value is not a measured zero.",
+      "answer": "Preserve a parse-failure signal and apply an explicit admission policy.",
+      "expected": "Preserve a parse-failure signal and apply an explicit admission policy."
+    },
+    {
+      "prompt": "Validate a zero-row table with the correct schema.",
+      "hint": "Schema and row validity are separate.",
+      "answer": "An empty but correctly typed batch can be admitted under a stated empty-batch policy.",
+      "expected": "An empty but correctly typed batch can be admitted under a stated empty-batch policy."
+    },
+    {
+      "prompt": "Explain what local validation cannot prove.",
+      "hint": "Scientific suitability requires broader evidence.",
+      "answer": "Range and schema checks do not establish representativeness, causality, freshness or measurement accuracy.",
+      "expected": "Range and schema checks do not establish representativeness, causality, freshness or measurement accuracy."
+    }
+  ],
+  "starter": "# r-035: Validate ingestion and preserve rejected-record evidence\n# Complete the six guide tasks using these local inputs.\nraw <- data.frame(id = c(\"A\", \"\", \"C\", \"D\"), amount = c(2, 3, -1, NA_real_))\n# TODO: retain rule flags and reconcile admitted/rejected counts.\nprint(raw)\n",
+  "reference": "validate <- function(data) {\n  stopifnot(all(c(\"id\", \"amount\") %in% names(data)), is.character(data$id), is.numeric(data$amount))\n  flags <- data.frame(missing_id = is.na(data$id) | data$id == \"\", invalid_amount = !is.finite(data$amount) | data$amount < 0)\n  keep <- !flags$missing_id & !flags$invalid_amount\n  list(admitted = data[keep, , drop = FALSE], rejected = cbind(data[!keep, , drop = FALSE], flags[!keep, , drop = FALSE]))\n}\nraw <- data.frame(id = c(\"A\", \"\", \"C\", \"D\"), amount = c(2, -3, -1, NA_real_))\nresult <- validate(raw)\nstopifnot(nrow(result$admitted) == 1L, nrow(result$rejected) == 3L)\nstopifnot(result$rejected$missing_id[[1]], result$rejected$invalid_amount[[1]])\nstopifnot(nrow(result$admitted) + nrow(result$rejected) == nrow(raw))\nempty <- validate(raw[integer(0), , drop = FALSE])\nstopifnot(nrow(empty$admitted) == 0L, nrow(empty$rejected) == 0L)\ncat(\"r-035 reference checks passed\\n\")\n",
+  "solution_explanation": "The negative and missing amounts remain distinct original inputs, even though both violate the same finite-nonnegative amount rule.\n\nThe validator does not silently rename an unexpected field or guess that value must mean amount. Structural drift gets an explicit failure.",
+  "sources": [
+    {
+      "title": "R finite values",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/is.finite.html"
+    },
+    {
+      "title": "R data frames",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html"
+    }
+  ]
+}

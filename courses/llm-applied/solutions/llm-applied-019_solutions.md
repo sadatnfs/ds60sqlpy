@@ -18,7 +18,7 @@ RLHF is a broader family of workflows in which human feedback informs a reward o
 
 ## Reading the implementation
 
-Represent the policy log-probability difference as a trainable scalar for the smallest diagnostic. The reference difference is fixed. Compute margin=beta*(policy_difference-reference_difference) and loss=softplus(-margin). Backpropagate and apply oneSGD update. Reversing chosen/rejected labels reverses the margin and gradient direction. Keep response identities attached to scores when forming pairs.
+Represent the policy log-probability difference as a trainable scalar for the smallest diagnostic. The reference difference is fixed. Compute `margin=beta*(policy_difference-reference_difference)` and `loss=softplus(-margin)`. Backpropagate and apply one SGD update. Reversing chosen/rejected labels reverses the margin and gradient direction. Keep response identities attached to scores when forming pairs.
 
 ## Derive the DPO-style scalar update
 

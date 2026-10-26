@@ -74,7 +74,7 @@ assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)
 
 ## Exercise 3: Accumulate one full-batch gradient
 
-The question is: At \(w=0\), use x 1..4, y = 2x, accumulate squared-loss sums for shards 1 and 3, and divide by 4.
+The question is: At \(w=0\), use \(x=(1, 2, 3, 4)\) and \(y=2x\), accumulate squared-loss sums for shards of sizes 1 and 3, and divide by the total sample count 4.
 
 The weight remains fixed across both backward calls. Accumulation is intentional here, and its denominator is applied exactly once.
 

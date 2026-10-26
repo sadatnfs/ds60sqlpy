@@ -1,0 +1,18 @@
+// dax-052: Expanded tables and existing combinations
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-052-a: Fact-table removal reaches related dimensions
+// Context: Regular Import-style star; starting filters are North and order year 2025; no bidirectional or limited relationships.
+EVALUATE CALCULATETABLE ( ROW ( "Original", [NetRevenue], "ClearExpandedSales", CALCULATE ( [NetRevenue], ALL ( Sales ) ), "ClearAmountOnly", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Sales[NetAmount] ) ) ), Customer[Region] = "North", 'Date'[Year] = 2025 )
+
+// dax-052-b: Requested values are not all existing pairs
+// Context: Explicit domain comparison: requested Paper/Red and Home/Red versus stored Product combinations.
+EVALUATE
+VAR RequestedCategories = DATATABLE ( "WantedCategory", STRING, { { "Paper" }, { "Home" } } )
+VAR RequestedColors = DATATABLE ( "WantedColor", STRING, { { "Red" } } )
+RETURN ROW ( "RequestedPairs", COUNTROWS ( CROSSJOIN ( RequestedCategories, RequestedColors ) ), "ExistingPairs", COUNTROWS ( SUMMARIZE ( FILTER ( Product, Product[Category] IN { "Paper", "Home" } && Product[Color] = "Red" ), Product[Category], Product[Color] ) ) )

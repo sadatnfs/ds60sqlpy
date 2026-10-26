@@ -1,0 +1,17 @@
+// dax-024: Selected totals and the limits of ALLSELECTED intuition
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-024-a: Share of the selected product set
+// Context: Outer selection {Notebook, Pen}; query groups by Product.Product; no nested iterator in the measure.
+EVALUATE CALCULATETABLE ( SUMMARIZECOLUMNS ( Product[Product], "Revenue", [NetRevenue], "SelectedTotal", CALCULATE ( [NetRevenue], ALLSELECTED ( Product[Product] ) ), "Share", DIVIDE ( [NetRevenue], CALCULATE ( [NetRevenue], ALLSELECTED ( Product[Product] ) ) ) ), Product[Product] IN { "Notebook", "Pen" } )
+ORDER BY Product[Product]
+
+// dax-024-b: Share of all products instead
+// Context: Same selected rows; the denominator removes the Product.Product restriction entirely.
+EVALUATE CALCULATETABLE ( SUMMARIZECOLUMNS ( Product[Product], "Revenue", [NetRevenue], "AllProductTotal", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product[Product] ) ), "Share", DIVIDE ( [NetRevenue], CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product[Product] ) ) ) ), Product[Product] IN { "Notebook", "Pen" } )
+ORDER BY Product[Product]

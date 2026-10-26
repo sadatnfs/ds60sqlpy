@@ -1,0 +1,17 @@
+// dax-009: Calculated columns, measures and evaluation lifetime
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+
+// dax-009-a: Stored row amounts and their formula
+// Context: Two first SaleID values; each projection evaluates its own Sales row.
+EVALUATE SELECTCOLUMNS ( TOPN ( 2, Sales, Sales[SaleID], ASC ), "Line", Sales[SaleID], "Stored", Sales[NetAmount], "Reconstructed", Sales[Quantity] * Sales[UnitPrice] - Sales[Discount] )
+ORDER BY [Line]
+
+// dax-009-b: A measure over a selected population
+// Context: North customers and order year 2025.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", [NetRevenue], "Quantity", [QuantitySold] ), Customer[Region] = "North", 'Date'[Year] = 2025 )

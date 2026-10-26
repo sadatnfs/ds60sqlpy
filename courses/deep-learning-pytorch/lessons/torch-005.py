@@ -9,15 +9,15 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: derivative -4; loss 4.
 
 # Exercise 2: Check three finite differences
-# Use h=0.1, .01, .001 at w=0 and compare each slope with-4.
+# Use \(h\in\{0.1, 0.01, 0.001\}\) at \(w=0\) and compare each slope with \(-4\).
 # Expected: all agree within 1e-10.
 
 # Exercise 3: Separate gradient from update
-# Use learning rate 0.1 and gradient-4 from w = 0.
-# Expected: new w=0.4, not-4.
+# Use learning rate \(\eta=0.1\) and gradient \(-4\) at \(w=0\).
+# Expected: new parameter \(w=0.4\); the supplied gradient is \(-4\).
 
 # Exercise 4: Inspect a stationary point
-# Differentiate the same objective atw 2.
+# Differentiate the same objective at \(w=2\).
 # Expected: gradient 0 and loss 0.
 
 # Exercise 5: Observe grad-return behavior

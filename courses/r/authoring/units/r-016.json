@@ -1,0 +1,98 @@
+{
+  "id": "r-016",
+  "title": "Strings, encodings and explicit text parsing",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-005", "r-006", "r-012"],
+  "concepts": ["Character string", "Regular expression", "Fixed matching", "Encoding"],
+  "outcome": "Normalize and parse small text records with explicit patterns while preserving identifiers and Unicode meaning.",
+  "mechanism": "Text often carries identifiers, labels and encoded values in one field. Parsing should distinguish these roles. An ID such as \"0017\" is not automatically a number, and trimming surrounding whitespace should not silently remove meaningful internal characters. Preserve the original field when normalization needs to be audited.\n\nRegular expressions describe patterns rather than literal strings. In an anchored pattern, ^ and $ constrain the match to the beginning and end. A dot in regex syntax usually matches any character, so grepl(\".\", x) is not a test for a literal decimal point. Use fixed=TRUE for literal matching or escape the regex metacharacter deliberately.\n\nR source strings add another escaping layer. A backslash needed by the regular-expression engine may itself need escaping inside the source string. Keep a small input/output table beside a complicated pattern and test a near-miss case, not only a valid example. A pattern that extracts a plausible substring from an invalid whole record can admit malformed data if it lacks anchors.\n\nCharacters and bytes are different units. A Unicode string can contain a character represented by several UTF-8 bytes. nchar(type=\"chars\") and nchar(type=\"bytes\") can therefore disagree. Neither automatically counts user-perceived grapheme clusters. Declare the unit used by a limit or slicing operation, and avoid assuming every visible symbol occupies one byte.",
+  "vocabulary": [
+    {
+      "term": "Character string",
+      "definition": "Text stored as an element of a character vector."
+    },
+    {
+      "term": "Regular expression",
+      "definition": "A pattern language for matching text."
+    },
+    {
+      "term": "Fixed matching",
+      "definition": "Literal matching without interpreting regex syntax."
+    },
+    {
+      "term": "Encoding",
+      "definition": "A representation of text as bytes, distinct from character count."
+    }
+  ],
+  "anatomy": "trimws removes selected surrounding whitespace, paste combines strings, strsplit returns a list of split pieces, and grepl returns a logical match mask. Use anchors for a whole-field contract and fixed=TRUE when the input is a literal delimiter.",
+  "worked_examples": [
+    {
+      "title": "Whole-field IDs retain leading zeros",
+      "code": "raw <- c(\" 0017 \", \"A17\", \"17x\")\nclean <- trimws(raw)\nvalid <- grepl(\"^[0-9]{4}$\", clean)\nstopifnot(identical(clean[[1]], \"0017\"), identical(valid, c(TRUE, FALSE, FALSE)))\nprint(data.frame(raw = raw, clean = clean, valid = valid))\n",
+      "explanation": "Normalization removes only surrounding whitespace. The four-digit contract rejects partial or mixed matches without converting the ID to a number.",
+      "expected": "Only 0017 is valid."
+    },
+    {
+      "title": "Literal dots and Unicode byte counts",
+      "code": "x <- c(\"a.b\", \"axb\")\nstopifnot(identical(grepl(\".\", x, fixed = TRUE), c(TRUE, FALSE)))\ntext <- enc2utf8(\"café\")\nstopifnot(nchar(text, type = \"chars\") == 4L, nchar(text, type = \"bytes\") == 5L)\nprint(c(characters = nchar(text), bytes = nchar(text, type = \"bytes\")))\n",
+      "explanation": "Literal matching avoids regex wildcard semantics. The accented character uses multiple UTF-8 bytes while the string has four code-point characters.",
+      "expected": "Four characters and five bytes."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict fixed dot matching on \"a.b\" and \"axb\".",
+      "hint": "Fixed matching treats the dot literally.",
+      "answer": "Only a.b matches.",
+      "expected": "Only a.b matches."
+    },
+    {
+      "prompt": "Allow exactly five digits instead of four.",
+      "hint": "Change the anchored repetition count.",
+      "answer": "Use ^[0-9]{5}$.",
+      "expected": "Use ^[0-9]{5}$."
+    },
+    {
+      "prompt": "Split \"A|12\" on a literal pipe.",
+      "hint": "The regex pipe has another meaning unless fixed matching is selected.",
+      "answer": "strsplit(..., fixed=TRUE) returns the two fields.",
+      "expected": "strsplit(..., fixed=TRUE) returns the two fields."
+    },
+    {
+      "prompt": "Diagnose accepting \"ID12 bad\" with an unanchored digit search.",
+      "hint": "Finding digits is weaker than validating the whole field.",
+      "answer": "Use the intended anchored field grammar.",
+      "expected": "Use the intended anchored field grammar."
+    },
+    {
+      "prompt": "Retain an empty trailing field deliberately.",
+      "hint": "Check the split function boundary behavior before assuming field counts.",
+      "answer": "Define and test an explicit parser policy rather than silently assuming every delimiter creates a retained empty component.",
+      "expected": "Define and test an explicit parser policy rather than silently assuming every delimiter creates a retained empty component."
+    },
+    {
+      "prompt": "Explain a byte limit for Unicode text.",
+      "hint": "Visible characters need not occupy one byte.",
+      "answer": "State encoding and byte/character units separately and test multibyte input.",
+      "expected": "State encoding and byte/character units separately and test multibyte input."
+    }
+  ],
+  "starter": "# r-016: Strings, encodings and explicit text parsing\n# Complete the six guide tasks using these local inputs.\nraw <- c(\" 0017 \", \"A17\", \"17x\")\n# TODO: normalize without destroying identifier meaning.\nprint(raw)\n",
+  "reference": "stopifnot(identical(grepl(\".\", c(\"a.b\", \"axb\"), fixed = TRUE), c(TRUE, FALSE)))\nstopifnot(grepl(\"^[0-9]{5}$\", \"00123\"), !grepl(\"^[0-9]{5}$\", \"123\"))\nfields <- strsplit(\"A|12\", \"|\", fixed = TRUE)[[1]]\nstopifnot(identical(fields, c(\"A\", \"12\")))\nstopifnot(!grepl(\"^[0-9]+$\", \"ID12bad\"))\nstopifnot(identical(strsplit(\"A|\", \"|\", fixed = TRUE)[[1]], \"A\"))\ntext <- enc2utf8(\"café\")\nstopifnot(nchar(text, type = \"chars\") == 4L, nchar(text, type = \"bytes\") == 5L)\ncat(\"r-016 reference checks passed\\n\")\n",
+  "solution_explanation": "Normalization removes only surrounding whitespace. The four-digit contract rejects partial or mixed matches without converting the ID to a number.\n\nLiteral matching avoids regex wildcard semantics. The accented character uses multiple UTF-8 bytes while the string has four code-point characters.",
+  "sources": [
+    {
+      "title": "R pattern matching",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/grep.html"
+    },
+    {
+      "title": "R character counts",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/nchar.html"
+    },
+    {
+      "title": "R string splitting",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/strsplit.html"
+    }
+  ]
+}

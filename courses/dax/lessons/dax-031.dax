@@ -1,0 +1,9 @@
+// dax-031 learner draft: A complete date dimension is not a list of sale dates
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish calendar coverage, observed facts and data-availability boundaries.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a date-table quality checklist.
+
+EVALUATE
+ROW ( "Calendar days", BLANK(), "Observed sales dates", BLANK(), "Missing dates", BLANK() )

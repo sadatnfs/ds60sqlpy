@@ -1,0 +1,169 @@
+[
+  [
+    "Data, traces and honest encodings",
+    "beginner",
+    ["python-16"],
+    ["records", "traces", "layout", "units"],
+    "Preserve record identity, units and exact values while sorting and rendering a chart.",
+    [
+      ["u1", "Alpha", 2],
+      ["u2", "Beta", 5],
+      ["u3", "Gamma", 3]
+    ],
+    [
+      "Sort complete records: u2/Beta/5, u3/Gamma/3, u1/Alpha/2. Their total is ten. Keeping identity beside value prevents a silent label shuffle.",
+      "Construct one bar trace from the sorted records, then set a Team x axis and Elapsed hours y axis with a zero baseline. The title states these are measured completion times, not estimates of treatment effect.",
+      "Change the u3 record's value to four, then derive both trace and table again. The total becomes eleven; the other IDs and values remain unchanged.",
+      "Alphabetizing only labels pairs Alpha with five and Beta with three, contradicting the source. Sorting the record tuples repairs the mapping; changing colors cannot repair it.",
+      "Branch before constructing a data trace when the record list is empty. Show a no-observations caption and an empty table; do not invent zero values for absent categories.",
+      "Use three new IDs with distances 1.5,2,2.5 and update every unit label to kilometers. Sum equals six. A copied hours caption would remain a substantive error despite correct heights."
+    ]
+  ],
+  [
+    "Distributions, bins and missingness",
+    "beginner",
+    ["viz-001"],
+    ["histogram", "density", "ECDF", "missingness"],
+    "Explain bin boundaries, density normalization and tied empirical CDF values from the same records.",
+    [1, 1, 2, 2, 3, 4, 6, 8, 10, 12, null],
+    [
+      "Use left-closed/right-open bins, with the final upper edge included. Values at three and six enter the next bin. Counts are 4,2,2,2 and sum to ten.",
+      "Divide each count by ten and its bin width. Heights are 4/30,2/30,2/30,2/40; multiplying by widths and summing gives one.",
+      "With edges 0,6,13, counts are six and four. Density heights are 6/(10*6) and 4/(10*7), so equal-looking bar heights would not encode the same probability.",
+      "Replacing missing with zero produces eleven claimed durations and changes all probability denominators. Exclusion with a reported missing count preserves the distinction between unknown and observed zero.",
+      "Aggregate repeated values first. Counts at one and two are each two, so cumulative fractions are .2 and .4. Prepend an origin below the minimum with probability zero, then use horizontal-vertical steps.",
+      "Duplicating every observed record doubles counts but leaves a probability density and ECDF unchanged. State sample sizes ten and twenty; equal normalized shapes do not imply equal total volume."
+    ]
+  ],
+  [
+    "Uncertainty and effect displays",
+    "beginner",
+    ["viz-002", "statistics-008"],
+    ["confidence interval", "error bars", "practical margin", "multiplicity"],
+    "Render interval endpoints correctly and distinguish statistical from practical effect claims.",
+    [
+      ["North", -0.4, 0.1],
+      ["Central", 0.2, 0.3],
+      ["South", 0.8, 0.2]
+    ],
+    [
+      "The three intervals are [-.596,-.204], [-.388,.788], [.408,1.192]. Each uses its own estimate plus/minus 1.96 SE under the stated normal approximation.",
+      "Plotly expects distances: upper minus estimate and estimate minus lower. For these symmetric examples both equal 1.96 SE. Check resulting endpoints against the table.",
+      "South excludes zero, but its lower endpoint .408 is below .5. It therefore does not establish an improvement greater than the practical margin at the stated interval level.",
+      "For estimate .8 with [.3,1.5], minus distance is .5 and plus distance is .7. Absolute endpoints supplied as distances would misdraw the interval.",
+      "With SD two and n=100, the independent mean SE is .2. A mean confidence interval uses uncertainty about the mean; an SD bar describes observed variation. Relabeling is required when the target changes.",
+      "For three prespecified comparisons and family alpha .05, Bonferroni intervals use critical level 1-.05/(2*3), approximately z=2.394. This provides conservative simultaneous coverage when each constituent bound is valid."
+    ]
+  ],
+  [
+    "Filters and linked record inspection",
+    "intermediate",
+    ["viz-001", "viz-003"],
+    ["customdata", "visibility", "selection", "keyboard controls"],
+    "Implement reversible filters and preserve point identity with a readable complete source table.",
+    [
+      ["u0", "A", 0, 0],
+      ["u1", "A", 1, 3],
+      ["u2", "A", 2, 6],
+      ["u3", "A", 3, 6],
+      ["u4", "B", 4, 9],
+      ["u5", "B", 5, 12],
+      ["u6", "B", 6, 12],
+      ["u7", "B", 7, 15]
+    ],
+    [
+      "Group B contains u4,u5,u6,u7. Filtering by group should return those IDs regardless of row ordering.",
+      "The masks are [true,true], [true,false], [false,true]. Python serializes them in update menus; JavaScript applies them through named native buttons and restyle. Await browser updates before announcing state.",
+      "Sort complete records before building trace arrays and customdata. Hover text reads the persistent user ID from customdata rather than interpreting point position as identity.",
+      "Treat absent event data as an empty point list. Clear the status to No selected points. A stale list is incorrect state even when the chart itself clears visually.",
+      "In the browser, tab to a named group button and press Enter or Space. Confirm its pressed state and live status. The source table remains eight rows and is labeled as complete data. Python's table fallback remains readable without hover.",
+      "An empty group receives no points. Keep the group choice explicit and display an empty-state interpretation; do not reuse previously filtered arrays. The full table reflects the revised source collection."
+    ]
+  ],
+  [
+    "Time series and forecast evidence",
+    "intermediate",
+    ["viz-003", "viz-004", "statistics-027"],
+    ["forecast cutoff", "prediction band", "time order", "availability"],
+    "Separate available history, frozen predictions and later outcomes while labeling uncertainty honestly.",
+    [
+      ["2026-01-07", 16, 17],
+      ["2026-01-08", 17, 16],
+      ["2026-01-09", 18, 19]
+    ],
+    [
+      "History ends January 6 and forecast dates are January 7,8,9. This ordering is checked before any line is drawn.",
+      "Forecast errors are -1,+1,-1, giving RMSE one. A last-value forecast of 15 gives squared errors 4,1,16, so RMSE is sqrt(7), approximately 2.646.",
+      "Concatenate dates forward with upper values, then reversed dates with reversed lower values. Reversing only one array creates a crossed polygon and is not a valid interval display.",
+      "To display an actual missing-day gap, retain January 4 with a missing y value and disable gap connection. Merely deleting the row can still draw a line between adjacent remaining dates.",
+      "A mean-confidence band concerns the conditional mean; an outcome-prediction band includes outcome variability. The illustrative plus/minus two band has neither guarantee until a construction and validation are supplied.",
+      "If labels arrive two days later, an origin at January 6 can use outcomes through January 4. Filter by availability before selecting the latest revision for each event."
+    ]
+  ],
+  [
+    "Paired comparisons and subplot design",
+    "intermediate",
+    ["viz-003", "viz-005", "statistics-022"],
+    ["paired loss", "shared axes", "subplots", "evaluation grain"],
+    "Link model predictions to paired losses under common data and axis definitions.",
+    [
+      [1, 0.2],
+      [2, -0.2],
+      [3, 0.5],
+      [4, -0.5],
+      [5, 0.1],
+      [6, -0.1],
+      [7, 1],
+      [8, -1]
+    ],
+    [
+      "For u6, A loss is one and B loss is 2.25, so A minus B equals -1.25. The negative sign favors A under squared loss.",
+      "Use common observed/predicted limits [0,10] and an identity line. In a second panel, plot each user's loss difference with squared units. The two panels expose different aspects of the same evaluation.",
+      "Changing B's final error to two changes its loss to four and that paired difference to -3. The new average difference is -.59625.",
+      "A wider axis compresses visual errors without changing predictions. Restore shared limits before comparing distances, and retain the same observation IDs in both traces.",
+      "The first four users have mean difference -.115 and the last four -.64. With equal counts their average is -.3775. With unequal groups, recombine using the relevant user weights.",
+      "Resample customers with all their visits, or aggregate an explicitly defined user-level loss first. Independently resampling visits treats correlated observations as new users and can understate uncertainty."
+    ]
+  ],
+  [
+    "Bounded rendering and representative reduction",
+    "advanced",
+    ["viz-004", "viz-005", "viz-006"],
+    ["downsampling", "extrema", "SVG", "lifecycle"],
+    "Reduce displayed marks with a stated preservation property and test its limitations.",
+    {
+      "count": 5000,
+      "spike_index": 2473,
+      "spike_value": 12,
+      "block": 100
+    },
+    [
+      "The stride keeps multiples of 100, so 2473 is absent. Its maximum is near one even though the full series reaches twelve.",
+      "Retain minimum and maximum indices from each of 50 blocks plus endpoints, deduplicate and sort. The upper bound is 102 points and the spike remains.",
+      "Blocks of 250 give 20 blocks and at most 42 retained indices. The global maximum still occurs as the maximum of its containing block.",
+      "The selected-point mean generally differs from the source mean because extreme values are intentionally overrepresented. Compute both with their own denominators and do not use display reduction for inference.",
+      "Resize the actual rendered preview, rerun after a source edit, then navigate away. Check for current errors and stale controls. Purge the owned Plotly graph on page exit; do not count a startup marker as interaction evidence.",
+      "For average utilization, use window means and a meaningful variation summary with the window definition stated. An extrema envelope answers a peak-preservation question instead."
+    ]
+  ],
+  [
+    "Accessible output and reviewable figure export",
+    "advanced",
+    ["viz-006", "viz-007"],
+    ["semantic table", "caption", "JSON", "provenance"],
+    "Preserve data meaning and accessible exact values through a figure-specification round-trip.",
+    {
+      "completed": 8,
+      "pending": 3,
+      "failed": 1
+    },
+    [
+      "Eight plus three plus one equals twelve. Pending remains a separate observation state; classifying it as failure changes the reported outcome.",
+      "Use labels, values and patterns alongside color, then provide a caption and semantic table. The table is an exact-value alternative rather than a claim that an ARIA attribute alone guarantees accessibility.",
+      "Serialize data and layout, reconstruct the figure, and compare count arrays and table rows. A JSON round-trip proves specification preservation, not identical pixels on every browser.",
+      "If failed changes to two, the total becomes thirteen. Recompute the title/caption or reject the inconsistency before export; a hardcoded denominator can survive correct chart rendering.",
+      "Inspect narrow width and zoom in the actual browser, including keyboard controls and table reading. Record observable clipping or focus defects; DOM existence is insufficient evidence of usable access.",
+      "For an effect chart, record outcome units, estimator, interval construction, population, source version and limitations. A source-bound receipt, JSON specification and screenshot establish different evidence and should be labeled separately."
+    ]
+  ]
+]

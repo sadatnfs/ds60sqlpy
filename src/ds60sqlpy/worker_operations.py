@@ -38,6 +38,9 @@ class WorkerProfile:
 
 
 PROFILES = {
+    "jax-cpu": WorkerProfile("jax-cpu", "python", "main.py"),
+    "bayesian-cpu": WorkerProfile("bayesian-cpu", "python", "main.py"),
+    "r-statistics": WorkerProfile("r-statistics", "r", "main.R"),
     "python-core": WorkerProfile("python-core", "python", "main.py", ("llm-causal-attention-v1",)),
     "tensorflow-cpu": WorkerProfile("tensorflow-cpu", "python", "main.py", ("tf-gradient-v1",)),
     "llm-torch-cpu": WorkerProfile(
@@ -76,6 +79,7 @@ class OperationResult:
     status: str
     detail: str
     checks: list[dict[str, Any]] = field(default_factory=list)
+    artifacts: list[dict[str, Any]] = field(default_factory=list)
 
 
 class BoundedOutput:
@@ -179,6 +183,13 @@ def child_environment(
         PYSPARK_PYTHON=sys.executable,
         PYSPARK_DRIVER_PYTHON=sys.executable,
     )
+    if profile_id == "jax-cpu":
+        environment.update(JAX_PLATFORMS="cpu", XLA_FLAGS="--xla_cpu_multi_thread_eigen=false")
+    if profile_id == "bayesian-cpu":
+        environment.update(
+            PYTENSOR_FLAGS=f"compiledir={directory / 'pytensor'},blas__ldflags=",
+            NUMBA_NUM_THREADS="2",
+        )
     if profile_id in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:
         environment.update(
             CUDA_VISIBLE_DEVICES="0",
@@ -583,6 +594,8 @@ def validate_operation(profile_id: str, language: str, verification_id: str | No
 def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]], list[str]]:
     """Reviewed single-source toolchains; source cannot supply build flags or packages."""
     node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
+    if profile_id == "r-statistics":
+        return [], ["Rscript", "--vanilla", str(Path(__file__).with_name("worker_figures.R"))]
     if profile_id == "php-cli":
         flags = [
             "php",
@@ -788,8 +801,14 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
             "javascript-node",
             "typescript-node",
             "php-cli",
+            "r-statistics",
         }:
             smoke = {
+                "r-statistics": (
+                    "stopifnot(sum(c(20,22)) == 42); "
+                    "invisible(lapply(c('ggplot2','plotly','R6','S7','jsonlite'), loadNamespace)); "
+                    "cat('R statistics ready\\n')"
+                ),
                 "php-cli": (
                     "<?php declare(strict_types=1); $db = new PDO('sqlite::memory:'); "
                     "assert((int)$db->query('SELECT 42')->fetchColumn() === 42); echo '42';\n"
@@ -873,19 +892,35 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
         else:
             module = {
                 "python-core": "numpy",
+                "jax-cpu": "jax",
+                "bayesian-cpu": "pymc",
                 "tensorflow-cpu": "tensorflow",
                 "llm-torch-cpu": "torch",
             }[profile_id]
             if importlib.util.find_spec(module) is None:
                 return False, f"The prepared {module} package is missing."
             smoke = {
+                "jax": (
+                    "import jax as m; import jax.numpy as j; "
+                    "assert m.default_backend() == 'cpu'; "
+                    "x=m.jit(m.grad(lambda v:j.sum(v*v)))(j.array([3.,4.])); "
+                    "x.block_until_ready(); assert x.tolist()==[6.,8.]"
+                ),
+                "pymc": (
+                    "import pymc as m; import arviz as az; import numpy as np\n"
+                    "with m.Model():\n"
+                    " p=m.Beta('p',2,2); m.Binomial('y',n=10,p=p,observed=6)\n"
+                    " trace=m.sample(draws=30,tune=30,chains=1,cores=1,random_seed=17,"
+                    "progressbar=False,compute_convergence_checks=False)\n"
+                    "assert np.isfinite(trace.posterior['p'].values).all()\n"
+                ),
                 "numpy": "import numpy as m; assert int(m.array([20,22]).sum())==42",
                 "tensorflow": (
                     "import tensorflow as m; assert int(m.reduce_sum(m.constant([20,22])))==42"
                 ),
                 "torch": "import torch as m; assert int(m.tensor([20,22]).sum())==42",
             }[module]
-            commands = [[sys.executable, "-c", smoke + "; print(m.__version__)"]]
+            commands = [[sys.executable, "-c", smoke.rstrip() + "\nprint(m.__version__)"]]
         environment = child_environment(directory, profile_id=profile_id)
         if isolate_user:
             if sys.platform != "linux" or os.geteuid() != 0:
@@ -995,6 +1030,7 @@ def execute_operation(
         "javascript-node",
         "typescript-node",
         "php-cli",
+        "r-statistics",
     }:
         compiling, command = language_commands(profile_id, directory)
         if isolate_user:
@@ -1047,7 +1083,7 @@ def execute_operation(
             (directory / "verify_spark.py").write_text(checker.read_text(), encoding="utf-8")
             command[-1] = "verify_spark.py"
     else:
-        command = [sys.executable, "-u", "main.py"]
+        command = [sys.executable, "-u", "-m", "ds60sqlpy.worker_figures"]
         if verification_id:
             (directory / "verify.py").write_text(
                 _python_verifier(verification_id), encoding="utf-8"
@@ -1109,4 +1145,9 @@ def execute_operation(
             "timed_out": "Total execution deadline exceeded; child processes reaped.",
             "failed": "Scratch allowance exceeded; child processes reaped.",
         }[interrupted]
-    return OperationResult(code, text, truncated, status, detail, checks)
+    from ds60sqlpy.plot_artifacts import read_artifacts
+
+    artifacts, capture_warning = read_artifacts(directory)
+    if capture_warning:
+        detail += " " + capture_warning
+    return OperationResult(code, text, truncated, status, detail, checks, artifacts)

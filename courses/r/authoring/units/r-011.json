@@ -1,0 +1,94 @@
+{
+  "id": "r-011",
+  "title": "Branching, loops and empty-input behavior",
+  "level": "beginner",
+  "minutes": 120,
+  "prerequisites": ["r-004", "r-005", "r-010"],
+  "concepts": ["Branch", "Iteration", "Accumulator", "Preallocation"],
+  "outcome": "Implement bounded loops with explicit scalar conditions, empty-input behavior and predictable output shape.",
+  "mechanism": "An if expression chooses one branch based on a single TRUE or FALSE value. A missing or multi-element condition is not a valid replacement for one known decision. When the input is a vector, decide whether the question concerns any value, every value or each value separately before selecting a control structure.\n\nA for loop iterates over a supplied sequence. The common pattern seq_along(x) creates valid positions for x, including an empty sequence when x is empty. By contrast, 1:length(x) becomes 1:0 for an empty vector, which unexpectedly contains two positions. Empty-input tests expose this bug before a loop starts selecting nonexistent data.\n\nPreallocate an output when its size is known. numeric(length(x)) creates a vector ready for assignment at each position. Repeatedly extending an output can cause avoidable allocations and obscures the intended shape. The main purpose here is a clear invariant: after iteration i, the first i outputs satisfy the transformation contract.\n\nA while loop needs a condition that eventually changes or an explicit bound. It is appropriate for convergence or state-dependent work when a fixed sequence is not available. Keep an iteration limit and distinguish reaching a tolerance from merely exhausting that limit. The classroom also applies runtime limits, but an external timeout is not a substitute for a correct stopping rule.",
+  "vocabulary": [
+    {
+      "term": "Branch",
+      "definition": "A choice between expressions under one known logical condition."
+    },
+    {
+      "term": "Iteration",
+      "definition": "Repeated work over a sequence of values or positions."
+    },
+    {
+      "term": "Accumulator",
+      "definition": "State deliberately updated during a loop."
+    },
+    {
+      "term": "Preallocation",
+      "definition": "Creating an output of the required size before filling it."
+    }
+  ],
+  "anatomy": "Use braces for a branch or loop containing multiple expressions. A loop variable takes each supplied value in turn. next skips the remaining current iteration and break ends the loop; neither returns from an enclosing function automatically.",
+  "worked_examples": [
+    {
+      "title": "Preallocate and handle an empty vector",
+      "code": "x <- c(2, 4, 6)\nout <- numeric(length(x))\nfor (i in seq_along(x)) {\n  out[[i]] <- x[[i]]^2\n}\nstopifnot(identical(out, c(4, 16, 36)))\nempty <- numeric(0)\nstopifnot(length(seq_along(empty)) == 0L, identical(1:length(empty), c(1L, 0L)))\nprint(out)\n",
+      "explanation": "The output length is established before iteration. seq_along also gives the intended zero iterations for empty input.",
+      "expected": "4,16,36."
+    },
+    {
+      "title": "A bounded state-dependent loop",
+      "code": "remaining <- 20\nsteps <- 0L\nwhile (remaining > 3 && steps < 10L) {\n  remaining <- remaining / 2\n  steps <- steps + 1L\n}\nstopifnot(steps == 3L, remaining == 2.5)\nprint(c(steps = steps, remaining = remaining))\n",
+      "explanation": "Each iteration reduces the state and increments a bound. The final condition is checked separately from the iteration count.",
+      "expected": "Three steps; remaining 2.5."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict squares for c(1,3).",
+      "hint": "Follow one position at a time.",
+      "answer": "The output is 1,9.",
+      "expected": "The output is 1,9."
+    },
+    {
+      "prompt": "Use an empty input with seq_along.",
+      "hint": "There are zero valid positions.",
+      "answer": "No iterations occur and the output is numeric(0).",
+      "expected": "No iterations occur and the output is numeric(0)."
+    },
+    {
+      "prompt": "Construct a loop summing only positive values.",
+      "hint": "Initialize one total and use a scalar branch for each known value.",
+      "answer": "For -2,3,4 the total is seven.",
+      "expected": "For -2,3,4 the total is seven."
+    },
+    {
+      "prompt": "Diagnose 1:length(x) on empty x.",
+      "hint": "The colon operator creates a descending sequence.",
+      "answer": "It produces 1,0 rather than no indices.",
+      "expected": "It produces 1,0 rather than no indices."
+    },
+    {
+      "prompt": "Bound a while loop that may not converge.",
+      "hint": "Track an iteration count and report which stopping rule fired.",
+      "answer": "A maximum iteration count prevents unbounded work but is not convergence evidence.",
+      "expected": "A maximum iteration count prevents unbounded work but is not convergence evidence."
+    },
+    {
+      "prompt": "Compare a clear loop with a vectorized equivalent.",
+      "hint": "Compare shape and values, including empty inputs.",
+      "answer": "Equivalent ordinary cases do not remove the need to test missingness and boundary policies.",
+      "expected": "Equivalent ordinary cases do not remove the need to test missingness and boundary policies."
+    }
+  ],
+  "starter": "# r-011: Branching, loops and empty-input behavior\n# Complete the six guide tasks using these local inputs.\nx <- c(-2, 3, 4)\nout <- numeric(length(x))\n# TODO: use valid positions and a documented branch.\nprint(out)\n",
+  "reference": "square <- function(x) {\n  out <- numeric(length(x)); for (i in seq_along(x)) out[[i]] <- x[[i]]^2; out\n}\nstopifnot(identical(square(c(1, 3)), c(1, 9)), identical(square(numeric(0)), numeric(0)))\ntotal <- 0\nfor (value in c(-2, 3, 4)) {\n  if (value > 0) total <- total + value\n}\nstopifnot(total == 7, identical(1:0, c(1L, 0L)))\nstate <- 20; steps <- 0L\nwhile (state > 3 && steps < 10L) {\n  state <- state / 2; steps <- steps + 1L\n}\nstopifnot(state <= 3, steps == 3L)\nstopifnot(identical(square(c(1, 3)), c(1, 3)^2))\ncat(\"r-011 reference checks passed\\n\")\n",
+  "solution_explanation": "The output length is established before iteration. seq_along also gives the intended zero iterations for empty input.\n\nEach iteration reduces the state and increments a bound. The final condition is checked separately from the iteration count.",
+  "sources": [
+    {
+      "title": "R control flow",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Control.html"
+    },
+    {
+      "title": "R sequences",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/seq.html"
+    }
+  ]
+}

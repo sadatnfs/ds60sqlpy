@@ -1,0 +1,24 @@
+// dax-058: Commercial-model capstone: reconcile adjustments and targets
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+    MEASURE Sales[GrossRevenue] = SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+    MEASURE Sales[RefundsAttributedToSale] = COALESCE ( SUM ( Returns[Refund] ), 0 )
+    MEASURE Sales[AdjustedCoreRevenue] = [NetRevenue] - [RefundsAttributedToSale]
+    MEASURE ForeignSales[ConvertedUSD] = SUMX ( ForeignSales,
+        ForeignSales[LocalAmount] * LOOKUPVALUE ( ExchangeRate[USDPerUnit],
+            ExchangeRate[RateDate], ForeignSales[SaleDate],
+            ExchangeRate[Currency], ForeignSales[Currency] ) )
+
+// dax-058-a: Reconcile named monetary populations
+// Context: Analytics model; complete supplied refund and rate fixtures; core and foreign populations are reported separately.
+EVALUATE ROW ( "CoreNetSales", [NetRevenue], "RefundsAttributedToSales", [RefundsAttributedToSale], "AdjustedCoreRevenue", [AdjustedCoreRevenue], "SeparateForeignUSD", [ConvertedUSD] )
+
+// dax-058-b: Compare an aligned two-month core population
+// Context: FullJanuary/February 2025, Paper/Home core sales, refunds attributed to original sale dates; Budget covers exactly that month/category scope.
+EVALUATE CALCULATETABLE ( VAR Target = CALCULATE ( SUM ( Budget[Amount] ), TREATAS ( VALUES ( 'Date'[MonthKey] ), Budget[MonthKey] ), TREATAS ( VALUES ( Product[Category] ), Budget[Category] ) ) RETURN ROW ( "CoreBeforeRefund", [NetRevenue], "Refunds", [RefundsAttributedToSale], "AdjustedCore", [AdjustedCoreRevenue], "Budget", Target, "Variance", [AdjustedCoreRevenue] - Target ), 'Date'[Year] = 2025, 'Date'[MonthNumber] IN { 1, 2 }, Product[Category] IN { "Paper", "Home" } )

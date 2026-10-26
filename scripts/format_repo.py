@@ -28,6 +28,7 @@ from scripts.check_public_release import CREDENTIAL_DIRECTORY  # noqa: E402
 
 LANGUAGES = (
     "python",
+    "r",
     "web",
     "java",
     "c",
@@ -48,6 +49,7 @@ LANGUAGES = (
 )
 SUFFIXES = {
     ".py": "python",
+    ".r": "r",
     ".pyi": "python",
     ".ipynb": "python",
     ".js": "web",
@@ -304,6 +306,13 @@ def run_formatter(command: list[str], paths: list[str], root: Path, check: bool)
 
 def format_group(language: str, paths: list[str], root: Path, check: bool) -> bool:
     config = root / "docker/formatting"
+    if language == "r":
+        return streamed(
+            ["Rscript", "--vanilla", str(root / "scripts/r_source_tools.R"), "format"],
+            paths,
+            root,
+            check,
+        )
     if language == "rust":
         return streamed(
             ["rustfmt", "--config-path", str(config / "rustfmt.toml"), "--emit", "stdout"],
@@ -462,7 +471,7 @@ def generated_views(root: Path, check: bool) -> bool:
                 success = False
             else:
                 path.write_text(expected, encoding="utf-8", newline="\n")
-    for script in ("build_course_guide.py", "build_lesson_readers.py"):
+    for script in ("build_course_guide.py", "compile_lesson_tex.py", "build_lesson_readers.py"):
         command = [sys.executable, str(root / "scripts" / script)]
         if check:
             command.append("--check")
@@ -482,7 +491,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--language", choices=LANGUAGES, action="append", help="limit source formatters"
     )
+    parser.add_argument(
+        "--exclude-language", choices=LANGUAGES, action="append", default=[], help=argparse.SUPPRESS
+    )
+    parser.add_argument("--only-language", choices=LANGUAGES, help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    if args.only_language:
+        args.language = [args.only_language]
     if args.lint:
         from scripts import lint_repo
 
@@ -491,10 +506,17 @@ def main(argv: list[str] | None = None) -> int:
         ]
         if args.list:
             lint_args.append("--list")
+        for language in args.exclude_language:
+            lint_args.extend(["--exclude-language", language])
         return lint_repo.main(lint_args)
     print("Discovering source files and formatting policy...", flush=True)
     groups, excluded, unmanaged = inventory(ROOT)
-    chosen = [language for language in LANGUAGES if not args.language or language in args.language]
+    chosen = [
+        language
+        for language in LANGUAGES
+        if (not args.language or language in args.language)
+        and language not in args.exclude_language
+    ]
     print(
         "Maintained source coverage: " + ", ".join(f"{k}={len(groups.get(k, []))}" for k in chosen),
         flush=True,
@@ -517,6 +539,7 @@ def main(argv: list[str] | None = None) -> int:
         ensure_publication_paths(ROOT)
     required = {
         "python": "ruff",
+        "r": "Rscript",
         "web": "prettier",
         "java": "prettier",
         "c": "clang-format",

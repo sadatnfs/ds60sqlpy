@@ -1,0 +1,98 @@
+{
+  "id": "r-013",
+  "title": "Lexical scope, closures and lazy arguments",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-007", "r-012"],
+  "concepts": ["Lexical scope", "Closure", "Promise", "Forced value"],
+  "outcome": "Explain captured configuration and lazy argument timing without relying on hidden global state.",
+  "mechanism": "A function's environment influences where it finds names not defined locally. R uses lexical scope: the search follows the function's enclosing environment rather than simply using the caller's local variables. A closure combines executable function code with this environment. That makes it possible to construct a reusable function with a private configured value.\n\nA function factory returns another function. For example, a multiplier factory can bind one factor and return a function that multiplies future inputs by it. Creating two factories gives two separate enclosing environments, so a factor of two in one closure need not affect a factor of three in another. Avoid shared global assignments when ordinary captured configuration is enough.\n\nR arguments are lazy promises. The argument expression is normally evaluated when the function first needs it, and its value is then retained. This can surprise a factory that returns before using an argument referring to a changing outer variable. force evaluates that argument during factory construction, making the capture time explicit.\n\nLazy evaluation is useful, but it is not a reason to hide time-dependent behavior. Decide whether a returned function should capture today's configuration or reevaluate an external object later. Test the chosen behavior by changing the caller's binding between construction and invocation. Keep mutation and lexical lookup separate: the existence of a closure does not mean every captured value should be updated with <<-.",
+  "vocabulary": [
+    {
+      "term": "Lexical scope",
+      "definition": "Name lookup through the environment where a function was created."
+    },
+    {
+      "term": "Closure",
+      "definition": "A function paired with its enclosing environment."
+    },
+    {
+      "term": "Promise",
+      "definition": "An argument expression evaluated when its value is needed."
+    },
+    {
+      "term": "Forced value",
+      "definition": "An argument evaluated deliberately before later use."
+    }
+  ],
+  "anatomy": "A function can return function(x) ... directly. force(argument) evaluates its promise at that point. environment(fn) identifies the enclosing environment for inspection, but routine analytical code should expose a clear interface rather than editing it externally.",
+  "worked_examples": [
+    {
+      "title": "Two independent configured closures",
+      "code": "make_multiplier <- function(factor) {\n  force(factor)\n  function(x) x * factor\n}\ndouble <- make_multiplier(2)\ntriple <- make_multiplier(3)\nstopifnot(double(4) == 8, triple(4) == 12)\nprint(c(double = double(4), triple = triple(4)))\n",
+      "explanation": "Each returned function retains its own configured factor. No global factor is needed at call time.",
+      "expected": "8 and 12."
+    },
+    {
+      "title": "Capture time is observable",
+      "code": "lazy_factory <- function(factor) function(x) x * factor\nfixed_factory <- function(factor) {\n  force(factor); function(x) x * factor\n}\nrate <- 2\nlazy <- lazy_factory(rate)\nfixed <- fixed_factory(rate)\nrate <- 5\nstopifnot(lazy(3) == 15, fixed(3) == 6)\nprint(c(lazy = lazy(3), fixed = fixed(3)))\n",
+      "explanation": "The unforced promise looks up rate on first use after the change. The forced closure retained the value two during construction.",
+      "expected": "Lazy 15; fixed 6."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict make_multiplier(4)(2).",
+      "hint": "The captured factor is four.",
+      "answer": "The result is eight.",
+      "expected": "The result is eight."
+    },
+    {
+      "prompt": "Create two factories with different factors.",
+      "hint": "Each construction creates its own environment.",
+      "answer": "Their outputs remain independently configured.",
+      "expected": "Their outputs remain independently configured."
+    },
+    {
+      "prompt": "Capture a threshold at construction time.",
+      "hint": "Force the argument before returning the predicate.",
+      "answer": "Later caller rebinding does not change the captured threshold.",
+      "expected": "Later caller rebinding does not change the captured threshold."
+    },
+    {
+      "prompt": "Diagnose a lazy factory changing after caller configuration changes.",
+      "hint": "The promise was not evaluated at construction.",
+      "answer": "Force the argument when fixed configuration is intended.",
+      "expected": "Force the argument when fixed configuration is intended."
+    },
+    {
+      "prompt": "Reject an invalid scalar configuration before returning a closure.",
+      "hint": "Validate after forcing the value.",
+      "answer": "No partially configured function is returned for missing or nonfinite input.",
+      "expected": "No partially configured function is returned for missing or nonfinite input."
+    },
+    {
+      "prompt": "Explain why hidden global mutation complicates a model pipeline.",
+      "hint": "Outputs can depend on invisible prior calls.",
+      "answer": "Prefer explicit inputs or documented captured state with reset and reproducibility rules.",
+      "expected": "Prefer explicit inputs or documented captured state with reset and reproducibility rules."
+    }
+  ],
+  "starter": "# r-013: Lexical scope, closures and lazy arguments\n# Complete the six guide tasks using these local inputs.\nthreshold <- 10\n# TODO: create a factory with an explicit capture-time policy.\nprint(threshold)\n",
+  "reference": "make_multiplier <- function(factor) {\n  force(factor)\n  stopifnot(is.numeric(factor), length(factor) == 1L, is.finite(factor))\n  function(x) x * factor\n}\nstopifnot(make_multiplier(4)(2) == 8)\na <- make_multiplier(2); b <- make_multiplier(3)\nstopifnot(a(5) == 10, b(5) == 15)\nmake_threshold <- function(threshold) {\n  force(threshold); function(x) x >= threshold\n}\nt <- 10; predicate <- make_threshold(t); t <- 100\nstopifnot(predicate(20))\nlazy_factory <- function(factor) function(x) x * factor\nv <- 2; lazy <- lazy_factory(v); v <- 5\nstopifnot(lazy(3) == 15)\nbad <- tryCatch(\n  {\n    make_multiplier(NA_real_); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad)\ncat(\"r-013 reference checks passed\\n\")\n",
+  "solution_explanation": "Each returned function retains its own configured factor. No global factor is needed at call time.\n\nThe unforced promise looks up rate on first use after the change. The forced closure retained the value two during construction.",
+  "sources": [
+    {
+      "title": "R argument forcing",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/force.html"
+    },
+    {
+      "title": "R environments",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/environment.html"
+    },
+    {
+      "title": "R functions",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/function.html"
+    }
+  ]
+}

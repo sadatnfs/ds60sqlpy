@@ -1,0 +1,12 @@
+ARG DS60_PYTHON_IMAGE=python:3.12.12-slim-bookworm
+FROM ${DS60_PYTHON_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+RUN install -d -m 0700 /run/ds60
+WORKDIR /opt/worker
+ARG TARGETARCH
+COPY docker/workers/requirements-jax.${TARGETARCH}.lock /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/requirements.txt
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
+ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=jax-cpu CUDA_VISIBLE_DEVICES=""
+ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

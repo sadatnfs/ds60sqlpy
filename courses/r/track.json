@@ -1,0 +1,1241 @@
+{
+  "schema_version": 1,
+  "id": "r",
+  "title": "R: programming, statistical computing and visualization",
+  "summary": "60 lessons covering R fundamentals, functions, data workflows, S3/S4/R6/S7 objects, statistical models and base, ggplot2 and Plotly visualization.",
+  "lessons": [
+    {
+      "id": "r-001",
+      "title": "Run an R script and inspect its result",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Expression",
+        "Binding",
+        "Script",
+        "Assertion"
+      ],
+      "outcome": "Run a self-contained calculation and distinguish printed output, saved source and a successful check.",
+      "lab": "Construct a script for subtotal 20 plus fee 3.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-002",
+      "title": "Numbers, types and approximate equality",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-001"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Integer",
+        "Double",
+        "Coercion",
+        "Tolerance"
+      ],
+      "outcome": "Inspect numeric types and choose an equality check that matches the numerical contract.",
+      "lab": "Check that 19 items form three groups of five with four left.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-003",
+      "title": "Atomic vectors, lengths and recycling",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-002"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Atomic vector",
+        "Elementwise operation",
+        "Recycling",
+        "Length contract"
+      ],
+      "outcome": "Write vectorized calculations while rejecting accidental recycling and unintended coercion.",
+      "lab": "Write a guard allowing one fee or one fee per amount.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-004",
+      "title": "Logical vectors, comparisons and three-valued reasoning",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-003"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Logical vector",
+        "Elementwise conjunction",
+        "Short-circuit condition",
+        "Unknown predicate"
+      ],
+      "outcome": "Build explicit selection predicates and handle unknown values without turning them into false evidence.",
+      "lab": "Construct a mask for known amounts from ten through twenty inclusive.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-005",
+      "title": "Index by position, name and an explicit mask",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-003",
+        "r-004"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Positive index",
+        "Negative index",
+        "Named index",
+        "Logical mask"
+      ],
+      "outcome": "Select and replace vector elements without confusing positions, exclusions and unknown masks.",
+      "lab": "Select and update a validated named value.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-006",
+      "title": "Missing values, NULL, NaN and infinity",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-002",
+        "r-004"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "NA",
+        "NaN",
+        "NULL",
+        "Finite value"
+      ],
+      "outcome": "Choose and test a missingness policy that preserves the distinction between absence, undefined arithmetic and zero.",
+      "lab": "Construct a finite-only mask for c(2, Inf, NA,4).",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-007",
+      "title": "Names, attributes and ordinary value semantics",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-003",
+        "r-005"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Attribute",
+        "Copy-on-modify behavior",
+        "Identity",
+        "Reference object"
+      ],
+      "outcome": "Explain why ordinary vector updates differ from mutations of reference objects and why attributes matter.",
+      "lab": "Construct a two-column shape from four numbers.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-008",
+      "title": "Matrices, dimensions and linear algebra operators",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-003",
+        "r-005",
+        "r-007"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Matrix",
+        "Column-major order",
+        "Elementwise multiplication",
+        "Matrix product"
+      ],
+      "outcome": "Construct and subset matrices while distinguishing elementwise arithmetic from a matrix product.",
+      "lab": "Compute predictions for intercept two and slope three at x=3,4.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-009",
+      "title": "Lists and nested records without accidental flattening",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-005",
+        "r-006",
+        "r-007"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "List",
+        "Single-bracket extraction",
+        "Double-bracket extraction",
+        "Schema"
+      ],
+      "outcome": "Read and update nested records while preserving heterogeneous fields and validating required components.",
+      "lab": "Validate required id and values fields.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-010",
+      "title": "Data frames, column types and record identity",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "r-004",
+        "r-005",
+        "r-009"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Data frame",
+        "Row grain",
+        "Key",
+        "Shape-preserving selection"
+      ],
+      "outcome": "Create a typed table, select records safely and verify its grain and key instead of relying on row positions.",
+      "lab": "Validate a nonmissing unique ID column.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-011",
+      "title": "Branching, loops and empty-input behavior",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "r-004",
+        "r-005",
+        "r-010"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Branch",
+        "Iteration",
+        "Accumulator",
+        "Preallocation"
+      ],
+      "outcome": "Implement bounded loops with explicit scalar conditions, empty-input behavior and predictable output shape.",
+      "lab": "Construct a loop summing only positive values.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-012",
+      "title": "Functions, arguments and return contracts",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "r-011"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Function",
+        "Formal argument",
+        "Default argument",
+        "Return contract"
+      ],
+      "outcome": "Define reusable functions with validated inputs, explicit defaults and testable return values.",
+      "lab": "Write a function returning count and total.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-013",
+      "title": "Lexical scope, closures and lazy arguments",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-007",
+        "r-012"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Lexical scope",
+        "Closure",
+        "Promise",
+        "Forced value"
+      ],
+      "outcome": "Explain captured configuration and lazy argument timing without relying on hidden global state.",
+      "lab": "Capture a threshold at construction time.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-014",
+      "title": "Functional iteration, typed results and the base pipe",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-009",
+        "r-012",
+        "r-013"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Mapping",
+        "lapply",
+        "vapply",
+        "Pipe"
+      ],
+      "outcome": "Map a validated computation over records and retain predictable output types with readable data flow.",
+      "lab": "Map count and mean into a list per group.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-015",
+      "title": "Errors, warnings and structured recovery",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-012",
+        "r-013"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Error",
+        "Warning",
+        "Exiting handler",
+        "Cleanup"
+      ],
+      "outcome": "Recover from expected input failures without concealing programming defects or dropping diagnostics.",
+      "lab": "Return structured status, value and diagnostic fields.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-016",
+      "title": "Strings, encodings and explicit text parsing",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-005",
+        "r-006",
+        "r-012"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Character string",
+        "Regular expression",
+        "Fixed matching",
+        "Encoding"
+      ],
+      "outcome": "Normalize and parse small text records with explicit patterns while preserving identifiers and Unicode meaning.",
+      "lab": "Split \"A|12\" on a literal pipe.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-017",
+      "title": "Factors, levels and model interpretation",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-007",
+        "r-010",
+        "r-016"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Factor",
+        "Unused level",
+        "Ordered factor",
+        "Reference level"
+      ],
+      "outcome": "Represent categories explicitly and avoid interpreting internal factor codes as measurements.",
+      "lab": "Retain an unused C level in a table.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-018",
+      "title": "Dates, instants and explicit time zones",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-006",
+        "r-016"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Date",
+        "POSIXct",
+        "Time zone",
+        "Elapsed duration"
+      ],
+      "outcome": "Parse dates and timestamps with explicit formats and zones, distinguishing calendar labels from elapsed time.",
+      "lab": "Parse an explicit ISO calendar date.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-019",
+      "title": "Local files, CSV, JSON and RDS contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-010",
+        "r-015",
+        "r-016",
+        "r-017"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Serialization",
+        "CSV schema",
+        "JSON shape",
+        "RDS"
+      ],
+      "outcome": "Round-trip small local data through appropriate formats while verifying types, missingness and cleanup.",
+      "lab": "Round-trip one trusted R object with attributes.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-020",
+      "title": "Debugging, regression checks and reproducible scripts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-008",
+        "r-012",
+        "r-015",
+        "r-019"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Minimal reproduction",
+        "Invariant",
+        "Regression check",
+        "Reproducibility record"
+      ],
+      "outcome": "Reduce a defect to a small case and build behavioral checks that cover ordinary, boundary and rejected inputs.",
+      "lab": "Add tests for mismatched lengths and zero total weight.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-021",
+      "title": "S3 value objects, validation and generic dispatch",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-012",
+        "r-017",
+        "r-020"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "constructor",
+        "validator",
+        "S3 class",
+        "generic dispatch",
+        "value semantics"
+      ],
+      "outcome": "Build a validated S3 measurement value, dispatch a domain-specific generic and reject malformed objects at the public boundary.",
+      "lab": "Implement an observed-count generic for measurement objects.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-022",
+      "title": "S4 slots, validity and multiple dispatch",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-021"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "formal class",
+        "slot",
+        "validity",
+        "method signature",
+        "multiple dispatch"
+      ],
+      "outcome": "Define an S4 measurement with cross-slot invariants and select methods using both argument classes.",
+      "lab": "Construct a new object with an infinite measurement.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-023",
+      "title": "R6 identity, encapsulation and cloning",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-007",
+        "r-013",
+        "r-021"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "reference semantics",
+        "encapsulation",
+        "alias",
+        "shallow clone",
+        "deep clone"
+      ],
+      "outcome": "Trace shared R6 identity, protect state through methods and distinguish shallow from nested-R6 deep cloning.",
+      "lab": "Verify that a rejected negative increment leaves the counter unchanged.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-024",
+      "title": "S7 properties, validators and generic methods",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-021",
+        "r-022"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "S7 class",
+        "property",
+        "validator",
+        "S7 generic",
+        "multiple dispatch"
+      ],
+      "outcome": "Use the pinned S7 property and method API to construct valid values, reject invalid replacement and dispatch across two typed arguments.",
+      "lab": "Add a series_count generic returning the number of observations.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-025",
+      "title": "Object interoperability and public data contracts",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-022",
+        "r-023",
+        "r-024"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "adapter",
+        "public interface",
+        "representation",
+        "interoperability",
+        "version-aware API"
+      ],
+      "outcome": "Convert S3, S4, R6 and S7 values through validated adapters and inspect ggplot2 through public build interfaces.",
+      "lab": "Write an S7 adapter using its declared properties.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-026",
+      "title": "Namespaces, dependency declarations and package boundaries",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-020",
+        "r-025"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "namespace",
+        "export",
+        "dependency",
+        "package layout",
+        "public interface"
+      ],
+      "outcome": "Use exported namespace-qualified functions and inspect a local package source layout without confusing sourced definitions with an installed package.",
+      "lab": "Create and inspect DESCRIPTION, NAMESPACE and one R source file in a temporary tree.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-027",
+      "title": "Profile equivalent work and account for allocations",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-014",
+        "r-020",
+        "r-026"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "profiling",
+        "elapsed time",
+        "sampling profiler",
+        "allocation",
+        "vectorization"
+      ],
+      "outcome": "Compare numerically equivalent R implementations, collect bounded timing and profiling evidence, and explain its measurement limits.",
+      "lab": "Measure both implementations with the same fixture and repetitions.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-028",
+      "title": "Bounded local parallelism and task-owned random streams",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-015",
+        "r-020",
+        "r-027"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "PSOCK worker",
+        "serialization",
+        "task purity",
+        "resource cleanup",
+        "random stream"
+      ],
+      "outcome": "Execute fixed independent tasks with two local PSOCK workers, preserve deterministic task results and close worker processes on every ordinary exit path.",
+      "lab": "Implement a self-contained task that returns count and squared sum.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-029",
+      "title": "Reproducibility, RNG scope and analysis metadata",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-019",
+        "r-020",
+        "r-028"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "RNG state",
+        "configuration",
+        "provenance",
+        "content hash",
+        "reproducibility"
+      ],
+      "outcome": "Run repeatable stochastic calculations without leaking caller RNG state and record a bounded configuration, input digest and software-version ledger.",
+      "lab": "Test the case where .Random.seed did not exist before the call.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-030",
+      "title": "Analytical-package capstone with explicit value and data contracts",
+      "level": "intermediate",
+      "minutes": 150,
+      "prerequisites": [
+        "r-025",
+        "r-026",
+        "r-029"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "data contract",
+        "public API",
+        "S3 summary",
+        "regression test",
+        "analytical package"
+      ],
+      "outcome": "Assemble a tested analytical value object with unique record identity, explicit missingness, compatible aggregation and a documented package continuation.",
+      "lab": "Independently implement and test the duplicate-ID and equal-length constructor rules.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-031",
+      "title": "Transform records with explicit selection and ordering",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-010",
+        "r-020"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Pipeline stage",
+        "Eligibility mask",
+        "Derived column",
+        "Stable identifier"
+      ],
+      "outcome": "Build an auditable table transformation whose row population, units and key alignment remain inspectable.",
+      "lab": "Return an exclusion count alongside the selected table.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-032",
+      "title": "Grouped summaries and sufficient aggregation state",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-014",
+        "r-017",
+        "r-031"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Group key",
+        "Sufficient aggregation state",
+        "Weighted mean",
+        "Empty group"
+      ],
+      "outcome": "Aggregate groups while preserving missingness counts and enough state to reconstruct the intended overall mean.",
+      "lab": "Return rows, observed, missing, sum and mean per group.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-033",
+      "title": "Joins, key uniqueness and unmatched records",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-010",
+        "r-020",
+        "r-031"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Join cardinality",
+        "Many-to-one lookup",
+        "Unmatched key",
+        "Join multiplication"
+      ],
+      "outcome": "Perform a validated many-to-one lookup and detect duplicate or unmatched keys before they change totals.",
+      "lab": "Write a many-to-one join guard.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-034",
+      "title": "Long and wide tables with explicit cell keys",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-010",
+        "r-017",
+        "r-033"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Long representation",
+        "Wide representation",
+        "Cell key",
+        "Round-trip invariant"
+      ],
+      "outcome": "Reshape repeated measurements only after validating the observation key and deciding how missing cells are represented.",
+      "lab": "Reverse a complete wide table to long form.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-035",
+      "title": "Validate ingestion and preserve rejected-record evidence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-015",
+        "r-019",
+        "r-031",
+        "r-033"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Validation rule",
+        "Quarantine",
+        "Reason code",
+        "Schema drift"
+      ],
+      "outcome": "Validate a small ingestion boundary without silently coercing, dropping or repairing invalid records.",
+      "lab": "Return admitted and quarantined tables with stable IDs.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-036",
+      "title": "Chunked aggregation and memory-aware data contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-014",
+        "r-032"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Chunk",
+        "Mergeable state",
+        "Associativity",
+        "Numerical accumulation"
+      ],
+      "outcome": "Combine chunk-level sufficient statistics correctly and distinguish a memory strategy from a performance claim.",
+      "lab": "Implement an all-missing finalization rule.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-037",
+      "title": "Simulation, Monte Carlo error and reproducible randomness",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-008",
+        "r-020",
+        "r-029",
+        "r-036"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Simulation model",
+        "Monte Carlo estimate",
+        "Monte Carlo standard error",
+        "Seeded stream"
+      ],
+      "outcome": "Use a small simulation to investigate a probability while separating simulation error from model uncertainty.",
+      "lab": "Simulate an event and retain seed, B, estimate and error estimate.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-038",
+      "title": "Finite probability tables and conditional reasoning",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-008",
+        "r-032",
+        "r-037"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Joint probability",
+        "Marginal probability",
+        "Conditional probability",
+        "Bayes rule"
+      ],
+      "outcome": "Compute and reconcile conditional probabilities from a finite original table without confusing the conditioning direction.",
+      "lab": "Construct joint probabilities from the count table.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-039",
+      "title": "Formulas, design matrices and identifiability",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-008",
+        "r-017",
+        "r-020"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Formula",
+        "Design matrix",
+        "Interaction",
+        "Rank deficiency"
+      ],
+      "outcome": "Inspect the numeric design implied by a formula before interpreting coefficients or fitting a model.",
+      "lab": "Inspect and validate a design before fitting.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-040",
+      "title": "An auditable analytical pipeline capstone",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-031",
+        "r-032",
+        "r-033",
+        "r-035",
+        "r-036"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "Analysis population",
+        "Metric contract",
+        "Audit ledger",
+        "Interpretation boundary"
+      ],
+      "outcome": "Deliver a self-contained analysis that validates inputs, joins metadata, summarizes groups and reports a bounded conclusion.",
+      "lab": "Assemble validate, enrich, summarize into one callable pipeline.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-041",
+      "title": "Explore distributions and preserve missingness",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "r-040"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "observation unit",
+        "missingness",
+        "denominator",
+        "distribution summary"
+      ],
+      "outcome": "Produce a descriptive summary whose observation counts, missing-value policy and distributional limits are explicit.",
+      "lab": "Construct group summaries for A=c(1,NA) and B=c(4,6,NA), retaining observed counts.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-042",
+      "title": "Estimation, standard errors and resampling targets",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "r-041"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "estimator",
+        "standard error",
+        "bootstrap",
+        "confidence interval"
+      ],
+      "outcome": "Calculate and interpret distinct uncertainty quantities while keeping the resampling population and assumptions explicit.",
+      "lab": "Enumerate all four-draw bootstrap samples and verify their conditional variance.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-043",
+      "title": "Linear models, design matrices and diagnostic limits",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "r-042"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "formula",
+        "design matrix",
+        "residual",
+        "rank",
+        "prediction interval"
+      ],
+      "outcome": "Connect an R model formula to its numerical design matrix, fitted coefficients and diagnostic assumptions.",
+      "lab": "Fit y~x*group to two exact group lines A:1+2x and B:4+x.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-044",
+      "title": "Binomial GLMs, probabilities and calibration",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "r-043"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "binomial GLM",
+        "log odds",
+        "odds ratio",
+        "Brier score",
+        "calibration"
+      ],
+      "outcome": "Translate a logistic model between its link scale, probabilities and evaluation quantities without confusing their interpretations.",
+      "lab": "Calculate the trial-weighted Brier score.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-045",
+      "title": "Structured validation and training-only preprocessing",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "r-044"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "group split",
+        "temporal split",
+        "leakage",
+        "cross-validation",
+        "training-only preprocessing"
+      ],
+      "outcome": "Construct validation procedures whose partitions and preprocessing match the intended transfer claim.",
+      "lab": "Perform leave-one-group-out prediction for the exact rule y=1+2x.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-046",
+      "title": "PCA, scaling and reconstruction",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-045"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "principal component",
+        "centering",
+        "scaling",
+        "loading",
+        "reconstruction"
+      ],
+      "outcome": "Fit and inspect PCA while preserving its preprocessing, orientation and interpretation contracts.",
+      "lab": "Reverse the first loading and score signs together.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-047",
+      "title": "Decision trees, complexity and held-out decisions",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-046"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "recursive partitioning",
+        "leaf",
+        "complexity parameter",
+        "class probability",
+        "extrapolation"
+      ],
+      "outcome": "Fit a small rpart classifier and distinguish its partition, probability output, complexity policy and generalization limits.",
+      "lab": "Prune with cp 1 and count terminal leaves.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-048",
+      "title": "Censoring, risk sets and survival models",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-047"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "right censoring",
+        "risk set",
+        "Kaplan-Meier",
+        "hazard ratio",
+        "proportional hazards"
+      ],
+      "outcome": "Construct survival outcomes and inspect Kaplan-Meier and Cox calculations without treating censored observations as observed event times.",
+      "lab": "Validate an event column before creating Surv.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-049",
+      "title": "Time series, ARIMA and rolling-origin evidence",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-048"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "time index",
+        "ARIMA",
+        "forecast origin",
+        "innovation",
+        "backtesting"
+      ],
+      "outcome": "Fit and evaluate a small time-series model while preserving temporal information boundaries and forecast targets.",
+      "lab": "Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-050",
+      "title": "Scientific synthesis and reproducible model comparison",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-049"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "baseline",
+        "held-out evaluation",
+        "paired records",
+        "report contract",
+        "reproducibility"
+      ],
+      "outcome": "Produce a small analytical report that connects the scientific question, model comparison, numerical evidence and limits.",
+      "lab": "Reorder one candidate table and realign by ID before scoring.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-051",
+      "title": "Base graphics, coordinates and owned devices",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-050"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "graphics device",
+        "plot region",
+        "overlay",
+        "coordinate system",
+        "file output"
+      ],
+      "outcome": "Construct a labeled base-R graphic and manage an explicitly owned file device without confusing drawing with browser delivery.",
+      "lab": "Set and inspect exact limits 0:4 and 0:8.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-052",
+      "title": "Multiple panels, uncertainty and scale contracts",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-051",
+        "r-042"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "multi-panel layout",
+        "confidence interval",
+        "axis scale",
+        "visual comparison"
+      ],
+      "outcome": "Build a compact uncertainty display whose panels, interval target and axis choices support a valid comparison.",
+      "lab": "Draw raw observations and summaries with shared y limits.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-053",
+      "title": "ggplot2 data mappings and layers",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-052"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "ggplot object",
+        "aesthetic mapping",
+        "constant setting",
+        "layer data",
+        "explicit printing"
+      ],
+      "outcome": "Construct and inspect a ggplot whose data, mappings and layer-specific responsibilities are explicit.",
+      "lab": "Add a group-mean layer using its own data.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-054",
+      "title": "ggplot2 statistics, geometries and grouping",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-053"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "statistic",
+        "geometry",
+        "count bars",
+        "identity bars",
+        "grouping",
+        "binning"
+      ],
+      "outcome": "Choose a statistic and grouping contract that matches whether the input contains raw observations or precomputed summaries.",
+      "lab": "Diagnose geom_bar(aes(category,n)) with the default statistic.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-055",
+      "title": "Scales, coordinates and facets change different contracts",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-054"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "scale limit",
+        "coordinate zoom",
+        "transformation",
+        "facet",
+        "shared comparison"
+      ],
+      "outcome": "Choose scale, coordinate and facet policies while explaining how each affects calculations and visual comparisons.",
+      "lab": "Compare fixed and free-y facet scale assignments.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-056",
+      "title": "Statistical graphics for model diagnosis",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-055",
+        "r-043"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "residual plot",
+        "Q-Q plot",
+        "heteroskedasticity",
+        "diagnostic evidence",
+        "model assumptions"
+      ],
+      "outcome": "Construct diagnostic graphics from fitted quantities and explain which model concerns they can investigate without treating a plot as proof.",
+      "lab": "Construct a normal Q-Q graphic of those residuals.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-057",
+      "title": "Plotly traces and layout from explicit data",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-056"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "trace",
+        "layout",
+        "scatter mode",
+        "figure specification",
+        "explicit widget printing"
+      ],
+      "outcome": "Construct and inspect a small Plotly figure whose trace data and layout correspond to a declared analytical view.",
+      "lab": "Set axis titles through layout.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-058",
+      "title": "Hover, view controls and accessible alternatives",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-057"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "hover template",
+        "custom data",
+        "visibility control",
+        "static alternative",
+        "interaction evidence"
+      ],
+      "outcome": "Encode a bounded interactive view while preserving observation identity and a non-hover-dependent explanation.",
+      "lab": "Encode All and Group A visibility buttons for two known traces.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-059",
+      "title": "ggplotly translation and validation boundaries",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-058"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "translation",
+        "source graphic",
+        "trace decomposition",
+        "tooltip",
+        "rendering parity"
+      ],
+      "outcome": "Translate a supported ggplot to Plotly and verify retained data while identifying the visual and interaction properties that still require review.",
+      "lab": "Add a mean reference line and inspect the translated structure.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    },
+    {
+      "id": "r-060",
+      "title": "Capstone: an analytical visualization with an evidence record",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "r-059",
+        "r-050"
+      ],
+      "runtime": "r-statistics",
+      "concepts": [
+        "eligibility",
+        "summary table",
+        "uncertainty display",
+        "interactive payload",
+        "report limits"
+      ],
+      "outcome": "Build a linked numerical, static and interactive analysis whose denominators, identities, uncertainty and delivery limits can be reviewed.",
+      "lab": "Construct a static raw-point and interval display from those tables.",
+      "verification": "Run explicit behavioral checks for the declared inputs; inspect types, shape, missingness, diagnostics and supported figures."
+    }
+  ]
+}

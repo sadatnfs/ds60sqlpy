@@ -74,7 +74,7 @@ def validate_observation(
         or record.get("lesson_id") != identity
         or record.get("profile") != "javascript-browser"
         or record.get("language") != "javascript"
-        or record.get("library") != "d3@7.9.0"
+        or record.get("library") != "d3@7.9.0+plotly@4.1.2"
         or record.get("verification_kind") != "browser_observation"
         or record.get("verified") is not False
         or record.get("checks") != []

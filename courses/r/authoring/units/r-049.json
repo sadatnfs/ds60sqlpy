@@ -1,0 +1,98 @@
+{
+  "id": "r-049",
+  "title": "Time series, ARIMA and rolling-origin evidence",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-048"],
+  "concepts": ["time index", "ARIMA", "forecast origin", "innovation", "backtesting"],
+  "outcome": "Fit and evaluate a small time-series model while preserving temporal information boundaries and forecast targets.",
+  "mechanism": "Time order is part of the data contract. A forecast made at one origin may use only information available by that origin. Randomly shuffling observations can therefore answer a different question from future prediction and can introduce information from later periods into an earlier fit.\n\nARIMA models describe dependence through autoregressive terms, differencing and moving-average innovation terms. The order triple p,d,q names those components; it is not a universal recipe chosen merely because a series looks noisy. Differencing changes the modeled quantity, while intercept and mean conventions depend on whether the series is differenced.\n\nA fixed-parameter AR(1) fixture is useful for checking forecast mechanics. With zero mean and coefficient one half, an h-step forecast is one half to the h power times the latest value. Holding the coefficient fixed separates this arithmetic from estimation uncertainty and model selection. It does not claim that one half is an appropriate parameter for an unseen real series.\n\nForecast standard errors describe the fitted model's predictive uncertainty under its assumptions. Their nominal intervals do not automatically account for all model-selection, parameter or structural-change uncertainty. Residual diagnostics can identify remaining patterns, but a lack of obvious structure in a short series is limited evidence.\n\nRolling-origin evaluation records each training window, origin, horizon, prediction and later outcome. A naive last-value baseline is often a useful comparison because its information boundary is transparent. Keep horizons and denominators consistent when aggregating errors, and do not tune a model repeatedly on the final backtest period while presenting that period as untouched evaluation.",
+  "vocabulary": [
+    {
+      "term": "Forecast origin",
+      "definition": "The last time whose information is available when a forecast is issued."
+    },
+    {
+      "term": "Innovation",
+      "definition": "A new unpredictable disturbance under the stated time-series model."
+    },
+    {
+      "term": "Differencing",
+      "definition": "Transforming a series into changes, which alters the quantity modeled."
+    },
+    {
+      "term": "Backtest",
+      "definition": "Evaluation of forecasts against later observed outcomes using declared historical information boundaries."
+    }
+  ],
+  "anatomy": "Use ts to retain an observation frequency and arima with explicit order, mean and fitting options. predict(fit,n.ahead=...) returns forecast means and standard errors. For a fixed coefficient, set fixed and its transformation policy deliberately. A rolling-origin loop must slice training data before each target time and retain its forecast horizon.",
+  "worked_examples": [
+    {
+      "title": "A fixed AR(1) oracle",
+      "code": "y <- ts(c(2, 1.2, 0.8, 0.1, -0.2, 0.3, 0.1, 0.4))\nfit <- arima(y, order = c(1, 0, 0), include.mean = FALSE, fixed = 0.5, transform.pars = FALSE, method = \"ML\")\nforecast <- predict(fit, n.ahead = 3)\nstopifnot(max(abs(as.numeric(forecast$pred) - 0.4 * 0.5^(1:3))) < 1e-10)\nstopifnot(all(is.finite(forecast$se)), all(forecast$se >= 0))\nprint(forecast)\n",
+      "explanation": "The coefficient and mean are fixed explicitly, so the forecast means have a hand-calculated oracle. The fitted innovation scale and its forecast SE are separate model-dependent quantities.",
+      "expected": "Forecasts 0.2,0.1,0.05 with finite nonnegative SEs."
+    },
+    {
+      "title": "A rolling-origin naive baseline",
+      "code": "y <- 1:8\norigins <- 4:7\nrecords <- do.call(rbind, lapply(origins, function(origin) {\n  training <- y[seq_len(origin)]\n  prediction <- tail(training, 1)\n  data.frame(origin = origin, target_time = origin + 1, prediction = prediction, actual = y[origin + 1])\n}))\nrecords$error <- records$actual - records$prediction\nstopifnot(all(records$origin < records$target_time), all(records$error == 1), mean(records$error^2) == 1)\nprint(records)\n",
+      "explanation": "Every prediction uses only its prefix. The exact trend fixture gives error one for the last-value baseline, making the information boundary and error calculation visible.",
+      "expected": "Four one-step forecasts, all errors1, MSE 1."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Derive three forecasts for a zero-mean AR(1) with phi 0.5 and latest value 0.4.",
+      "hint": "Apply the coefficient once per horizon.",
+      "answer": "The means are 0.2,0.1 and 0.05.",
+      "expected": "Exact three-horizon oracle."
+    },
+    {
+      "prompt": "Explain why an ARIMA order(1,0,0) differs from(0,1,0).",
+      "hint": "Identify the modeled level versus differenced quantity.",
+      "answer": "The first is an autoregressive level model; the second differences the series and has a different continuation/mean convention.",
+      "expected": "Model components and targets distinguished."
+    },
+    {
+      "prompt": "Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.",
+      "hint": "Slice the training prefix at each origin.",
+      "answer": "Each next value exceeds the last observed value by one, so every error and the MSE are one.",
+      "expected": "Four records with MSE 1."
+    },
+    {
+      "prompt": "Diagnose using mean(y) from all eight values at the first origin.",
+      "hint": "Identify which future values enter the fitted summary.",
+      "answer": "Values after origin 4 have influenced the predictor, violating the declared information boundary.",
+      "expected": "Future-data leakage identified."
+    },
+    {
+      "prompt": "Difference the sequence 1:6 and retain the changed length and meaning.",
+      "hint": "One adjacent difference uses two level observations.",
+      "answer": "There are five differences, all one. They describe changes rather than six original levels.",
+      "expected": "Length 5, all differences 1."
+    },
+    {
+      "prompt": "Interpret forecast SEs without claiming all sources of future error are covered.",
+      "hint": "List model and selection assumptions.",
+      "answer": "SEs belong to the fitted time-series model; misspecification, structural change and model-selection uncertainty need additional assessment.",
+      "expected": "Finite model SEs with explicit limits."
+    }
+  ],
+  "starter": "# r-049: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\ny <- ts(c(2, 1.2, 0.8, 0.1, -0.2, 0.3, 0.1, 0.4))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Derive three forecasts for a zero-mean AR(1) with phi 0.5 and latest value 0.4.\n# TODO: Apply the coefficient once per horizon.\n# Exercise 2: Explain why an ARIMA order(1,0,0) differs from(0,1,0).\n# TODO: Identify the modeled level versus differenced quantity.\n# Exercise 3: Construct rolling-origin naive predictions for origins 4 through 7 of 1:8.\n# TODO: Slice the training prefix at each origin.\n# Exercise 4: Diagnose using mean(y) from all eight values at the first origin.\n# TODO: Identify which future values enter the fitted summary.\n# Exercise 5: Difference the sequence 1:6 and retain the changed length and meaning.\n# TODO: One adjacent difference uses two level observations.\n# Exercise 6: Interpret forecast SEs without claiming all sources of future error are covered.\n# TODO: List model and selection assumptions.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "y <- ts(c(2, 1.2, 0.8, 0.1, -0.2, 0.3, 0.1, 0.4))\nfit <- arima(y, order = c(1, 0, 0), include.mean = FALSE, fixed = 0.5, transform.pars = FALSE, method = \"ML\")\nf <- predict(fit, n.ahead = 3)\nstopifnot(max(abs(as.numeric(f$pred) - c(0.2, 0.1, 0.05))) < 1e-10)\nstopifnot(all(is.finite(f$se)), all(f$se >= 0))\nseries <- 1:8\norigins <- 4:7\npredictions <- vapply(origins, function(origin) tail(series[seq_len(origin)], 1), numeric(1))\nactual <- series[origins + 1]\nstopifnot(all(actual - predictions == 1), mean((actual - predictions)^2) == 1)\nstopifnot(mean(series) != mean(series[1:4]))\nchanges <- diff(1:6)\nstopifnot(length(changes) == 5, all(changes == 1))\nstopifnot(all(origins < origins + 1))\ncat(\"r-049 reference checks passed\\n\")\n",
+  "solution_explanation": "The fixed-coefficient model isolates forecast arithmetic from parameter estimation. The rolling-origin reference separately verifies that each forecast uses a historical prefix and is scored at the declared next time. This prevents a correct error formula from hiding an invalid information boundary.\n\nThe differencing check retains both the new length and changed target. Forecast uncertainty is reported as a property of the fitted model, with its assumptions and omitted uncertainty sources named. No production forecasting claim follows from these synthetic controls.",
+  "sources": [
+    {
+      "title": "R ARIMA",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/arima.html"
+    },
+    {
+      "title": "R predict.Arima",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.arima.html"
+    },
+    {
+      "title": "R time-series objects",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/ts.html"
+    }
+  ]
+}

@@ -93,6 +93,25 @@ class CourseRequestHandler(BaseHTTPRequestHandler):
             self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
             return
         path = urlsplit(self.path).path
+        from ds60sqlpy.reader_tex import ASSET_ROUTE, public_font_names
+
+        if path.startswith(ASSET_ROUTE) and path[len(ASSET_ROUTE) :] in public_font_names() | {
+            "fonts.css"
+        }:
+            from importlib.resources import files
+
+            data = (
+                files("ds60sqlpy")
+                .joinpath("assets/vendor/textbook/" + path[len(ASSET_ROUTE) :])
+                .read_bytes()
+            )
+            self.send_response(HTTPStatus.OK)
+            self._security_headers(
+                "text/css; charset=utf-8" if path.endswith(".css") else "font/woff2", len(data)
+            )
+            self.end_headers()
+            self.wfile.write(data)
+            return
         if path == "/api/status":
             if not self._authorized_api_request(require_origin=False):
                 return

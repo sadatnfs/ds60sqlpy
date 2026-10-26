@@ -1,0 +1,9 @@
+// dax-035 learner draft: Fiscal labels, boundaries and as-of totals
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Define a fiscal year explicitly and distinguish fiscal-to-date from a completed fiscal year.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a fiscal-to-date metric caption.
+
+EVALUATE
+ROW ( "Fiscal boundary", "June 30", "Fiscal amount", BLANK() )

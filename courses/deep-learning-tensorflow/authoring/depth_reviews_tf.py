@@ -444,7 +444,7 @@ derivative can be zero at the evaluated point.
 
 For the scalar squared-loss fixture, the update with learning rate 0.1
 contracts the residual w-2 by a factor of 1/15 on each full-batch step.
-Starting from zero gives w_1=28/15 and w_2=448/225. The squared residual, and
+Starting from zero gives \\(w_1=\\frac{28}{15}\\) and \\(w_2=\\frac{448}{225}\\). The squared residual, and
 therefore this fixed-batch loss, contracts by 1/225 per step. These exact
 relationships provide a way to locate the first incorrect update without
 guessing from a final training curve.
@@ -541,7 +541,7 @@ cosine instead of treating a finite replacement value as ordinary evidence.""",
     "tf-026": (
         """## Separate persistent state from each forward calculation
 
-The residual layer computes Y = X + XW. For a feature width D, its square
+The residual layer computes \\(Y=X+XW\\). For a feature width D, its square
 kernel has D squared scalar parameters. At W = 0 it is exactly the identity;
 at W = I it doubles every input. These two states are useful independent
 oracles because neither requires trusting the layer's implementation.
@@ -612,7 +612,7 @@ from claims about useful pretrained features.""",
         """## A restart is a claim about the next operation
 
 Equal model weights do not imply equal training state. Consider a momentum
-rule v_next = 0.9v + g and w_next = w - 0.1v_next. At the same w and gradient
+rule \\(v_{\\mathrm{next}}=0.9v+g\\) and \\(w_{\\mathrm{next}}=w-0.1v_{\\mathrm{next}}\\). At the same w and gradient
 g = 2, a saved velocity of 1 gives a step of 0.29; a reset velocity of zero
 gives a step of 0.2. Adam uses different moment equations, but the same
 principle applies: history affects the next update.

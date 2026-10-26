@@ -1,0 +1,98 @@
+{
+  "id": "r-021",
+  "title": "S3 value objects, validation and generic dispatch",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-012", "r-017", "r-020"],
+  "concepts": ["constructor", "validator", "S3 class", "generic dispatch", "value semantics"],
+  "outcome": "Build a validated S3 measurement value, dispatch a domain-specific generic and reject malformed objects at the public boundary.",
+  "mechanism": "An S3 object is an ordinary R value with a class attribute. A numeric vector, list or other underlying representation can carry that attribute. Assigning a class does not install a schema or prove an invariant. For an analytical measurement, the contract must state what the values represent, which units accompany them and how missing or infinite values are handled.\n\nThis lesson uses a list with a finite numeric vector and one nonempty unit string. An empty vector is allowed and its total is zero in the declared unit. Missing values, matrices and complex numbers are rejected. A low-level constructor assembles the representation; a validator checks the invariant; the public constructor combines both. Keeping these roles visible explains why a fast internal constructor must not become an unchecked public input boundary.\n\nA generic describes an operation. UseMethod chooses a method from the object's class and the generic name. measurement_total.measurement is a method for one class; measurement_total.default makes unsupported input fail explicitly. The method validates again because a caller can forge a class attribute or modify a list field after construction. In a package, exported generics and registered methods need NAMESPACE declarations, which the later package lesson explains.\n\nFor these list and numeric components, assignment has value semantics: changing the copied list's values leaves the original observable value unchanged. This does not mean every S3 object is deeply immutable. A list can contain an environment or another reference object, and that component can still be shared. The later R6 lesson isolates that difference with actual mutable objects.\n\nChoose domain operations deliberately. A total of measurements retains the unit; adding milliseconds to seconds without conversion would silently change meaning. Implementing every base arithmetic method is unnecessary for a small public interface and creates additional recycling, missingness and compatibility obligations. This lesson exposes only one total operation and tests the boundary with forged and unsupported inputs.\n\nA method's printed representation is separate from its returned value. Downstream analysis should receive a named numeric total, not parse console text. Tests inspect the numeric result, name and unchanged input. A class label is useful for dispatch, while validation and tests supply evidence about this particular contract.",
+  "vocabulary": [
+    {
+      "term": "Constructor",
+      "definition": "A function that creates the chosen internal representation."
+    },
+    {
+      "term": "Validator",
+      "definition": "A function that checks and rejects violations of an object invariant."
+    },
+    {
+      "term": "Generic",
+      "definition": "An operation whose implementation is selected from an object class."
+    },
+    {
+      "term": "S3 method",
+      "definition": "A function conventionally named generic.class and selected by S3 dispatch."
+    },
+    {
+      "term": "Value semantics",
+      "definition": "Changes to a copied value do not mutate another observable value under the stated representation."
+    }
+  ],
+  "anatomy": "structure(..., class=\"measurement\") labels a list. UseMethod(\"measurement_total\") dispatches to measurement_total.measurement. The validator returns x when valid and raises stop(..., call.=FALSE) otherwise. A named scalar such as c(ms=6) preserves the total unit without inventing arithmetic for incompatible objects.",
+  "worked_examples": [
+    {
+      "title": "Construct a unit-bearing value and dispatch its total",
+      "code": "new_measurement <- function(values, unit) {\n  structure(list(values = values, unit = unit), class = \"measurement\")\n}\nvalidate_measurement <- function(x) {\n  if (!inherits(x, \"measurement\") || !is.list(x) ||\n    !is.numeric(x$values) || is.complex(x$values) ||\n    !is.null(dim(x$values)) || any(!is.finite(x$values))) {\n    stop(\"values must be a finite numeric vector\", call. = FALSE)\n  }\n  if (!is.character(x$unit) || length(x$unit) != 1L ||\n    is.na(x$unit) || !nzchar(x$unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  x\n}\nmeasurement <- function(values, unit) {\n  validate_measurement(new_measurement(values, unit))\n}\nmeasurement_total <- function(x, ...) UseMethod(\"measurement_total\")\nmeasurement_total.measurement <- function(x, ...) {\n  x <- validate_measurement(x)\n  setNames(sum(x$values), x$unit)\n}\nmeasurement_total.default <- function(x, ...) {\n  stop(\"measurement_total requires a measurement\", call. = FALSE)\n}\n\nx <- measurement(c(2, 4), \"ms\")\nresult <- measurement_total(x)\nstopifnot(identical(result, c(ms = 6)))\nprint(result)\n",
+      "explanation": "The generic receives the complete object. Dispatch selects the measurement method, which checks the fields and returns six milliseconds. The class controls selection; it does not replace the explicit checks.",
+      "expected": "A named numeric total ms=6."
+    },
+    {
+      "title": "A copied list and a forged class",
+      "code": "new_measurement <- function(values, unit) {\n  structure(list(values = values, unit = unit), class = \"measurement\")\n}\nvalidate_measurement <- function(x) {\n  if (!inherits(x, \"measurement\") || !is.list(x) ||\n    !is.numeric(x$values) || is.complex(x$values) ||\n    !is.null(dim(x$values)) || any(!is.finite(x$values))) {\n    stop(\"values must be a finite numeric vector\", call. = FALSE)\n  }\n  if (!is.character(x$unit) || length(x$unit) != 1L ||\n    is.na(x$unit) || !nzchar(x$unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  x\n}\nmeasurement <- function(values, unit) {\n  validate_measurement(new_measurement(values, unit))\n}\nmeasurement_total <- function(x, ...) UseMethod(\"measurement_total\")\nmeasurement_total.measurement <- function(x, ...) {\n  x <- validate_measurement(x)\n  setNames(sum(x$values), x$unit)\n}\nmeasurement_total.default <- function(x, ...) {\n  stop(\"measurement_total requires a measurement\", call. = FALSE)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\na <- measurement(c(2, 4), \"ms\")\nb <- a\nb$values[[1]] <- 100\nstopifnot(a$values[[1]] == 2, measurement_total(b)[[1]] == 104)\nforged <- new_measurement(c(2, Inf), \"ms\")\nassert_error(measurement_total(forged), \"finite numeric vector\")\nassert_error(measurement_total(c(2, 4)), \"requires a measurement\")\nprint(c(original = measurement_total(a)[[1]], copy = measurement_total(b)[[1]]))\n",
+      "explanation": "The copy can change without changing a. A forged class gets as far as dispatch but fails validation inside the method. Unsupported plain numeric input reaches the deliberately defined default method.",
+      "expected": "Original total 6, copied total 104; forged and unsupported inputs rejected."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Trace measurement_total(measurement(c(3,7), \"ms\")).",
+      "hint": "Name both the selected method and returned unit.",
+      "answer": "UseMethod selects measurement_total.measurement; it returns c(ms=10).",
+      "expected": "Named total ms=10."
+    },
+    {
+      "prompt": "Add one observation five to the input and check that the earlier object is unchanged.",
+      "hint": "Construct another value instead of modifying the earlier list.",
+      "answer": "measurement(c(x$values,5), x$unit) has total 15; x retains total 10.",
+      "expected": "Totals 10 and 15 with the same unit."
+    },
+    {
+      "prompt": "Implement an observed-count generic for measurement objects.",
+      "hint": "Use a distinct generic and class-specific method; keep validation.",
+      "answer": "measurement_count uses UseMethod and its measurement method returns length(validate_measurement(x)$values). The three-observation object returns 3L.",
+      "expected": "Count 3L and explicit default rejection."
+    },
+    {
+      "prompt": "Diagnose structure(list(values=c(1,Inf),unit=\"ms\"), class=\"measurement\").",
+      "hint": "A class attribute is not a validator.",
+      "answer": "The object dispatches as a measurement but violates the finite-vector invariant. The public operation must reject it.",
+      "expected": "A matching finite-vector validation error."
+    },
+    {
+      "prompt": "Define the empty-vector and empty-unit cases.",
+      "hint": "The contract permits one of them.",
+      "answer": "measurement(numeric(0),\"ms\") has total 0 and count 0; an empty unit string is rejected.",
+      "expected": "Zero total; malformed unit rejected."
+    },
+    {
+      "prompt": "Explain whether a measurement containing an environment would have the same copy guarantee.",
+      "hint": "Distinguish the list container from a referenced component.",
+      "answer": "An environment can be shared across list copies. The current constructor excludes such values, so its tested numeric representation has a narrower value-semantics claim.",
+      "expected": "State the representation-specific limit."
+    }
+  ],
+  "starter": "# r-021: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nvalues <- c(3, 7)\nunit <- \"ms\"\n\n# Exercise 1: Trace measurement_total(measurement(c(3,7), \"ms\")).\n# TODO: Name both the selected method and returned unit.\n# Exercise 2: Add one observation five to the input and check that the earlier object is unchanged.\n# TODO: Construct another value instead of modifying the earlier list.\n# Exercise 3: Implement an observed-count generic for measurement objects.\n# TODO: Use a distinct generic and class-specific method; keep validation.\n# Exercise 4: Diagnose structure(list(values=c(1,Inf),unit=\"ms\"), class=\"measurement\").\n# TODO: A class attribute is not a validator.\n# Exercise 5: Define the empty-vector and empty-unit cases.\n# TODO: The contract permits one of them.\n# Exercise 6: Explain whether a measurement containing an environment would have the same copy guarantee.\n# TODO: Distinguish the list container from a referenced component.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "new_measurement <- function(values, unit) {\n  structure(list(values = values, unit = unit), class = \"measurement\")\n}\nvalidate_measurement <- function(x) {\n  if (!inherits(x, \"measurement\") || !is.list(x) ||\n    !is.numeric(x$values) || is.complex(x$values) ||\n    !is.null(dim(x$values)) || any(!is.finite(x$values))) {\n    stop(\"values must be a finite numeric vector\", call. = FALSE)\n  }\n  if (!is.character(x$unit) || length(x$unit) != 1L ||\n    is.na(x$unit) || !nzchar(x$unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  x\n}\nmeasurement <- function(values, unit) {\n  validate_measurement(new_measurement(values, unit))\n}\nmeasurement_total <- function(x, ...) UseMethod(\"measurement_total\")\nmeasurement_total.measurement <- function(x, ...) {\n  x <- validate_measurement(x)\n  setNames(sum(x$values), x$unit)\n}\nmeasurement_total.default <- function(x, ...) {\n  stop(\"measurement_total requires a measurement\", call. = FALSE)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\nx <- measurement(c(3, 7), \"ms\")\ny <- measurement(c(x$values, 5), x$unit)\nstopifnot(identical(measurement_total(x), c(ms = 10)))\nstopifnot(identical(measurement_total(y), c(ms = 15)))\nmeasurement_count <- function(x, ...) UseMethod(\"measurement_count\")\nmeasurement_count.measurement <- function(x, ...) length(validate_measurement(x)$values)\nmeasurement_count.default <- function(x, ...) stop(\"unsupported count input\")\nstopifnot(identical(measurement_count(y), 3L))\nassert_error(measurement_count(1), \"unsupported count\")\nassert_error(measurement_total(new_measurement(c(1, Inf), \"ms\")), \"finite numeric vector\")\nassert_error(measurement(matrix(1:4, 2), \"ms\"), \"finite numeric vector\")\nassert_error(measurement(c(1, NA_real_), \"ms\"), \"finite numeric vector\")\nassert_error(measurement(1, \"\"), \"nonempty string\")\nempty <- measurement(numeric(0), \"ms\")\nstopifnot(measurement_count(empty) == 0L, identical(measurement_total(empty), c(ms = 0)))\ncopy <- x\ncopy$values[[1]] <- 9\nstopifnot(x$values[[1]] == 3, copy$values[[1]] == 9)\ncat(\"r-021 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference separates assembly, validation and dispatch, so each failed input has a stated cause. The matrix case is numeric but has a shape that the vector contract excludes. The NA case demonstrates a declared policy rather than accidental na.rm behavior.\n\nThe count generic is an independent operation with the same object invariant. Its default rejection prevents unrelated values from silently acquiring domain meaning. Copy assertions establish behavior for the actual numeric-list representation. They are not a proof that all S3 objects are immutable or that package registration has already occurred.",
+  "sources": [
+    {
+      "title": "R S3 method dispatch",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/UseMethod.html"
+    },
+    {
+      "title": "R class attributes",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/class.html"
+    }
+  ]
+}

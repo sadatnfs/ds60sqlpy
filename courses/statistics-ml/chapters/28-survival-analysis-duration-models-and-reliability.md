@@ -276,6 +276,10 @@ if __name__ == "__main__":
 
 - [Cox, Regression Models and Life-Tables](https://doi.org/10.1111/j.2517-6161.1972.tb00899.x)
 
+## Connected worked tutorial
+
+[Fit censored duration models](../tutorials/science/04-survival-and-competing-events.md). Fit Cox and censored lognormal AFT models and contrast competing incidence with an inappropriate survival complement.
+
 ## Reading connections
 
 [Previous chapter](27-advanced-forecasting-and-forecast-evaluation.md) | [Book contents](../README.md) | [Next chapter](29-anomaly-detection-changepoints-and-statistical-process-control.md)

@@ -1,0 +1,15 @@
+// dax-045: Precedence and dynamic format strings
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-045-a: Scale has higher precedence
+// Context: Specified items: AddTen = SELECTEDMEASURE()+10 at lower precedence; Scale = SELECTEDMEASURE()*0.9 at higher precedence.
+EVALUATE ROW ( "ExpandedValue", ( [NetRevenue] + 10 ) * 0.9 )
+
+// dax-045-b: Addition has higher precedence
+// Context: The same two item definitions with AddTen as the higher-precedence outer expression.
+EVALUATE ROW ( "ExpandedValue", [NetRevenue] * 0.9 + 10 )

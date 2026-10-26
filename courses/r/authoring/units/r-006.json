@@ -1,0 +1,98 @@
+{
+  "id": "r-006",
+  "title": "Missing values, NULL, NaN and infinity",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-002", "r-004"],
+  "concepts": ["NA", "NaN", "NULL", "Finite value"],
+  "outcome": "Choose and test a missingness policy that preserves the distinction between absence, undefined arithmetic and zero.",
+  "mechanism": "NA represents a missing entry within a vector. Typed forms such as NA_real_, NA_integer_ and NA_character_ help retain a desired representation. NULL is different: it often denotes an absent component and has length zero. Combining NULL into a vector contributes no entry, while combining NA contributes one missing entry. Confusing these meanings changes counts and denominators.\n\nNaN is a floating-point result for undefined operations such as 0/0. is.na reports TRUE for both NA and NaN, while is.nan distinguishes NaN specifically. Inf and -Inf represent infinities, such as the result of a nonzero number divided by zero. is.finite excludes all of these exceptional numeric values. Whether infinity is an admissible scientific result or a rejected input depends on the interface.\n\nDropping missing entries is an operation on the admitted population. sum(x, na.rm=TRUE) can return zero for an all-missing vector because the sum of an empty numeric set is zero in R. That arithmetic convention does not mean that the original observations measured zero. A summary function should retain a valid count and explicitly choose how an all-missing population is reported.\n\nThe same principle applies to averages. mean(numeric(0)) yields NaN, while a reporting function may deliberately return NA_real_ to indicate that no observed mean is available. State this policy at the boundary rather than letting an incidental implementation choice become the meaning of the metric. Later statistical chapters use those counts to make selection assumptions visible.",
+  "vocabulary": [
+    {
+      "term": "NA",
+      "definition": "A missing value with a typed representation."
+    },
+    {
+      "term": "NaN",
+      "definition": "A floating-point result that is not a number."
+    },
+    {
+      "term": "NULL",
+      "definition": "The null object, often indicating an absent component."
+    },
+    {
+      "term": "Finite value",
+      "definition": "A numeric value that is neither missing nor infinite."
+    }
+  ],
+  "anatomy": "Use is.na, is.nan and is.finite for their distinct questions. Avoid equality comparisons to NA. Keep eligible count, observed count and the numerical summary together when missingness affects a denominator.",
+  "worked_examples": [
+    {
+      "title": "Classify exceptional numbers",
+      "code": "x <- c(0, NA_real_, NaN, Inf, -Inf, 4)\nstopifnot(identical(is.na(x), c(FALSE, TRUE, TRUE, FALSE, FALSE, FALSE)))\nstopifnot(identical(is.finite(x), c(TRUE, FALSE, FALSE, FALSE, FALSE, TRUE)))\nprint(data.frame(value = x, missing = is.na(x), finite = is.finite(x)))\n",
+      "explanation": "A finite-value mask is stricter than a missing-value mask. It rejects infinities as well as missing and undefined results.",
+      "expected": "Only zero and four are finite."
+    },
+    {
+      "title": "Absence and an all-missing summary",
+      "code": "stopifnot(length(c(1, NULL, 2)) == 2L, length(c(1, NA, 2)) == 3L)\nx <- c(NA_real_, NA_real_)\nobserved <- sum(!is.na(x))\nreported_sum <- if (observed == 0) NA_real_ else sum(x, na.rm = TRUE)\nstopifnot(observed == 0, is.na(reported_sum), sum(x, na.rm = TRUE) == 0)\nprint(c(observed = observed, reported_sum = reported_sum))\n",
+      "explanation": "The reporting policy preserves no observed sum instead of interpreting the empty-sum arithmetic convention as a measurement.",
+      "expected": "Observed count zero; reported sum NA."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict length(c(NULL, NA_real_)).",
+      "hint": "Only NA contributes a vector entry.",
+      "answer": "The length is one.",
+      "expected": "The length is one."
+    },
+    {
+      "prompt": "Add zero to an all-missing measurement vector.",
+      "hint": "Zero is an observed value.",
+      "answer": "The observed count becomes one and its observed mean is zero.",
+      "expected": "The observed count becomes one and its observed mean is zero."
+    },
+    {
+      "prompt": "Construct a finite-only mask for c(2, Inf, NA,4).",
+      "hint": "Use the predicate that excludes every exceptional value.",
+      "answer": "is.finite retains two and four.",
+      "expected": "is.finite retains two and four."
+    },
+    {
+      "prompt": "Diagnose calling an all-missing sum a measured zero.",
+      "hint": "na.rm removes all original entries.",
+      "answer": "Report no observations and an explicit missing summary under the stated policy.",
+      "expected": "Report no observations and an explicit missing summary under the stated policy."
+    },
+    {
+      "prompt": "Distinguish NA from NaN.",
+      "hint": "One broad predicate includes both; one identifies NaN.",
+      "answer": "is.na is true for both, but is.nan is true only for NaN.",
+      "expected": "is.na is true for both, but is.nan is true only for NaN."
+    },
+    {
+      "prompt": "Document a division-by-zero policy in a data pipeline.",
+      "hint": "Choose whether infinity, missing output or a rejected input is intended.",
+      "answer": "Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero.",
+      "expected": "Validate the denominator and retain a meaningful signal instead of silently replacing every exceptional result with zero."
+    }
+  ],
+  "starter": "# r-006: Missing values, NULL, NaN and infinity\n# Complete the six guide tasks using these local inputs.\nx <- c(0, NA_real_, NaN, Inf, 4)\n# TODO: classify values and define a summary policy.\nprint(x)\n",
+  "reference": "stopifnot(length(c(NULL, NA_real_)) == 1L)\nx <- c(NA_real_, NA_real_, 0)\nstopifnot(sum(!is.na(x)) == 1, mean(x, na.rm = TRUE) == 0)\nx <- c(2, Inf, NA_real_, 4)\nstopifnot(identical(x[is.finite(x)], c(2, 4)))\nall_missing <- c(NA_real_, NA_real_)\nreported <- if (all(is.na(all_missing))) NA_real_ else sum(all_missing, na.rm = TRUE)\nstopifnot(is.na(reported), is.na(NA_real_), is.na(NaN), !is.nan(NA_real_), is.nan(NaN))\nratio <- function(a, b) {\n  if (!is.finite(b) || b == 0) return(NA_real_); a / b\n}\nstopifnot(is.na(ratio(1, 0)), ratio(4, 2) == 2)\ncat(\"r-006 reference checks passed\\n\")\n",
+  "solution_explanation": "A finite-value mask is stricter than a missing-value mask. It rejects infinities as well as missing and undefined results.\n\nThe reporting policy preserves no observed sum instead of interpreting the empty-sum arithmetic convention as a measurement.\n\nIn the worked summary, if (observed == 0) chooses one result when the scalar condition is TRUE; else supplies the other result. Both branches use the same reported_sum name, so the no-observation policy is visible in the returned value. Chapter r-011 develops branching and loops more fully.",
+  "sources": [
+    {
+      "title": "R missing values",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html"
+    },
+    {
+      "title": "R finite numbers",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/is.finite.html"
+    },
+    {
+      "title": "R null object",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/NULL.html"
+    }
+  ]
+}

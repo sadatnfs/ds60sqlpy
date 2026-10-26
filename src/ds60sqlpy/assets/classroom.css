@@ -1515,3 +1515,33 @@ p:last-child {
   flex: 0 0 auto;
   font-size: 0.73rem;
 }
+
+.saved-plot {
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: white;
+}
+#figures figure {
+  margin: 1.25rem 0;
+}
+#figures figcaption {
+  font-weight: 650;
+  margin-bottom: 0.6rem;
+}
+#figures table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#figures td,
+#figures th {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+#figures details {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}

@@ -1,0 +1,98 @@
+{
+  "id": "r-055",
+  "title": "Scales, coordinates and facets change different contracts",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-054"],
+  "concepts": ["scale limit", "coordinate zoom", "transformation", "facet", "shared comparison"],
+  "outcome": "Choose scale, coordinate and facet policies while explaining how each affects calculations and visual comparisons.",
+  "mechanism": "A scale maps data values to visual properties and can transform or limit the data entering a layer. A coordinate system determines how those mapped positions are displayed. These stages are related but not interchangeable. In particular, setting a scale limit can remove observations before a statistic is calculated, while coordinate zoom can retain them in the calculation and change only the displayed window.\n\nThat distinction matters for a fitted line. If an extreme observation is outside a scale limit, a smoothing layer may fit without it. A coordinate zoom can hide the same point visually while retaining its influence on the fitted model. A plot that looks like a harmless zoom can therefore represent a different fitted analysis if the wrong mechanism is chosen.\n\nFacets divide a dataset into panels. Shared scales support direct magnitude comparison across panels; free scales can reveal within-panel detail but make equal visual distances correspond to different values. State which comparison the reader should make, and label free-scale choices rather than allowing them to imply equality of magnitudes.\n\nTransformations such as logarithmic scales change the mapping and often the interpretation of distance. Check the input domain before applying them. A nonpositive value cannot be silently treated as an ordinary positive observation on a log scale. A useful graphic preserves the admission decision and any excluded-count information.\n\nNamed palettes and factor levels are another scale contract. If category identity matters, specify the mapping by name and handle new categories deliberately. A polished legend cannot repair a chart that changed category meaning after a factor reorder. Validate the data-to-mark relationship before inspecting the final visual layout.",
+  "vocabulary": [
+    {
+      "term": "Scale limit",
+      "definition": "A restriction at the scale stage that can remove data before statistical transformation."
+    },
+    {
+      "term": "Coordinate zoom",
+      "definition": "A displayed-window restriction that can preserve the data used by layer statistics."
+    },
+    {
+      "term": "Facet",
+      "definition": "A panel subdivision determined by data variables."
+    },
+    {
+      "term": "Free scale",
+      "definition": "A panel-specific scale whose numerical mapping can differ from other panels."
+    }
+  ],
+  "anatomy": "Use scale_y_continuous(limits=...) only when its data-removal behavior is intended. Use coord_cartesian(ylim=...) for a visual zoom that retains underlying statistic inputs. facet_wrap(...,scales=\"fixed\" or \"free_y\") declares the comparison policy. Inspect built layer values and panel-scale assignments independently from the displayed image.",
+  "worked_examples": [
+    {
+      "title": "A zoom can change a fitted line if implemented as a scale limit",
+      "code": "d <- data.frame(x = 1:4, y = c(1, 2, 3, 100))\nbase <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_smooth(method = \"lm\", formula = y ~ x, se = FALSE)\nzoom <- base + ggplot2::coord_cartesian(ylim = c(0, 4)) + ggplot2::labs(title = \"Coordinate zoom retains the fitted data\")\nlimited <- base + ggplot2::scale_y_continuous(limits = c(0, 4)) + ggplot2::labs(title = \"Scale limit removes a fitting observation\")\na <- ggplot2::ggplot_build(zoom)$data[[2]]\nb <- ggplot2::ggplot_build(limited)$data[[2]]\nstopifnot(max(a$y, na.rm = TRUE) > 4, max(b$y, na.rm = TRUE) <= 4)\nprint(zoom)\nprint(limited)\n",
+      "explanation": "The warning about removed data is relevant evidence for the scale-limited fit. The two plots deliberately preserve different statistical inputs even though their visible y windows are similar.",
+      "expected": "The full-data fitted line differs from the line fitted after removing the extreme observation."
+    },
+    {
+      "title": "Inspect a free facet scale",
+      "code": "d <- data.frame(x = rep(1:2, 2), y = c(1, 2, 100, 200), group = c(\"A\", \"A\", \"B\", \"B\"))\nfixed <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::facet_wrap(~group, scales = \"fixed\")\nfree <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::facet_wrap(~group, scales = \"free_y\")\nstopifnot(length(unique(ggplot2::ggplot_build(fixed)$layout$layout$SCALE_Y)) == 1)\nstopifnot(length(unique(ggplot2::ggplot_build(free)$layout$layout$SCALE_Y)) == 2)\nprint(free)\n",
+      "explanation": "The free-scale plot can show both within-group patterns clearly, but equal vertical distances no longer encode equal changes across groups.",
+      "expected": "Two panels with two y-scale assignments under free_y."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Build the coordinate-zoom and scale-limited fitted-line comparison.",
+      "hint": "Inspect the smoothing layer after building.",
+      "answer": "The coordinate zoom retains all four observations in the fit, while the scale limit removes the extreme y value before fitting.",
+      "expected": "Different fitted numerical layers."
+    },
+    {
+      "prompt": "Choose a zoom that preserves the model-fitting data.",
+      "hint": "Separate display range from data admission.",
+      "answer": "Use coord_cartesian and retain the full-data fit; document any points outside the displayed window.",
+      "expected": "Model inputs preserved."
+    },
+    {
+      "prompt": "Compare fixed and free-y facet scale assignments.",
+      "hint": "Inspect the panel layout metadata.",
+      "answer": "Fixed panels share one y-scale assignment; free_y gives one per panel in this fixture.",
+      "expected": "One versus two scale assignments."
+    },
+    {
+      "prompt": "Transform positive values 1,10,100 with a log10 x scale.",
+      "hint": "Check the domain before building.",
+      "answer": "The built x coordinates are 0,1,2, representing equal ratios as equal spacing.",
+      "expected": "Expected transformed positions."
+    },
+    {
+      "prompt": "Diagnose a new category missing from a named palette contract.",
+      "hint": "Compare observed labels with palette names.",
+      "answer": "Admit the category with an explicit mapping or reject it under the application contract; do not silently change existing identities.",
+      "expected": "Unmapped category detected."
+    },
+    {
+      "prompt": "Explain when free scales can mislead a magnitude comparison.",
+      "hint": "Compare numerical units behind equal visual distances.",
+      "answer": "Free scales can make a small and a large range occupy similar panel heights; shared scales or explicit annotation are needed for direct magnitude comparison.",
+      "expected": "Comparison limit stated."
+    }
+  ],
+  "starter": "# r-055: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(x = 1:4, y = c(1, 2, 3, 100))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Build the coordinate-zoom and scale-limited fitted-line comparison.\n# TODO: Inspect the smoothing layer after building.\n# Exercise 2: Choose a zoom that preserves the model-fitting data.\n# TODO: Separate display range from data admission.\n# Exercise 3: Compare fixed and free-y facet scale assignments.\n# TODO: Inspect the panel layout metadata.\n# Exercise 4: Transform positive values 1,10,100 with a log10 x scale.\n# TODO: Check the domain before building.\n# Exercise 5: Diagnose a new category missing from a named palette contract.\n# TODO: Compare observed labels with palette names.\n# Exercise 6: Explain when free scales can mislead a magnitude comparison.\n# TODO: Compare numerical units behind equal visual distances.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(x = 1:4, y = c(1, 2, 3, 100))\nbase <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_smooth(method = \"lm\", formula = y ~ x, se = FALSE)\nzoom <- base + ggplot2::coord_cartesian(ylim = c(0, 4))\nlimited <- base + ggplot2::scale_y_continuous(limits = c(0, 4))\nstopifnot(max(ggplot2::ggplot_build(zoom)$data[[2]]$y, na.rm = TRUE) > 4)\nstopifnot(max(ggplot2::ggplot_build(limited)$data[[2]]$y, na.rm = TRUE) <= 4)\nf <- data.frame(x = rep(1:2, 2), y = c(1, 2, 100, 200), group = c(\"A\", \"A\", \"B\", \"B\"))\nfixed <- ggplot2::ggplot(f, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::facet_wrap(~group)\nfree <- fixed + ggplot2::facet_wrap(~group, scales = \"free_y\")\nstopifnot(length(unique(ggplot2::ggplot_build(fixed)$layout$layout$SCALE_Y)) == 1)\nstopifnot(length(unique(ggplot2::ggplot_build(free)$layout$layout$SCALE_Y)) == 2)\npositive <- data.frame(x = c(1, 10, 100), y = 1:3)\nstopifnot(all(positive$x > 0))\nlog_plot <- ggplot2::ggplot(positive, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::scale_x_log10()\nstopifnot(max(abs(ggplot2::ggplot_build(log_plot)$data[[1]]$x - 0:2)) < 1e-12)\npalette <- c(A = \"#0072B2\", B = \"#D55E00\")\nstopifnot(!all(c(\"A\", \"C\") %in% names(palette)))\nprint(zoom)\nprint(limited)\ncat(\"r-055 reference checks passed\\n\")\n",
+  "solution_explanation": "The fitted-line comparison verifies a real change in the statistic's input data, not only a cosmetic zoom. Its expected removal warning should be interpreted as part of that mechanism. Facet metadata and transformed coordinates supply separate checks for scale behavior.\n\nThe reference prints only two plots. Correct layer metadata does not guarantee that the delivered visual comparison is clear, so captions, scales and missing-category policies remain part of the graphical review.",
+  "sources": [
+    {
+      "title": "Coordinate Cartesian zoom",
+      "url": "https://ggplot2.tidyverse.org/reference/coord_cartesian.html"
+    },
+    {
+      "title": "Continuous position scales",
+      "url": "https://ggplot2.tidyverse.org/reference/scale_continuous.html"
+    },
+    {
+      "title": "Faceting",
+      "url": "https://ggplot2.tidyverse.org/reference/facet_wrap.html"
+    }
+  ]
+}

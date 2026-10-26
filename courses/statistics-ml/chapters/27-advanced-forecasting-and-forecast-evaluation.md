@@ -294,6 +294,10 @@ if __name__ == "__main__":
 
 - [Gneiting and Raftery, Strictly Proper Scoring Rules, Prediction, and Estimation](https://doi.org/10.1198/016214506000001437)
 
+## Connected worked tutorial
+
+[A vintage-aware multi-series case](../tutorials/science/03-vintage-aware-forecasting.md). Recreate rolling forecasts using label availability and revision timing, then compare a common baseline.
+
 ## Reading connections
 
 [Previous chapter](26-classical-forecasting-methods.md) | [Book contents](../README.md) | [Next chapter](28-survival-analysis-duration-models-and-reliability.md)

@@ -11,6 +11,6 @@ RUN cargo build --release --locked --jobs 2 \
     && python3 -c "from pathlib import Path; import shutil; p=list(Path('target/release/deps').glob('libarrow-*.rlib')); assert len(p)==1; shutil.copyfile(p[0], 'libarrow.rlib')" \
     && chmod -R a+rX /opt/course-rust /usr/local/rustup
 WORKDIR /opt/worker
-COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py /opt/worker/src/ds60sqlpy/
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
 ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=rust-stable
 ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

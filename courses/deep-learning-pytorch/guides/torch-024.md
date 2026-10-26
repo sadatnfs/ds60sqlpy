@@ -44,11 +44,11 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify \(\mathrm{logits}\ge 0\). Count TP, TN, FP, FN with boolean masks and verify their sum.
+Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate `x.std(dim=0, correction=0)` to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify \(\mathrm{logits}\ge 0\). Count TP, TN, FP, FN with boolean masks and verify their sum.
 
 ## Derive the classifier and audit every assessment row
 
-The training values[-2, -1, 1, 2] have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale \(\sqrt{2.5}\). PyTorch's correction=0 matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce \(\sqrt{\frac{10}{3}}\). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
+The training values `[-2, -1, 1, 2]` have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale \(\sqrt{2.5}\). PyTorch's `correction=0` matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce \(\sqrt{\frac{10}{3}}\). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
 
 The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
 
@@ -148,7 +148,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-If a paired-framework weight differs, check correction=0, initialization, loss reduction, target shape and update count before assuming a backend defect. Compute the first derivative -3/(4sqrt(2.5)) and inspect its sign. If the model predicts both classes incorrectly, verify that thresholding uses logits rather than a second sigmoid interpretation and that truth rows retain their identity order.
+If a paired-framework weight differs, check `correction=0`, initialization, loss reduction, target shape and update count before assuming a backend defect. Compute the first derivative -3/(4sqrt(2.5)) and inspect its sign. If the model predicts both classes incorrectly, verify that thresholding uses logits rather than a second sigmoid interpretation and that truth rows retain their identity order.
 
 If confusion counts do not sum to two, inspect Boolean complements, shape broadcasting and missing rows. If a subgroup report lacks its denominator, it is incomplete. If a result looks exceptionally strong, revisit the public geometric rule, tiny visible holdout and extrapolation range before calling it population evidence. A failed data or evaluation boundary is a no-go result even when the arithmetic accuracy is perfect.
 

@@ -349,7 +349,7 @@ assert residual.square().mean().item()==2""",
 )
 lesson(
     5,
-    "A derivative measures local sensitivity:how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.\n\nFinite differences involve a tradeoff:large steps measure a wider region, while extremely small steps lose precision through subtract iv e cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.",
+    "A derivative measures local sensitivity:how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with `requires_grad=True` and can calculate a derivative through `autograd.grad`. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.\n\nFinite differences involve a tradeoff:large steps measure a wider region, while extremely small steps lose precision through subtract iv e cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.",
     "Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.",
     [
         ("Derivative", "The local rate of change of a function."),
@@ -368,7 +368,7 @@ assert gradient.item()==-4 and loss.item()==4""",
         ),
         ex(
             "Check three finite differences",
-            "Useh.1, .01, .001 atw0 and compare each slope with-4.",
+            "Use \\(h\\in\\{0.1, 0.01, 0.001\\}\\) at \\(w=0\\) and compare each slope with \\(-4\\).",
             "all agree within1e-10.",
             """for h in [.1,.01,.001]:
     slope=central(lambda value:(value-2)**2,0.,h)
@@ -377,8 +377,8 @@ assert gradient.item()==-4 and loss.item()==4""",
         ),
         ex(
             "Separate gradient from update",
-            "Use learning rate 0.1 and gradient-4 from w = 0.",
-            "neww.4, not-4.",
+            "Use learning rate \\(\\eta=0.1\\) and gradient \\(-4\\) at \\(w=0\\).",
+            "new parameter \\(w=0.4\\); the supplied gradient is \\(-4\\).",
             """updated=0.-.1*gradient.item()
 np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()""",
@@ -386,7 +386,7 @@ assert updated!=gradient.item()""",
         ),
         ex(
             "Inspect a stationary point",
-            "Differentiate the same objective atw2.",
+            "Differentiate the same objective at \\(w=2\\).",
             "gradient0 and loss0.",
             """optimum=torch.tensor(2.,dtype=torch.float64,requires_grad=True)
 value=(optimum-2)**2; derivative=torch.autograd.grad(value,optimum)[0]
@@ -531,8 +531,8 @@ lesson(
     [
         ex(
             "Inspect leaf and nonleaf state",
-            "Create leaf w = 0 and intermediate2w, retain the intermediate gradient and backpropagate its sum.",
-            "w leaf True; intermediate False; gradients2 and 1.",
+            "Create a leaf tensor \\(w=0\\) and intermediate tensor \\(u=2w\\), retain the intermediate gradient and backpropagate its sum.",
+            "`w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \\(w\\) and \\(u\\) are 2 and 1.",
             """w=torch.tensor(0.,requires_grad=True); intermediate=2*w; intermediate.retain_grad(); intermediate.backward()
 assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermediate.grad.item()==1""",
             "Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.",
@@ -572,7 +572,7 @@ assert tracked.requires_grad and not observed.requires_grad""",
         ex(
             "Show eval is separate",
             "Put a Linear module in eval mode, run a differentiable input, and inspect output tracking.",
-            "output still requires_grad True.",
+            "the output still has `requires_grad=True`.",
             """model=nn.Linear(1,1); model.eval(); result=model(torch.tensor([[1.]],requires_grad=True))
 assert result.requires_grad and model.training is False""",
             "Evaluation mode changes module behavior, not the global autograd mode. Use no_grad or inference_mode separately for inference when appropriate.",
@@ -639,7 +639,7 @@ np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.g
         ),
         ex(
             "Check a finite-difference gradient",
-            "Use a plain NumPy scalar objective around w = 0 with h.001.",
+            "Use a plain NumPy scalar objective around \\(w=0\\) with finite-difference step \\(h=0.001\\).",
             "slope-56/3 within1e-9.",
             """values=np.array([1.,2.,3.]); objective=lambda value:np.mean((value*values-2*values)**2); h=.001
 slope=(objective(h)-objective(-h))/(2*h)
@@ -648,7 +648,7 @@ np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)""",
         ),
         ex(
             "Clear the consumed gradient",
-            "Call optimizer.zero_grad(set_to_none=True) after the step and inspect state.",
+            "Call `optimizer.zero_grad(set_to_none=True)` after the step and inspect state.",
             "w.grad None; updated weight unchanged.",
             """saved=w.item(); optimizer.zero_grad(set_to_none=True)
 assert w.grad is None and w.item()==saved""",
@@ -983,7 +983,7 @@ assert not set(train)&set(test) and len(report['test_ids'])==2 and report['steps
 lesson(
     13,
     "A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid e d probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.\n\nA classification threshold is a separate decision policy. Changing it alters predicted labels without changing fitted logits. The threshold can reflect costs or coverage, but must be chosen on validation evidence rather than after viewing final-test results. The tiny scores-2, 0, 2 make the midpoint and boundary policy inspectable. Their probabilities are not automatically calibrated merely because sigmoid produced them.",
-    "F.binary_cross_entropy_with_logits expects floating targets and logits of matching shape. torch.sigmoid is useful for reporting probabilities after the objective convention is fixed. Use probability>=threshold to declare a tie policy. Compare loss at zero logit with log2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.",
+    "`F.binary_cross_entropy_with_logits` expects floating targets and logits of matching shape. `torch.sigmoid` is useful for reporting probabilities after the objective convention is fixed. Use `probability>=threshold` to declare a tie policy. Compare loss at zero logit with log2 and use extreme logits to check stable arithmetic. Do not infer label correctness from confidence alone.",
     [
         ("Logit", "A binary score before the sigmoid probability transformation."),
         ("BCEWithLogitsLoss", "A stable combined binary logistic objective."),
@@ -1662,7 +1662,7 @@ else: raise AssertionError('zero-length packed sequence accepted')""",
             "The application should detect empty records before this low-level call and choose an explicit policy. An undefined target mean must not be converted into perfect loss.",
         ),
     ],
-    "Keras can propagate mask metadata from Embedding(mask_zero=True)through compatible layers. PyTorch often uses explicit lengths, masks or PackedSequence. padding_id x is not the same as automatic recurrent mask propagation. Both frameworks require a valid-token loss denominator.",
+    "Keras can propagate mask metadata from `Embedding(mask_zero=True)` through compatible layers. PyTorch often uses explicit lengths, masks or PackedSequence. padding_id x is not the same as automatic recurrent mask propagation. Both frameworks require a valid-token loss denominator.",
     [
         (
             "Why do not zero embeddings make padding harmless for an R NN?",
@@ -1676,7 +1676,7 @@ else: raise AssertionError('zero-length packed sequence accepted')""",
 )
 lesson(
     22,
-    "Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.\n\nThe functional API also applies dropout according to its dropout_p argument; calling an enclosing module.eval does not automatically change an explicit nonzero probability. For an evaluation oracle, pass dropout_p0. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.",
+    "Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.\n\nThe functional API also applies dropout according to its `dropout_p` argument; calling an enclosing `module.eval` does not automatically change an explicit nonzero probability. For an evaluation oracle, pass dropout_p0. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.",
     "The checked helper accepts nonempty2D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.",
     [
         ("SDPA", "Scaled dot-product attention implemented by a functional API."),
@@ -1845,7 +1845,7 @@ else: raise AssertionError('nonfinite gradient accepted')""",
 lesson(
     24,
     "A classifier capstone must connect the task definition to training and evaluation evidence. The literal fixture classifies the sign of a scalar coordinate. Training and test IDs are fixed before fitting. Normalization statistics use only training rows, and the decision threshold is declared before test scoring. Aone-weight logistic model is sufficient for the fixture; unnecessary depth would obscure the experiment rather than improve its meaning.\n\nReport confusion counts and their denominator, not only accuracy. A mean baseline or constant-class baseline provides a comparison under the same held-out units. Per-group failures can be hidden by an aggregate. The tiny test contains only two rows, so the capstone proves an inspectable local pipeline without establishing population reliability. PyTorch standard-deviation defaults differ from NumPy's population default, so the preprocessing comparison must set correction explicitly.",
-    "UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.",
+    "Use X shaped (4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate `x.std(dim=0, correction=0)` to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.",
     [
         ("Confusion matrix", "Counts of true/false positive and negative decisions."),
         ("Frozen threshold", "A decision policy chosen before final assessment."),
@@ -2093,7 +2093,7 @@ class Cube(torch.autograd.Function):
 )
 lesson(
     27,
-    "Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting requires_grad=False prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled care lessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.\n\nThe local fixture uses a fixed identity base and a new linear head, so a byte-level snapshot can verify that only the head changes. A later unfreeze phase creates a new optimizer with a declared rate and membership list. No pretrained weights are downloaded. The lesson teaches the state transition required for transfer rather than claiming that freezing always improves quality.",
+    "Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting `requires_grad=False` prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled care lessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.\n\nThe local fixture uses a fixed identity base and a new linear head, so a byte-level snapshot can verify that only the head changes. A later unfreeze phase creates a new optimizer with a declared rate and membership list. No pretrained weights are downloaded. The lesson teaches the state transition required for transfer rather than claiming that freezing always improves quality.",
     "Call requires_grad_(False) on base parameters, clear their grad fields, and construct the head optimizer from head.parameters only. Use base.eval when its mode-dependent state should remain fixed. Snapshot all base state_dict tensors with clone. After training the head, compare both parameters and buffers. Unfreezing changes the intended update set and requires an explicit optimizer policy.",
     [
         ("Frozen base", "A reused model component excluded from parameter updates."),
@@ -2388,7 +2388,7 @@ assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)
         ),
         ex(
             "Accumulate one full-batch gradient",
-            "At w = 0, usex1..4, y = 2x, accumulate squared-loss sums forshards1and3, and divide by4.",
+            "At \\(w=0\\), use \\(x=(1,2,3,4)\\) and \\(y=2x\\), accumulate squared-loss sums for shards of sizes 1 and 3, and divide by the total sample count 4.",
             "gradient-30, matching full-batch mean.",
             """x=torch.arange(1,5,dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tensor(0.,dtype=torch.float64))
 for start,end in [(0,1),(1,4)]: ((w*x[start:end]-y[start:end])**2).sum().backward()

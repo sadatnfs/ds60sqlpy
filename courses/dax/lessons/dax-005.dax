@@ -1,0 +1,10 @@
+// dax-005 learner draft: DAX query shape, names and deterministic result tables
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish scalar expressions, table expressions and named model measures in a readable query.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a query returning three rows in descending SaleID order.
+
+EVALUATE
+SELECTCOLUMNS ( Sales, "Line", Sales[SaleID], "Amount to explain", BLANK() )
+ORDER BY [Line]

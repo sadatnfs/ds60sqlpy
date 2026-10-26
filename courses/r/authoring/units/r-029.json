@@ -1,0 +1,102 @@
+{
+  "id": "r-029",
+  "title": "Reproducibility, RNG scope and analysis metadata",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-019", "r-020", "r-028"],
+  "concepts": ["RNG state", "configuration", "provenance", "content hash", "reproducibility"],
+  "outcome": "Run repeatable stochastic calculations without leaking caller RNG state and record a bounded configuration, input digest and software-version ledger.",
+  "mechanism": "A seed is one component of a reproducible analysis. Results also depend on the random-number algorithm, the sequence of random calls, input contents and order, configuration, package versions and numerical platform. Setting a seed once does not make arbitrary parallel scheduling or a later changed algorithm produce the same output. The preceding lesson assigned streams to task identities; this lesson makes serial RNG ownership explicit.\n\nwith_rng validates one integer seed, saves the caller's RNG kind and state, chooses an explicit generator configuration, evaluates a callback and restores the prior state. The restoration handler also runs when the callback raises an ordinary error. If the caller did not have a .Random.seed, the helper removes the seed it created instead of leaving a new ambient state behind. Tests cover both cases because restoring only an existing seed is an incomplete ownership policy.\n\nThe helper's callback is still ordinary code. It can modify files or other global objects, and restoring RNG state does not undo those effects. Keep the calculation pure where possible and return structured results. The public contract says which state the wrapper owns, not that it provides a transaction for the whole R session. Use the prepared package versions when comparing exact outputs, and use numerical tolerances where floating-point algorithms warrant them.\n\nAnalysis configuration should be data: seed, sample size, missingness policy, model choice and other declared options. Validate it before computation. Store an explicit representation of the input fixture and a content hash together with that configuration. A hash identifies those bytes; it is not proof that the data are correct, authentic, representative or scientifically suitable. Changing the row order can change the hash and the stochastic result even when a set of values is unchanged.\n\nThe metadata example serializes a deliberately ordered local configuration and fixture to JSON, then computes a SHA256 digest with serialize=FALSE over those exact JSON strings. This is an explicit local representation, not a promise that arbitrary JSON producers will generate identical canonical bytes. The ledger records R version, selected package versions and RNG kinds. It avoids dumping the full process environment, credentials or unrelated user state.\n\nA reproducibility ledger helps another analyst reconstruct what was run, but it does not establish statistical validity. A repeated biased estimate remains biased. Keep assumptions, eligibility criteria, uncertainty and interpretation alongside source and configuration. The later analytical-package capstone uses these contracts to distinguish a checked descriptive result from a claim about a population.",
+  "vocabulary": [
+    {
+      "term": "RNG state",
+      "definition": "The generator configuration and state determining subsequent random draws."
+    },
+    {
+      "term": "Configuration",
+      "definition": "Explicit data controlling an analysis rather than hidden interactive choices."
+    },
+    {
+      "term": "Content digest",
+      "definition": "A deterministic identifier of a specified byte representation."
+    },
+    {
+      "term": "Provenance ledger",
+      "definition": "A bounded record of inputs, configuration and software context used for a result."
+    }
+  ],
+  "anatomy": "RNGkind() queries generator choices and set.seed selects an initial state. Save and restore .Random.seed with assign(...,envir=.GlobalEnv), preserving whether it existed. jsonlite::toJSON(...,auto_unbox=TRUE,digits=17) creates the chosen JSON representation; digest::digest(text,algo=\"sha256\",serialize=FALSE) hashes those bytes.",
+  "worked_examples": [
+    {
+      "title": "Repeat a calculation while restoring the caller stream",
+      "code": "with_rng <- function(seed, fun) {\n  if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed) ||\n    seed != floor(seed) || seed < 0 || seed > .Machine$integer.max) stop(\"seed must be one valid integer\")\n  old_kind <- RNGkind()\n  had_seed <- exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)\n  if (had_seed) old_seed <- get(\".Random.seed\", envir = .GlobalEnv)\n  on.exit(\n    {\n      do.call(RNGkind, as.list(old_kind))\n      if (had_seed) assign(\".Random.seed\", old_seed, envir = .GlobalEnv)\n      else if (exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)) rm(\".Random.seed\", envir = .GlobalEnv)\n    },\n    add = TRUE\n  )\n  RNGkind(kind = \"Mersenne-Twister\", normal.kind = \"Inversion\", sample.kind = \"Rejection\")\n  set.seed(as.integer(seed))\n  fun()\n}\n\nset.seed(81)\nstate_before <- .Random.seed\nkind_before <- RNGkind()\na <- with_rng(2026, function() stats::rnorm(5))\nb <- with_rng(2026, function() stats::rnorm(5))\nstopifnot(identical(a, b), identical(.Random.seed, state_before), identical(RNGkind(), kind_before))\nprint(a)\n",
+      "explanation": "Two callbacks receive the same explicit generator configuration and seed. Their vectors match, while the caller retains its prior RNG state. The claim is about this declared calculation in the prepared environment.",
+      "expected": "Identical five-value vectors and unchanged caller RNG state."
+    },
+    {
+      "title": "Create an explicit, bounded analysis ledger",
+      "code": "config <- list(seed = 2026L, draws = 5L, missing_policy = \"reject\")\nfixture <- list(id = c(\"a\", \"b\", \"c\"), value = c(2, 4, 6), unit = \"ms\")\nconfig_json <- as.character(jsonlite::toJSON(config, auto_unbox = TRUE, digits = 17))\nfixture_json <- as.character(jsonlite::toJSON(fixture, auto_unbox = TRUE, digits = 17))\nledger <- list(\n  config = config,\n  config_sha256 = digest::digest(config_json, algo = \"sha256\", serialize = FALSE),\n  input_sha256 = digest::digest(fixture_json, algo = \"sha256\", serialize = FALSE),\n  R = R.version.string,\n  packages = list(\n    jsonlite = as.character(utils::packageVersion(\"jsonlite\")),\n    digest = as.character(utils::packageVersion(\"digest\"))\n  ),\n  rng = RNGkind()\n)\nstopifnot(nchar(ledger$input_sha256) == 64L, nchar(ledger$config_sha256) == 64L)\nprint(ledger)\n",
+      "explanation": "The hashes identify explicitly serialized local data, and package versions make the serialization context inspectable. No ambient environment variables or credentials are collected.",
+      "expected": "Configuration, two 64-character digests, R/package versions and RNG kinds."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict whether two with_rng calls with seed 2026 and identical callbacks match.",
+      "hint": "The wrapper fixes both seed and generator kinds.",
+      "answer": "They match in the prepared runtime, while the caller stream is restored after each call.",
+      "expected": "Equal output vectors and equal caller state."
+    },
+    {
+      "prompt": "Test cleanup after a callback raises an error.",
+      "hint": "Capture kind and seed before invoking the wrapper.",
+      "answer": "The error propagates and the prior generator kind and seed remain unchanged.",
+      "expected": "Matched error plus restored state."
+    },
+    {
+      "prompt": "Test the case where .Random.seed did not exist before the call.",
+      "hint": "A restoration policy includes absence.",
+      "answer": "After completion, remove the temporary seed rather than creating ambient RNG state for the caller.",
+      "expected": "No .Random.seed remains."
+    },
+    {
+      "prompt": "Change one fixture value and compare its content digest.",
+      "hint": "Hash the same explicit JSON representation rules.",
+      "answer": "The altered fixture has a different SHA256 digest; that identifies a content change without judging its validity.",
+      "expected": "Different digest and bounded meaning."
+    },
+    {
+      "prompt": "Record only the configuration and software metadata needed to reproduce this calculation.",
+      "hint": "Avoid whole-environment dumps.",
+      "answer": "Keep seed, draws, missingness rule, input digest, R version, relevant package versions and RNG kinds.",
+      "expected": "A bounded ledger without unrelated state."
+    },
+    {
+      "prompt": "Explain why a repeated result is not evidence that the estimator is unbiased.",
+      "hint": "Numerical reproducibility and statistical assumptions are different.",
+      "answer": "The same selection bias or model misspecification can repeat exactly. Evaluate design and assumptions separately.",
+      "expected": "No validity claim from repeatability."
+    }
+  ],
+  "starter": "# r-029: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nconfig <- list(seed = 2026L, draws = 5L, missing_policy = \"reject\")\nfixture <- list(id = c(\"a\", \"b\", \"c\"), value = c(2, 4, 6), unit = \"ms\")\n\n# Exercise 1: Predict whether two with_rng calls with seed 2026 and identical callbacks match.\n# TODO: The wrapper fixes both seed and generator kinds.\n# Exercise 2: Test cleanup after a callback raises an error.\n# TODO: Capture kind and seed before invoking the wrapper.\n# Exercise 3: Test the case where .Random.seed did not exist before the call.\n# TODO: A restoration policy includes absence.\n# Exercise 4: Change one fixture value and compare its content digest.\n# TODO: Hash the same explicit JSON representation rules.\n# Exercise 5: Record only the configuration and software metadata needed to reproduce this calculation.\n# TODO: Avoid whole-environment dumps.\n# Exercise 6: Explain why a repeated result is not evidence that the estimator is unbiased.\n# TODO: Numerical reproducibility and statistical assumptions are different.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "with_rng <- function(seed, fun) {\n  if (!is.numeric(seed) || length(seed) != 1L || !is.finite(seed) ||\n    seed != floor(seed) || seed < 0 || seed > .Machine$integer.max) stop(\"seed must be one valid integer\")\n  old_kind <- RNGkind()\n  had_seed <- exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)\n  if (had_seed) old_seed <- get(\".Random.seed\", envir = .GlobalEnv)\n  on.exit(\n    {\n      do.call(RNGkind, as.list(old_kind))\n      if (had_seed) assign(\".Random.seed\", old_seed, envir = .GlobalEnv)\n      else if (exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)) rm(\".Random.seed\", envir = .GlobalEnv)\n    },\n    add = TRUE\n  )\n  RNGkind(kind = \"Mersenne-Twister\", normal.kind = \"Inversion\", sample.kind = \"Rejection\")\n  set.seed(as.integer(seed))\n  fun()\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\nset.seed(81)\nbefore <- .Random.seed\nkind <- RNGkind()\na <- with_rng(2026, function() stats::rnorm(5))\nb <- with_rng(2026, function() stats::rnorm(5))\nstopifnot(identical(a, b), identical(.Random.seed, before), identical(RNGkind(), kind))\nassert_error(with_rng(2026, function() stop(\"deliberate callback failure\")), \"deliberate callback failure\")\nstopifnot(identical(.Random.seed, before), identical(RNGkind(), kind))\nrm(\".Random.seed\", envir = .GlobalEnv)\nwith_rng(4, function() stats::runif(2))\nstopifnot(!exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE))\nassert_error(with_rng(1.5, function() 1), \"valid integer\")\nfixture <- list(id = c(\"a\", \"b\", \"c\"), value = c(2, 4, 6), unit = \"ms\")\nhash_fixture <- function(x) digest::digest(as.character(jsonlite::toJSON(x, auto_unbox = TRUE, digits = 17)), algo = \"sha256\", serialize = FALSE)\noriginal_hash <- hash_fixture(fixture)\nmodified <- fixture\nmodified$value[[3]] <- 7\nstopifnot(original_hash == hash_fixture(fixture), original_hash != hash_fixture(modified))\nstopifnot(nchar(original_hash) == 64L, fixture$value[[3]] == 6)\nledger <- list(\n  seed = 2026L, draws = 5L, missing_policy = \"reject\", input_sha256 = original_hash,\n  R = R.version.string, jsonlite = as.character(utils::packageVersion(\"jsonlite\")),\n  digest = as.character(utils::packageVersion(\"digest\")), rng = RNGkind()\n)\nstopifnot(identical(sort(names(ledger)), sort(c(\"seed\", \"draws\", \"missing_policy\", \"input_sha256\", \"R\", \"jsonlite\", \"digest\", \"rng\"))))\nprint(ledger)\ncat(\"r-029 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference tests ordinary completion, a deliberately failed callback and an initially absent seed. Each checks a separate restoration obligation. The numeric output is compared within the same explicit generator configuration rather than asserted as an eternal cross-version sequence.\n\nThe digest test changes one known value and retains the original object. Metadata is an explicit allowlist of analysis-relevant fields, so the example does not expose unrelated session state. A reproducible ledger supports review but cannot establish unbiasedness or sound experimental design.",
+  "sources": [
+    {
+      "title": "R random-number generation",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html"
+    },
+    {
+      "title": "R session information",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/utils/html/sessionInfo.html"
+    },
+    {
+      "title": "jsonlite JSON conversion",
+      "url": "https://jeroen.r-universe.dev/jsonlite/doc/manual.html"
+    },
+    {
+      "title": "digest package reference",
+      "url": "https://eddelbuettel.github.io/digest/man/digest.html"
+    }
+  ]
+}

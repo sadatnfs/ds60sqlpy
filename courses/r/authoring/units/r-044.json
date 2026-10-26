@@ -1,0 +1,98 @@
+{
+  "id": "r-044",
+  "title": "Binomial GLMs, probabilities and calibration",
+  "level": "intermediate",
+  "minutes": 140,
+  "prerequisites": ["r-043"],
+  "concepts": ["binomial GLM", "log odds", "odds ratio", "Brier score", "calibration"],
+  "outcome": "Translate a logistic model between its link scale, probabilities and evaluation quantities without confusing their interpretations.",
+  "mechanism": "A generalized linear model combines a response distribution with a link between its mean and a linear predictor. For binomial logistic regression, the linear predictor is a log-odds quantity. Applying the inverse logit produces a probability between zero and one. The two scales support different interpretations and should be labeled in output.\n\nR can represent binomial observations as individual zero/one responses or as a two-column matrix of successes and failures. Aggregated counts preserve their trial denominators when supplied correctly. A vector of proportions without the corresponding weights would describe a different likelihood. The small two-group fixture below has ten trials in each group and admits an exact probability oracle.\n\nExponentiating a coefficient gives an odds ratio conditional on the encoded model. It does not multiply probabilities by that factor. Changing probability from 0.2 to 0.6 multiplies odds from 0.25 to 1.5, an odds ratio of six; multiplying the original probability by six would be meaningless here.\n\nPrediction quality has several dimensions. A threshold turns probabilities into decisions under an explicit tie and cost policy. Brier score evaluates squared probability error. Log loss penalizes small assigned probability for observed outcomes. Calibration compares predicted probabilities with observed frequencies under a stated grouping and sampling design. These quantities should not be substituted for one another.\n\nConvergence also does not guarantee a scientifically adequate model. Complete separation can drive unpenalized logistic coefficients toward extreme values, while confounding, selection and misspecification remain outside the optimizer's numerical diagnosis. A preferred threshold or calibrated appearance on reused training data is not independent evidence of population performance.",
+  "vocabulary": [
+    {
+      "term": "Link scale",
+      "definition": "The transformed mean scale modeled by a linear predictor, here log odds."
+    },
+    {
+      "term": "Odds ratio",
+      "definition": "A multiplicative comparison of odds, not of probabilities."
+    },
+    {
+      "term": "Calibration",
+      "definition": "Agreement between predicted probabilities and observed event frequencies under a defined evaluation design."
+    },
+    {
+      "term": "Separation",
+      "definition": "A pattern in which predictors perfectly divide outcomes and can prevent finite unpenalized logistic coefficient estimates."
+    }
+  ],
+  "anatomy": "Fit glm(cbind(successes, failures) ~ x, family=binomial(), data=d). predict(type=\"link\") returns log odds; type=\"response\" returns probabilities. plogis and qlogis translate the two scales. Calculate scores from the same trial counts, and retain the evaluation denominator. Use held-out outcomes for a calibration assessment rather than treating fitted training frequencies as independent validation.",
+  "worked_examples": [
+    {
+      "title": "Recover probabilities and odds",
+      "code": "d <- data.frame(x = c(0, 1), successes = c(2, 6), failures = c(8, 4))\nfit <- glm(cbind(successes, failures) ~ x, family = binomial(), data = d)\np <- predict(fit, type = \"response\")\neta <- predict(fit, type = \"link\")\nstopifnot(max(abs(p - c(0.2, 0.6))) < 1e-8)\nstopifnot(max(abs(plogis(eta) - p)) < 1e-10)\nstopifnot(abs(exp(coef(fit)[[\"x\"]]) - 6) < 1e-7)\nprint(data.frame(x = d$x, log_odds = eta, probability = p))\n",
+      "explanation": "The saturated two-group fixture recovers the two observed trial proportions. Its coefficient expresses an odds ratio of six, not a sixfold probability change.",
+      "expected": "Probabilities 0.2/0.6; odds ratio 6."
+    },
+    {
+      "title": "Score probabilities before thresholding",
+      "code": "successes <- c(2, 6)\nfailures <- c(8, 4)\np <- c(0.2, 0.6)\nn <- sum(successes + failures)\nbrier <- sum(successes * (1 - p)^2 + failures * p^2) / n\nlog_loss <- -sum(successes * log(p) + failures * log1p(-p)) / n\naccuracy <- (failures[1] + successes[2]) / n\nstopifnot(abs(brier - 0.2) < 1e-12, abs(accuracy - 0.7) < 1e-12, is.finite(log_loss))\nprint(c(brier = brier, log_loss = log_loss, threshold_accuracy = accuracy))\n",
+      "explanation": "The same probabilities produce a continuous score and a threshold decision score. The threshold rule is explicitly p>=0.5; another cost policy could choose another threshold.",
+      "expected": "Brier 0.2, threshold accuracy 0.7, finite log loss."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Fit the two-group binomial model and reconstruct probabilities from the link scale.",
+      "hint": "Use plogis on link predictions.",
+      "answer": "The fitted probabilities are 0.2 and 0.6; inverse-link predictions agree with response predictions.",
+      "expected": "Two matching probability paths."
+    },
+    {
+      "prompt": "Interpret the x coefficient as an odds ratio.",
+      "hint": "Calculate odds p/(1-p) at both x values.",
+      "answer": "Odds are 0.25 and 1.5, so their ratio is 6. The probability ratio is 3, a different quantity.",
+      "expected": "Odds ratio 6, probability ratio 3."
+    },
+    {
+      "prompt": "Calculate the trial-weighted Brier score.",
+      "hint": "Count successes and failures separately.",
+      "answer": "Successes contribute (1-p)^2 and failures p^2; their sum over 20 trials gives 0.2.",
+      "expected": "Brier 0.2."
+    },
+    {
+      "prompt": "Diagnose treating the proportions 0.2 and 0.6 as two equally weighted binary observations.",
+      "hint": "Retain the ten-trial denominator in each group.",
+      "answer": "The aggregation represents 20 Bernoulli trials. Losing the denominators changes the likelihood and uncertainty interpretation.",
+      "expected": "Trial count 20 retained."
+    },
+    {
+      "prompt": "Recognize complete separation for x=c(-2,-1,1,2) and y=c(0,0,1,1).",
+      "hint": "Find a threshold that perfectly separates the labels.",
+      "answer": "A threshold at zero separates all outcomes. An unpenalized logistic fit can lack a finite optimum; a numerical convergence flag alone is insufficient.",
+      "expected": "Separation identified without inventing finite coefficient evidence."
+    },
+    {
+      "prompt": "Assess held-out group outcomes 1/10 and 8/10 under predictions 0.2 and 0.6.",
+      "hint": "Compare probabilities with new frequencies, not the training groups.",
+      "answer": "The frequency gaps are-0.1 and 0.2. Their weighted absolute gap is 0.15 for equal counts; uncertainty and binning choices remain relevant.",
+      "expected": "Held-out gaps and denominator reported."
+    }
+  ],
+  "starter": "# r-044: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(x = c(0, 1), successes = c(2, 6), failures = c(8, 4))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Fit the two-group binomial model and reconstruct probabilities from the link scale.\n# TODO: Use plogis on link predictions.\n# Exercise 2: Interpret the x coefficient as an odds ratio.\n# TODO: Calculate odds p/(1-p) at both x values.\n# Exercise 3: Calculate the trial-weighted Brier score.\n# TODO: Count successes and failures separately.\n# Exercise 4: Diagnose treating the proportions 0.2 and 0.6 as two equally weighted binary observations.\n# TODO: Retain the ten-trial denominator in each group.\n# Exercise 5: Recognize complete separation for x=c(-2,-1,1,2) and y=c(0,0,1,1).\n# TODO: Find a threshold that perfectly separates the labels.\n# Exercise 6: Assess held-out group outcomes 1/10 and 8/10 under predictions 0.2 and 0.6.\n# TODO: Compare probabilities with new frequencies, not the training groups.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(x = c(0, 1), successes = c(2, 6), failures = c(8, 4))\nfit <- glm(cbind(successes, failures) ~ x, family = binomial(), data = d)\np <- as.numeric(predict(fit, type = \"response\"))\nstopifnot(max(abs(p - c(0.2, 0.6))) < 1e-8)\nstopifnot(max(abs(plogis(predict(fit, type = \"link\")) - p)) < 1e-10)\nodds <- p / (1 - p)\nstopifnot(abs(odds[2] / odds[1] - 6) < 1e-7, abs(p[2] / p[1] - 3) < 1e-7)\nn <- sum(d$successes + d$failures)\nbrier <- sum(d$successes * (1 - p)^2 + d$failures * p^2) / n\nstopifnot(n == 20, abs(brier - 0.2) < 1e-10)\nx_sep <- c(-2, -1, 1, 2)\ny_sep <- c(0, 0, 1, 1)\nstopifnot(all(x_sep[y_sep == 0] < 0), all(x_sep[y_sep == 1] > 0))\nheldout_rate <- c(1, 8) / 10\ngaps <- heldout_rate - p\nstopifnot(max(abs(gaps - c(-0.1, 0.2))) < 1e-8, abs(mean(abs(gaps)) - 0.15) < 1e-8)\ncat(\"r-044 reference checks passed\\n\")\n",
+  "solution_explanation": "The two-column response retains successes and failures as trial counts. The exact fixture probabilities make link-scale and odds calculations independently checkable. Brier score and classification accuracy evaluate different properties of those same predictions.\n\nThe separation example is diagnosed from the geometry of its inputs rather than forcing an unstable fit and presenting a huge coefficient as a valid estimate. The held-out frequency comparison uses new outcomes and remains a descriptive calibration check with its count visible. It does not infer population calibration from two bins.",
+  "sources": [
+    {
+      "title": "R glm",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/glm.html"
+    },
+    {
+      "title": "R predict.glm",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/predict.glm.html"
+    },
+    {
+      "title": "R logistic distribution",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Logistic.html"
+    }
+  ]
+}

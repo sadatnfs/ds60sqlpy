@@ -1,0 +1,651 @@
+{
+  "schema_version": 1,
+  "id": "analytics",
+  "title": "Retail and analytical extensions",
+  "description": "Original synthetic USD sales. NetAmount = Quantity * UnitPrice - line Discount. No tax or returns are included in NetAmount.",
+  "tables": [
+    {
+      "name": "Product",
+      "path": "courses/dax/models/retail/Product.csv",
+      "sha256": "7c0cf39f0133a5238b1d0bc1b8e6b356e57279604f4416f9bc67cf9d9f89e7a9",
+      "grain": "one row per product",
+      "key": [
+        "ProductKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "ProductKey",
+          "type": "integer"
+        },
+        {
+          "name": "Product",
+          "type": "text"
+        },
+        {
+          "name": "Category",
+          "type": "text"
+        },
+        {
+          "name": "Color",
+          "type": "text"
+        },
+        {
+          "name": "UnitCost",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "path": "courses/dax/models/retail/Customer.csv",
+      "sha256": "2e8ac5aac48f07d1d7eff94d678de397d59473a3ca5a8b552d6bb35bef7156b9",
+      "grain": "one row per customer",
+      "key": [
+        "CustomerKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "CustomerKey",
+          "type": "integer"
+        },
+        {
+          "name": "Customer",
+          "type": "text"
+        },
+        {
+          "name": "Region",
+          "type": "text"
+        },
+        {
+          "name": "Segment",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Sales",
+      "path": "courses/dax/models/retail/Sales.csv",
+      "sha256": "e0d2cb6611969bec7a18da84974359458513446add37b034d151f3da690525db",
+      "grain": "one order line; OrderID can repeat",
+      "key": [
+        "SaleID"
+      ],
+      "row_count": 8,
+      "columns": [
+        {
+          "name": "SaleID",
+          "type": "text"
+        },
+        {
+          "name": "OrderID",
+          "type": "integer"
+        },
+        {
+          "name": "ProductKey",
+          "type": "integer"
+        },
+        {
+          "name": "CustomerKey",
+          "type": "integer"
+        },
+        {
+          "name": "OrderDate",
+          "type": "date"
+        },
+        {
+          "name": "ShipDate",
+          "type": "date"
+        },
+        {
+          "name": "Quantity",
+          "type": "integer"
+        },
+        {
+          "name": "UnitPrice",
+          "type": "number"
+        },
+        {
+          "name": "Discount",
+          "type": "number"
+        },
+        {
+          "name": "NetAmount",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Date",
+      "path": "courses/dax/models/retail/Date.csv",
+      "sha256": "a83a3b5878431f3145184d345fcffd7c7b74a488b5c539ebf72ac801af1f7d50",
+      "grain": "one calendar day, complete 2024 and 2025",
+      "key": [
+        "Date"
+      ],
+      "row_count": 731,
+      "columns": [
+        {
+          "name": "Date",
+          "type": "date"
+        },
+        {
+          "name": "Year",
+          "type": "integer"
+        },
+        {
+          "name": "MonthNumber",
+          "type": "integer"
+        },
+        {
+          "name": "MonthKey",
+          "type": "integer"
+        },
+        {
+          "name": "YearMonth",
+          "type": "text"
+        },
+        {
+          "name": "DayOfMonth",
+          "type": "integer"
+        },
+        {
+          "name": "FiscalYear",
+          "type": "integer"
+        },
+        {
+          "name": "RetailYear",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "Returns",
+      "path": "courses/dax/models/analytics/Returns.csv",
+      "sha256": "fa1657e92785518dda519b9a53723ce6ea1af3eddbad0c64aa55c347539a8eb9",
+      "grain": "one return event; multiple returns per sale could exist",
+      "key": [
+        "ReturnID"
+      ],
+      "row_count": 2,
+      "columns": [
+        {
+          "name": "ReturnID",
+          "type": "text"
+        },
+        {
+          "name": "SaleID",
+          "type": "text"
+        },
+        {
+          "name": "Refund",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Budget",
+      "path": "courses/dax/models/analytics/Budget.csv",
+      "sha256": "9ee8eca2722ec91a41d5b84cbf9987968f4f1392ffdd8542902aea408124c77c",
+      "grain": "one month and category",
+      "key": [
+        "MonthKey",
+        "Category"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "MonthKey",
+          "type": "integer"
+        },
+        {
+          "name": "Category",
+          "type": "text"
+        },
+        {
+          "name": "Amount",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "path": "courses/dax/models/analytics/Inventory.csv",
+      "sha256": "261d85a5b76d6326287ba144ce10f55621a32c9cd05cc5a920ef0c0029c8e662",
+      "grain": "one product at an end-of-day snapshot",
+      "key": [
+        "SnapshotDate",
+        "ProductKey"
+      ],
+      "row_count": 6,
+      "columns": [
+        {
+          "name": "SnapshotDate",
+          "type": "date"
+        },
+        {
+          "name": "ProductKey",
+          "type": "integer"
+        },
+        {
+          "name": "Units",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "ForeignSales",
+      "path": "courses/dax/models/analytics/ForeignSales.csv",
+      "sha256": "e07908254a364aeb692446cb25dd60428c633672c76f71efd3a6db325941bc61",
+      "grain": "one foreign-currency transaction",
+      "key": [
+        "ForeignID"
+      ],
+      "row_count": 3,
+      "columns": [
+        {
+          "name": "ForeignID",
+          "type": "text"
+        },
+        {
+          "name": "SaleDate",
+          "type": "date"
+        },
+        {
+          "name": "Currency",
+          "type": "text"
+        },
+        {
+          "name": "LocalAmount",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "ExchangeRate",
+      "path": "courses/dax/models/analytics/ExchangeRate.csv",
+      "sha256": "02a25572c32e4466859591effbec80c7d03986e712892c1b98c60a489079f408",
+      "grain": "one currency rate per date, expressed as USD per local currency unit",
+      "key": [
+        "RateDate",
+        "Currency"
+      ],
+      "row_count": 3,
+      "columns": [
+        {
+          "name": "RateDate",
+          "type": "date"
+        },
+        {
+          "name": "Currency",
+          "type": "text"
+        },
+        {
+          "name": "USDPerUnit",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "CohortMember",
+      "path": "courses/dax/models/analytics/CohortMember.csv",
+      "sha256": "4c0324959cd1e357bbe55ecd8b609f83870d7717ee226a559d8a9c52ac401acc",
+      "grain": "one enrolled member",
+      "key": [
+        "MemberKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "MemberKey",
+          "type": "integer"
+        },
+        {
+          "name": "CohortMonth",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "Activity",
+      "path": "courses/dax/models/analytics/Activity.csv",
+      "sha256": "2aef44f74f8bd1b44df961302fc35d1991b0b4eef2851ed963f8e233a5090a59",
+      "grain": "one observed member-month activity in this small fixture",
+      "key": [
+        "ActivityID"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "ActivityID",
+          "type": "text"
+        },
+        {
+          "name": "MemberKey",
+          "type": "integer"
+        },
+        {
+          "name": "MonthKey",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "Assignments",
+      "path": "courses/dax/models/analytics/Assignments.csv",
+      "sha256": "de524fef2c581a7e616f946de889bc165f919a3035e433208906819eafce2f8b",
+      "grain": "one assigned experimental unit",
+      "key": [
+        "UnitID"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "UnitID",
+          "type": "text"
+        },
+        {
+          "name": "Arm",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Outcomes",
+      "path": "courses/dax/models/analytics/Outcomes.csv",
+      "sha256": "b80645d71815b9986921ec9faff2150e9500923f250ba803edcd7c521682e90b",
+      "grain": "one finalized outcome per assigned unit",
+      "key": [
+        "UnitID"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "UnitID",
+          "type": "text"
+        },
+        {
+          "name": "Converted",
+          "type": "integer"
+        },
+        {
+          "name": "Revenue",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Exposures",
+      "path": "courses/dax/models/analytics/Exposures.csv",
+      "sha256": "296877923546e296d53cbcffb6d5acb248c58801bb06286a1ef6f0a852fd42ac",
+      "grain": "one exposure event; repeat events are not independent assigned units",
+      "key": [
+        "ExposureID"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "ExposureID",
+          "type": "text"
+        },
+        {
+          "name": "UnitID",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Audience",
+      "path": "courses/dax/models/analytics/Audience.csv",
+      "sha256": "f6a8ef4dfb84ad756d3781c03063d6ae6f6c00a8fc6cdc96b9e97e8e5c787bc8",
+      "grain": "one named customer audience",
+      "key": [
+        "GroupKey"
+      ],
+      "row_count": 2,
+      "columns": [
+        {
+          "name": "GroupKey",
+          "type": "integer"
+        },
+        {
+          "name": "Audience",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "GroupMembership",
+      "path": "courses/dax/models/analytics/GroupMembership.csv",
+      "sha256": "8a3010400f10bfbbfbe27375e11b6b235979497c56f6fbf01d361ac204f0b3ea",
+      "grain": "one customer membership in one audience",
+      "key": [
+        "GroupKey",
+        "CustomerKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "GroupKey",
+          "type": "integer"
+        },
+        {
+          "name": "CustomerKey",
+          "type": "integer"
+        }
+      ]
+    },
+    {
+      "name": "Access",
+      "path": "courses/dax/models/analytics/Access.csv",
+      "sha256": "773ead65417f3211ac2a10908192ec77cf67594d527a9dd7701e6f9bef066d58",
+      "grain": "one allowed region per synthetic principal in this tiny fixture",
+      "key": [
+        "Principal",
+        "Region"
+      ],
+      "row_count": 2,
+      "columns": [
+        {
+          "name": "Principal",
+          "type": "text"
+        },
+        {
+          "name": "Region",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "ExperimentSummary",
+      "path": "courses/dax/models/analytics/ExperimentSummary.csv",
+      "sha256": "90d37d9e403ba9d42ba31dd6c1faed2b5bfff371382f95eb999ab31e7d57fbac",
+      "grain": "one supplied statistical summary per experimental arm; marginal95percent Wilson score intervals",
+      "key": [
+        "Arm"
+      ],
+      "row_count": 2,
+      "columns": [
+        {
+          "name": "Arm",
+          "type": "text"
+        },
+        {
+          "name": "Assigned",
+          "type": "integer"
+        },
+        {
+          "name": "Converted",
+          "type": "integer"
+        },
+        {
+          "name": "Rate",
+          "type": "number"
+        },
+        {
+          "name": "WilsonLower",
+          "type": "number"
+        },
+        {
+          "name": "WilsonUpper",
+          "type": "number"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "Product",
+      "from_column": "ProductKey",
+      "to_table": "Sales",
+      "to_column": "ProductKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Customer",
+      "from_column": "CustomerKey",
+      "to_table": "Sales",
+      "to_column": "CustomerKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Date",
+      "from_column": "Date",
+      "to_table": "Sales",
+      "to_column": "OrderDate",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Date",
+      "from_column": "Date",
+      "to_table": "Sales",
+      "to_column": "ShipDate",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": false
+    },
+    {
+      "from_table": "Sales",
+      "from_column": "SaleID",
+      "to_table": "Returns",
+      "to_column": "SaleID",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Product",
+      "from_column": "ProductKey",
+      "to_table": "Inventory",
+      "to_column": "ProductKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Date",
+      "from_column": "Date",
+      "to_table": "Inventory",
+      "to_column": "SnapshotDate",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "CohortMember",
+      "from_column": "MemberKey",
+      "to_table": "Activity",
+      "to_column": "MemberKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Assignments",
+      "from_column": "UnitID",
+      "to_table": "Outcomes",
+      "to_column": "UnitID",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Assignments",
+      "from_column": "UnitID",
+      "to_table": "Exposures",
+      "to_column": "UnitID",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Audience",
+      "from_column": "GroupKey",
+      "to_table": "GroupMembership",
+      "to_column": "GroupKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Customer",
+      "from_column": "CustomerKey",
+      "to_table": "GroupMembership",
+      "to_column": "CustomerKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    }
+  ],
+  "observation_end": "2025-02-28",
+  "calendar_definitions": [
+    {
+      "name": "RetailCalendar",
+      "table": "Date",
+      "status": "offline specification only; calendar-based time intelligence preview",
+      "tags": {
+        "Day": "Date",
+        "Year": "RetailYear",
+        "Month": "YearMonth"
+      },
+      "year_starts": "February 1"
+    }
+  ],
+  "date_table": {
+    "table": "Date",
+    "column": "Date",
+    "marked": true
+  },
+  "assumptions": [
+    "Dates have no time component.",
+    "All ordinary retail amounts are USD.",
+    "The one side is unique; normal foreign keys are complete.",
+    "Relationships are regular Import-style relationships for hand reasoning, not live engine metadata.",
+    "The Date table contains 731 dates; guides show relevant slices rather than hide unselected dates.",
+    "Budget, ForeignSales and ExchangeRate are disconnected; formulas explicitly transfer keys or look up a unique rate.",
+    "Cohorts and experiments are independent synthetic populations, not renamed retail customers.",
+    "Outcome data are complete for all four assignments; exposure is a separate event stream."
+  ],
+  "security_specification": {
+    "status": "offline policy specification, not installed or tested security",
+    "scope": "regular Import-style model; role-restricted Viewer context",
+    "static_roles": {
+      "NorthViewer": "Customer[Region] = \"North\"",
+      "SouthViewer": "Customer[Region] = \"South\""
+    },
+    "dynamic_customer_rule": "Customer[Region] IN SELECTCOLUMNS(FILTER(Access, Access[Principal] = USERPRINCIPALNAME()), \"AllowedRegion\", Access[Region])",
+    "unknown_principal": "no allowed Customer rows",
+    "limits": [
+      "Ordinary report filters are not security enforcement.",
+      "Workspace Admin/Member/Contributor behavior must not be inferred from Viewer tests.",
+      "The Access mapping itself requires appropriate visibility controls in a real model."
+    ]
+  }
+}

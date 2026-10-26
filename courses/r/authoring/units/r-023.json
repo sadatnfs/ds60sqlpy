@@ -1,0 +1,94 @@
+{
+  "id": "r-023",
+  "title": "R6 identity, encapsulation and cloning",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-007", "r-013", "r-021"],
+  "concepts": ["reference semantics", "encapsulation", "alias", "shallow clone", "deep clone"],
+  "outcome": "Trace shared R6 identity, protect state through methods and distinguish shallow from nested-R6 deep cloning.",
+  "mechanism": "R6 creates objects with reference semantics. Assigning an existing R6 object to another name creates an alias to the same instance. A method that changes its private state is visible through both names. That behavior is useful for a controlled cache, iterator or running accumulator, but it differs from the numeric-list value in the S3 lesson. An analysis that assumes assignment always isolates state can therefore change earlier results accidentally.\n\nAn R6Class call creates a generator. Calling Counter$new constructs an instance, and object$method() invokes one of its public methods. The example stores value in the private environment and exposes read and add operations. Validation occurs before mutation, so a rejected negative, missing or infinite increment leaves the previous state intact. The method returns invisible(self), allowing explicit chaining without using printed output as data.\n\nPrivate members express an interface boundary for ordinary use. They are not a security boundary against arbitrary R reflection in the same process. The purpose is to keep callers from depending on internal representation and to concentrate state changes in methods that preserve the invariant. A reusable method should document whether it mutates the object and what it returns.\n\nclone creates a new instance, but shallow and deep cloning have different reach. A shallow clone copies the outer R6 object while retaining references to nested R6 objects. A deep clone automatically clones those nested R6 objects. The boxed-counter example makes this distinction measurable: a change through a shallow box affects the original counter, while a change through the deep box does not.\n\nDeep cloning is not a universal recursive snapshot of every possible object graph. Arbitrary environments and external resources need an explicitly designed deep_clone policy, and file connections or external pointers may not have a meaningful copy. This lesson tests nested R6 members only. When independent analytical values are sufficient, a plain validated value object often has a smaller behavioral contract.\n\nReference objects make test order and ownership important. Each example starts in a fresh process and constructs fresh counters. Tests check aliases, clones, unchanged state after rejection and returned values independently. A mutable accumulator should not be reused across folds or simulations unless that reuse is intentional and reset behavior is part of the interface.",
+  "vocabulary": [
+    {
+      "term": "Alias",
+      "definition": "Another name referring to the same mutable object instance."
+    },
+    {
+      "term": "Encapsulation",
+      "definition": "Keeping state changes behind a stated public interface."
+    },
+    {
+      "term": "Shallow clone",
+      "definition": "A new outer instance that can retain referenced inner objects."
+    },
+    {
+      "term": "Deep clone",
+      "definition": "An R6 clone that also clones nested R6 objects, with limits for other reference types."
+    }
+  ],
+  "anatomy": "R6::R6Class returns a generator; Counter$new(initial=2) makes an instance. Public methods use self and private to access object state. b <- a aliases a, while a$clone() creates a new outer instance. a$clone(deep=TRUE) also clones nested R6 members under the default R6 policy.",
+  "worked_examples": [
+    {
+      "title": "Aliases observe the same counter",
+      "code": "Counter <- R6::R6Class(\"Counter\", private = list(value = 0), public = list(\n  initialize = function(initial = 0) {\n    if (!is.numeric(initial) || length(initial) != 1L || !is.finite(initial) || initial < 0) {\n      stop(\"initial must be one nonnegative finite number\")\n    }\n    private$value <- initial\n  },\n  add = function(amount) {\n    if (!is.numeric(amount) || length(amount) != 1L || !is.finite(amount) || amount < 0) {\n      stop(\"amount must be one nonnegative finite number\")\n    }\n    if (!is.finite(private$value + amount)) stop(\"counter overflow\")\n    private$value <- private$value + amount\n    invisible(self)\n  },\n  read = function() private$value\n))\n\na <- Counter$new(2)\nb <- a\nb$add(3)\nstopifnot(a$read() == 5, b$read() == 5, identical(a, b))\ncopy <- a$clone()\ncopy$add(4)\nstopifnot(a$read() == 5, copy$read() == 9)\nprint(c(original = a$read(), copy = copy$read()))\n",
+      "explanation": "Assignment shares the same reference; cloning the simple scalar counter creates independent private state. The returned numeric readings are suitable for later calculations.",
+      "expected": "Alias reads 5; independent clone reads 9."
+    },
+    {
+      "title": "Nested R6 members expose shallow-clone sharing",
+      "code": "Counter <- R6::R6Class(\"Counter\", private = list(value = 0), public = list(\n  initialize = function(initial = 0) {\n    if (!is.numeric(initial) || length(initial) != 1L || !is.finite(initial) || initial < 0) {\n      stop(\"initial must be one nonnegative finite number\")\n    }\n    private$value <- initial\n  },\n  add = function(amount) {\n    if (!is.numeric(amount) || length(amount) != 1L || !is.finite(amount) || amount < 0) {\n      stop(\"amount must be one nonnegative finite number\")\n    }\n    if (!is.finite(private$value + amount)) stop(\"counter overflow\")\n    private$value <- private$value + amount\n    invisible(self)\n  },\n  read = function() private$value\n))\n\nBox <- R6::R6Class(\"Box\", public = list(\n  counter = NULL,\n  initialize = function(counter) {\n    stopifnot(inherits(counter, \"Counter\"))\n    self$counter <- counter\n  }\n))\noriginal <- Box$new(Counter$new(1))\nshallow <- original$clone()\ndeep <- original$clone(deep = TRUE)\nshallow$counter$add(2)\ndeep$counter$add(5)\nstopifnot(original$counter$read() == 3, shallow$counter$read() == 3, deep$counter$read() == 6)\nprint(c(original = original$counter$read(), shallow = shallow$counter$read(), deep = deep$counter$read()))\n",
+      "explanation": "The shallow box and original share the same nested counter. The deep box owns a cloned counter that started at one. This demonstrates the supported nested-R6 policy without claiming to duplicate arbitrary resources.",
+      "expected": "Original 3, shallow 3, deep 6."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict two readings after a=Counter$new(2), b=a and b$add(3).",
+      "hint": "Trace identity rather than copying the scalar mentally.",
+      "answer": "Both names refer to one counter and read 5.",
+      "expected": "Both readings 5."
+    },
+    {
+      "prompt": "Make a separate scalar counter with clone and add four.",
+      "hint": "Clone before mutating.",
+      "answer": "The clone reads 9 while the original remains 5.",
+      "expected": "Original 5, clone 9."
+    },
+    {
+      "prompt": "Verify that a rejected negative increment leaves the counter unchanged.",
+      "hint": "Read before and after catching the specific validation error.",
+      "answer": "add(-1) fails and both readings remain equal.",
+      "expected": "Validation error and unchanged state."
+    },
+    {
+      "prompt": "Construct a box containing a Counter and compare shallow and deep copies.",
+      "hint": "The outer box can differ while its inner counter is shared.",
+      "answer": "The shallow copy shares its nested counter with the original; deep=TRUE clones that R6 member.",
+      "expected": "Three readings demonstrate the stated identities."
+    },
+    {
+      "prompt": "Diagnose using one mutable counter for every resampling fold.",
+      "hint": "A prior fold may leave state for the next.",
+      "answer": "Construct a fresh counter per fold or define and test a reset policy. Reassignment alone does not isolate it.",
+      "expected": "No cross-fold state leakage."
+    },
+    {
+      "prompt": "State the limit of clone(deep=TRUE) for an arbitrary environment member.",
+      "hint": "R6 members and all reference types are not interchangeable.",
+      "answer": "Default deep cloning does not promise a full snapshot of arbitrary environments or connections. Design and test a custom deep_clone policy if such resources are allowed.",
+      "expected": "A bounded cloning claim."
+    }
+  ],
+  "starter": "# r-023: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\ninitial <- 2\nincrement <- 3\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Predict two readings after a=Counter$new(2), b=a and b$add(3).\n# TODO: Trace identity rather than copying the scalar mentally.\n# Exercise 2: Make a separate scalar counter with clone and add four.\n# TODO: Clone before mutating.\n# Exercise 3: Verify that a rejected negative increment leaves the counter unchanged.\n# TODO: Read before and after catching the specific validation error.\n# Exercise 4: Construct a box containing a Counter and compare shallow and deep copies.\n# TODO: The outer box can differ while its inner counter is shared.\n# Exercise 5: Diagnose using one mutable counter for every resampling fold.\n# TODO: A prior fold may leave state for the next.\n# Exercise 6: State the limit of clone(deep=TRUE) for an arbitrary environment member.\n# TODO: R6 members and all reference types are not interchangeable.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "Counter <- R6::R6Class(\"Counter\", private = list(value = 0), public = list(\n  initialize = function(initial = 0) {\n    if (!is.numeric(initial) || length(initial) != 1L || !is.finite(initial) || initial < 0) {\n      stop(\"initial must be one nonnegative finite number\")\n    }\n    private$value <- initial\n  },\n  add = function(amount) {\n    if (!is.numeric(amount) || length(amount) != 1L || !is.finite(amount) || amount < 0) {\n      stop(\"amount must be one nonnegative finite number\")\n    }\n    if (!is.finite(private$value + amount)) stop(\"counter overflow\")\n    private$value <- private$value + amount\n    invisible(self)\n  },\n  read = function() private$value\n))\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\na <- Counter$new(2)\nb <- a\nb$add(3)\nstopifnot(identical(a, b), a$read() == 5, b$read() == 5)\ncopy <- a$clone()\ncopy$add(4)\nstopifnot(copy$read() == 9, a$read() == 5)\nbefore <- a$read()\nassert_error(a$add(-1), \"nonnegative finite\")\nassert_error(a$add(NA_real_), \"nonnegative finite\")\nstopifnot(a$read() == before)\nBox <- R6::R6Class(\"Box\", public = list(\n  counter = NULL,\n  initialize = function(counter) self$counter <- counter\n))\noriginal <- Box$new(Counter$new(1))\nshallow <- original$clone()\ndeep <- original$clone(deep = TRUE)\nshallow$counter$add(2)\ndeep$counter$add(5)\nstopifnot(original$counter$read() == 3, shallow$counter$read() == 3, deep$counter$read() == 6)\nfold_values <- vapply(c(2, 5, 1), function(amount) {\n  counter <- Counter$new()\n  counter$add(amount)\n  counter$read()\n}, numeric(1))\nstopifnot(identical(fold_values, c(2, 5, 1)))\ncat(\"r-023 reference checks passed\\n\")\n",
+  "solution_explanation": "The alias test establishes reference identity directly with identical, then tests observable mutation. The scalar clone and nested box tests isolate two different depths of copying. Validation tests check that rejection happens before mutation, rather than merely checking that some error occurs.\n\nFresh counters within the fold function demonstrate one ownership policy for independent analytical tasks. The example makes no claim that default deep cloning duplicates every environment, file handle or external resource. Those need their own lifecycle and copying rules.",
+  "sources": [
+    {
+      "title": "R6 introduction",
+      "url": "https://r6.r-lib.org/articles/Introduction.html"
+    },
+    {
+      "title": "R6 encapsulated object classes",
+      "url": "https://r6.r-lib.org/reference/R6Class.html"
+    }
+  ]
+}

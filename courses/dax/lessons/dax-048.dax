@@ -1,0 +1,9 @@
+// dax-048 learner draft: Visual calculations operate on a visual's aggregated shape
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish a visual running total from a reusable semantic-model measure.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the intended visual expression and its scope contract.
+
+// This is an explicit snapshot, not a live visual-calculation definition.
+EVALUATE DATATABLE ( "Month", STRING, "Revenue", INTEGER, { { "January 2025", 67 }, { "February 2025", 56 } } )

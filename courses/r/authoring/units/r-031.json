@@ -1,0 +1,94 @@
+{
+  "id": "r-031",
+  "title": "Transform records with explicit selection and ordering",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-010", "r-020"],
+  "concepts": ["Pipeline stage", "Eligibility mask", "Derived column", "Stable identifier"],
+  "outcome": "Build an auditable table transformation whose row population, units and key alignment remain inspectable.",
+  "mechanism": "A data pipeline is easier to reason about when each stage has one observable purpose. Start with a typed input table and an explicit row grain. Validate its key, derive any needed fields, apply a documented eligibility mask, then choose an output order and schema. Keep the original input available so a reviewer can reconstruct each exclusion and transformation.\n\nFiltering changes the population. A missing quantity, an invalid price and an intentionally excluded category are different reasons for a row not entering a total. A single final count cannot explain which rule removed which record. For a small pipeline, retain a row-level reason or separate masks; for a larger pipeline, retain bounded counts and representative diagnostics without exposing private data.\n\nColumn calculations must use aligned rows. The expression quantity * unit_price - discount computes one line amount from corresponding fields. Sorting only unit_price first would silently pair it with the wrong quantity. Apply permutations to entire data frames and preserve a stable line identifier in every intermediate output.\n\nThe transformation should not depend on incidental input order unless order is part of its meaning. Sorting the final output by the stable ID makes comparison reproducible, while testing a permuted input verifies that a commutative aggregate remains unchanged. A sequence-dependent feature, such as a lag, would need an explicit sort and tie-breaking rule before calculation instead.",
+  "vocabulary": [
+    {
+      "term": "Pipeline stage",
+      "definition": "A transformation with stated inputs, outputs and invariants."
+    },
+    {
+      "term": "Eligibility mask",
+      "definition": "A complete rule deciding which records enter a calculation."
+    },
+    {
+      "term": "Derived column",
+      "definition": "A value computed from aligned fields of the same records."
+    },
+    {
+      "term": "Stable identifier",
+      "definition": "A key retained through filtering, sorting and projection."
+    }
+  ],
+  "anatomy": "Create named intermediate data frames and masks. Use stopifnot for key/type assumptions, complete logical masks for eligibility, and df[order(df$id),, drop=FALSE] for a deterministic record permutation. Avoid relying on row names as business keys.",
+  "worked_examples": [
+    {
+      "title": "Compute before selecting a known population",
+      "code": "lines <- data.frame(id = c(\"L3\", \"L1\", \"L2\"), quantity = c(2, 1, NA_real_), price = c(5, 8, 4), discount = c(1, 0, 0))\nstopifnot(!anyNA(lines$id), !anyDuplicated(lines$id))\nlines$net <- lines$quantity * lines$price - lines$discount\nkeep <- !is.na(lines$net) & lines$net >= 8\nresult <- lines[keep, c(\"id\", \"net\"), drop = FALSE]\nresult <- result[order(result$id), , drop = FALSE]\nstopifnot(identical(result$id, c(\"L1\", \"L3\")), identical(result$net, c(8, 9)))\nprint(result)\n",
+      "explanation": "The missing quantity is excluded explicitly. The final row permutation preserves ID/amount alignment and makes the result deterministic.",
+      "expected": "L1=8, L3=9."
+    },
+    {
+      "title": "A permutation-invariant total",
+      "code": "total_net <- function(data) {\n  stopifnot(!anyNA(data$id), !anyDuplicated(data$id))\n  amount <- data$quantity * data$price - data$discount\n  stopifnot(all(is.finite(amount)))\n  sum(amount)\n}\nlines <- data.frame(id = c(\"L1\", \"L2\"), quantity = c(2, 3), price = c(4, 5), discount = c(1, 2))\nstopifnot(total_net(lines) == 20, total_net(lines[2:1, ]) == 20)\nprint(total_net(lines))\n",
+      "explanation": "The total is seven plus thirteen regardless of input row order. This invariant would not apply unchanged to a sequence-dependent lag calculation.",
+      "expected": "20 in either order."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Trace the two retained rows in the first example.",
+      "hint": "Compute each net amount before applying the threshold.",
+      "answer": "L1 has 8 and L3 has 9; L2 has an unknown amount.",
+      "expected": "L1 has 8 and L3 has 9; L2 has an unknown amount."
+    },
+    {
+      "prompt": "Raise the threshold from eight to nine.",
+      "hint": "Only one known amount now qualifies.",
+      "answer": "L3 remains with net 9.",
+      "expected": "L3 remains with net 9."
+    },
+    {
+      "prompt": "Return an exclusion count alongside the selected table.",
+      "hint": "Keep the mask and original row count.",
+      "answer": "Report input 3, retained 2, excluded 1 under the original policy.",
+      "expected": "Report input 3, retained 2, excluded 1 under the original policy."
+    },
+    {
+      "prompt": "Diagnose sorting only prices before multiplication.",
+      "hint": "Corresponding fields would no longer describe the same record.",
+      "answer": "Permute complete rows or join by a validated key.",
+      "expected": "Permute complete rows or join by a validated key."
+    },
+    {
+      "prompt": "Handle an input with no qualifying rows.",
+      "hint": "Preserve the output schema.",
+      "answer": "Return a zero-row id/net data frame with declared types.",
+      "expected": "Return a zero-row id/net data frame with declared types."
+    },
+    {
+      "prompt": "Transfer the pipeline to a lagged feature.",
+      "hint": "Order becomes part of the computation rather than presentation only.",
+      "answer": "Sort by entity, time and a deterministic tie-breaker before computing lags.",
+      "expected": "Sort by entity, time and a deterministic tie-breaker before computing lags."
+    }
+  ],
+  "starter": "# r-031: Transform records with explicit selection and ordering\n# Complete the six guide tasks using these local inputs.\nlines <- data.frame(id = c(\"L3\", \"L1\", \"L2\"), quantity = c(2, 1, NA_real_), price = c(5, 8, 4), discount = c(1, 0, 0))\n# TODO: retain eligibility evidence and transform complete records.\nprint(lines)\n",
+  "reference": "transform_lines <- function(lines, threshold = 8) {\n  stopifnot(!anyNA(lines$id), !anyDuplicated(lines$id))\n  lines$net <- lines$quantity * lines$price - lines$discount\n  keep <- !is.na(lines$net) & lines$net >= threshold\n  selected <- lines[keep, c(\"id\", \"net\"), drop = FALSE]\n  selected <- selected[order(selected$id), , drop = FALSE]\n  list(data = selected, input = nrow(lines), retained = sum(keep), excluded = sum(!keep))\n}\nlines <- data.frame(id = c(\"L3\", \"L1\", \"L2\"), quantity = c(2, 1, NA_real_), price = c(5, 8, 4), discount = c(1, 0, 0))\na <- transform_lines(lines)\nstopifnot(identical(a$data$id, c(\"L1\", \"L3\")), identical(a$data$net, c(8, 9)))\nstopifnot(a$input == 3, a$retained == 2, a$excluded == 1)\nb <- transform_lines(lines, 9)\nstopifnot(identical(b$data$id, \"L3\"), b$data$net == 9)\nempty <- transform_lines(lines, 100)$data\nstopifnot(nrow(empty) == 0, identical(names(empty), c(\"id\", \"net\")))\ncat(\"r-031 reference checks passed\\n\")\n",
+  "solution_explanation": "The missing quantity is excluded explicitly. The final row permutation preserves ID/amount alignment and makes the result deterministic.\n\nThe total is seven plus thirteen regardless of input row order. This invariant would not apply unchanged to a sequence-dependent lag calculation.",
+  "sources": [
+    {
+      "title": "R ordering",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/order.html"
+    },
+    {
+      "title": "R data-frame extraction",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.data.frame.html"
+    }
+  ]
+}

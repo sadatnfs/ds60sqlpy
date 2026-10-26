@@ -1,0 +1,9 @@
+// dax-036 learner draft: Calendar-based time intelligence is a metadata-dependent continuation
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why a calendar reference can represent a different year definition than a classic date column.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a review checklist for adding an external calendar object.
+
+EVALUATE
+ROW ( "Gregorian year to date", BLANK(), "Declared retail year to date", BLANK() )

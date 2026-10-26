@@ -60,7 +60,7 @@ plt.title(f'Normal(0,1) — mean={mu:.3f}, var={var:.3f}')
 plt.legend(); plt.tight_layout(); plt.show()
 ```
 Notes
-- density=True scales histogram to a probability density
+- `density=True` scales histogram to a probability density
 - For higher fidelity, use SciPy if available to get pdf directly
 
 ---
@@ -138,7 +138,7 @@ unless you can explain why that output follows from the inputs.
 
 **Prompt:** Generate `Normal(0, 1)` values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.
 
-**How to reason about it:** A density histogram must use density=True before its height can be compared with a probability-density curve. Check the sample mean and variance numerically as well, and state whether variance uses the population convention (ddof=0) or an unbiased sample estimate.
+**How to reason about it:** A density histogram must use `density=True` before its height can be compared with a probability-density curve. Check the sample mean and variance numerically as well, and state whether variance uses the population convention (`ddof=0`) or an unbiased sample estimate.
 
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence

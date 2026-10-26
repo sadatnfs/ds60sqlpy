@@ -48,7 +48,7 @@ Dense embeddings compress or learn useful representations of these relationships
 
 ## Mechanism review and counterexample
 
-Singular-value decomposition writes M=U*diag(s)*V_transpose. Retaining the largest k singular values gives a rank-k reconstruction with a precise least-squares approximation property for the matrix. The embedding used here is U_k*diag(s_k), with V_k_transpose used to reconstruct. Other conventions distribute singular-value powers differently and therefore change cosine geometry.
+Singular-value decomposition writes \(M=U\operatorname{diag}(s)V^{\mathsf T}\). Retaining the largest k singular values gives a rank-k reconstruction with a precise least-squares approximation property for the matrix. The embedding used here is \(U_k\operatorname{diag}(s_k)\), with V_k_transpose used to reconstruct. Other conventions distribute singular-value powers differently and therefore change cosine geometry.
 
 Cosine similarity is the dot product divided by the product of vector norms. It measures direction rather than magnitude and is undefined for a zero vector. The reference returns None for that boundary so missing representation is not mislabeled as meaningful dissimilarity. A normalized dot product and an unnormalized dot product answer different retrieval questions.
 

@@ -4,17 +4,39 @@ Book: **Statistics and Machine Learning for Data Scientists End To End**. Chapte
 
 ## The decision and the mental model
 
-Regression specifies how an outcome distribution changes with predictors. A linear regression is linear in coefficients, so squared features and spline bases can represent curved relationships while retaining a linear coefficient problem. A generalized linear model separates three choices: an outcome family, a linear predictor eta=X beta, and a link g(mu)=eta. These choices encode support and variance as well as mean behavior.
+Regression specifies how an outcome distribution changes with predictors. A linear regression is linear in coefficients, so squared features and spline bases can represent curved relationships while retaining a linear coefficient problem. A generalized linear model separates three choices: an outcome family, a linear predictor \(\eta=X\beta\), and a link \(g(\mu)=\eta\), where \(\mu\) is the conditional mean. These choices encode support and variance as well as mean behavior.
 
 ### Derive ordinary least squares
 
-Let \(r=y-X\) beta and minimize r-transpose r. Differentiating gives gradient -2 X-transpose r. Setting it to zero yields the normal equations \(X^{\mathsf T}X\) beta=\(X^{\mathsf T}y\). With full column rank the solution is unique, but QR or SVD is preferable to explicitly inverting the normal matrix. Under E[epsilon|X]=0, coefficients describe a correctly specified conditional mean. Homoskedasticity is needed for the simplest covariance formula, not for calculating the minimizing coefficients. Normal errors are useful for exact small-sample t inference, not a requirement that predictors or outcomes be normally distributed.
+Let \(r=y-X\beta\), where \(y,r\in\mathbb{R}^n\), \(X\in\mathbb{R}^{n\times p}\) and \(\beta\in\mathbb{R}^p\), and minimize \(r^{\mathsf T}r\). Differentiating gives gradient \(-2X^{\mathsf T}r\). Setting it to zero yields \(X^{\mathsf T}X\beta=X^{\mathsf T}y\). With full column rank the solution is unique, but QR or SVD is preferable to explicitly inverting the normal matrix. Under \(\mathbb{E}[\epsilon\mid X]=0\), coefficients describe a correctly specified conditional mean. Homoskedasticity is needed for the simplest covariance formula, not for calculating the minimizing coefficients. Normal errors are useful for exact small-sample t inference, not a requirement that predictors or outcomes be normally distributed.
 
-A coefficient measures a conditional contrast holding the other encoded columns fixed. With y=beta0+beta1*x+beta2*z+beta3*x*z, the x slope is beta1+beta3*z. Reporting beta1 as a universal effect ignores the interaction. Prediction outside the observed design region adds extrapolation assumptions that the normal equations cannot check.
+A coefficient measures a conditional contrast holding the other encoded columns fixed. For a conditional mean with an interaction,
+
+\[
+m(x,z)=\beta_0+\beta_1x+\beta_2z+\beta_3xz,
+\qquad \frac{\partial m(x,z)}{\partial x}=\beta_1+\beta_3z.
+\]
+
+The slope with respect to \(x\) depends on \(z\). Reporting \(\beta_1\) as a universal effect ignores the interaction; it is the slope at \(z=0\) under this encoding. Prediction outside the observed design region adds extrapolation assumptions that the normal equations cannot check.
 
 ### Derive logistic regression
 
-For binary y, set \(p=\sigma(\eta)=\frac{1}{1+\exp(-\eta)}\). The negative log likelihood is \(\operatorname{sum}(\log(1+\exp(\eta))-y\cdot \eta)\); `logaddexp` computes this stably. Its gradient is X-transpose(p-y) and Hessian X-transpose W X with W_i=p_i(1-p_i). A coefficient beta_j multiplies conditional odds by \(\exp(\beta_{j})\) per unit, not probabilities. If an intercept-only model has \(p=0.2\), adding \(\log(2)\) to its linear predictor changes p to one-third, not .4. Complete separation can make unpenalized coefficients diverge even while classification looks perfect.
+For binary outcomes \(y_i\in\{0,1\}\), define \(\eta_i=x_i^{\mathsf T}\beta\) and \(p_i=\sigma(\eta_i)=1/(1+\exp(-\eta_i))\). Independent Bernoulli observations give the negative log likelihood
+
+\[
+\mathcal L(\beta)=\sum_{i=1}^{n}\left[\log(1+\exp(\eta_i))-y_i\eta_i\right].
+\]
+
+Evaluate the softplus term with `logaddexp(0, eta)` to avoid exponential overflow. With \(p=(p_1,\ldots,p_n)^{\mathsf T}\) and \(W=\operatorname{diag}(p_i(1-p_i))\), differentiation gives
+
+\[
+\nabla_{\beta}\mathcal L=X^{\mathsf T}(p-y),
+\qquad \nabla^2_{\beta}\mathcal L=X^{\mathsf T}WX.
+\]
+
+The gradient has one entry per coefficient. The Hessian is a coefficient-by-coefficient matrix; its positive-semidefinite structure explains convexity of the unpenalized negative log likelihood. Rank deficiency and separation still require attention. These formulas describe the summed loss; averaging the loss divides both derivatives by \(n\).
+
+A coefficient \(\beta_j\) multiplies conditional odds by \(\exp(\beta_j)\) per unit when the other encoded predictors remain fixed. If an intercept-only model has \(p=0.2\), its odds are \(0.2/0.8=1/4\). Adding \(\log 2\) to the linear predictor doubles the odds to \(1/2\), giving probability \(1/3\). It does not double the probability to \(0.4\). Complete separation can make unpenalized coefficients diverge even while classification looks perfect.
 
 ### Select a family and a loss
 
@@ -365,6 +387,10 @@ if __name__ == "__main__":
 - [scikit-learn linear model formulations and regularization](https://scikit-learn.org/stable/modules/linear_model.html).
 
 - [statsmodels generalized linear models](https://www.statsmodels.org/stable/glm.html).
+
+## Connected worked tutorial
+
+[A complete logistic modeling case](../tutorials/learning/03-logistic-model-to-decision.md). Fit stable likelihood, estimate coefficient uncertainty, evaluate probabilities and distinguish conditional from marginal odds ratios.
 
 ## Reading connections
 

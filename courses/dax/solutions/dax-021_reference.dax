@@ -1,0 +1,15 @@
+// dax-021: SUMX and AVERAGEX choose both an expression and a population
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-021-a: Calculate additive row amounts
+// Context: All eight Sales rows; Discount is a currency amount per line.
+EVALUATE ROW ( "Gross", SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] ), "Net", SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] - Sales[Discount] ) )
+
+// dax-021-b: Average sold products or the complete catalog
+// Context: All four Product rows; Bag has no sales and a blank revenue measure.
+EVALUATE ROW ( "NonblankProducts", AVERAGEX ( Product, [NetRevenue] ), "AllCatalogProducts", AVERAGEX ( Product, COALESCE ( [NetRevenue], 0 ) ) )

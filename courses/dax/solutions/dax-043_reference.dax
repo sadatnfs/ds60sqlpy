@@ -1,0 +1,21 @@
+// dax-043: Measure composition, dependency graphs and numeric formatting
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+    MEASURE Sales[GrossRevenue] = SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+    MEASURE Sales[Cost] = SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) )
+    MEASURE Sales[Profit] = [NetRevenue] - [Cost]
+    MEASURE Sales[NetMargin] = DIVIDE ( [Profit], [NetRevenue] )
+
+// dax-043-a: Whole-model profit graph
+// Context: Clean retail model; current UnitCost is explicitly constant per product; all amounts USD.
+EVALUATE ROW ( "Revenue", [NetRevenue], "Cost", [Cost], "Profit", [Profit], "Margin", [NetMargin] )
+
+// dax-043-b: The same family under Blue
+// Context: Blue products only; the same measure definitions and cost assumptions.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", [NetRevenue], "Cost", [Cost], "Profit", [Profit], "Margin", [NetMargin] ), Product[Color] = "Blue" )

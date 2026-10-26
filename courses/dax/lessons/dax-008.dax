@@ -1,0 +1,9 @@
+// dax-008 learner draft: BLANK, zero and the difference between missing and false
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain coercion and choose a deliberate missing-value display policy.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a label distinguishing no sales from positive revenue.
+
+EVALUATE
+ROW ( "No eligible rows", BLANK(), "Measured zero", 0, "Comparison", BLANK() )

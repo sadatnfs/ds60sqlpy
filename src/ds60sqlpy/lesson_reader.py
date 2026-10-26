@@ -24,7 +24,11 @@ from urllib.parse import quote, unquote, urlsplit
 from ds60sqlpy.catalog import Catalog, Lesson
 from ds60sqlpy.curriculum_framework import RUNNERS, validate_content_path
 from ds60sqlpy.reader_content import render_code_block, rich_content_styles
-from ds60sqlpy.reader_math import INLINE_MATH, render_math
+from ds60sqlpy.reader_math import INLINE_MATH
+from ds60sqlpy.reader_tex import render_lesson_math
+
+# Public rendering hook shared with the build-time formula inventory.
+render_math = render_lesson_math
 
 LESSON_PAGES_DIR = "lesson-pages"
 REFERENCE_PAGES_DIR = "reference-pages"
@@ -54,6 +58,9 @@ COURSE_GUIDE_REFERENCE_PATHS = (
 )
 _SOURCE_LANGUAGES = {
     ".py": "python",
+    ".R": "r",
+    ".r": "r",
+    ".dax": "dax",
     ".sql": "sql",
     ".cpp": "cpp",
     ".cu": "cuda",
@@ -498,7 +505,7 @@ def render_inline(text: str, resolver: LinkResolver) -> str:
         if match.group("code") is not None:
             value = f"<code>{html.escape(match.group('code_text'), quote=True)}</code>"
         elif match.group("math") is not None:
-            value = render_math(match.group("expression") or match.group("dollar"))
+            value = render_math(match.group("expression"))
         else:
             label = render_inline(match.group("label") or "", resolver)
             if match.group("image"):
@@ -953,10 +960,17 @@ def render_artifact(
         )
     if suffix in _SOURCE_LANGUAGES or path.name == "LICENSE":
         language = _SOURCE_LANGUAGES.get(suffix, "text")
+        guidance = (
+            "DAX references are hand-derived. The classroom provides an offline editor "
+            "and comparison tables without executing DAX."
+            if language == "dax"
+            else "This page does not execute source code. Use the classroom for supported "
+            "runnable lessons, or follow the lesson's external project instructions."
+        )
         return (
             '<div class="preview-note" role="note"><strong>Readable preview.</strong> '
-            "This page does not execute source code. Use the run controls above in the "
-            "real course environment.</div>"
+            + guidance
+            + "</div>"
             + _render_source_code(path.read_text(encoding="utf-8"), language=language)
         )
     raise ValueError(f"Unsupported catalog artifact type: {path}")
@@ -967,6 +981,8 @@ def _path_kind(path: str) -> str:
     return {
         ".ipynb": "Jupyter notebook",
         ".py": "Python source file",
+        ".r": "R source file",
+        ".dax": "DAX expression or query",
         ".sql": "PostgreSQL script",
         ".md": "lesson notes",
         ".cpp": "C++ source file",
@@ -1323,8 +1339,9 @@ def build_lesson_html(
   <meta name="color-scheme" content="light dark">
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
   >
+  <link rel="stylesheet" href="{posixpath.relpath("src/ds60sqlpy/assets/vendor/textbook/fonts.css", start=PurePosixPath(output_path).parent.as_posix())}">
   <title>{html.escape(lesson.id)} · {html.escape(lesson.title)} · DS60</title>
   <style>
     :root {{
@@ -1818,8 +1835,9 @@ def build_reference_html(
   <meta name="color-scheme" content="light dark">
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+    content="default-src 'none'; style-src 'self' file: 'unsafe-inline'; font-src data:; img-src data:; form-action 'none'"
   >
+  <link rel="stylesheet" href="{posixpath.relpath("src/ds60sqlpy/assets/vendor/textbook/fonts.css", start=PurePosixPath(output_path).parent.as_posix())}">
   <title>{html.escape(title)} · DS60 reference</title>
   <style>
     :root {{

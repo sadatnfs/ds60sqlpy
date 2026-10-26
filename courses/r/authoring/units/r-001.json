@@ -1,0 +1,98 @@
+{
+  "id": "r-001",
+  "title": "Run an R script and inspect its result",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": [],
+  "concepts": ["Expression", "Binding", "Script", "Assertion"],
+  "outcome": "Run a self-contained calculation and distinguish printed output, saved source and a successful check.",
+  "mechanism": "R evaluates expressions and associates names with objects. In a classroom script, each run starts a new R process. A name created in yesterday's run is not a hidden input available today. Put every required input and definition in the pad so the submitted source explains its result. Saving that source preserves a draft; it does not keep a live R session in memory.\n\nUse <- to bind a value and print to display it deliberately. An interactive R console often prints the result of a bare expression automatically. Rscript does not promise the same convenient display for every nested expression or object, so explicit print calls make a lesson's observable output clear. Comments begin with # and describe intent without changing the calculation.\n\nA successful exit means the script reached its end without an uncaught error. It does not establish that the calculation answered the intended question. A small assertion such as stopifnot(total == 18) states a separate expected property. Later lessons will develop checks for approximate numerical equality and failure cases. Here, the arithmetic uses small exact integers represented as R numbers.\n\nThe classroom provides R and prepared packages inside Linux Docker. Windows uses WSL 2 to run that same container. There is no need to install R or an IDE on the learner's host, and lessons do not download packages or data. Output, plots and saved run receipts are separate from the editable source. Reading an old receipt should not recreate variables or rerun a script.",
+  "vocabulary": [
+    {
+      "term": "Expression",
+      "definition": "A piece of source evaluated to obtain a value."
+    },
+    {
+      "term": "Binding",
+      "definition": "A name associated with an object in an environment."
+    },
+    {
+      "term": "Script",
+      "definition": "Source evaluated from top to bottom in a fresh process."
+    },
+    {
+      "term": "Assertion",
+      "definition": "A check that stops execution when an expected property is false."
+    }
+  ],
+  "anatomy": "Assignment puts the computed right-hand value under the left-hand name. Parentheses supply arguments to print or stopifnot. A quoted string is text; the unquoted name total asks R to look up its value. Use \"Total\" as a label and total as data. R is case-sensitive: quantity and Quantity are different names. A syntax error points to source that could not be parsed; retain its message and check quotes, parentheses and the indicated line before rerunning.",
+  "worked_examples": [
+    {
+      "title": "Calculate a small invoice",
+      "code": "quantity <- 3\nunit_price <- 6\ntotal <- quantity * unit_price\nprint(total)\nstopifnot(total == 18)\n",
+      "explanation": "Both inputs are present in the script. The printed 18 is the computed total, while stopifnot states the expected arithmetic result.",
+      "expected": "18"
+    },
+    {
+      "title": "Rebinding does not rewrite a prior calculation",
+      "code": "quantity <- 3\nunit_price <- 6\ntotal <- quantity * unit_price\nquantity <- 4\nprint(c(saved_total = total, recalculated = quantity * unit_price))\nstopifnot(total == 18, quantity * unit_price == 24)\n",
+      "explanation": "total contains the earlier result. Changing quantity does not convert total into a spreadsheet formula that reevaluates itself.",
+      "expected": "saved_total 18; recalculated 24."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict 4 * 7 before running it.",
+      "hint": "Multiply the two supplied quantities.",
+      "answer": "The result is 28.",
+      "expected": "The result is 28."
+    },
+    {
+      "prompt": "Change the invoice quantity to five.",
+      "hint": "Recompute total after the input changes.",
+      "answer": "The result is 30 at unit price six.",
+      "expected": "The result is 30 at unit price six."
+    },
+    {
+      "prompt": "Construct a script for subtotal 20 plus fee 3.",
+      "hint": "Define both inputs and print their sum.",
+      "answer": "The printed total is 23.",
+      "expected": "The printed total is 23."
+    },
+    {
+      "prompt": "Diagnose why changing quantity after total leaves total unchanged.",
+      "hint": "A binding stores the result of the earlier expression.",
+      "answer": "Reevaluate the arithmetic to obtain the new total.",
+      "expected": "Reevaluate the arithmetic to obtain the new total."
+    },
+    {
+      "prompt": "Check an invoice with zero quantity.",
+      "hint": "A measured zero is a valid input here.",
+      "answer": "The total is zero, with no missing input.",
+      "expected": "The total is zero, with no missing input."
+    },
+    {
+      "prompt": "Separate a saved draft from a checked result.",
+      "hint": "Only a run produces fresh process output.",
+      "answer": "Saving retains source; running evaluates it; assertions check declared properties.",
+      "expected": "Saving retains source; running evaluates it; assertions check declared properties."
+    }
+  ],
+  "starter": "# r-001: Run an R script and inspect its result\n# Complete the six guide tasks using these local inputs.\nquantity <- 3\nunit_price <- 6\n# TODO: calculate, print and check an invoice.\nprint(c(quantity = quantity, unit_price = unit_price))\n",
+  "reference": "stopifnot(4 * 7 == 28)\nquantity <- 5\nunit_price <- 6\ntotal <- quantity * unit_price\nstopifnot(total == 30)\nsubtotal <- 20\nfee <- 3\nstopifnot(subtotal + fee == 23)\nquantity <- 8\nstopifnot(total == 30, quantity * unit_price == 48)\nquantity <- 0\nstopifnot(quantity * unit_price == 0)\nprint(c(total_from_prior_calculation = total, current_total = quantity * unit_price))\ncat(\"r-001 reference checks passed\\n\")\n",
+  "solution_explanation": "Both inputs are present in the script. The printed 18 is the computed total, while stopifnot states the expected arithmetic result.\n\ntotal contains the earlier result. Changing quantity does not convert total into a spreadsheet formula that reevaluates itself.",
+  "sources": [
+    {
+      "title": "R assignment",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/assignOps.html"
+    },
+    {
+      "title": "R printing",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/print.html"
+    },
+    {
+      "title": "R assertions",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/stopifnot.html"
+    }
+  ]
+}

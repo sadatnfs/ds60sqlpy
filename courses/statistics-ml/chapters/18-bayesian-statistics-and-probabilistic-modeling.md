@@ -337,6 +337,10 @@ if __name__ == "__main__":
 
 - [Stan prior and posterior predictive checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html).
 
+## Connected worked tutorial
+
+[Posterior prediction and actual Bayesian computation](../tutorials/science/02-posterior-prediction-and-decision.md). Begin with exact pooling and predictive uncertainty, then follow the linked PyMC hierarchy on its explicitly prepared Bayesian CPU profile.
+
 ## Reading connections
 
 [Previous chapter](17-causal-estimation-heterogeneous-effects-and-policy-learning.md) | [Book contents](../README.md) | [Next chapter](19-statistical-learning-and-classical-supervised-models.md)

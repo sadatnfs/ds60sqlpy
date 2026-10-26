@@ -1,0 +1,9 @@
+// dax-038 learner draft: Window positions, ordering and row identity
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish a positional row window from a calendar interval and identify the ordering contract.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Specify a per-customer chronological ordering.
+
+EVALUATE
+ROW ( "First ordered line", BLANK(), "Previous line", BLANK(), "Window total", BLANK() )

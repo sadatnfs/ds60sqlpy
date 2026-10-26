@@ -1,0 +1,4297 @@
+{
+  "schema_version": 1,
+  "track_id": "dax",
+  "lessons": [
+    {
+      "lesson_id": "dax-001",
+      "reference_path": "courses/dax/solutions/dax-001_reference.dax",
+      "source_sha256": "42ad646753ecd452bb1928a8136a246b008ef2c38b4bb9ec7f4c1cadc3e7d990",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-001-a",
+          "title": "All eight lines",
+          "context": "No filters; regular active relationships; USD sales-line grain.",
+          "trace": [
+            "Eligible lines are S1 through S8.",
+            "Add 20 + 4 + 40 + 27 + 20 + 20 + 20 + 36.",
+            "The total is 187 USD before returns and tax."
+          ],
+          "columns": [
+            {
+              "name": "NetRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-001-b",
+          "title": "Notebook product only",
+          "context": "ProductKey 1; the Product-to-Sales relationship is active and single-direction.",
+          "trace": [
+            "ProductKey 1 identifies Notebook, not all products in the Paper category.",
+            "The key filter admits Sales S1, S4 and S7.",
+            "20 + 27 + 20 = 67 USD."
+          ],
+          "columns": [
+            {
+              "name": "NetRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              67
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-002",
+      "reference_path": "courses/dax/solutions/dax-002_reference.dax",
+      "source_sha256": "a0e7ec4a6b1bbff27f73758d91987acb1f203b326740708cd4a8b128fe626fcf",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-002-a",
+          "title": "Whole model counts",
+          "context": "All Sales rows; one row per SaleID.",
+          "trace": [
+            "S1 and S2 share OrderID 101.",
+            "Seven distinct order identifiers remain after counting 101 once.",
+            "Revenue still includes both legitimate lines of that order."
+          ],
+          "columns": [
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Orders",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              8,
+              7,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-002-b",
+          "title": "One multi-line order",
+          "context": "OrderID 101 only; both matching fact rows retained.",
+          "trace": [
+            "S1 contributes Notebook quantity 2 and amount 20.",
+            "S2 contributes Pen quantity 1 and amount 4.",
+            "The order has two lines, one identity and revenue 24."
+          ],
+          "columns": [
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Orders",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              1,
+              24
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-003",
+      "reference_path": "courses/dax/solutions/dax-003_reference.dax",
+      "source_sha256": "133928d24902e1e4494714ec2376f7cbcad373143dfe5a43c9057ae00556c5a9",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-003-a",
+          "title": "Paper products",
+          "context": "Product.Category = Paper; other dimensions unrestricted.",
+          "trace": [
+            "Paper maps to product keys 1 and 2.",
+            "Eligible lines are S1, S2, S4, S5 and S7.",
+            "20 + 4 + 27 + 20 + 20 = 91."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              91
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-003-b",
+          "title": "Paper in the North",
+          "context": "Product.Category = Paper AND Customer.Region = North.",
+          "trace": [
+            "North admits customer keys 10 and 30.",
+            "Intersect those customers with Paper's product keys.",
+            "S7 is excluded because customer 20 is South; 91 - 20 = 71."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              71
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-004",
+      "reference_path": "courses/dax/solutions/dax-004_reference.dax",
+      "source_sha256": "054d38902e8190338f7bd312740429574d10f8232a682072073dad9c6b54b87d",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-004-a",
+          "title": "Dimension-to-fact propagation",
+          "context": "Blue Product rows; active Product -> Sales direction.",
+          "trace": [
+            "Notebook and Mug are Blue.",
+            "Their keys admit six sales lines.",
+            "Product count is 2; their revenues 67 and 96 sum to 163."
+          ],
+          "columns": [
+            {
+              "name": "VisibleProducts",
+              "type": "integer"
+            },
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              6,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-004-b",
+          "title": "Fact filter does not flow backward",
+          "context": "Direct filter Sales.SaleID = S4; no Product filter; single-direction relationships.",
+          "trace": [
+            "Sales is reduced to S4.",
+            "The relationship does not propagate from its many side to Product.",
+            "All four Product rows remain visible, even though S4 uses only product 1."
+          ],
+          "columns": [
+            {
+              "name": "VisibleProducts",
+              "type": "integer"
+            },
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              4,
+              1,
+              27
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-005",
+      "reference_path": "courses/dax/solutions/dax-005_reference.dax",
+      "source_sha256": "fe364b0fd29c3bebb4d133df4284ebe149f9caafd0f72efa706a007d90a2e5c9",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-005-a",
+          "title": "A scalar wrapped as a table",
+          "context": "No filters; one named scalar in a one-row query result.",
+          "trace": [
+            "SUM produces one scalar in the current context.",
+            "ROW assigns that scalar the output name RevenueUSD.",
+            "EVALUATE returns the one-row table, not a stored model column."
+          ],
+          "columns": [
+            {
+              "name": "RevenueUSD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-005-b",
+          "title": "A projected two-row result",
+          "context": "No filters; smallest two unique SaleID values, then explicit output ordering.",
+          "trace": [
+            "SaleID is unique, so the two smallest keys select exactly S1 and S2.",
+            "SELECTCOLUMNS evaluates each projected expression for its input row.",
+            "The outer ORDER BY makes the displayed sequence S1 then S2."
+          ],
+          "columns": [
+            {
+              "name": "Line",
+              "type": "text"
+            },
+            {
+              "name": "Amount",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "S1",
+              20
+            ],
+            [
+              "S2",
+              4
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-006",
+      "reference_path": "courses/dax/solutions/dax-006_reference.dax",
+      "source_sha256": "a412318380d5bade50ccbc30e2dc5981c0c300919a67bd477c92716bf9b54a15",
+      "model_path": "courses/dax/models/unknown-member/model.json",
+      "model_sha256": "3a724083f6ba20765e679edf46fb2338e36632e04e325dc369392845fbc65928",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-006-a",
+          "title": "A duplicate-key diagnostic, not a loaded dimension",
+          "context": "A query-local candidate table; it is not related to Sales.",
+          "trace": [
+            "The candidate contains keys 1, 1 and 2.",
+            "Projecting Key then taking DISTINCT leaves 1 and 2.",
+            "Three rows and two keys prove the one-row-per-key contract fails."
+          ],
+          "columns": [
+            {
+              "name": "Rows",
+              "type": "integer"
+            },
+            {
+              "name": "UniqueKeys",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              3,
+              2
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-006-b",
+          "title": "An unmatched fact key",
+          "context": "Unknown-member model; no filters; S9 references absent ProductKey 999.",
+          "trace": [
+            "Fact keys are 1, 2, 3 and 999.",
+            "Stored Product keys are 1, 2, 3 and 4.",
+            "The fact-minus-dimension set contains only 999."
+          ],
+          "columns": [
+            {
+              "name": "ProductKey",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              999
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-007",
+      "reference_path": "courses/dax/solutions/dax-007_reference.dax",
+      "source_sha256": "2a56c4cbd2c09cfd1b1207e90b94c2925bf6d4a4be54751a7d681777b3b37f01",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-007-a",
+          "title": "A row of distinct types",
+          "context": "Literal expressions; no model filter is needed.",
+          "trace": [
+            "The whole-number literal is 3.",
+            "Three divided by two is 1.5, while the comparison is TRUE.",
+            "DATE constructs 2025-01-02; a different display format would not change that date."
+          ],
+          "columns": [
+            {
+              "name": "Count",
+              "type": "integer"
+            },
+            {
+              "name": "Ratio",
+              "type": "number"
+            },
+            {
+              "name": "Larger",
+              "type": "boolean"
+            },
+            {
+              "name": "Day",
+              "type": "date"
+            }
+          ],
+          "rows": [
+            [
+              3,
+              1.5,
+              true,
+              "2025-01-02"
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-007-b",
+          "title": "A number and its text label",
+          "context": "All retail sales; a numeric result and an explicitly formatted text representation.",
+          "trace": [
+            "The measure evaluates to numeric 187.",
+            "FORMAT renders the same amount as the text $187.00.",
+            "The original number remains available for later arithmetic."
+          ],
+          "columns": [
+            {
+              "name": "NumericRevenue",
+              "type": "number"
+            },
+            {
+              "name": "DisplayText",
+              "type": "text"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              "$187.00"
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-008",
+      "reference_path": "courses/dax/solutions/dax-008_reference.dax",
+      "source_sha256": "eeef0abfb54ecd3a69405d7d76c16107dabc8a17d47e8a5da13f6538aded9586",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-008-a",
+          "title": "Blank coercion is operator-specific",
+          "context": "Literal BLANK operations; no model context.",
+          "trace": [
+            "Ordinary numeric equality coerces BLANK for the comparison with zero.",
+            "Strict equality does not identify BLANK with numeric zero.",
+            "Addition and multiplication have different blank behavior: 5 versus BLANK."
+          ],
+          "columns": [
+            {
+              "name": "LooseZero",
+              "type": "boolean"
+            },
+            {
+              "name": "StrictZero",
+              "type": "boolean"
+            },
+            {
+              "name": "PlusFive",
+              "type": "number"
+            },
+            {
+              "name": "TimesFive",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              true,
+              false,
+              5,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-008-b",
+          "title": "An existing product with no sales",
+          "context": "ProductKey 4, Bag; no matching Sales rows.",
+          "trace": [
+            "One dimension member remains.",
+            "The related fact table is empty, so COUNTROWS and SUM return BLANK.",
+            "COALESCE deliberately displays zero while the original measure remains blank."
+          ],
+          "columns": [
+            {
+              "name": "Products",
+              "type": "integer"
+            },
+            {
+              "name": "SalesRows",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "DisplayRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              null,
+              null,
+              0
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-009",
+      "reference_path": "courses/dax/solutions/dax-009_reference.dax",
+      "source_sha256": "91e15f25c668afd4aa27263d3bf1ec92f9104433fea7b7ef2d19b766cdab561d",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-009-a",
+          "title": "Stored row amounts and their formula",
+          "context": "Two first SaleID values; each projection evaluates its own Sales row.",
+          "trace": [
+            "S1: 2 times 10 minus 0 equals 20.",
+            "S2: 1 times 5 minus 1 equals 4.",
+            "The supplied NetAmount column agrees with the documented row formula."
+          ],
+          "columns": [
+            {
+              "name": "Line",
+              "type": "text"
+            },
+            {
+              "name": "Stored",
+              "type": "number"
+            },
+            {
+              "name": "Reconstructed",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "S1",
+              20,
+              20
+            ],
+            [
+              "S2",
+              4,
+              4
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-009-b",
+          "title": "A measure over a selected population",
+          "context": "North customers and order year 2025.",
+          "trace": [
+            "Eligible lines are S4, S5 and S8.",
+            "Their stored amounts are 27, 20 and 36, totaling 83.",
+            "Their quantities are 3, 4 and 2, totaling 9."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Quantity",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              83,
+              9
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-010",
+      "reference_path": "courses/dax/solutions/dax-010_reference.dax",
+      "source_sha256": "92046eab7d3e9c50e0b7790476547b7c5b6f9dfb77ba312c8a517d60978c5b48",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-010-a",
+          "title": "Whole-model populations",
+          "context": "All rows; complete nonblank order/customer fact keys.",
+          "trace": [
+            "Eight SaleID values represent eight lines.",
+            "Order 101 repeats across two lines, leaving seven orders.",
+            "The fact includes customer keys 10, 20 and 30."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Orders",
+              "type": "integer"
+            },
+            {
+              "name": "CustomersWithSales",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              8,
+              7,
+              3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-010-b",
+          "title": "Paper's overlapping order population",
+          "context": "Paper products 1 and 2; all years and customers otherwise allowed.",
+          "trace": [
+            "Five eligible lines total 91.",
+            "Their order keys are 101, 101, 201, 202 and 204.",
+            "All three purchasing customers still appear, but only four distinct orders remain."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Lines",
+              "type": "integer"
+            },
+            {
+              "name": "Orders",
+              "type": "integer"
+            },
+            {
+              "name": "CustomersWithSales",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              91,
+              5,
+              4,
+              3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-011",
+      "reference_path": "courses/dax/solutions/dax-011_reference.dax",
+      "source_sha256": "3703f8d9906eba6d20b925d6c44e6dde58e562e885e9ef7f60b19ed86cf3a436",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-011-a",
+          "title": "A ratio of sufficient totals",
+          "context": "All sales; numerator USD and denominator sold units.",
+          "trace": [
+            "Sum net revenue to 187 and quantities to 17.",
+            "187 / 17 = 11.",
+            "The resulting unit is USD per sold unit, not USD per order."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Units",
+              "type": "integer"
+            },
+            {
+              "name": "NetPerUnit",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              17,
+              11
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-011-b",
+          "title": "Explicit undefined-ratio policy",
+          "context": "Literal values distinguish no denominator from a positive denominator with zero outcome.",
+          "trace": [
+            "Zero divided by zero is not a defined observed rate.",
+            "DIVIDE's default is BLANK; the third argument deliberately replaces it with zero.",
+            "Zero divided by five is a defined zero rate."
+          ],
+          "columns": [
+            {
+              "name": "DefaultResult",
+              "type": "number"
+            },
+            {
+              "name": "ChosenDisplay",
+              "type": "number"
+            },
+            {
+              "name": "ZeroNumerator",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              null,
+              0,
+              0
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-012",
+      "reference_path": "courses/dax/solutions/dax-012_reference.dax",
+      "source_sha256": "8276184e8945861499791e1c60cbd39c54e27a380918277c4085720a317c8327",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-012-a",
+          "title": "Binding before a new filter",
+          "context": "Start unfiltered; bind the variable before introducing Blue.",
+          "trace": [
+            "The variable binds NetRevenue in the original all-row context: 187.",
+            "CALCULATE around that scalar cannot recreate its earlier measure expression.",
+            "The direct measure reference is evaluated with Blue and returns 163."
+          ],
+          "columns": [
+            {
+              "name": "FrozenInBlue",
+              "type": "number"
+            },
+            {
+              "name": "RecomputedInBlue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-012-b",
+          "title": "Binding inside Blue before removing it",
+          "context": "The outer CALCULATETABLE supplies Blue before the variable is bound.",
+          "trace": [
+            "Blue makes NetRevenue 163 at variable binding time.",
+            "Removing the color filter around the scalar still returns 163.",
+            "Removing color before evaluating the measure restores the full revenue 187."
+          ],
+          "columns": [
+            {
+              "name": "FrozenWithoutColor",
+              "type": "number"
+            },
+            {
+              "name": "RecomputedWithoutColor",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              163,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-013",
+      "reference_path": "courses/dax/solutions/dax-013_reference.dax",
+      "source_sha256": "2fae8b654198061188b0f59c5adc7f710bb61ccb9e2f4c4554769d28ba93fab4",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-013-a",
+          "title": "A row label beside an unfiltered sum",
+          "context": "No outer filters; SELECTCOLUMNS supplies a Product row context only.",
+          "trace": [
+            "The Product label changes on each iteration.",
+            "The raw SUM has no transitioned Product filter.",
+            "Every iteration therefore adds the same eight sales lines and returns 187."
+          ],
+          "columns": [
+            {
+              "name": "Product",
+              "type": "text"
+            },
+            {
+              "name": "RawSum",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Bag",
+              187
+            ],
+            [
+              "Mug",
+              187
+            ],
+            [
+              "Notebook",
+              187
+            ],
+            [
+              "Pen",
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-013-b",
+          "title": "Transition the current product into a filter",
+          "context": "The same Product rows, now with explicit context transition for the raw SUM.",
+          "trace": [
+            "CALCULATE turns each current Product row into filters.",
+            "The active key relationship restricts Sales for that product.",
+            "Bag has no matching fact rows; the other products contribute 96, 67 and 24."
+          ],
+          "columns": [
+            {
+              "name": "Product",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Bag",
+              null
+            ],
+            [
+              "Mug",
+              96
+            ],
+            [
+              "Notebook",
+              67
+            ],
+            [
+              "Pen",
+              24
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-014",
+      "reference_path": "courses/dax/solutions/dax-014_reference.dax",
+      "source_sha256": "522ca8e929f0991c1caefe979617e9cee1a1fbb672d7af08fe8ddaf56792000a",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-014-a",
+          "title": "One region in one year",
+          "context": "Customer.Region = North and Date.Year = 2025, using active OrderDate.",
+          "trace": [
+            "North supplies customer keys 10 and 30.",
+            "Year 2025 removes S1, S2 and S3.",
+            "S4, S5 and S8 remain: 27 + 20 + 36 = 83."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              83
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-014-b",
+          "title": "A multi-selection retains the year",
+          "context": "Region is the allowed set {North, South}; order year remains 2025.",
+          "trace": [
+            "The region set admits all three customers with sales.",
+            "The year filter still excludes the three 2024 lines.",
+            "S4 through S8 total 123."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              123
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-015",
+      "reference_path": "courses/dax/solutions/dax-015_reference.dax",
+      "source_sha256": "8d60ae1eff59edcaa5ef2c58ed47aae2e33ffa15acf818c57e20d5062fe51f9d",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-015-a",
+          "title": "Replace Blue with Red",
+          "context": "Start with Product.Color = Blue; the inner calculation sets Color = Red.",
+          "trace": [
+            "The original measure includes Notebook and Mug, totaling 163.",
+            "The inner predicate replaces the filter on the same Color column.",
+            "Red admits Pen and produces 24."
+          ],
+          "columns": [
+            {
+              "name": "Original",
+              "type": "number"
+            },
+            {
+              "name": "RedRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              163,
+              24
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-015-b",
+          "title": "Add Color while retaining Category",
+          "context": "Start with Category = Paper; add Color = Blue on a different column.",
+          "trace": [
+            "Paper supplies Notebook and Pen: 91.",
+            "Blue is added while Paper remains active.",
+            "Only Notebook satisfies both; revenue is 67."
+          ],
+          "columns": [
+            {
+              "name": "PaperRevenue",
+              "type": "number"
+            },
+            {
+              "name": "BluePaperRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              91,
+              67
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-016",
+      "reference_path": "courses/dax/solutions/dax-016_reference.dax",
+      "source_sha256": "b8342f715d38ce6a6089f53c02a471566bd797a2d82b20f16d41519acc08116a",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-016-a",
+          "title": "Sibling filters use the incoming key maximum",
+          "context": "Incoming Product.Category = Paper; sibling Color and ProductKey filters.",
+          "trace": [
+            "Paper's incoming keys are 1 and 2; MAX is 2.",
+            "Blue and ProductKey 2 are then applied together with the retained category.",
+            "Pen is key 2 but Red, so the resulting product set is empty."
+          ],
+          "columns": [
+            {
+              "name": "IncomingMaxKey",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-016-b",
+          "title": "Nested context before computing the key",
+          "context": "Paper first; outer CALCULATE applies Blue before the inner key expression is evaluated.",
+          "trace": [
+            "Paper plus Blue leaves ProductKey 1.",
+            "The inner MAX therefore evaluates to 1.",
+            "Notebook revenue is 67."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              67
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-017",
+      "reference_path": "courses/dax/solutions/dax-017_reference.dax",
+      "source_sha256": "28d11bcb031486746ce567e958944cb3f81c3255624ecff47f97bf1cd5b095cd",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-017-a",
+          "title": "Eight repetitions versus eight individual amounts",
+          "context": "No outer filters; SUMX creates one Sales row context per unique SaleID.",
+          "trace": [
+            "Without transition, the inner SUM is 187 for every row.",
+            "Eight iterations give 8 * 187 = 1496.",
+            "With transition, the eight selected line amounts sum once each to 187."
+          ],
+          "columns": [
+            {
+              "name": "RawRepeated",
+              "type": "number"
+            },
+            {
+              "name": "Transitioned",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1496,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-017-b",
+          "title": "Measure invocation transitions each customer",
+          "context": "No outer filters; a model measure is invoked within each Customer row context.",
+          "trace": [
+            "Ada contributes 51, Bo 80 and Cy 56.",
+            "Di has no matching sales and contributes BLANK.",
+            "51 + 80 + 56 = 187."
+          ],
+          "columns": [
+            {
+              "name": "CustomerRows",
+              "type": "integer"
+            },
+            {
+              "name": "SumOfCustomerRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              4,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-018",
+      "reference_path": "courses/dax/solutions/dax-018_reference.dax",
+      "source_sha256": "dff3bea372c76652d4457701bf309f2aaaa995c9a5f299a37160a491f956e76a",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-018-a",
+          "title": "Products above fifty",
+          "context": "No incoming filters; consider each visible ProductKey independently.",
+          "trace": [
+            "Candidate revenues are Notebook 67, Pen 24, Mug 96 and Bag BLANK.",
+            "Keys 1 and 3 exceed 50.",
+            "Applying those retained keys yields 67 + 96 = 163."
+          ],
+          "columns": [
+            {
+              "name": "Products",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-018-b",
+          "title": "A stricter threshold",
+          "context": "Same candidate population, threshold changed from 50 to 90.",
+          "trace": [
+            "Notebook no longer qualifies because 67 is not greater than 90.",
+            "Mug's 96 still qualifies.",
+            "The retained one-key table filters the final measure to 96."
+          ],
+          "columns": [
+            {
+              "name": "Products",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              96
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-019",
+      "reference_path": "courses/dax/solutions/dax-019_reference.dax",
+      "source_sha256": "07ac5508dcb10b8d5847d0f3b4642c2dc15824afbdefe65381309d64893f687c",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-019-a",
+          "title": "A disjoint subgroup stays empty",
+          "context": "Original allowed color {Blue}; compare replacement with intersection by {Red}.",
+          "trace": [
+            "Replacement changes the allowed set to Red and admits Pen.",
+            "Intersection computes {Blue} intersect {Red}, an empty set.",
+            "ForcedRed is 24; the selected-subgroup result is BLANK."
+          ],
+          "columns": [
+            {
+              "name": "ForcedRed",
+              "type": "number"
+            },
+            {
+              "name": "RedWithinSelection",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              24,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-019-b",
+          "title": "An overlapping subgroup is retained",
+          "context": "Original allowed colors {Blue, Red}; restrict to Blue without expanding selection.",
+          "trace": [
+            "All products with recorded sales are Blue or Red, totaling 187.",
+            "Intersecting with Blue removes Pen's 24.",
+            "Notebook and Mug remain and total 163."
+          ],
+          "columns": [
+            {
+              "name": "SelectedRevenue",
+              "type": "number"
+            },
+            {
+              "name": "BlueWithinSelection",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-020",
+      "reference_path": "courses/dax/solutions/dax-020_reference.dax",
+      "source_sha256": "78321c8fa161aba0c2cac531e5d77d2b293a68cb7cc1ac3dde37e187f6f0ab5a",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-020-a",
+          "title": "Share within the retained category",
+          "context": "Paper and Blue selected; remove only Color in the denominator.",
+          "trace": [
+            "The numerator contains Notebook: 67.",
+            "Removing Color restores Pen within Paper, giving 67 + 24 = 91.",
+            "The share is 67/91; Home remains outside the category population."
+          ],
+          "columns": [
+            {
+              "name": "Numerator",
+              "type": "number"
+            },
+            {
+              "name": "CategoryDenominator",
+              "type": "number"
+            },
+            {
+              "name": "Share",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              67,
+              91,
+              0.7362637362637363
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-020-b",
+          "title": "All products within North",
+          "context": "Paper, Blue and North selected; remove Product filters only in the denominator.",
+          "trace": [
+            "North Notebook sales are S1 and S4: 47.",
+            "Removing Product restrictions admits North Pen 24? In North Pen contributes S2 4 plus S5 20, totaling 24, and Mug contributes 36.",
+            "The retained North population totals 47 + 24 + 36 = 107; share is 47/107."
+          ],
+          "columns": [
+            {
+              "name": "Numerator",
+              "type": "number"
+            },
+            {
+              "name": "RegionalDenominator",
+              "type": "number"
+            },
+            {
+              "name": "Share",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              47,
+              107,
+              0.4392523364485981
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-021",
+      "reference_path": "courses/dax/solutions/dax-021_reference.dax",
+      "source_sha256": "fd853eded33af8c3a303a34442846728601463b1186ecc484d99fe9be672caea",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-021-a",
+          "title": "Calculate additive row amounts",
+          "context": "All eight Sales rows; Discount is a currency amount per line.",
+          "trace": [
+            "The line gross amounts are 20, 5, 40, 30, 20, 20, 20 and 40.",
+            "Their sum is 195; the line discounts sum to 8.",
+            "Subtracting each line's discount yields net total 187."
+          ],
+          "columns": [
+            {
+              "name": "Gross",
+              "type": "number"
+            },
+            {
+              "name": "Net",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              195,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-021-b",
+          "title": "Average sold products or the complete catalog",
+          "context": "All four Product rows; Bag has no sales and a blank revenue measure.",
+          "trace": [
+            "Per-product results are 67, 24, 96 and BLANK.",
+            "AVERAGEX over the nonblank numerical results divides 187 by 3.",
+            "COALESCE changes Bag to zero, so the average divides 187 by 4."
+          ],
+          "columns": [
+            {
+              "name": "NonblankProducts",
+              "type": "number"
+            },
+            {
+              "name": "AllCatalogProducts",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              62.333333333333336,
+              46.75
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-022",
+      "reference_path": "courses/dax/solutions/dax-022_reference.dax",
+      "source_sha256": "75c0e0fbc42ba91ce742b8fd025e3e5d3c3ceed387988ed0551eb6f52b6b5c97",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-022-a",
+          "title": "One shared total versus one value per product",
+          "context": "No outer filters; four Product rows, including unsold Bag.",
+          "trace": [
+            "IncomingRevenue is bound once to 187.",
+            "The shared scalar contributes 187 on four iterations, totaling 748.",
+            "The inner measure binding transitions each product and sums 67 + 24 + 96 = 187."
+          ],
+          "columns": [
+            {
+              "name": "SharedScalarSum",
+              "type": "number"
+            },
+            {
+              "name": "PerProductSum",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              748,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-022-b",
+          "title": "An incoming filtered total is still shared",
+          "context": "Paper is established before either variable binding; Product has two eligible rows.",
+          "trace": [
+            "The incoming measure total is 91.",
+            "An outer scalar is reused for Notebook and Pen, giving 182.",
+            "Binding inside the iterator evaluates 67 and 24 separately, totaling 91."
+          ],
+          "columns": [
+            {
+              "name": "SharedScalarSum",
+              "type": "number"
+            },
+            {
+              "name": "PerProductSum",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              182,
+              91
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-023",
+      "reference_path": "courses/dax/solutions/dax-023_reference.dax",
+      "source_sha256": "8aec0193618df02a64dc549a26bea957fd5c3b89b221af449baa9fbd146fd0ad",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-023-a",
+          "title": "Category-level prices",
+          "context": "One group per Category; no outer filters; all-blank Travel group omitted by this summary.",
+          "trace": [
+            "Home contributes 96 over 5 units.",
+            "Paper contributes 91 over 12 units.",
+            "Each ratio describes its own category population."
+          ],
+          "columns": [
+            {
+              "name": "Category",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Units",
+              "type": "integer"
+            },
+            {
+              "name": "NetPerUnit",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Home",
+              96,
+              5,
+              19.2
+            ],
+            [
+              "Paper",
+              91,
+              12,
+              7.583333333333333
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-023-b",
+          "title": "The total and an intentionally different measure",
+          "context": "No category grouping for the pooled total; a separate iterator explicitly sums category ratios.",
+          "trace": [
+            "The pooled measure reevaluates 187/17 and returns 11.",
+            "The iterator evaluates 19.2 and 91/12 for the two nonblank categories.",
+            "Their sum is about 26.7833, a different defined calculation."
+          ],
+          "columns": [
+            {
+              "name": "PooledNetPerUnit",
+              "type": "number"
+            },
+            {
+              "name": "SumOfCategoryRatios",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              11,
+              26.78333333333333
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-024",
+      "reference_path": "courses/dax/solutions/dax-024_reference.dax",
+      "source_sha256": "161e9b2c549fc9ef79c7a0b826765a24402ad4de2cd67314cb9ed71325389746",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-024-a",
+          "title": "Share of the selected product set",
+          "context": "Outer selection {Notebook, Pen}; query groups by Product.Product; no nested iterator in the measure.",
+          "trace": [
+            "The outer selected population totals 67 + 24 = 91.",
+            "Each product group supplies its own numerator.",
+            "ALLSELECTED removes this grouping restriction while preserving the named outer selection."
+          ],
+          "columns": [
+            {
+              "name": "Product",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "SelectedTotal",
+              "type": "number"
+            },
+            {
+              "name": "Share",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Notebook",
+              67,
+              91,
+              0.7362637362637363
+            ],
+            [
+              "Pen",
+              24,
+              91,
+              0.26373626373626374
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-024-b",
+          "title": "Share of all products instead",
+          "context": "Same selected rows; the denominator removes the Product.Product restriction entirely.",
+          "trace": [
+            "The visible numerators remain 67 and 24.",
+            "The denominator includes Mug's 96 as well, totaling 187.",
+            "The selected rows' shares sum to 91/187, not one."
+          ],
+          "columns": [
+            {
+              "name": "Product",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "AllProductTotal",
+              "type": "number"
+            },
+            {
+              "name": "Share",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Notebook",
+              67,
+              187,
+              0.3582887700534759
+            ],
+            [
+              "Pen",
+              24,
+              187,
+              0.12834224598930483
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-025",
+      "reference_path": "courses/dax/solutions/dax-025_reference.dax",
+      "source_sha256": "747da9b8db4889d7ff27b8dbf33b1ec7c11dfff762498e09673db210b29390a6",
+      "model_path": "courses/dax/models/unknown-member/model.json",
+      "model_sha256": "3a724083f6ba20765e679edf46fb2338e36632e04e325dc369392845fbc65928",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-025-a",
+          "title": "Stored keys versus semantic members",
+          "context": "Unknown-member model; stored Product keys 1..4; Sales also has key 999.",
+          "trace": [
+            "DISTINCT sees the four stored Product keys.",
+            "The unmatched regular relationship introduces one semantic blank member for VALUES.",
+            "VALUES therefore has five members, not a new stored row with key 999."
+          ],
+          "columns": [
+            {
+              "name": "ValuesMembers",
+              "type": "integer"
+            },
+            {
+              "name": "StoredDistinctKeys",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              5,
+              4
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-025-b",
+          "title": "Reconcile the unknown amount",
+          "context": "Unknown-member model; the first expression selects its semantic blank Product member.",
+          "trace": [
+            "S9 is the only unmatched product fact and contributes 7.",
+            "Known-product facts still contribute 187.",
+            "The full fact total is 194, including the unknown bucket."
+          ],
+          "columns": [
+            {
+              "name": "UnknownRevenue",
+              "type": "number"
+            },
+            {
+              "name": "AllRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              7,
+              194
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-026",
+      "reference_path": "courses/dax/solutions/dax-026_reference.dax",
+      "source_sha256": "892f50642343c4a1a23853886503bb083aa7120d6b9d4c88bc943f31c07c9e6d",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-026-a",
+          "title": "Extend every candidate key",
+          "context": "All four clean-model Product keys; retain every input row while adding revenue.",
+          "trace": [
+            "VALUES supplies keys 1,2,3,4.",
+            "ADDCOLUMNS computes one revenue result per input key.",
+            "Bag's blank measure does not remove key 4 from this projected table."
+          ],
+          "columns": [
+            {
+              "name": "ProductKey",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              67
+            ],
+            [
+              2,
+              24
+            ],
+            [
+              3,
+              96
+            ],
+            [
+              4,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-026-b",
+          "title": "A grouped summary omits an all-blank group",
+          "context": "Same clean model; grouped summary with one measure expression.",
+          "trace": [
+            "The four candidate keys form groups.",
+            "Key 4 has BLANK for every supplied expression.",
+            "That all-blank group is omitted; keys 1,2,3 remain."
+          ],
+          "columns": [
+            {
+              "name": "ProductKey",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              67
+            ],
+            [
+              2,
+              24
+            ],
+            [
+              3,
+              96
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-027",
+      "reference_path": "courses/dax/solutions/dax-027_reference.dax",
+      "source_sha256": "32f778878c694dff9781fc2b3fd85669215fdd9f4621c568302cfab76603d555",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-027-a",
+          "title": "A direct key projection retains its model identity",
+          "context": "No outer filters; direct projection of the two Paper ProductKey values.",
+          "trace": [
+            "The projected values are 1 and 2.",
+            "The direct model-column projection retains ProductKey lineage.",
+            "Using that table as a filter selects Paper sales and revenue 91."
+          ],
+          "columns": [
+            {
+              "name": "CandidateRows",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              91
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-027-b",
+          "title": "Restore an explicitly detached mapping",
+          "context": "Expression-derived values {1,2}; compare a lineage-free table filter with an explicit target mapping.",
+          "trace": [
+            "Adding zero preserves the numbers but changes the projected expression's lineage contract.",
+            "Without a model target, that detached column does not select the Product rows for revenue.",
+            "TREATAS maps the values to ProductKey, restoring the intended 91."
+          ],
+          "columns": [
+            {
+              "name": "WithoutTarget",
+              "type": "number"
+            },
+            {
+              "name": "WithTarget",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              91
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-028",
+      "reference_path": "courses/dax/solutions/dax-028_reference.dax",
+      "source_sha256": "c2326bcfd432b266b8d909e343501d42313133b3b7d053ee05da9ed0dd1c51e7",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-028-a",
+          "title": "Intersection and one-sided difference",
+          "context": "Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.",
+          "trace": [
+            "The shared key is 1, so the intersection has one row.",
+            "Key 2 belongs to Paper but not Blue.",
+            "Reversing the difference would return key 3 instead, a different population."
+          ],
+          "columns": [
+            {
+              "name": "IntersectionRows",
+              "type": "integer"
+            },
+            {
+              "name": "PaperOnlyRows",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              1
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-028-b",
+          "title": "UNION keeps repeated membership rows",
+          "context": "Concatenate the two two-row key tables; key 1 occurs in each input.",
+          "trace": [
+            "UNION produces four rows, including key 1 twice.",
+            "DISTINCT removes repeated key rows, leaving 1,2,3.",
+            "The two counts represent memberships versus unique product identities."
+          ],
+          "columns": [
+            {
+              "name": "CombinedRows",
+              "type": "integer"
+            },
+            {
+              "name": "DistinctKeys",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              4,
+              3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-029",
+      "reference_path": "courses/dax/solutions/dax-029_reference.dax",
+      "source_sha256": "fbf723b1ba866b7247006bcbfed7be0c2fc5bff876facc9f60d59438513261d4",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-029-a",
+          "title": "January order versus shipment attribution",
+          "context": "Date year 2025/month 1; compare active OrderDate with the explicitly selected ShipDate relationship.",
+          "trace": [
+            "Orders S4,S5,S6 belong to January and total 67.",
+            "Shipments S4 and S 5 occur in January and total 47.",
+            "S6's 20 moves to shipment month February."
+          ],
+          "columns": [
+            {
+              "name": "OrderRevenue",
+              "type": "number"
+            },
+            {
+              "name": "ShipRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              67,
+              47
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-029-b",
+          "title": "February absorbs the delayed shipment",
+          "context": "Date year 2025/month 2 with the same role comparison.",
+          "trace": [
+            "Orders S7,S8 total 56 in February.",
+            "Shipments include S6,S7,S8, totaling 76.",
+            "Across January and February, both date-role totals reconcile to 123."
+          ],
+          "columns": [
+            {
+              "name": "OrderRevenue",
+              "type": "number"
+            },
+            {
+              "name": "ShipRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              56,
+              76
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-030",
+      "reference_path": "courses/dax/solutions/dax-030_reference.dax",
+      "source_sha256": "bcbe1652d064a8566ba57580c1e752abf2d1dedb98db3fae22c6395421156315",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-030-a",
+          "title": "Newsletter's two customers",
+          "context": "Analytics model; Audience=Newsletter; single-direction relationships into GroupMembership.",
+          "trace": [
+            "Newsletter leaves membership keys 10 and 20.",
+            "Without explicit mapping the bridge does not filter Customer, so RawRevenue stays 187.",
+            "TREATAS selects Ada 51 and Bo 80, totaling 131."
+          ],
+          "columns": [
+            {
+              "name": "RawRevenue",
+              "type": "number"
+            },
+            {
+              "name": "AudienceRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              131
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-030-b",
+          "title": "Prospects overlaps the first audience",
+          "context": "Analytics model; Audience=Prospects; selected membership keys 20 and 30.",
+          "trace": [
+            "Prospects selects Bo and Cy through the explicit mapping.",
+            "Their revenues are 80 and 56, totaling 136.",
+            "Bo is shared with Newsletter, so summing the two audience totals would count 80 twice."
+          ],
+          "columns": [
+            {
+              "name": "RawRevenue",
+              "type": "number"
+            },
+            {
+              "name": "AudienceRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              136
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-031",
+      "reference_path": "courses/dax/solutions/dax-031_reference.dax",
+      "source_sha256": "3e236cc0bda38ded95b1eccbbcc951fe0b704890b6ee37df4e7898a1c928f5c9",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-031-a",
+          "title": "January calendar versus event dates",
+          "context": "January 2025, active OrderDate relationship; observed coverage includes the full month.",
+          "trace": [
+            "The complete Date table contains January 1 through 31.",
+            "Sales occur on January 2,3 and 5.",
+            "The calendar count is 31 while observed event-date count is 3."
+          ],
+          "columns": [
+            {
+              "name": "CalendarDates",
+              "type": "integer"
+            },
+            {
+              "name": "OrderDatesWithSales",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              31,
+              3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-031-b",
+          "title": "A date exists without a sale",
+          "context": "2025-01-04 is inside declared observation coverage but has no OrderDate fact.",
+          "trace": [
+            "The Date selection contains one valid date.",
+            "No Sales row has OrderDate 2025-01-04.",
+            "The fact count and revenue are BLANK; the calendar row is not missing."
+          ],
+          "columns": [
+            {
+              "name": "CalendarDates",
+              "type": "integer"
+            },
+            {
+              "name": "SalesRows",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              null,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-032",
+      "reference_path": "courses/dax/solutions/dax-032_reference.dax",
+      "source_sha256": "04072a8d73f1b9a1abf6077918d5dd54b3993add9709e449359de7e7caf001bb",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-032-a",
+          "title": "An early January anchor",
+          "context": "Anchor 2025-01-03; classic Gregorian year; active OrderDate; coverage is available.",
+          "trace": [
+            "The current date contains S5 and revenue 20.",
+            "The YTD set begins January 1 and ends January 3.",
+            "S4 and S 5 contribute 27 +20 =47."
+          ],
+          "columns": [
+            {
+              "name": "CurrentDay",
+              "type": "number"
+            },
+            {
+              "name": "YTD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              20,
+              47
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-032-b",
+          "title": "An anchor in February",
+          "context": "Anchor 2025-02-03; same calendar and date role.",
+          "trace": [
+            "S8 contributes 36 on the current day.",
+            "The YTD set includes January plus February 1 through 3.",
+            "S4..S8 sum 27 +20 +20 +20 +36 =123."
+          ],
+          "columns": [
+            {
+              "name": "CurrentDay",
+              "type": "number"
+            },
+            {
+              "name": "YTD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              36,
+              123
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-033",
+      "reference_path": "courses/dax/solutions/dax-033_reference.dax",
+      "source_sha256": "5068c241632c375500615816fb92daab743d715f7335c86e32c64578ec6cf39c",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-033-a",
+          "title": "Completed January versus completed January",
+          "context": "Full January 2025 versus the shifted January 2024 date set; both periods are within available data.",
+          "trace": [
+            "Current January contains S4,S5,S6, totaling 67.",
+            "Prior January contains S1,S2,S3, totaling 64.",
+            "The difference 3 divided by prior 64 is 0.046875."
+          ],
+          "columns": [
+            {
+              "name": "Current",
+              "type": "number"
+            },
+            {
+              "name": "Prior",
+              "type": "number"
+            },
+            {
+              "name": "Growth",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              67,
+              64,
+              0.046875
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-033-b",
+          "title": "An explicit as-of comparison",
+          "context": "January 1..3,2025 compared with January 1..3,2024; explicitly as-of rather than full-month.",
+          "trace": [
+            "The current interval excludes S6 on January 5, leaving 47.",
+            "The prior interval still contains all three prior-year fixture lines, totaling 64.",
+            "The difference-17 divided by 64 is-0.265625."
+          ],
+          "columns": [
+            {
+              "name": "Current",
+              "type": "number"
+            },
+            {
+              "name": "Prior",
+              "type": "number"
+            },
+            {
+              "name": "Growth",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              47,
+              64,
+              -0.265625
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-034",
+      "reference_path": "courses/dax/solutions/dax-034_reference.dax",
+      "source_sha256": "a190cbaa979f1ef0ad38de3d4a40b2fec817b1732d94d3140d8aaade3c0d0f9f",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-034-a",
+          "title": "A three-calendar-day denominator",
+          "context": "AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.",
+          "trace": [
+            "February 1 has no order, February 2 contributes 20 and February 3 contributes 36.",
+            "Window revenue is 56 and the Date table supplies three eligible dates.",
+            "The calendar-day ratio is 56/3."
+          ],
+          "columns": [
+            {
+              "name": "Days",
+              "type": "integer"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "RevenuePerCalendarDay",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              3,
+              56,
+              18.666666666666668
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-034-b",
+          "title": "Two different averages over the same window",
+          "context": "Same three observed calendar dates; contrast exclusion of BLANK with an explicit zero policy.",
+          "trace": [
+            "The unfilled values are BLANK,20,36.",
+            "The blank-excluding average is 56/2 =28.",
+            "The zero-filled observed-calendar values 0,20,36 average 56/3."
+          ],
+          "columns": [
+            {
+              "name": "SaleDayAverage",
+              "type": "number"
+            },
+            {
+              "name": "ObservedCalendarAverage",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              28,
+              18.666666666666668
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-035",
+      "reference_path": "courses/dax/solutions/dax-035_reference.dax",
+      "source_sha256": "c288f64be152a635fea704f0033f3aab8f476387295e4f728346da67a177b58e",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-035-a",
+          "title": "Two neighboring fiscal labels",
+          "context": "The declared fiscal year starts July 1 and is named by its ending year.",
+          "trace": [
+            "June 30 belongs to the fiscal year ending in 2024.",
+            "The next day starts the fiscal year ending in 2025.",
+            "A one-day boundary changes the fiscal label without changing the Gregorian year."
+          ],
+          "columns": [
+            {
+              "name": "Day",
+              "type": "date"
+            },
+            {
+              "name": "FiscalYear",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              "2024-06-30",
+              2024
+            ],
+            [
+              "2024-07-01",
+              2025
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-035-b",
+          "title": "Available fiscal-year-to-date revenue",
+          "context": "FY 2025 under the July-start convention, observed only through 2025-02-28; active OrderDate.",
+          "trace": [
+            "The fiscal interval starts July 1,2024.",
+            "The as-of boundary stops at February 28,2025, not June 30.",
+            "The available matching sales are S4..S8, totaling 123."
+          ],
+          "columns": [
+            {
+              "name": "FiscalYTDRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              123
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-036",
+      "reference_path": "courses/dax/solutions/dax-036_reference.dax",
+      "source_sha256": "11b388be357a90dd742338e42e7252ad6c53552afead2c776301a064839b2876",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-036-a",
+          "title": "Classic Gregorian YTD",
+          "context": "Classic marked Date column; Gregorian year; anchor 2025-02-03.",
+          "trace": [
+            "The classic year begins January 1.",
+            "January revenue 67 and February-to-date 56 are included.",
+            "Gregorian YTD is 123."
+          ],
+          "columns": [
+            {
+              "name": "GregorianYTD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              123
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-036-b",
+          "title": "The declared February-start retail calendar",
+          "context": "Assume the optional RetailCalendar metadata has been configured exactly as specified; RetailYear starts February 1.",
+          "trace": [
+            "The anchor belongs to RetailYear 2026 under the ending-year naming rule.",
+            "Its year-to-date date set begins February 1,2025.",
+            "S7 and S 8 contribute 20 +36 =56; January belongs to the prior retail year."
+          ],
+          "columns": [
+            {
+              "name": "RetailYTD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              56
+            ]
+          ],
+          "note": "Hand-derived under the explicitly specified optional calendar metadata. No preview engine, model authoring or execution was performed."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-037",
+      "reference_path": "courses/dax/solutions/dax-037_reference.dax",
+      "source_sha256": "187d63072398c4d59b3a93e56344b7e257d3c2edca602d2d662d328d2aee6bae",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-037-a",
+          "title": "Dense and skip ranks",
+          "context": "Query-local candidate fixture; descending score; four unique names and one score tie.",
+          "trace": [
+            "Alpha has the only score 100 and rank 1.",
+            "Beta and Gamma share score 80 and rank 2.",
+            "Delta follows the tie at dense rank 3 or skip rank 4."
+          ],
+          "columns": [
+            {
+              "name": "Name",
+              "type": "text"
+            },
+            {
+              "name": "Score",
+              "type": "integer"
+            },
+            {
+              "name": "DenseRank",
+              "type": "integer"
+            },
+            {
+              "name": "SkipRank",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              "Alpha",
+              100,
+              1,
+              1
+            ],
+            [
+              "Beta",
+              80,
+              2,
+              2
+            ],
+            [
+              "Gamma",
+              80,
+              2,
+              2
+            ],
+            [
+              "Delta",
+              50,
+              3,
+              4
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-037-b",
+          "title": "Tied cutoff versus a deliberate tie-breaker",
+          "context": "Same candidate table; compare score-only selection with score plus unique Name ordering.",
+          "trace": [
+            "The second score position is 80 and two candidates share it.",
+            "Score-only TOPN includes Alpha, Beta and Gamma.",
+            "Adding Name as a tie-breaker selects Alpha and Beta exactly."
+          ],
+          "columns": [
+            {
+              "name": "TopTwoByScoreRows",
+              "type": "integer"
+            },
+            {
+              "name": "TopTwoWithTieBreakerRows",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              3,
+              2
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-038",
+      "reference_path": "courses/dax/solutions/dax-038_reference.dax",
+      "source_sha256": "21cb83a1a6a7cbbc8b6d0d24ecb82c28b90e10cb304283cfcbc0aebb9b3c98c4",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-038-a",
+          "title": "First two positions",
+          "context": "Whole clean-model Sales relation ordered by unique SaleID; absolute positions 1 through 2.",
+          "trace": [
+            "The first two keys are S1 and S 2.",
+            "Both rows belong to order 101 and date 2024-01-02.",
+            "The window contains two lines, not two distinct dates; amounts are 20 and 4."
+          ],
+          "columns": [
+            {
+              "name": "Line",
+              "type": "text"
+            },
+            {
+              "name": "Amount",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "S1",
+              20
+            ],
+            [
+              "S2",
+              4
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-038-b",
+          "title": "Last two positions",
+          "context": "Same explicit relation and ordering; last two absolute positions.",
+          "trace": [
+            "Position-1 identifies S8; position-2 identifies S7.",
+            "The inclusive window includes both rows.",
+            "Their amounts total 56, but the relation contract remains line-based."
+          ],
+          "columns": [
+            {
+              "name": "Line",
+              "type": "text"
+            },
+            {
+              "name": "Amount",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "S7",
+              20
+            ],
+            [
+              "S8",
+              36
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-038-c",
+          "title": "INDEX chooses one absolute position",
+          "context": "One unpartitioned relation ordered by the unique SaleID; no outer row required.",
+          "trace": [
+            "ALL exposes all eight line identities and amounts.",
+            "The declared unique order starts with S1.",
+            "Absolute position one therefore returns S1 and amount 20."
+          ],
+          "columns": [
+            {
+              "name": "SaleID",
+              "type": "text"
+            },
+            {
+              "name": "NetAmount",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "S1",
+              20
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-038-d",
+          "title": "OFFSET identifies a previous row",
+          "context": "The outer context identifies S4; the relation contains every SaleID in ascending unique order.",
+          "trace": [
+            "The outer filter supplies exactly one current SaleID: S4.",
+            "The explicit ALL relation permits movement outside that current-row selection.",
+            "Moving one position backward reaches S3; a backward move from S1 would be empty."
+          ],
+          "columns": [
+            {
+              "name": "SaleID",
+              "type": "text"
+            }
+          ],
+          "rows": [
+            [
+              "S3"
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-039",
+      "reference_path": "courses/dax/solutions/dax-039_reference.dax",
+      "source_sha256": "5d66ab91fe7cf99b969d71f5c535ab48a4fd13216dfadb7a5abca097731d2bb2",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-039-a",
+          "title": "Two states are not one closing balance",
+          "context": "Analytics model; January and February 2025; all products; complete snapshots on January 31 and February 28.",
+          "trace": [
+            "January 31 has 10 +20 +5 =35 units.",
+            "February 28 has 8 +15 +7 =30 units.",
+            "All snapshot rows sum to 65; the closing selected-date balance is 30."
+          ],
+          "columns": [
+            {
+              "name": "SummedSnapshots",
+              "type": "integer"
+            },
+            {
+              "name": "ClosingUnits",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              65,
+              30
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-039-b",
+          "title": "An explicitly carried-forward subset",
+          "context": "Notebook and Mug only; as-of February 15; carry the last eligible snapshot under an explicit policy.",
+          "trace": [
+            "For each selected product, the last snapshot not after February 15 is January 31.",
+            "Notebook has 10 and Mug has 5 at that snapshot.",
+            "The policy-derived carried total is 15, with 15 days of staleness."
+          ],
+          "columns": [
+            {
+              "name": "CarriedUnits",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              15
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-040",
+      "reference_path": "courses/dax/solutions/dax-040_reference.dax",
+      "source_sha256": "c5fcb2995ea516a239f153bd31f75317f2cda0fbc8e01559682fd4e2679f20fd",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-040-a",
+          "title": "January cohort at one-month age",
+          "context": "Analytics cohort population; January entrants 100/200; activity observed through February 2025.",
+          "trace": [
+            "Both January members remain in the eligible denominator.",
+            "Both are active in January, but only 100 is active in February.",
+            "One-month retention is 1/2, regardless of how many events member 100 generated."
+          ],
+          "columns": [
+            {
+              "name": "EligibleMembers",
+              "type": "integer"
+            },
+            {
+              "name": "ActiveAtEntry",
+              "type": "integer"
+            },
+            {
+              "name": "ActiveAtAgeOne",
+              "type": "integer"
+            },
+            {
+              "name": "RetentionAtAgeOne",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              2,
+              1,
+              0.5
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-040-b",
+          "title": "A newer cohort has unavailable follow-up",
+          "context": "February entrants 300/400; March follow-up is outside the declared observed months.",
+          "trace": [
+            "Both members are enrolled, but only 300 has February activity.",
+            "Entry activity is 1/2.",
+            "Month-one retention asks about March, so the coverage guard returns BLANK rather than an invented zero."
+          ],
+          "columns": [
+            {
+              "name": "EligibleMembers",
+              "type": "integer"
+            },
+            {
+              "name": "ActiveAtEntry",
+              "type": "integer"
+            },
+            {
+              "name": "EntryActivityRate",
+              "type": "number"
+            },
+            {
+              "name": "RetentionAtAgeOne",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              1,
+              0.5,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-041",
+      "reference_path": "courses/dax/solutions/dax-041_reference.dax",
+      "source_sha256": "7d8f3b051d99d88c249e02371b7b8608ca5b43381ae42e9b7e44b6c6cf7c3792",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-041-a",
+          "title": "A comparable full-month category",
+          "context": "FullJanuary 2025 and Paper category; Budget is monthly/category-grained and disconnected.",
+          "trace": [
+            "January has 31 selected dates, satisfying the complete single-month guard.",
+            "Paper actuals are S 4 and S 5:27 +20 =47.",
+            "The mapped budget is 60, so actual minus budget is-13."
+          ],
+          "columns": [
+            {
+              "name": "Actual",
+              "type": "number"
+            },
+            {
+              "name": "ComparableBudget",
+              "type": "number"
+            },
+            {
+              "name": "Variance",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              47,
+              60,
+              -13
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-041-b",
+          "title": "A daily selection is not assigned the monthly target",
+          "context": "One observed day in January 2025; no daily budget allocation policy exists.",
+          "trace": [
+            "The selected date count is 1 rather than January's31.",
+            "Actual revenue on the day is 27.",
+            "The guard refuses to present the whole-month 60 as a comparable daily budget."
+          ],
+          "columns": [
+            {
+              "name": "Actual",
+              "type": "number"
+            },
+            {
+              "name": "ComparableBudget",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              27,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-042",
+      "reference_path": "courses/dax/solutions/dax-042_reference.dax",
+      "source_sha256": "83d71309dd03310a1e308892a0b898de28d498bf3752694a80ae6a57b918fe2d",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-042-a",
+          "title": "Convert each transaction before adding",
+          "context": "Analytics model; three ForeignSales rows; each date/currency rate key exists exactly once.",
+          "trace": [
+            "F1 is 100 USD at rate 1, contributing 100 USD.",
+            "F2 is 100 EUR at 1.1, contributing 110 USD; F3 is 50 EUR at 1.2, contributing 60 USD.",
+            "The compatible converted amounts sum to 270 USD."
+          ],
+          "columns": [
+            {
+              "name": "ConvertedUSD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              270
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-042-b",
+          "title": "A latest-rate shortcut changes the policy",
+          "context": "EUR-only transactions; contrast transaction-date rates with one selected maximum rate in this tiny increasing-rate fixture.",
+          "trace": [
+            "The local EUR amounts sum to 150.",
+            "Transaction-date conversion gives 110 +60 =170 USD.",
+            "Multiplying 150 by 1.2 gives 180 USD, ten more than the stated policy."
+          ],
+          "columns": [
+            {
+              "name": "LocalEUR",
+              "type": "number"
+            },
+            {
+              "name": "CorrectUSD",
+              "type": "number"
+            },
+            {
+              "name": "NaiveLatestRateUSD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              150,
+              170,
+              180
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-043",
+      "reference_path": "courses/dax/solutions/dax-043_reference.dax",
+      "source_sha256": "bd89681ff2b33b07f7d13ac373b1bee127fbb6a77257e57089dff7b65d19fae8",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-043-a",
+          "title": "Whole-model profit graph",
+          "context": "Clean retail model; current UnitCost is explicitly constant per product; all amounts USD.",
+          "trace": [
+            "Line costs are 4,1,10,6,4,5,4,10, totaling 44.",
+            "Profit is 187 -44 =143.",
+            "Margin is 143/187, evaluated from the same all-row population."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Cost",
+              "type": "number"
+            },
+            {
+              "name": "Profit",
+              "type": "number"
+            },
+            {
+              "name": "Margin",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              44,
+              143,
+              0.7647058823529411
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-043-b",
+          "title": "The same family under Blue",
+          "context": "Blue products only; the same measure definitions and cost assumptions.",
+          "trace": [
+            "Notebook cost is 14 and Mug cost is 25, totaling 39.",
+            "Blue revenue 163 minus 39 gives profit 124.",
+            "The filtered margin is 124/163, not the unfiltered 143/187."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Cost",
+              "type": "number"
+            },
+            {
+              "name": "Profit",
+              "type": "number"
+            },
+            {
+              "name": "Margin",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              163,
+              39,
+              124,
+              0.7607361963190185
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-044",
+      "reference_path": "courses/dax/solutions/dax-044_reference.dax",
+      "source_sha256": "593a03fab5f39ed2508a507355f542321afb50bd8f5479953225b4a0d6851b6e",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-044-a",
+          "title": "Current measures before an item",
+          "context": "No calculation item applied; baseline measure definitions.",
+          "trace": [
+            "The eligible Sales rows total 187 USD.",
+            "Their quantities total 17 units.",
+            "These quantities have different units and transformation policies."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "Units",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              17
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-044-b",
+          "title": "Expanded guarded fee item",
+          "context": "Algebraic expansion of the named revenue-only item; no live calculation-group execution.",
+          "trace": [
+            "The revenue branch multiplies 187 by 0.9, giving 168.3.",
+            "The guard leaves the quantity measure at 17.",
+            "The transformation changes a defined revenue policy, not the observed transaction counts."
+          ],
+          "columns": [
+            {
+              "name": "RevenueAfterFee",
+              "type": "number"
+            },
+            {
+              "name": "UnitsUnchanged",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              168.3,
+              17
+            ]
+          ],
+          "note": "Hand-derived algebraic expansion of a specified calculation item. No calculation group was created or executed in this classroom."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-045",
+      "reference_path": "courses/dax/solutions/dax-045_reference.dax",
+      "source_sha256": "dfb4e7ac4421ab1f0c76a32af604ec825d0091b76c438213a8663284629310be",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-045-a",
+          "title": "Scale has higher precedence",
+          "context": "Specified items: AddTen = SELECTEDMEASURE()+10 at lower precedence; Scale = SELECTEDMEASURE()*0.9 at higher precedence.",
+          "trace": [
+            "The outer Scale expression receives the lower-precedence AddTen expression.",
+            "The expansion is(187 +10)*0.9.",
+            "197 multiplied by 0.9 is 177.3."
+          ],
+          "columns": [
+            {
+              "name": "ExpandedValue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              177.3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-045-b",
+          "title": "Addition has higher precedence",
+          "context": "The same two item definitions with AddTen as the higher-precedence outer expression.",
+          "trace": [
+            "The expansion is(187*0.9)+10.",
+            "The scale first yields 168.3.",
+            "Adding 10 gives 178.3, one more than the other order."
+          ],
+          "columns": [
+            {
+              "name": "ExpandedValue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              178.3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-046",
+      "reference_path": "courses/dax/solutions/dax-046_reference.dax",
+      "source_sha256": "ccb15f7f9973fe146fa3561ea4e6d1e6f381a3760fd0ca470ab2a8621c65cc58",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-046-a",
+          "title": "Default and explicit rates",
+          "context": "All-row revenue 187; fee-rate domain 0..1; default rate 0.1.",
+          "trace": [
+            "The omitted rate uses 0.1, giving 187*(1-0.1)=168.3.",
+            "An explicit 0.2 overrides that default.",
+            "187*(1-0.2)=149.6."
+          ],
+          "columns": [
+            {
+              "name": "DefaultFee",
+              "type": "number"
+            },
+            {
+              "name": "ExplicitTwentyPercent",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              168.3,
+              149.6
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-046-b",
+          "title": "A valid zero and an invalid rate",
+          "context": "Same function; compare boundary rate 1 with out-of-domain rate 1.2.",
+          "trace": [
+            "Rate 1 is inside the declared domain and leaves zero amount.",
+            "Rate 1.2 violates the rule.",
+            "The invalid-domain branch returns BLANK, not a fabricated negative net amount."
+          ],
+          "columns": [
+            {
+              "name": "FullFee",
+              "type": "number"
+            },
+            {
+              "name": "InvalidRate",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              0,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-047",
+      "reference_path": "courses/dax/solutions/dax-047_reference.dax",
+      "source_sha256": "6a9edfb7e438e9be8eac1a626a0980046378e268ed2910506160a47b9134ccf2",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-047-a",
+          "title": "Unfiltered caller",
+          "context": "No incoming filter; both calls receive the same written measure argument with different parameter modes.",
+          "trace": [
+            "VAL evaluates [NetRevenue] before the body and passes 187.",
+            "Changing color around that scalar cannot recreate its original expression.",
+            "EXPR evaluates the measure under Blue and returns 163."
+          ],
+          "columns": [
+            {
+              "name": "EagerValue",
+              "type": "number"
+            },
+            {
+              "name": "DeferredExpression",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-047-b",
+          "title": "Red caller and a Blue-transforming function",
+          "context": "Incoming Color=Red; the function body requests Color=Blue.",
+          "trace": [
+            "The eager argument is evaluated in Red and becomes 24.",
+            "The deferred argument is evaluated after the body's Color replacement.",
+            "Its Blue result is 163, not a Red-and-Blue intersection."
+          ],
+          "columns": [
+            {
+              "name": "EagerValue",
+              "type": "number"
+            },
+            {
+              "name": "DeferredExpression",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              24,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-048",
+      "reference_path": "courses/dax/solutions/dax-048_reference.dax",
+      "source_sha256": "0503cc9515ecefa819d673f1e640ff0f5d443a07f0707fc5c44c65fc4799adfe",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-048-a",
+          "title": "Ascending month snapshot",
+          "context": "A supplied flat visual snapshot in ascending month order; arithmetic expansion only.",
+          "trace": [
+            "The first position contains January revenue 67.",
+            "The second position includes 67 plus February 56.",
+            "Running values are 67 and 123."
+          ],
+          "columns": [
+            {
+              "name": "Position",
+              "type": "integer"
+            },
+            {
+              "name": "Month",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "RunningRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              "January2025",
+              67,
+              67
+            ],
+            [
+              2,
+              "February2025",
+              56,
+              123
+            ]
+          ],
+          "note": "Hand-derived expansion over a named visual snapshot. No Power BI visual was created or executed."
+        },
+        {
+          "id": "dax-048-b",
+          "title": "Reversed visual order",
+          "context": "The same monthly values in descending month order; no change to their underlying amounts.",
+          "trace": [
+            "February 56 is now the first visible position.",
+            "January 67 is added at the second position.",
+            "The intermediate running value changes from 67 to 56 while the final sum remains 123."
+          ],
+          "columns": [
+            {
+              "name": "Position",
+              "type": "integer"
+            },
+            {
+              "name": "Month",
+              "type": "text"
+            },
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "RunningRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              1,
+              "February2025",
+              56,
+              56
+            ],
+            [
+              2,
+              "January2025",
+              67,
+              123
+            ]
+          ],
+          "note": "Hand-derived expansion of a second visual snapshot, not execution of edited source or visual-calculation APIs."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-049",
+      "reference_path": "courses/dax/solutions/dax-049_reference.dax",
+      "source_sha256": "6d6a719ae2912de4be0c0c78ba20fb9926863078445e15979821e0d3eb046005",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-049-a",
+          "title": "Fact-column cardinalities",
+          "context": "Clean retail fact; no filters; counts describe source cardinality, not physical scan metrics.",
+          "trace": [
+            "There are eight unique sale lines.",
+            "Three product keys repeat across them, and S1/S2 share one order date.",
+            "Distinct counts are 3 products,7 order dates and 8 SaleIDs."
+          ],
+          "columns": [
+            {
+              "name": "SalesRows",
+              "type": "integer"
+            },
+            {
+              "name": "ProductKeys",
+              "type": "integer"
+            },
+            {
+              "name": "OrderDates",
+              "type": "integer"
+            },
+            {
+              "name": "SaleIDs",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              8,
+              3,
+              7,
+              8
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-049-b",
+          "title": "Dimension attributes have another grain",
+          "context": "Product dimension, including the unsold Bag member.",
+          "trace": [
+            "Four product rows describe four catalog keys.",
+            "Categories are Paper,Home,Travel and colors are Blue,Red,Green.",
+            "The dimension's domain includes valid attributes absent from current sales."
+          ],
+          "columns": [
+            {
+              "name": "ProductRows",
+              "type": "integer"
+            },
+            {
+              "name": "Categories",
+              "type": "integer"
+            },
+            {
+              "name": "Colors",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              4,
+              3,
+              3
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-050",
+      "reference_path": "courses/dax/solutions/dax-050_reference.dax",
+      "source_sha256": "3d3386d3d8f438bf8b0fa2aeae324410bf0ad6a55dd4304de1c3b6d08b59ea2b",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-050-a",
+          "title": "Possible customer/product pairs",
+          "context": "No filters; dimension population 4 products by 4 customers; observed pair grain from Sales.",
+          "trace": [
+            "The full dimension product is 4 times 4 =16 pairs.",
+            "Observed pairs are(1,10),(2,10),(3,20),(2,30),(1,20),(3,30).",
+            "Repeated purchases of the same pair do not add a new pair, leaving six observed groups."
+          ],
+          "columns": [
+            {
+              "name": "CandidatePairs",
+              "type": "integer"
+            },
+            {
+              "name": "ObservedPairs",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              16,
+              6
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-050-b",
+          "title": "Adding a complete calendar dimension",
+          "context": "Whole two-year Date dimension has 731 days; compare possible versus observed product/customer/date cells.",
+          "trace": [
+            "The possible-cell count is 4 *4 *731 =11696.",
+            "Each of the eight sales lines has a distinct product/customer/order-date combination in this fixture.",
+            "The observed grouping therefore has eight cells."
+          ],
+          "columns": [
+            {
+              "name": "CandidateCells",
+              "type": "integer"
+            },
+            {
+              "name": "ObservedCells",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              11696,
+              8
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-051",
+      "reference_path": "courses/dax/solutions/dax-051_reference.dax",
+      "source_sha256": "b8696fca4edb53966bc8dfb368307f9a9dbab1ab924bcdcd2005d2cd2f5cfb67",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-051-a",
+          "title": "An unfiltered agreement case",
+          "context": "No existing Quantity filter; all three forms select quantity at least two.",
+          "trace": [
+            "S2 and S 6 have quantity 1 and contribute 4 +20 =24.",
+            "Removing those lines from 187 leaves 163.",
+            "The three forms agree in this incoming context."
+          ],
+          "columns": [
+            {
+              "name": "TableFilter",
+              "type": "number"
+            },
+            {
+              "name": "ColumnFilter",
+              "type": "number"
+            },
+            {
+              "name": "IntersectingColumn",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              163,
+              163,
+              163
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-051-b",
+          "title": "The same-column selection exposes a difference",
+          "context": "Incoming Sales.Quantity=1; compare filtering current rows with replacing or intersecting that column selection.",
+          "trace": [
+            "The incoming visible fact rows are S2 and S 6, both quantity 1.",
+            "FILTER over those rows finds no quantity>=2 line, while the plain Boolean predicate replaces the original selection.",
+            "KEEPFILTERS intersects incompatible quantity conditions and also yields BLANK."
+          ],
+          "columns": [
+            {
+              "name": "TableFilter",
+              "type": "number"
+            },
+            {
+              "name": "ColumnFilter",
+              "type": "number"
+            },
+            {
+              "name": "IntersectingColumn",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              null,
+              163,
+              null
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-052",
+      "reference_path": "courses/dax/solutions/dax-052_reference.dax",
+      "source_sha256": "8a4f8112d8b9be27ec63d565fed87a29e988798f943936b282f3e91fd4bd41e0",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-052-a",
+          "title": "Fact-table removal reaches related dimensions",
+          "context": "Regular Import-style star; starting filters are North and order year 2025; no bidirectional or limited relationships.",
+          "trace": [
+            "The starting context totals 83.",
+            "ALL(Sales) as a modifier clears filters over its expanded table, restoring the whole-model 187.",
+            "Removing only Sales.NetAmount does not remove Customer.Region or Date.Year, so the result stays 83."
+          ],
+          "columns": [
+            {
+              "name": "Original",
+              "type": "number"
+            },
+            {
+              "name": "ClearExpandedSales",
+              "type": "number"
+            },
+            {
+              "name": "ClearAmountOnly",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              83,
+              187,
+              83
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-052-b",
+          "title": "Requested values are not all existing pairs",
+          "context": "Explicit domain comparison: requested Paper/Red and Home/Red versus stored Product combinations.",
+          "trace": [
+            "Two requested categories times one requested color gives two candidate pairs.",
+            "Only Paper/Red exists in Product, represented by Pen.",
+            "Home/Red is not a stored combination; the existing pair count is one."
+          ],
+          "columns": [
+            {
+              "name": "RequestedPairs",
+              "type": "integer"
+            },
+            {
+              "name": "ExistingPairs",
+              "type": "integer"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              1
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-053",
+      "reference_path": "courses/dax/solutions/dax-053_reference.dax",
+      "source_sha256": "b13423eb54495596456232bd55d377fee61f54926d71af5ef86c772dd98efa43",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-053-a",
+          "title": "Cold and warm are different conditions",
+          "context": "Original synthetic trial scenario, not measured engine output; three supplied values per cache-state label.",
+          "trace": [
+            "The synthetic cold values sum to 330 and average 110.",
+            "The synthetic warm values sum to 66 and average 22.",
+            "The different conditions must not be presented as proof that one formula is five times faster."
+          ],
+          "columns": [
+            {
+              "name": "SyntheticColdMeanMs",
+              "type": "number"
+            },
+            {
+              "name": "SyntheticWarmMeanMs",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              110,
+              22
+            ]
+          ],
+          "note": "Arithmetic over explicitly synthetic timing data. No timing measurement or engine execution occurred."
+        },
+        {
+          "id": "dax-053-b",
+          "title": "Best trial and average can disagree",
+          "context": "Two synthetic three-trial candidates under a hypothetical comparable condition; no real benchmark claim.",
+          "trace": [
+            "CandidateA has mean 20, median 20 and best 19.",
+            "CandidateB has mean 32, median 18 and best 18 because one supplied trial is 60.",
+            "Selecting only the best trial hides the variability shown by the complete record."
+          ],
+          "columns": [
+            {
+              "name": "MeanA",
+              "type": "number"
+            },
+            {
+              "name": "MedianA",
+              "type": "number"
+            },
+            {
+              "name": "BestA",
+              "type": "number"
+            },
+            {
+              "name": "MeanB",
+              "type": "number"
+            },
+            {
+              "name": "MedianB",
+              "type": "number"
+            },
+            {
+              "name": "BestB",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              20,
+              20,
+              19,
+              32,
+              18,
+              18
+            ]
+          ],
+          "note": "Synthetic scenario summary only; these values are not DS60 runtime performance receipts."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-054",
+      "reference_path": "courses/dax/solutions/dax-054_reference.dax",
+      "source_sha256": "21f39d6b82127240b1f6fb30cb5eed4859c3eb20661a37af52573306f15e30f2",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-054-a",
+          "title": "Whole-model parity under a constant product cost",
+          "context": "Clean retail model; UnitCost is constant per product and unique on ProductKey.",
+          "trace": [
+            "Notebook has 7 units at 2, Pen 5 units at 1 and Mug 5 units at 5.",
+            "Grouped costs are 14,5 and 25, totaling 44.",
+            "The eight line-level costs independently sum to the same 44."
+          ],
+          "columns": [
+            {
+              "name": "LineCost",
+              "type": "number"
+            },
+            {
+              "name": "GroupedCost",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              44,
+              44
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-054-b",
+          "title": "Parity under a region and year selection",
+          "context": "North and order year 2025 remain active while the grouped expression iterates product keys.",
+          "trace": [
+            "S4,S5,S8 are the eligible lines.",
+            "Their costs are 6,4 and 10.",
+            "The grouped quantities 3,4,2 at rates 2,1,5 also yield 20."
+          ],
+          "columns": [
+            {
+              "name": "LineCost",
+              "type": "number"
+            },
+            {
+              "name": "GroupedCost",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              20,
+              20
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-055",
+      "reference_path": "courses/dax/solutions/dax-055_reference.dax",
+      "source_sha256": "1edb5e8c5fb0e420f720ac70cce93cbedaa301ef3af8acb01142987f2f44a298",
+      "model_path": "courses/dax/models/retail/model.json",
+      "model_sha256": "787cf08a4b834c73b38099c3ce191e86de8cec44973219de03c8251dc0be1a7e",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-055-a",
+          "title": "Same data, same defined amount",
+          "context": "The same fixed data and compatible semantics; no actual storage-mode execution.",
+          "trace": [
+            "Both expressions include the same eight line amounts.",
+            "Each totals 187.",
+            "This parity condition says nothing about refresh latency or external function support."
+          ],
+          "columns": [
+            {
+              "name": "FixedFixtureRevenue",
+              "type": "number"
+            },
+            {
+              "name": "EquivalentSnapshotRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-055-b",
+          "title": "A refresh boundary can explain a difference",
+          "context": "Illustrative scenario: an additional valid 10 USD event arrives after the stored snapshot; it is not added to the checked-in Sales fixture.",
+          "trace": [
+            "The snapshot still contains 187.",
+            "The hypothetical later source adds exactly 10 under the same metric policy.",
+            "Its intended amount is 197; an observed difference would need provenance and freshness checks."
+          ],
+          "columns": [
+            {
+              "name": "StoredSnapshot",
+              "type": "number"
+            },
+            {
+              "name": "HypotheticalLaterSource",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              197
+            ]
+          ],
+          "note": "Hand-derived freshness scenario only. No source connection, refresh, DirectQuery or Direct Lake operation occurred."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-056",
+      "reference_path": "courses/dax/solutions/dax-056_reference.dax",
+      "source_sha256": "8f9f2efcc86321df136c49ae37386ef82f3f7a9cddd3424b9897d9d16a1b37a5",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-056-a",
+          "title": "An ordinary filter can be removed",
+          "context": "Unrestricted model; North is only an ordinary report/query filter.",
+          "trace": [
+            "The report filter selects Ada and Cy, whose revenue totals 107.",
+            "REMOVEFILTERS(Customer) removes that analytical selection.",
+            "Bo's 80 becomes eligible, restoring 187."
+          ],
+          "columns": [
+            {
+              "name": "SelectedRevenue",
+              "type": "number"
+            },
+            {
+              "name": "AfterRemovingCustomerFilters",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              107,
+              187
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-056-b",
+          "title": "Expected behavior under an enforced NorthViewer role",
+          "context": "Assume a role-restricted Viewer with the declared NorthViewer RLS policy enforced by a compatible engine; no ordinary Customer filter is needed.",
+          "trace": [
+            "The security policy permits Customer 10 and 30 only.",
+            "The expected fact population totals 51 +56 =107.",
+            "Removing ordinary Customer filters must not remove the security restriction."
+          ],
+          "columns": [
+            {
+              "name": "VisibleRevenue",
+              "type": "number"
+            },
+            {
+              "name": "AfterRemovingCustomerFilters",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              107,
+              107
+            ]
+          ],
+          "note": "Hand-derived security-policy expectation only. The classroom has not executed an RLS engine or authenticated this synthetic role."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-057",
+      "reference_path": "courses/dax/solutions/dax-057_reference.dax",
+      "source_sha256": "f209a0509c00d009ac88430cb862d1f187adc8c638a9817a0c25ca45ef332498",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-057-a",
+          "title": "A mapped synthetic principal",
+          "context": "Assume the declared dynamic Customer policy is enforced for north.learner@example.test in a role-restricted Viewer context.",
+          "trace": [
+            "The Access mapping supplies North.",
+            "Customer 10 and 30 are allowed.",
+            "Their revenues 51 and 56 total 107."
+          ],
+          "columns": [
+            {
+              "name": "VisibleCustomers",
+              "type": "integer"
+            },
+            {
+              "name": "VisibleRevenue",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              2,
+              107
+            ]
+          ],
+          "note": "Hand-derived expectation for a fictional principal and declared dynamic policy; not live security evidence."
+        },
+        {
+          "id": "dax-057-b",
+          "title": "An unmapped principal is denied by the declared policy",
+          "context": "Assume the same enforced policy for unmapped.learner@example.test; its allowed-region set is empty.",
+          "trace": [
+            "No Access row matches that principal.",
+            "The policy's allowed Region set is empty and no Customer row qualifies.",
+            "COUNTROWS and SUM are BLANK on their empty populations; the positive-row comparison is FALSE."
+          ],
+          "columns": [
+            {
+              "name": "VisibleCustomers",
+              "type": "integer"
+            },
+            {
+              "name": "VisibleRevenue",
+              "type": "number"
+            },
+            {
+              "name": "HasVisibleRows",
+              "type": "boolean"
+            }
+          ],
+          "rows": [
+            [
+              null,
+              null,
+              false
+            ]
+          ],
+          "note": "Hand-derived default-deny expectation. No authentication or live RLS enforcement occurred."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-058",
+      "reference_path": "courses/dax/solutions/dax-058_reference.dax",
+      "source_sha256": "35c48cf9c1f60f0d65d0c9f07e2789139571bcd89edc592b574bc4b3a1ed230f",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-058-a",
+          "title": "Reconcile named monetary populations",
+          "context": "Analytics model; complete supplied refund and rate fixtures; core and foreign populations are reported separately.",
+          "trace": [
+            "Core line discounts are already included in NetAmount, whose total is 187.",
+            "Refunds 4 and 9 total 13; adjusted core revenue is 174.",
+            "Foreign amounts convert to 100 +110 +60 =270 USD under their separate policy."
+          ],
+          "columns": [
+            {
+              "name": "CoreNetSales",
+              "type": "number"
+            },
+            {
+              "name": "RefundsAttributedToSales",
+              "type": "number"
+            },
+            {
+              "name": "AdjustedCoreRevenue",
+              "type": "number"
+            },
+            {
+              "name": "SeparateForeignUSD",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              187,
+              13,
+              174,
+              270
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-058-b",
+          "title": "Compare an aligned two-month core population",
+          "context": "FullJanuary/February 2025, Paper/Home core sales, refunds attributed to original sale dates; Budget covers exactly that month/category scope.",
+          "trace": [
+            "Core 2025 sales in these months total 123.",
+            "Only the refund linked to S 4 belongs to that sale-date population, subtracting 9.",
+            "The four compatible budget rows total 165;114 -165 =-51."
+          ],
+          "columns": [
+            {
+              "name": "CoreBeforeRefund",
+              "type": "number"
+            },
+            {
+              "name": "Refunds",
+              "type": "number"
+            },
+            {
+              "name": "AdjustedCore",
+              "type": "number"
+            },
+            {
+              "name": "Budget",
+              "type": "number"
+            },
+            {
+              "name": "Variance",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              123,
+              9,
+              114,
+              165,
+              -51
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-059",
+      "reference_path": "courses/dax/solutions/dax-059_reference.dax",
+      "source_sha256": "3bc2d2ad9879a81eb6eacac93e38a73d4814eadfcc181279e190c96c499e923e",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-059-a",
+          "title": "Assignment and exposure integrity",
+          "context": "Analytics experiment fixture; all four assigned units have one complete outcome; exposure is a separate repeated-event stream.",
+          "trace": [
+            "Control U1/U2 yield one conversion among two assignments.",
+            "Treatment U3/U4 yield two conversions, but both treatment exposure events belong to U3.",
+            "Assigned-unit rates are 0.5 and 1; exposure counts reveal a separate coverage/duplication issue."
+          ],
+          "columns": [
+            {
+              "name": "Arm",
+              "type": "text"
+            },
+            {
+              "name": "Assigned",
+              "type": "integer"
+            },
+            {
+              "name": "Converted",
+              "type": "integer"
+            },
+            {
+              "name": "ExposedUnits",
+              "type": "integer"
+            },
+            {
+              "name": "ExposureEvents",
+              "type": "integer"
+            },
+            {
+              "name": "AssignedUnitRate",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Control",
+              2,
+              1,
+              2,
+              2,
+              0.5
+            ],
+            [
+              "Treatment",
+              2,
+              2,
+              1,
+              2,
+              1
+            ]
+          ],
+          "note": "Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table."
+        },
+        {
+          "id": "dax-059-b",
+          "title": "Display supplied uncertainty without overstating it",
+          "context": "Supplied marginal 95 percent Wilson score intervals for each arm's binomial rate; n=2 per arm; not a difference interval.",
+          "trace": [
+            "Control has k=1,n=2 and estimate 0.5.",
+            "Treatment has k=2,n=2 and estimate 1.",
+            "The marginal intervals remain wide; an all-successes sample does not imply a known population rate of 1."
+          ],
+          "columns": [
+            {
+              "name": "Arm",
+              "type": "text"
+            },
+            {
+              "name": "Rate",
+              "type": "number"
+            },
+            {
+              "name": "WilsonLower",
+              "type": "number"
+            },
+            {
+              "name": "WilsonUpper",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              "Control",
+              0.5,
+              0.09453120573423074,
+              0.9054687942657693
+            ],
+            [
+              "Treatment",
+              1,
+              0.34238022750665303,
+              1
+            ]
+          ],
+          "note": "Hand-derived/displayed supplied statistical summary. No DAX or statistical runtime was executed by this lesson."
+        }
+      ]
+    },
+    {
+      "lesson_id": "dax-060",
+      "reference_path": "courses/dax/solutions/dax-060_reference.dax",
+      "source_sha256": "18c2278625ebfb6248bd01b8a58d9dd628cce9cc978f55b39150bc37e4562a32",
+      "model_path": "courses/dax/models/analytics/model.json",
+      "model_sha256": "6e514f880b76e7efa757ab156d68d1b7bc6c1fe7115176a767f2d93452b1b228",
+      "evidence": "hand-derived",
+      "cases": [
+        {
+          "id": "dax-060-a",
+          "title": "Expected NorthViewer regression row",
+          "context": "Assume enforced NorthViewer policy on the analytical model; all available dates; constant UnitCost per product.",
+          "trace": [
+            "North permits Ada and Cy, giving revenue 51 +56 =107.",
+            "Their product quantities are 5 Notebook,5 Pen and 2 Mug, costing 10 +5 +10 =25.",
+            "Both cost forms agree; a real security restriction must remain after ordinary Customer-filter removal."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "LineCost",
+              "type": "number"
+            },
+            {
+              "name": "GroupedCost",
+              "type": "number"
+            },
+            {
+              "name": "AfterCustomerFilterRemoval",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              107,
+              25,
+              25,
+              107
+            ]
+          ],
+          "note": "Hand-derived acceptance specification under an assumed role; not a runtime, security or deployment receipt."
+        },
+        {
+          "id": "dax-060-b",
+          "title": "Expected SouthViewer regression row",
+          "context": "Assume enforced SouthViewer policy; the same model and measure definitions with a different allowed Customer population.",
+          "trace": [
+            "South permits Bo, whose three lines total 80.",
+            "TwoNotebook units cost 4 and three Mug units cost 15, totaling 19.",
+            "The grouped result agrees and the restricted revenue remains 80 after ordinary filter removal."
+          ],
+          "columns": [
+            {
+              "name": "Revenue",
+              "type": "number"
+            },
+            {
+              "name": "LineCost",
+              "type": "number"
+            },
+            {
+              "name": "GroupedCost",
+              "type": "number"
+            },
+            {
+              "name": "AfterCustomerFilterRemoval",
+              "type": "number"
+            }
+          ],
+          "rows": [
+            [
+              80,
+              19,
+              19,
+              80
+            ]
+          ],
+          "note": "Hand-derived role/context matrix only. No actual model publication or security enforcement was performed."
+        }
+      ]
+    }
+  ]
+}

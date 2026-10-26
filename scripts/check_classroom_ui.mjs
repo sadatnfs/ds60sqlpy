@@ -1505,6 +1505,10 @@ await test("all registered subject accents meet text contrast in both appearance
       "llm-applied",
       "nlp",
       "statistics-ml",
+      "jax",
+      "dax",
+      "r",
+      "data-visualization",
     ]),
   );
   const luminance = (hex) => {
@@ -1525,6 +1529,25 @@ await test("all registered subject accents meet text contrast in both appearance
     assert.ok(contrast(dark, "#20232b") >= 4.5, id + " dark text");
     assert.ok(contrast(dark, darkTint) >= 4.5, id + " dark tinted text");
   }
+});
+
+await test("offline DAX keeps its editor but cannot create a worker run", async () => {
+  const e = environment();
+  e.current("dax-001", "dax");
+  e.run(
+    'current.runtime_profile="dax-offline";current.execution_mode="draft";current.capability={profile:"dax-offline",ready:true,can_run:false,detail:"Offline reference desk"};showCapability(current.capability);',
+  );
+  assert.equal(e.element("run").hidden, true);
+  assert.equal(e.element("timeout").hidden, true);
+  assert.equal(e.element("runtime-results").hidden, true);
+  assert.equal(e.element("offline-workspace").hidden, false);
+  e.element("source").value = 'EVALUATE ROW("Draft",23)';
+  await e.run("runCode()");
+  assert.equal(
+    e.requests.some((item) => item.body.action === "module-run"),
+    false,
+  );
+  assert.equal(e.element("source").value, 'EVALUATE ROW("Draft",23)');
 });
 
 await test("reading-only module worksheets remain editable without inventing a runtime", async () => {
@@ -2170,6 +2193,74 @@ await test("a rejected native exit keeps an Exit control available until Escape"
   await e.documentEvent("fullscreenchange");
   assert.equal(e.panel.hidden, true);
   assert.equal(e.element("browser-fullscreen")["aria-pressed"], "false");
+});
+
+await test("DAX navigation before save acknowledgement prevents a stale compare request", async () => {
+  const e = environment();
+  e.current("dax-001", "dax");
+  e.run('current.execution_mode="draft";');
+  e.element("source").value = "old draft";
+  const opened = e.event("offline-compare");
+  await settle();
+  e.current("dax-002", "dax");
+  e.run('current.execution_mode="draft";intentVersion++;');
+  e.element("source").value = "new draft";
+  e.resolve(e.next("module-save"), { session: {} });
+  await opened;
+  assert.equal(e.requests.filter((r) => r.body.action === "module-worked-examples").length, 0);
+  assert.equal(e.element("source").value, "new draft");
+});
+await test("DAX late comparison cannot repaint another lesson or a returned view", async () => {
+  const e = environment();
+  e.current("dax-001", "dax");
+  e.run('current.execution_mode="draft";');
+  const opened = e.event("offline-compare");
+  await settle();
+  e.resolve(e.next("module-save"), { session: {} });
+  await settle();
+  const comparison = e.next("module-worked-examples");
+  assert.equal(comparison.body.lesson_id, "dax-001");
+  e.current("dax-002", "dax");
+  e.run("intentVersion++;");
+  e.current("dax-001", "dax");
+  e.run('current.execution_mode="draft";intentVersion++;');
+  e.element("source").value = "newer returned draft";
+  e.element("status").textContent = "new view status";
+  e.resolve(comparison, {
+    lesson_id: "dax-001",
+    reference_path: "old reference",
+    model_path: "old model",
+    reference_source: "old source",
+    cases: [],
+  });
+  await opened;
+  assert.equal(e.element("offline-cases").children.length, 0);
+  assert.equal(e.element("source").value, "newer returned draft");
+  assert.equal(e.element("status").textContent, "new view status");
+});
+await test("DAX worked reference does not replace edits made during the response wait", async () => {
+  const e = environment();
+  e.current("dax-001", "dax");
+  e.run('current.execution_mode="draft";');
+  e.element("source").value = "initial draft";
+  const opened = e.event("offline-compare");
+  await settle();
+  e.resolve(e.next("module-save"), { session: {} });
+  await settle();
+  e.element("source").value = "new local draft";
+  await e.event("source", "input");
+  e.resolve(e.next("module-worked-examples"), {
+    lesson_id: "dax-001",
+    reference_path: "reference.dax",
+    model_path: "model.json",
+    reference_source: "reference source",
+    cases: [],
+  });
+  await opened;
+  assert.equal(e.element("source").value, "new local draft");
+  assert.equal(e.element("offline-cases").children.length, 3);
+  assert.match(e.element("status").textContent, /not executed/);
+  assert.equal(e.requests.filter((r) => r.body.action === "module-run").length, 0);
 });
 
 console.log(JSON.stringify({ checks, passed: true, final: true }));

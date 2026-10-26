@@ -1,0 +1,98 @@
+{
+  "id": "r-027",
+  "title": "Profile equivalent work and account for allocations",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-014", "r-020", "r-026"],
+  "concepts": ["profiling", "elapsed time", "sampling profiler", "allocation", "vectorization"],
+  "outcome": "Compare numerically equivalent R implementations, collect bounded timing and profiling evidence, and explain its measurement limits.",
+  "mechanism": "Optimization starts with a defined computation and a correct reference. Comparing two programs is not meaningful when one ignores missing values, drops groups or performs fewer repetitions. This lesson computes one mean per matrix row using a preallocated R loop and rowMeans on exactly the same finite numeric matrix. The reference values are checked before timing begins, and performance is not asserted as a mathematical invariant.\n\nsystem.time records CPU and elapsed time for an expression. Elapsed time includes scheduling and other delays; a short expression may be rounded to zero at the available timer resolution. Repeat equivalent work enough to observe a bounded interval, retain the repetition count, and keep fixture generation outside the timed region. A faster result on one run is evidence about that run and workload, not a guarantee for every input size or machine.\n\nRprof samples the call stack at intervals. summaryRprof aggregates sampled time into inclusive and self-time views. A function can appear expensive because it calls expensive work, so total and self measures answer different questions. Sampling can miss short functions, and profiling itself adds overhead. This example reports the sampled duration and the top entries without asserting an exact profile or requiring every small call to receive a sample.\n\nMemory needs a separate question. object.size estimates the size of an R object, not the process resident set, peak allocation or every shared backing object. Rprofmem records qualifying allocation events when memory profiling is available. The bounded example allocates a known vector inside a temporary profiling session and reports event counts. Those lines are observations of allocation activity, not a complete account of retained memory or garbage-collector behavior.\n\nRepeated c(result,value) can allocate and copy as a vector grows. Preallocation avoids that obvious growth pattern, but it does not make every loop the fastest implementation. A vectorized function can still allocate large intermediates or perform the wrong operation. Prefer a clear implementation that meets the resource bound, then profile the actual bottleneck before adding complexity.\n\nProfiler cleanup matters in a fresh-process lesson as well as a package. The examples register on.exit handlers, stop profiling explicitly, remove only their own temporary files and return data rather than relying on an interactive profiler. They create no persistent benchmark report. Repeated numerical equivalence checks, nonnegative timing values and bounded artifacts are the acceptance evidence; a required speedup would be a brittle and unjustified test.",
+  "vocabulary": [
+    {
+      "term": "Elapsed time",
+      "definition": "Wall-clock duration observed for the timed expression."
+    },
+    {
+      "term": "Sampling profile",
+      "definition": "Periodic stack observations used to estimate where execution spends time."
+    },
+    {
+      "term": "Self time",
+      "definition": "Sampled time in a function excluding its called functions."
+    },
+    {
+      "term": "Allocation",
+      "definition": "Creation of memory storage, distinct from memory retained at the end."
+    }
+  ],
+  "anatomy": "system.time(expr)[[\"elapsed\"]] extracts elapsed seconds. Rprof(path,interval=0.01) begins sampling and Rprof(NULL) stops it. summaryRprof reads the file. Rprofmem and Rprofmem(NULL) separately control allocation logging. on.exit cleanup belongs inside the function that owns those temporary resources.",
+  "worked_examples": [
+    {
+      "title": "Profile two equivalent row-summary implementations",
+      "code": "row_means_loop <- function(x) {\n  result <- numeric(nrow(x))\n  for (i in seq_len(nrow(x))) result[[i]] <- mean(x[i, ])\n  result\n}\nprofile_equivalent_work <- function(x) {\n  stopifnot(is.matrix(x), is.numeric(x), all(is.finite(x)))\n  reference <- row_means_loop(x)\n  vectorized <- rowMeans(x)\n  stopifnot(isTRUE(all.equal(reference, vectorized, tolerance = 1e-12)))\n  slow_time <- system.time(for (i in seq_len(20L)) row_means_loop(x))[[\"elapsed\"]]\n  fast_time <- system.time(for (i in seq_len(20L)) rowMeans(x))[[\"elapsed\"]]\n  path <- tempfile(fileext = \".Rprof\")\n  on.exit(unlink(path), add = TRUE)\n  utils::Rprof(path, interval = 0.01)\n  on.exit(utils::Rprof(NULL), add = TRUE)\n  for (i in seq_len(30L)) row_means_loop(x)\n  utils::Rprof(NULL)\n  profile <- utils::summaryRprof(path)\n  list(\n    loop_seconds = slow_time, vector_seconds = fast_time,\n    sampled_seconds = profile$sampling.time, top = head(profile$by.total, 5L),\n    input_bytes = as.numeric(utils::object.size(x))\n  )\n}\n\nx <- matrix(seq_len(6000) / 100, nrow = 300)\nresult <- profile_equivalent_work(x)\nstopifnot(result$loop_seconds >= 0, result$vector_seconds >= 0, result$input_bytes > 0)\nprint(result)\n",
+      "explanation": "Both versions compute the same 300 row means over 20 columns. The bounded repeats expose a measurable workload, while exact timings and sampled functions remain environment-dependent observations.",
+      "expected": "Equivalent results, nonnegative timings, input size and a bounded profile summary."
+    },
+    {
+      "title": "Object size and allocation events answer different questions",
+      "code": "inspect_allocation <- function() {\n  x <- seq_len(1000) / 10\n  bytes <- as.numeric(utils::object.size(x))\n  stopifnot(bytes > 0)\n  if (!isTRUE(capabilities(\"profmem\"))) return(list(object_bytes = bytes, allocation_events = NA_integer_))\n  path <- tempfile(fileext = \".Rprofmem\")\n  on.exit(unlink(path), add = TRUE)\n  utils::Rprofmem(path, threshold = 1000)\n  on.exit(utils::Rprofmem(NULL), add = TRUE)\n  y <- numeric(10000)\n  y[[1]] <- sum(x)\n  utils::Rprofmem(NULL)\n  events <- readLines(path, warn = FALSE)\n  stopifnot(y[[1]] == sum(x))\n  list(object_bytes = bytes, allocation_events = length(events))\n}\nprint(inspect_allocation())\n",
+      "explanation": "The object-size estimate describes x, while allocation events come from the later profiling interval. The capability branch reports unavailable memory profiling explicitly rather than inventing a zero event count.",
+      "expected": "Positive object size; allocation event count or explicit unavailable value."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the row means of matrix(1:6,nrow=2).",
+      "hint": "R fills the matrix by columns.",
+      "answer": "The rows are 1,3,5 and 2,4,6, giving means 3 and 4.",
+      "expected": "Means 3,4."
+    },
+    {
+      "prompt": "Replace repeated vector growth with a preallocated result.",
+      "hint": "Allocate numeric(nrow(x)) before the loop.",
+      "answer": "Assign each mean into its existing result index; compare against rowMeans on the same input.",
+      "expected": "Equal values without repeated c growth."
+    },
+    {
+      "prompt": "Measure both implementations with the same fixture and repetitions.",
+      "hint": "Exclude input creation and retain the repeat count.",
+      "answer": "Report observed elapsed seconds for both; do not assert a fixed ratio or exact duration.",
+      "expected": "Comparable measurement conditions."
+    },
+    {
+      "prompt": "Diagnose a faster version that silently removes missing observations.",
+      "hint": "The original operation propagates missingness unless specified otherwise.",
+      "answer": "It changes the computation. Decide one missingness policy first, then compare equivalent implementations.",
+      "expected": "Correctness is checked before timing."
+    },
+    {
+      "prompt": "Collect a short Rprof and report a possible empty sample set honestly.",
+      "hint": "Sampling can miss brief work.",
+      "answer": "Report sampling.time and available entries, or explicitly state that the workload produced insufficient samples. Do not infer zero cost.",
+      "expected": "Bounded profile with measurement limits."
+    },
+    {
+      "prompt": "Explain why object.size(x) cannot establish peak process memory.",
+      "hint": "Object accounting and whole-process usage differ.",
+      "answer": "It estimates the R object size, excluding a complete process/peak/shared-memory accounting. Use an appropriate process measurement for that separate question.",
+      "expected": "No peak-memory overclaim."
+    }
+  ],
+  "starter": "# r-027: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nsmall <- matrix(1:6, nrow = 2)\nworkload <- matrix(seq_len(6000) / 100, nrow = 300)\n\n# Exercise 1: Predict the row means of matrix(1:6,nrow=2).\n# TODO: R fills the matrix by columns.\n# Exercise 2: Replace repeated vector growth with a preallocated result.\n# TODO: Allocate numeric(nrow(x)) before the loop.\n# Exercise 3: Measure both implementations with the same fixture and repetitions.\n# TODO: Exclude input creation and retain the repeat count.\n# Exercise 4: Diagnose a faster version that silently removes missing observations.\n# TODO: The original operation propagates missingness unless specified otherwise.\n# Exercise 5: Collect a short Rprof and report a possible empty sample set honestly.\n# TODO: Sampling can miss brief work.\n# Exercise 6: Explain why object.size(x) cannot establish peak process memory.\n# TODO: Object accounting and whole-process usage differ.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "row_means_loop <- function(x) {\n  result <- numeric(nrow(x))\n  for (i in seq_len(nrow(x))) result[[i]] <- mean(x[i, ])\n  result\n}\nprofile_equivalent_work <- function(x) {\n  stopifnot(is.matrix(x), is.numeric(x), all(is.finite(x)))\n  reference <- row_means_loop(x)\n  vectorized <- rowMeans(x)\n  stopifnot(isTRUE(all.equal(reference, vectorized, tolerance = 1e-12)))\n  slow_time <- system.time(for (i in seq_len(20L)) row_means_loop(x))[[\"elapsed\"]]\n  fast_time <- system.time(for (i in seq_len(20L)) rowMeans(x))[[\"elapsed\"]]\n  path <- tempfile(fileext = \".Rprof\")\n  on.exit(unlink(path), add = TRUE)\n  utils::Rprof(path, interval = 0.01)\n  on.exit(utils::Rprof(NULL), add = TRUE)\n  for (i in seq_len(30L)) row_means_loop(x)\n  utils::Rprof(NULL)\n  profile <- utils::summaryRprof(path)\n  list(\n    loop_seconds = slow_time, vector_seconds = fast_time,\n    sampled_seconds = profile$sampling.time, top = head(profile$by.total, 5L),\n    input_bytes = as.numeric(utils::object.size(x))\n  )\n}\n\nsmall <- matrix(1:6, nrow = 2)\nstopifnot(identical(row_means_loop(small), c(3, 4)))\ngrowing <- function(x) {\n  output <- numeric(0)\n  for (i in seq_len(nrow(x))) output <- c(output, mean(x[i, ]))\n  output\n}\nx <- matrix(seq_len(6000) / 100, nrow = 300)\nstopifnot(isTRUE(all.equal(growing(x), row_means_loop(x))))\nstopifnot(isTRUE(all.equal(row_means_loop(x), rowMeans(x))))\nmissing <- matrix(c(1, NA_real_, 3, 4), nrow = 2)\nstopifnot(is.na(rowMeans(missing)[[2]]), rowMeans(missing, na.rm = TRUE)[[2]] == 4)\nresult <- profile_equivalent_work(x)\nstopifnot(result$loop_seconds >= 0, result$vector_seconds >= 0)\nstopifnot(result$sampled_seconds >= 0, result$input_bytes > 0)\nprint(result)\ncat(\"r-027 reference checks passed\\n\")\n",
+  "solution_explanation": "The independent small matrix supplies known row means, while the larger fixture compares the two implementations within numerical tolerance. The missing-value counterexample shows how a superficially faster implementation can answer a different question.\n\nThe reference retains timing and profiler observations without testing an environment-dependent speed ratio. Cleanup belongs to the profiling function, and object.size is labeled as an object estimate. These checks establish equivalent outputs and bounded measurement behavior, not a universal optimization ranking.",
+  "sources": [
+    {
+      "title": "R profiling",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/utils/html/Rprof.html"
+    },
+    {
+      "title": "R memory profiling",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/utils/html/Rprofmem.html"
+    },
+    {
+      "title": "R object size",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/utils/html/object.size.html"
+    }
+  ]
+}

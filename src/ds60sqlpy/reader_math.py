@@ -9,12 +9,9 @@ from xml.etree import ElementTree
 
 from latex2mathml.converter import convert
 
-# Inline delimiters are explicit. Dollar delimiters avoid common currency pairs
-# and escaped dollars; authoring documentation recommends the unambiguous \(...\).
-INLINE_MATH = re.compile(
-    r"(?<!\\)\\\((?P<expression>.+?)\\\)"
-    r"|(?<![\\$])\$(?![\s$])(?P<dollar>[^\n$]*?\S)(?<!\\)\$(?![\d$])"
-)
+# Dollar signs belong to currency, shell variables and regular expressions.
+# Inline mathematics requires the explicit authoring delimiters \( ... \).
+INLINE_MATH = re.compile(r"(?<!\\)\\\((?P<expression>.+?)\\\)")
 MATH_NAMESPACE = "http://www.w3.org/1998/Math/MathML"
 _ALLOWED_TAGS = frozenset(
     {

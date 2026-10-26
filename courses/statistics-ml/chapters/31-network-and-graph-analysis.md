@@ -215,6 +215,10 @@ if __name__ == "__main__":
 
 - [Kipf and Welling, Semi-Supervised Classification with Graph Convolutional Networks](https://arxiv.org/abs/1609.02907)
 
+## Connected worked tutorial
+
+[Estimate network exposure effects](../tutorials/experimentation/10-interference-and-saturation.md). Enumerate a small assignment design and distinguish direct, spillover and full-rollout estimands.
+
 ## Reading connections
 
 [Previous chapter](30-spatial-and-spatiotemporal-statistics.md) | [Book contents](../README.md) | [Next chapter](32-recommendation-information-retrieval-and-ranking.md)

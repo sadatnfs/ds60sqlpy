@@ -1757,7 +1757,7 @@
       },
       {
         "question": "Why must online accumulators rescale when the maximum increases?",
-        "answer": "Their exponential weights used the old reference maximum. Multiply old sums by exp(old_max-new_max) before combining new terms."
+        "answer": "Their exponential weights used the old reference maximum. Multiply old sums by \\(\\exp(m_{\\mathrm{old}}-m_{\\mathrm{new}})\\) before combining new terms."
       },
       {
         "question": "What is the policy for a completely masked row?",
@@ -2092,7 +2092,7 @@
     "mistake": "faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.",
     "sources": [],
     "mechanism": "A custom ML operator has a forward contract and, when differentiable, a backward contract. State supported shape, strides, dtype, device, aliasing and stream behavior. Reject unsupported inputs before unsafe access. The operator must integrate with the framework's ownership and current-stream rules, not merely return plausible numbers. Compare against a readable framework reference and the framework's optimized or compiled path where available. Measure full training or inference scope, including backward, transfers and launch overhead. A faster forward kernel can still make training slower or produce wrong gradients.",
-    "example1": "For affine y=a*x+b with a=3, b=1 and x=\\([-1,0,2]\\), forward output is \\([-2,1,7]\\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.",
+    "example1": "For affine \\(y=ax+b\\) with a=3, b=1 and x=\\([-1,0,2]\\), forward output is \\([-2,1,7]\\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.",
     "example2": "For a fused bias-plus-ReLU, derivative at a nonzero preactivation is one when positive and zero when negative, multiplied by incoming gradient. The exact zero point needs the framework's chosen convention. A finite-difference check near a kink can be misleading, so test smooth points and the explicit boundary policy separately.",
     "code": "x, a, b = [-1.0, 0.0, 2.0], 3.0, 1.0\nforward = [a * value + b for value in x]\nassert forward == [-2.0, 1.0, 7.0]\n\n\ndef loss(values):\n    return sum(a * value + b for value in values)\n\n\nepsilon = 1e-5\ngradients = []\nfor i in range(len(x)):\n    plus, minus = x.copy(), x.copy()\n    plus[i] += epsilon\n    minus[i] -= epsilon\n    gradients.append((loss(plus) - loss(minus)) / (2 * epsilon))\nassert all(abs(g - a) < 1e-8 for g in gradients)\nprint({\"forward\": forward, \"CPU_finite_difference_gradients\": gradients})",
     "tasks": [

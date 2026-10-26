@@ -30,4 +30,4 @@ def test_async_classroom_ui_behaviors() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     receipt = json.loads(result.stdout.splitlines()[-1])
-    assert receipt == {"checks": 75, "passed": True, "final": True}
+    assert receipt == {"checks": 79, "passed": True, "final": True}

@@ -251,7 +251,7 @@ Candidate generation places a ceiling on the final system. If a required documen
             "Build an inverted index and derive BM25",
             """An inverted index maps each term to the document IDs containing it. It avoids scanning every document for every query term and provides document-frequency counts. A posting can later include positions or term frequencies, but the simple index here stores sets of IDs. Term frequency remains in each document\'s Counter, so repeated router occurrences do not count twice toward document frequency.
 
-The chosen BM25 term score is IDF(q)*tf*(k1+1)/(tf+k1*(1-b+b*length/average_length)), with IDF=log(1+(N-df+0.5)/(df+0.5)). k1 controls term-frequency saturation and b controls length normalization. These conventions should be recorded because variants exist. Query terms are treated as a set here, so repeated query words do not receive an extra query-frequency factor.
+The chosen BM25 term score is \\(\\operatorname{IDF}(q)\\frac{\\mathrm{tf}(k_1+1)}{\\mathrm{tf}+k_1(1-b+b\\,\\mathrm{length}/\\mathrm{average\\_length})}\\), with IDF=log(1+(N-df+0.5)/(df+0.5)). k1 controls term-frequency saturation and b controls length normalization. These conventions should be recorded because variants exist. Query terms are treated as a set here, so repeated query words do not receive an extra query-frequency factor.
 
 For the three documents, N=3 and average length is eight-thirds. Router and reset each occur in two documents, giving the same IDF log(1+1.5/2.5). The shorter router reset document gets two equal contributions. The longer document repeats router but incurs a length adjustment; extra repetition is not rewarded linearly forever.""",
         ),

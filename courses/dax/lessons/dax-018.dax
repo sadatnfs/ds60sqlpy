@@ -1,0 +1,9 @@
+// dax-018 learner draft: Measure predicates need an explicit candidate table
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Build a measure-dependent selection by evaluating the measure for each candidate member.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a selection for customers with revenue above 55.
+
+EVALUATE
+FILTER ( VALUES ( Product[ProductKey] ), FALSE() )

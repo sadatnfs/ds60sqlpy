@@ -385,3 +385,19 @@ def test_history_read_survives_concurrent_twenty_first_save_and_pruning(
     current = browser_store.history(BROWSER_LESSON)
     assert len(current) == BROWSER_HISTORY_LIMIT
     assert current[0] == latest
+
+
+def test_library_upgrade_reads_old_observations_without_relabeling_them(
+    browser_store: BrowserRunStore,
+) -> None:
+    old = browser_store.record(BROWSER_LESSON, observation())
+    old["library"] = "d3@7.9.0"
+    path = record_path(browser_store, old)
+    original = json.dumps(old).encode()
+    path.write_bytes(original)
+    restored = browser_store.get(BROWSER_LESSON, old["job_id"])
+    assert restored["library"] == "d3@7.9.0"
+    new = browser_store.record(BROWSER_LESSON, observation(source="console.log(Plotly.version)"))
+    assert new["library"] == "d3@7.9.0+plotly@4.1.2"
+    assert path.read_bytes() == original
+    assert len(browser_store.history(BROWSER_LESSON)) == 2

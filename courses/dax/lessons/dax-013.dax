@@ -1,0 +1,9 @@
+// dax-013 learner draft: Row context is not a filter on related facts
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why iterating Product does not by itself filter a raw Sales aggregation.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a projection that shows both raw and transitioned sums.
+
+EVALUATE
+ADDCOLUMNS ( Sales, "Current row calculation", BLANK() )

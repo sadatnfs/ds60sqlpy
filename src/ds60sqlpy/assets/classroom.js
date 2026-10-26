@@ -24,6 +24,10 @@ const themes = {
   "deep-learning-pytorch": ["#a02d43", "#ffe9ee", "#ffafc0", "#482a34", "PT"],
   "llm-theory": ["#5542a5", "#eeeaff", "#c9bdff", "#322c4b", "Lm"],
   "llm-applied": ["#006b60", "#def6ee", "#8adfc9", "#223e38", "AI"],
+  dax: ["#875516", "#fff1dc", "#f2c383", "#443522", "DAX"],
+  jax: ["#6844a8", "#f0eaff", "#cbb3f8", "#34294b", "JAX"],
+  r: ["#235e91", "#e8f3ff", "#a8cce9", "#24384b", "R"],
+  "data-visualization": ["#136c61", "#e2f7f0", "#97ddc9", "#243e37", "Viz"],
   nlp: ["#923875", "#fbe8f4", "#f3b5df", "#432c3e", "Aa"],
   "statistics-ml": ["#70428b", "#f4e9fa", "#ddbcf3", "#3c2e45", "Σ"],
 };
@@ -215,7 +219,7 @@ async function renderBrowserLive(context, generation, source) {
         ? "Updates are paused. The preview shows the last rendered version."
         : observation.status === "failed"
           ? "The preview needs attention. Edit your code to try again."
-          : "Up to date. Keep exploring.",
+          : "Preview is up to date.",
       observation.status === "failed" ? "error" : "ready",
     );
   } catch (error) {
@@ -660,13 +664,9 @@ function renderHome() {
     const icon = theme(subject, card);
     card.append(
       node("span", icon, "subject-icon"),
-      node("span", "GO AT YOUR OWN PACE", "card-stage"),
+      node("span", "COURSE", "card-stage"),
       node("h3", subject.title),
-      node(
-        "p",
-        subject.description ||
-          "Explore clear explanations, worked examples, and a place to practice.",
-      ),
+      node("p", subject.description || "Lessons, worked examples and coding exercises."),
     );
     const authored = subject.lessons.filter((item) => item.status !== "planned").length,
       bottom = node("span", undefined, "card-bottom");
@@ -762,7 +762,7 @@ async function showHome(historyMode = "push") {
   theme(null);
   renderHome();
   recordRoute("/classroom", historyMode);
-  document.title = "DS60 Classroom · Choose your next idea";
+  document.title = "DS60 Classroom · Course catalog";
   $("home-title").focus({ preventScroll: true });
   window.scrollTo({ top: 0 });
   status(
@@ -1082,8 +1082,10 @@ async function openLesson(id, save = true, requested = {}) {
     ? "Notes and interpretations"
     : "Explain the evidence";
   $("learning-guidance").textContent = tutorial
-    ? "Read the explanations and explore the examples at your own pace. There are no exams, problem sets, or withheld solutions. The read marker is your personal bookmark."
-    : "A successful run is evidence, not automatic mastery. Explain what happened, investigate a boundary case, and revisit the idea later.";
+    ? "Tutorial chapters include complete worked examples. There are no exams or withheld solutions. Mark a chapter as read to save your review status."
+    : data.execution_mode === "draft"
+      ? "Use the notes to explain your context trace and compare it with the named worked reference."
+      : "Execution status reports runtime behavior. Use the notes to explain results and record checks.";
   $("title").textContent = data.title || found.record.title;
   $("outcome").textContent =
     data.outcome || found.record.outcome || (data.topics || []).join(" · ");
@@ -1109,6 +1111,7 @@ async function openLesson(id, save = true, requested = {}) {
   $("explanation").value = data.session.explanation || "";
   $("solutions").replaceChildren();
   $("solutions").hidden = true;
+  $("offline-cases").replaceChildren();
   let recovered = false;
   const key = workspaceKey();
   try {
@@ -1195,7 +1198,7 @@ async function openLesson(id, save = true, requested = {}) {
   $("title").scrollIntoView({ block: "start" });
   status(
     tutorial
-      ? "The chapter and your saved notes are ready. Read and explore at your own pace."
+      ? "Chapter and saved notes loaded."
       : "Your guide, code, and notes are ready. Choose a small idea to try.",
   );
 }
@@ -1205,7 +1208,7 @@ function renderPrerequisites(ids) {
     $("prerequisites").append(node("span", "Start here: no earlier lesson is required."));
     return;
   }
-  $("prerequisites").append(node("span", "Helpful foundations, whenever you need them: "));
+  $("prerequisites").append(node("span", "Prerequisite lessons: "));
   for (const id of ids) {
     const found = locate(id);
     if (!found) {
@@ -1269,6 +1272,19 @@ function updateControls() {
 }
 function showCapability(cap) {
   const reading = current.runtime_profile === "reading";
+  const draft = current.execution_mode === "draft";
+  $("prediction-label").textContent = draft
+    ? "Predict before you compare"
+    : "Predict before you run";
+  $("source-help").textContent = draft
+    ? "Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves. Use Open worked comparison to inspect the named reference."
+    : "Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S saves; Ctrl/Cmd+Enter runs.";
+  $("runtime-summary").textContent = draft ? "About this offline workspace" : "How this code runs";
+  $("run").hidden = draft;
+  $("refresh").hidden = draft;
+  $("runtime-results").hidden = draft;
+  $("offline-workspace").hidden = !draft;
+  if (draft && !activeJob) $("cancel").hidden = true;
   const browser = ["javascript-browser", "html-browser"].includes(current.runtime_profile);
   const activity = activeJobRecord
     ? " A job for " + activeJobRecord.lesson_id + " is active or awaiting confirmation."
@@ -1276,21 +1292,23 @@ function showCapability(cap) {
       ? " A bounded Python or SQL run is active. Wait for its result before running again."
       : "";
   $("capability").textContent =
-    (reading
-      ? "Read the guide and record your reasoning. This lesson needs no code runtime."
-      : cap.ready
-        ? "Ready to run in your local classroom. " +
-          (current.engine === "legacy" ? cap.detail || "" : "")
-        : (cap.profile || current.runtime_profile) + " is not ready. " + (cap.detail || "")) +
+    (draft
+      ? cap.detail
+      : reading
+        ? "Read the guide and record your reasoning. This lesson needs no code runtime."
+        : cap.ready
+          ? "Ready to run in your local classroom. " +
+            (current.engine === "legacy" ? cap.detail || "" : "")
+          : (cap.profile || current.runtime_profile) + " is not ready. " + (cap.detail || "")) +
     activity;
   $("capability").className = "notice" + (!cap.ready && !reading ? " warn" : "");
   $("runtime-setup").hidden =
-    cap.ready || reading || (!current.setup_commands?.length && !current.runtime_guidance);
+    cap.ready || reading || draft || (!current.setup_commands?.length && !current.runtime_guidance);
   $("runtime-commands").textContent = (current.setup_commands || []).join("\n\n");
   $("runtime-setup-note").textContent =
     current.engine === "legacy" ? current.runtime_guidance || "" : "";
   $("run").disabled =
-    !cap.ready || reading || activeJob !== null || submitInFlight || legacyRunActive;
+    !cap.ready || reading || draft || activeJob !== null || submitInFlight || legacyRunActive;
   $("run").textContent = reading
     ? "Reading and reasoning"
     : legacyRunActive
@@ -1299,7 +1317,7 @@ function showCapability(cap) {
         ? "Run browser preview"
         : "Run code";
   $("timeout").disabled = reading || browser || legacyRunActive;
-  $("timeout").hidden = browser;
+  $("timeout").hidden = browser || draft;
   if (current.engine === "legacy") {
     const allowed = current.effective.allowed_timeout_seconds || [15, 60, 120];
     const old = Number($("timeout").value);
@@ -1327,6 +1345,7 @@ function resetResult() {
   $("checks").replaceChildren();
   $("sql-results").replaceChildren();
   $("figures").replaceChildren();
+  plottedReceiptKey = "";
   $("error-line").hidden = true;
 }
 function renderHistory(records) {
@@ -1415,6 +1434,8 @@ function sourceErrorLine(job) {
     matches = [
       ...output.matchAll(/(?:^|\n)\s*File\s+["'](?:[^"'\n]*[/\\])?main\.py["'],\s*line\s+(\d+)/g),
     ];
+  else if (current.language === "r")
+    matches = [...output.matchAll(/(?:^|[\s(])(?:[^\s()]*\/)?main\.R:(\d+)(?::\d+)?:/g)];
   else if (current.language === "cpp")
     matches = [...output.matchAll(/(?:^|\n)(?:[^\n]*[/\\])?main\.cpp:(\d+)(?::\d+)?:/g)];
   else if (current.language === "java")
@@ -1453,6 +1474,107 @@ function updateErrorJump() {
     $("source").setSelectionRange(start, start + (lines[currentLine - 1] || "").length);
   };
 }
+let plottedReceiptKey = "";
+function showPlotArtifacts(artifacts, key, append = false) {
+  if (plottedReceiptKey === key) return;
+  plottedReceiptKey = key;
+  if (!append) $("figures").replaceChildren();
+  for (const [position, artifact] of (artifacts || []).entries()) {
+    const figure = node("figure"),
+      title = artifact.description || "Figure " + (position + 1);
+    figure.append(node("figcaption", title));
+    if (artifact.kind === "png") {
+      const img = node("img");
+      img.src = "data:image/png;base64," + artifact.data;
+      img.alt = title;
+      figure.append(img);
+    } else if (artifact.kind === "plotly") {
+      const frame = node("iframe"),
+        note = node("p", "Loading saved chart...", "muted");
+      frame.title = title;
+      frame.className = "saved-plot";
+      frame.setAttribute("sandbox", "allow-scripts allow-downloads");
+      frame.src = "/plot-sandbox";
+      frame.addEventListener(
+        "load",
+        () => {
+          if (!frame.isConnected) return;
+          const channel = new MessageChannel();
+          const timer = setTimeout(() => {
+            if (frame.isConnected)
+              note.textContent =
+                "Chart is taking longer to render. The saved source and table remain available.";
+            channel.port1.close();
+          }, 20000);
+          channel.port1.onmessage = (event) => {
+            if (!frame.isConnected) {
+              clearTimeout(timer);
+              channel.port1.close();
+              return;
+            }
+            if (event.data?.type === "ready") {
+              note.textContent = "Saved chart. Hover, zoom or select from its controls.";
+              clearTimeout(timer);
+              channel.port1.close();
+            } else if (event.data?.type === "error") {
+              note.textContent = "Chart rendering failed: " + event.data.message;
+              clearTimeout(timer);
+              channel.port1.close();
+            }
+          };
+          channel.port1.start();
+          frame.contentWindow.postMessage(
+            { type: "ds60-plot-connect", figure: artifact.figure },
+            "*",
+            [channel.port2],
+          );
+        },
+        { once: true },
+      );
+      figure.append(frame, note);
+      const download = node("button", "Download figure JSON", "quiet");
+      download.type = "button";
+      download.addEventListener("click", () => {
+        const url = URL.createObjectURL(
+          new Blob([JSON.stringify(artifact.figure, null, 2)], { type: "application/json" }),
+        );
+        const link = node("a");
+        link.href = url;
+        link.download = "figure-" + (position + 1) + ".json";
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      });
+      figure.append(download);
+      if (artifact.table) {
+        const table = node("table"),
+          head = node("thead"),
+          row = node("tr"),
+          body = node("tbody");
+        table.append(node("caption", "Data for " + title));
+        for (const label of artifact.table.columns) {
+          const cell = node("th", label);
+          cell.scope = "col";
+          row.append(cell);
+        }
+        head.append(row);
+        table.append(head);
+        for (const values of artifact.table.rows) {
+          const line = node("tr");
+          for (const value of values)
+            line.append(node("td", value === null ? "Missing" : String(value)));
+          body.append(line);
+        }
+        table.append(body);
+        const details = node("details");
+        details.append(node("summary", "Accessible data table"), table);
+        figure.append(details);
+      }
+    }
+    $("figures").append(figure);
+  }
+}
 function showJob(job) {
   if (job.kind === "browser_observation") {
     showBrowserObservation(job);
@@ -1482,6 +1604,7 @@ function showJob(job) {
     (job.detail || "") +
     (job.truncated ? " · Log truncated; exit status and checks remain explicit." : "");
   $("output").textContent = job.output || "(No output yet.)";
+  showPlotArtifacts(job.artifacts || [], job.job_id + ":" + JSON.stringify(job.artifacts || []));
   $("checks").replaceChildren();
   for (const check of job.checks || [])
     $("checks").append(
@@ -1707,6 +1830,7 @@ function showLegacyResult(result, context, source) {
     figure.append(image, node("figcaption", image.alt));
     $("figures").append(figure);
   }
+  showPlotArtifacts(result.artifacts || [], "legacy:" + displayRevision, true);
   displayedJob = {
     lesson_id: context.id,
     source,
@@ -1849,6 +1973,7 @@ async function runCode() {
     !current ||
     !current.capability.ready ||
     current.runtime_profile === "reading" ||
+    current.execution_mode === "draft" ||
     activeJob ||
     submitInFlight ||
     legacyRunActive
@@ -2220,6 +2345,55 @@ $("refresh").addEventListener("click", async () => {
     if (sameView(intent)) status(error.message, true);
   }
 });
+$("offline-compare").addEventListener("click", async () => {
+  if (current?.execution_mode !== "draft") return;
+  const intent = selectedViewIntent();
+  try {
+    await flushSave();
+    if (!sameView(intent)) return;
+    const result = await api("module-worked-examples", { lesson_id: current.id, reveal: true });
+    if (!sameView(intent)) return;
+    const host = $("offline-cases");
+    host.replaceChildren(node("p", "Worked reference: " + result.reference_path, "muted"));
+    host.append(
+      node("p", "Model: " + result.model_path + ". BLANK denotes a missing DAX value.", "muted"),
+    );
+    const reference = node("details"),
+      pre = node("pre", result.reference_source, "result-log");
+    reference.append(node("summary", "Reference source, separate from your draft"), pre);
+    host.append(reference);
+    for (const item of result.cases) {
+      const section = node("section"),
+        trace = node("ol"),
+        table = node("table");
+      section.append(node("h4", item.title), node("p", item.context));
+      for (const step of item.trace) trace.append(node("li", step));
+      section.append(trace);
+      table.append(node("caption", "Hand-derived result for " + item.title));
+      const head = node("thead"),
+        headings = node("tr");
+      for (const column of item.columns) {
+        const cell = node("th", column.name);
+        cell.scope = "col";
+        headings.append(cell);
+      }
+      head.append(headings);
+      table.append(head);
+      const body = node("tbody");
+      for (const row of item.rows) {
+        const line = node("tr");
+        for (const value of row) line.append(node("td", value === null ? "BLANK" : String(value)));
+        body.append(line);
+      }
+      table.append(body);
+      section.append(table, node("p", item.note, "muted"));
+      host.append(section);
+    }
+    status("Opened the named reference. Your draft is unchanged and was not executed.");
+  } catch (error) {
+    if (sameView(intent)) status(error.message, true);
+  }
+});
 $("download-source").addEventListener("click", () => {
   if (!current) return;
   const url = URL.createObjectURL(
@@ -2429,7 +2603,7 @@ async function boot() {
     else {
       recordRoute("/classroom", "replace");
       status(
-        "Choose any path. Start anywhere, switch subjects freely, and learn at your own pace.",
+        "Select a subject or search for a lesson. Saved work is retained when you switch subjects.",
       );
     }
   } catch (error) {

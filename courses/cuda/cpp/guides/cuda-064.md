@@ -53,7 +53,7 @@ No lesson opening downloads a model, installs a driver or starts a GPU job.
 
 ## Worked example 1: trace the mechanism
 
-For affine y=a*x+b with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
+For affine \(y=ax+b\) with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
 
 The complete CPU model below intentionally models only the named arithmetic,
 layout, dependency or capability decision. It does not model GPU scheduling,

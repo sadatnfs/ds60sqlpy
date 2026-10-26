@@ -1,9 +1,12 @@
 # Contributor formatting toolchain
 
-This directory is the complete build context for the local formatting and
-linting image. It contains tools and configuration only. Learner files, course
-content and Git history are not copied into the image. The root formatting
-script mounts the checkout and runs the prepared tools without network access.
+This directory is the build context for the Ubuntu formatting and linting
+image. R uses a separate image to retain its compatible R system libraries.
+Its `Dockerfile.r` builds from the repository root and copies only the existing
+hash-locked R package list and installer; the root Docker ignore policy excludes
+private state and Git history. No course files are copied into either image.
+The host wrapper mounts the checkout and runs both prepared tools without
+network access or an engine socket inside the containers.
 
 The image supports Linux `amd64` and `arm64`. Windows contributors run the same
 Linux image through WSL 2 and their Docker engine. It does not start classroom
@@ -20,12 +23,19 @@ Run from the repository root with a local Linux-container engine:
 ./scripts/format-repo --list
 ```
 
-The wrapper derives a local `ds60-formatting` image tag from the complete tool
-build-context fingerprint. First use builds it with visible logs; unchanged
-preparation reuses the existing image. `--build` explicitly rebuilds tools.
-The unfiltered format command also refreshes its owned generated views;
+The wrapper derives a local `ds60-formatting` image tag from its tool context,
+excluding the separately owned R Dockerfile. `ds60-formatting-r` depends only
+on that R Dockerfile and the shared R lock/installer, not lesson or runtime
+source files. First use builds selected tools with visible logs; unchanged
+preparation reuses them. `--build` explicitly rebuilds selected tools.
+The unfiltered pass runs R first, then the remaining formatters, then refreshes
+its owned generated views. A failed R pass stops that chain. Shared regeneration
+compiles the lesson TeX before building readers;
 `--language NAME` narrows source adapters and omits shared reader refresh.
-Check/list/lint modes mount source read-only. The wrapper requires a local
+Check/list/lint modes mount source read-only. Listing uses the existing inventory
+without preparing the R image. `--language r` uses only the R image and does not
+refresh shared readers. Mixed language selections run the relevant isolated
+passes without duplicating R checks. The wrapper requires a local
 Unix-socket context because a remote engine cannot safely interpret this
 checkout's bind path. It never mounts an engine socket inside the tool container.
 
@@ -38,6 +48,7 @@ instructions therefore reuses the same tools. Dockerfile, locks, wrappers and
 | Sources | Tool and pinned release |
 | --- | --- |
 | Python and Python notebook cells | Ruff 0.16.0 |
+| R source (`.R` and `.r`) | R 4.6.1, styler 1.11.0 and lintr 3.4.0 in the separate R image |
 | JavaScript, TypeScript, JSON, CSS, HTML and YAML | Prettier 3.6.2 |
 | Java | prettier-plugin-java 2.7.7 |
 | XML, including C# project files | @prettier/plugin-xml 3.4.2 |
@@ -59,6 +70,21 @@ repository's reviewed prose and mathematical normalizers own permitted text
 repairs. The separate statistics-book synchronizer updates only manifest-linked
 complete Python fences after independently proving AST equivalence with the
 styled example files. Other subjects' frozen fences remain unchanged.
+
+R source checks use `Rscript --vanilla` and stdin. Formatting uses styler's
+line-break scope and independently compares parsed expressions before any
+write, preserving executable meaning and literal values. Invalid syntax or a
+changed parse fails without replacing the source. Lint uses fixed lexical
+lintr rules plus R's parser, with cache and ambient `.lintr` settings disabled.
+It does not evaluate learner expressions, load `.Rprofile`, install packages,
+or infer that an R model is statistically valid. R Markdown and Quarto prose
+are not silently executed or reformatted by this source adapter.
+
+The isolated image can run `python3 docker/formatting/smoke.py --r-only` with the
+repository mounted. This checks idempotence, protected literal spacing, valid
+and invalid parsing, lint and a source-side-effect sentinel without executing
+the supplied source. The ordinary smoke command remains specific to the Ubuntu
+toolchain.
 
 JavaScript and TypeScript linting uses ESLint 9.39.1, typescript-eslint 8.47.0,
 TypeScript 5.9.3 and globals 16.5.0. ShellCheck is supplied by Ubuntu 24.04.

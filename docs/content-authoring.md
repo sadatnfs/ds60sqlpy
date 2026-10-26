@@ -8,6 +8,14 @@ track-specific rules live in [python/AGENTS.md](../python/AGENTS.md),
 [curriculum design references](curriculum-design-references.md) record the
 external tutorial patterns that informed this contract.
 
+## Editorial style
+
+Use professional, factual language in classroom labels, onboarding and lessons.
+Describe the topic, action, prerequisite or result. Avoid motivational slogans,
+growth metaphors and promotional phrases such as "a place to learn and grow",
+"one attempt at a time" or "unlock your potential". Preserve concrete teaching
+instructions and accurate explanations of capability and progress.
+
 ## One classroom across every subject
 
 The public browser entrypoint is `/classroom`. Python, PostgreSQL, the bridge
@@ -30,8 +38,10 @@ navigation. The tutorial-book exception still has no exam or solution gate.
 Author mathematical statements with explicit LaTeX delimiters: `\( ... \)`
 for inline notation and `\[ ... \]` on separate lines for a displayed
 formula. These delimiters avoid ambiguity with monetary dollar signs. The
-reader converts supported notation into accessible native MathML using bundled
-local dependencies. No CDN or network request is required to read a formula.
+build compiles supported notation into KaTeX HTML with accessible MathML. Latin
+Modern fonts and syntax highlighters are bundled locally. No CDN or network
+request is required. See [textbook rendering](textbook-rendering.md) for the
+compiler, fallback and source-preservation contract.
 
 For example, write `\(\widehat{\delta}=\bar{x}_A-\bar{x}_B\)` for a mean
 difference. Give the larger uncertainty expression its own paragraph:
@@ -74,6 +84,7 @@ regeneration and before building readers:
 
 ```sh
 python scripts/normalize_lesson_prose.py --write --report work/math-prose-audit.json
+python scripts/compile_lesson_tex.py
 python scripts/build_lesson_readers.py
 ```
 

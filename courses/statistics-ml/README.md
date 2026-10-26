@@ -37,6 +37,20 @@ Replace `01` with the chapter number. Optional ecosystems such as PyMC/Stan, XGB
 
 The prose, numerical fixtures and programs are original teaching material. Chapter references link to primary papers, author-maintained books or official API documentation. External reading is optional. Interpret each demonstration within its stated assumptions and distinguish a worked calculation, an estimator's mathematical guarantee, and evidence that a real deployment is useful.
 
+## Connected tutorial routes
+
+The original forty chapters retain their IDs and all 1,005 method anchors.
+Twenty-nine additive, complete tutorials now connect selected methods into
+worked analyses with assumptions, contrasting cases and answered discussion:
+
+- [Twelve-unit experiment lifecycle](tutorials/experimentation/README.md).
+- [Eight statistical-learning and inference tutorials](tutorials/learning/README.md).
+- [Nine scientific case studies](tutorials/science/README.md), including a separately prepared PyMC/ArviZ hierarchy.
+
+The ordinary examples remain offline and use the existing scientific stack.
+The Bayesian package example explicitly uses `bayesian-cpu`; opening its guide
+does not install packages. All answers stay visible, with no exam or solution gate.
+
 ## Contents
 
 1. [Problem Formulation and Statistical Reasoning](chapters/01-problem-formulation-and-statistical-reasoning.md)

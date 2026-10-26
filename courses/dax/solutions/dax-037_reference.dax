@@ -1,0 +1,17 @@
+// dax-037: Ranking, ties and an exact-sized Top N
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    VAR Candidates = DATATABLE ( "Name", STRING, "Score", INTEGER,
+        { { "Alpha", 100 }, { "Beta", 80 }, { "Gamma", 80 }, { "Delta", 50 } } )
+
+// dax-037-a: Dense and skip ranks
+// Context: Query-local candidate fixture; descending score; four unique names and one score tie.
+EVALUATE ADDCOLUMNS ( Candidates, "DenseRank", RANKX ( Candidates, [Score], , DESC, DENSE ), "SkipRank", RANKX ( Candidates, [Score], , DESC, SKIP ) )
+ORDER BY [Score] DESC, [Name] ASC
+
+// dax-037-b: Tied cutoff versus a deliberate tie-breaker
+// Context: Same candidate table; compare score-only selection with score plus unique Name ordering.
+EVALUATE ROW ( "TopTwoByScoreRows", COUNTROWS ( TOPN ( 2, Candidates, [Score], DESC ) ), "TopTwoWithTieBreakerRows", COUNTROWS ( TOPN ( 2, Candidates, [Score], DESC, [Name], ASC ) ) )

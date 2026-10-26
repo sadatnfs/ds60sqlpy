@@ -1,0 +1,11 @@
+# r-039: complete reference for the declared synthetic inputs.
+data <- data.frame(x = c(0, 1, 0, 1), group = factor(c("A", "A", "B", "B"), levels = c("A", "B")))
+additive <- model.matrix(~ x + group, data)
+stopifnot(identical(colnames(additive), c("(Intercept)", "x", "groupB")))
+interaction <- model.matrix(~ x * group, data)
+stopifnot(identical(colnames(interaction), c("(Intercept)", "x", "groupB", "x:groupB")))
+stopifnot(qr(interaction)$rank == ncol(interaction))
+redundant <- model.matrix(~ x + I(2 * x), data)
+stopifnot(qr(redundant)$rank < ncol(redundant))
+stopifnot(!("C" %in% levels(data$group)))
+cat("r-039 reference checks passed\n")

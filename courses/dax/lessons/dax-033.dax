@@ -1,0 +1,9 @@
+// dax-033 learner draft: Prior periods and comparable completeness
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Separate a full-period comparison from an as-of comparison and explain the sign change.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a metric title that exposes the as-of boundary.
+
+EVALUATE
+ROW ( "Current comparable interval", BLANK(), "Prior interval", BLANK(), "Growth", BLANK() )

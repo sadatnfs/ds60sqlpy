@@ -1,0 +1,98 @@
+{
+  "id": "r-024",
+  "title": "S7 properties, validators and generic methods",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-021", "r-022"],
+  "concepts": ["S7 class", "property", "validator", "S7 generic", "multiple dispatch"],
+  "outcome": "Use the pinned S7 property and method API to construct valid values, reject invalid replacement and dispatch across two typed arguments.",
+  "mechanism": "S7 provides class definitions with declared properties and an explicit generic-method system. It aims to support interoperability with existing R object systems while offering more regular interfaces. It is not a spelling change for either S3 or S4. This lesson targets the prepared S7 0.2.2 API and uses method(generic, class) <- function(...) replacement syntax. Newer development documentation can show syntax not present in this pinned environment.\n\nnew_class returns a class object that is also callable as a constructor. Named properties specify expected classes such as class_numeric and class_character. A class validator expresses constraints that property types cannot state: the numeric values must form a finite vector, and the unit must contain exactly one nonempty string. An S7 validator returns NULL on success or a character vector of failures, which differs from the TRUE success result used by the S4 validity function.\n\nProperty access uses @. Construction and ordinary property replacement are validated by the S7 interface. An attempted invalid replacement should raise an error instead of installing an invalid value. Tests verify both the diagnostic and the value retained after failure. Low-level bypasses or arbitrary attribute editing are outside the public interface and should not be used as an analytical shortcut.\n\nA new_generic declares the names of the arguments involved in dispatch. A single-argument total uses the Series class. A two-argument join uses list(Series,Series), so the method is selected from both argument classes. The method still checks equality of units because dispatch selects by type, not by every possible property value. Concatenation is explicit and does not silently convert incompatible units.\n\nS7 properties and S4 slots share @ notation, but notation alone does not establish that an object is an S4 instance or that S4 method registrations apply. Inspect the public class interfaces and write adapters when crossing object-system boundaries. The next lesson uses an ordinary validated data contract so one analytical calculation can consume S3, S4, R6 and S7 values without depending on their private layouts.\n\nVersion-aware examples should test behavior against the actual prepared package and cite the relevant API. A package upgrade can change dispatch details, diagnostics or helper syntax. The bounded checks here establish construction, property validation and two generic operations on a small fixture. They do not establish compatibility with every historical S3 generic or every future S7 release.",
+  "vocabulary": [
+    {
+      "term": "Property",
+      "definition": "A declared component exposed through the S7 property interface."
+    },
+    {
+      "term": "Class object",
+      "definition": "The S7 value representing a class and serving as its constructor."
+    },
+    {
+      "term": "Validator",
+      "definition": "An S7 check returning NULL on success or character failure messages."
+    },
+    {
+      "term": "Dispatch arguments",
+      "definition": "The named generic arguments whose classes choose a method."
+    }
+  ],
+  "anatomy": "Series <- S7::new_class(...) defines properties and a validator. Series(values=c(2,4),unit=\"ms\") constructs a value and x@values reads its property. S7::new_generic(\"join_series\",c(\"x\",\"y\")) declares multiple dispatch; S7::method(join_series,list(Series,Series)) <- function(x,y) installs the pinned-version method.",
+  "worked_examples": [
+    {
+      "title": "Single and multiple dispatch on validated properties",
+      "code": "Series <- S7::new_class(\"Series\",\n  properties = list(\n    values = S7::class_numeric, unit = S7::class_character\n  ),\n  validator = function(self) {\n    problems <- character(0)\n    if (!is.null(dim(self@values)) || any(!is.finite(self@values))) {\n      problems <- c(problems, \"values must be a finite vector\")\n    }\n    if (length(self@unit) != 1L || is.na(self@unit) || !nzchar(self@unit)) {\n      problems <- c(problems, \"unit must be one nonempty string\")\n    }\n    if (length(problems)) problems else NULL\n  }\n)\nseries_total <- S7::new_generic(\"series_total\", \"x\")\nS7::method(series_total, Series) <- function(x) setNames(sum(x@values), x@unit)\njoin_series <- S7::new_generic(\"join_series\", c(\"x\", \"y\"))\nS7::method(join_series, list(Series, Series)) <- function(x, y) {\n  if (!identical(x@unit, y@unit)) stop(\"incompatible series units\")\n  Series(values = c(x@values, y@values), unit = x@unit)\n}\n\na <- Series(values = c(2, 4), unit = \"ms\")\nb <- Series(values = 6, unit = \"ms\")\nresult <- join_series(a, b)\nstopifnot(identical(result@values, c(2, 4, 6)))\nstopifnot(identical(series_total(result), c(ms = 12)))\nprint(series_total(result))\n",
+      "explanation": "The class object builds both inputs and the join result. The join method receives two Series values and preserves their unit. The total generic then returns a named scalar.",
+      "expected": "A joined vector 2,4,6 and total ms=12."
+    },
+    {
+      "title": "A property type does not express all domain constraints",
+      "code": "Series <- S7::new_class(\"Series\",\n  properties = list(\n    values = S7::class_numeric, unit = S7::class_character\n  ),\n  validator = function(self) {\n    problems <- character(0)\n    if (!is.null(dim(self@values)) || any(!is.finite(self@values))) {\n      problems <- c(problems, \"values must be a finite vector\")\n    }\n    if (length(self@unit) != 1L || is.na(self@unit) || !nzchar(self@unit)) {\n      problems <- c(problems, \"unit must be one nonempty string\")\n    }\n    if (length(problems)) problems else NULL\n  }\n)\nseries_total <- S7::new_generic(\"series_total\", \"x\")\nS7::method(series_total, Series) <- function(x) setNames(sum(x@values), x@unit)\njoin_series <- S7::new_generic(\"join_series\", c(\"x\", \"y\"))\nS7::method(join_series, list(Series, Series)) <- function(x, y) {\n  if (!identical(x@unit, y@unit)) stop(\"incompatible series units\")\n  Series(values = c(x@values, y@values), unit = x@unit)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\nx <- Series(values = c(2, 4), unit = \"ms\")\nassert_error(Series(values = Inf, unit = \"ms\"), \"finite vector\")\nassert_error(\n  {\n    x@unit <- character(0)\n  },\n  \"nonempty string\"\n)\nstopifnot(identical(x@unit, \"ms\"), identical(x@values, c(2, 4)))\nseconds <- Series(values = 1, unit = \"s\")\nassert_error(join_series(x, seconds), \"incompatible series units\")\ncat(\"Invalid construction, replacement and combination rejected.\\n\")\n",
+      "explanation": "Infinity is numeric and an empty character vector is character, so the domain validator must add information beyond the property declarations. The failed replacement preserves the previous unit.",
+      "expected": "Three expected failures; the original value remains valid."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the total of Series(values=c(3,7),unit=\"ms\").",
+      "hint": "Use the method registered for the class object.",
+      "answer": "series_total returns c(ms=10).",
+      "expected": "Named total ms=10."
+    },
+    {
+      "prompt": "Join that Series to a five-millisecond Series.",
+      "hint": "The signature is list(Series,Series).",
+      "answer": "The result contains c(3,7,5), has unit ms and total 15.",
+      "expected": "Three values and total 15."
+    },
+    {
+      "prompt": "Add a series_count generic returning the number of observations.",
+      "hint": "Declare dispatch argument x, then register one Series method.",
+      "answer": "S7::new_generic(\"series_count\",\"x\") and S7::method(series_count,Series) <- function(x) length(x@values) return 3L for the joined value.",
+      "expected": "An integer count 3L."
+    },
+    {
+      "prompt": "Diagnose a validator returning TRUE on success.",
+      "hint": "Compare the S7 and S4 contracts.",
+      "answer": "The S7 validator must return NULL on success. TRUE belongs to the S4 validity convention taught in r-022.",
+      "expected": "Use the correct S7 success result."
+    },
+    {
+      "prompt": "Test invalid property replacement and verify retained state.",
+      "hint": "Catch the stated diagnostic and read the property again.",
+      "answer": "Replacing unit with character(0) fails; the previous \"ms\" unit remains.",
+      "expected": "Error plus unchanged property."
+    },
+    {
+      "prompt": "Explain why @ access does not make an S7 object an S4 object.",
+      "hint": "Syntax and object-system identity are separate.",
+      "answer": "Use the public S7 interface and explicit adapters rather than assuming S4 slot introspection or methods apply.",
+      "expected": "No inferred cross-system inheritance."
+    }
+  ],
+  "starter": "# r-024: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nvalues <- c(3, 7)\nunit <- \"ms\"\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Predict the total of Series(values=c(3,7),unit=\"ms\").\n# TODO: Use the method registered for the class object.\n# Exercise 2: Join that Series to a five-millisecond Series.\n# TODO: The signature is list(Series,Series).\n# Exercise 3: Add a series_count generic returning the number of observations.\n# TODO: Declare dispatch argumentx, then register one Series method.\n# Exercise 4: Diagnose a validator returning TRUE on success.\n# TODO: Compare the S7 and S4 contracts.\n# Exercise 5: Test invalid property replacement and verify retained state.\n# TODO: Catch the stated diagnostic and read the property again.\n# Exercise 6: Explain why @ access does not make an S7 object an S4 object.\n# TODO: Syntax and object-system identity are separate.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "Series <- S7::new_class(\"Series\",\n  properties = list(\n    values = S7::class_numeric, unit = S7::class_character\n  ),\n  validator = function(self) {\n    problems <- character(0)\n    if (!is.null(dim(self@values)) || any(!is.finite(self@values))) {\n      problems <- c(problems, \"values must be a finite vector\")\n    }\n    if (length(self@unit) != 1L || is.na(self@unit) || !nzchar(self@unit)) {\n      problems <- c(problems, \"unit must be one nonempty string\")\n    }\n    if (length(problems)) problems else NULL\n  }\n)\nseries_total <- S7::new_generic(\"series_total\", \"x\")\nS7::method(series_total, Series) <- function(x) setNames(sum(x@values), x@unit)\njoin_series <- S7::new_generic(\"join_series\", c(\"x\", \"y\"))\nS7::method(join_series, list(Series, Series)) <- function(x, y) {\n  if (!identical(x@unit, y@unit)) stop(\"incompatible series units\")\n  Series(values = c(x@values, y@values), unit = x@unit)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\nx <- Series(values = c(3, 7), unit = \"ms\")\ny <- join_series(x, Series(values = 5, unit = \"ms\"))\nstopifnot(identical(series_total(x), c(ms = 10)), identical(y@values, c(3, 7, 5)))\nstopifnot(identical(series_total(y), c(ms = 15)))\nseries_count <- S7::new_generic(\"series_count\", \"x\")\nS7::method(series_count, Series) <- function(x) length(x@values)\nstopifnot(identical(series_count(y), 3L))\nassert_error(Series(values = NA_real_, unit = \"ms\"), \"finite vector\")\nassert_error(\n  {\n    x@unit <- character(0)\n  },\n  \"nonempty string\"\n)\nstopifnot(identical(x@unit, \"ms\"))\nassert_error(join_series(x, Series(values = 1, unit = \"s\")), \"incompatible series units\")\nempty <- Series(values = numeric(0), unit = \"ms\")\nstopifnot(series_count(empty) == 0L, series_total(empty)[[1]] == 0)\ncat(\"r-024 reference checks passed\\n\")\n",
+  "solution_explanation": "The implementation uses the pinned replacement-method syntax and the S7 NULL validator convention. It separately tests constructor validation, property replacement and a compatibility check inside a multi-argument method. These are different sources of guarantees.\n\nThe count operation demonstrates an independent generic with the same public class. The all-empty case is deliberate and preserves units. Class-system interoperability is deferred to explicit adapters; the shared @ notation is not used as evidence of S4 inheritance.",
+  "sources": [
+    {
+      "title": "S7 overview",
+      "url": "https://rconsortium.github.io/S7/articles/S7.html"
+    },
+    {
+      "title": "S7 class constructor API",
+      "url": "https://rconsortium.github.io/S7/reference/new_class.html"
+    },
+    {
+      "title": "S7 compatibility",
+      "url": "https://rconsortium.github.io/S7/articles/compatibility.html"
+    }
+  ]
+}

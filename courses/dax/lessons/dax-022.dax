@@ -1,0 +1,10 @@
+// dax-022 learner draft: Variables inside and outside an iterator
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Locate a variable's binding context and avoid repeating one total for every member.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write an iterator whose variable intentionally holds one global denominator.
+
+EVALUATE
+VAR OutsideValue = BLANK()
+RETURN ROW ( "Captured outside iterator", OutsideValue, "Evaluated inside iterator", BLANK() )

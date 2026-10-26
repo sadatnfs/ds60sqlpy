@@ -1,0 +1,9 @@
+// dax-051 learner draft: A faster-looking rewrite must preserve filter semantics
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Find a context where two similar predicates differ before treating one as an optimization.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a minimum semantic regression grid.
+
+EVALUATE
+ROW ( "Replacement population", BLANK(), "Preserved intersection population", BLANK() )

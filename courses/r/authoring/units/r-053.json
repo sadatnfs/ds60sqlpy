@@ -1,0 +1,104 @@
+{
+  "id": "r-053",
+  "title": "ggplot2 data mappings and layers",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-052"],
+  "concepts": [
+    "ggplot object",
+    "aesthetic mapping",
+    "constant setting",
+    "layer data",
+    "explicit printing"
+  ],
+  "outcome": "Construct and inspect a ggplot whose data, mappings and layer-specific responsibilities are explicit.",
+  "mechanism": "A ggplot describes a graphic by combining data, aesthetic mappings and layers. The data supplies observations; aes maps columns or expressions to visual properties such as x position, y position, colour or shape. A geom chooses how those mapped values become marks. The plus operator adds components to the plot object rather than performing ordinary numerical addition.\n\nA mapping inside aes differs from a constant setting outside it. Mapping colour to a group variable assigns values through a scale and can create a legend. Setting colour=\"blue\" outside aes requests the same colour for the layer. Putting a literal string inside aes creates a mapped category with that label; it is not automatically the same as selecting that colour directly.\n\nLayers can share the plot's default data and mappings or use their own. This is useful when raw observations and a derived summary appear together. A summary layer must contain the columns its mappings require. inherit.aes=FALSE makes a layer's separate contract explicit when it should not inherit all mappings from the raw data.\n\nConstructing an object is not always the same as drawing it. Interactive sessions often print the final expression automatically, but scripts and functions should call print(p) explicitly. The classroom's R capture path relies on actual drawing or explicit widget printing. A variable containing a plot object alone is not evidence that a figure was emitted.\n\nInspecting ggplot_build can verify transformed layer data, group counts and mark coordinates. These are useful software checks, but they do not establish final readability, contrast or label placement. A complete graphical acceptance combines correct numerical/layer data with actual rendering and visual inspection at the delivered size.",
+  "vocabulary": [
+    {
+      "term": "Aesthetic mapping",
+      "definition": "A relationship from data values to a visual property, specified through aes."
+    },
+    {
+      "term": "Constant setting",
+      "definition": "A fixed visual property supplied outside aes for a layer."
+    },
+    {
+      "term": "Layer",
+      "definition": "A data/statistic/geometry combination added to the plot."
+    },
+    {
+      "term": "Inherited mapping",
+      "definition": "A default mapping reused by a layer unless explicitly replaced or disabled."
+    }
+  ],
+  "anatomy": "Start with ggplot2::ggplot(data, ggplot2::aes(x,y,...)), add geoms with +, then add labels and scales. Use a manual named palette when category-colour identity matters. Inspect ggplot_build(p)$data for layer values. Call print(p) explicitly in a script; do not rely on implicit interactive printing.",
+  "worked_examples": [
+    {
+      "title": "Map group identity",
+      "code": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\np <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = group, shape = group)) +\n  ggplot2::geom_point(size = 3) +\n  ggplot2::scale_colour_manual(values = c(A = \"#0072B2\", B = \"#D55E00\")) +\n  ggplot2::labs(x = \"Input\", y = \"Response\", colour = \"Group\", shape = \"Group\")\nbuilt <- ggplot2::ggplot_build(p)$data[[1]]\nstopifnot(nrow(built) == 4, length(unique(built$colour)) == 2, length(unique(built$shape)) == 2)\nprint(p)\n",
+      "explanation": "Group is mapped through two visual channels. The named palette preserves category identity, while the layer-data checks confirm four marks and two encoded groups.",
+      "expected": "Four points, two group colours and shapes, one explicitly printed plot."
+    },
+    {
+      "title": "Give a summary layer its own data",
+      "code": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = c(\"A\", \"A\", \"B\", \"B\"))\nmeans <- aggregate(cbind(x, y) ~ group, d, mean)\np <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = group)) +\n  ggplot2::geom_point(size = 2) +\n  ggplot2::geom_point(data = means, mapping = ggplot2::aes(x, y), inherit.aes = FALSE, colour = \"black\", shape = 4, size = 5) +\n  ggplot2::labs(x = \"Input\", y = \"Response\", title = \"Raw points and group means\")\nbuilt <- ggplot2::ggplot_build(p)$data\nstopifnot(nrow(built[[1]]) == 4, nrow(built[[2]]) == 2)\nstopifnot(max(abs(sort(built[[2]]$y) - c(2, 4))) < 1e-12)\nprint(p)\n",
+      "explanation": "The second layer uses a derived table and only its own x/y mapping. It does not accidentally require the raw layer's complete aesthetic contract.",
+      "expected": "Raw layer four rows; summary layer two means at y2 and 4."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Map group to colour and shape for the four-row fixture.",
+      "hint": "Place the variable inside aes.",
+      "answer": "The built point layer contains four observations and two encoded group identities.",
+      "expected": "Four marks and two categories."
+    },
+    {
+      "prompt": "Set a constant point colour outside aes and compare it with a group mapping.",
+      "hint": "Inspect the built colour values.",
+      "answer": "The constant setting gives one colour to every row, while a group mapping uses a scale.",
+      "expected": "One fixed colour versus two mapped colours."
+    },
+    {
+      "prompt": "Add a group-mean layer using its own data.",
+      "hint": "Define the summary table and disable unwanted inherited mappings.",
+      "answer": "The layer has two rows with response means 2 and 4, separate from the four raw observations.",
+      "expected": "Correct layer-specific row counts and coordinates."
+    },
+    {
+      "prompt": "Diagnose aes(colour=\"group\") when the intended mapping is the group column.",
+      "hint": "Distinguish a string literal from a column expression.",
+      "answer": "The quoted string is one mapped category, not the data column. Use aes(colour=group) for variable mapping.",
+      "expected": "Literal-versus-variable distinction stated."
+    },
+    {
+      "prompt": "Print a plot object from a script or function.",
+      "hint": "Call print explicitly.",
+      "answer": "The explicit call emits the graphic through the active device rather than merely storing an object.",
+      "expected": "A rendered figure request occurs."
+    },
+    {
+      "prompt": "Explain what ggplot_build checks cannot establish about the delivered image.",
+      "hint": "Separate layer data from visual perception.",
+      "answer": "Correct marks and groups do not prove readable labels, sufficient contrast or absence of clipping in the browser.",
+      "expected": "Data and visual evidence separated."
+    }
+  ],
+  "starter": "# r-053: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Map group to colour and shape for the four-row fixture.\n# TODO: Place the variable inside aes.\n# Exercise 2: Set a constant point colour outside aes and compare it with a group mapping.\n# TODO: Inspect the built colour values.\n# Exercise 3: Add a group-mean layer using its own data.\n# TODO: Define the summary table and disable unwanted inherited mappings.\n# Exercise 4: Diagnose aes(colour=\"group\") when the intended mapping is the group column.\n# TODO: Distinguish a string literal from a column expression.\n# Exercise 5: Print a plot object from a script or function.\n# TODO: Call print explicitly.\n# Exercise 6: Explain what ggplot_build checks cannot establish about the delivered image.\n# TODO: Separate layer data from visual perception.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\nmapped <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = group, shape = group)) +\n  ggplot2::geom_point(size = 3) +\n  ggplot2::scale_colour_manual(values = c(A = \"#0072B2\", B = \"#D55E00\"))\nb <- ggplot2::ggplot_build(mapped)$data[[1]]\nstopifnot(nrow(b) == 4, length(unique(b$colour)) == 2, length(unique(b$shape)) == 2)\nconstant <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point(colour = \"#0072B2\")\nstopifnot(length(unique(ggplot2::ggplot_build(constant)$data[[1]]$colour)) == 1)\nmeans <- aggregate(cbind(x, y) ~ group, d, mean)\nlayered <- mapped + ggplot2::geom_point(data = means, mapping = ggplot2::aes(x, y), inherit.aes = FALSE, colour = \"black\", shape = 4, size = 5)\nlayers <- ggplot2::ggplot_build(layered)$data\nstopifnot(nrow(layers[[1]]) == 4, nrow(layers[[2]]) == 2, max(abs(sort(layers[[2]]$y) - c(2, 4))) < 1e-12)\nliteral <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = \"group\")) +\n  ggplot2::geom_point()\nstopifnot(length(unique(ggplot2::ggplot_build(literal)$data[[1]]$colour)) == 1)\nprint(mapped)\nprint(layered)\ncat(\"r-053 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference tests both mapping and constant-setting behavior rather than checking only that a ggplot object exists. The summary layer has independent data and explicitly controlled inheritance, making its numerical role inspectable.\n\nOnly two plots are printed. The built-data checks establish row/group/coordinate properties, while the actual classroom renderer must still be inspected for visual quality and delivery. No browser success is inferred from a bare Rscript pass.",
+  "sources": [
+    {
+      "title": "ggplot creation",
+      "url": "https://ggplot2.tidyverse.org/reference/ggplot.html"
+    },
+    {
+      "title": "Aesthetic mappings",
+      "url": "https://ggplot2.tidyverse.org/reference/aes.html"
+    },
+    {
+      "title": "Point geometry",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_point.html"
+    }
+  ]
+}

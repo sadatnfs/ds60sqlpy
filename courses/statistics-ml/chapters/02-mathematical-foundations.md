@@ -250,6 +250,10 @@ if __name__ == "__main__":
 
 - [NumPy singular-value decomposition API](https://numpy.org/doc/stable/reference/generated/numpy.linalg.svd.html).
 
+## Connected worked tutorial
+
+[Build matrix operations before optimization](../tutorials/learning/01-geometry-and-calculus.md). Trace dimensions, derive gradients and compare stable with unstable quadratic updates.
+
 ## Reading connections
 
 [Previous chapter](01-problem-formulation-and-statistical-reasoning.md) | [Book contents](../README.md) | [Next chapter](03-probability-fundamentals-and-stochastic-processes.md)

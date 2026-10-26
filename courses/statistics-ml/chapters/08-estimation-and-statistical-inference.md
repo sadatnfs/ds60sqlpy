@@ -313,6 +313,10 @@ if __name__ == "__main__":
 
 - [statsmodels robust regression covariance](https://www.statsmodels.org/stable/generated/statsmodels.regression.linear_model.RegressionResults.get_robustcov_results.html).
 
+## Connected worked tutorial
+
+[From likelihood to coverage](../tutorials/learning/02-likelihood-and-inference.md). Derive a Bernoulli estimator and compare Wald/Wilson coverage by exact enumeration.
+
 ## Reading connections
 
 [Previous chapter](07-missing-data-measurement-error-and-robust-statistics.md) | [Book contents](../README.md) | [Next chapter](09-hypothesis-tests-and-group-comparisons.md)

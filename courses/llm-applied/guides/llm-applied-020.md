@@ -88,7 +88,7 @@ Compute query_embeddings=query_features@W andscore_matrix=query_embeddings@docum
 
 ## Derive the first query-projection and reranker updates
 
-Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix \({QWD}^{T}\) is therefore W itself. Each row has uniform class probabilities[0.5, 0.5], and the labels are[0, 1]. Mean cross entropy across two rows gives gradient[[-0.25, 0.25], [0.25, -0.25]]. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
+Queries and documents are both the 2-by-2 identity matrix, while W begins at zero. The score matrix \(QWD^{\mathsf T}\) is therefore W itself. Each row has uniform class probabilities[0.5, 0.5], and the labels are[0, 1]. Mean cross entropy across two rows gives gradient[[-0.25, 0.25], [0.25, -0.25]]. SGD at 0.5 produces W=[[0.125, -0.125], [-0.125, 0.125]] after one update.
 
 The positive-minus-negative score margin is 0.25 in both training rows. Symmetry preserves the form[[a, -a], [-a, a]] during this particular optimization, with positive a after the first step. For a new query[x, y], the two scores are[a(x-y), -a(x-y)], so the decision boundary is \(x=y\). The held-out[0.9, 0.1] lies well on the document 0 side; after the first step its scores are[0.1, -0.1]. That is a local feature-space check, not a test of understanding a new sentence.
 

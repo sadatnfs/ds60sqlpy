@@ -16,11 +16,11 @@ Gradient clipping limits a norm after backward and before the optimizer step. It
 
 ## Reading the implementation
 
-Check loss.requires_grad and parameter.grad before calling step. Use optimizer.zero_grad(set_to_none=True) for independent updates. nn.utils.clip_grad_norm_ mutates gradients in place and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
+Check `loss.requires_grad` and parameter.grad before calling step. Use `optimizer.zero_grad(set_to_none=True)` for independent updates. nn.utils.clip_grad_norm_ mutates gradients in place and returns the norm before clipping. Record weight before, gradient before clipping, gradient after clipping and weight after step as distinct states. A detached numeric loss cannot backpropagate to its origin.
 
 ## Trace the optimizer state transition and objective denominator
 
-Example A computes a numeric loss from \(w=0\) and detaches it. Its value is still four, but its dependency on w is no longer in the recorded graph. Setting requires_grad on that detached scalar would create a new leaf; it would not reconstruct the missing operation. The failed backward leaves the original parameter unchanged, so the sequential Example B still begins at \(w=0\).
+Example A computes a numeric loss from \(w=0\) and detaches it. Its value is still four, but its dependency on w is no longer in the recorded graph. Setting `requires_grad` on that detached scalar would create a new leaf; it would not reconstruct the missing operation. The failed backward leaves the original parameter unchanged, so the sequential Example B still begins at \(w=0\).
 
 For x=[1, 2, 3], y=2x and mean squared error, the objective is \(L(w)=\frac{14}{3}(w-2)^2\). Its derivative is \(\frac{28}{3}(w-2)\). With learning rate \(\frac{1}{10}\), the update is \(w_{\mathrm{next}}=\frac{w}{15}+\frac{28}{15}\). The exact trace is:
 
@@ -31,7 +31,7 @@ For x=[1, 2, 3], y=2x and mean squared error, the objective is \(L(w)=\frac{14}{
 
 The loss at the final weight is \(\frac{56}{151875}\). A logged loss tensor calculated before step still represents the earlier state after the parameter changes. Recompute the forward objective to report post-update loss; printing the new weight beside the old loss without labeling them mixes two different states.
 
-backward adds to stored gradient buffers. If the second step does not clear the first gradient, the stored value becomes \(\frac{-56}{3}-\frac{56}{45}=\frac{-896}{45}\), and the next weight becomes \(\frac{868}{225}\) rather than \(\frac{448}{225}\). That precise wrong trace distinguishes accidental accumulation from a wrong derivative formula. set_to_none=True also makes absence visible: None means no stored gradient was produced for that parameter in the relevant pass, whereas a connected derivative can be an actual zero. An optimizer may treat those cases differently, especially with state or decay.
+backward adds to stored gradient buffers. If the second step does not clear the first gradient, the stored value becomes \(\frac{-56}{3}-\frac{56}{45}=\frac{-896}{45}\), and the next weight becomes \(\frac{868}{225}\) rather than \(\frac{448}{225}\). That precise wrong trace distinguishes accidental accumulation from a wrong derivative formula. `set_to_none=True` also makes absence visible: None means no stored gradient was produced for that parameter in the relevant pass, whereas a connected derivative can be an actual zero. An optimizer may treat those cases differently, especially with state or decay.
 
 Intentional microbatch accumulation needs a global denominator. Split the same three rows into one row and two rows at \(w=0\). The local mean gradients are -4 and -26. Averaging those means equally gives -15, but the full-data gradient is(1×(-4)+2×(-26))/3=\(\frac{-56}{3}\). One correct implementation weights each local mean by its valid-example count divided by the total, or accumulates local summed losses and divides by the total valid count. For padded tokens or sample weights, the denominator is the valid weight mass, not necessarily the number of stored rows.
 
@@ -41,13 +41,13 @@ Norm clipping is another nonlinear boundary. Concatenate the participating param
 
 Clipping each contribution before accumulation can change the result. Scalar contributions 100 and-99 sum to one; clipping their sum to magnitude one leaves one. Clipping each separately to±1 and then adding gives zero. Therefore clip at the declared update boundary after the intended weighting and accumulation. With scaled gradients, unscale before applying a threshold expressed in ordinary gradient units.
 
-Clipping limits the supplied gradient norm. It does not universally bound optimizer displacement when momentum, adaptive preconditioning, weight decay or retained state also affect the update. It also cannot repair invalid labels, nonfinite forward values or leakage. error_if_nonfinite=True makes an infinite/NaN norm a refusal rather than a meaningful update. The unchanged CPU fixture checks these local distinctions; it does not qualify mixed-precision or distributed execution.
+Clipping limits the supplied gradient norm. It does not universally bound optimizer displacement when momentum, adaptive preconditioning, weight decay or retained state also affect the update. It also cannot repair invalid labels, nonfinite forward values or leakage. `error_if_nonfinite=True` makes an infinite/NaN norm a refusal rather than a meaningful update. The unchanged CPU fixture checks these local distinctions; it does not qualify mixed-precision or distributed execution.
 
 ## Exercise 1: Expose detachment
 
 The question is: Detach \({\left(w-2\right)}^{2}\) before backward and inspect tracking.
 
-The loss may have the correct numeric value while the training path is broken. Re-enabling requires_grad on the detached scalar would create a new leaf, not reconnect w.
+The loss may have the correct numeric value while the training path is broken. Re-enabling `requires_grad` on the detached scalar would create a new leaf, not reconnect w.
 
 ```python
 w=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); disconnected=((w-2)**2).detach()
@@ -57,9 +57,9 @@ except RuntimeError: pass
 else: raise AssertionError('detached loss backpropagated')
 ```
 
-**Expected:** detached loss requires_grad False; backward raises RuntimeError.
+**Expected:** detached loss `requires_grad` False; backward raises RuntimeError.
 
-**Verify:** Compare the computed values or written argument with detached loss requires_grad False; backward raises RuntimeError.
+**Verify:** Compare the computed values or written argument with detached loss `requires_grad` False; backward raises RuntimeError.
 
 ## Exercise 2: Repair two exact updates
 

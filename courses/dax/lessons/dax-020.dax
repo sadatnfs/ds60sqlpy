@@ -1,0 +1,9 @@
+// dax-020 learner draft: REMOVEFILTERS and the exact denominator population
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: State which filters a share denominator removes and which it retains.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the denominator contract in plain language before coding.
+
+EVALUATE
+ROW ( "Numerator", BLANK(), "Declared denominator", BLANK(), "Share", BLANK() )

@@ -132,7 +132,7 @@ boundaries as applicable:
 
 | Layer | Source |
 | --- | --- |
-| Profile/language and verifier admission | `modules.py`, `module_extensions.py` |
+| Profile/language, source suffix and verifier admission | `modules.py` (`LANGUAGES`, `SOURCE_SUFFIXES`), `module_extensions.py` |
 | App routing and durable jobs | `module_jobs.py`, `module_service.py` |
 | Fixed argv, preparation and typed checks | `worker_operations.py`, `gpu_runtime.py` and reviewed adapters |
 | External resource ownership | A dedicated adapter such as `kubernetes_module.py` |
@@ -165,8 +165,8 @@ recoverable drafts before switching contexts. Viewing an earlier result must
 not execute code or replace current source.
 
 Use explicit LaTeX and tagged code fences. Run the subject authoring generator
-when relevant, then `python scripts/normalize_lesson_prose.py --write`, shared
-generation and the publication rendering gate. Do not hand-edit HTML or change
+when relevant, then `python scripts/normalize_lesson_prose.py --write`,
+`python scripts/compile_lesson_tex.py`, shared generation and the publication rendering gate. Do not hand-edit HTML or change
 reference code to resolve a display defect.
 
 Run `python scripts/check_modules.py`, relevant subject tests, actual reference

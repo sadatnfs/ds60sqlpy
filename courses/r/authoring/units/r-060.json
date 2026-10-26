@@ -1,0 +1,104 @@
+{
+  "id": "r-060",
+  "title": "Capstone: an analytical visualization with an evidence record",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-059", "r-050"],
+  "concepts": [
+    "eligibility",
+    "summary table",
+    "uncertainty display",
+    "interactive payload",
+    "report limits"
+  ],
+  "outcome": "Build a linked numerical, static and interactive analysis whose denominators, identities, uncertainty and delivery limits can be reviewed.",
+  "mechanism": "An analytical visualization should connect its displayed marks to an explicit calculation. This capstone begins with identified synthetic records, a declared missing-value policy and two groups. The raw data, summary table and figures remain separate artifacts so a reviewer can reconstruct every value rather than trusting the appearance of a polished chart.\n\nThe observed-value policy retains eight measured values and records two missing measurements. Each group has four observed values. Means, standard errors and Student t intervals are calculated from those admitted observations. The intervals target group means under their stated assumptions; they are not predictions for future individuals and do not establish a causal treatment effect.\n\nThe static graphic shows observations and the mean intervals together. The interactive figure retains observation IDs and a separate summary trace with error bars. The summary trace does not add new observations to the underlying dataset. Counting all rendered points as sample size would therefore be a denominator error.\n\nA printed table provides an alternative to hover and makes the eligibility counts inspectable. The report should name the metric, missingness rule, interval construction, package environment and limitations. A difference between group means is descriptive here because no randomized or otherwise identified causal design is supplied.\n\nAcceptance proceeds through several evidence layers: numeric assertions, layer/trace parity, explicit plot printing, captured figure structure and actual browser inspection. This reference performs the first stages and can be executed through the prepared worker capture path. It does not infer readable labels, working hover controls or accessibility from a successful Rscript exit.\n\nFor independent work, change the group sizes or missingness pattern and derive the new expected summaries before modifying the figures. Explain how the report would change if the target were an overall observation mean, an equal-group mean or a causal contrast. A defensible analysis keeps those questions distinct.",
+  "vocabulary": [
+    {
+      "term": "Eligibility ledger",
+      "definition": "Counts and rules determining which records contribute to a calculation."
+    },
+    {
+      "term": "Summary trace",
+      "definition": "Marks representing derived statistics rather than additional raw observations."
+    },
+    {
+      "term": "Interval construction",
+      "definition": "The explicit estimator, standard error and critical-value procedure behind an uncertainty display."
+    },
+    {
+      "term": "Evidence record",
+      "definition": "A report connecting source data, calculations, rendered payloads and the limits of observed validation."
+    }
+  ],
+  "anatomy": "Create a keyed raw data frame, select observed values under the declared policy, then compute one summary row per group with n, missing, mean, SE and interval endpoints. Use that same summary table for ggplot2 error bars and Plotly error_y, keeping raw observations in separate layers/traces. Validate counts and coordinates, print the table and exactly two figures, and report remaining browser checks.",
+  "worked_examples": [
+    {
+      "title": "Compute the eligibility and uncertainty ledger",
+      "code": "d <- data.frame(id = c(paste0(\"A\", 1:5), paste0(\"B\", 1:5)), group = rep(c(\"A\", \"B\"), each = 5), value = c(1, 2, 3, 4, NA_real_, 2, 3, 6, 7, NA_real_))\nsummary <- do.call(rbind, lapply(split(d$value, d$group), function(values) {\n  observed <- values[!is.na(values)]\n  n <- length(observed); se <- sd(observed) / sqrt(n); half <- qt(0.975, n - 1) * se\n  data.frame(n = n, missing = sum(is.na(values)), mean = mean(observed), se = se, half = half)\n}))\nsummary$group <- rownames(summary)\nstopifnot(sum(summary$n) == 8, sum(summary$missing) == 2, max(abs(summary$mean - c(2.5, 4.5))) < 1e-12)\nstopifnot(max(abs(summary$se^2 - c(5 / 12, 17 / 12))) < 1e-12)\nprint(summary)\n",
+      "explanation": "The table retains both observed and missing counts and labels the mean-interval construction. These are the exact values later supplied to both rendering systems.",
+      "expected": "Eight observed values, two missing values, group means 2.5/4.5 and squared SEs 5/12 and 17/12."
+    },
+    {
+      "title": "Represent summaries without double-counting observations",
+      "code": "summary <- data.frame(group = c(\"A\", \"B\"), n = c(4L, 4L), mean = c(2.5, 4.5), se = sqrt(c(5 / 12, 17 / 12)))\nsummary$half <- qt(0.975, 3) * summary$se\np <- plotly::plot_ly(summary, x = ~group, y = ~mean, type = \"scatter\", mode = \"markers\", name = \"Group mean\", error_y = list(type = \"data\", array = summary$half, visible = TRUE))\np <- plotly::layout(p, xaxis = list(title = \"Group\"), yaxis = list(title = \"Mean and 95% t interval\"))\ntrace <- plotly::plotly_build(p)$x$data[[1]]\nstopifnot(length(trace$x) == 2, max(abs(as.numeric(trace$y) - summary$mean)) < 1e-12)\nstopifnot(max(abs(as.numeric(trace$error_y$array) - summary$half)) < 1e-12)\nprint(summary)\nprint(p)\n",
+      "explanation": "Two summary marks represent eight observations. The error bars reuse the declared half-widths; their visual presence does not change the observation denominator.",
+      "expected": "Two mean marks with exact supplied t-interval half-widths."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Build the eligibility ledger from the ten raw records.",
+      "hint": "Keep missing counts instead of silently dropping them.",
+      "answer": "There are eight observed values and two missing measurements, with four observed values per group.",
+      "expected": "Counts 10/8/2 and group counts 4/4."
+    },
+    {
+      "prompt": "Derive means, SEs and t-interval endpoints.",
+      "hint": "Use the admitted raw values and df 3 for each group.",
+      "answer": "Means are 2.5 and 4.5; squared SEs 5/12 and 17/12; half-widths are qt(0.975,3) times SE.",
+      "expected": "Independent numerical oracle."
+    },
+    {
+      "prompt": "Construct a static raw-point and interval display from those tables.",
+      "hint": "Use separate layer data and explicit inheritance.",
+      "answer": "Eight raw marks and two mean intervals correspond to distinct statistical objects.",
+      "expected": "Correct layer counts and interval coordinates."
+    },
+    {
+      "prompt": "Construct an interactive figure retaining raw IDs and a separate summary trace.",
+      "hint": "Do not count summary marks as new observations.",
+      "answer": "The raw trace has eight keyed observations; the summary trace has two means and supplied error bars.",
+      "expected": "Trace counts 8 and 2 with retained identity."
+    },
+    {
+      "prompt": "Diagnose interpreting the mean difference as a causal effect.",
+      "hint": "Identify the absent assignment/identification design.",
+      "answer": "The difference of two is descriptive for this fixture. A causal interpretation requires additional design assumptions and evidence.",
+      "expected": "No unsupported causal claim."
+    },
+    {
+      "prompt": "Produce a factual report of what execution and capture established.",
+      "hint": "Separate numeric, payload and browser evidence.",
+      "answer": "Report calculation and layer/trace checks, actual printed/captured figures, and any unperformed readability, hover or accessibility checks.",
+      "expected": "A complete bounded evidence record."
+    }
+  ],
+  "starter": "# r-060: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(id = c(paste0(\"A\", 1:5), paste0(\"B\", 1:5)), group = rep(c(\"A\", \"B\"), each = 5), value = c(1, 2, 3, 4, NA_real_, 2, 3, 6, 7, NA_real_))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Build the eligibility ledger from the ten raw records.\n# TODO: Keep missing counts instead of silently dropping them.\n# Exercise 2: Derive means, SEs and t-interval endpoints.\n# TODO: Use the admitted raw values and df 3 for each group.\n# Exercise 3: Construct a static raw-point and interval display from those tables.\n# TODO: Use separate layer data and explicit inheritance.\n# Exercise 4: Construct an interactive figure retaining raw IDs and a separate summary trace.\n# TODO: Do not count summary marks as new observations.\n# Exercise 5: Diagnose interpreting the mean difference as a causal effect.\n# TODO: Identify the absent assignment/identification design.\n# Exercise 6: Produce a factual report of what execution and capture established.\n# TODO: Separate numeric, payload and browser evidence.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(id = c(paste0(\"A\", 1:5), paste0(\"B\", 1:5)), group = rep(c(\"A\", \"B\"), each = 5), value = c(1, 2, 3, 4, NA_real_, 2, 3, 6, 7, NA_real_))\nobserved <- d[!is.na(d$value), ]\nsummary <- do.call(rbind, lapply(split(d$value, d$group), function(values) {\n  x <- values[!is.na(values)]; n <- length(x); se <- sd(x) / sqrt(n); half <- qt(0.975, n - 1) * se\n  data.frame(n = n, missing = sum(is.na(values)), mean = mean(x), se = se, lower = mean(x) - half, upper = mean(x) + half, half = half)\n}))\nsummary$group <- rownames(summary)\nstopifnot(nrow(d) == 10, nrow(observed) == 8, sum(summary$missing) == 2, !anyDuplicated(observed$id))\nstopifnot(max(abs(summary$mean - c(2.5, 4.5))) < 1e-12, max(abs(summary$se^2 - c(5 / 12, 17 / 12))) < 1e-12)\nstatic <- ggplot2::ggplot(observed, ggplot2::aes(group, value)) +\n  ggplot2::geom_point(colour = \"#0072B2\", size = 2) +\n  ggplot2::geom_errorbar(data = summary, mapping = ggplot2::aes(x = group, ymin = lower, ymax = upper), inherit.aes = FALSE, width = 0.15) +\n  ggplot2::geom_point(data = summary, mapping = ggplot2::aes(group, mean), inherit.aes = FALSE, shape = 4, size = 4) +\n  ggplot2::labs(x = \"Group\", y = \"Observed value and mean interval\", caption = \"Intervals: 95% Student t intervals for group means; synthetic independent-observation model\")\nlayers <- ggplot2::ggplot_build(static)$data\nstopifnot(nrow(layers[[1]]) == 8, nrow(layers[[2]]) == 2, nrow(layers[[3]]) == 2)\ninteractive <- plotly::plot_ly()\ninteractive <- plotly::add_trace(interactive, data = observed, x = ~group, y = ~value, customdata = ~id, type = \"scatter\", mode = \"markers\", name = \"Observed\", hovertemplate = \"ID: %{customdata}<br>Group: %{x}<br>Value: %{y}<extra>Observed</extra>\")\ninteractive <- plotly::add_trace(interactive, data = summary, x = ~group, y = ~mean, type = \"scatter\", mode = \"markers\", name = \"Mean and 95% t interval\", inherit = FALSE, error_y = list(type = \"data\", array = summary$half, visible = TRUE))\ninteractive <- plotly::layout(interactive, xaxis = list(title = \"Group\"), yaxis = list(title = \"Observed value and mean interval\"))\ntraces <- plotly::plotly_build(interactive)$x$data\nstopifnot(length(traces) == 2, length(traces[[1]]$x) == 8, length(traces[[2]]$x) == 2)\nstopifnot(identical(sort(as.character(traces[[1]]$customdata)), sort(observed$id)))\nstopifnot(max(abs(as.numeric(traces[[2]]$error_y$array) - summary$half)) < 1e-12)\nstopifnot(diff(summary$mean) == 2)\nprint(summary)\nprint(static)\nprint(interactive)\ncat(\"r-060 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference calculates one eligibility/summary table and uses it consistently across the static and interactive views. It checks raw IDs, layer counts, trace counts and uncertainty coordinates, preventing duplicated summary marks from being mistaken for additional observations.\n\nThe two printed figures share a numerical contract while retaining different rendering systems. The source and worker capture can establish actual PNG/Plotly payload production, but final browser usability remains a separate observation. The group difference is explicitly descriptive because the fixture supplies no causal assignment design.",
+  "sources": [
+    {
+      "title": "ggplot error bars",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_linerange.html"
+    },
+    {
+      "title": "Plotly error bars",
+      "url": "https://plotly.com/r/error-bars/"
+    },
+    {
+      "title": "R Student t distribution",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TDist.html"
+    }
+  ]
+}

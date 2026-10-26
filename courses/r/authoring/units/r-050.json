@@ -1,0 +1,100 @@
+{
+  "id": "r-050",
+  "title": "Scientific synthesis and reproducible model comparison",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-049"],
+  "concepts": [
+    "baseline",
+    "held-out evaluation",
+    "paired records",
+    "report contract",
+    "reproducibility"
+  ],
+  "outcome": "Produce a small analytical report that connects the scientific question, model comparison, numerical evidence and limits.",
+  "mechanism": "An analysis is more than a fitted object. A reviewer needs to know the question, the observations used, the model choices, the evaluation design and the numerical evidence supporting each conclusion. A reproducible report preserves those relationships rather than displaying only a favorable score.\n\nThis unit compares an affine model with a quadratic feature model on a synthetic response rule. The training and held-out inputs are declared before fitting. The quadratic rule is known, providing an independent coefficient and prediction oracle. The comparison is useful precisely because its mechanics can be reconstructed without an external dataset or service.\n\nBoth candidates must be evaluated on the same held-out observation identities. Reordering predictions without preserving their IDs can change the errors while every vector length still looks correct. Retain IDs, targets and predictions together, validate uniqueness and align by identity before aggregating.\n\nA lower held-out error on four authored points supports a bounded statement about that fixture. It does not establish that a quadratic model is generally preferable, that real data follow the same rule, or that a larger study's sampling uncertainty is negligible. Model-selection decisions should be separated from a final assessment if the comparison is extended.\n\nA report artifact should preserve counts, metric definitions, candidate identities, package/runtime information and the relevant limitations. Temporary JSON round trips demonstrate a local serialization contract. They do not imply that arbitrary worker-created files are automatically exported or durable across classroom Runs. Keep the report's durable source and observed receipt in the supported channels, and use a separately prepared workflow for persistent external artifacts.",
+  "vocabulary": [
+    {
+      "term": "Baseline",
+      "definition": "A defined comparison method evaluated under the same task and observation contract."
+    },
+    {
+      "term": "Paired evaluation",
+      "definition": "Scoring candidates on the same observation identities."
+    },
+    {
+      "term": "Metric contract",
+      "definition": "The target, unit, weighting, denominator and failure policy of a reported score."
+    },
+    {
+      "term": "Reproducible report",
+      "definition": "An artifact retaining the inputs and configuration needed to reconstruct the stated calculation and interpretation."
+    }
+  ],
+  "anatomy": "Fit both lm formulas on the training data only. Build a held-out table containing id, actual and each candidate prediction. Calculate squared-error means from aligned records. Use jsonlite with an owned tempfile for a bounded report round trip, and record R/package versions as metadata rather than claiming environment portability from a single run.",
+  "worked_examples": [
+    {
+      "title": "Compare an explicit baseline",
+      "code": "train <- data.frame(x = c(-2, -1, 0, 1, 2))\ntrain$y <- 1 + 2 * train$x - 0.5 * train$x^2\nheldout <- data.frame(id = paste0(\"q\", 1:4), x = c(-1.5, -0.5, 0.5, 1.5))\nheldout$actual <- 1 + 2 * heldout$x - 0.5 * heldout$x^2\naffine <- lm(y ~ x, data = train)\nquadratic <- lm(y ~ x + I(x^2), data = train)\nheldout$affine <- predict(affine, heldout)\nheldout$quadratic <- predict(quadratic, heldout)\nmse <- c(affine = mean((heldout$actual - heldout$affine)^2), quadratic = mean((heldout$actual - heldout$quadratic)^2))\nstopifnot(abs(mse[[\"affine\"]] - 0.390625) < 1e-10, mse[[\"quadratic\"]] < 1e-20)\nprint(heldout)\nprint(mse)\n",
+      "explanation": "The exact target rule supplies an independent oracle. Both candidates use the same four held-out rows, so the numerical comparison does not mix different evaluation populations.",
+      "expected": "Affine MSE 0.390625; quadratic error near zero on four authored held-out points."
+    },
+    {
+      "title": "Preserve report structure",
+      "code": "report <- list(question = \"Compare two fixed synthetic regression candidates\", counts = list(training = 5L, heldout = 4L), metric = \"mean squared error per held-out observation\", limitations = c(\"synthetic target\", \"four held-out observations\"))\nround_trip <- function(value) {\n  path <- tempfile(fileext = \".json\")\n  on.exit(unlink(path), add = TRUE)\n  jsonlite::write_json(value, path, auto_unbox = TRUE, pretty = TRUE)\n  jsonlite::read_json(path, simplifyVector = TRUE)\n}\nrestored <- round_trip(report)\nstopifnot(restored$counts$heldout == 4, identical(restored$metric, report$metric))\nprint(restored)\n",
+      "explanation": "Serialization retains a named report contract. The tempfile is owned and removed by the example, so this does not claim persistent artifact publication.",
+      "expected": "Metric and held-out count preserved through a local JSON round trip."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Fit both candidate formulas using only the five training rows.",
+      "hint": "Retain the same response rule and split.",
+      "answer": "The quadratic coefficients recover 1,2,-0.5; the affine candidate is the stated baseline.",
+      "expected": "Correct coefficient oracle."
+    },
+    {
+      "prompt": "Calculate both held-out MSE values on the same four IDs.",
+      "hint": "Keep targets and predictions in one keyed table.",
+      "answer": "Affine error is 0.390625 and the exact quadratic fixture error is near zero.",
+      "expected": "Two correctly labeled metrics and count 4."
+    },
+    {
+      "prompt": "Reorder one candidate table and realign by ID before scoring.",
+      "hint": "Join on identity rather than vector position.",
+      "answer": "The correctly aligned score is unchanged; positional subtraction is not a valid substitute.",
+      "expected": "Permutation-invariant keyed score."
+    },
+    {
+      "prompt": "Diagnose choosing the model repeatedly from the final held-out score.",
+      "hint": "Separate development selection from final assessment.",
+      "answer": "Repeated tuning on that set turns it into development data; a new final assessment is needed for a clean final claim.",
+      "expected": "Selection boundary stated."
+    },
+    {
+      "prompt": "Round-trip a report through an owned temporary JSON file.",
+      "hint": "Retain metric, counts, versions and limitations.",
+      "answer": "Named fields survive serialization and the file is removed after the scoped operation.",
+      "expected": "Report readback and owned cleanup."
+    },
+    {
+      "prompt": "Write the conclusion without extending the synthetic result to a population.",
+      "hint": "Name the exact task and observed evidence.",
+      "answer": "The quadratic representation fits this known rule and performs better on the four declared held-out points. Broader model choice and uncertainty remain unestablished.",
+      "expected": "A bounded, factual conclusion."
+    }
+  ],
+  "starter": "# r-050: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\ntrain <- data.frame(x = c(-2, -1, 0, 1, 2))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Fit both candidate formulas using only the five training rows.\n# TODO: Retain the same response rule and split.\n# Exercise 2: Calculate both held-out MSE values on the same four IDs.\n# TODO: Keep targets and predictions in one keyed table.\n# Exercise 3: Reorder one candidate table and realign by ID before scoring.\n# TODO: Join on identity rather than vector position.\n# Exercise 4: Diagnose choosing the model repeatedly from the final held-out score.\n# TODO: Separate development selection from final assessment.\n# Exercise 5: Round-trip a report through an owned temporary JSON file.\n# TODO: Retain metric, counts, versions and limitations.\n# Exercise 6: Write the conclusion without extending the synthetic result to a population.\n# TODO: Name the exact task and observed evidence.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "train <- data.frame(x = c(-2, -1, 0, 1, 2))\ntrain$y <- 1 + 2 * train$x - 0.5 * train$x^2\nheldout <- data.frame(id = paste0(\"q\", 1:4), x = c(-1.5, -0.5, 0.5, 1.5))\nheldout$actual <- 1 + 2 * heldout$x - 0.5 * heldout$x^2\naffine <- lm(y ~ x, data = train)\nquadratic <- lm(y ~ x + I(x^2), data = train)\nstopifnot(max(abs(unname(coef(quadratic)) - c(1, 2, -0.5))) < 1e-10)\npred <- data.frame(id = heldout$id, prediction = as.numeric(predict(affine, heldout)))\npaired <- merge(heldout, pred[4:1, ], by = \"id\", sort = FALSE)\nstopifnot(!anyDuplicated(paired$id), nrow(paired) == 4)\nscore <- mean((paired$actual - paired$prediction)^2)\nstopifnot(abs(score - 0.390625) < 1e-10)\nstopifnot(mean((heldout$actual - predict(quadratic, heldout))^2) < 1e-20)\nreport <- list(metric = \"held-out mean squared error\", count = 4L, affine = score, R = as.character(getRversion()), limitation = \"synthetic four-point assessment\")\ncheck_report <- function(value) {\n  path <- tempfile(fileext = \".json\")\n  on.exit(unlink(path), add = TRUE)\n  jsonlite::write_json(value, path, auto_unbox = TRUE)\n  restored <- jsonlite::read_json(path, simplifyVector = TRUE)\n  stopifnot(restored$count == 4, restored$metric == value$metric)\n  path\n}\nremoved <- check_report(report)\nstopifnot(!file.exists(removed))\ncat(\"r-050 reference checks passed\\n\")\n",
+  "solution_explanation": "The exact quadratic coefficients and affine held-out error provide independent arithmetic oracles. The keyed merge deliberately changes row order so an implementation relying on coincidental vector alignment would be exposed.\n\nThe report retains the metric denominator and a limitation rather than promoting one score into an unsupported scientific claim. Its JSON file is an owned temporary demonstration. Persistent storage, publication and browser delivery are separate workflow capabilities.",
+  "sources": [
+    {
+      "title": "R linear models",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html"
+    },
+    {
+      "title": "jsonlite package",
+      "url": "https://cran.r-project.org/package=jsonlite"
+    }
+  ]
+}

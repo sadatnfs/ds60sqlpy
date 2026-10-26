@@ -1,0 +1,15 @@
+// dax-019: KEEPFILTERS expresses an intersection policy
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-019-a: A disjoint subgroup stays empty
+// Context: Original allowed color {Blue}; compare replacement with intersection by {Red}.
+EVALUATE CALCULATETABLE ( ROW ( "ForcedRed", CALCULATE ( [NetRevenue], Product[Color] = "Red" ), "RedWithinSelection", CALCULATE ( [NetRevenue], KEEPFILTERS ( Product[Color] = "Red" ) ) ), Product[Color] = "Blue" )
+
+// dax-019-b: An overlapping subgroup is retained
+// Context: Original allowed colors {Blue, Red}; restrict to Blue without expanding selection.
+EVALUATE CALCULATETABLE ( ROW ( "SelectedRevenue", [NetRevenue], "BlueWithinSelection", CALCULATE ( [NetRevenue], KEEPFILTERS ( Product[Color] = "Blue" ) ) ), Product[Color] IN { "Blue", "Red" } )

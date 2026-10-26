@@ -1,0 +1,94 @@
+{
+  "id": "r-034",
+  "title": "Long and wide tables with explicit cell keys",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-010", "r-017", "r-033"],
+  "concepts": ["Long representation", "Wide representation", "Cell key", "Round-trip invariant"],
+  "outcome": "Reshape repeated measurements only after validating the observation key and deciding how missing cells are represented.",
+  "mechanism": "Long and wide tables organize the same measurements differently. In a long table, each row might identify one person, one visit and one observed value. In a wide table, visits become columns and each row describes a person. Neither representation is inherently more correct; the intended operation determines which shape is easier to use.\n\nA reshape requires a unique cell key. If two records share person and visit, they cannot both occupy one ordinary scalar wide cell without an additional rule. Summing or taking the first value is an aggregation decision, not a neutral reshape. Diagnose duplicates before conversion and decide whether they are repeated events, data errors or measurements requiring a declared summary.\n\nAn absent person-visit combination differs from a present row whose value is missing. A wide table can represent both as NA unless additional observation-status information is retained. If that distinction matters, preserve a presence indicator or keep the original long records. Do not claim a lossy wide representation can reconstruct information it never stored.\n\nVerify a round trip under the declared uniqueness and missingness assumptions. Order may change during reshaping, so compare sorted keys and aligned values rather than raw row order. Preserve identifier types and state the resulting column names explicitly. A successful round trip on one complete table does not validate a later table with duplicated keys or structurally absent measurements.",
+  "vocabulary": [
+    {
+      "term": "Long representation",
+      "definition": "Rows encode repeated measurement identifiers as values."
+    },
+    {
+      "term": "Wide representation",
+      "definition": "Repeated measurement identifiers become separate columns."
+    },
+    {
+      "term": "Cell key",
+      "definition": "The fields identifying one intended wide-table cell."
+    },
+    {
+      "term": "Round-trip invariant",
+      "definition": "A property preserved after conversion and reversal."
+    }
+  ],
+  "anatomy": "Base reshape uses idvar for the entity key, timevar for repeated measurement labels, v.names for measured values and direction for the target shape. Supply varying columns explicitly on a reverse conversion rather than relying on accidental naming inference.",
+  "worked_examples": [
+    {
+      "title": "Two visits become two columns",
+      "code": "long <- data.frame(id = c(\"A\", \"A\", \"B\", \"B\"), visit = c(1, 2, 1, 2), value = c(10, 12, 20, 23))\nstopifnot(!anyDuplicated(long[c(\"id\", \"visit\")]))\nwide <- reshape(long, idvar = \"id\", timevar = \"visit\", direction = \"wide\")\nwide <- wide[order(wide$id), , drop = FALSE]\nstopifnot(identical(wide$value.1, c(10, 20)), identical(wide$value.2, c(12, 23)))\nprint(wide)\n",
+      "explanation": "The unique id/visit key determines one value per output cell. No aggregation is necessary.",
+      "expected": "A10/12;B20/23."
+    },
+    {
+      "title": "An absent visit becomes an explicit missing cell",
+      "code": "long <- data.frame(id = c(\"A\", \"A\", \"B\"), visit = c(1, 2, 1), value = c(10, 12, 20))\nwide <- reshape(long, idvar = \"id\", timevar = \"visit\", direction = \"wide\")\nstopifnot(is.na(wide$value.2[wide$id == \"B\"]))\npresent <- transform(long, present = TRUE)\nstopifnot(nrow(present) == 3L)\nprint(wide)\n",
+      "explanation": "The missing B visit 2 cell means no supplied record here. Keeping the original long rows or a separate presence table preserves that distinction.",
+      "expected": "B visit 2 isNA."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Identify the cell key for person/visit/value data.",
+      "hint": "One cell needs one person and one visit.",
+      "answer": "The key is person plus visit.",
+      "expected": "The key is person plus visit."
+    },
+    {
+      "prompt": "Add a third visit for every person.",
+      "hint": "A new repeated label creates another column.",
+      "answer": "The wide schema gains the declared third-visit value column.",
+      "expected": "The wide schema gains the declared third-visit value column."
+    },
+    {
+      "prompt": "Reverse a complete wide table to long form.",
+      "hint": "Specify varying columns and compare sorted keys.",
+      "answer": "The unique measurement records are recovered under the stated complete-table contract.",
+      "expected": "The unique measurement records are recovered under the stated complete-table contract."
+    },
+    {
+      "prompt": "Diagnose two values for one person/visit.",
+      "hint": "A scalar cell cannot retain both without a rule.",
+      "answer": "Reject duplicates or perform an explicitly justified aggregation first.",
+      "expected": "Reject duplicates or perform an explicitly justified aggregation first."
+    },
+    {
+      "prompt": "Distinguish an absent visit from an observed NA.",
+      "hint": "A plain missing wide cell may conflate them.",
+      "answer": "Retain presence metadata when the difference matters.",
+      "expected": "Retain presence metadata when the difference matters."
+    },
+    {
+      "prompt": "Choose a shape for a model or chart.",
+      "hint": "The operation determines which fields should be columns versus rows.",
+      "answer": "Document the chosen observation grain and avoid treating reshaping as an implicit aggregation.",
+      "expected": "Document the chosen observation grain and avoid treating reshaping as an implicit aggregation."
+    }
+  ],
+  "starter": "# r-034: Long and wide tables with explicit cell keys\n# Complete the six guide tasks using these local inputs.\nlong <- data.frame(id = c(\"A\", \"A\", \"B\", \"B\"), visit = c(1, 2, 1, 2), value = c(10, 12, 20, 23))\n# TODO: validate cell keys, reshape and compare a round trip.\nprint(long)\n",
+  "reference": "long <- data.frame(id = c(\"A\", \"A\", \"B\", \"B\"), visit = c(1, 2, 1, 2), value = c(10, 12, 20, 23))\nstopifnot(!anyDuplicated(long[c(\"id\", \"visit\")]))\nwide <- reshape(long, idvar = \"id\", timevar = \"visit\", direction = \"wide\")\nrestored <- reshape(wide, varying = c(\"value.1\", \"value.2\"), v.names = \"value\", timevar = \"visit\", times = c(1, 2), idvar = \"id\", direction = \"long\")\nrestored <- restored[order(restored$id, restored$visit), c(\"id\", \"visit\", \"value\")]\nrow.names(restored) <- NULL\nstopifnot(isTRUE(all.equal(restored, long, check.attributes = FALSE)))\nduplicate <- rbind(long, long[1, ])\nstopifnot(anyDuplicated(duplicate[c(\"id\", \"visit\")]) > 0L)\nincomplete <- long[-4, ]\nincomplete_wide <- reshape(incomplete, idvar = \"id\", timevar = \"visit\", direction = \"wide\")\nstopifnot(is.na(incomplete_wide$value.2[incomplete_wide$id == \"B\"]))\ncat(\"r-034 reference checks passed\\n\")\n",
+  "solution_explanation": "The unique id/visit key determines one value per output cell. No aggregation is necessary.\n\nThe missing B visit 2 cell means no supplied record here. Keeping the original long rows or a separate presence table preserves that distinction.",
+  "sources": [
+    {
+      "title": "R reshaping",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/reshape.html"
+    },
+    {
+      "title": "R duplicate detection",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/duplicated.html"
+    }
+  ]
+}

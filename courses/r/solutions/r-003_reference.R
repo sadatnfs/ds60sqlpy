@@ -1,0 +1,11 @@
+# r-003: complete reference for the declared synthetic inputs.
+stopifnot(identical(c(2, 4, 6) * 3, c(6, 12, 18)))
+amount <- c(10, 20, 30)
+fees <- c(1, 2, 3)
+stopifnot(length(amount) == length(fees))
+stopifnot(identical(amount + fees, c(11, 22, 33)))
+valid <- function(amount, fee) length(fee) == 1L || length(fee) == length(amount)
+stopifnot(valid(amount, 2), valid(amount, fees), !valid(amount, c(1, 2)))
+stopifnot(length(numeric(0) + 2) == 0L)
+stopifnot(is.character(c("A", 2)), is.double(c(1, 2)))
+cat("r-003 reference checks passed\n")

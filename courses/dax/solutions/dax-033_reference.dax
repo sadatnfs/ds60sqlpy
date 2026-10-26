@@ -1,0 +1,15 @@
+// dax-033: Prior periods and comparable completeness
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-033-a: Completed January versus completed January
+// Context: Full January 2025 versus the shifted January 2024 date set; both periods are within available data.
+EVALUATE CALCULATETABLE ( VAR CurrentRevenue = [NetRevenue] VAR PriorRevenue = CALCULATE ( [NetRevenue], SAMEPERIODLASTYEAR ( 'Date'[Date] ) ) RETURN ROW ( "Current", CurrentRevenue, "Prior", PriorRevenue, "Growth", DIVIDE ( CurrentRevenue - PriorRevenue, PriorRevenue ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] = 1 )
+
+// dax-033-b: An explicit as-of comparison
+// Context: January 1..3,2025 compared with January 1..3,2024; explicitly as-of rather than full-month.
+EVALUATE CALCULATETABLE ( VAR CurrentRevenue = [NetRevenue] VAR PriorRevenue = CALCULATE ( [NetRevenue], SAMEPERIODLASTYEAR ( 'Date'[Date] ) ) RETURN ROW ( "Current", CurrentRevenue, "Prior", PriorRevenue, "Growth", DIVIDE ( CurrentRevenue - PriorRevenue, PriorRevenue ) ), DATESBETWEEN ( 'Date'[Date], DATE ( 2025, 1, 1 ), DATE ( 2025, 1, 3 ) ) )

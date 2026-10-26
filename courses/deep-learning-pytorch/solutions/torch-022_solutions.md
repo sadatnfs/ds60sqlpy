@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.
 
-The functional API also applies dropout according to its dropout_p argument; calling an enclosing module.eval does not automatically change an explicit nonzero probability. For an evaluation oracle, pass dropout_p=0. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.
+The functional API also applies dropout according to its `dropout_p` argument; calling an enclosing `module.eval` does not automatically change an explicit nonzero probability. For an evaluation oracle, pass `dropout_p=0`. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.
 
 **SDPA:** Scaled dot-product attention implemented by a functional API.
 
@@ -22,13 +22,13 @@ The checked helper accepts nonempty 2 D self-attention matrices and a boolean sq
 
 ## Derive attention values and information boundaries
 
-Let Q have shape(L, d_k), K shape(S, d_k) and V shape(S, d_v). Scores \(S_{\mathrm{score}}=\frac{{QK}^{T}}{\sqrt{d_{k}}}\) have shape(L, S): each row belongs to one query and each column to one key. Softmax runs across the key axis, and P@V produces(L, d_v). The lesson restricts L=S and matching query/key widths to make this map inspectable. Batched multihead code adds batch/head axes; those do not replace the query and key meanings.
+Let Q have shape(L, d_k), K shape(S, d_k) and V shape(S, d_v). Scores \(S_{\mathrm{score}}=\frac{QK^{\mathsf T}}{\sqrt{d_k}}\) have shape(L, S): each row belongs to one query and each column to one key. Softmax runs across the key axis, and P@V produces(L, d_v). The lesson restricts L=S and matching query/key widths to make this map inspectable. Batched multihead code adds batch/head axes; those do not replace the query and key meanings.
 
 When every score is zero, a legal row containing m keys assigns each probability \(\frac{1}{m}\). The causal rows here permit one, two and three keys, giving[2, 0], [1, 1] and[\(\frac{8}{3}\), \(\frac{8}{3}\)]. Multiplying an unrestricted uniform \(\frac{1}{3}\) distribution by the triangle afterward would instead leave row sums \(\frac{1}{3}\), \(\frac{2}{3}\), 1. Forbidden keys already participated in normalization, so masking must define the legal score set before softmax or be followed by a correctly specified renormalization.
 
 The zero-score example cannot verify the scale factor: zero divided by any finite positive width factor remains zero. For the nonuniform second query[0, 1], the two legal keys[1, 0] and[0, 1] produce scores 0 and \(a=\frac{1}{\sqrt{2}}\). Let \(p=\frac{\exp(a)}{1+\exp(a)}\), approximately 0.669762. The correct mixture is[2(1-p), 2p], approximately[0.660477, 1.339523]. Omitting the scale changes p to \(\frac{\exp(1)}{1+\exp(1)}\), approximately 0.731059, while a causal prefix test can still pass. Thus nonuniform prefix agreement checks an information boundary but is not an independent numerical oracle for every score operation.
 
-A backward trace separates the roles of Q, K and V. If upstream derivatives are \(G=\frac{\partial L}{\partial Y}\), then \(\frac{\partial L}{\partial V}={P}^{T}\) G and \(\frac{\partial L}{\partial P}=G\) \({V}^{T}\). For one softmax row p with incoming derivative u, the score derivative is p elementwise-multiplied by(u-sum(p*u)). This subtracts the probability-weighted mean because changing one score changes every normalized weight in that row. Then \(\frac{\partial L}{\partial Q}=\frac{(\partial L/\partial S_{\mathrm{score}})K}{\sqrt{d_k}}\), and \(\frac{\partial L}{\partial K}=\frac{(\partial L/\partial S_{\mathrm{score}})^{\mathsf T}Q}{\sqrt{d_k}}\). Shapes must match the corresponding inputs. At \(Q=K=0\), both query/key derivative paths can evaluate to zero even though the output still depends on V; that is another reason to use a nonuniform diagnostic.
+A backward trace separates the roles of Q, K and V. If upstream derivatives are \(G=\frac{\partial L}{\partial Y}\), then \(\frac{\partial L}{\partial V}=P^{\mathsf T}G\) and \(\frac{\partial L}{\partial P}=GV^{\mathsf T}\). For one softmax row p with incoming derivative u, the score derivative is p elementwise-multiplied by(u-sum(p*u)). This subtracts the probability-weighted mean because changing one score changes every normalized weight in that row. Then \(\frac{\partial L}{\partial Q}=\frac{(\partial L/\partial S_{\mathrm{score}})K}{\sqrt{d_k}}\), and \(\frac{\partial L}{\partial K}=\frac{(\partial L/\partial S_{\mathrm{score}})^{\mathsf T}Q}{\sqrt{d_k}}\). Shapes must match the corresponding inputs. At \(Q=K=0\), both query/key derivative paths can evaluate to zero even though the output still depends on V; that is another reason to use a nonuniform diagnostic.
 
 Boolean mask meaning belongs to the parameter, not the word PyTorch:
 
@@ -47,7 +47,7 @@ Causality also depends on position alignment. In the square shifted-target fixtu
 
 Prefix invariance should recompute the shorter input, not slice a full attention matrix that already used future data. It is still only a test of the components exercised. Upstream bidirectional features, position-mixing normalization, target construction or contaminated retrieval can leak future information before a correct attention mask sees it. A full decoder needs a corresponding end-to-end boundary test.
 
-Functional SDPA applies dropout according to dropout_p, including when an enclosing module is in evaluation mode. The unchanged helper passes 0 explicitly. A training wrapper must derive the argument from its mode deliberately. This CPU arithmetic fixture does not qualify a fused accelerator backend, memory scaling or generation quality; it establishes the stated finite values and mask behavior.
+Functional SDPA applies dropout according to `dropout_p`, including when an enclosing module is in evaluation mode. The unchanged helper passes 0 explicitly. A training wrapper must derive the argument from its mode deliberately. This CPU arithmetic fixture does not qualify a fused accelerator backend, memory scaling or generation quality; it establishes the stated finite values and mask behavior.
 
 ## Exercise 1: Compute uniform causal mixtures
 
@@ -130,9 +130,9 @@ assert forbidden[0].tolist()==[False,True,True]
 
 ## Exercise 6: Keep inference dropout disabled
 
-The question is: Repeat functional attention with dropout_p=0 and compare exact outputs.
+The question is: Repeat functional attention with `dropout_p=0` and compare exact outputs.
 
-The helper fixes dropout_p=0, so its behavior is independent of the mode of any surrounding module. A training wrapper must pass its chosen probability explicitly.
+The helper fixes `dropout_p=0`, so its behavior is independent of the mode of any surrounding module. A training wrapper must pass its chosen probability explicitly.
 
 ```python
 again=attention(q,q,v,allowed)

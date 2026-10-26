@@ -1,0 +1,94 @@
+{
+  "id": "r-036",
+  "title": "Chunked aggregation and memory-aware data contracts",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-014", "r-032"],
+  "concepts": ["Chunk", "Mergeable state", "Associativity", "Numerical accumulation"],
+  "outcome": "Combine chunk-level sufficient statistics correctly and distinguish a memory strategy from a performance claim.",
+  "mechanism": "A table may be larger than a convenient in-memory intermediate. Processing it in chunks can reduce the peak size of some operations, but only when the output state can be combined correctly. A sum and count are straightforward mergeable state for an observed-value mean. An unweighted mean of chunk means is generally wrong when chunk sizes differ.\n\nDefine the state before the loop. Each chunk can return observed count, missing count and observed sum. Combining those fields by addition preserves enough information for the final mean. The final all-missing policy still matters: zero total count should produce the declared missing result rather than an accidental division by zero.\n\nNot every operation is equally mergeable. An exact median requires more distribution information than one number per chunk. A distinct count requires the union of keys or a deliberately chosen approximate sketch with an error contract. A join may require partitioning by keys, external storage or an indexed lookup. Chunking syntax alone does not solve those algorithmic requirements.\n\nFloating-point addition is not perfectly associative. Two mathematically equivalent reduction orders can differ slightly when magnitudes vary greatly. Tests should distinguish harmless representation error from a changed population or weighting rule. These tiny examples establish semantic equivalence and bounded state size; they do not claim measured speed, memory savings on a large production workload or automatic parallel execution.",
+  "vocabulary": [
+    {
+      "term": "Chunk",
+      "definition": "A bounded subset processed under the same transformation contract."
+    },
+    {
+      "term": "Mergeable state",
+      "definition": "Partial results that can be combined without changing the intended statistic."
+    },
+    {
+      "term": "Associativity",
+      "definition": "A property allowing grouping of operations without changing exact mathematical meaning."
+    },
+    {
+      "term": "Numerical accumulation",
+      "definition": "The finite-precision implementation of repeated arithmetic."
+    }
+  ],
+  "anatomy": "Represent state as a named numeric vector or list, update it per chunk, and compute the final statistic once. Test uneven chunk sizes and all-missing input. Use an explicit tolerance when reduction order can change floating-point rounding.",
+  "worked_examples": [
+    {
+      "title": "Combine sums and counts, not means",
+      "code": "chunks <- list(c(10), c(20, 30, 40))\nstate <- c(count = 0, total = 0)\nfor (chunk in chunks) {\n  state <- state + c(count = length(chunk), total = sum(chunk))\n}\nmean_from_state <- state[[\"total\"]] / state[[\"count\"]]\nstopifnot(mean_from_state == 25, mean(vapply(chunks, mean, numeric(1))) == 20)\nprint(state)\n",
+      "explanation": "The two chunks have unequal sizes. Sufficient totals reconstruct the observation mean while averaging the two chunk means changes the weighting.",
+      "expected": "Count 4, total 100, mean 25."
+    },
+    {
+      "title": "A chunked missingness ledger",
+      "code": "chunks <- list(c(1, NA_real_), c(3, 5), c(NA_real_))\nstate <- c(observed = 0, missing = 0, total = 0)\nfor (chunk in chunks) {\n  valid <- !is.na(chunk)\n  state <- state + c(observed = sum(valid), missing = sum(!valid), total = sum(chunk[valid]))\n}\nstopifnot(state[[\"observed\"]] == 3, state[[\"missing\"]] == 2, state[[\"total\"]] == 9)\nprint(state)\n",
+      "explanation": "Each input entry contributes to either observed or missing count. The total uses only observed measurements under the declared policy.",
+      "expected": "Observed 3, missing 2, total 9."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Reconstruct a mean from count 4, total 100.",
+      "hint": "Divide once after merging.",
+      "answer": "The mean is 25.",
+      "expected": "The mean is 25."
+    },
+    {
+      "prompt": "Change chunk boundaries without changing observations.",
+      "hint": "The admitted population stays the same.",
+      "answer": "The semantic total/count remain unchanged, subject to floating-point tolerance.",
+      "expected": "The semantic total/count remain unchanged, subject to floating-point tolerance."
+    },
+    {
+      "prompt": "Implement an all-missing finalization rule.",
+      "hint": "Check total observed count before division.",
+      "answer": "Return an explicit missing mean when count is zero.",
+      "expected": "Return an explicit missing mean when count is zero."
+    },
+    {
+      "prompt": "Diagnose averaging chunk medians.",
+      "hint": "One median per chunk discards necessary distribution information.",
+      "answer": "Keep sufficient distribution state or recompute the exact combined median.",
+      "expected": "Keep sufficient distribution state or recompute the exact combined median."
+    },
+    {
+      "prompt": "Process an empty chunk among nonempty chunks.",
+      "hint": "Its zero count/sum should not invent an observation.",
+      "answer": "It leaves the accumulated state unchanged.",
+      "expected": "It leaves the accumulated state unchanged."
+    },
+    {
+      "prompt": "State what a scalability claim still requires.",
+      "hint": "A small arithmetic check is not a benchmark.",
+      "answer": "Measure representative peak memory, elapsed work and equivalent outputs under controlled conditions.",
+      "expected": "Measure representative peak memory, elapsed work and equivalent outputs under controlled conditions."
+    }
+  ],
+  "starter": "# r-036: Chunked aggregation and memory-aware data contracts\n# Complete the six guide tasks using these local inputs.\nchunks <- list(10, c(20, 30, 40), numeric(0))\n# TODO: retain mergeable state with an explicit finalization rule.\nprint(vapply(chunks, length, integer(1)))\n",
+  "reference": "combine <- function(chunks) {\n  state <- c(observed = 0, missing = 0, total = 0)\n  for (chunk in chunks) {\n    valid <- !is.na(chunk)\n    state <- state + c(observed = sum(valid), missing = sum(!valid), total = sum(chunk[valid]))\n  }\n  list(state = state, mean = if (state[[\"observed\"]] > 0) state[[\"total\"]] / state[[\"observed\"]] else NA_real_)\n}\na <- combine(list(10, c(20, 30, 40))); b <- combine(list(c(10, 20), numeric(0), c(30, 40)))\nstopifnot(a$mean == 25, identical(a, b))\nmissing <- combine(list(NA_real_, c(NA_real_, NA_real_)))\nstopifnot(is.na(missing$mean), missing$state[[\"missing\"]] == 3)\nc <- combine(list(c(1, NA_real_), c(3, 5), NA_real_))\nstopifnot(c$mean == 3, c$state[[\"observed\"]] == 3)\ncat(\"r-036 reference checks passed\\n\")\n",
+  "solution_explanation": "The two chunks have unequal sizes. Sufficient totals reconstruct the observation mean while averaging the two chunk means changes the weighting.\n\nEach input entry contributes to either observed or missing count. The total uses only observed measurements under the declared policy.",
+  "sources": [
+    {
+      "title": "R sums",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/sum.html"
+    },
+    {
+      "title": "R reduction",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/funprog.html"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+// dax-016: Filter arguments are not an imperative sequence
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-016-a: Sibling filters use the incoming key maximum
+// Context: Incoming Product.Category = Paper; sibling Color and ProductKey filters.
+EVALUATE CALCULATETABLE ( ROW ( "IncomingMaxKey", MAX ( Product[ProductKey] ), "Revenue", CALCULATE ( [NetRevenue], Product[Color] = "Blue", Product[ProductKey] = MAX ( Product[ProductKey] ) ) ), Product[Category] = "Paper" )
+
+// dax-016-b: Nested context before computing the key
+// Context: Paper first; outer CALCULATE applies Blue before the inner key expression is evaluated.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", CALCULATE ( CALCULATE ( [NetRevenue], Product[ProductKey] = MAX ( Product[ProductKey] ) ), Product[Color] = "Blue" ) ), Product[Category] = "Paper" )

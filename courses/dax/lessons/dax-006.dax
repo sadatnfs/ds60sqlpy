@@ -1,0 +1,9 @@
+// dax-006 learner draft: Model quality capstone: duplicates, missing keys and unknown members
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/unknown-member/model.json
+// Goal: Produce a model-quality ledger that separates an invalid dimension key from an unmatched fact key.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write an issue ledger with type, evidence and disposition.
+
+EVALUATE
+ROW ( "Duplicate dimension keys", BLANK(), "Unmatched foreign keys", BLANK() )

@@ -52,7 +52,7 @@ For a ZIP, use `cd` with its actual extracted directory instead. Check that
 ```
 
 The starter prepares Python and PostgreSQL while keeping every subject
-readable. Use `./classroom --all` for all sixteen ordinary workers. A first
+readable. Use `./classroom --all` for all ordinary workers. A first
 build requires internet and disk space for images and intermediate build
 layers; the [one-command guide](../one-command-classroom.md) explains resources
 and choosing a smaller selection.

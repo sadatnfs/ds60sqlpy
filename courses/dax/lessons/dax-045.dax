@@ -1,0 +1,9 @@
+// dax-045 learner draft: Precedence and dynamic format strings
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Expand interacting calculation items and distinguish numeric transformation from display selection.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a regression grid for two interacting groups.
+
+EVALUATE
+ROW ( "Scale outside addition", BLANK(), "Addition outside scale", BLANK() )

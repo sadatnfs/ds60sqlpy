@@ -1,0 +1,18 @@
+// dax-053: Read timing evidence without inventing a benchmark
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-053-a: Cold and warm are different conditions
+// Context: Original synthetic trial scenario, not measured engine output; three supplied values per cache-state label.
+EVALUATE
+VAR Cold = DATATABLE ( "DurationMs", INTEGER, { { 100 }, { 120 }, { 110 } } )
+VAR Warm = DATATABLE ( "DurationMs", INTEGER, { { 20 }, { 25 }, { 21 } } )
+RETURN ROW ( "SyntheticColdMeanMs", AVERAGEX ( Cold, [DurationMs] ), "SyntheticWarmMeanMs", AVERAGEX ( Warm, [DurationMs] ) )
+
+// dax-053-b: Best trial and average can disagree
+// Context: Two synthetic three-trial candidates under a hypothetical comparable condition; no real benchmark claim.
+EVALUATE
+VAR A = DATATABLE ( "DurationMs", INTEGER, { { 20 }, { 21 }, { 19 } } )
+VAR B = DATATABLE ( "DurationMs", INTEGER, { { 18 }, { 60 }, { 18 } } )
+RETURN ROW ( "MeanA", AVERAGEX ( A, [DurationMs] ), "MedianA", MEDIANX ( A, [DurationMs] ), "BestA", MINX ( A, [DurationMs] ), "MeanB", AVERAGEX ( B, [DurationMs] ), "MedianB", MEDIANX ( B, [DurationMs] ), "BestB", MINX ( B, [DurationMs] ) )

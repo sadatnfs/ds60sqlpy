@@ -45,10 +45,19 @@ Run `./scripts/format-repo` to apply maintained code style, or
 Make exposes the same commands as `make format` and `make format-check`.
 `./scripts/lint-repo` (or `make lint`) adds read-only static source checks using
 the same toolchain. `make check` requires both formatting and lint checks.
-These commands use a dedicated Docker toolchain on Linux, macOS and Windows
-through WSL 2. The first invocation builds that tool image; later invocations
-reuse it. `--build` explicitly rebuilds it, and `--list` reports covered files.
-Classroom containers and learner volumes are not part of this operation.
+These commands use two pinned Docker toolchains on Linux, macOS and Windows
+through WSL 2. R uses a separate compatible R image with styler and lintr; other
+languages use the existing formatting image. A full pass checks R first, then
+the remaining languages, and refreshes shared generated views after successful
+source formatting. Image fingerprints follow tool inputs rather than lesson edits.
+The first invocation prepares missing images; `--build` explicitly rebuilds them,
+and `--list` reports coverage without formatting source. Classroom containers
+and learner volumes are not part of this operation.
+
+The R adapter parses without evaluating lesson code and checks that formatting
+preserves parsed expressions. Its fixed lexical lint rules do not substitute for
+runtime assertions. Check and lint modes use read-only source mounts. A focused
+language pass omits shared regeneration, so finish with the unfiltered checks.
 
 Use a repeated `--language` selection for focused iteration and the unfiltered
 check before submission. Follow [the contributor formatting workflow](../CONTRIBUTING.md#format-the-repository)
@@ -69,6 +78,7 @@ python scripts/audit_lesson_depth.py
 python scripts/normalize_lesson_prose.py
 python scripts/check_content_rendering.py
 python scripts/build_course_guide.py --check
+python scripts/compile_lesson_tex.py --check
 python scripts/build_lesson_readers.py --check
 python scripts/check_modules.py
 python scripts/check_repository_guidance.py
@@ -87,6 +97,16 @@ refreshing reviewed prose, run it with `--write` after authoring generators and
 before HTML generation. `check_content_rendering.py` renders the actual
 published Markdown and notebooks, checking mathematics and code blocks through
 the production reader. A generic Markdown parser is not a substitute.
+
+`compile_lesson_tex.py --check` recompiles explicit TeX with the pinned bundled
+KaTeX compiler and checks the input inventory, compiled HTML/MathML and integrity
+binding. Node is needed for this contributor check; no runtime CDN is used.
+Intentional generation normalizes prose, compiles TeX and then builds readers.
+`--check-inputs` checks source coverage and cache integrity without invoking Node;
+it does not recompile. A successful compiler check establishes supported syntax
+and synchronized typesetting artifacts, not correct derivations or statistical
+assumptions. Code remains literal, and uncompiled draft expressions retain the
+safe native MathML fallback.
 
 After an intentional content change, regenerate the catalog, reports and
 readers with `make generate`, or run that target's listed Python commands when
@@ -149,22 +169,32 @@ gates. Windows Docker wrappers remain supported entrypoints into WSL 2.
 | Course validation: Advanced imports | Manual dispatch and weekly schedule; Ubuntu Python 3.12 | Frozen all-extras installation and isolated imports, without downloading pretrained models or proving full model training |
 | Application builds: Portable Docker classroom starter | Push, pull request and manual dispatch; Ubuntu | A complete source ZIP assembled through the allowlisted packaging path for Docker/WSL learners |
 | Application builds: Docker classroom | Same triggers; isolated Linux groups covering all ordinary profiles | Every admitted ordinary module reference runs in its declared worker; real compiler failures, timeout recovery and saved receipts are checked |
-| Application builds: Chromium acceptance | Python Core Docker group, with container replacement checks | Real browser navigation, isolated pads/results, saved progress, output and prose contrast, mathematical rendering, HTML/CSS/JavaScript live previews, the original browser JavaScript fixtures and all 24 D3 classroom references work |
+| Application builds: Scientific figures | Python Core and R Docker groups, before and after container replacement | Declared source-bound figures are captured, original drafts are restored, and the original figure receipts survive replacement without replay |
+| Application builds: Chromium acceptance | Python Core Docker group, with container replacement checks | Real browser navigation, isolated pads/results, saved progress, contrast, typeset mathematics, web live previews, all 24 D3 references, all eight Plotly variants and the offline DAX editor/reference flow pass their stated checks |
 | Owned Kubernetes runtime | Manual dispatch and weekly schedule; disposable Linux kind cluster | Every admitted bounded Kubernetes reference and explicit failure/timeout/cancellation cases produce matching receipts and verified owned cleanup |
 
 The Docker groups cover Python Core, C, C++, Go, C#, Rust, Swift, Java,
-JavaScript/TypeScript, PHP, Scala/Spark, TensorFlow and PyTorch. The Core group runs the statistics book,
-NLP and compatible LLM examples once; the framework groups execute their own
-TensorFlow, PyTorch and LLM references. PySpark and tutorial example variants
+JavaScript/TypeScript, PHP, Scala/Spark, TensorFlow, PyTorch, JAX CPU, Bayesian CPU
+and R. JAX, Bayesian and R dependencies stay in separate locked worker images.
+The Core group runs compatible statistics-book, NLP and LLM examples; dedicated
+groups execute references requiring their own frameworks. The representative
+JAX007, Bayesian science009 and R001 smoke cases establish those selected behaviors;
+the catalog-driven corpus separately executes every admitted reference in each
+selected profile. Bounded Bayesian diagnostics remain evidence to interpret,
+not a declaration of convergence. PySpark and tutorial example variants
 are discovered from the same catalog used by the classroom. There is no second
-hand-maintained lesson list. Reading/manual lessons and owned-cluster operations
-appear as explicit exclusions from the ordinary corpus, never successful runs.
+hand-maintained executable lesson list. Reading/manual lessons, offline DAX and
+owned-cluster operations appear as explicit exclusions from the ordinary corpus,
+never successful ordinary-worker runs. DAX has no execution engine or compiler
+requirement; its saved editing and hand-derived comparison flow is browser-tested.
 CUDA CPU models and the selected CPU framework/Spark variants run in those ordinary
 groups. Optional NVIDIA profiles remain explicitly excluded: CPU execution,
 compiler-only acceptance and GPU device execution require separate receipts.
 
-Each group owns a disposable project. At most four Docker groups run together,
-and each worker executes one reference at a time. The corpus records failures,
+Each group owns a disposable project. At most four Docker groups run together.
+One classroom controller admits one active module job across all profiles, so
+parallel runtime qualification requires separate disposable projects. The grouped
+unit suite independently supports four workers. The corpus records failures,
 source hashes, actual exit status and typed checks where registered. An overall
 time budget leaves unexecuted cases visibly pending and fails the job. Artifact
 JSON distinguishes reference execution from independent typed verification.
@@ -253,7 +283,7 @@ disposable project's loopback URL:
 
 ```text
 python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --reset-sql
-python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli" --report work/release-runtime-receipts.json
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics" --report work/release-runtime-receipts.json
 ```
 
 To run the complete admitted module corpus for selected prepared profiles:
@@ -277,13 +307,39 @@ lesson code, also run the relevant full reference corpus and its boundary/failur
 cases. Compile errors, runtime errors, timeouts and successful execution must
 remain distinct results.
 
+For selected prepared Python Core and R profiles, also capture the declared
+scientific figure references before replacing containers:
+
+```text
+python scripts/check_scientific_artifacts.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core r-statistics" --report work/scientific-artifact-receipts.json
+```
+
+Select only profiles prepared in this disposable project. The explicit reviewed
+inventory covers Python `viz-001` through `viz-008` and R `r-051` through `r-060`.
+It binds source hashes, figure kinds/counts and required accessible Plotly metadata,
+and checks complete PNG chunks and checksums. A computation that succeeds while
+losing its expected figures fails this gate. Reference edits require deliberate
+review of the expectations and source digests. The gate restores prior drafts
+and notes after each run; it does not infer that every R lesson produces a plot.
+
 Replace the disposable project's containers while retaining its volumes, then
-run both checks in persistence mode against the newly printed URL:
+run the applicable checks in persistence mode against the newly printed URL:
 
 ```text
 python scripts/check_lab_http.py --url CLASSROOM_URL --confirm-disposable --check-persistence
-python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli" --report work/release-runtime-receipts.json --check-persistence
+python scripts/check_classroom_profiles.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics" --report work/release-runtime-receipts.json --check-persistence
 ```
+
+If scientific figures were captured, read those original receipts as well:
+
+```text
+python scripts/check_scientific_artifacts.py --url CLASSROOM_URL --confirm-disposable --profiles "python-core r-statistics" --report work/scientific-artifact-receipts.json --check-persistence
+```
+
+This compares original job identities, source/output/figure hashes and restored
+saved pads without execution or writes. Run it before later acceptance scenarios
+deliberately edit the same lesson drafts, or use a separate disposable project.
+A second read against an unchanged process does not prove replacement durability.
 
 Persistence verification must read the original receipt rather than rerun code
 to recreate the expected result. A saved result belongs to its source, lesson,
@@ -354,6 +410,34 @@ Check these user journeys:
   execution. Tutorial read markers must not imply tested mastery.
 - Confirm focus, contrast, navigation labels, mobile layout and local asset
   loading. No runtime CDN should be needed for math or highlighting.
+
+Run the paired Plotly and offline DAX gate in the prepared browser environment:
+
+```text
+python scripts/check_plotly_browser.py --url CLASSROOM_URL --confirm-disposable --report work/plotly-browser-receipts.json
+```
+
+All eight JavaScript variants are exercised through the real classroom pad and
+Run control. The checks cover SVG output, declared source-table row counts,
+keyboard filters, figure JSON export, narrow layouts and no external requests.
+Original drafts and notes are restored. DAX001 separately checks source save,
+reload and exact export, hand-derived reference comparison without replacing the
+draft, hidden execution controls, the keyboard no-run guard and mobile layout.
+It does not execute DAX or require Power BI, an account or an external service.
+
+After replacing the same disposable project's containers while retaining volumes,
+use the newly printed URL and the original report:
+
+```text
+python scripts/check_plotly_browser.py --url CLASSROOM_URL --confirm-disposable --report work/plotly-browser-receipts.json --check-persistence
+```
+
+This mode reads original Plotly observation IDs, restored source/note hashes and
+DAX source/model reference bindings without launching a browser or submitting
+execution. Retain the report from both phases. Plotly browser records remain
+client observations with `verified: false`, not independent worker verification.
+The workflow supplies the actual replacement boundary; the checker cannot infer
+that replacement occurred merely because its reads succeeded.
 
 Also inspect `START_HERE.html` as a separate static reading mode. Static browser
 progress and server-backed classroom progress have different storage boundaries.

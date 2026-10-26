@@ -1,0 +1,15 @@
+// dax-003: A star schema and the path of a filter
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-003-a: Paper products
+// Context: Product.Category = Paper; other dimensions unrestricted.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", [NetRevenue] ), Product[Category] = "Paper" )
+
+// dax-003-b: Paper in the North
+// Context: Product.Category = Paper AND Customer.Region = North.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", [NetRevenue] ), Product[Category] = "Paper", Customer[Region] = "North" )

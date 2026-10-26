@@ -119,7 +119,7 @@ EQUATIONS = {
         "This centered population normalization puts epsilon inside the square root. RMS normalization and epsilon outside the root are different formulas.",
     ),
     54: (
-        r"\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\left(\frac{QK^T}{\sqrt{d_k}}+M\right)V",
+        r"\operatorname{Attention}(Q,K,V)=\operatorname{softmax}\left(\frac{QK^{\mathsf T}}{\sqrt{d_k}}+M\right)V",
         "The mask M, softmax axis and scaling dimension d_k are part of the model contract. The first tiny example deliberately states that its scores are unscaled.",
     ),
     60: (

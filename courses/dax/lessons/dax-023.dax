@@ -1,0 +1,9 @@
+// dax-023 learner draft: Grand totals reevaluate the measure
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Reconcile row values and a grand-total ratio without forcing the total to sum visible cells.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a separately named equal-category average.
+
+EVALUATE
+ROW ( "Recomputed total", BLANK(), "Sum of visible ratios", BLANK() )

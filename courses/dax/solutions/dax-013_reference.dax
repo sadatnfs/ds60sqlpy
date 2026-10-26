@@ -1,0 +1,14 @@
+// dax-013: Row context is not a filter on related facts
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-013-a: A row label beside an unfiltered sum
+// Context: No outer filters; SELECTCOLUMNS supplies a Product row context only.
+EVALUATE SELECTCOLUMNS ( Product, "Product", Product[Product], "RawSum", SUM ( Sales[NetAmount] ) )
+ORDER BY [Product]
+
+// dax-013-b: Transition the current product into a filter
+// Context: The same Product rows, now with explicit context transition for the raw SUM.
+EVALUATE SELECTCOLUMNS ( Product, "Product", Product[Product], "Revenue", CALCULATE ( SUM ( Sales[NetAmount] ) ) )
+ORDER BY [Product]

@@ -1,0 +1,98 @@
+{
+  "id": "r-017",
+  "title": "Factors, levels and model interpretation",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-007", "r-010", "r-016"],
+  "concepts": ["Factor", "Unused level", "Ordered factor", "Reference level"],
+  "outcome": "Represent categories explicitly and avoid interpreting internal factor codes as measurements.",
+  "mechanism": "A factor stores category membership through integer codes and a levels attribute. The codes are an implementation representation, not the original category values. Calling as.numeric on a factor returns those codes. If categories happen to look numeric, that conversion can silently produce the wrong quantities. Decide first whether the field is a category or a numeric measurement.\n\nDeclared levels can outlive a selected subset. This is useful when a report must retain a stable category universe, including categories with zero observed rows. droplevels removes unused categories deliberately. The choice affects tables, plots and modeling contrasts, so it should follow a stated reporting or modeling contract rather than happen accidentally.\n\nAn ordered factor adds an ordering interpretation, such as low, medium and high. That does not establish equal numeric spacing between categories. A model may use different default contrasts for ordered versus unordered factors, changing the design matrix. Inspect model.matrix rather than assuming a factor becomes one simple numeric predictor.\n\nFor an unordered categorical predictor under ordinary treatment contrasts, the reference level defines the baseline interpretation. relevel can choose it explicitly. A coefficient then compares one category with that baseline while other modeled variables are held according to the model. The later regression lessons develop this fully; here the goal is to inspect and preserve the category contract before fitting anything.",
+  "vocabulary": [
+    {
+      "term": "Factor",
+      "definition": "A categorical vector with integer codes and declared levels."
+    },
+    {
+      "term": "Unused level",
+      "definition": "A declared category with no current observation."
+    },
+    {
+      "term": "Ordered factor",
+      "definition": "A categorical vector whose order is explicitly meaningful."
+    },
+    {
+      "term": "Reference level",
+      "definition": "A baseline category used by a chosen model contrast coding."
+    }
+  ],
+  "anatomy": "factor(x, levels=...) declares the category universe and order. levels exposes labels, as.character recovers them, table(..., useNA=...) counts categories and missing values, and droplevels changes the retained universe deliberately.",
+  "worked_examples": [
+    {
+      "title": "Codes are not numeric labels",
+      "code": "category <- factor(c(\"10\", \"20\", \"10\"), levels = c(\"10\", \"20\"))\nstopifnot(identical(as.numeric(category), c(1, 2, 1)))\nstopifnot(identical(as.numeric(as.character(category)), c(10, 20, 10)))\nprint(data.frame(label = as.character(category), code = as.integer(category)))\n",
+      "explanation": "The intermediate character conversion retrieves the labels before numeric parsing. It is appropriate only if those labels genuinely represent measurements.",
+      "expected": "Labels 10,20,10; codes 1,2,1."
+    },
+    {
+      "title": "A retained category universe",
+      "code": "group <- factor(c(\"A\", \"B\", \"A\"), levels = c(\"A\", \"B\", \"C\"))\nsubset <- group[group == \"A\"]\nstopifnot(identical(levels(subset), c(\"A\", \"B\", \"C\")))\nstopifnot(identical(levels(droplevels(subset)), \"A\"))\nprint(table(subset))\n",
+      "explanation": "Subsetting retains the declared levels. Zero counts for B and C can be useful evidence rather than categories that should automatically disappear.",
+      "expected": "A2, B0, C0."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict as.numeric(factor(c(\"5\",\"9\"))).",
+      "hint": "The output is internal codes.",
+      "answer": "The values are 1,2 under the default sorted levels.",
+      "expected": "The values are 1,2 under the default sorted levels."
+    },
+    {
+      "prompt": "Choose B as a reference level.",
+      "hint": "Use a full explicit category label.",
+      "answer": "relevel(..., ref=\"B\") puts B first for the relevant contrast convention.",
+      "expected": "relevel(..., ref=\"B\") puts B first for the relevant contrast convention."
+    },
+    {
+      "prompt": "Retain an unused C level in a table.",
+      "hint": "Declare it in levels before counting.",
+      "answer": "The table includes C with count zero.",
+      "expected": "The table includes C with count zero."
+    },
+    {
+      "prompt": "Diagnose treating ordered low/medium/high as equally spaced numbers.",
+      "hint": "An order does not define distances.",
+      "answer": "Choose a model encoding justified by the measurement assumptions.",
+      "expected": "Choose a model encoding justified by the measurement assumptions."
+    },
+    {
+      "prompt": "Handle a label outside declared levels.",
+      "hint": "Factor construction cannot assign an unknown level.",
+      "answer": "It becomes NA and should be audited rather than silently accepted.",
+      "expected": "It becomes NA and should be audited rather than silently accepted."
+    },
+    {
+      "prompt": "Inspect a categorical design matrix.",
+      "hint": "Contrast coding makes model columns explicit.",
+      "answer": "Check column names and baseline interpretation before explaining fitted coefficients.",
+      "expected": "Check column names and baseline interpretation before explaining fitted coefficients."
+    }
+  ],
+  "starter": "# r-017: Factors, levels and model interpretation\n# Complete the six guide tasks using these local inputs.\ngroup <- factor(c(\"A\", \"B\", \"A\"), levels = c(\"A\", \"B\", \"C\"))\n# TODO: inspect levels, counts and a declared reference category.\nprint(group)\n",
+  "reference": "stopifnot(identical(as.numeric(factor(c(\"5\", \"9\"))), c(1, 2)))\ngroup <- factor(c(\"A\", \"B\", \"A\"), levels = c(\"A\", \"B\", \"C\"))\nstopifnot(levels(relevel(group, ref = \"B\"))[[1]] == \"B\")\nstopifnot(unname(table(group)[\"C\"]) == 0L)\nordered_group <- ordered(c(\"low\", \"high\"), levels = c(\"low\", \"medium\", \"high\"))\nstopifnot(is.ordered(ordered_group))\nunknown <- factor(\"D\", levels = c(\"A\", \"B\", \"C\"))\nstopifnot(is.na(unknown))\ndesign <- model.matrix(~group)\nstopifnot(identical(colnames(design), c(\"(Intercept)\", \"groupB\", \"groupC\")))\ncat(\"r-017 reference checks passed\\n\")\n",
+  "solution_explanation": "The intermediate character conversion retrieves the labels before numeric parsing. It is appropriate only if those labels genuinely represent measurements.\n\nSubsetting retains the declared levels. Zero counts for B and C can be useful evidence rather than categories that should automatically disappear.",
+  "sources": [
+    {
+      "title": "R factors",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/factor.html"
+    },
+    {
+      "title": "R dropping unused levels",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/droplevels.html"
+    },
+    {
+      "title": "R reference levels",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/relevel.html"
+    }
+  ]
+}

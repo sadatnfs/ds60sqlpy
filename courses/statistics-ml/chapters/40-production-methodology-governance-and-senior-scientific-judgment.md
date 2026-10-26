@@ -337,6 +337,10 @@ if __name__ == "__main__":
 
 The [grounded claims and abstention guide](../../llm-applied/guides/llm-applied-011.md) and [retrieval/answer evaluation guide](../../llm-applied/guides/llm-applied-012.md) make key operational boundaries concrete. Record the actual source, model, prompt and evaluation versions before accepting a changed assistant, and preserve the difference between an authorized action, a generated proposal and a completed operation.
 
+## Connected worked tutorial
+
+[A connected scientific workflow](../tutorials/science/07-integrated-scientific-workflow.md). Trace availability-time data, model identity, delayed evaluation and rollback evidence, with links to existing DuckDB, MLflow and Prefect material.
+
 ## Reading connections
 
 [Previous chapter](39-research-synthesis-and-specialized-statistical-methodologies.md) | [Book contents](../README.md)

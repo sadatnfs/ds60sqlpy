@@ -1,0 +1,15 @@
+// dax-031: A complete date dimension is not a list of sale dates
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-031-a: January calendar versus event dates
+// Context: January 2025, active OrderDate relationship; observed coverage includes the full month.
+EVALUATE CALCULATETABLE ( ROW ( "CalendarDates", COUNTROWS ( 'Date' ), "OrderDatesWithSales", DISTINCTCOUNT ( Sales[OrderDate] ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] = 1 )
+
+// dax-031-b: A date exists without a sale
+// Context: 2025-01-04 is inside declared observation coverage but has no OrderDate fact.
+EVALUATE CALCULATETABLE ( ROW ( "CalendarDates", COUNTROWS ( 'Date' ), "SalesRows", COUNTROWS ( Sales ), "Revenue", [NetRevenue] ), 'Date'[Date] = DATE ( 2025, 1, 4 ) )

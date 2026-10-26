@@ -118,6 +118,9 @@ Disclose optional models, datasets, networks, hardware and services. Cite source
 and preserve required licenses. Use original explanations and public or synthetic
 fixtures, without workplace identifiers, private infrastructure or machine paths.
 Use explicit LaTeX for mathematics and tagged code fences for program examples.
+Compile the math with `python scripts/compile_lesson_tex.py` before building
+readers. The Docker build uses its own Node compiler stage; contributors running
+shared generation directly need Node as well as the prepared Python environment.
 Never modify executable logic only to repair typography.
 
 ## Format the repository

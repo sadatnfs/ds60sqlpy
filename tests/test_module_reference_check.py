@@ -113,6 +113,7 @@ def test_corpus_covers_all_admitted_runnable_implementations_and_book_examples()
         "cuda-python",
         "pytorch-cuda",
         "tensorflow-cuda",
+        "dax-offline",
     }
     assert all(case.source.strip() for case in cases)
 
@@ -130,6 +131,7 @@ def test_specialized_backends_are_not_silently_qualified_as_ordinary_cpu_workers
 
 def test_browser_exclusions_have_complete_real_ui_qualification_and_retained_reports() -> None:
     from scripts.check_d3_browser import references
+    from scripts.check_plotly_browser import references as plotly_references
 
     catalog = ModuleCatalog(ROOT)
     cases, report = probe.collect_cases(ROOT, sorted(probe.ORDINARY_PROFILES))
@@ -143,14 +145,23 @@ def test_browser_exclusions_have_complete_real_ui_qualification_and_retained_rep
         for row in report["excluded_external_or_reading"]
         if row["profile"] == "javascript-browser"
     }
-    assert browser_ids == set(excluded) == {row["id"] for row in references(ROOT)}
-    assert len(browser_ids) == 24
+    assert (
+        browser_ids
+        == set(excluded)
+        == {row["id"] for row in [*references(ROOT), *plotly_references(ROOT)]}
+    )
+    assert len(browser_ids) == 32
     assert not browser_ids & {case.lesson_id for case in cases}
-    assert all("real Chromium D3 workflow" in row["reason"] for row in excluded.values())
+    assert all(
+        "real Chromium D3 and Plotly workflows" in row["reason"] for row in excluded.values()
+    )
     workflow = (ROOT / ".github/workflows/app-build.yml").read_text()
     assert "scripts/check_d3_browser.py --url" in workflow
     assert "--report work/d3-browser-receipts.json --check-persistence" in workflow
     assert "work/d3-browser-receipts.json" in workflow.split("Retain runtime receipts", 1)[1]
+    assert "scripts/check_plotly_browser.py --url" in workflow
+    assert "--report work/plotly-browser-receipts.json --check-persistence" in workflow
+    assert "work/plotly-browser-receipts.json" in workflow.split("Retain runtime receipts", 1)[1]
 
 
 @pytest.mark.parametrize(

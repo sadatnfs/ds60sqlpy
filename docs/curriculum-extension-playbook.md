@@ -1,7 +1,8 @@
 # Extend the curriculum
 
 A subject is a learning sequence. A runtime is the tool that executes its code.
-A lesson can reuse a runtime or be reading-only. All subjects join the same
+A lesson can reuse a runtime, be reading-only, or use the explicit offline DAX
+editing contract. All subjects join the same
 `/classroom` home, workspace, navigation and saved-work experience.
 
 Start with the learner's goal and a real gap, then choose the existing content
@@ -16,7 +17,7 @@ this playbook into a reusable contributor-agent workflow.
 | Extend existing Python, SQL or bridge material | Existing artifacts and `catalog_builder.py`; additive legacy manifests when appropriate | Legacy catalog, practice and depth gates |
 | Add a new subject to the classroom | `courses/<subject>/track.json` and `lessons.json` | `ModuleCatalog`, subject tests and browser/runtime checks |
 | Extend one of the original five module subjects | Existing plan under `docs/expansion/plans/` and its `courses/<subject>/lessons.json` | Same module gates and core-plan validation |
-| Extend the statistics tutorial | `courses/statistics-ml/manifest.json`, chapters, examples and coverage | Tutorial coverage, numerical examples and rendering |
+| Extend the statistics tutorial | `courses/statistics-ml/manifest.json` or additive `tutorials/index.json`, chapters, examples and coverage | Tutorial coverage, numerical examples and rendering |
 | Add a new execution language or external operation | Reviewed backend adapter, profile and image in addition to content | Actual runtime success, failure, cleanup and persistence evidence |
 
 The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++
@@ -132,3 +133,25 @@ resources distinct. Record exact checks and unresolved platform limits.
 [Validation](validation.md) describes the grouped parallel suite and CI gates.
 A count check, build or reference execution alone does not establish a complete
 learning experience or independent learner competence.
+
+
+## Additional language and artifact contracts
+
+New language admission must include LANGUAGES and SOURCE_SUFFIXES in modules.py,
+a readable language label, the reader lexer/extension mapping, formatter/linter
+coverage and real source loading tests. A new runtime also needs the fixed worker
+operations, startup probe, private service mapping, Docker image/locks, launcher
+and image catalog, success/failure qualification cases and CI coverage. Merely
+adding the language name is insufficient.
+
+For DAX-style offline editing, use an explicit draft capability and reject Run
+on both service and job boundaries. Validate reference/model bytes and typed
+worked tables; never imply that a learner edit produced those tables. For plotted
+outputs, follow [the existing bounded artifact contract](plotting.md) and test
+saved-result readback separately from chart rendering. Add only the prepared
+libraries a lesson actually uses.
+
+After prose changes, compile TeX before generating readers. Maintain professional
+factual copy, preserve literal code, and review mathematical meaning independently
+of successful rendering. Keep current source hashes distinct from historical
+runtime evidence.

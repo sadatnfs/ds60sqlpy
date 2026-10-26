@@ -1,0 +1,10 @@
+// dax-012 learner draft: VAR and RETURN: values are not context-sensitive macros
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Predict when a variable freezes a value and when a measure is reevaluated in modified context.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Rewrite a filtered share with separately named numerator and denominator.
+
+EVALUATE
+VAR BeforeFilter = BLANK()
+RETURN ROW ( "Captured value", BeforeFilter, "Reevaluated value", BLANK() )

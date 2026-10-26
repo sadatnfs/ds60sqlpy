@@ -1,0 +1,15 @@
+// dax-056: A report filter is not row-level security
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-056-a: An ordinary filter can be removed
+// Context: Unrestricted model; North is only an ordinary report/query filter.
+EVALUATE CALCULATETABLE ( ROW ( "SelectedRevenue", [NetRevenue], "AfterRemovingCustomerFilters", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Customer ) ) ), Customer[Region] = "North" )
+
+// dax-056-b: Expected behavior under an enforced NorthViewer role
+// Context: Assume a role-restricted Viewer with the declared NorthViewer RLS policy enforced by a compatible engine; no ordinary Customer filter is needed.
+EVALUATE ROW ( "VisibleRevenue", [NetRevenue], "AfterRemovingCustomerFilters", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Customer ) ) )

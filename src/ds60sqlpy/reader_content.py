@@ -10,9 +10,59 @@ import html
 import re
 from functools import lru_cache
 
+from pygments.lexer import RegexLexer, words
 from pygments.lexers import get_all_lexers, get_lexer_by_name
 from pygments.token import Token, _TokenType, is_token_subtype
 from pygments.util import ClassNotFound
+
+
+class DaxLexer(RegexLexer):
+    """Small source-preserving lexer for DAX expressions and query syntax."""
+
+    name = "DAX"
+    aliases = ["dax"]
+    flags = re.IGNORECASE | re.MULTILINE
+    tokens = {
+        "root": [
+            (r"\s+", Token.Text),
+            (r"//[^\n]*|--[^\n]*", Token.Comment.Single),
+            (r"/\*[\s\S]*?\*/", Token.Comment.Multiline),
+            (r'"(?:[^"\n]|"")*"', Token.String),
+            (r"'(?:[^'\n]|'')*'", Token.Name.Class),
+            (r"\[(?:[^]\n]|\]\])*\]", Token.Name.Attribute),
+            (
+                words(
+                    (
+                        "VAR",
+                        "RETURN",
+                        "DEFINE",
+                        "MEASURE",
+                        "EVALUATE",
+                        "ORDER",
+                        "BY",
+                        "ASC",
+                        "DESC",
+                        "IN",
+                        "NOT",
+                        "TRUE",
+                        "FALSE",
+                        "TABLE",
+                        "COLUMN",
+                        "FUNCTION",
+                    ),
+                    suffix=r"\b",
+                ),
+                Token.Keyword,
+            ),
+            (r"[A-Za-z_][A-Za-z_0-9.]*?(?=\s*\()", Token.Name.Function),
+            (r"(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?", Token.Number),
+            (r"[+*/=<>!&|^-]+", Token.Operator),
+            (r"[(),{};]", Token.Punctuation),
+            (r"[A-Za-z_][A-Za-z_0-9]*", Token.Name),
+            (r".", Token.Text),
+        ]
+    }
+
 
 _ALIASES = {
     "py": "python",
@@ -86,10 +136,14 @@ def highlight_source(source: str, language: str = "text") -> str:
     if len(source) > 200_000:
         return escaped
     alias = normalize_language(language)
-    if alias == "text" or alias not in _BUILTIN_ALIASES:
+    if alias == "text" or (alias not in _BUILTIN_ALIASES and alias != "dax"):
         return escaped
     try:
-        lexer = get_lexer_by_name(alias, stripnl=False, ensurenl=False, tabsize=0)
+        lexer = (
+            DaxLexer(stripnl=False, ensurenl=False, tabsize=0)
+            if alias == "dax"
+            else get_lexer_by_name(alias, stripnl=False, ensurenl=False, tabsize=0)
+        )
     except ClassNotFound:
         return escaped
     try:
@@ -139,7 +193,12 @@ def render_code_block(source: str, language: str = "text", *, line_numbers: bool
 def rich_content_styles() -> str:
     """Return self-contained CSS for MathML and syntax tokens on every surface."""
 
-    return """
+    from ds60sqlpy.reader_tex import textbook_styles
+
+    return (
+        textbook_styles()
+        + "\n"
+        + """
 /* Shared offline reader rendering. Code retains a dark surface in both themes. */
 pre.highlighted-code, pre.source-code {
   color: var(--code-text, #e5edf8); background: var(--code-bg, #111d32);
@@ -187,3 +246,4 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   .math-display { overflow: visible; }
 }
 """.strip()
+    )

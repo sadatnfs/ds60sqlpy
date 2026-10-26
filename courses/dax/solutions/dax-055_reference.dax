@@ -1,0 +1,15 @@
+// dax-055: Storage modes, freshness and capability boundaries
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-055-a: Same data, same defined amount
+// Context: The same fixed data and compatible semantics; no actual storage-mode execution.
+EVALUATE ROW ( "FixedFixtureRevenue", [NetRevenue], "EquivalentSnapshotRevenue", SUMX ( Sales, Sales[NetAmount] ) )
+
+// dax-055-b: A refresh boundary can explain a difference
+// Context: Illustrative scenario: an additional valid 10 USD event arrives after the stored snapshot; it is not added to the checked-in Sales fixture.
+EVALUATE ROW ( "StoredSnapshot", [NetRevenue], "HypotheticalLaterSource", [NetRevenue] + 10 )

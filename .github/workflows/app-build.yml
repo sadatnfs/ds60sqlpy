@@ -81,6 +81,12 @@ jobs:
             profiles: tensorflow-cpu
           - group: pytorch
             profiles: llm-torch-cpu
+          - group: jax
+            profiles: jax-cpu
+          - group: bayesian
+            profiles: bayesian-cpu
+          - group: r
+            profiles: r-statistics
     env:
       COMPOSE_PROJECT_NAME: ds60-ci-${{ matrix.group }}
       DS60_PROFILES: ${{ matrix.profiles }}
@@ -131,6 +137,13 @@ jobs:
         run: |
           docker compose -f compose.classroom.yaml exec -T lab python scripts/course.py sql --quiet all --reset
           docker compose -f compose.classroom.yaml exec -T lab python scripts/course.py sql --quiet solutions --reset
+      - name: Capture source-bound Python and R figures
+        if: matrix.group == 'python-core' || matrix.group == 'r'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_scientific_artifacts.py --url "$url" --confirm-disposable \
+            --profiles "$DS60_PROFILES" --report work/scientific-artifact-receipts.json
       - name: Replace the project containers while retaining named learning volumes
         shell: bash
         run: |
@@ -146,6 +159,14 @@ jobs:
           python scripts/check_lab_http.py --url "$url" --confirm-disposable --check-persistence
           python scripts/check_classroom_profiles.py --url "$url" --confirm-disposable \
             --profiles "python-core $DS60_PROFILES" --report work/runtime-receipts.json \
+            --check-persistence
+      - name: Read retained scientific figures without rerunning
+        if: matrix.group == 'python-core' || matrix.group == 'r'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          python scripts/check_scientific_artifacts.py --url "$url" --confirm-disposable \
+            --profiles "$DS60_PROFILES" --report work/scientific-artifact-receipts.json \
             --check-persistence
       - name: Prepare isolated Chromium acceptance tools
         if: matrix.group == 'python-core'
@@ -176,6 +197,13 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           work/browser-env/bin/python scripts/check_d3_browser.py --url "$url" \
             --confirm-disposable --report work/d3-browser-receipts.json
+      - name: Exercise all Plotly references and the offline DAX workspace
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_plotly_browser.py --url "$url" \
+            --confirm-disposable --report work/plotly-browser-receipts.json
       - name: Replace Core containers after saving browser observations
         if: matrix.group == 'python-core'
         shell: bash
@@ -189,6 +217,13 @@ jobs:
           url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
           work/browser-env/bin/python scripts/check_d3_browser.py --url "$url" \
             --confirm-disposable --report work/d3-browser-receipts.json --check-persistence
+      - name: Read retained Plotly observations and DAX drafts
+        if: matrix.group == 'python-core'
+        shell: bash
+        run: |
+          url="$(cat ".classroom/$COMPOSE_PROJECT_NAME/classroom.url")"
+          work/browser-env/bin/python scripts/check_plotly_browser.py --url "$url" \
+            --confirm-disposable --report work/plotly-browser-receipts.json --check-persistence
       - name: Capture service diagnostics
         if: failure()
         run: docker compose -f compose.classroom.yaml --profile '*' logs --no-color
@@ -203,6 +238,8 @@ jobs:
             work/module-reference-results.json
             work/browser-receipts.json
             work/d3-browser-receipts.json
+            work/plotly-browser-receipts.json
+            work/scientific-artifact-receipts.json
             work/web-browser-receipts.json
             work/live-preview-receipts.json
             work/browser-screenshots/*.png

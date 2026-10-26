@@ -1,0 +1,9 @@
+// dax-056 learner draft: A report filter is not row-level security
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Distinguish a removable analytical filter from an engine-enforced role restriction.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a real RLS acceptance record template.
+
+// State whether each case assumes an ordinary filter or an externally enforced role.
+EVALUATE ROW ( "Visible revenue", BLANK(), "After ordinary filter removal", BLANK() )

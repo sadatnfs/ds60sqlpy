@@ -38,6 +38,114 @@ def _path(root: Path, track: str, value: Any) -> str:
     return relative
 
 
+def load_tutorial_units(root: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Load additive worked tutorials without changing the original topic contract."""
+    path = root / "courses/statistics-ml/tutorials/index.json"
+    if not path.exists():
+        return [], []
+    validate_content_path(root, path.relative_to(root).as_posix(), "Tutorial extension index")
+    if path.stat().st_size > 1_000_000:
+        raise ValueError("Tutorial index exceeds its size limit.")
+    raw = json.loads(path.read_text("utf-8"))
+    if (
+        not isinstance(raw, dict)
+        or type(raw.get("schema_version")) is not int
+        or raw["schema_version"] != 1
+        or raw.get("mode") != "tutorial"
+        or not isinstance(raw.get("units"), list)
+        or not 1 <= len(raw["units"]) <= 200
+    ):
+        raise ValueError("Invalid tutorial extension index.")
+    plans, authored = [], []
+    seen = set()
+    for unit in raw["units"]:
+        if not isinstance(unit, dict):
+            raise ValueError("Invalid tutorial extension unit.")
+        key = _text(unit.get("id"), "tutorial ID")
+        if not re.fullmatch(r"statistics-[a-z][a-z0-9-]*-[0-9]{3}", key) or key in seen:
+            raise ValueError("Invalid or duplicate tutorial extension ID.")
+        seen.add(key)
+        if (
+            unit.get("profile") not in {"python-core", "bayesian-cpu"}
+            or unit.get("mode") != "tutorial"
+            or unit.get("network") != "offline"
+            or unit.get("level") not in LEVELS
+            or type(unit.get("minutes")) is not int
+            or not 5 <= unit["minutes"] <= 480
+        ):
+            raise ValueError("Invalid tutorial extension runtime, stage or duration.")
+        for field in ("title", "outcome", "rationale"):
+            _text(unit.get(field), field)
+        for field in ("prerequisites", "concepts", "dependencies", "expected_outputs"):
+            values = unit.get(field)
+            if (
+                not isinstance(values, list)
+                or len(values) > 100
+                or any(not isinstance(v, str) or not v.strip() or len(v) > 2000 for v in values)
+                or len(values) != len(set(values))
+            ):
+                raise ValueError(f"Invalid tutorial extension {field}.")
+        if not unit["concepts"] or not unit["expected_outputs"]:
+            raise ValueError("Tutorial extensions need concepts and observable output.")
+        guide = _path(root, "statistics-ml", unit.get("chapter_path"))
+        examples = unit.get("example_paths")
+        if not isinstance(examples, list) or not 1 <= len(examples) <= 8:
+            raise ValueError("Tutorial extensions need bounded examples.")
+        sources = [_path(root, "statistics-ml", value) for value in examples]
+        if (
+            Path(guide).suffix != ".md"
+            or any(Path(p).suffix != ".py" for p in sources)
+            or len(sources) != len(set(sources))
+        ):
+            raise ValueError("Tutorial extensions need distinct Markdown and Python sources.")
+        plans.append(
+            {
+                "id": key,
+                "title": unit["title"],
+                "level": unit["level"],
+                "minutes": unit["minutes"],
+                "prerequisites": unit["prerequisites"],
+                "runtime": unit["profile"],
+                "concepts": unit["concepts"],
+                "outcome": unit["outcome"],
+                "lab": unit["rationale"],
+                "verification": (
+                    "Worked tutorial with explained output; no exam or mastery grading."
+                ),
+                "learning_mode": "tutorial",
+                "dependencies": unit["dependencies"],
+                "expected_outputs": unit["expected_outputs"],
+            }
+        )
+        if not all((root / p).is_file() for p in [guide, *sources]):
+            continue
+        item = {
+            "id": key,
+            "status": "authored",
+            "language": "python",
+            "runtime_profile": unit["profile"],
+            "guide_path": guide,
+            "source_path": sources[0],
+            "solution_paths": [],
+            "verification_id": None,
+        }
+        if len(sources) > 1:
+            item["variants"] = [
+                {
+                    "id": f"example-{i}",
+                    "title": f"Example {i}",
+                    "language": "python",
+                    "runtime_profile": unit["profile"],
+                    "source_path": p,
+                    "solution_paths": [],
+                    "verification_id": None,
+                }
+                for i, p in enumerate(sources[1:], 2)
+            ]
+        authored.append(item)
+    return plans, authored
+
+
 def load_book(root: Path) -> tuple[dict[str, Any], dict[str, Any]] | None:
     """Validate metadata even for unwritten chapters; expose only complete file pairs."""
     path = root / "courses/statistics-ml/manifest.json"
@@ -158,13 +266,16 @@ def load_book(root: Path) -> tuple[dict[str, Any], dict[str, Any]] | None:
                 for i, p in enumerate(sources[1:], 2)
             ]
         authored.append(item)
+    extra_plans, extra_authored = load_tutorial_units(root)
+    lessons.extend(extra_plans)
+    authored.extend(extra_authored)
     plan = {
         "id": "statistics-ml",
         "title": _text(raw.get("title"), "tutorial title"),
         "summary": (
             "A theory and code companion covering statistical reasoning, "
-            "modeling, experimentation, causality and machine learning. Read at "
-            "your own pace, with worked Python demonstrations and explained "
+            "modeling, experimentation, causality and machine learning. Includes "
+            "worked Python demonstrations and explained "
             "interview questions."
         ),
         "learning_mode": "tutorial",

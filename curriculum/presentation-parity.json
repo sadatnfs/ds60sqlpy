@@ -266,7 +266,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-019_solutions.md",
       "historical_sha256": "b0f112eab7967fb4b238b41c99ab6c084332fdca033323c22237fa3e1073ab97",
-      "presentation_sha256": "30c62567bf1fd2d1030898806d3ea6c154b59433362747752da56ebcb85a3264",
+      "presentation_sha256": "856139b4bf37a632ba91e9e75e31b2f181e68451fcc65f891d8199584eb80c21",
       "code_block_sha256": [
         "62ce10639c86c5e4838f4416fb8fa68e71671e8f028b185294af4746d442efc8",
         "517c5cad811e1a0e857a659b02e0c7f8bf7e42ac120f3789970f0709886d6033",
@@ -280,7 +280,7 @@
     {
       "path": "courses/llm-applied/solutions/llm-applied-020_solutions.md",
       "historical_sha256": "7a351cd30f8281e48ceeb15fe4d630a0c8ca4af4da82af80a3a600c414b5542a",
-      "presentation_sha256": "768ccc345c7069f6eb9d71408d700c2067f18b8096cd2952e0f695f12a2b47f2",
+      "presentation_sha256": "90e07aa54a93835b6d24fb44fc6496d28a478f0d4ac694fb94ecf99aff7f3fbe",
       "code_block_sha256": [
         "cf95ecb2210182d1412939188268ab372dd50911417f2f57207c923af7fd2552",
         "ece34bdc353d6b76c3e8351f7b6aae5bd5c2445ff5992cd6d3b43d316048a7be",
@@ -350,7 +350,7 @@
     {
       "path": "courses/deep-learning-pytorch/guides/torch-005.md",
       "historical_sha256": "77cb87a8d7098898c4f4137fc21d0a023df290e68733ca50d2553da9b6345fda",
-      "presentation_sha256": "e3483fa1454569a33bc1ee7e87cb2a02a658b0aee8f3f4b74a1533ae6be36552",
+      "presentation_sha256": "626a7ec54826a6955350990eefcd6de17c0266e7460725592ca694ab83caad54",
       "code_block_sha256": [
         "42202950e5ee8b65b1ce6b2d170a9ac2c66d1107b7ef6913042872e2e3b0917e",
         "cfdfb3c950a49fc04d319b39bd86b61aaacadb8cc873b5ccd95800446fe12601",

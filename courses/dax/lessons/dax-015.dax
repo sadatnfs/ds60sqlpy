@@ -1,0 +1,10 @@
+// dax-015 learner draft: CALCULATE replaces a filter on the same column
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Predict replacement on one column while retaining unrelated filters.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a measure that forces year 2025 but retains region.
+
+DEFINE MEASURE Sales[DraftRevenue] = BLANK()
+EVALUATE
+CALCULATETABLE ( ROW ( "Selected amount", [DraftRevenue] ), Product[Color] = "Blue" )

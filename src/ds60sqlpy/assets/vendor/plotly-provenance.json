@@ -1,0 +1,8 @@
+{
+  "version": "4.1.2",
+  "package": "plotly.js-cartesian-dist-min",
+  "source": "https://registry.npmjs.org/plotly.js-cartesian-dist-min/-/plotly.js-cartesian-dist-min-4.1.2.tgz",
+  "sha256": "aaf12ff1d4671f7e93f6df4291651ab4ca6b76c0ea5f1576ec1030e3c2819a20",
+  "license": "MIT",
+  "distribution": "Cartesian SVG charts; no external network assets required"
+}

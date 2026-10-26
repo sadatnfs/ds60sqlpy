@@ -3,10 +3,10 @@
 services:
   lab:
     environment:
-      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081","c17":"http://c-worker:8081","go":"http://go-worker:8081","csharp-dotnet":"http://csharp-worker:8081","rust-stable":"http://rust-worker:8081","swift-linux":"http://swift-worker:8081","php-cli":"http://php-worker:8081","cuda-cpp":"http://cuda-cpp-worker:8081","cuda-python":"http://cuda-python-worker:8081","pytorch-cuda":"http://pytorch-cuda-worker:8081","tensorflow-cuda":"http://tensorflow-cuda-worker:8081","k8s-kind":"http://kubernetes-worker:8081"}'
+      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081","c17":"http://c-worker:8081","go":"http://go-worker:8081","csharp-dotnet":"http://csharp-worker:8081","rust-stable":"http://rust-worker:8081","swift-linux":"http://swift-worker:8081","php-cli":"http://php-worker:8081","cuda-cpp":"http://cuda-cpp-worker:8081","cuda-python":"http://cuda-python-worker:8081","pytorch-cuda":"http://pytorch-cuda-worker:8081","tensorflow-cuda":"http://tensorflow-cuda-worker:8081","jax-cpu":"http://jax-worker:8081","bayesian-cpu":"http://bayesian-worker:8081","r-statistics":"http://r-worker:8081","k8s-kind":"http://kubernetes-worker:8081"}'
 
   kubernetes-worker:
-    image: ds60sqlpy-worker-k8s-kind:0.4.1
+    image: ds60sqlpy-worker-k8s-kind:0.5.0
     pull_policy: never
     profiles: [k8s-kind]
     build:

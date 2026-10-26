@@ -1,0 +1,10 @@
+// dax-027 learner draft: Lineage and TREATAS: equal values can filter differently
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why a virtual column's model identity matters in addition to its visible values.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a disconnected selection mapping for product keys 1 and 3.
+
+EVALUATE
+VAR ChosenKeys = { 1, 3 }
+RETURN ROW ( "Transferred selection", BLANK() )

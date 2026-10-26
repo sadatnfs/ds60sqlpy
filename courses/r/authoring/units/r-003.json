@@ -1,0 +1,98 @@
+{
+  "id": "r-003",
+  "title": "Atomic vectors, lengths and recycling",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-002"],
+  "concepts": ["Atomic vector", "Elementwise operation", "Recycling", "Length contract"],
+  "outcome": "Write vectorized calculations while rejecting accidental recycling and unintended coercion.",
+  "mechanism": "The c function combines values into an atomic vector when their types can be made compatible. Arithmetic on two equal-length numeric vectors generally pairs their elements by position. A scalar is a length-one vector, so adding one fee to every amount uses the same mechanism. Vectorized syntax is concise, but it does not automatically align records by a customer or product key.\n\nR recycles a shorter vector when its length is smaller than the other operand. A two-element pattern added to four values repeats twice without a warning. If the longer length is not a multiple of the shorter length, R commonly warns, but the operation still produces a result. That warning is not a dependable substitute for a shape contract: some incorrect lengths recycle silently.\n\nState the intended sizes before the operation. If every amount needs its own fee, require equal lengths. If one fee applies to all amounts, allow exactly one fee deliberately. The rule belongs to the calculation's interface, not to a later visual inspection of plausible output. A length-zero input also needs an explicit policy because it often propagates to a length-zero result.\n\nAn atomic vector has one storage type. c(1, TRUE) is numeric, while c(1, \"two\") is character. A list, introduced later, can retain different object types. These choices matter when reading heterogeneous records: putting a label beside measurements in a single atomic vector can silently turn all the measurements into text.",
+  "vocabulary": [
+    {
+      "term": "Atomic vector",
+      "definition": "A sequence whose elements share one underlying type."
+    },
+    {
+      "term": "Elementwise operation",
+      "definition": "An operation applied to aligned vector elements."
+    },
+    {
+      "term": "Recycling",
+      "definition": "Reuse of a shorter vector during compatible elementwise operations."
+    },
+    {
+      "term": "Length contract",
+      "definition": "A declared relationship between input sizes."
+    }
+  ],
+  "anatomy": "Use length(x) to inspect size, seq_along(x) to create valid positions even for empty x, and rep to create a deliberate repeated pattern. The expression x + fee pairs positions; it is not a join on names.",
+  "worked_examples": [
+    {
+      "title": "One declared scalar fee",
+      "code": "amount <- c(10, 20, 30)\nfee <- 2\nstopifnot(length(fee) == 1)\nresult <- amount + fee\nstopifnot(identical(result, c(12, 22, 32)))\nprint(result)\n",
+      "explanation": "Length one is an intentional broadcast in this calculation. Each input receives the same fee.",
+      "expected": "12, 22, 32."
+    },
+    {
+      "title": "A silent pattern can be the wrong contract",
+      "code": "amount <- c(10, 20, 30, 40)\nfees <- c(1, 2)\nrecycled <- amount + fees\nstopifnot(identical(recycled, c(11, 22, 31, 42)))\nvalid_per_row <- length(amount) == length(fees)\nstopifnot(!valid_per_row)\nprint(recycled)\n",
+      "explanation": "No warning is needed because four is a multiple of two. The separate per-row length rule still rejects the input.",
+      "expected": "11, 22, 31, 42; per-row lengths are invalid."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict c(2,4,6) * 3.",
+      "hint": "The scalar repeats intentionally.",
+      "answer": "The values are 6,12,18.",
+      "expected": "The values are 6,12,18."
+    },
+    {
+      "prompt": "Use fees c(1,2,3) for three amounts.",
+      "hint": "Require equal lengths.",
+      "answer": "Adding to 10,20,30 gives 11,22,33.",
+      "expected": "Adding to 10,20,30 gives 11,22,33."
+    },
+    {
+      "prompt": "Write a guard allowing one fee or one fee per amount.",
+      "hint": "Check the fee length before arithmetic.",
+      "answer": "length(fee) must be one or length(amount).",
+      "expected": "length(fee) must be one or length(amount)."
+    },
+    {
+      "prompt": "Diagnose two fees applied to four unrelated records.",
+      "hint": "Divisibility does not prove intended alignment.",
+      "answer": "Silent recycling can assign the wrong per-record fee.",
+      "expected": "Silent recycling can assign the wrong per-record fee."
+    },
+    {
+      "prompt": "Inspect numeric(0) + 2.",
+      "hint": "The result contains no elements.",
+      "answer": "It remains a numeric vector of length zero.",
+      "expected": "It remains a numeric vector of length zero."
+    },
+    {
+      "prompt": "Keep an ID and a numeric measurement without coercing the measurement.",
+      "hint": "Atomic vectors share one type; later use a structured container.",
+      "answer": "Use separate vectors or a list/data frame with explicit column types.",
+      "expected": "Use separate vectors or a list/data frame with explicit column types."
+    }
+  ],
+  "starter": "# r-003: Atomic vectors, lengths and recycling\n# Complete the six guide tasks using these local inputs.\namount <- c(10, 20, 30)\nfees <- c(1, 2)\n# TODO: check the intended length relationship before arithmetic.\nprint(c(amount_length = length(amount), fee_length = length(fees)))\n",
+  "reference": "stopifnot(identical(c(2, 4, 6) * 3, c(6, 12, 18)))\namount <- c(10, 20, 30)\nfees <- c(1, 2, 3)\nstopifnot(length(amount) == length(fees))\nstopifnot(identical(amount + fees, c(11, 22, 33)))\nvalid <- function(amount, fee) length(fee) == 1L || length(fee) == length(amount)\nstopifnot(valid(amount, 2), valid(amount, fees), !valid(amount, c(1, 2)))\nstopifnot(length(numeric(0) + 2) == 0L)\nstopifnot(is.character(c(\"A\", 2)), is.double(c(1, 2)))\ncat(\"r-003 reference checks passed\\n\")\n",
+  "solution_explanation": "Length one is an intentional broadcast in this calculation. Each input receives the same fee.\n\nNo warning is needed because four is a multiple of two. The separate per-row length rule still rejects the input.\n\nThe reference defines a small checking helper with function(amount, fee). Its arguments receive the two input vectors, and its final logical expression reports whether the length rule holds. This avoids copying the guard for each boundary case. Chapter r-012 develops function interfaces in detail; the worked examples here can be followed with direct length checks.",
+  "sources": [
+    {
+      "title": "R combination",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/c.html"
+    },
+    {
+      "title": "R arithmetic",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Arithmetic.html"
+    },
+    {
+      "title": "R sequences",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/seq.html"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+// dax-019 learner draft: KEEPFILTERS expresses an intersection policy
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Choose between forcing a value and respecting an existing selection on the same column.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a selected-subgroup measure for Trade customers.
+
+EVALUATE
+ROW ( "Replacement result", BLANK(), "Intersection result", BLANK() )

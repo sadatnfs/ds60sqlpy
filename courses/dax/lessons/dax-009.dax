@@ -1,0 +1,9 @@
+// dax-009 learner draft: Calculated columns, measures and evaluation lifetime
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Separate a row's stored calculation from a scalar reevaluated for a query context.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a calculated-column expression for a line's gross amount.
+
+DEFINE MEASURE Sales[DraftRevenue] = BLANK()
+EVALUATE ROW ( "Reusable measure", [DraftRevenue] )

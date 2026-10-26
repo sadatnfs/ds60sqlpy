@@ -395,7 +395,7 @@
       "prerequisites": ["statistics-009"],
       "level": "foundation",
       "minutes": 90,
-      "dependencies": ["numpy", "statsmodels"],
+      "dependencies": ["numpy", "statsmodels", "scipy"],
       "mode": "tutorial",
       "network": "offline"
     },
@@ -560,7 +560,7 @@
       "prerequisites": ["statistics-013"],
       "level": "intermediate",
       "minutes": 120,
-      "dependencies": ["numpy", "scipy"],
+      "dependencies": ["numpy", "scipy", "statsmodels"],
       "mode": "tutorial",
       "network": "offline"
     },

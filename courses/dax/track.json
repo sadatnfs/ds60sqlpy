@@ -1,0 +1,1273 @@
+{
+  "schema_version": 1,
+  "id": "dax",
+  "title": "DAX: semantic models, context and analytical reasoning",
+  "summary": "60 offline coding lessons from table grain to context, analytical models, reusable logic, security and delivery. Edit and compare DAX with named hand-derived references; no engine, compiler or account is required.",
+  "lessons": [
+    {
+      "id": "dax-001",
+      "title": "A semantic model, a question and a worked result",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "dax-offline",
+      "concepts": [
+        "semantic model",
+        "fact",
+        "dimension",
+        "measure",
+        "query"
+      ],
+      "outcome": "Explain what a revenue number means by identifying the model, grain and eligible rows.",
+      "lab": "Write a one-row query that names the output QuantitySold.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-002",
+      "title": "Grain, keys and why rows are not orders",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-001"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "grain",
+        "key",
+        "order line",
+        "distinct count",
+        "unit"
+      ],
+      "outcome": "Distinguish sales lines, orders and customers before selecting an aggregation.",
+      "lab": "Write the average revenue per order measure.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-003",
+      "title": "A star schema and the path of a filter",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-002"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "star schema",
+        "dimension",
+        "foreign key",
+        "filter propagation"
+      ],
+      "outcome": "Trace a dimension selection through an active relationship to the exact contributing fact rows.",
+      "lab": "Draw the two paths that meet at Sales.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-004",
+      "title": "Relationships are filter rules, not materialized joins",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-003"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "relationship direction",
+        "one side",
+        "many side",
+        "relationship versus join"
+      ],
+      "outcome": "Predict asymmetric filter propagation and identify when a SQL join analogy breaks.",
+      "lab": "Write a query returning both populations with unambiguous labels.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-005",
+      "title": "DAX query shape, names and deterministic result tables",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-001",
+        "dax-002"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "EVALUATE",
+        "ROW",
+        "SELECTCOLUMNS",
+        "TOPN",
+        "ORDER BY"
+      ],
+      "outcome": "Distinguish scalar expressions, table expressions and named model measures in a readable query.",
+      "lab": "Write a query returning three rows in descending SaleID order.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-006",
+      "title": "Model quality capstone: duplicates, missing keys and unknown members",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-002",
+        "dax-003",
+        "dax-005"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "referential integrity",
+        "duplicate key",
+        "unknown member",
+        "model validation"
+      ],
+      "outcome": "Produce a model-quality ledger that separates an invalid dimension key from an unmatched fact key.",
+      "lab": "Write an issue ledger with type, evidence and disposition.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-007",
+      "title": "Scalar types, operators and measurement units",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-005"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "scalar",
+        "number",
+        "text",
+        "Boolean",
+        "date",
+        "format"
+      ],
+      "outcome": "Keep a numeric measure numeric and explain why its display label is a separate concern.",
+      "lab": "Write a result row containing quantity, revenue and revenue per unit.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-008",
+      "title": "BLANK, zero and the difference between missing and false",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-007"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "BLANK",
+        "ISBLANK",
+        "strict equality",
+        "COALESCE",
+        "empty population"
+      ],
+      "outcome": "Explain coercion and choose a deliberate missing-value display policy.",
+      "lab": "Write a label distinguishing no sales from positive revenue.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-009",
+      "title": "Calculated columns, measures and evaluation lifetime",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-003",
+        "dax-007"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "calculated column",
+        "measure",
+        "refresh",
+        "query context",
+        "stored value"
+      ],
+      "outcome": "Separate a row's stored calculation from a scalar reevaluated for a query context.",
+      "lab": "Write a calculated-column expression for a line's gross amount.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-010",
+      "title": "Additive sums and distinct populations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-002",
+        "dax-008",
+        "dax-009"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "SUM",
+        "COUNTROWS",
+        "DISTINCTCOUNT",
+        "additivity",
+        "population"
+      ],
+      "outcome": "Choose an aggregation whose input grain and total behavior match the metric definition.",
+      "lab": "Write two separate measures for catalog customers and customers with sales.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-011",
+      "title": "DIVIDE, weighted averages and zero denominators",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-010"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "ratio of totals",
+        "DIVIDE",
+        "weighted average",
+        "denominator",
+        "zero"
+      ],
+      "outcome": "Derive a ratio at its declared population and distinguish an undefined ratio from zero.",
+      "lab": "Write a measure that leaves undefined rates blank.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-012",
+      "title": "VAR and RETURN: values are not context-sensitive macros",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "dax-009",
+        "dax-011"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "VAR",
+        "RETURN",
+        "evaluation context",
+        "binding",
+        "readability"
+      ],
+      "outcome": "Predict when a variable freezes a value and when a measure is reevaluated in modified context.",
+      "lab": "Rewrite a filtered share with separately named numerator and denominator.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-013",
+      "title": "Row context is not a filter on related facts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-003",
+        "dax-009"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "row context",
+        "filter context",
+        "iterator",
+        "context transition"
+      ],
+      "outcome": "Explain why iterating Product does not by itself filter a raw Sales aggregation.",
+      "lab": "Write a projection that shows both raw and transitioned sums.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-014",
+      "title": "Filter context is the full question, not just one slicer",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-003",
+        "dax-010"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "filter context",
+        "intersection",
+        "selection",
+        "report cell"
+      ],
+      "outcome": "Record a complete context ledger and explain two cells with the same measure definition.",
+      "lab": "Write a context ledger for North, Home and 2025.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-015",
+      "title": "CALCULATE replaces a filter on the same column",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-012",
+        "dax-014"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "CALCULATE",
+        "Boolean filter",
+        "replacement",
+        "added filter"
+      ],
+      "outcome": "Predict replacement on one column while retaining unrelated filters.",
+      "lab": "Write a measure that forces year 2025 but retains region.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-016",
+      "title": "Filter arguments are not an imperative sequence",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-015"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "evaluation order",
+        "nested CALCULATE",
+        "filter argument",
+        "captured scalar"
+      ],
+      "outcome": "Explain why sibling filter arguments differ from deliberately nested evaluation.",
+      "lab": "Write a context ledger for each sibling expression.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-017",
+      "title": "Explicit and implicit context transition",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-013",
+        "dax-015"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "context transition",
+        "model measure",
+        "SUMX",
+        "row identity",
+        "duplicate rows"
+      ],
+      "outcome": "Trace a raw aggregation and a measure reference inside an iterator without treating context transition as a row pointer.",
+      "lab": "Write the simplest formula for this additive revenue total.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-018",
+      "title": "Measure predicates need an explicit candidate table",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-008",
+        "dax-010",
+        "dax-017"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "FILTER",
+        "measure predicate",
+        "candidate set",
+        "table filter",
+        "lineage"
+      ],
+      "outcome": "Build a measure-dependent selection by evaluating the measure for each candidate member.",
+      "lab": "Write a selection for customers with revenue above 55.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-019",
+      "title": "KEEPFILTERS expresses an intersection policy",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-015",
+        "dax-016"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "KEEPFILTERS",
+        "intersection",
+        "replacement",
+        "selection policy"
+      ],
+      "outcome": "Choose between forcing a value and respecting an existing selection on the same column.",
+      "lab": "Write a selected-subgroup measure for Trade customers.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-020",
+      "title": "REMOVEFILTERS and the exact denominator population",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-011",
+        "dax-019"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "REMOVEFILTERS",
+        "denominator scope",
+        "column versus table",
+        "share"
+      ],
+      "outcome": "State which filters a share denominator removes and which it retains.",
+      "lab": "Write the denominator contract in plain language before coding.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-021",
+      "title": "SUMX and AVERAGEX choose both an expression and a population",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-013",
+        "dax-017"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "SUMX",
+        "AVERAGEX",
+        "row expression",
+        "blank exclusion",
+        "weighting"
+      ],
+      "outcome": "Derive an iterator result and explain how blank rows affect its denominator.",
+      "lab": "Write a customer-level average revenue for customers with sales.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-022",
+      "title": "Variables inside and outside an iterator",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-012",
+        "dax-021"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "variable scope",
+        "iterator body",
+        "implicit transition",
+        "shared scalar"
+      ],
+      "outcome": "Locate a variable's binding context and avoid repeating one total for every member.",
+      "lab": "Write an iterator whose variable intentionally holds one global denominator.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-023",
+      "title": "Grand totals reevaluate the measure",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-011",
+        "dax-021"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "grand total",
+        "subtotal",
+        "nonadditive measure",
+        "ratio",
+        "reevaluation"
+      ],
+      "outcome": "Reconcile row values and a grand-total ratio without forcing the total to sum visible cells.",
+      "lab": "Write a separately named equal-category average.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-024",
+      "title": "Selected totals and the limits of ALLSELECTED intuition",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-020",
+        "dax-023"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "ALLSELECTED",
+        "visual total",
+        "query grouping",
+        "outer selection",
+        "shadow context"
+      ],
+      "outcome": "Differentiate share of an explicitly selected population from share of all model products.",
+      "lab": "Write a denominator specification for a chart with a year slicer.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-025",
+      "title": "VALUES, DISTINCT and the model's unknown member",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-004",
+        "dax-008",
+        "dax-010"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "VALUES",
+        "DISTINCT",
+        "blank member",
+        "referential integrity",
+        "reconciliation"
+      ],
+      "outcome": "Reconcile unmatched facts without confusing the stored dimension with its semantic blank member.",
+      "lab": "Write the reconciliation equation for product reporting.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-026",
+      "title": "Virtual tables have row-retention and column contracts",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-018",
+        "dax-021",
+        "dax-025"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "ADDCOLUMNS",
+        "SELECTCOLUMNS",
+        "SUMMARIZECOLUMNS",
+        "virtual table",
+        "nonempty"
+      ],
+      "outcome": "Predict which rows survive a projection, an extension and a grouped summary.",
+      "lab": "Write an intermediate-table ledger for a revenue-threshold calculation.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-027",
+      "title": "Lineage and TREATAS: equal values can filter differently",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-017",
+        "dax-026"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "data lineage",
+        "direct projection",
+        "computed column",
+        "TREATAS",
+        "virtual relationship"
+      ],
+      "outcome": "Explain why a virtual column's model identity matters in addition to its visible values.",
+      "lab": "Write a disconnected selection mapping for product keys 1 and 3.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-028",
+      "title": "Set operations, duplicates and argument order",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-025",
+        "dax-027"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "UNION",
+        "INTERSECT",
+        "EXCEPT",
+        "duplicates",
+        "set membership"
+      ],
+      "outcome": "Distinguish membership operations from bag concatenation and preserve a deliberate key population.",
+      "lab": "Write an eligible-product union that should contain each key once.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-029",
+      "title": "Active and inactive date roles with USERELATIONSHIP",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-004",
+        "dax-015"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "active relationship",
+        "inactive relationship",
+        "USERELATIONSHIP",
+        "role-playing date"
+      ],
+      "outcome": "Reconcile order-date and ship-date totals without changing the fact amounts.",
+      "lab": "Write a clearly named shipment-revenue measure.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-030",
+      "title": "Bridge tables and overlapping audiences",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-027",
+        "dax-028"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "bridge table",
+        "many-to-many",
+        "TREATAS",
+        "filter direction",
+        "overlap"
+      ],
+      "outcome": "Model overlapping customer groups and reconcile unique reach without enabling ambiguous filter paths.",
+      "lab": "Write a reconciliation for the two audience totals.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-031",
+      "title": "A complete date dimension is not a list of sale dates",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-004",
+        "dax-007"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "date table",
+        "calendar grain",
+        "missing dates",
+        "mark as date table",
+        "coverage"
+      ],
+      "outcome": "Distinguish calendar coverage, observed facts and data-availability boundaries.",
+      "lab": "Write a date-table quality checklist.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-032",
+      "title": "Year-to-date means a specific included-date set",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-015",
+        "dax-031"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "DATESYTD",
+        "year to date",
+        "date filter",
+        "anchor date",
+        "reconciliation"
+      ],
+      "outcome": "Derive a YTD measure by enumerating its date boundary and eligible fact rows.",
+      "lab": "Write a YTD audit ledger.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-033",
+      "title": "Prior periods and comparable completeness",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-011",
+        "dax-032"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "SAMEPERIODLASTYEAR",
+        "year-over-year",
+        "period completeness",
+        "comparison denominator"
+      ],
+      "outcome": "Separate a full-period comparison from an as-of comparison and explain the sign change.",
+      "lab": "Write a metric title that exposes the as-of boundary.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-034",
+      "title": "Rolling windows: calendar days versus event days",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-021",
+        "dax-031"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "DATESINPERIOD",
+        "rolling window",
+        "calendar weighting",
+        "zero versus blank"
+      ],
+      "outcome": "Explain why a mean over observed sale days differs from revenue per eligible calendar day.",
+      "lab": "Write a complete rolling-window contract.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-035",
+      "title": "Fiscal labels, boundaries and as-of totals",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-032",
+        "dax-033"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "fiscal year",
+        "date role",
+        "year label",
+        "as-of boundary",
+        "calendar policy"
+      ],
+      "outcome": "Define a fiscal year explicitly and distinguish fiscal-to-date from a completed fiscal year.",
+      "lab": "Write a fiscal-to-date metric caption.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-036",
+      "title": "Calendar-based time intelligence is a metadata-dependent continuation",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "dax-031",
+        "dax-035"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "calendar metadata",
+        "calendar-based time intelligence",
+        "preview",
+        "tagged columns",
+        "compatibility"
+      ],
+      "outcome": "Explain why a calendar reference can represent a different year definition than a classic date column.",
+      "lab": "Write a review checklist for adding an external calendar object.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-037",
+      "title": "Ranking, ties and an exact-sized Top N",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-018",
+        "dax-021",
+        "dax-023"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "RANKX",
+        "dense rank",
+        "skip rank",
+        "TOPN",
+        "tie-breaker"
+      ],
+      "outcome": "Specify tie behavior separately from deterministic ordering and selection size.",
+      "lab": "Write a ranking specification including its comparison population.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-038",
+      "title": "Window positions, ordering and row identity",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-026",
+        "dax-037"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "WINDOW",
+        "INDEX",
+        "OFFSET",
+        "ORDERBY",
+        "absolute versus relative"
+      ],
+      "outcome": "Distinguish a positional row window from a calendar interval and identify the ordering contract.",
+      "lab": "Specify a per-customer chronological ordering.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-039",
+      "title": "Inventory balances are semi-additive",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-029",
+        "dax-031",
+        "dax-034"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "snapshot",
+        "semi-additive",
+        "closing balance",
+        "last known",
+        "staleness"
+      ],
+      "outcome": "Choose a time aggregation that matches a balance rather than summing repeated states.",
+      "lab": "Write a staleness acceptance rule for carried balances.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-040",
+      "title": "Cohorts, retention denominators and unobserved ages",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-011",
+        "dax-027",
+        "dax-034"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "cohort",
+        "retention",
+        "eligibility",
+        "observation age",
+        "censoring"
+      ],
+      "outcome": "Separate enrolled members, active members and unavailable follow-up periods.",
+      "lab": "Write a cohort metric contract.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-041",
+      "title": "Budget comparisons require compatible grains",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-023",
+        "dax-027",
+        "dax-031"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "monthly budget",
+        "grain mismatch",
+        "TREATAS",
+        "full-period guard",
+        "allocation"
+      ],
+      "outcome": "Align actuals with a monthly category budget without copying a whole-month target into a daily metric.",
+      "lab": "Specify a uniform daily allocation for January Paper.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-042",
+      "title": "Currency conversion belongs at the rate's grain",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-011",
+        "dax-013",
+        "dax-021"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "exchange rate",
+        "LOOKUPVALUE",
+        "currency unit",
+        "rate date",
+        "quality gate"
+      ],
+      "outcome": "Convert compatible transactions before aggregation and diagnose a misleading latest-rate shortcut.",
+      "lab": "Write a rate-coverage quality rule.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-043",
+      "title": "Measure composition, dependency graphs and numeric formatting",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-011",
+        "dax-021",
+        "dax-029"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "measure dependency",
+        "RELATED",
+        "cost grain",
+        "numeric measure",
+        "format property"
+      ],
+      "outcome": "Build a small reusable measure family with explicit units and dependency boundaries.",
+      "lab": "Draw the dependency graph and annotate units.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-044",
+      "title": "Calculation items transform selected measures",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-023",
+        "dax-043"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "calculation group",
+        "SELECTEDMEASURE",
+        "ISSELECTEDMEASURE",
+        "applicability",
+        "reuse"
+      ],
+      "outcome": "Describe a reusable transformation while preventing it from changing incompatible measures.",
+      "lab": "Write the calculation-item expression and its applicability contract.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-045",
+      "title": "Precedence and dynamic format strings",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-044"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "precedence",
+        "expression expansion",
+        "noncommutativity",
+        "dynamic format string"
+      ],
+      "outcome": "Expand interacting calculation items and distinguish numeric transformation from display selection.",
+      "lab": "Write a regression grid for two interacting groups.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-046",
+      "title": "DAX UDFs: explicit parameters and a reusable scalar rule",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-007",
+        "dax-008",
+        "dax-012",
+        "dax-043"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "FUNCTION",
+        "UDF",
+        "numeric parameter",
+        "default argument",
+        "compatibility"
+      ],
+      "outcome": "Define a small reusable function with a clear parameter domain and default behavior.",
+      "lab": "Write a function contract with units and domain.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-047",
+      "title": "UDF value versus expression parameters",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-015",
+        "dax-017",
+        "dax-046"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "VAL",
+        "EXPR",
+        "eager evaluation",
+        "deferred evaluation",
+        "filter context"
+      ],
+      "outcome": "Predict whether a UDF receives a precomputed value or an expression evaluated under its own modifier.",
+      "lab": "Write documentation warning callers about context changes.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-048",
+      "title": "Visual calculations operate on a visual's aggregated shape",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-023",
+        "dax-032",
+        "dax-038"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "visual calculation",
+        "RUNNINGSUM",
+        "visual order",
+        "aggregation grain",
+        "scope"
+      ],
+      "outcome": "Distinguish a visual running total from a reusable semantic-model measure.",
+      "lab": "Write the intended visual expression and its scope contract.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-049",
+      "title": "Formula work, columnar scans and cardinality",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-021",
+        "dax-026"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "formula engine",
+        "storage engine",
+        "columnar storage",
+        "cardinality",
+        "measurement"
+      ],
+      "outcome": "Separate an expression's semantics, model cardinality and observed engine performance.",
+      "lab": "Write a performance-claim checklist.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-050",
+      "title": "Intermediate tables can grow before aggregation",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-026",
+        "dax-049"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "materialization",
+        "CROSSJOIN",
+        "observed combinations",
+        "intermediate grain",
+        "cardinality"
+      ],
+      "outcome": "Estimate candidate-table size without confusing a logical table with measured physical work.",
+      "lab": "Choose a population for a complete customer/product coverage matrix.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-051",
+      "title": "A faster-looking rewrite must preserve filter semantics",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-016",
+        "dax-019",
+        "dax-049"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "semantic equivalence",
+        "FILTER",
+        "Boolean predicate",
+        "KEEPFILTERS",
+        "regression context"
+      ],
+      "outcome": "Find a context where two similar predicates differ before treating one as an optimization.",
+      "lab": "Write a minimum semantic regression grid.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-052",
+      "title": "Expanded tables and existing combinations",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-004",
+        "dax-020",
+        "dax-026",
+        "dax-051"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "expanded table",
+        "ALL",
+        "auto-exist",
+        "value-filter behavior",
+        "model scope"
+      ],
+      "outcome": "Explain why broad filter removal and same-table combinations need model-aware reasoning.",
+      "lab": "Write a denominator-debugging ledger.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-053",
+      "title": "Read timing evidence without inventing a benchmark",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-049",
+        "dax-050",
+        "dax-051"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "cache state",
+        "repeated trials",
+        "median",
+        "variance",
+        "synthetic evidence"
+      ],
+      "outcome": "Interpret a supplied timing scenario while separating it from an actual DAX execution receipt.",
+      "lab": "Write a real benchmark protocol without running it here.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-054",
+      "title": "Optimization capstone: prove the grouping assumption first",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-043",
+        "dax-050",
+        "dax-053"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "semantic parity",
+        "grouped rewrite",
+        "constant rate",
+        "cost model",
+        "qualification"
+      ],
+      "outcome": "Review a grouped cost rewrite under explicit assumptions before proposing a performance measurement.",
+      "lab": "Write a release decision for this proposed rewrite.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-055",
+      "title": "Storage modes, freshness and capability boundaries",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-004",
+        "dax-031",
+        "dax-052"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "Import",
+        "DirectQuery",
+        "composite model",
+        "Direct Lake",
+        "refresh"
+      ],
+      "outcome": "Separate a metric's definition from data freshness, storage mode and external capability.",
+      "lab": "Write a storage-mode capability review.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-056",
+      "title": "A report filter is not row-level security",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-015",
+        "dax-020",
+        "dax-052"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "RLS",
+        "Viewer",
+        "security context",
+        "report filter",
+        "REMOVEFILTERS"
+      ],
+      "outcome": "Distinguish a removable analytical filter from an engine-enforced role restriction.",
+      "lab": "Write a real RLS acceptance record template.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-057",
+      "title": "Dynamic RLS needs a complete identity and mapping contract",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-027",
+        "dax-056"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "USERPRINCIPALNAME",
+        "identity mapping",
+        "default deny",
+        "role predicate",
+        "access table"
+      ],
+      "outcome": "Reason about a dynamic region policy, including unmapped identities and policy-table exposure.",
+      "lab": "Write a default-deny mapping test matrix.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-058",
+      "title": "Commercial-model capstone: reconcile adjustments and targets",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-029",
+        "dax-041",
+        "dax-042",
+        "dax-043"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "commercial model",
+        "refund attribution",
+        "currency conversion",
+        "budget grain",
+        "reconciliation"
+      ],
+      "outcome": "Produce a reviewable commercial metric specification with explicit populations and adjustment policies.",
+      "lab": "Write the capstone's metric and model specification.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-059",
+      "title": "Experiment and cohort capstone: preserve the assigned unit",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-010",
+        "dax-011",
+        "dax-023",
+        "dax-040"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "assignment unit",
+        "exposure events",
+        "intention to treat",
+        "Wilson interval",
+        "causal boundary"
+      ],
+      "outcome": "Build an experiment-quality semantic report without treating repeated events or displayed estimates as causal proof.",
+      "lab": "Write the quality matrix needed before interpreting the arm contrast.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    },
+    {
+      "id": "dax-060",
+      "title": "Delivery capstone: a model specification and an evidence ledger",
+      "level": "advanced",
+      "minutes": 150,
+      "prerequisites": [
+        "dax-054",
+        "dax-055",
+        "dax-057",
+        "dax-058",
+        "dax-059"
+      ],
+      "runtime": "dax-offline",
+      "concepts": [
+        "model contract",
+        "semantic regression",
+        "role matrix",
+        "source control",
+        "release evidence"
+      ],
+      "outcome": "Assemble a reviewable model change with expected role/context results and explicit unperformed deployment checks.",
+      "lab": "Produce an offline change-review packet for the grouped-cost rewrite.",
+      "verification": "Compare a written context trace with the named hand-derived reference; no execution or automatic correctness claim."
+    }
+  ]
+}

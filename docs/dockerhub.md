@@ -8,9 +8,9 @@ The publisher uses **one repository**, `YOUR_DOCKERHUB_USER/ds60sqlpy`, with a
 separate tag for each image and CPU architecture. For example:
 
 ```text
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-lab-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-worker-python-core-arm64
-YOUR_DOCKERHUB_USER/ds60sqlpy:0.4.1-worker-php-cli-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-lab-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-python-core-arm64
+YOUR_DOCKERHUB_USER/ds60sqlpy:0.5.0-worker-php-cli-arm64
 ```
 
 Use your actual lowercase Docker Hub username wherever this guide says
@@ -28,10 +28,10 @@ first. The following command shows the build logs, starts the classroom and
 opens the browser:
 
 ```sh
-./classroom --all --local-build --tag 0.4.1 --rebuild
+./classroom --all --local-build --tag 0.5.0 --rebuild
 ```
 
-This includes the app, PostgreSQL and sixteen ordinary runtime workers. HTML
+This includes the app, PostgreSQL and the ordinary runtime workers. HTML
 and CSS previews run in the browser. PHP has its own worker. Optional NVIDIA
 workers are excluded from `--all` and from the normal publisher; see
 [CUDA classroom setup](cuda-classroom.md) before choosing them.
@@ -43,7 +43,7 @@ its own saved work; changing its name is not a way to recover previous progress.
 For a build without starting anything, use:
 
 ```sh
-./classroom build --all --local-build --tag 0.4.1
+./classroom build --all --local-build --tag 0.5.0
 ```
 
 Check representative reading and runnable lessons, compiler errors, switching
@@ -82,7 +82,7 @@ the classroom. [Docker access-token documentation](https://docs.docker.com/secur
 The first command only inspects local images and prints their destination tags:
 
 ```sh
-./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.4.1
+./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.5.0
 ```
 
 It requires the complete ordinary image set to exist locally and checks that
@@ -93,7 +93,7 @@ infer that an image passed the test suite.
 After reviewing that output and your release checks, explicitly publish:
 
 ```sh
-./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.4.1 --push
+./scripts/publish-images --namespace YOUR_DOCKERHUB_USER --version 0.5.0 --push
 ```
 
 The script tags the inspected local IDs and pushes them sequentially. PostgreSQL
@@ -126,14 +126,14 @@ The learner still needs a matching checkout or starter ZIP for the launcher
 and Compose files. After you have published the required architecture, they run:
 
 ```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1
+./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
 ```
 
 This pulls missing classroom images, starts the services and opens the browser.
 It never falls back to a local build in Hub mode. A smaller installation is:
 
 ```sh
-./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1
+./classroom --starter --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
 ```
 
 The project saves its source, namespace and version in
@@ -153,21 +153,21 @@ saved image source; `resume` instead explains what is missing.
 To download the selected images without starting services:
 
 ```sh
-./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1
+./classroom pull --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
 ```
 
 To switch an existing locally built project to the published release, explicitly
 apply the configuration change while preserving its volumes:
 
 ```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1 --rebuild
+./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0 --rebuild
 ```
 
 In Hub mode, `--rebuild` refreshes the selected published images and applies the
 update. It does not compile them. To return to local development:
 
 ```sh
-./classroom --local-build --tag 0.4.1 --rebuild
+./classroom --local-build --tag 0.5.0 --rebuild
 ```
 
 Always use the matching source release and image tag. Preserve a learning backup
@@ -186,7 +186,7 @@ workflow's display name or an older successful commit.
 
 Publication has two separate phases:
 
-1. **Build and qualify every image.** All seventeen ordinary images are built
+1. **Build and qualify every image.** All ordinary runtime images and the app image are built
    and exercised on the selected native architecture, with at most two image
    jobs running together. Each worker writes a source-bound runtime receipt.
    No job in this phase receives the Docker Hub token or logs in to Docker Hub.
@@ -223,7 +223,7 @@ up for you. When you are ready:
    require a reviewer and restrict the environment to the release branch. If
    environments or the required protections are unavailable for your repository,
    retain the local publication route rather than assuming a protection exists.
-5. First run the workflow with `publish` left **false**, choosing `0.4.1` and
+5. First run the workflow with `publish` left **false**, choosing `0.5.0` and
    one architecture. Review all build jobs and validation receipts. This needs
    available Actions runners and a successful exact-revision CI result.
 6. When ready to upload, deliberately set the repository variable

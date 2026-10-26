@@ -1,4 +1,4 @@
-# torch-005: Derivatives, requires_grad and finite-difference checks
+# torch-005: Derivatives, `requires_grad` and finite-difference checks
 
 ## Level and prerequisites
 
@@ -6,11 +6,11 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-004`. The prer
 
 ## Learning objectives
 
-A derivative measures local sensitivity: how much a function changes for a small input change. The central investigation is concrete: Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using autograd.grad. The finish condition is derivative -4; loss 4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A derivative measures local sensitivity: how much a function changes for a small input change. The central investigation is concrete: Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using `autograd.grad`. The finish condition is derivative -4; loss 4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with requires_grad=True and can calculate a derivative through autograd.grad. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.
+A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with `requires_grad=True` and can calculate a derivative through `autograd.grad`. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.
 
 Finite differences involve a tradeoff: large steps measure a wider region, while extremely small steps lose precision through subtractive cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework's chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.
 
@@ -24,7 +24,7 @@ Prefer an analytic derivative when a tiny expression permits one, and compare se
 
 Compare [tf-005](../../deep-learning-tensorflow/guides/tf-005.md) after deriving the shared numerical contract.
 
-TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64 finite-difference oracle applies to either framework.
+TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch `autograd.grad` also returns them and backward accumulates into `leaf.grad`. Both must record the relevant forward computation. The same float64 finite-difference oracle applies to either framework.
 
 ## Vocabulary and concepts
 
@@ -42,27 +42,27 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-For \(f(w)=(w-2)^2\), the analytic derivative is \(2(w-2)\). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses \(\frac{f(w+h)-f(w-h)}{2h}\). Validate positive finite h and finite function values before comparing.
+For \(f(w)=(w-2)^2\), the analytic derivative is \(2(w-2)\). Construct a scalar float64 tensor with `requires_grad=True`, calculate f, and request `autograd.grad(f, w)`. The returned tensor does not automatically populate `w.grad`. A central difference uses \(\frac{f(w+h)-f(w-h)}{2h}\). Validate positive finite h and finite function values before comparing.
 
 ## Derive the slope before using it as an update
 
-For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=\(2(w-2)\). At \(w=0\) the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
+For \(f(w)=(w-2)^2\), expand the derivative or apply the square rule to obtain \(f'(w)=2(w-2)\). At \(w=0\) the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With learning rate \(\eta=0.1\), the update is \(w_{\mathrm{new}}=0-0.1(-4)=0.4\) and the recomputed loss is \(f(0.4)=(0.4-2)^2=2.56\).
 
 The central finite difference uses two probes separated by 2 h:
 
-`D_h = [f(w+h)-f(w-h)]/(2h)`.
+\(D_h=\frac{f(w+h)-f(w-h)}{2h}\).
 
-Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=\(2(w-2)\) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
+Expanding this particular quadratic gives \(f(w+h)-f(w-h)=4h(w-2)\), so \(D_h=2(w-2)\) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
 
-A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus \(h=0.1\) gives -3.9, \(h=0.01\) gives -3.99, and \(h=0.001\) gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
+A forward difference has a different error even on this quadratic. At zero, \(\frac{f(h)-f(0)}{h}=-4+h\). Thus \(h=0.1\) gives -3.9, \(h=0.01\) gives -3.99, and \(h=0.001\) gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
 
 Floating-point cancellation pushes in the opposite direction from truncation error. As h shrinks, the two function values can become nearly equal compared with their magnitude. Their subtraction can lose meaningful digits, and a sufficiently small perturbation may not change the represented point at all. Scaling, dtype and the function's local behavior all matter. Sweep several probe scales and inspect the error curve rather than applying a universal h or tolerance.
 
 The probe distance h is not the optimizer learning rate. A probe estimates local sensitivity without choosing a training trajectory; an update deliberately changes model state. A negative derivative identifies a locally descending direction, but a large finite update can still overshoot. For the supplied quadratic, a rate 1.1 update from zero moves to 4.4 and increases loss to 5.76, despite using the correct derivative.
 
-At abs(w) around zero, the left slope is -1 and the right slope is+1. A symmetric probe returns zero because the sides cancel, even though no unique ordinary derivative exists. ReLU gives a related counterexample: its symmetric slope at zero is 0.5 while PyTorch's selected backward convention is zero. Use a smooth point when checking equality with a classical derivative; at a kink, explain the convention separately.
+For \(f(w)=|w|\) around zero, the left slope is -1 and the right slope is +1. A symmetric probe returns zero because the sides cancel, even though no unique ordinary derivative exists. ReLU gives a related counterexample: its symmetric slope at zero is 0.5 while PyTorch's selected backward convention is zero. Use a smooth point when checking equality with a classical derivative; at a kink, explain the convention separately.
 
-Finally, `autograd.grad` returns the requested derivatives. It does not mean that the leaf's `.grad` buffer was populated. The return tuple and the accumulation behavior of `backward` are separate interfaces. [PyTorch 2.9 autograd.grad](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html). A returned -4 with w.grad stillNone is therefore expected here, while a genuinely disconnected path requires a different diagnosis.
+Finally, `autograd.grad` returns the requested derivatives. It does not mean that the leaf's `.grad` buffer was populated. The return tuple and the accumulation behavior of `backward` are separate interfaces. [PyTorch 2.9 autograd.grad](https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad.html). A returned -4 with `w.grad` still `None` is therefore expected here, while a genuinely disconnected path requires a different diagnosis.
 
 ## Worked example / walkthrough
 
@@ -110,7 +110,7 @@ np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()
 ```
 
-**Expected:** new \(w=0.4\), not-4.
+**Expected:** new parameter \(w=0.4\); the supplied gradient is \(-4\).
 
 ## Prediction before your attempt
 
@@ -118,25 +118,25 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Derive a scalar slope.** Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using autograd.grad.
+1. **Derive a scalar slope.** Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using `autograd.grad`.
    **Expected:** derivative -4; loss 4.
    **Verify:** Save the assertion results for exercise 1, including derivative -4; loss 4.
 
-2. **Check three finite differences.** Use \(h=0.1\), .01, .001 at \(w=0\) and compare each slope with-4.
+2. **Check three finite differences.** Use \(h\in\{0.1, 0.01, 0.001\}\) at \(w=0\) and compare each slope with \(-4\).
    **Expected:** all agree within 1e-10.
    **Verify:** Save the assertion results for exercise 2, including all agree within 1e-10.
 
-3. **Separate gradient from update.** Use learning rate 0.1 and gradient-4 from w = 0.
-   **Expected:** new \(w=0.4\), not-4.
-   **Verify:** Save the assertion results for exercise 3, including new \(w=0.4\), not-4.
+3. **Separate gradient from update.** Use learning rate \(\eta=0.1\) and gradient \(-4\) at \(w=0\).
+   **Expected:** new parameter \(w=0.4\); the supplied gradient is \(-4\).
+   **Verify:** Save the assertion results for exercise 3, including new parameter \(w=0.4\); the supplied gradient is \(-4\).
 
-4. **Inspect a stationary point.** Differentiate the same objective atw 2.
+4. **Inspect a stationary point.** Differentiate the same objective at \(w=2\).
    **Expected:** gradient 0 and loss 0.
    **Verify:** Save the assertion results for exercise 4, including gradient 0 and loss 0.
 
-5. **Observe grad-return behavior.** Check that autograd.grad did not accumulate into the leaf.grad field.
-   **Expected:** w.grad is None despite a returned derivative.
-   **Verify:** Save the assertion results for exercise 5, including w.grad is None despite a returned derivative.
+5. **Observe grad-return behavior.** Check that `autograd.grad` did not accumulate into the `leaf.grad` field.
+   **Expected:** `w.grad` is None despite a returned derivative.
+   **Verify:** Save the assertion results for exercise 5, including `w.grad` is None despite a returned derivative.
 
 6. **Reject invalid probes.** Pass \(h=0\), negative h and a function returning infinity to the finite-difference helper.
    **Expected:** all raise ValueError.

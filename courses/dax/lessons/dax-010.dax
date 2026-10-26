@@ -1,0 +1,9 @@
+// dax-010 learner draft: Additive sums and distinct populations
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Choose an aggregation whose input grain and total behavior match the metric definition.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write two separate measures for catalog customers and customers with sales.
+
+EVALUATE
+ROW ( "Rows", BLANK(), "Orders", BLANK(), "Customers", BLANK() )

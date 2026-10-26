@@ -1,0 +1,98 @@
+{
+  "id": "r-007",
+  "title": "Names, attributes and ordinary value semantics",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-003", "r-005"],
+  "concepts": ["Attribute", "Copy-on-modify behavior", "Identity", "Reference object"],
+  "outcome": "Explain why ordinary vector updates differ from mutations of reference objects and why attributes matter.",
+  "mechanism": "An R object can carry attributes in addition to its underlying values. Names attach labels, dim gives an array shape, and class influences methods. Two vectors with the same numerical entries can differ as complete objects if their names or other attributes differ. Use unname only when the labels are genuinely irrelevant to the question.\n\nFor ordinary vectors, a second assignment such as y <- x creates another binding whose value initially agrees with x. Updating y should not be interpreted as changing x by reference. R's implementation can share storage internally until modification, but the observable ordinary-vector behavior preserves x. Avoid claiming that every assignment immediately copies all bytes; allocation strategy is different from language semantics.\n\nEnvironments are an important exception. Two bindings can refer to the same environment, and assigning a field through one binding is visible through the other. Later R6 objects use related reference semantics. This distinction affects testing, caching and configuration: an apparent local update may modify shared state when the object is reference-based.\n\nAttributes are also part of an interface. A function intended to return an unnamed numeric vector should deliberately document and test that choice. A function intended to preserve labels should not drop them by accident. Numeric equality alone cannot validate either contract. Inspect structure and use exact assertions for names, dimensions and class where those properties carry meaning.",
+  "vocabulary": [
+    {
+      "term": "Attribute",
+      "definition": "Metadata attached to an object, such as names or dimensions."
+    },
+    {
+      "term": "Copy-on-modify behavior",
+      "definition": "Ordinary vector modification preserves another binding to the prior value."
+    },
+    {
+      "term": "Identity",
+      "definition": "Exact comparison of value, type and attributes."
+    },
+    {
+      "term": "Reference object",
+      "definition": "An object such as an environment whose mutations can be shared."
+    }
+  ],
+  "anatomy": "names(x) reads labels and names(x) <- value assigns them. attributes(x) exposes metadata. identical compares the full object. new.env creates a reference object; e$value <- ... changes its binding rather than an ordinary numeric vector copy.",
+  "worked_examples": [
+    {
+      "title": "An ordinary vector remains independently editable",
+      "code": "x <- c(A = 1, B = 2)\ny <- x\ny[[1]] <- 99\nstopifnot(x[[1]] == 1, y[[1]] == 99)\nstopifnot(!identical(x, unname(x)))\nprint(list(original = x, edited = y))\n",
+      "explanation": "The updated binding has a different vector value. The original labels and values remain intact.",
+      "expected": "Original A is one; edited A is 99."
+    },
+    {
+      "title": "An environment is shared state",
+      "code": "first <- new.env(parent = emptyenv())\nfirst$count <- 1\nsecond <- first\nsecond$count <- 2\nstopifnot(first$count == 2, identical(first, second))\nprint(first$count)\n",
+      "explanation": "Both names point to the same environment. This is a reference object, so the mutation is visible through either binding.",
+      "expected": "2."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict x after y <- x; y[1] <- 9 for a numeric vector.",
+      "hint": "Ordinary vector modification preserves x.",
+      "answer": "x retains its earlier first value.",
+      "expected": "x retains its earlier first value."
+    },
+    {
+      "prompt": "Remove names from a labeled vector.",
+      "hint": "Use unname deliberately.",
+      "answer": "The values remain while names become NULL.",
+      "expected": "The values remain while names become NULL."
+    },
+    {
+      "prompt": "Construct a two-column shape from four numbers.",
+      "hint": "Set a compatible dim attribute.",
+      "answer": "A 2 by 2 matrix retains four values.",
+      "expected": "A 2 by 2 matrix retains four values."
+    },
+    {
+      "prompt": "Diagnose a shared environment counter changing through another name.",
+      "hint": "The names reference the same mutable object.",
+      "answer": "Use a fresh environment when independent state is required.",
+      "expected": "Use a fresh environment when independent state is required."
+    },
+    {
+      "prompt": "Test exact equality of c(A=1) and 1.",
+      "hint": "Include attributes in the comparison.",
+      "answer": "identical is FALSE because one object is named.",
+      "expected": "identical is FALSE because one object is named."
+    },
+    {
+      "prompt": "State a function return contract including metadata.",
+      "hint": "Values alone may not preserve record identity.",
+      "answer": "Specify and test names, dimensions and class that downstream code relies on.",
+      "expected": "Specify and test names, dimensions and class that downstream code relies on."
+    }
+  ],
+  "starter": "# r-007: Names, attributes and ordinary value semantics\n# Complete the six guide tasks using these local inputs.\noriginal <- c(A = 1, B = 2)\ncopy <- original\n# TODO: compare values and metadata after an update.\nprint(attributes(original))\n",
+  "reference": "x <- c(A = 1, B = 2)\ny <- x\ny[1] <- 9\nstopifnot(x[[1]] == 1)\nz <- unname(x)\nstopifnot(is.null(names(z)), identical(z, c(1, 2)))\nm <- 1:4\ndim(m) <- c(2L, 2L)\nstopifnot(identical(dim(m), c(2L, 2L)))\ne <- new.env(parent = emptyenv()); e$count <- 1\nalias <- e; alias$count <- 3\nstopifnot(e$count == 3, !identical(c(A = 1), 1))\nstopifnot(identical(names(x), c(\"A\", \"B\")))\ncat(\"r-007 reference checks passed\\n\")\n",
+  "solution_explanation": "The updated binding has a different vector value. The original labels and values remain intact.\n\nBoth names point to the same environment. This is a reference object, so the mutation is visible through either binding.",
+  "sources": [
+    {
+      "title": "R attributes",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/attributes.html"
+    },
+    {
+      "title": "R environments",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/environment.html"
+    },
+    {
+      "title": "R object identity",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/identical.html"
+    }
+  ]
+}

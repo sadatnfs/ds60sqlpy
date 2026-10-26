@@ -1,0 +1,15 @@
+// dax-036: Calendar-based time intelligence is a metadata-dependent continuation
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-036-a: Classic Gregorian YTD
+// Context: Classic marked Date column; Gregorian year; anchor 2025-02-03.
+EVALUATE CALCULATETABLE ( ROW ( "GregorianYTD", TOTALYTD ( [NetRevenue], 'Date'[Date] ) ), 'Date'[Date] = DATE ( 2025, 2, 3 ) )
+
+// dax-036-b: The declared February-start retail calendar
+// Context: Assume the optional RetailCalendar metadata has been configured exactly as specified; RetailYear starts February 1.
+EVALUATE CALCULATETABLE ( ROW ( "RetailYTD", TOTALYTD ( [NetRevenue], RetailCalendar ) ), 'Date'[Date] = DATE ( 2025, 2, 3 ) )

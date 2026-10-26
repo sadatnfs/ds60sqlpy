@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>DS60 Classroom · Choose your next idea</title>
+    <title>DS60 Classroom · Course catalog</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -12,6 +12,7 @@
     />
     <link rel="stylesheet" href="/assets/classroom.css" />
     <link rel="stylesheet" href="/assets/rich-content.css" />
+    <link rel="stylesheet" href="/src/ds60sqlpy/assets/vendor/textbook/fonts.css" />
   </head>
   <body data-mode="light">
     <a class="skip" href="#main">Skip to learning content</a>
@@ -20,7 +21,7 @@
         <span class="brand-mark" aria-hidden="true">d.</span
         ><span
           >DS60 <strong>Classroom</strong
-          ><small>A place to understand, build, and grow.</small></span
+          ><small>Programming, data science and systems.</small></span
         >
       </button>
       <nav aria-label="Classroom">
@@ -34,37 +35,37 @@
       <section id="home-view" class="home-view" aria-labelledby="home-title">
         <div class="home-intro">
           <div>
-            <p class="eyebrow">YOUR CURIOSITY. YOUR PACE.</p>
-            <h1 id="home-title" tabindex="-1"> What will you<br /><em>understand next?</em> </h1>
+            <p class="eyebrow">COURSE CATALOG</p>
+            <h1 id="home-title" tabindex="-1">
+              Programming, data science<br /><em>and systems.</em>
+            </h1>
             <p class="intro-copy">
-              Start with a first line of code. Follow a question into the theory. Build something
-              that makes it click. Every path belongs here, and you choose where to begin.
+              Select a subject to view lessons, worked examples and coding exercises. Code, notes
+              and run history are saved in your local classroom.
             </p>
             <p id="catalog-summary" class="catalog-summary"> Loading the classroom library... </p>
           </div>
           <aside class="pace-card">
-            <span class="tiny-heading">MAKE IT YOURS</span>
-            <h2
-              >A little time.<br />
-              A meaningful next step.</h2
-            >
+            <span class="tiny-heading">STUDY PLANNING</span>
+            <h2>Session duration</h2>
             <label for="pace">Time for a typical study session</label
             ><select id="pace">
-              <option value="15">15 minutes · one idea</option>
-              <option value="30" selected>30 minutes · room to explore</option>
-              <option value="60">60 minutes · a deeper session</option>
-              <option value="90">90 minutes · settle into a project</option>
+              <option value="15">15 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="60">60 minutes</option>
+              <option value="90">90 minutes</option>
             </select>
             <p id="pace-note">
-              Session estimates are suggestions. Nothing is locked, timed, or graded by your pace.
+              This preference estimates the number of study sessions. It does not restrict lesson
+              access or change code execution timeouts.
             </p>
             <button id="resume" class="primary" hidden></button>
           </aside>
         </div>
         <div class="browse-heading">
           <div>
-            <p class="eyebrow">THE LEARNING LIBRARY</p>
-            <h2>Find a path that speaks to you.</h2>
+            <p class="eyebrow">SUBJECTS</p>
+            <h2>Browse courses</h2>
           </div>
           <div class="search-control">
             <label for="catalog-search">Search every subject and lesson</label
@@ -91,11 +92,10 @@
           No subjects or lessons match yet. Try a shorter topic, a language, or a lesson ID.
         </p>
         <div class="home-footnote">
-          <strong>Pick up where you left off.</strong>
+          <strong>Saved work</strong>
           <p>
-            Your saved code and notes stay in this classroom's local learning workspace. Reading,
-            experimenting, and revisiting an idea all count as learning. Completion labels describe
-            your own records, not automatic certification.
+            Code, notes and progress are stored locally and retained when containers stop or
+            restart. Completion markers record your own review; they are not certifications.
           </p>
         </div>
       </section>
@@ -108,7 +108,7 @@
         </div>
         <div class="workspace-grid">
           <aside id="lesson-sidebar" class="lesson-sidebar" aria-label="Lesson navigation">
-            <p class="eyebrow">YOUR PATH</p>
+            <p class="eyebrow">COURSE</p>
             <h2 id="path-title"></h2>
             <p id="path-description" class="muted"></p>
             <label for="subject-select">Switch subject</label
@@ -164,7 +164,7 @@
               <section class="panel reading-pane">
                 <div class="panel-head">
                   <div>
-                    <span class="tiny-heading">UNDERSTAND</span>
+                    <span class="tiny-heading">LESSON</span>
                     <h2>The lesson</h2>
                   </div>
                   <button id="reading-toggle" aria-pressed="false"> Focus on reading </button>
@@ -190,7 +190,7 @@
               <section class="panel practice-pane">
                 <div class="panel-head">
                   <div>
-                    <span class="tiny-heading">EXPLORE</span>
+                    <span class="tiny-heading">EDITOR</span>
                     <h2 id="pad-title">Code and reflection</h2>
                   </div>
                   <span id="language" class="badge"></span>
@@ -221,7 +221,8 @@
                   >
                     <div class="browser-live-heading">
                       <div
-                        ><span class="tiny-heading">MAKE IT YOURS</span><h3>Preview studio</h3></div
+                        ><span class="tiny-heading">STUDY PLANNING</span
+                        ><h3>Preview studio</h3></div
                       >
                       <button
                         id="browser-studio-toggle"
@@ -287,7 +288,7 @@
                         Ctrl/Cmd+Enter runs.
                       </p>
                       <details id="runtime-details">
-                        <summary>How this code runs</summary>
+                        <summary id="runtime-summary">How this code runs</summary>
                         <p id="runtime-guidance"></p>
                       </details>
                       <div id="legacy-pad-tools" hidden>
@@ -327,10 +328,10 @@
                       </div>
                       <div id="browser-preview-empty" class="browser-preview-empty">
                         <span aria-hidden="true">&lt;/&gt;</span>
-                        <h4>Your next idea, on screen.</h4>
+                        <h4>Browser preview</h4>
                         <p
-                          >Run once to explore, or turn on Live preview and watch your page change
-                          as you type.</p
+                          >Select Run to render the current source. Enable Live preview to refresh
+                          the page after edits.</p
                         >
                       </div>
                       <section
@@ -416,8 +417,18 @@
                   </div>
                   <p id="learning-guidance" class="muted"></p>
                 </div>
-                <section class="results" aria-labelledby="results-title">
-                  <h3 id="results-title">What actually happened</h3>
+                <section id="offline-workspace" hidden aria-labelledby="offline-title">
+                  <h3 id="offline-title">DAX reference desk</h3>
+                  <p
+                    >Your editable draft is saved locally. Compare it with a worked reference and
+                    its filter-context trace. These tables are hand-derived examples, not output
+                    from your draft.</p
+                  >
+                  <button id="offline-compare" type="button">Open worked comparison</button>
+                  <div id="offline-cases" class="sql-results" aria-live="polite"></div>
+                </section>
+                <section id="runtime-results" class="results" aria-labelledby="results-title">
+                  <h3 id="results-title">Execution results</h3>
                   <p id="job-status" class="muted"> No run yet for this lesson. </p>
 
                   <pre id="output" class="result-log" tabindex="0" aria-label="Runtime output">
@@ -445,7 +456,7 @@ Your output and compiler diagnostics will appear here.</pre
     </main>
     <footer class="site-footer">
       <span>DS60 Classroom</span>
-      <p>One library. Many ways to learn. Built for your local machine.</p>
+      <p>Local Docker classroom with saved code, notes and run history.</p>
       <a href="/reference-pages/docs/one-command-classroom.md.html">Classroom guide</a>
     </footer>
     <noscript

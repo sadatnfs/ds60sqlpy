@@ -307,6 +307,7 @@ class LabRequestHandler(CourseRequestHandler):
         if route not in classroom_routes | set(assets) | {
             "/assets/rich-content.css",
             "/browser-sandbox",
+            "/plot-sandbox",
         }:
             super().do_GET()
             return
@@ -314,12 +315,20 @@ class LabRequestHandler(CourseRequestHandler):
             self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
             return
         content_type = "text/html; charset=utf-8"
-        if route == "/browser-sandbox":
+        if route in {"/browser-sandbox", "/plot-sandbox"}:
             # No session token or learner data enters this document. The opaque
             # iframe receives source only through an explicitly connected port.
             assets_root = files("ds60sqlpy").joinpath("assets")
-            document = assets_root.joinpath("browser-sandbox.html").read_text(encoding="utf-8")
+            document = assets_root.joinpath(
+                "plot-sandbox.html" if route == "/plot-sandbox" else "browser-sandbox.html"
+            ).read_text(encoding="utf-8")
             bundle = assets_root.joinpath("vendor/d3.v7.9.0.min.js").read_text(encoding="utf-8")
+            plotly = assets_root.joinpath("vendor/plotly-cartesian.v4.1.2.min.js").read_text(
+                encoding="utf-8"
+            )
+            if "</script" in plotly.lower():
+                raise ValueError("The reviewed Plotly bundle cannot be embedded safely.")
+            document = document.replace("__DS60_PLOTLY_BUNDLE__", plotly, 1)
             if "</script" in bundle.lower():
                 raise ValueError("The reviewed D3 bundle cannot be embedded safely.")
             document = document.replace("__DS60_D3_BUNDLE__", bundle, 1).replace(
@@ -330,7 +339,9 @@ class LabRequestHandler(CourseRequestHandler):
             self._security_headers(content_type, len(encoded), allow_same_origin_frame=True)
             self.send_header(
                 "Content-Security-Policy",
-                "default-src 'none'; sandbox allow-scripts; "
+                "default-src 'none'; sandbox allow-scripts"
+                + (" allow-downloads" if route == "/plot-sandbox" else "")
+                + "; "
                 "script-src 'unsafe-inline' 'unsafe-eval'; "
                 "style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'; "
                 "frame-src 'none'; worker-src 'none'; base-uri 'none'; form-action 'none'; "
@@ -363,7 +374,7 @@ class LabRequestHandler(CourseRequestHandler):
         policy = (
             "default-src 'none'; script-src 'self' 'unsafe-inline'; "
             "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
-            "connect-src 'self'; font-src 'self'; frame-src 'self'; base-uri 'none'; "
+            "connect-src 'self'; font-src 'self' data:; frame-src 'self'; base-uri 'none'; "
             "form-action 'none'; object-src 'none'; frame-ancestors 'none'"
         )
         self.send_header("Content-Security-Policy", policy)

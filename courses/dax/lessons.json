@@ -1,0 +1,786 @@
+{
+  "schema_version": 1,
+  "track_id": "dax",
+  "lessons": [
+    {
+      "id": "dax-001",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-001.md",
+      "source_path": "courses/dax/lessons/dax-001.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-001_reference.dax",
+        "courses/dax/solutions/dax-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-002",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-002.md",
+      "source_path": "courses/dax/lessons/dax-002.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-002_reference.dax",
+        "courses/dax/solutions/dax-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-003",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-003.md",
+      "source_path": "courses/dax/lessons/dax-003.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-003_reference.dax",
+        "courses/dax/solutions/dax-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-004",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-004.md",
+      "source_path": "courses/dax/lessons/dax-004.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-004_reference.dax",
+        "courses/dax/solutions/dax-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-005",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-005.md",
+      "source_path": "courses/dax/lessons/dax-005.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-005_reference.dax",
+        "courses/dax/solutions/dax-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-006",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-006.md",
+      "source_path": "courses/dax/lessons/dax-006.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-006_reference.dax",
+        "courses/dax/solutions/dax-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-007",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-007.md",
+      "source_path": "courses/dax/lessons/dax-007.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-007_reference.dax",
+        "courses/dax/solutions/dax-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-008",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-008.md",
+      "source_path": "courses/dax/lessons/dax-008.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-008_reference.dax",
+        "courses/dax/solutions/dax-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-009",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-009.md",
+      "source_path": "courses/dax/lessons/dax-009.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-009_reference.dax",
+        "courses/dax/solutions/dax-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-010",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-010.md",
+      "source_path": "courses/dax/lessons/dax-010.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-010_reference.dax",
+        "courses/dax/solutions/dax-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-011",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-011.md",
+      "source_path": "courses/dax/lessons/dax-011.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-011_reference.dax",
+        "courses/dax/solutions/dax-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-012",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-012.md",
+      "source_path": "courses/dax/lessons/dax-012.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-012_reference.dax",
+        "courses/dax/solutions/dax-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-013",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-013.md",
+      "source_path": "courses/dax/lessons/dax-013.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-013_reference.dax",
+        "courses/dax/solutions/dax-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-014",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-014.md",
+      "source_path": "courses/dax/lessons/dax-014.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-014_reference.dax",
+        "courses/dax/solutions/dax-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-015",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-015.md",
+      "source_path": "courses/dax/lessons/dax-015.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-015_reference.dax",
+        "courses/dax/solutions/dax-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-016",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-016.md",
+      "source_path": "courses/dax/lessons/dax-016.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-016_reference.dax",
+        "courses/dax/solutions/dax-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-017",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-017.md",
+      "source_path": "courses/dax/lessons/dax-017.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-017_reference.dax",
+        "courses/dax/solutions/dax-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-018",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-018.md",
+      "source_path": "courses/dax/lessons/dax-018.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-018_reference.dax",
+        "courses/dax/solutions/dax-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-019",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-019.md",
+      "source_path": "courses/dax/lessons/dax-019.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-019_reference.dax",
+        "courses/dax/solutions/dax-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-020",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-020.md",
+      "source_path": "courses/dax/lessons/dax-020.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-020_reference.dax",
+        "courses/dax/solutions/dax-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-021",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-021.md",
+      "source_path": "courses/dax/lessons/dax-021.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-021_reference.dax",
+        "courses/dax/solutions/dax-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-022",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-022.md",
+      "source_path": "courses/dax/lessons/dax-022.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-022_reference.dax",
+        "courses/dax/solutions/dax-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-023",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-023.md",
+      "source_path": "courses/dax/lessons/dax-023.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-023_reference.dax",
+        "courses/dax/solutions/dax-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-024",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-024.md",
+      "source_path": "courses/dax/lessons/dax-024.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-024_reference.dax",
+        "courses/dax/solutions/dax-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-025",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-025.md",
+      "source_path": "courses/dax/lessons/dax-025.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-025_reference.dax",
+        "courses/dax/solutions/dax-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-026",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-026.md",
+      "source_path": "courses/dax/lessons/dax-026.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-026_reference.dax",
+        "courses/dax/solutions/dax-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-027",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-027.md",
+      "source_path": "courses/dax/lessons/dax-027.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-027_reference.dax",
+        "courses/dax/solutions/dax-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-028",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-028.md",
+      "source_path": "courses/dax/lessons/dax-028.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-028_reference.dax",
+        "courses/dax/solutions/dax-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-029",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-029.md",
+      "source_path": "courses/dax/lessons/dax-029.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-029_reference.dax",
+        "courses/dax/solutions/dax-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-030",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-030.md",
+      "source_path": "courses/dax/lessons/dax-030.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-030_reference.dax",
+        "courses/dax/solutions/dax-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-031",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-031.md",
+      "source_path": "courses/dax/lessons/dax-031.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-031_reference.dax",
+        "courses/dax/solutions/dax-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-032",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-032.md",
+      "source_path": "courses/dax/lessons/dax-032.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-032_reference.dax",
+        "courses/dax/solutions/dax-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-033",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-033.md",
+      "source_path": "courses/dax/lessons/dax-033.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-033_reference.dax",
+        "courses/dax/solutions/dax-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-034",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-034.md",
+      "source_path": "courses/dax/lessons/dax-034.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-034_reference.dax",
+        "courses/dax/solutions/dax-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-035",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-035.md",
+      "source_path": "courses/dax/lessons/dax-035.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-035_reference.dax",
+        "courses/dax/solutions/dax-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-036",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-036.md",
+      "source_path": "courses/dax/lessons/dax-036.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-036_reference.dax",
+        "courses/dax/solutions/dax-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-037",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-037.md",
+      "source_path": "courses/dax/lessons/dax-037.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-037_reference.dax",
+        "courses/dax/solutions/dax-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-038",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-038.md",
+      "source_path": "courses/dax/lessons/dax-038.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-038_reference.dax",
+        "courses/dax/solutions/dax-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-039",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-039.md",
+      "source_path": "courses/dax/lessons/dax-039.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-039_reference.dax",
+        "courses/dax/solutions/dax-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-040",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-040.md",
+      "source_path": "courses/dax/lessons/dax-040.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-040_reference.dax",
+        "courses/dax/solutions/dax-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-041",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-041.md",
+      "source_path": "courses/dax/lessons/dax-041.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-041_reference.dax",
+        "courses/dax/solutions/dax-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-042",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-042.md",
+      "source_path": "courses/dax/lessons/dax-042.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-042_reference.dax",
+        "courses/dax/solutions/dax-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-043",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-043.md",
+      "source_path": "courses/dax/lessons/dax-043.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-043_reference.dax",
+        "courses/dax/solutions/dax-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-044",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-044.md",
+      "source_path": "courses/dax/lessons/dax-044.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-044_reference.dax",
+        "courses/dax/solutions/dax-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-045",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-045.md",
+      "source_path": "courses/dax/lessons/dax-045.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-045_reference.dax",
+        "courses/dax/solutions/dax-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-046",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-046.md",
+      "source_path": "courses/dax/lessons/dax-046.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-046_reference.dax",
+        "courses/dax/solutions/dax-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-047",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-047.md",
+      "source_path": "courses/dax/lessons/dax-047.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-047_reference.dax",
+        "courses/dax/solutions/dax-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-048",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-048.md",
+      "source_path": "courses/dax/lessons/dax-048.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-048_reference.dax",
+        "courses/dax/solutions/dax-048_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-049",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-049.md",
+      "source_path": "courses/dax/lessons/dax-049.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-049_reference.dax",
+        "courses/dax/solutions/dax-049_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-050",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-050.md",
+      "source_path": "courses/dax/lessons/dax-050.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-050_reference.dax",
+        "courses/dax/solutions/dax-050_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-051",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-051.md",
+      "source_path": "courses/dax/lessons/dax-051.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-051_reference.dax",
+        "courses/dax/solutions/dax-051_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-052",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-052.md",
+      "source_path": "courses/dax/lessons/dax-052.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-052_reference.dax",
+        "courses/dax/solutions/dax-052_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-053",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-053.md",
+      "source_path": "courses/dax/lessons/dax-053.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-053_reference.dax",
+        "courses/dax/solutions/dax-053_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-054",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-054.md",
+      "source_path": "courses/dax/lessons/dax-054.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-054_reference.dax",
+        "courses/dax/solutions/dax-054_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-055",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-055.md",
+      "source_path": "courses/dax/lessons/dax-055.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-055_reference.dax",
+        "courses/dax/solutions/dax-055_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-056",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-056.md",
+      "source_path": "courses/dax/lessons/dax-056.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-056_reference.dax",
+        "courses/dax/solutions/dax-056_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-057",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-057.md",
+      "source_path": "courses/dax/lessons/dax-057.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-057_reference.dax",
+        "courses/dax/solutions/dax-057_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-058",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-058.md",
+      "source_path": "courses/dax/lessons/dax-058.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-058_reference.dax",
+        "courses/dax/solutions/dax-058_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-059",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-059.md",
+      "source_path": "courses/dax/lessons/dax-059.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-059_reference.dax",
+        "courses/dax/solutions/dax-059_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "dax-060",
+      "status": "authored",
+      "language": "dax",
+      "runtime_profile": "dax-offline",
+      "guide_path": "courses/dax/guides/dax-060.md",
+      "source_path": "courses/dax/lessons/dax-060.dax",
+      "solution_paths": [
+        "courses/dax/solutions/dax-060_reference.dax",
+        "courses/dax/solutions/dax-060_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

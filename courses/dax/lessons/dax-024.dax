@@ -1,0 +1,9 @@
+// dax-024 learner draft: Selected totals and the limits of ALLSELECTED intuition
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Differentiate share of an explicitly selected population from share of all model products.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a denominator specification for a chart with a year slicer.
+
+EVALUATE
+SUMMARIZECOLUMNS ( Product[Category], "Amount", BLANK(), "Selected total", BLANK() )

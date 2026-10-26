@@ -7,7 +7,7 @@ resume and rebuild instructions; [profile selection](docker-profiles.md) explain
 how to prepare a smaller set. This reference describes what each execution
 surface actually accepts and how the optional owned Kubernetes session works.
 
-A new project prepares sixteen ordinary worker profiles. `--starter` prepares
+A new project prepares the ordinary worker profiles. `--starter` prepares
 only the app, PostgreSQL and Python Core. Explicit `--profile` selections include
 Core and replace the remembered selection; they do not stop unselected workers
 already running. Repeat a custom `--project NAME` on later commands. `resume`
@@ -25,6 +25,9 @@ upload channel or durable storage.
 | Profile | Staged source | Actual operation |
 | --- | --- | --- |
 | `python-core` | `main.py` | Fresh Python process with the prepared Core dependencies |
+| `jax-cpu` | `main.py` | Pinned CPU JAX/JAXLIB, including real JIT and autodiff startup checks |
+| `bayesian-cpu` | `main.py` | Pinned PyMC/ArviZ with the tutorial's InferenceData contract and CPU sampling |
+| `r-statistics` | `main.R` | Rscript with base/recommended statistics, ggplot2, Plotly and S3/S4/R6/S7 support |
 | `cpp20` | `main.cpp` | C++20 compile and link, then execute; pthread support and compiler warnings enabled |
 | `c17` | `main.c` | C17 compile and link, then execute; pthread and math libraries available |
 | `go` | `main.go` | Fixed `go tool compile` and link using the image's prepared standard-library import configuration |
@@ -59,12 +62,28 @@ includes. Preparing the `training` schema is a deliberate reset of disposable
 course tables. See [PostgreSQL setup](setup/postgresql.md) and
 [classroom controls](classroom-experience.md).
 
+## Offline drafts and saved figures
+
+DAX uses the `dax-offline` editing capability, not a launcher profile or compiler.
+Its `main.dax` draft and notes are saved per lesson. A worked comparison checks
+the reference source and model hashes and shows bounded hand-derived tables.
+Editing the pad does not recompute those tables. Both service and job entrypoints
+reject execution requests for this capability.
+
+Python/R workers can attach at most two bounded PNG or Plotly artifacts to their
+source-bound result. Plotly data is rendered in a separate opaque offline frame;
+metadata descriptions and small tables remain accessible in the classroom.
+Opening a saved result renders that saved data without rerunning the program.
+A storage/capture warning is separate from runtime success or failure. See
+[plotting](plotting.md) for supported operations and limits.
+
 ## Browser and optional GPU surfaces
 
 `html-browser` and `javascript-browser` are browser capabilities, not launcher
 `--profile` names. They need no additional compiler worker. HTML/CSS accepts one
 complete document with embedded styles and bounded inline JavaScript. D3 uses
-the bundled library, `#chart` and `#output`, with inline offline data. Node source
+the bundled library, `#chart` and `#output`, with inline offline data. Plotly is
+also bundled for JavaScript visualization lessons. Node source
 has no browser DOM. External imports, fetches and navigation are not part of the
 opaque preview contract.
 

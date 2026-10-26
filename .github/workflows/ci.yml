@@ -113,6 +113,8 @@ jobs:
         run: uv run --no-sync python scripts/normalize_lesson_prose.py
       - name: Check maintained documentation and repository skills
         run: uv run --no-sync python scripts/check_repository_guidance.py
+      - name: Check compiled TeX and offline font integrity
+        run: uv run --no-sync python scripts/compile_lesson_tex.py --check
       - name: Validate published mathematics and code rendering
         run: uv run --no-sync python scripts/check_content_rendering.py
       - name: Check generated learning portal drift

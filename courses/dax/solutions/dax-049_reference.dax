@@ -1,0 +1,12 @@
+// dax-049: Formula work, columnar scans and cardinality
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-049-a: Fact-column cardinalities
+// Context: Clean retail fact; no filters; counts describe source cardinality, not physical scan metrics.
+EVALUATE ROW ( "SalesRows", COUNTROWS ( Sales ), "ProductKeys", DISTINCTCOUNT ( Sales[ProductKey] ), "OrderDates", DISTINCTCOUNT ( Sales[OrderDate] ), "SaleIDs", DISTINCTCOUNT ( Sales[SaleID] ) )
+
+// dax-049-b: Dimension attributes have another grain
+// Context: Product dimension, including the unsold Bag member.
+EVALUATE ROW ( "ProductRows", COUNTROWS ( Product ), "Categories", DISTINCTCOUNT ( Product[Category] ), "Colors", DISTINCTCOUNT ( Product[Color] ) )

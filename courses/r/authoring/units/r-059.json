@@ -1,0 +1,104 @@
+{
+  "id": "r-059",
+  "title": "ggplotly translation and validation boundaries",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-058"],
+  "concepts": [
+    "translation",
+    "source graphic",
+    "trace decomposition",
+    "tooltip",
+    "rendering parity"
+  ],
+  "outcome": "Translate a supported ggplot to Plotly and verify retained data while identifying the visual and interaction properties that still require review.",
+  "mechanism": "ggplotly translates a ggplot object into a Plotly figure. The source graphic and the interactive result use different representations and rendering systems. A successful conversion is therefore a useful starting point, not a guarantee that every geometry, label, facet, scale or theme behaves identically.\n\nOne source layer can become several traces, for example when a group mapping separates categories or when an uncertainty region needs additional geometry. Conversely, a simple layer count is not a reliable measure of the amount of data represented after translation. Validate the quantities and group identities that matter to the task rather than assuming a one-to-one layer-to-trace mapping.\n\nThe supported scatter fixture below makes coordinate preservation inspectable. Collect the marker-trace coordinates and compare them with the original observations. This checks the data payload, while legend layout, tooltip wording, text clipping and actual interaction remain browser observations. A conversion can retain every coordinate yet still communicate the wrong quantity through a misleading label.\n\nTooltip selection is part of the user-facing contract. Choose fields that identify the point and its units without adding irrelevant implementation details. If the task needs precise custom interaction, stable metadata or specialized controls that are awkward to translate, constructing Plotly traces directly can be clearer than repeatedly patching an automatic conversion.\n\nRetain the original ggplot as a static baseline and record package versions with the comparison. The prepared ggplot2 and Plotly versions have been checked for these small examples, but that does not qualify every extension geometry or future version. Actual visual parity must be reviewed at the delivered dimensions, with a static alternative for essential information.",
+  "vocabulary": [
+    {
+      "term": "Translation boundary",
+      "definition": "The conversion from one graphic representation and renderer contract to another."
+    },
+    {
+      "term": "Trace decomposition",
+      "definition": "The splitting of a source layer or group structure into interactive traces."
+    },
+    {
+      "term": "Data parity",
+      "definition": "Agreement of the observations or derived quantities represented before and after conversion."
+    },
+    {
+      "term": "Visual parity",
+      "definition": "Agreement of intended visual meaning and usability, requiring inspection beyond coordinate equality."
+    }
+  ],
+  "anatomy": "Build and inspect the original ggplot, then call plotly::ggplotly(p,tooltip=...). Use plotly_build on the converted object and select relevant marker or line traces before comparing coordinates. Print both the static and converted objects when a direct delivered comparison is needed, staying within the two-figure limit.",
+  "worked_examples": [
+    {
+      "title": "Retain scatter coordinates across translation",
+      "code": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = c(\"A\", \"A\", \"B\", \"B\"))\np <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = group)) +\n  ggplot2::geom_point(size = 3) +\n  ggplot2::labs(x = \"Input\", y = \"Response\", colour = \"Group\")\ninteractive <- plotly::ggplotly(p, tooltip = c(\"x\", \"y\", \"group\"))\ntraces <- Filter(function(trace) identical(trace$type, \"scatter\") && isTRUE(grepl(\"markers\", trace$mode)), plotly::plotly_build(interactive)$x$data)\nxs <- unlist(lapply(traces, function(trace) as.numeric(trace$x)), use.names = FALSE)\nys <- unlist(lapply(traces, function(trace) as.numeric(trace$y)), use.names = FALSE)\nstopifnot(length(xs) == 4, max(abs(sort(xs) - sort(d$x))) < 1e-12, max(abs(sort(ys) - sort(d$y))) < 1e-12)\nprint(p)\nprint(interactive)\n",
+      "explanation": "The checks confirm the four source x and y values in the marker payload. A stronger production comparison should also retain paired identities; separate sorted-coordinate checks alone would not detect every permutation bug.",
+      "expected": "Four retained source observations, one static figure and one converted figure."
+    },
+    {
+      "title": "A reference line becomes additional geometry",
+      "code": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6))\np <- ggplot2::ggplot(d, ggplot2::aes(x, y)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_hline(yintercept = mean(d$y), linetype = \"dashed\") +\n  ggplot2::labs(x = \"Input\", y = \"Response\")\ninteractive <- plotly::ggplotly(p, tooltip = c(\"x\", \"y\"))\ntraces <- plotly::plotly_build(interactive)$x$data\nstopifnot(length(traces) >= 2)\nmarker_count <- sum(vapply(traces, function(trace) if (isTRUE(grepl(\"markers\", trace$mode))) length(trace$x) else 0L, integer(1)))\nstopifnot(marker_count == 4)\nprint(interactive)\n",
+      "explanation": "The converted figure contains both the observations and additional line geometry. A raw trace count is not the same as the number of observations or source layers.",
+      "expected": "Four marker observations plus reference-line geometry."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Translate the supported scatterplot and inspect marker traces.",
+      "hint": "Select the trace modes relevant to the observations.",
+      "answer": "The marker payload retains the source coordinates; do not count line or auxiliary traces as additional observations.",
+      "expected": "Four retained markers."
+    },
+    {
+      "prompt": "Compare paired coordinates rather than only independent sorted x and y values.",
+      "hint": "Build a key from both coordinates or retain an observation ID.",
+      "answer": "Matching paired coordinate keys detects a permutation that separately matching coordinate sets could miss.",
+      "expected": "Pair identity preserved."
+    },
+    {
+      "prompt": "Add a mean reference line and inspect the translated structure.",
+      "hint": "Separate observations from auxiliary geometry.",
+      "answer": "The result contains extra trace geometry without adding source observations.",
+      "expected": "Four markers and at least one additional trace."
+    },
+    {
+      "prompt": "Choose a bounded tooltip field set.",
+      "hint": "Include relevant identities and quantities with units.",
+      "answer": "Avoid exposing unrelated implementation fields; test actual tooltip readability in the browser.",
+      "expected": "An explicit tooltip contract."
+    },
+    {
+      "prompt": "Diagnose claiming complete visual equivalence from a successful conversion call.",
+      "hint": "List properties not established by object construction.",
+      "answer": "Legend ordering, clipping, facets, themes, hover, keyboard interaction and final size still require visual/interaction checks.",
+      "expected": "No unsupported parity claim."
+    },
+    {
+      "prompt": "Choose direct Plotly construction when translation obscures the intended interaction.",
+      "hint": "Compare maintenance and interface clarity.",
+      "answer": "A direct trace specification can make IDs, controls and payloads easier to validate when automatic translation does not preserve the required contract clearly.",
+      "expected": "A justified implementation choice."
+    }
+  ],
+  "starter": "# r-059: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = c(\"A\", \"A\", \"B\", \"B\"))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Translate the supported scatterplot and inspect marker traces.\n# TODO: Select the trace modes relevant to the observations.\n# Exercise 2: Compare paired coordinates rather than only independent sorted x and y values.\n# TODO: Build a key from both coordinates or retain an observation ID.\n# Exercise 3: Add a mean reference line and inspect the translated structure.\n# TODO: Separate observations from auxiliary geometry.\n# Exercise 4: Choose a bounded tooltip field set.\n# TODO: Include relevant identities and quantities with units.\n# Exercise 5: Diagnose claiming complete visual equivalence from a successful conversion call.\n# TODO: List properties not established by object construction.\n# Exercise 6: Choose direct Plotly construction when translation obscures the intended interaction.\n# TODO: Compare maintenance and interface clarity.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(x = 1:4, y = c(1, 3, 2, 6), group = c(\"A\", \"A\", \"B\", \"B\"))\np <- ggplot2::ggplot(d, ggplot2::aes(x, y, colour = group)) +\n  ggplot2::geom_point(size = 3) +\n  ggplot2::labs(x = \"Input\", y = \"Response\", colour = \"Group\")\ninteractive <- plotly::ggplotly(p, tooltip = c(\"x\", \"y\", \"group\"))\ntraces <- Filter(function(trace) identical(trace$type, \"scatter\") && isTRUE(grepl(\"markers\", trace$mode)), plotly::plotly_build(interactive)$x$data)\nstopifnot(all(vapply(traces, function(trace) length(trace$x) == length(trace$y), logical(1))))\npairs <- unlist(lapply(traces, function(trace) paste(as.numeric(trace$x), as.numeric(trace$y), sep = \":\")), use.names = FALSE)\nstopifnot(length(pairs) == 4, identical(sort(pairs), sort(paste(d$x, d$y, sep = \":\"))))\nline_plot <- p + ggplot2::geom_hline(yintercept = mean(d$y), linetype = \"dashed\")\nline_widget <- plotly::ggplotly(line_plot, tooltip = c(\"x\", \"y\", \"group\"))\nall_traces <- plotly::plotly_build(line_widget)$x$data\nstopifnot(length(all_traces) >= 3)\nmarker_count <- sum(vapply(all_traces, function(trace) if (isTRUE(grepl(\"markers\", trace$mode))) length(trace$x) else 0L, integer(1)))\nstopifnot(marker_count == 4)\nprint(p)\nprint(interactive)\ncat(\"r-059 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference strengthens coordinate-set checks by comparing paired x/y keys, so a permutation of y values cannot pass merely because the marginal coordinate sets match. It separately counts marker observations and auxiliary line geometry.\n\nOnly the static baseline and one converted widget are printed. Their payload checks establish the stated supported conversion, while the final visual and interaction contract still requires browser inspection. This is not a blanket compatibility claim for every ggplot extension.",
+  "sources": [
+    {
+      "title": "Plotly ggplot2 integration",
+      "url": "https://plotly.com/ggplot2/"
+    },
+    {
+      "title": "Plotly R package manual",
+      "url": "https://cran.r-project.org/web/packages/plotly/plotly.pdf"
+    },
+    {
+      "title": "ggplot2 build helpers",
+      "url": "https://ggplot2.tidyverse.org/reference/ggplot_build.html"
+    }
+  ]
+}

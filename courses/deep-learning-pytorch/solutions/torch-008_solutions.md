@@ -26,7 +26,7 @@ The hypothesis is prediction_i=w x_i for x=[1, 2, 3] and y=2x. With a mean over 
 
 Its derivative is`g(w)=(28/3)(w-2)`. At \(w=0\), the predictions are zeros, residuals[-2, -4, -6], squared errors[4, 16, 36], loss \(\frac{56}{3}\) and gradient-\(\frac{56}{3}\). The input features can remain ordinary constant tensors because the requested derivative is with respect to w. Targets also remain fixed labels rather than state the optimizer is allowed to change.
 
-For learning rateη=1/10, plain SGD gives w_new=w-ηg=28/15. The new residual is(w_new-2)x=(-2/15)x, so its entries are[-2/15, \(\frac{-4}{15}\), -6/15]. Squaring and averaging gives \(\frac{56}{675}\). The before-loss, gradient, new parameter and after-loss are four separately inspected observations:
+For learning rateη=1/10, plain SGD gives \(w_{\mathrm{new}}=w-\eta g=\frac{28}{15}\). The new residual is(w_new-2)x=(-2/15)x, so its entries are[-2/15, \(\frac{-4}{15}\), -6/15]. Squaring and averaging gives \(\frac{56}{675}\). The before-loss, gradient, new parameter and after-loss are four separately inspected observations:
 
 | Stage | Weight | Quantity observed |
 | --- | --- | --- |
@@ -37,7 +37,7 @@ For learning rateη=1/10, plain SGD gives w_new=w-ηg=28/15. The new residual is
 
 Backward does not perform the update, and step does not recompute the loss. The old loss tensor still records the earlier forward result after the parameter changes. The fresh Parameter starts with no stored gradient, which makes the first backward unambiguous; repeated independent steps need an explicit clearing policy. The SGD API specifies how momentum, weight decay and other options would change this simpler transition. [PyTorch 2.9 SGD](https://docs.pytorch.org/docs/2.9/generated/torch.optim.SGD.html).
 
-The exact quadratic also permits a stability calculation. Let \(e=w-2\) be the error from the optimum. One update gives e_new=(1-28η/3)e. Repeated full-batch updates contract this error only when|1-28η/3|<1, or 0<η<3/14. Atη=0.1, the contraction factor is \(\frac{1}{15}\). Atη=0.25, it is-4/3: the parameter crosses the optimum and its error grows. The first weight becomes \(\frac{14}{3}\) and the new loss \(\frac{896}{27}\), larger than the initial \(\frac{56}{3}\) despite a correct derivative.
+The exact quadratic also permits a stability calculation. Let \(e=w-2\) be the error from the optimum. One update gives \(e_{\mathrm{new}}=\left(1-\frac{28\eta}{3}\right)e\). Repeated full-batch updates contract this error only when \(\left|1-\frac{28\eta}{3}\right|<1\), or \(0<\eta<\frac{3}{14}\). Atη=0.1, the contraction factor is \(\frac{1}{15}\). Atη=0.25, it is-4/3: the parameter crosses the optimum and its error grows. The first weight becomes \(\frac{14}{3}\) and the new loss \(\frac{896}{27}\), larger than the initial \(\frac{56}{3}\) despite a correct derivative.
 
 Changing to a summed objective changes that bound because the gradient is three times larger. This is why learning-rate claims require a declared denominator. The result is exact for this fixed convex scalar objective; it is not a universal neural-network learning-rate rule.
 
@@ -108,7 +108,7 @@ np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.g
 
 ## Exercise 5: Check a finite-difference gradient
 
-The question is: Use a plain NumPy scalar objective around w = 0 with h.001.
+The question is: Use a plain NumPy scalar objective around \(w=0\) with finite-difference step \(h=0.001\).
 
 The checker does not read the PyTorch gradient buffer. It verifies the complete scalar objective through perturbed values.
 
@@ -124,7 +124,7 @@ np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)
 
 ## Exercise 6: Clear the consumed gradient
 
-The question is: Call optimizer.zero_grad(set_to_none=True) after the step and inspect state.
+The question is: Call `optimizer.zero_grad(set_to_none=True)` after the step and inspect state.
 
 Clearing derivatives is not undoing the parameter update. It prepares an independent next gradient calculation.
 
@@ -133,9 +133,9 @@ saved=w.item(); optimizer.zero_grad(set_to_none=True)
 assert w.grad is None and w.item()==saved
 ```
 
-**Expected:** w.grad None; updated weight unchanged.
+**Expected:** `w.grad` None; updated weight unchanged.
 
-**Verify:** Compare the computed values or written argument with w.grad None; updated weight unchanged.
+**Verify:** Compare the computed values or written argument with `w.grad` None; updated weight unchanged.
 
 ## Review after comparison
 

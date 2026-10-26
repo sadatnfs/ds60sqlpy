@@ -72,6 +72,28 @@ from pathlib import Path
 from ds60sqlpy.notebook_execution import execute_python_file, python_cells
 
 runtime = Path(sys.argv[2])
+import json
+from ds60sqlpy.plot_artifacts import validate_artifacts
+from ds60sqlpy.plot_capture import install_display_hooks
+plotly_figures = []
+def patch_plotly(pio):
+    def show_plotly(figure, *args, **kwargs):
+        if len(plotly_figures) >= 2:
+            print("Figure limit reached: the first two Plotly figures are retained.",
+                  file=sys.stderr)
+            return
+        try:
+            artifact = {"kind": "plotly", "figure": json.loads(pio.to_json(figure))}
+            checked = validate_artifacts([*plotly_figures, artifact])
+            (runtime / "ds60-figures.json").write_text(
+                json.dumps(checked, allow_nan=False), "utf-8"
+            )
+        except (OSError, ValueError, TypeError, RecursionError) as exc:
+            print("Figure omitted: " + str(exc), file=sys.stderr)
+            return
+        plotly_figures[:] = checked
+    pio.show = show_plotly
+install_display_hooks(patch_plotly)
 captured = set()
 def save_png(data):
     if len(data) > 2_000_000 or not data.startswith(b'\x89PNG\r\n\x1a\n'):
@@ -477,6 +499,13 @@ class PadRunner:
                     if data.startswith(b"\x89PNG\r\n\x1a\n"):
                         images.append("data:image/png;base64," + base64.b64encode(data).decode())
                 response = {**asdict(result), "figures": images}
+                from ds60sqlpy.plot_artifacts import read_artifacts
+
+                artifacts, warning = read_artifacts(Path(figures))
+                if artifacts:
+                    response["artifacts"] = artifacts
+                if warning:
+                    response["output"] += "\n" + warning
                 metadata = Path(figures) / "execution.json"
                 with contextlib.suppress(OSError, ValueError, TypeError):
                     if not metadata.is_symlink() and metadata.stat().st_size <= 1_000:

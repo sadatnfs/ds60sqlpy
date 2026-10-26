@@ -179,7 +179,7 @@ class ClassroomService:
             "active_job": module_index["active_job"],
             "completed": progress["completed"],
             "learning_paths": progress["paths"],
-            "publication": "One classroom. Choose a subject, a lesson and your own pace.",
+            "publication": "Course catalog with saved code, notes and run history.",
         }
 
     def solutions(self, payload: dict[str, Any]) -> dict[str, Any]:

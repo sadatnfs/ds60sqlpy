@@ -116,7 +116,7 @@ np.testing.assert_array_equal(weights[:,2],[0,0])""",
         ),
     ],
     ("Attention Is All You Need", "https://arxiv.org/abs/1706.03762"),
-    r"""For one attention operation, let Q have Tq query rows and K,V have Tk source rows. Scores are S=QK^T/sqrt(d),so S is Tq by Tk. For each queryi,normalize only allowed keysj:
+    r"""For one attention operation, let Q have Tq query rows and K,V have Tk source rows. Scores are \(S=\frac{QK^{\mathsf T}}{\sqrt{d}}\),so S is Tq by Tk. For each queryi,normalize only allowed keysj:
 
 \[
 A_{ij}=\frac{\exp(S_{ij}-m_i)}{\sum_{k\in\mathcal A_i}\exp(S_{ik}-m_i)},\qquad O_i=\sum_{j\in\mathcal A_i}A_{ij}V_j.
@@ -800,7 +800,7 @@ def apply_round(cache,old_length,result):
 # Editorial pass: keep equations and their surrounding prose independently readable.
 SPECS["llm-043"][
     "derivation"
-] = r"""Let Q have shape(Tq,d), K shape(Tk,d), and V shape(Tk,dv), where d is the positive shared query/key feature width and dv is the value feature width. Scores are S=QK^T/sqrt(d), so the score matrix is Tq by Tk. For each query i, A_i is its nonempty allowed key set and m_i=max_(j in A_i) S_ij is the maximum allowed score. Normalize only that allowed set:
+] = r"""Let Q have shape(Tq,d), K shape(Tk,d), and V shape(Tk,dv), where d is the positive shared query/key feature width and dv is the value feature width. Scores are \(S=\frac{QK^{\mathsf T}}{\sqrt{d}}\), so the score matrix is Tq by Tk. For each query i, A_i is its nonempty allowed key set and m_i=max_(j in A_i) S_ij is the maximum allowed score. Normalize only that allowed set:
 
 \[
 A_{ij}=\frac{\exp(S_{ij}-m_i)}{\sum_{k\in\mathcal A_i}\exp(S_{ik}-m_i)},\qquad O_i=\sum_{j\in\mathcal A_i}A_{ij}V_j.
@@ -833,29 +833,12 @@ A learned gain g_i multiplies row i of this Jacobian. RMSNorm does not subtract 
 For a residual branch F and normalizer N, pre-norm is y=x+F(N(x)), with Jacobian I+J_F J_N. Post-norm is y=N(x+F(x)), with Jacobian J_N(I+J_F). Setting F=0 isolates the placement: the first Jacobian is I, while the second remains J_N. This local identity-path argument is not a complete theorem about every training configuration.
 
 A bias-free plain feed-forward block phi(xW1)W2 has 2dh weights. SwiGLU, [SiLU(xWg) elementwise_mul(xWu)]Wd, has 3dh weights. Equal weight budgets therefore use gated hidden width two-thirds of the plain hidden width when dimensions permit. SiLU(g)=g*sigmoid(g), with derivative sigmoid(g)+g*sigmoid(g)*(1-sigmoid(g)). At g=0 this derivative is 1/2, which explains the scalar gate-gradient example."""
-SPECS["llm-046"][
-    "derivation"
-] = r"""Let B be batch size, L cached token count, Hkv key/value head count, d head width and s bytes per entry. Raw key/value storage is 2*B*L*Hkv*d*s. Query heads do not multiply that storage a second time. With model width D and Hq query heads, the bias-free projection count is D*(Hq*d)+2D*(Hkv*d)+(Hq*d)*D.
-
-For one query, maintain a running maximum m, denominator ell=sum exp(score-m), and numerator n=sum exp(score-m)*value. When a new score block b arrives, define m_new=max(m,max(b)) and alpha=exp(m-m_new). Update both accumulated quantities:
-
-\[
-\ell_{new}=\alpha\ell+\sum_j\exp(b_j-m_{new}),\quad
-n_{new}=\alpha n+\sum_j\exp(b_j-m_{new})v_j.
-\]
-
-The final output is n/ell. Both quantities now use the same reference maximum, so their ratio matches dense softmax attention up to floating-point rounding. Skipping a fully masked block is valid; accepting a query with no legal key is not valid under this lesson contract.
-
-This recurrence supports tiled execution without retaining the whole score matrix. A fast GPU implementation additionally manages memory layout, synchronization, parallelism and backward recomputation. Those implementation and hardware properties are not measured by this NumPy reference."""
-SPECS["llm-047"][
-    "derivation"
-] = r"""For token x_t, let router probabilities p_t=softmax(z_t), and let S_t be its selected top-k expert set. This reference uses g_ti=p_ti/sum_(j in S_t)p_tj for selected experts and zero otherwise. The output is y_t=sum_i g_ti E_i(x_t). Retaining the original selected probabilities instead would define a different gate policy.
-
-Within a fixed selected set, a scalar mixture has derivative dy/dz_j=g_j*(e_j-y). With expert outputs 1 and 2 and gates 3/4 and 1/4, y=5/4 and the first-logit derivative is (3/4)*(1-5/4)=-3/16. A change in top-k membership introduces a hard selection boundary, so this local derivative must not be described as differentiating every routing decision.
-
-A Switch-style auxiliary term is L_aux=alpha*N*sum_i f_i P_i. Here f_i is the fraction of hard assignments to expert i, and P_i is the mean router probability. The hard fraction vector is not differentiable; the probability vector is. For T tokens and fixed f, the derivative for one logit is alpha*N/T * p_tj * (f_j-sum_i f_i p_ti). The coefficient .01 is a declared fixture setting.
-
-For E experts with two bias-free matrices D-by-H and H-by-D, total expert weights are 2EDH. Top-k activates k experts per token, but storage and communication still depend on placement and serving of all E experts."""
+SPECS["llm-046"]["derivation"] = (
+    "Let B be batch size, L cached token count, Hkv key/value head count, d head width and s bytes per entry. Raw key/value storage is 2*B*L*Hkv*d*s. Query heads do not multiply that storage a second time. With model width D and Hq query heads, the bias-free projection count is \\(N_{\\mathrm{proj}}=D(H_qd)+2D(H_{kv}d)+(H_qd)D\\).\n\nFor one query, maintain a running maximum m, denominator \\(\\ell=\\sum_j\\exp(s_j-m)\\), and numerator \\(n=\\sum_j\\exp(s_j-m)v_j\\) over the processed legal keys. When a new score block b arrives, define m_new=max(m,max(b)) and alpha=exp(m-m_new). Update both accumulated quantities:\n\n\\[\n\\ell_{new}=\\alpha\\ell+\\sum_j\\exp(b_j-m_{new}),\\quad\nn_{new}=\\alpha n+\\sum_j\\exp(b_j-m_{new})v_j.\n\\]\n\nThe final output is \\(o=n/\\ell\\). Both quantities now use the same reference maximum, so their ratio matches dense softmax attention up to floating-point rounding. Skipping a fully masked block is valid; accepting a query with no legal key is not valid under this lesson contract.\n\nThis recurrence supports tiled execution without retaining the whole score matrix. A fast GPU implementation additionally manages memory layout, synchronization, parallelism and backward recomputation. Those implementation and hardware properties are not measured by this NumPy reference."
+)
+SPECS["llm-047"]["derivation"] = (
+    "For token x_t, let router probabilities p_t=softmax(z_t), and let S_t be its selected top-k expert set. This reference uses g_ti=p_ti/sum_(j in S_t)p_tj for selected experts and zero otherwise. The output is y_t=sum_i g_ti E_i(x_t). Retaining the original selected probabilities instead would define a different gate policy.\n\nWithin a fixed selected set, a scalar mixture has derivative dy/dz_j=g_j*(e_j-y). With expert outputs 1 and 2 and gates 3/4 and 1/4, y=5/4 and the first-logit derivative is (3/4)*(1-5/4)=-3/16. A change in top-k membership introduces a hard selection boundary, so this local derivative must not be described as differentiating every routing decision.\n\nA Switch-style auxiliary term is L_aux=alpha*N*sum_i f_i P_i. Here f_i is the fraction of hard assignments to expert i, and P_i is the mean router probability. The hard fraction vector is not differentiable; the probability vector is. For T tokens and fixed f, the derivative for one logit is \\(\\frac{\\partial L_{\\mathrm{aux}}}{\\partial z_{tj}}=\\frac{\\alpha N}{T}p_{tj}\\left(f_j-\\sum_i f_ip_{ti}\\right)\\). The coefficient .01 is a declared fixture setting.\n\nFor E experts with two bias-free matrices D-by-H and H-by-D, total expert weights are 2EDH. Top-k activates k experts per token, but storage and communication still depend on placement and serving of all E experts."
+)
 SPECS["llm-048"][
     "derivation"
 ] = r"""At one fixed prefix, sample a draft token X from q. Its accepted mass at token i is q_i*min(1,p_i/q_i)=min(p_i,q_i). Define R=1-sum_i min(p_i,q_i). Since both distributions sum to one, R=sum_i max(p_i-q_i,0). For R>0, use residual r_i=max(p_i-q_i,0)/R. Then

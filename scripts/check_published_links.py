@@ -28,6 +28,9 @@ ASSETS = {
     "/assets/classroom.css": "src/ds60sqlpy/assets/classroom.css",
     "/assets/classroom.js": "src/ds60sqlpy/assets/classroom.js",
     "/assets/browser-preview.js": "src/ds60sqlpy/assets/browser-preview.js",
+    "/src/ds60sqlpy/assets/vendor/textbook/fonts.css": (
+        "src/ds60sqlpy/assets/vendor/textbook/fonts.css"
+    ),
     # The server generates this stylesheet. Its source module must be packaged;
     # actual CSS generation is covered by the rendering gate, not this scanner.
     "/assets/rich-content.css": "src/ds60sqlpy/reader_content.py",

@@ -1,0 +1,14 @@
+// dax-059: Experiment and cohort capstone: preserve the assigned unit
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-059-a: Assignment and exposure integrity
+// Context: Analytics experiment fixture; all four assigned units have one complete outcome; exposure is a separate repeated-event stream.
+EVALUATE SUMMARIZECOLUMNS ( Assignments[Arm], "Assigned", COUNTROWS ( Assignments ), "Converted", SUM ( Outcomes[Converted] ), "ExposedUnits", DISTINCTCOUNT ( Exposures[UnitID] ), "ExposureEvents", COUNTROWS ( Exposures ), "AssignedUnitRate", DIVIDE ( SUM ( Outcomes[Converted] ), COUNTROWS ( Assignments ) ) )
+ORDER BY Assignments[Arm]
+
+// dax-059-b: Display supplied uncertainty without overstating it
+// Context: Supplied marginal 95 percent Wilson score intervals for each arm's binomial rate; n=2 per arm; not a difference interval.
+EVALUATE SELECTCOLUMNS ( ExperimentSummary, "Arm", ExperimentSummary[Arm], "Rate", ExperimentSummary[Rate], "WilsonLower", ExperimentSummary[WilsonLower], "WilsonUpper", ExperimentSummary[WilsonUpper] )
+ORDER BY [Arm]

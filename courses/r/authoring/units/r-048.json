@@ -1,0 +1,104 @@
+{
+  "id": "r-048",
+  "title": "Censoring, risk sets and survival models",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-047"],
+  "concepts": [
+    "right censoring",
+    "risk set",
+    "Kaplan-Meier",
+    "hazard ratio",
+    "proportional hazards"
+  ],
+  "outcome": "Construct survival outcomes and inspect Kaplan-Meier and Cox calculations without treating censored observations as observed event times.",
+  "mechanism": "A right-censored observation tells us that an event had not occurred by the last observation time. It does not say the event happened at that time or that it will never happen. Survival methods retain this partial information through risk sets rather than replacing censored times with ordinary completed durations.\n\nThe Kaplan-Meier estimator changes at observed event times. Its multiplicative factor uses the number of events divided by the number at risk just before that event. A censoring time changes who remains at risk for later events but does not itself create an event drop. The small four-record fixture below makes those steps calculable by hand.\n\nThe interpretation depends on the observation process. Standard right-censoring analysis needs assumptions about the relationship between censoring and the event process, possibly conditional on covariates. A correctly constructed Surv object does not prove those assumptions. Delayed entry, competing events and interval censoring require their corresponding data and model contracts rather than being silently treated as this simple case.\n\nA Cox model describes multiplicative covariate effects on the hazard while leaving the baseline hazard unspecified. Exponentiating a coefficient gives a hazard ratio under the model. It is not a direct ratio of survival probabilities, a mean lifetime ratio or automatically a causal effect. The proportional-hazards assumption and covariate specification need separate assessment.\n\nA finite fitted coefficient and a diagnostic p-value are limited evidence, especially for a tiny sample. Inspect risk-set construction, model inputs, convergence and residual diagnostics, then state uncertainty and scientific limits. The examples execute real survival-package methods on synthetic data; they do not qualify a clinical prediction model.",
+  "vocabulary": [
+    {
+      "term": "Right censoring",
+      "definition": "Observation ending before an event is observed, providing a lower bound on event time."
+    },
+    {
+      "term": "Risk set",
+      "definition": "The observations still under observation and event-free immediately before an event time."
+    },
+    {
+      "term": "Survival function",
+      "definition": "The probability of remaining event-free beyond a specified time under the stated event definition."
+    },
+    {
+      "term": "Hazard ratio",
+      "definition": "A relative instantaneous event rate conditional on the model, distinct from a survival-probability ratio."
+    }
+  ],
+  "anatomy": "Use survival::Surv(time,event) with an explicit validated 0/1 event indicator. survfit(Surv(...)~1) estimates the single-group Kaplan-Meier curve. coxph(Surv(...)~x) fits a proportional-hazards model; exp(coef(fit)) returns the modeled hazard ratio. summary at selected times and cox.zph diagnostics answer different questions and retain their own assumptions.",
+  "worked_examples": [
+    {
+      "title": "A censor changes risk, not survival directly",
+      "code": "d <- data.frame(time = c(1, 2, 3, 4), event = c(1, 0, 1, 1))\nstopifnot(all(d$event %in% c(0, 1)))\nkm <- survival::survfit(survival::Surv(time, event) ~ 1, data = d)\ns <- summary(km, times = c(1, 2, 3, 4))$surv\nstopifnot(max(abs(s - c(3 / 4, 3 / 4, 3 / 8, 0))) < 1e-12)\nprint(data.frame(time = 1:4, survival = s))\n",
+      "explanation": "At time one, one of four at risk has an event. Time two is a censor, leaving survival unchanged but reducing the later risk set. The next event multiplies survival by one half.",
+      "expected": "Survival 0.75,0.75,0.375,0."
+    },
+    {
+      "title": "Fit and label a Cox effect",
+      "code": "d <- data.frame(time = 1:12, event = c(1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0), group = c(0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1))\nfit <- survival::coxph(survival::Surv(time, event) ~ group, data = d, x = TRUE)\nhr <- exp(coef(fit))\nstopifnot(length(hr) == 1, all(is.finite(hr)), all(hr > 0))\ncurves <- survival::survfit(fit, newdata = data.frame(group = c(0, 1)))\nstopifnot(ncol(curves$surv) == 2, all(curves$surv >= 0), all(curves$surv <= 1))\nprint(c(log_hazard_ratio = coef(fit), hazard_ratio = hr))\n",
+      "explanation": "The package fits an actual model and produces covariate-specific survival curves. The coefficient is labeled on its log-hazard scale; no causal or clinical interpretation is inferred from this synthetic fit.",
+      "expected": "Finite positive hazard ratio and two bounded survival curves."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Reconstruct the four-record Kaplan-Meier steps.",
+      "hint": "Update the risk set after the censor at time two.",
+      "answer": "The factors at event times are 3/4,1/2 and 0; the censor creates no survival drop.",
+      "expected": "0.75,0.75,0.375,0 at times 1:4."
+    },
+    {
+      "prompt": "Treat the censor at time two as an event and compare the resulting curve.",
+      "hint": "Change only the event indicator.",
+      "answer": "The curve drops to 0.5 at time two instead of staying 0.75, showing that event coding changes the target.",
+      "expected": "Different second-time survival."
+    },
+    {
+      "prompt": "Validate an event column before creating Surv.",
+      "hint": "Require a declared binary coding rather than relying on guessing.",
+      "answer": "Reject values outside 0/1 under this lesson contract. Other survival encodings require a different explicit specification.",
+      "expected": "Invalid event code rejected."
+    },
+    {
+      "prompt": "Fit the Cox fixture and convert its coefficient to a hazard ratio.",
+      "hint": "Exponentiate the log-hazard coefficient.",
+      "answer": "The ratio is positive and finite for this fixture; it is not a ratio of survival probabilities or a causal estimate by itself.",
+      "expected": "Correctly labeled coefficient and hazard ratio."
+    },
+    {
+      "prompt": "Inspect cox.zph output without turning its p-value into proof of proportional hazards.",
+      "hint": "Identify the diagnostic and its sampling limits.",
+      "answer": "The test supplies model-diagnostic evidence; a small synthetic sample cannot establish the assumption universally.",
+      "expected": "A finite diagnostic table with bounded interpretation."
+    },
+    {
+      "prompt": "Explain why averaging observed event times after dropping censored rows changes the analysis.",
+      "hint": "Ask which survival information was discarded.",
+      "answer": "Dropping censored rows conditions on event observation and discards their at-risk exposure. It is not a substitute for the declared survival analysis.",
+      "expected": "Selection and risk-set consequences stated."
+    }
+  ],
+  "starter": "# r-048: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(time = c(1, 2, 3, 4), event = c(1, 0, 1, 1))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Reconstruct the four-record Kaplan-Meier steps.\n# TODO: Update the risk set after the censor at time two.\n# Exercise 2: Treat the censor at time two as an event and compare the resulting curve.\n# TODO: Change only the event indicator.\n# Exercise 3: Validate an event column before creating Surv.\n# TODO: Require a declared binary coding rather than relying on guessing.\n# Exercise 4: Fit the Cox fixture and convert its coefficient to a hazard ratio.\n# TODO: Exponentiate the log-hazard coefficient.\n# Exercise 5: Inspect cox.zph output without turning its p-value into proof of proportional hazards.\n# TODO: Identify the diagnostic and its sampling limits.\n# Exercise 6: Explain why averaging observed event times after dropping censored rows changes the analysis.\n# TODO: Ask which survival information was discarded.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(time = c(1, 2, 3, 4), event = c(1, 0, 1, 1))\nvalidate_event <- function(event) {\n  if (anyNA(event) || !all(event %in% c(0, 1))) stop(\"event must use 0/1 coding\")\n}\nvalidate_event(d$event)\nkm <- survival::survfit(survival::Surv(time, event) ~ 1, data = d)\nstopifnot(max(abs(summary(km, times = 1:4)$surv - c(0.75, 0.75, 0.375, 0))) < 1e-12)\nchanged <- d; changed$event[2] <- 1\nwrong <- survival::survfit(survival::Surv(time, event) ~ 1, data = changed)\nstopifnot(abs(summary(wrong, times = 2)$surv - 0.5) < 1e-12)\nstopifnot(inherits(try(validate_event(c(0, 2)), silent = TRUE), \"try-error\"))\nc <- data.frame(time = 1:12, event = c(1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0), group = c(0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1))\nfit <- survival::coxph(survival::Surv(time, event) ~ group, data = c, x = TRUE)\nstopifnot(all(is.finite(coef(fit))), all(exp(coef(fit)) > 0))\ndiagnostic <- survival::cox.zph(fit)\nstopifnot(all(is.finite(diagnostic$table)), \"GLOBAL\" %in% rownames(diagnostic$table))\nstopifnot(sum(d$event) == 3, nrow(d) == 4)\ncat(\"r-048 reference checks passed\\n\")\n",
+  "solution_explanation": "The exact Kaplan-Meier oracle checks event coding and risk-set arithmetic. The changed-status case supplies a meaningful negative comparison: the same times produce a different survival curve when a censor is incorrectly declared an event.\n\nThe Cox fit and its proportional-hazards diagnostic are actual package operations on a synthetic fixture. Their interpretation remains conditional on the event definition, censoring assumptions and model. Finite coefficients and diagnostic output do not turn the example into a validated prediction system.",
+  "sources": [
+    {
+      "title": "R survival curves",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/survival/html/survfit.html"
+    },
+    {
+      "title": "R survival outcomes",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/survival/html/Surv.html"
+    },
+    {
+      "title": "R Cox models",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html"
+    }
+  ]
+}

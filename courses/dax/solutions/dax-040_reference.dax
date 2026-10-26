@@ -1,0 +1,15 @@
+// dax-040: Cohorts, retention denominators and unobserved ages
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    VAR LastObservedMonth = 202502
+
+// dax-040-a: January cohort at one-month age
+// Context: Analytics cohort population; January entrants 100/200; activity observed through February 2025.
+EVALUATE CALCULATETABLE ( ROW ( "EligibleMembers", COUNTROWS ( CohortMember ), "ActiveAtEntry", CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202501 ), "ActiveAtAgeOne", CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202502 ), "RetentionAtAgeOne", DIVIDE ( CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202502 ), COUNTROWS ( CohortMember ) ) ), CohortMember[CohortMonth] = 202501 )
+
+// dax-040-b: A newer cohort has unavailable follow-up
+// Context: February entrants 300/400; March follow-up is outside the declared observed months.
+EVALUATE CALCULATETABLE ( ROW ( "EligibleMembers", COUNTROWS ( CohortMember ), "ActiveAtEntry", CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202502 ), "EntryActivityRate", DIVIDE ( CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202502 ), COUNTROWS ( CohortMember ) ), "RetentionAtAgeOne", IF ( 202503 > LastObservedMonth, BLANK(), DIVIDE ( CALCULATE ( DISTINCTCOUNT ( Activity[MemberKey] ), Activity[MonthKey] = 202503 ), COUNTROWS ( CohortMember ) ) ) ), CohortMember[CohortMonth] = 202502 )

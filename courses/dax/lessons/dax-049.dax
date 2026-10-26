@@ -1,0 +1,9 @@
+// dax-049 learner draft: Formula work, columnar scans and cardinality
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Separate an expression's semantics, model cardinality and observed engine performance.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a performance-claim checklist.
+
+EVALUATE
+ROW ( "Fact rows", BLANK(), "Product groups", BLANK(), "Arithmetic operations to explain", BLANK() )

@@ -1,0 +1,94 @@
+{
+  "id": "r-041",
+  "title": "Explore distributions and preserve missingness",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-040"],
+  "concepts": ["observation unit", "missingness", "denominator", "distribution summary"],
+  "outcome": "Produce a descriptive summary whose observation counts, missing-value policy and distributional limits are explicit.",
+  "mechanism": "An exploratory summary starts with the unit represented by each row. A value may describe one measurement, one person or one aggregated group. Those units determine what a count or mean means. Before choosing a plot or model, record the eligible rows and the distinction between an observed zero and an absent measurement.\n\nR represents missing numeric values with NA. Arithmetic often propagates that missingness, making an unexamined mean return NA. Setting na.rm=TRUE changes the calculation to use observed values. It does not establish that those observed values represent the missing population. Report the observed and missing counts alongside the summary, especially when availability differs between groups.\n\nA mean compresses a distribution and is sensitive to extreme values. A median answers a different descriptive question about the middle ordered observation. Neither is universally preferable. Comparing them with quantiles and the actual small sample can expose skew or an outlier that a single scalar hides. The authored long-tail fixture below makes this sensitivity visible without claiming to diagnose a real data-quality error.\n\nGrouped summaries introduce another denominator choice. A group with one observed value should not automatically receive the same weight as a group with two when reconstructing the overall observation mean. Retaining counts and sums makes that aggregation auditable. An empty group and a group whose rows are all missing also have different data-collection meanings, even if neither has an observed mean.\n\nChoose an explicit all-missing policy. This lesson reports NA_real_ for the mean and median when no observed values exist, preserving the absence of information. Returning zero would create a numerical observation that was never measured. The policy is a semantic decision at the analysis boundary, not merely a way to suppress a warning.\n\nThese summaries describe the admitted records. They do not prove a causal effect, a representative sampling design or a mechanism for missing values. A subsequent inferential analysis needs those assumptions stated separately. Keep original records and identifiers so a reviewer can reconstruct which values entered each statistic.",
+  "vocabulary": [
+    {
+      "term": "Observation unit",
+      "definition": "The entity or event represented by one admitted row."
+    },
+    {
+      "term": "Missing value",
+      "definition": "An absent measurement, distinct from a measured numerical zero."
+    },
+    {
+      "term": "Observed-value mean",
+      "definition": "A mean whose denominator counts only values retained by the declared missingness policy."
+    },
+    {
+      "term": "Robust descriptive summary",
+      "definition": "A statistic such as the median whose response to extreme observations differs from the mean."
+    }
+  ],
+  "anatomy": "Use is.na to create a missingness mask and sum it to retain counts. Select observed values before calculating summaries. For values x_i with observed indicators m_i, the observed mean is \\(\\sum_i m_i x_i/\\sum_i m_i\\) when the denominator is positive. The implementation selects valid entries first rather than multiplying NA by zero. split keeps the group labels available; a safe summary function makes the all-missing case explicit.",
+  "worked_examples": [
+    {
+      "title": "A denominator ledger",
+      "code": "x <- c(1, NA_real_, 4, 6, NA_real_)\nobserved <- !is.na(x)\nsummary <- c(rows = length(x), observed = sum(observed), missing = sum(!observed), mean = mean(x[observed]))\nstopifnot(summary[[\"rows\"]] == 5, summary[[\"observed\"]] == 3, summary[[\"missing\"]] == 2)\nstopifnot(isTRUE(all.equal(summary[[\"mean\"]], 11 / 3)))\nprint(summary)\n",
+      "explanation": "The complete-case calculation retains three observed measurements and excludes two missing records from the mean denominator. Their exclusion is reported rather than interpreted as proof that missingness is harmless.",
+      "expected": "Rows 5, observed 3, missing 2, observed mean 11/3."
+    },
+    {
+      "title": "A long tail changes the mean",
+      "code": "x <- c(1, 2, 2, 3, 100)\nstopifnot(isTRUE(all.equal(mean(x), 21.6)), median(x) == 2)\nwithout_extreme <- x[-5]\nstopifnot(mean(without_extreme) == 2, median(without_extreme) == 2)\nprint(c(mean = mean(x), median = median(x)))\n",
+      "explanation": "Removing the extreme value changes the mean greatly while the median stays two. This is an arithmetic sensitivity comparison, not an instruction to delete large real observations without investigation.",
+      "expected": "Mean 21.6 and median 2; the four smaller values have mean and median 2."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the row, observed and missing counts for c(0, NA, 2, NA).",
+      "hint": "Keep zero in the observed set.",
+      "answer": "There are four rows, two observed values and two missing values; the observed mean is one.",
+      "expected": "Counts 4,2,2; mean 1."
+    },
+    {
+      "prompt": "Add an observed value eight to c(1, NA, 4, 6, NA) and update the mean.",
+      "hint": "Update both the sum and count.",
+      "answer": "The observed sum becomes 19 and the observed count four, so the mean is 19/4.",
+      "expected": "Observed count 4, mean 4.75."
+    },
+    {
+      "prompt": "Construct group summaries for A=c(1,NA) and B=c(4,6,NA), retaining observed counts.",
+      "hint": "Summarize the selected values within each group.",
+      "answer": "A has one observed value and mean one; B has two and mean five. The overall observed mean is the count-weighted 11/3, not the equal-group mean three.",
+      "expected": "A: count 1 / mean 1; B: count 2 / mean 5; overall 11/3."
+    },
+    {
+      "prompt": "Diagnose replacing every missing measurement with zero before averaging.",
+      "hint": "Ask whether a missing record supplies a measured zero.",
+      "answer": "The replacement changes the data and denominator. For the five-row fixture it produces 11/5 rather than the observed-value mean 11/3. Neither is a justified population estimate without a missingness model.",
+      "expected": "The two descriptive quantities differ and the assumption is stated."
+    },
+    {
+      "prompt": "Define and test the summary of c(NA_real_, NA_real_).",
+      "hint": "Check the valid count before calling mean.",
+      "answer": "Return counts two/zero/two and an explicit NA_real_ mean; do not report zero as an observed average.",
+      "expected": "Observed count 0; mean NA."
+    },
+    {
+      "prompt": "Compare mean and median after adding 100 to c(1,2,2,3), and explain the inferential limit.",
+      "hint": "Keep the full ordered values visible.",
+      "answer": "Mean becomes 21.6 and median 2. The difference describes sensitivity to the tail; it does not establish that 100 is erroneous or that the sample represents a population.",
+      "expected": "Correct summaries and a bounded interpretation."
+    }
+  ],
+  "starter": "# r-041: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nx <- c(1, NA_real_, 4, 6, NA_real_)\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Predict the row, observed and missing counts for c(0, NA, 2, NA).\n# TODO: Keep zero in the observed set.\n# Exercise 2: Add an observed value eight to c(1, NA, 4, 6, NA) and update the mean.\n# TODO: Update both the sum and count.\n# Exercise 3: Construct group summaries for A=c(1,NA) and B=c(4,6,NA), retaining observed counts.\n# TODO: Summarize the selected values within each group.\n# Exercise 4: Diagnose replacing every missing measurement with zero before averaging.\n# TODO: Ask whether a missing record supplies a measured zero.\n# Exercise 5: Define and test the summary of c(NA_real_, NA_real_).\n# TODO: Check the valid count before calling mean.\n# Exercise 6: Compare mean and median after adding 100 to c(1,2,2,3), and explain the inferential limit.\n# TODO: Keep the full ordered values visible.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "describe <- function(x) {\n  valid <- !is.na(x)\n  c(\n    rows = length(x), observed = sum(valid), missing = sum(!valid),\n    mean = if (any(valid)) mean(x[valid]) else NA_real_,\n    median = if (any(valid)) median(x[valid]) else NA_real_\n  )\n}\na <- describe(c(0, NA_real_, 2, NA_real_))\nstopifnot(a[[\"rows\"]] == 4, a[[\"observed\"]] == 2, a[[\"missing\"]] == 2, a[[\"mean\"]] == 1)\nb <- describe(c(1, NA_real_, 4, 6, NA_real_, 8))\nstopifnot(b[[\"observed\"]] == 4, b[[\"mean\"]] == 19 / 4)\ngroups <- list(A = c(1, NA_real_), B = c(4, 6, NA_real_))\nsummaries <- lapply(groups, describe)\nstopifnot(summaries$A[[\"observed\"]] == 1, summaries$B[[\"observed\"]] == 2)\nstopifnot(summaries$A[[\"mean\"]] == 1, summaries$B[[\"mean\"]] == 5)\nweighted <- sum(vapply(summaries, function(s) s[[\"mean\"]] * s[[\"observed\"]], numeric(1))) /\n  sum(vapply(summaries, function(s) s[[\"observed\"]], numeric(1)))\nstopifnot(isTRUE(all.equal(weighted, 11 / 3)))\nx <- c(1, NA_real_, 4, 6, NA_real_)\nfilled <- replace(x, is.na(x), 0)\nstopifnot(mean(filled) == 11 / 5, !isTRUE(all.equal(mean(filled), weighted)))\nempty <- describe(c(NA_real_, NA_real_))\nstopifnot(empty[[\"observed\"]] == 0, is.na(empty[[\"mean\"]]))\ntail <- c(1, 2, 2, 3, 100)\nstopifnot(isTRUE(all.equal(mean(tail), 21.6)), median(tail) == 2)\ncat(\"r-041 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference preserves the observed set explicitly. Selecting x[valid] avoids performing arithmetic on missing entries and makes the denominator count inspectable. The zero in the first fixture is a valid measurement, so removing it would create another selection error.\n\nThe grouped calculation retains enough information to reconstruct the observation-weighted mean. Averages of group averages change the weighting unless group counts are equal or equal group weighting is the intended question. The all-missing branch returns missing output deliberately; it does not turn absent evidence into a zero estimate.\n\nThe tail comparison uses the same five authored values for both summaries. Its conclusion is about their arithmetic sensitivity. Decisions about measurement error, eligibility or population inference require evidence not present in this small fixture.",
+  "sources": [
+    {
+      "title": "R mean documentation",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/mean.html"
+    },
+    {
+      "title": "R missing values",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html"
+    }
+  ]
+}

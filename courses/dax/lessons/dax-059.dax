@@ -1,0 +1,9 @@
+// dax-059 learner draft: Experiment and cohort capstone: preserve the assigned unit
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Build an experiment-quality semantic report without treating repeated events or displayed estimates as causal proof.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the quality matrix needed before interpreting the arm contrast.
+
+EVALUATE
+ROW ( "Assigned units", BLANK(), "Converted units", BLANK(), "Unit-level rate", BLANK(), "Uncertainty boundary", "Draft" )

@@ -1,0 +1,98 @@
+{
+  "id": "r-032",
+  "title": "Grouped summaries and sufficient aggregation state",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-014", "r-017", "r-031"],
+  "concepts": ["Group key", "Sufficient aggregation state", "Weighted mean", "Empty group"],
+  "outcome": "Aggregate groups while preserving missingness counts and enough state to reconstruct the intended overall mean.",
+  "mechanism": "A grouped summary changes the row grain. An observation table becomes one row per group, so each output field needs a clear aggregation rule. Counts, sums and means do not have identical missingness behavior. A reliable summary records both the number of input rows and the number of observed measurements used by a numerical statistic.\n\nA mean alone loses information needed for later regrouping. If one group contains one observation and another contains three, averaging their means gives each group equal weight rather than each observation equal weight. Retaining observed count and sum permits reconstruction of the observation-weighted mean. Equal group weighting can be legitimate, but it answers a different question and should be named accordingly.\n\nsplit and lapply provide a transparent base-R approach for small grouped computations. A factor key can retain a declared universe, including empty groups. A summary function should define the result for empty or all-missing groups before a table-building step combines outputs. Missing group labels also need a policy because some grouping functions omit them by default.\n\nAggregation order matters when the operation is not additive. A distinct count cannot generally be reconstructed by summing group distinct counts when the same entity appears in multiple groups. Similarly, a median is not reconstructed by averaging group medians. Keep the state required by the exact statistic or return to the underlying observations; do not assume every summary is composable like a sum.",
+  "vocabulary": [
+    {
+      "term": "Group key",
+      "definition": "The fields defining which observations share a summary."
+    },
+    {
+      "term": "Sufficient aggregation state",
+      "definition": "Intermediate counts and totals needed to reconstruct a desired aggregate."
+    },
+    {
+      "term": "Weighted mean",
+      "definition": "An average using declared relative weights."
+    },
+    {
+      "term": "Empty group",
+      "definition": "A declared category without an admitted observation."
+    }
+  ],
+  "anatomy": "Use split(data, key, drop=FALSE) for explicit factor-group retention, lapply for a structured summary and vapply when each group must return one known scalar. Reconstruct an overall observed mean as total observed sum divided by total observed count.",
+  "worked_examples": [
+    {
+      "title": "Unequal group counts change the overall mean",
+      "code": "groups <- list(A = c(10), B = c(20, 30, 40))\ncounts <- vapply(groups, length, integer(1))\nsums <- vapply(groups, sum, numeric(1))\nmeans <- sums / counts\noverall <- sum(sums) / sum(counts)\nstopifnot(overall == 25, mean(means) == 20)\nprint(c(observation_mean = overall, equal_group_mean = mean(means)))\n",
+      "explanation": "The observation mean counts four measurements equally. The equal-group mean gives A and B equal influence despite their unequal sizes.",
+      "expected": "25 versus 20."
+    },
+    {
+      "title": "Retain an empty group and missing counts",
+      "code": "data <- data.frame(group = factor(c(\"A\", \"A\", \"B\"), levels = c(\"A\", \"B\", \"C\")), value = c(2, NA_real_, 6))\nsummary <- lapply(split(data$value, data$group, drop = FALSE), function(x) {\n  observed <- x[!is.na(x)]\n  c(rows = length(x), observed = length(observed), sum = sum(observed), mean = if (length(observed)) mean(observed) else NA_real_)\n})\nstopifnot(summary$A[[\"rows\"]] == 2, summary$A[[\"observed\"]] == 1)\nstopifnot(summary$C[[\"rows\"]] == 0, is.na(summary$C[[\"mean\"]]))\nprint(summary)\n",
+      "explanation": "The declared C category remains visible with zero rows and no observed mean. A missing measurement within A is separately counted.",
+      "expected": "Arows 2/observed 1; Crows 0/meanNA."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Reconstruct an overall mean from sums 10,90 and counts 1,3.",
+      "hint": "Add sufficient totals before dividing.",
+      "answer": "The mean is 25.",
+      "expected": "The mean is 25."
+    },
+    {
+      "prompt": "Add another observation 50 to B.",
+      "hint": "Update B sum and count together.",
+      "answer": "Overall sum 150, count 5, mean 30.",
+      "expected": "Overall sum 150, count 5, mean 30."
+    },
+    {
+      "prompt": "Return rows, observed, missing, sum and mean per group.",
+      "hint": "Keep denominator evidence beside the statistic.",
+      "answer": "An all-missing group has observed 0 and an explicitly missing mean.",
+      "expected": "An all-missing group has observed 0 and an explicitly missing mean."
+    },
+    {
+      "prompt": "Diagnose summing distinct-customer counts across overlapping groups.",
+      "hint": "One customer can appear in more than one group.",
+      "answer": "Deduplicate the intended union or preserve an exact mergeable set/sketch contract.",
+      "expected": "Deduplicate the intended union or preserve an exact mergeable set/sketch contract."
+    },
+    {
+      "prompt": "Retain a category with no observations.",
+      "hint": "Use a declared factor universe and an empty-group policy.",
+      "answer": "Report zero rows separately from all-missing measured rows.",
+      "expected": "Report zero rows separately from all-missing measured rows."
+    },
+    {
+      "prompt": "Explain why group medians cannot be averaged into an overall median.",
+      "hint": "Medians discard order information needed for the combined sample.",
+      "answer": "Retain the necessary distribution state or recompute from admitted observations.",
+      "expected": "Retain the necessary distribution state or recompute from admitted observations."
+    }
+  ],
+  "starter": "# r-032: Grouped summaries and sufficient aggregation state\n# Complete the six guide tasks using these local inputs.\ngroups <- list(A = 10, B = c(20, 30, 40), C = numeric(0))\n# TODO: retain counts and sums before combining means.\nprint(groups)\n",
+  "reference": "groups <- list(A = 10, B = c(20, 30, 40))\nsums <- vapply(groups, sum, numeric(1)); counts <- vapply(groups, length, integer(1))\nstopifnot(sum(sums) / sum(counts) == 25)\ngroups$B <- c(groups$B, 50)\nstopifnot(sum(unlist(groups)) / length(unlist(groups)) == 30)\nsummarize <- function(x) {\n  valid <- !is.na(x); c(rows = length(x), observed = sum(valid), missing = sum(!valid), sum = sum(x[valid]), mean = if (any(valid)) mean(x[valid]) else NA_real_)\n}\nstopifnot(summarize(c(NA_real_, NA_real_))[[\"observed\"]] == 0, is.na(summarize(numeric(0))[[\"mean\"]]))\na <- c(\"U1\", \"U2\"); b <- c(\"U2\", \"U3\")\nstopifnot(length(unique(c(a, b))) == 3, length(unique(a)) + length(unique(b)) == 4)\nstopifnot(median(c(0, 100, 101)) != mean(c(median(0), median(c(100, 101)))))\ncat(\"r-032 reference checks passed\\n\")\n",
+  "solution_explanation": "The observation mean counts four measurements equally. The equal-group mean gives A and B equal influence despite their unequal sizes.\n\nThe declared C category remains visible with zero rows and no observed mean. A missing measurement within A is separately counted.",
+  "sources": [
+    {
+      "title": "R split",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/split.html"
+    },
+    {
+      "title": "R grouped application",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/tapply.html"
+    },
+    {
+      "title": "R means",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/mean.html"
+    }
+  ]
+}

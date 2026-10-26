@@ -19,7 +19,7 @@ MAX_BROWSER_RECORD_BYTES = 512 * 1024
 BROWSER_HISTORY_LIMIT = 20
 BROWSER_STATUSES = frozenset({"succeeded", "failed", "cancelled"})
 BROWSER_PROFILES = {
-    "javascript-browser": ("javascript", "d3@7.9.0"),
+    "javascript-browser": ("javascript", "d3@7.9.0+plotly@4.1.2"),
     "html-browser": ("html", "html-css-dom"),
 }
 
@@ -33,7 +33,7 @@ def browser_capability(profile: str = "javascript-browser") -> dict[str, Any]:
         "detail": (
             "Renders HTML, inline CSS and inline JavaScript in the isolated offline preview."
             if profile == "html-browser"
-            else "Runs in the isolated browser preview with bundled D3 7.9.0."
+            else "Runs in the isolated browser preview with bundled D3 7.9.0 and Plotly 4.1.2."
         ),
         "execution_location": "browser",
         "verification_kind": "browser_observation",
@@ -78,6 +78,9 @@ class BrowserRunStore:
     def _read(self, path: Path, lesson_id: str) -> dict[str, Any]:
         lesson = self.state.catalog.get(lesson_id)
         expected_language, expected_library = BROWSER_PROFILES[lesson.runtime_profile]
+        historical_libraries = {expected_library}
+        if lesson.runtime_profile == "javascript-browser":
+            historical_libraries.add("d3@7.9.0")
         safe = self.state.safe_path(path)
         if safe.stat().st_size > MAX_BROWSER_RECORD_BYTES:
             raise ValueError("Browser history contains an oversized record; preserve it.")
@@ -112,7 +115,8 @@ class BrowserRunStore:
             or record["lesson_id"] != lesson_id
             or record["profile"] != lesson.runtime_profile
             or record["language"] != expected_language
-            or record["library"] != expected_library
+            or not isinstance(record["library"], str)
+            or record["library"] not in historical_libraries
             or record["verification_kind"] != "browser_observation"
             or record["verified"] is not False
             or record["checks"] != []

@@ -1,0 +1,98 @@
+{
+  "id": "r-008",
+  "title": "Matrices, dimensions and linear algebra operators",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-003", "r-005", "r-007"],
+  "concepts": ["Matrix", "Column-major order", "Elementwise multiplication", "Matrix product"],
+  "outcome": "Construct and subset matrices while distinguishing elementwise arithmetic from a matrix product.",
+  "mechanism": "A matrix is an atomic vector with a two-element dim attribute. Its entries share one storage type. By default matrix fills columns first, so matrix(1:6, nrow=2) has first column 1,2 and second column 3,4. The optional byrow argument changes how the supplied sequence is arranged, not the meaning of later row and column indices.\n\nThe expression a * b multiplies corresponding entries. The expression a %*% b computes a matrix product and requires compatible inner dimensions. Those operations answer different questions even when both are syntactically valid. In a design-matrix calculation, rows usually represent observations and columns represent features; a coefficient column then produces one prediction per observation.\n\nSubsetting can drop a dimension. m[,1] often returns a vector, whereas m[,1, drop=FALSE] preserves a one-column matrix. A function that requires two-dimensional input should retain and test its shape rather than relying on the number of selected columns being greater than one. Empty or single-column cases often expose this boundary.\n\nBasic linear algebra also requires numerical assumptions. A square matrix is not automatically invertible. Prefer solving a system with solve(A, b) when the goal is a solution rather than constructing an inverse by habit. Later statistical work will revisit conditioning, rank and stable decompositions; these examples use tiny nonsingular systems with an explicit residual check.",
+  "vocabulary": [
+    {
+      "term": "Matrix",
+      "definition": "An atomic vector with two dimensions."
+    },
+    {
+      "term": "Column-major order",
+      "definition": "The order in which R fills and stores ordinary matrix entries."
+    },
+    {
+      "term": "Elementwise multiplication",
+      "definition": "The * operator applied to corresponding entries."
+    },
+    {
+      "term": "Matrix product",
+      "definition": "The %*% operation combining rows and columns."
+    }
+  ],
+  "anatomy": "matrix(data, nrow=...) declares shape, t transposes it, dim reports it and drop=FALSE retains it during extraction. For A of shape m by n and beta of shape n by one, A %*% beta has shape m by one.",
+  "worked_examples": [
+    {
+      "title": "Rows, columns and a prediction",
+      "code": "design <- cbind(intercept = c(1, 1, 1), x = c(0, 1, 2))\nbeta <- c(2, 3)\nprediction <- design %*% beta\nstopifnot(identical(dim(prediction), c(3L, 1L)))\nstopifnot(identical(as.numeric(prediction), c(2, 5, 8)))\nprint(prediction)\n",
+      "explanation": "Each row combines an intercept and one feature with the same coefficient vector. Matrix multiplication preserves one output per observation.",
+      "expected": "2,5,8 in a 3 by 1 matrix."
+    },
+    {
+      "title": "Solve and check a small system",
+      "code": "a <- matrix(c(2, 0, 0, 4), nrow = 2)\nb <- c(6, 8)\nsolution <- solve(a, b)\nstopifnot(isTRUE(all.equal(solution, c(3, 2))))\nstopifnot(max(abs(a %*% solution - b)) < 1e-12)\nstopifnot(is.matrix(a[, 1, drop = FALSE]), is.null(dim(a[, 1])))\nprint(solution)\n",
+      "explanation": "The residual checks the solved equation. The extraction comparison shows why a one-column matrix needs an explicit shape policy.",
+      "expected": "Solution 3,2; residual below tolerance."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the first row of matrix(1:6, nrow=2).",
+      "hint": "Default filling proceeds down columns.",
+      "answer": "The first row is 1,3,5.",
+      "expected": "The first row is 1,3,5."
+    },
+    {
+      "prompt": "Construct the same dimensions with byrow=TRUE.",
+      "hint": "The input now fills across rows.",
+      "answer": "The first row becomes 1,2,3.",
+      "expected": "The first row becomes 1,2,3."
+    },
+    {
+      "prompt": "Compute predictions for intercept two and slope three at x=3,4.",
+      "hint": "Use a two-column design matrix.",
+      "answer": "The predictions are 11 and 14.",
+      "expected": "The predictions are 11 and 14."
+    },
+    {
+      "prompt": "Diagnose replacing %*% with *.",
+      "hint": "Elementwise multiplication does not sum feature contributions.",
+      "answer": "Keep the matrix product and validate dimensions.",
+      "expected": "Keep the matrix product and validate dimensions."
+    },
+    {
+      "prompt": "Retain one selected column as a matrix.",
+      "hint": "Disable dimension dropping.",
+      "answer": "Use drop=FALSE and test dim.",
+      "expected": "Use drop=FALSE and test dim."
+    },
+    {
+      "prompt": "Explain why a residual check is useful after solve.",
+      "hint": "It checks the equation at the returned value.",
+      "answer": "A small residual supports this numerical solution but does not by itself establish good conditioning or correct model assumptions.",
+      "expected": "A small residual supports this numerical solution but does not by itself establish good conditioning or correct model assumptions."
+    }
+  ],
+  "starter": "# r-008: Matrices, dimensions and linear algebra operators\n# Complete the six guide tasks using these local inputs.\nm <- matrix(1:6, nrow = 2)\nbeta <- c(2, 3)\n# TODO: inspect shape and build a compatible design matrix.\nprint(m)\n",
+  "reference": "m <- matrix(1:6, nrow = 2)\nstopifnot(identical(m[1, ], c(1L, 3L, 5L)))\nby_row <- matrix(1:6, nrow = 2, byrow = TRUE)\nstopifnot(identical(by_row[1, ], c(1L, 2L, 3L)))\ndesign <- cbind(1, c(3, 4))\nstopifnot(identical(as.numeric(design %*% c(2, 3)), c(11, 14)))\none <- design[, 1, drop = FALSE]\nstopifnot(identical(dim(one), c(2L, 1L)))\na <- diag(c(2, 4)); b <- c(6, 8); solution <- solve(a, b)\nstopifnot(max(abs(a %*% solution - b)) < 1e-12)\ncat(\"r-008 reference checks passed\\n\")\n",
+  "solution_explanation": "Each row combines an intercept and one feature with the same coefficient vector. Matrix multiplication preserves one output per observation.\n\nThe residual checks the solved equation. The extraction comparison shows why a one-column matrix needs an explicit shape policy.",
+  "sources": [
+    {
+      "title": "R matrix construction",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/matrix.html"
+    },
+    {
+      "title": "R matrix multiplication",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/matmult.html"
+    },
+    {
+      "title": "R linear systems",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/solve.html"
+    }
+  ]
+}

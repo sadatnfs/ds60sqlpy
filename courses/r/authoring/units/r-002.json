@@ -1,0 +1,98 @@
+{
+  "id": "r-002",
+  "title": "Numbers, types and approximate equality",
+  "level": "beginner",
+  "minutes": 90,
+  "prerequisites": ["r-001"],
+  "concepts": ["Integer", "Double", "Coercion", "Tolerance"],
+  "outcome": "Inspect numeric types and choose an equality check that matches the numerical contract.",
+  "mechanism": "A printed number does not reveal all of its representation. In R, 2 is usually a double and 2L is an integer. Both can participate in arithmetic, but their storage types differ. typeof inspects that storage distinction, while class describes the class used by higher-level behavior. Do not infer a type solely from the way print rounds a value for display.\n\nFloating-point arithmetic stores many decimal fractions approximately. The expression 0.1 + 0.2 need not be exactly equal to the stored representation of 0.3. This is a representation issue rather than evidence that arithmetic is arbitrary. For a numerical result, specify a sensible scale-aware tolerance. isTRUE(all.equal(actual, expected, tolerance=...)) converts the comparison's success or explanatory text into one logical answer.\n\nCoercion can change both type and meaning. Combining a number with text in one atomic vector creates character data. as.numeric can parse an ordinary numeric string, but identifiers with leading zeros should usually remain text. Turning \"0017\" into 17 loses a representational distinction that might matter for a customer code.\n\nInteger division and remainders answer another pair of questions. For nonnegative items, 17 %/% 5 counts complete groups and 17 %% 5 counts the remainder. Ordinary / computes a ratio. Keep those operations distinct when translating a business rule into source, and define the intended behavior for negative quantities before generalizing the example.",
+  "vocabulary": [
+    {
+      "term": "Integer",
+      "definition": "An integer-storage value, commonly written with an L suffix."
+    },
+    {
+      "term": "Double",
+      "definition": "A floating-point numeric representation with finite precision."
+    },
+    {
+      "term": "Coercion",
+      "definition": "Conversion to a common or requested type."
+    },
+    {
+      "term": "Tolerance",
+      "definition": "An explicit allowance for numerical comparison error."
+    }
+  ],
+  "anatomy": "Use typeof(2L) versus typeof(2), / for a ratio, %/% for integer quotient and %% for remainder. identical checks exact value and attributes, so identical(2L, 2) is false even when 2L == 2 is true.",
+  "worked_examples": [
+    {
+      "title": "Same displayed value, different storage",
+      "code": "stopifnot(typeof(2L) == \"integer\", typeof(2) == \"double\")\nstopifnot(2L == 2, !identical(2L, 2))\nprint(c(integer_type = typeof(2L), double_type = typeof(2)))\n",
+      "explanation": "Numeric equality and exact object identity make different claims. The storage difference is intentional.",
+      "expected": "integer and double."
+    },
+    {
+      "title": "A decimal result and a grouping rule",
+      "code": "decimal <- 0.1 + 0.2\nstopifnot(isTRUE(all.equal(decimal, 0.3, tolerance = 1e-12)))\nstopifnot(17 %/% 5 == 3, 17 %% 5 == 2)\nprint(c(decimal = decimal, groups = 17 %/% 5, remainder = 17 %% 5))\n",
+      "explanation": "The decimal check allows a tiny representation error. Grouping uses exact small integer arithmetic and keeps quotient separate from remainder.",
+      "expected": "Approximately 0.3; three groups and two remaining."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the storage type of c(1L, 2.5).",
+      "hint": "One atomic vector uses a common type.",
+      "answer": "Both entries are stored as doubles.",
+      "expected": "Both entries are stored as doubles."
+    },
+    {
+      "prompt": "Replace numeric 17 with the identifier \"0017\".",
+      "hint": "Consider whether arithmetic is meaningful for an identifier.",
+      "answer": "Keep the identifier character to preserve leading zeros.",
+      "expected": "Keep the identifier character to preserve leading zeros."
+    },
+    {
+      "prompt": "Check that 19 items form three groups of five with four left.",
+      "hint": "Use quotient and remainder independently.",
+      "answer": "19 %/% 5 is 3 and 19 %% 5 is 4.",
+      "expected": "19 %/% 5 is 3 and 19 %% 5 is 4."
+    },
+    {
+      "prompt": "Diagnose identical(2L, 2) being false.",
+      "hint": "Exact identity includes representation.",
+      "answer": "The storage types differ even though numeric equality holds.",
+      "expected": "The storage types differ even though numeric equality holds."
+    },
+    {
+      "prompt": "Check a decimal calculation near 0.3.",
+      "hint": "Use a justified small tolerance instead of printed digits.",
+      "answer": "isTRUE(all.equal(...)) supplies one logical result.",
+      "expected": "isTRUE(all.equal(...)) supplies one logical result."
+    },
+    {
+      "prompt": "State why a large tolerance can hide a defect.",
+      "hint": "The accepted error must fit the units and application.",
+      "answer": "A tolerance should permit representation error, not an arbitrary change in the intended amount.",
+      "expected": "A tolerance should permit representation error, not an arbitrary change in the intended amount."
+    }
+  ],
+  "starter": "# r-002: Numbers, types and approximate equality\n# Complete the six guide tasks using these local inputs.\nitems <- 19\ngroup_size <- 5\nidentifier <- \"0017\"\n# TODO: inspect types, quotient, remainder and approximate equality.\nprint(items)\n",
+  "reference": "stopifnot(typeof(c(1L, 2.5)) == \"double\")\nidentifier <- \"0017\"\nstopifnot(nchar(identifier) == 4, is.character(identifier))\nstopifnot(19 %/% 5 == 3, 19 %% 5 == 4)\nstopifnot(!identical(2L, 2), 2L == 2)\nstopifnot(isTRUE(all.equal(0.1 + 0.2, 0.3, tolerance = 1e-12)))\nstopifnot(!isTRUE(all.equal(0.31, 0.3, tolerance = 1e-12)))\ncat(\"r-002 reference checks passed\\n\")\n",
+  "solution_explanation": "Numeric equality and exact object identity make different claims. The storage difference is intentional.\n\nThe decimal check allows a tiny representation error. Grouping uses exact small integer arithmetic and keeps quotient separate from remainder.",
+  "sources": [
+    {
+      "title": "R numeric vectors",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/numeric.html"
+    },
+    {
+      "title": "R equality comparison",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/all.equal.html"
+    },
+    {
+      "title": "R arithmetic",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Arithmetic.html"
+    }
+  ]
+}

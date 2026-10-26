@@ -79,6 +79,18 @@ export default [
     processor: "classroom/async",
   },
   {
+    files: ["courses/data-visualization/{authoring,lessons,references}/*.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: { ...globals.browser },
+    },
+  },
+  {
+    files: ["courses/data-visualization/{lessons,references}/viz-*.js"],
+    plugins: { classroom: browserPad },
+    processor: "classroom/async",
+  },
+  {
     files: ["src/ds60sqlpy/assets/classroom.js"],
     // The classroom server supplies this value in the page before the asset.
     languageOptions: { globals: { SERVER_TOKEN: "readonly" } },

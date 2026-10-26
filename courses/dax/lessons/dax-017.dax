@@ -1,0 +1,9 @@
+// dax-017 learner draft: Explicit and implicit context transition
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Trace a raw aggregation and a measure reference inside an iterator without treating context transition as a row pointer.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the simplest formula for this additive revenue total.
+
+EVALUATE
+ADDCOLUMNS ( VALUES ( Product[ProductKey] ), "Per-product amount", BLANK() )

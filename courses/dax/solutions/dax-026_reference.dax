@@ -1,0 +1,17 @@
+// dax-026: Virtual tables have row-retention and column contracts
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-026-a: Extend every candidate key
+// Context: All four clean-model Product keys; retain every input row while adding revenue.
+EVALUATE SELECTCOLUMNS ( ADDCOLUMNS ( VALUES ( Product[ProductKey] ), "RevenueForKey", [NetRevenue] ), "ProductKey", Product[ProductKey], "Revenue", [RevenueForKey] )
+ORDER BY [ProductKey]
+
+// dax-026-b: A grouped summary omits an all-blank group
+// Context: Same clean model; grouped summary with one measure expression.
+EVALUATE SUMMARIZECOLUMNS ( Product[ProductKey], "Revenue", [NetRevenue] )
+ORDER BY Product[ProductKey]

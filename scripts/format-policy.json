@@ -1,6 +1,74 @@
 {
   "exclude": [
     {
+      "pattern": "courses/jax/lessons.json",
+      "reason": "Exact generated JAX metadata; rebuild with the subject authoring generator. Executable Python remains under the formatter."
+    },
+    {
+      "pattern": "courses/jax/track.json",
+      "reason": "Exact generated JAX metadata; rebuild with the subject authoring generator. Executable Python remains under the formatter."
+    },
+    {
+      "pattern": "courses/dax/guides/*",
+      "reason": "Generated DAX guides; edit owned authoring units and rebuild the subject."
+    },
+    {
+      "pattern": "courses/dax/solutions/*.md",
+      "reason": "Generated DAX explanations; preserve subject generation bytes."
+    },
+    {
+      "pattern": "courses/dax/README.md",
+      "reason": "Generated subject entrypoint; edit the DAX assembler."
+    },
+    {
+      "pattern": "courses/dax/models/README.md",
+      "reason": "Generated fixture handbook; regenerate with model metadata."
+    },
+    {
+      "pattern": "courses/dax/models/*/model.json",
+      "reason": "DAX model bytes are SHA-bound by reference-results.json; rebuild together."
+    },
+    {
+      "pattern": "courses/dax/track.json",
+      "reason": "Generated DAX plan; edit authoring units."
+    },
+    {
+      "pattern": "courses/dax/lessons.json",
+      "reason": "Generated DAX admission; edit authoring units."
+    },
+    {
+      "pattern": "courses/dax/reference-results.json",
+      "reason": "Generated hand-derived references with exact source/model hashes."
+    },
+    {
+      "pattern": "courses/r/guides/*",
+      "reason": "Generated R guides; edit owned authoring units and rebuild the subject."
+    },
+    {
+      "pattern": "courses/r/solutions/*.md",
+      "reason": "Generated R explanations; preserve subject generation bytes."
+    },
+    {
+      "pattern": "courses/r/README.md",
+      "reason": "Generated subject entrypoint; edit the R assembler."
+    },
+    {
+      "pattern": "courses/r/track.json",
+      "reason": "Generated R plan; edit authoring units."
+    },
+    {
+      "pattern": "courses/r/lessons.json",
+      "reason": "Generated R admission; edit authoring units."
+    },
+    {
+      "pattern": "src/ds60sqlpy/_tex_cache_digest.py",
+      "reason": "Generated compiler-output integrity binding; rebuild with compile_lesson_tex.py."
+    },
+    {
+      "pattern": "curriculum/tex-inputs.json",
+      "reason": "Deterministic generated TeX source inventory. Refresh with scripts/compile_lesson_tex.py; preserve its compiler input byte contract."
+    },
+    {
       "pattern": "lesson-pages/*",
       "reason": "Generated HTML readers. Rebuild with scripts/build_lesson_readers.py after formatting maintained source."
     },

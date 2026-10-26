@@ -1,0 +1,10 @@
+// dax-003 learner draft: A star schema and the path of a filter
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Trace a dimension selection through an active relationship to the exact contributing fact rows.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Draw the two paths that meet at Sales.
+
+DEFINE MEASURE Sales[DraftRevenue] = BLANK()
+EVALUATE
+SUMMARIZECOLUMNS ( Product[Category], "Revenue", [DraftRevenue] )

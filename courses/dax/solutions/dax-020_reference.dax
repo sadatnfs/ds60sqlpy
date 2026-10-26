@@ -1,0 +1,15 @@
+// dax-020: REMOVEFILTERS and the exact denominator population
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-020-a: Share within the retained category
+// Context: Paper and Blue selected; remove only Color in the denominator.
+EVALUATE CALCULATETABLE ( ROW ( "Numerator", [NetRevenue], "CategoryDenominator", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product[Color] ) ), "Share", DIVIDE ( [NetRevenue], CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product[Color] ) ) ) ), Product[Category] = "Paper", Product[Color] = "Blue" )
+
+// dax-020-b: All products within North
+// Context: Paper, Blue and North selected; remove Product filters only in the denominator.
+EVALUATE CALCULATETABLE ( ROW ( "Numerator", [NetRevenue], "RegionalDenominator", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product ) ), "Share", DIVIDE ( [NetRevenue], CALCULATE ( [NetRevenue], REMOVEFILTERS ( Product ) ) ) ), Product[Category] = "Paper", Product[Color] = "Blue", Customer[Region] = "North" )

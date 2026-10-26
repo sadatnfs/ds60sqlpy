@@ -20,7 +20,7 @@ The surviving probability is one, so output is \([2,0]\) under the defined valid
 
 ## Exercise 4
 
-Their exponential weights used the old reference maximum. Multiply old sums by exp(old_max-new_max) before combining new terms.
+Their exponential weights used the old reference maximum. Multiply old sums by \(\exp(m_{\mathrm{old}}-m_{\mathrm{new}})\) before combining new terms.
 
 ## Exercise 5
 

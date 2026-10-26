@@ -1,0 +1,15 @@
+// dax-057: Dynamic RLS needs a complete identity and mapping contract
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-057-a: A mapped synthetic principal
+// Context: Assume the declared dynamic Customer policy is enforced for north.learner@example.test in a role-restricted Viewer context.
+EVALUATE ROW ( "VisibleCustomers", COUNTROWS ( Customer ), "VisibleRevenue", [NetRevenue] )
+
+// dax-057-b: An unmapped principal is denied by the declared policy
+// Context: Assume the same enforced policy for unmapped.learner@example.test; its allowed-region set is empty.
+EVALUATE ROW ( "VisibleCustomers", COUNTROWS ( Customer ), "VisibleRevenue", [NetRevenue], "HasVisibleRows", COUNTROWS ( Customer ) > 0 )

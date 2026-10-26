@@ -47,7 +47,8 @@ book requires a supported loader, not merely a file named `manifest.json`.
 
 Use small deterministic offline fixtures. Label optional downloads, hardware,
 services and separately prepared projects. Use explicit LaTeX delimiters and
-accurate code-fence languages. Preserve literal source and copy/paste behavior.
+accurate code-fence languages. Compile lesson TeX before rebuilding readers.
+Use professional factual copy with no motivational slogans. Preserve literal source and copy/paste behavior.
 Write original, self-contained prose; a tutor cannot compensate for an empty
 chapter or repeated generic filler.
 
@@ -91,6 +92,28 @@ launcher and image catalog, formatter/linter, source packaging and the ordinary
 CI matrix. Optional hardware or cluster profiles need separate real-capability
 gates. Read only the applicable details in [integration](references/integration.md).
 
+## Reuse the scientific and offline patterns
+
+Use JAX's dedicated CPU profile for transformations and state-explicit numerical
+work; label optional accelerators and multi-host execution separately. R has a
+prepared Rscript profile, explicit script plotting, S3/S4/R6/S7 examples and a
+separate compatible formatting tool image. Bayesian examples target their pinned
+PyMC/ArviZ data-object API. Do not combine incompatible framework environments
+merely because their lessons all use Python.
+
+Additional statistics tutorials use the validated tutorials/index.json contract;
+the original outline and chapter identities remain stable. Offline DAX uses
+editable drafts and source/model-bound hand-derived references, with Run rejected
+in both service and job layers. A new offline subject needs an explicit supported
+contract, not a pretend executable profile.
+
+For a new language, update source-suffix admission and readable labels as well as
+profile/language admission, renderer, formatter, fixed execution, image catalog
+and CI cases. Use the paired data-visualization route for language variants that
+share an analytical question. Captured plots need bounded validated data,
+accessible descriptions/tables and persistence tests. Never render arbitrary
+saved HTML into the classroom origin.
+
 ## Verify the result and hand it off
 
 Use the subject's authoring checks and relevant reference programs. Format code
@@ -105,7 +128,10 @@ source isolation and saved-result readback after container replacement as
 applicable. Use explicitly disposable state. Read-only MCP discovery should
 expose the same IDs and prerequisites. Follow [validation](../../../docs/validation.md)
 for the relevant gates, including grouped parallel pytest for implementation
-changes. A pure prose correction does not require unrelated GPU or cluster runs.
+changes. The classroom admits one active module job across all profiles; use
+separate disposable projects for parallel runtime qualification. Keep launcher
+profile/service pairs aligned with the image catalog, including the optional GPU
+profiles. A pure prose correction does not require unrelated GPU or cluster runs.
 
 Report maintained sources, registered IDs, actual checks and remaining hardware
 or platform limits. Separate parsed source, CPU models, compiled artifacts,

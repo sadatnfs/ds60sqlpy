@@ -1,0 +1,657 @@
+{
+  "schema_version": 1,
+  "id": "jax",
+  "title": "JAX: numerical functions to independent scientific work",
+  "summary": "An offline CPU route through functional state, transformations, differentiation, training, scientific computing and measured systems tradeoffs, with explicit optional hardware boundaries.",
+  "lessons": [
+    {
+      "id": "jax-001",
+      "title": "From a Python function to a numerical contract",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "function",
+        "prediction unit",
+        "shape",
+        "independent oracle"
+      ],
+      "outcome": "Specify a small computation and distinguish its numerical result from a model-quality claim.",
+      "lab": "Evaluate the zero-weight predictor on the three observations.",
+      "verification": "Loss 56/3, predictions [0,0,0]."
+    },
+    {
+      "id": "jax-002",
+      "title": "Array axes, broadcasting and functional updates",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-001"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "axis",
+        "broadcasting",
+        "functional update",
+        "index contract"
+      ],
+      "outcome": "Control the shape and meaning of every reduction and update in a small array calculation.",
+      "lab": "Calculate row and column totals of [[0,1,2],[3,4,5]].",
+      "verification": "Rows [3,12]; columns [3,5,7]."
+    },
+    {
+      "id": "jax-003",
+      "title": "Dtypes, precision and numerical error contracts",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-002"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "dtype",
+        "rounding",
+        "X64",
+        "absolute and relative error"
+      ],
+      "outcome": "Choose a precision policy and distinguish floating-point error from a wrong mathematical operation.",
+      "lab": "Add one to 1e8 and subtract 1e8 using explicit float32, then float64.",
+      "verification": "Float32 gives 0; float64 gives 1."
+    },
+    {
+      "id": "jax-004",
+      "title": "Pure functions and explicit state transitions",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-003"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "purity",
+        "state",
+        "transition",
+        "replay"
+      ],
+      "outcome": "Represent a changing computation as inputs and returned state that can be replayed and inspected.",
+      "lab": "Apply observation 3 to the empty state and inspect both states.",
+      "verification": "Old (0,0); new (3,1), mean 3."
+    },
+    {
+      "id": "jax-005",
+      "title": "Typed random keys and independent streams",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-004"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "PRNG key",
+        "split",
+        "fold_in",
+        "randomness contract"
+      ],
+      "outcome": "Thread random keys explicitly and detect accidental reuse without claiming statistical independence from one sample.",
+      "lab": "Draw twice from the same typed key with the same shape.",
+      "verification": "Arrays agree exactly in this pinned process."
+    },
+    {
+      "id": "jax-006",
+      "title": "Pytrees organize parameters and state",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-005"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "pytree",
+        "leaf",
+        "tree structure",
+        "parameter update"
+      ],
+      "outcome": "Inspect, transform and reconstruct structured numerical state while preserving leaf identities and shapes.",
+      "lab": "Subtract rate 0.1 times all-one gradient leaves.",
+      "verification": "Every numerical parameter decreases by 0.1; old params remain unchanged."
+    },
+    {
+      "id": "jax-007",
+      "title": "Differentiate a scalar loss and audit one update",
+      "level": "beginner",
+      "minutes": 100,
+      "prerequisites": [
+        "jax-006"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "gradient",
+        "scalar objective",
+        "value_and_grad",
+        "stop_gradient"
+      ],
+      "outcome": "Derive a scalar gradient, compare it independently, and separate differentiation from parameter updating.",
+      "lab": "Calculate loss and gradient at zero, apply rate 0.1, then recalculate loss.",
+      "verification": "56/3, -56/3, 28/15 and 56/675 respectively."
+    },
+    {
+      "id": "jax-008",
+      "title": "JVPs and VJPs are shaped linear maps",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-007"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "Jacobian",
+        "tangent",
+        "cotangent",
+        "pushforward",
+        "pullback"
+      ],
+      "outcome": "Compute directional derivatives and pullbacks with explicit input/output shapes and an independent duality check.",
+      "lab": "Compute a JVP at [2,0] in direction [3,4].",
+      "verification": "Primal [4,0,0]; tangent [12,8,4]."
+    },
+    {
+      "id": "jax-009",
+      "title": "Jacobians, curvature and matrix-free products",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-008"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "Jacobian",
+        "Hessian",
+        "Hessian-vector product",
+        "curvature"
+      ],
+      "outcome": "Inspect second-order structure and calculate a Hessian-vector product without requiring a dense Hessian.",
+      "lab": "Calculate the Hessian with jacfwd applied to grad.",
+      "verification": "[[2,1],[1,4]], symmetric."
+    },
+    {
+      "id": "jax-010",
+      "title": "JIT tracing, static inputs and compilation reuse",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-009"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "tracer",
+        "static argument",
+        "specialization",
+        "compilation cache"
+      ],
+      "outcome": "Predict which Python behavior happens during tracing and choose a valid compilation boundary.",
+      "lab": "Compile repeat_add with n static and compare n=3 and n=4 for x=2.",
+      "verification": "6 and 8."
+    },
+    {
+      "id": "jax-011",
+      "title": "Structured control flow and fixed-shape carries",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-010"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "cond",
+        "scan",
+        "while_loop",
+        "loop carry",
+        "dynamic shape"
+      ],
+      "outcome": "Express dynamic decisions and repeated state transitions in forms compatible with the intended JAX transformations.",
+      "lab": "Evaluate the recurrence on three values equal to two.",
+      "verification": "Final 3.5, history [2,3,3.5]."
+    },
+    {
+      "id": "jax-012",
+      "title": "Vectorization, per-example gradients and axis meaning",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-011"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "vmap",
+        "mapped axis",
+        "shared argument",
+        "per-example gradient"
+      ],
+      "outcome": "Vectorize a scalar example computation while preserving shared parameters, sample identity and the chosen gradient reduction.",
+      "lab": "Map predict_one over feature rows with weight [2,-1] shared.",
+      "verification": "Predictions [0,2]."
+    },
+    {
+      "id": "jax-013",
+      "title": "Stable categorical losses and active-target masks",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-012"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "logits",
+        "log-softmax",
+        "target mask",
+        "active denominator"
+      ],
+      "outcome": "Compute a stable masked categorical objective and verify its value and direct logit gradients.",
+      "lab": "Admit the fixture and compute its mean loss.",
+      "verification": "log(3), with three active targets."
+    },
+    {
+      "id": "jax-014",
+      "title": "Optimizer updates are explicit state transitions",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-013"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "SGD",
+        "momentum",
+        "Adam",
+        "optimizer state",
+        "bias correction"
+      ],
+      "outcome": "Implement and audit scalar optimizer transitions while distinguishing parameters from the state determining their next update.",
+      "lab": "Apply gradient two at weight zero with velocity zero, then velocity one.",
+      "verification": "Weights -0.2 and -0.29."
+    },
+    {
+      "id": "jax-015",
+      "title": "Train a small neural network with visible parameters",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-014"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "MLP",
+        "initialization",
+        "training loop",
+        "held-out evaluation"
+      ],
+      "outcome": "Assemble a bounded neural training experiment and distinguish optimization progress from evidence about new observations.",
+      "lab": "Initialize the model and inspect parameter count and output shape.",
+      "verification": "13 parameters; predictions shape (5,1), all finite."
+    },
+    {
+      "id": "jax-016",
+      "title": "Dropout, evaluation and stochastic objective contracts",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-015"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "dropout",
+        "training mode",
+        "evaluation",
+        "random-key ownership"
+      ],
+      "outcome": "Implement an explicit stochastic training transform and show why evaluation and replay require a declared mode/key policy.",
+      "lab": "Apply training dropout with keep probability one half to ones.",
+      "verification": "Every output is either zero or two."
+    },
+    {
+      "id": "jax-017",
+      "title": "Continuation requires parameters, history and keys",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-016"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "checkpoint",
+        "optimizer history",
+        "random state",
+        "next-step parity"
+      ],
+      "outcome": "Define and verify a bounded continuation contract that preserves every state component used by the next update.",
+      "lab": "Save the two-step state to an owned temporary file, load it and compare the next update with uninterrupted continuation.",
+      "verification": "Matching next weight, velocity, key data and step count three."
+    },
+    {
+      "id": "jax-018",
+      "title": "Debug the first broken transformation invariant",
+      "level": "intermediate",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-017"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "tracer error",
+        "debug print",
+        "checkify",
+        "finite intermediates"
+      ],
+      "outcome": "Distinguish host conversion, dynamic shape and numerical-domain failures using bounded diagnostics.",
+      "lab": "Evaluate the piecewise log extension and its summed gradient on [-1,0,2].",
+      "verification": "Values [0,0,log(2)] and finite gradient [0,0,0.5]."
+    },
+    {
+      "id": "jax-019",
+      "title": "Linear solves, residuals and sensitivity",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-018"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "linear solve",
+        "conditioning",
+        "residual",
+        "implicit sensitivity"
+      ],
+      "outcome": "Solve and differentiate a small linear system while checking its numerical and mathematical assumptions independently.",
+      "lab": "Solve the two-by-two system and reconstruct its right-hand side.",
+      "verification": "Solution [2,3]; residual zero within tolerance."
+    },
+    {
+      "id": "jax-020",
+      "title": "Differentiate a simulation and measure discretization error",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-019"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "Euler method",
+        "scan",
+        "discretization",
+        "parameter sensitivity"
+      ],
+      "outcome": "Build a differentiable fixed-step simulation and distinguish the derivative of the discretized algorithm from the continuous model.",
+      "lab": "Simulate rate one for ten steps over horizon one.",
+      "verification": "0.9^10, approximately 0.34867844."
+    },
+    {
+      "id": "jax-021",
+      "title": "Monte Carlo estimates and pathwise sensitivity",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-020"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "Monte Carlo",
+        "reparameterization",
+        "common random numbers",
+        "sampling error"
+      ],
+      "outcome": "Differentiate a fixed-sample reparameterized objective and separate that derivative from population expectations and Monte Carlo uncertainty.",
+      "lab": "Calculate the sample objective and both parameter derivatives on noise [-1,1].",
+      "verification": "Objective 13, mean derivative 4, scale derivative 6."
+    },
+    {
+      "id": "jax-022",
+      "title": "Custom JVP and VJP rule validation",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-021"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "custom_jvp",
+        "custom_vjp",
+        "tangent linearity",
+        "saved residual"
+      ],
+      "outcome": "Define and independently validate custom derivative rules while respecting their transformation limits.",
+      "lab": "Evaluate softplus at zero and its JVP with tangent three.",
+      "verification": "Value log(2), tangent 1.5."
+    },
+    {
+      "id": "jax-023",
+      "title": "Implicit differentiation depends on the solved equation",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-022"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "implicit derivative",
+        "custom_linear_solve",
+        "primal residual",
+        "transpose solve"
+      ],
+      "outcome": "Validate an implicit linear-solve derivative by checking both the defining equation and its sensitivity assumptions.",
+      "lab": "Evaluate the implicit solution at theta zero and multiply it by the diagonal.",
+      "verification": "Solution [1,2], reconstructed right-hand side [2,6]."
+    },
+    {
+      "id": "jax-024",
+      "title": "Inspect shapes, jaxpr and compilation stages",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-023"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "eval_shape",
+        "jaxpr",
+        "lowering",
+        "compiled signature"
+      ],
+      "outcome": "Inspect distinct staging artifacts without treating their existence as a proof of portability or performance.",
+      "lab": "Evaluate the abstract shape of gram on a (3,2) float64 input.",
+      "verification": "Shape (2,2), dtype float64."
+    },
+    {
+      "id": "jax-025",
+      "title": "Benchmark completed work and separate its costs",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-024"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "asynchronous dispatch",
+        "synchronization",
+        "cold call",
+        "warm call"
+      ],
+      "outcome": "Produce a bounded timing record that distinguishes compilation, warm execution and data placement without asserting a universal speedup.",
+      "lab": "Time one first invocation and three later invocations of the same fresh jitted product.",
+      "verification": "Correct products and two labeled timing groups; no required speed ordering."
+    },
+    {
+      "id": "jax-026",
+      "title": "Recomputation and donation change resource ownership",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-025"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "checkpoint",
+        "rematerialization",
+        "buffer donation",
+        "memory evidence"
+      ],
+      "outcome": "Preserve numerical behavior while reasoning about recomputation and the ownership contract of donated buffers.",
+      "lab": "Compare cubic_sum and its checkpointed form on [1,2,3].",
+      "verification": "Value 36 and gradient [3,12,27] for both."
+    },
+    {
+      "id": "jax-027",
+      "title": "Array placement and sharding contracts on one CPU",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-026"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "Mesh",
+        "NamedSharding",
+        "PartitionSpec",
+        "addressable shard"
+      ],
+      "outcome": "Inspect real array placement and sharding metadata while keeping a single-device lesson distinct from multi-device performance.",
+      "lab": "Put the host table into the declared row layout and inspect its addressable shard.",
+      "verification": "Global shape (3,2), one CPU shard with the original values."
+    },
+    {
+      "id": "jax-028",
+      "title": "Collective mathematics and unequal shard counts",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-027"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "named mapped axis",
+        "psum",
+        "global mean",
+        "gradient aggregation"
+      ],
+      "outcome": "Validate collective reduction semantics on a named mapped CPU axis without confusing that model with physical distributed execution.",
+      "lab": "Use the named mapped reduction on sums [2,12] and counts [1,3].",
+      "verification": "Both logical participants receive 3.5."
+    },
+    {
+      "id": "jax-029",
+      "title": "Port attention and low-rank updates by their equations",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-028"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "scaled attention",
+        "causal mask",
+        "LoRA",
+        "framework parity"
+      ],
+      "outcome": "Reconstruct two small language-model mechanisms in JAX and compare values and gradients with independent shape-aware oracles.",
+      "lab": "Admit the zero-score attention fixture and calculate its outputs.",
+      "verification": "[[2,0],[1,1],[8/3,8/3]]."
+    },
+    {
+      "id": "jax-030",
+      "title": "Capstone: a checked differentiable numerical component",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-029"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "admission contract",
+        "masked objective",
+        "ridge solve",
+        "independent validation"
+      ],
+      "outcome": "Deliver a small reusable numerical component with separate admission, mathematical, transformation and interpretation evidence.",
+      "lab": "Admit and solve the unpenalized fixture, then evaluate its gradient.",
+      "verification": "Weights [1,2], zero loss and zero gradient within tolerance."
+    },
+    {
+      "id": "jax-031",
+      "title": "Capstone: a reproducible training comparison",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-030"
+      ],
+      "runtime": "jax-cpu",
+      "concepts": [
+        "baseline",
+        "held-out task",
+        "fixed budget",
+        "restart state",
+        "model comparison"
+      ],
+      "outcome": "Complete a small training study whose data, optimization, comparison and limitations can be independently reconstructed.",
+      "lab": "Train from zero for 400 updates and compare with the known coefficients.",
+      "verification": "Coefficients within 0.01 of [1,2,-0.5], with reduced training loss."
+    },
+    {
+      "id": "jax-032",
+      "title": "Optional GPU and TPU execution qualification",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-031"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "backend admission",
+        "device readback",
+        "allocator",
+        "hardware evidence"
+      ],
+      "outcome": "Design and assess a device-specific qualification record without treating CPU or compiler evidence as accelerator acceptance.",
+      "lab": "A hypothetical record says imports succeeded and one GPU was listed, but contains no allocation or output check. Decide what it establishes.",
+      "verification": "Package/device discovery only; execution correctness remains unqualified."
+    },
+    {
+      "id": "jax-033",
+      "title": "Optional multi-host arrays and collective lifecycle",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-032"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "distributed initialization",
+        "global array",
+        "addressability",
+        "collective order"
+      ],
+      "outcome": "Specify a multi-process numerical and lifecycle contract with explicit ownership, data placement and failure evidence.",
+      "lab": "Two hypothetical processes report loss sums 6 and 10 with counts 3 and 1. Define the global mean and required collective order.",
+      "verification": "Global mean four, with both participants reducing sum and count in the same order."
+    },
+    {
+      "id": "jax-034",
+      "title": "Optional kernels, FFI and an independent engineering review",
+      "level": "advanced",
+      "minutes": 140,
+      "prerequisites": [
+        "jax-033"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "custom kernel",
+        "FFI",
+        "layout",
+        "derivative rule",
+        "evidence review"
+      ],
+      "outcome": "Decide when a lower-level extension is justified and specify the numerical, transformation and hardware evidence it must produce.",
+      "lab": "A hypothetical affine GPU operator returns correct values for contiguous float32 inputs but has no backward or stride tests. Assess its status.",
+      "verification": "One narrow forward case only; derivative, layout, dtype and broader execution remain unqualified."
+    }
+  ]
+}

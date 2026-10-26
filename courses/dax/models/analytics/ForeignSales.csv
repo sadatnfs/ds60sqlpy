@@ -1,0 +1,4 @@
+ForeignID,SaleDate,Currency,LocalAmount
+F1,2025-01-02,USD,100
+F2,2025-01-02,EUR,100
+F3,2025-02-03,EUR,50

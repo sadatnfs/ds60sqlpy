@@ -1,0 +1,10 @@
+// dax-039 learner draft: Inventory balances are semi-additive
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Choose a time aggregation that matches a balance rather than summing repeated states.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a staleness acceptance rule for carried balances.
+
+EVALUATE
+VAR AsOfDate = DATE ( 2025, 2, 15 )
+RETURN ROW ( "As of", AsOfDate, "Closing units", BLANK(), "Snapshot age days", BLANK() )

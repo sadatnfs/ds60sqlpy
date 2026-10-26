@@ -1,0 +1,11 @@
+// dax-028 learner draft: Set operations, duplicates and argument order
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish membership operations from bag concatenation and preserve a deliberate key population.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write an eligible-product union that should contain each key once.
+
+EVALUATE
+VAR FirstSet = { 10, 20 }
+VAR SecondSet = { 20, 30 }
+RETURN ROW ( "Union rows", BLANK(), "Intersection rows", BLANK() )

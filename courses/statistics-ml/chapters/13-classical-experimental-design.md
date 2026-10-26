@@ -174,7 +174,7 @@ Prespecify estimands, metrics, exclusions, sample size, stopping and multiplicit
 
 ### Case study: optimize a process without confounding factors
 
-A manufacturing team can change temperature and pressure, each at two settings. Changing temperature first at low pressure, then pressure at high temperature, confounds the pressure comparison with the changed temperature setting. A full two-by-two factorial measures all combinations, allowing a direct interaction contrast: the temperature effect at high pressure minus its effect at low pressure.
+A manufacturing team can change temperature and pressure, each at two settings. Changing temperature first at low pressure, then pressure at high temperature, can estimate two conditional effects when each comparison holds the other factor fixed. It leaves the low-temperature, high-pressure corner unobserved, so it cannot identify the interaction or an effect averaged across both settings without additional assumptions. A full two-by-two factorial measures all combinations, allowing a direct interaction contrast: the temperature effect at high pressure minus its effect at low pressure.
 
 Suppose the four means at (low,low), (high,low), (low,high), (high,high) are 10,12,13,23. Temperature adds two at low pressure but ten at high pressure, so the interaction contrast is eight. Averaging temperature over equal pressure weights gives a main effect six. A one-factor-at-a-time conclusion that temperature adds two would miss the operating region with the largest benefit. Whether that region is safe and feasible remains an engineering constraint, not a statistical property of the fitted surface.
 
@@ -288,6 +288,10 @@ if __name__ == "__main__":
 - [NIST choosing an experimental design](https://www.itl.nist.gov/div898/handbook/pri/section3/pri3.htm).
 
 - [NIST response-surface design comparison](https://itl.nist.gov/div898/handbook/pri/section3/pri3363.htm).
+
+## Connected worked tutorial
+
+[Replicated factorial analysis](../tutorials/experimentation/09-factorial-analysis.md). Carry interactions through residual degrees of freedom, contrast intervals and alias identification.
 
 ## Reading connections
 

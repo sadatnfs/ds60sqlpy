@@ -1,0 +1,98 @@
+{
+  "id": "r-040",
+  "title": "An auditable analytical pipeline capstone",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-031", "r-032", "r-033", "r-035", "r-036"],
+  "concepts": ["Analysis population", "Metric contract", "Audit ledger", "Interpretation boundary"],
+  "outcome": "Deliver a self-contained analysis that validates inputs, joins metadata, summarizes groups and reports a bounded conclusion.",
+  "mechanism": "An analytical deliverable needs more than a final chart or scalar. A reviewer should be able to identify the input records, their grain, the admission rules, the grouping definition and the numerical meaning of each output. The capstone combines the earlier contracts into one small original pipeline rather than introducing an unrelated external dataset.\n\nThe synthetic input contains one measurement per record ID and a segment key. A validated dimension supplies segment labels. The pipeline rejects invalid keys or negative/nonfinite measurements according to its declared policy, then reports admitted counts and group sums/means. Keeping this ledger prevents an attractive average from concealing dropped records or a duplicated join.\n\nA summary should retain enough state to reconcile. Group observed counts sum to the admitted count, and group sums sum to the admitted amount. The overall observation mean is reconstructed from those totals, not by averaging group means indiscriminately. Sort the final report by a stable group label so a repeated run can compare its structure directly.\n\nThe numerical result is descriptive for this synthetic admitted population. It does not establish a treatment effect, a representative survey or a predictive model. The next chapters develop exploratory analysis, uncertainty and modeling assumptions. A good handoff states those limits alongside the actual checked outputs, with source and environment metadata sufficient to reproduce the computation.",
+  "vocabulary": [
+    {
+      "term": "Analysis population",
+      "definition": "The explicitly admitted units used by a reported metric."
+    },
+    {
+      "term": "Metric contract",
+      "definition": "A definition of numerator, denominator, units and missingness policy."
+    },
+    {
+      "term": "Audit ledger",
+      "definition": "Counts and checks explaining how inputs became reported outputs."
+    },
+    {
+      "term": "Interpretation boundary",
+      "definition": "A statement of what the computation does and does not establish."
+    }
+  ],
+  "anatomy": "Separate validate, enrich and summarize functions with named inputs/outputs. Each stage checks its required invariants and returns data rather than parsing console text. The top-level script prints a report and a small audit ledger after assertions pass.",
+  "worked_examples": [
+    {
+      "title": "Validate and enrich a small measurement table",
+      "code": "raw <- data.frame(id = c(\"R1\", \"R2\", \"R3\", \"R4\"), segment = c(\"A\", \"B\", \"A\", \"B\"), amount = c(10, 20, NA_real_, 40))\ndimension <- data.frame(segment = c(\"A\", \"B\"), label = c(\"Alpha\", \"Beta\"))\nstopifnot(!anyDuplicated(raw$id), !anyDuplicated(dimension$segment))\nkeep <- is.finite(raw$amount) & raw$amount >= 0\nadmitted <- raw[keep, , drop = FALSE]\nindex <- match(admitted$segment, dimension$segment)\nstopifnot(!anyNA(index))\nadmitted$label <- dimension$label[index]\nstopifnot(nrow(admitted) == 3L, sum(admitted$amount) == 70)\nprint(admitted)\n",
+      "explanation": "The unknown measurement is excluded under a finite-nonnegative policy, while every admitted segment has exactly one dimension match.",
+      "expected": "Three admitted records, total 70."
+    },
+    {
+      "title": "Reconcile group and overall summaries",
+      "code": "data <- data.frame(label = c(\"Alpha\", \"Beta\", \"Beta\"), amount = c(10, 20, 40))\ngroups <- split(data$amount, data$label)\ncount <- vapply(groups, length, integer(1))\ntotal <- vapply(groups, sum, numeric(1))\nreport <- data.frame(label = as.character(names(groups)), count = unname(count), total = unname(total), mean = unname(total / count))\nstopifnot(sum(report$count) == nrow(data), sum(report$total) == sum(data$amount))\nstopifnot(isTRUE(all.equal(sum(report$total) / sum(report$count), 70 / 3)))\nprint(report)\n",
+      "explanation": "Alpha has one admitted record and Beta has two. The final observation mean uses all three rather than equal weighting of the two group means.",
+      "expected": "Alpha count 1, total 10, mean 10; Beta count 2, total 60, mean 30."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Derive the overall admitted mean.",
+      "hint": "Use total 70 and count 3.",
+      "answer": "It is 70/3.",
+      "expected": "It is 70/3."
+    },
+    {
+      "prompt": "Change R3 to a valid amount 30.",
+      "hint": "The admission population expands.",
+      "answer": "Count becomes 4, total 100 and overall mean 25.",
+      "expected": "Count becomes 4, total 100 and overall mean 25."
+    },
+    {
+      "prompt": "Assemble validate, enrich, summarize into one callable pipeline.",
+      "hint": "Return both report and audit fields.",
+      "answer": "The stages preserve unique IDs and reconcile admitted/group totals.",
+      "expected": "The stages preserve unique IDs and reconcile admitted/group totals."
+    },
+    {
+      "prompt": "Diagnose a duplicated segment dimension.",
+      "hint": "It violates the many-to-one enrichment contract.",
+      "answer": "Reject it before any join can multiply records.",
+      "expected": "Reject it before any join can multiply records."
+    },
+    {
+      "prompt": "Handle a batch with no admitted records.",
+      "hint": "Choose a report schema and missing overall mean.",
+      "answer": "Return an empty group report, count 0 and an explicit missing mean.",
+      "expected": "Return an empty group report, count 0 and an explicit missing mean."
+    },
+    {
+      "prompt": "Write a bounded analyst handoff.",
+      "hint": "Separate checked descriptive output from untested scientific claims.",
+      "answer": "State source, grain, admission, join policy, metric definitions, actual checks and limits on generalization.",
+      "expected": "State source, grain, admission, join policy, metric definitions, actual checks and limits on generalization."
+    }
+  ],
+  "starter": "# r-040: An auditable analytical pipeline capstone\n# Complete the six guide tasks using these local inputs.\nraw <- data.frame(id = c(\"R1\", \"R2\", \"R3\", \"R4\"), segment = c(\"A\", \"B\", \"A\", \"B\"), amount = c(10, 20, NA_real_, 40))\ndimension <- data.frame(segment = c(\"A\", \"B\"), label = c(\"Alpha\", \"Beta\"))\n# TODO: build a report with admission and reconciliation evidence.\nprint(raw)\n",
+  "reference": "analyze <- function(raw, dimension) {\n  stopifnot(is.data.frame(raw), is.data.frame(dimension))\n  stopifnot(all(c(\"id\", \"segment\", \"amount\") %in% names(raw)), all(c(\"segment\", \"label\") %in% names(dimension)))\n  stopifnot(is.character(raw$id), is.character(raw$segment), is.numeric(raw$amount), is.character(dimension$segment), is.character(dimension$label))\n  stopifnot(!anyNA(raw$id), !anyDuplicated(raw$id), !anyNA(dimension$segment), !anyDuplicated(dimension$segment))\n  keep <- is.finite(raw$amount) & raw$amount >= 0\n  data <- raw[keep, , drop = FALSE]\n  index <- match(data$segment, dimension$segment)\n  stopifnot(!anyNA(index))\n  data$label <- dimension$label[index]\n  groups <- split(data$amount, data$label)\n  count <- vapply(groups, length, integer(1)); total <- vapply(groups, sum, numeric(1))\n  report <- data.frame(label = as.character(names(groups)), count = unname(count), total = unname(total), mean = unname(total / count))\n  stopifnot(sum(report$count) == nrow(data), sum(report$total) == sum(data$amount))\n  list(report = report, input = nrow(raw), admitted = nrow(data), rejected = sum(!keep), overall = if (nrow(data)) sum(data$amount) / nrow(data) else NA_real_)\n}\nraw <- data.frame(id = c(\"R1\", \"R2\", \"R3\", \"R4\"), segment = c(\"A\", \"B\", \"A\", \"B\"), amount = c(10, 20, NA_real_, 40))\ndimension <- data.frame(segment = c(\"A\", \"B\"), label = c(\"Alpha\", \"Beta\"))\nresult <- analyze(raw, dimension)\nstopifnot(result$admitted == 3L, result$rejected == 1L, isTRUE(all.equal(result$overall, 70 / 3)))\nchanged <- raw; changed$amount[[3]] <- 30\nstopifnot(analyze(changed, dimension)$overall == 25)\nbad <- tryCatch(\n  {\n    analyze(raw, rbind(dimension, dimension[1, ])); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad)\nempty <- raw; empty$amount[] <- NA_real_\nempty_result <- analyze(empty, dimension)\nstopifnot(empty_result$admitted == 0L, is.na(empty_result$overall), nrow(empty_result$report) == 0L)\nstopifnot(identical(names(empty_result$report), c(\"label\", \"count\", \"total\", \"mean\")))\nwrong_type <- raw; wrong_type$amount <- as.character(wrong_type$amount)\nrejected_type <- tryCatch(\n  {\n    analyze(wrong_type, dimension); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(rejected_type)\ncat(\"r-040 reference checks passed\\n\")\n",
+  "solution_explanation": "The unknown measurement is excluded under a finite-nonnegative policy, while every admitted segment has exactly one dimension match.\n\nAlpha has one admitted record and Beta has two. The final observation mean uses all three rather than equal weighting of the two group means.",
+  "sources": [
+    {
+      "title": "R matching",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/match.html"
+    },
+    {
+      "title": "R split",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/split.html"
+    },
+    {
+      "title": "R data frames",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html"
+    }
+  ]
+}

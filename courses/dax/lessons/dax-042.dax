@@ -1,0 +1,9 @@
+// dax-042 learner draft: Currency conversion belongs at the rate's grain
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Convert compatible transactions before aggregation and diagnose a misleading latest-rate shortcut.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a rate-coverage quality rule.
+
+EVALUATE
+ROW ( "Local transactions", BLANK(), "Converted USD", BLANK(), "Missing rates", BLANK() )

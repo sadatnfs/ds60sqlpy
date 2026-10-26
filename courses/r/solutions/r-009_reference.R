@@ -1,0 +1,10 @@
+# r-009: complete reference for the declared synthetic inputs.
+record <- list(id = "A", values = c(2, 4))
+stopifnot(is.list(record[1]), record[["values"]][[1]] == 2)
+stopifnot(all(c("id", "values") %in% names(record)))
+stopifnot(is.character(record$id), length(record$id) == 1, is.numeric(record$values))
+stopifnot(mean(record[["values"]]) == 3)
+record["note"] <- list(NULL)
+stopifnot("note" %in% names(record), is.null(record$note))
+stopifnot(is.character(unlist(record[c("id", "values")])))
+cat("r-009 reference checks passed\n")

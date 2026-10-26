@@ -1,0 +1,16 @@
+// dax-010: Additive sums and distinct populations
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+
+// dax-010-a: Whole-model populations
+// Context: All rows; complete nonblank order/customer fact keys.
+EVALUATE ROW ( "Revenue", [NetRevenue], "Lines", COUNTROWS ( Sales ), "Orders", [OrderCount], "CustomersWithSales", DISTINCTCOUNT ( Sales[CustomerKey] ) )
+
+// dax-010-b: Paper's overlapping order population
+// Context: Paper products 1 and 2; all years and customers otherwise allowed.
+EVALUATE CALCULATETABLE ( ROW ( "Revenue", [NetRevenue], "Lines", COUNTROWS ( Sales ), "Orders", [OrderCount], "CustomersWithSales", DISTINCTCOUNT ( Sales[CustomerKey] ) ), Product[Category] = "Paper" )

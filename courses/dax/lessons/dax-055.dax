@@ -1,0 +1,9 @@
+// dax-055 learner draft: Storage modes, freshness and capability boundaries
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Separate a metric's definition from data freshness, storage mode and external capability.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a storage-mode capability review.
+
+EVALUATE
+ROW ( "Fixed snapshot", BLANK(), "Hypothetical later source", BLANK() )

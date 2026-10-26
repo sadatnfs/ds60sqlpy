@@ -1,0 +1,98 @@
+{
+  "id": "r-052",
+  "title": "Multiple panels, uncertainty and scale contracts",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-051", "r-042"],
+  "concepts": ["multi-panel layout", "confidence interval", "axis scale", "visual comparison"],
+  "outcome": "Build a compact uncertainty display whose panels, interval target and axis choices support a valid comparison.",
+  "mechanism": "A statistical graphic should identify the quantity represented by each mark. A raw observation, a fitted mean and an uncertainty interval are different objects. Placing them in adjacent panels can help a reader see both the underlying measurements and the summary, provided their scales and labels remain explicit.\n\nAn interval must name its target and construction. A mean confidence interval is not a prediction interval for a future observation, and a standard-error bar is not automatically a 95 percent interval. The tiny group example computes Student t intervals from the actual within-group sample standard deviations and counts, retaining the assumptions rather than drawing arbitrary error bars.\n\nComparable panels need deliberate scales. Shared limits support direct visual comparisons of magnitudes. Free scales can reveal within-panel patterns but make equal-looking distances mean different numerical changes. Neither policy is universally correct; choose it according to the comparison and explain it in the caption.\n\nA logarithmic scale gives equal distance to equal ratios, while a linear scale gives equal distance to equal differences. Zero and negative values require special treatment on a logarithmic scale. A truncated baseline can be appropriate for some position-based plots but is especially misleading for bars whose lengths encode magnitude from zero.\n\nBase graphics par settings affect subsequent drawing. Save and restore settings within a plotting helper so a multi-panel layout does not unexpectedly alter a caller's later graph. This is separate from graphics-device ownership: restoring a layout does not close or publish a figure. The reference creates one two-panel page and leaves browser readability as a separate visual acceptance check.",
+  "vocabulary": [
+    {
+      "term": "Interval target",
+      "definition": "The quantity an interval procedure is intended to cover, such as a mean or future response."
+    },
+    {
+      "term": "Shared scale",
+      "definition": "The same numerical mapping used across panels for a stated comparison."
+    },
+    {
+      "term": "Logarithmic scale",
+      "definition": "A position scale where equal distances correspond to equal ratios."
+    },
+    {
+      "term": "Layout state",
+      "definition": "Graphics parameters such as mfrow and margins that influence subsequent drawing."
+    }
+  ],
+  "anatomy": "Compute each group's n, mean and sd/sqrt(n), then use qt with its degrees of freedom for the declared mean interval. Set par(mfrow=c(1,2)) inside a function with on.exit(par(old)). Plot raw values in one panel and means with segments/arrows in the other. Set common y limits when direct magnitude comparison is intended.",
+  "worked_examples": [
+    {
+      "title": "Show observations and interval summaries",
+      "code": "groups <- list(A = c(1, 2, 3, 4), B = c(2, 3, 6, 7))\nsummary <- do.call(rbind, lapply(names(groups), function(g) {\n  x <- groups[[g]]; se <- sd(x) / sqrt(length(x)); half <- qt(0.975, length(x) - 1) * se\n  data.frame(group = g, n = length(x), mean = mean(x), lower = mean(x) - half, upper = mean(x) + half)\n}))\ndraw <- function() {\n  old <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))\n  on.exit(par(old), add = TRUE)\n  limits <- range(c(unlist(groups), summary$lower, summary$upper))\n  plot(rep(1:2, each = 4), unlist(groups), xaxt = \"n\", ylim = limits, xlab = \"Group\", ylab = \"Observed value\", pch = 16, main = \"Raw observations\")\n  axis(1, at = 1:2, labels = names(groups))\n  plot(1:2, summary$mean, xaxt = \"n\", ylim = limits, xlab = \"Group\", ylab = \"Mean and t interval\", pch = 16, main = \"95% mean intervals\")\n  axis(1, at = 1:2, labels = summary$group)\n  arrows(1:2, summary$lower, 1:2, summary$upper, angle = 90, code = 3, length = 0.06)\n}\nstopifnot(identical(summary$n, c(4L, 4L)), identical(summary$mean, c(2.5, 4.5)))\ndraw()\n",
+      "explanation": "The first panel retains the observations, while the second identifies a model-dependent interval for each mean. Shared y limits keep the magnitude comparison consistent.",
+      "expected": "One two-panel graphic; group means 2.5/4.5 and explicitly constructed t intervals."
+    },
+    {
+      "title": "Equal ratios and equal differences",
+      "code": "values <- c(1, 10, 100)\nstopifnot(identical(diff(values), c(9, 90)))\nstopifnot(max(abs(diff(log10(values)) - c(1, 1))) < 1e-12)\nplot(values, rep(1, 3), log = \"x\", yaxt = \"n\", xlab = \"Positive quantity (log scale)\", ylab = \"\", pch = 16, main = \"Equal ratios have equal horizontal spacing\")\ntext(values, rep(1, 3), labels = values, pos = 3)\n",
+      "explanation": "The log scale changes the mapping from values to positions. The arithmetic checks establish equal log-space increments; visual label placement still needs inspection at the delivered size.",
+      "expected": "Linear differences 9/90; log10 differences 1/1."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Calculate both group means and standard errors from the raw observations.",
+      "hint": "Retain each sample count.",
+      "answer": "Means are 2.5 and 4.5; squared SEs are 5/12 and 17/12 respectively.",
+      "expected": "Correct means and SE denominators."
+    },
+    {
+      "prompt": "Construct the stated 95 percent t intervals for the means.",
+      "hint": "Use each group count minus one as degrees of freedom.",
+      "answer": "Each interval is mean plus/minus qt(0.975,3) times its SE, under the stated sampling/model assumptions.",
+      "expected": "Correctly labeled mean intervals."
+    },
+    {
+      "prompt": "Draw raw observations and summaries with shared y limits.",
+      "hint": "Calculate limits from both data and interval endpoints.",
+      "answer": "The two panels use one numerical y mapping, supporting direct magnitude comparison.",
+      "expected": "One two-panel page with shared limits."
+    },
+    {
+      "prompt": "Diagnose labeling mean plus/minus one SE as a 95 percent confidence interval.",
+      "hint": "Separate the standard error from a critical multiplier.",
+      "answer": "One SE is not the same procedure as the stated t interval; relabel or calculate the intended interval.",
+      "expected": "Interval target/construction repaired."
+    },
+    {
+      "prompt": "Explain why zero cannot be placed on an ordinary logarithmic axis.",
+      "hint": "Inspect log(0).",
+      "answer": "The logarithm is not finite at zero; choose a justified alternate representation or admission policy rather than silently dropping the observation.",
+      "expected": "Domain issue explicitly handled."
+    },
+    {
+      "prompt": "Restore a caller's layout after a plotting helper.",
+      "hint": "Save the old par settings and use scoped restoration.",
+      "answer": "The helper restores mfrow/margins and does not close an unrelated device.",
+      "expected": "Caller layout preserved."
+    }
+  ],
+  "starter": "# r-052: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\ngroups <- list(A = c(1, 2, 3, 4), B = c(2, 3, 6, 7))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Calculate both group means and standard errors from the raw observations.\n# TODO: Retain each sample count.\n# Exercise 2: Construct the stated 95 percent t intervals for the means.\n# TODO: Use each group count minus one as degrees of freedom.\n# Exercise 3: Draw raw observations and summaries with shared y limits.\n# TODO: Calculate limits from both data and interval endpoints.\n# Exercise 4: Diagnose labeling mean plus/minus one SE as a 95 percent confidence interval.\n# TODO: Separate the standard error from a critical multiplier.\n# Exercise 5: Explain why zero cannot be placed on an ordinary logarithmic axis.\n# TODO: Inspect log(0).\n# Exercise 6: Restore a caller's layout after a plotting helper.\n# TODO: Save the old par settings and use scoped restoration.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "groups <- list(A = c(1, 2, 3, 4), B = c(2, 3, 6, 7))\nmeans <- vapply(groups, mean, numeric(1))\nse <- vapply(groups, function(x) sd(x) / sqrt(length(x)), numeric(1))\nstopifnot(max(abs(means - c(2.5, 4.5))) < 1e-12, max(abs(se^2 - c(5 / 12, 17 / 12))) < 1e-12)\nhalf <- qt(0.975, 3) * se\nstopifnot(all(half > se))\ndraw <- function() {\n  old <- par(mfrow = c(1, 2), mar = c(4, 4, 3, 1))\n  on.exit(par(old), add = TRUE)\n  limits <- range(c(unlist(groups), means - half, means + half))\n  plot(rep(1:2, each = 4), unlist(groups), xaxt = \"n\", ylim = limits, xlab = \"Group\", ylab = \"Observed value\", pch = 16)\n  axis(1, 1:2, names(groups))\n  plot(1:2, means, xaxt = \"n\", ylim = limits, xlab = \"Group\", ylab = \"Mean and 95% t interval\", pch = 16)\n  axis(1, 1:2, names(groups))\n  arrows(1:2, means - half, 1:2, means + half, angle = 90, code = 3, length = 0.06)\n}\nbefore <- par(\"mfrow\")\ndraw()\nstopifnot(identical(par(\"mfrow\"), before), !is.finite(log(0)))\nstopifnot(max(abs(diff(log10(c(1, 10, 100))) - c(1, 1))) < 1e-12)\ncat(\"r-052 reference checks passed\\n\")\n",
+  "solution_explanation": "The summary is calculated from the same raw group observations shown in the graphic. The reference distinguishes a standard error from its t-based interval multiplier, and it includes interval endpoints when selecting shared panel limits.\n\nThe plot helper restores layout state without taking ownership of the surrounding device. Numerical and file checks can establish the calculations and drawing path, while the final classroom image still needs visual inspection for labels, overlap and accessibility.",
+  "sources": [
+    {
+      "title": "R graphical parameters",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/par.html"
+    },
+    {
+      "title": "R arrows",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/graphics/html/arrows.html"
+    },
+    {
+      "title": "R t distribution",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TDist.html"
+    }
+  ]
+}

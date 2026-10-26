@@ -1,12 +1,11 @@
-# DS60 Classroom: learn at your own pace
+# DS60 Classroom
 
 [![Course validation](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg)](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)
 
-DS60 is one local classroom for programming, data science, statistics, machine
-learning and systems. Its opening page brings **Python, PostgreSQL, the
-engineering bridge and every newer subject together**. Choose any path, review
-its prerequisites, and study at a pace that fits you. Historical day numbers
-are lesson labels, not deadlines.
+DS60 is a local classroom for programming, data science, statistics, machine
+learning and systems. **All subjects use one browser interface** with lessons,
+code editors, worked examples and saved progress. Prerequisites identify the
+knowledge used by each lesson; historical day numbers are stable lesson labels.
 
 The supported product runs entirely in **Linux Docker containers**. Windows
 uses WSL 2, macOS uses its Docker engine's Linux environment, and Linux uses a
@@ -33,7 +32,8 @@ to clone the repository; a ZIP download works without Git.
 
 Follow the [beginner setup guide](docs/one-command-classroom.md) for installation
 links, WSL integration and resource guidance. The course's Python, PostgreSQL,
-Java, C, C++, Go, C#, Rust, Swift, Node, PHP, TensorFlow, PyTorch and Spark tools run inside Docker, so you do
+Java, C, C++, Go, C#, Rust, Swift, R, Node, PHP, JAX, PyMC, TensorFlow, PyTorch
+and Spark tools run inside Docker, so you do
 not need to install those language toolchains on your machine.
 
 Check your engine from that terminal before continuing:
@@ -66,8 +66,8 @@ cd ds60sqlpy
 ```
 
 `doctor` checks the local engine and configuration without starting services.
-On a new project, the final command prepares PostgreSQL and all sixteen ordinary
-runtime workers. It builds **only missing images**, with visible logs, starts the
+On a new project, the final command prepares PostgreSQL and the ordinary
+CPU and language runtime workers. It builds **only missing images**, with visible logs, starts the
 services, waits for readiness and opens the browser. Keep the terminal open while
 it works. First preparation needs internet, several gigabytes of downloads and
 time to install image dependencies. Nothing is pushed to a registry.
@@ -162,6 +162,10 @@ second application.
 | PostgreSQL | [SQL](sql/postgres-60day/README.md) | First queries, relational reasoning, analytics, performance and operations |
 | Python + PostgreSQL engineering | [Bridge](bridge/README.md) | Safe database access, transactions, testing and pipelines |
 | Statistics and machine learning | [Tutorial book](courses/statistics-ml/README.md) | Theory, modeling choices, worked Python examples and interview explanations |
+| R | [R programming and statistics](courses/r/README.md) | Language foundations, data workflows, S3/S4/R6/S7, statistical modeling and plotting |
+| JAX | [JAX numerical computing](courses/jax/README.md) | Arrays, automatic differentiation, JIT, transformations, optimization and scientific models |
+| DAX | [Offline DAX](courses/dax/README.md) | Semantic models, filter context, measures, time intelligence and worked reference tables |
+| Data visualization | [Plotly in Python and JavaScript](courses/data-visualization/README.md) | Shared data semantics, uncertainty, interactive controls, accessibility and export |
 | C | [C17](courses/c/README.md) | Memory, pointers, representation, compilation and reliable systems programs |
 | C++ | [C++20](courses/cpp/README.md) | Language foundations, ownership, compilation and larger programs |
 | Go | [Go](courses/go/README.md) | General-purpose programs, concurrency, services and Kubernetes-oriented engineering |
@@ -181,8 +185,9 @@ second application.
 | GPU computing and CUDA | [CUDA, Python and GPU Spark](courses/cuda/README.md) | GPU architecture, C++ kernels, Python, PyTorch/TensorFlow and RAPIDS/Spark, with portable CPU study paths |
 | Web development | [HTML, CSS and PHP](courses/web-development/README.md) | Semantic pages, responsive layouts, accessibility, browser interactions and server-side applications |
 
-The library contains **1,110 canonical lessons and chapters across 22 subjects**,
-with separately saved language and framework variants. The statistics book maps its chapters to 1,005 topics in the source outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
+The catalog lists canonical lessons, tutorial chapters and separately saved
+language/framework variants. The current inventory is shown in the classroom
+and can be checked with `python scripts/check_modules.py --json`. The statistics book maps its chapters to 1,005 topics in the source outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
 connects mechanisms to a running subject-assistant case study; [Inside a
 Transformer](docs/learning/inside-a-transformer.md) provides a connected
 numerical explanation of the architecture.
@@ -191,10 +196,18 @@ For a first SQL course, start with `sql-start-01`, `sql-start-02` and
 `sql-start-03`, then continue to `sql-01`. The classroom keeps this on-ramp
 ahead of schema and operations topics.
 
-Prerequisites and estimated durations help you choose your next step. They do
-not impose a deadline or lock you into one subject. Read slowly, revisit a
-chapter, switch paths or combine them. A saved completion marker records your
-choice; running a sample or opening an answer does not certify mastery.
+Prerequisites and estimated durations support study planning. Access is not
+restricted by completion markers. Each subject retains its own drafts, notes
+and results when you change courses.
+
+Mathematics is compiled from explicit TeX during the image build, with bundled
+fonts and accessible MathML. Lesson prose uses textbook typography. Tagged code
+blocks remain highlighted and copyable. The classroom needs no font or math CDN.
+DAX uses an offline editor and fixed, hand-derived reference tables; it has no
+Run operation. JAX and Bayesian examples run on CPU in their dedicated profiles.
+Python and R plots can be retained with run history, and JavaScript Plotly examples
+run in the isolated browser preview. See [plotting](docs/plotting.md) for limits
+and [textbook rendering](docs/textbook-rendering.md) for the authoring contract.
 
 ## Read, code and keep your work
 
@@ -204,7 +217,7 @@ Local builds remain the default. After the owner has published a matching
 release and architecture, a learner can download the images instead:
 
 ```sh
-./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.4.1
+./classroom --from-hub YOUR_DOCKERHUB_USER --tag 0.5.0
 ```
 
 Replace the placeholder with the actual publisher's Docker Hub namespace. The
@@ -217,7 +230,7 @@ disabled-by-default manual GitHub publication workflow.
 To install this source release locally with visible build logs:
 
 ```sh
-./classroom --all --local-build --tag 0.4.1 --rebuild
+./classroom --all --local-build --tag 0.5.0 --rebuild
 ```
 
 Keep your existing `--project NAME` on every command when using a custom project.
@@ -300,7 +313,7 @@ To use an assistant as a study companion, open this repository in your coding
 assistant and ask it to use the
 [learning companion skill](.agents/skills/guide-ds60sqlpy-learning/SKILL.md).
 For example: "Help me resume my saved Go lesson. Read my current attempt, explain
-one concept at a time and give hints before solutions. Keep my notes and progress."
+prerequisite concepts clearly and give hints before solutions. Keep my notes and progress."
 The skill covers every subject and distinguishes reading, coding and external
 project workflows. It can also help diagnose startup without reinstalling tools
 or resetting your workspace. Share only the source and outputs you want reviewed.

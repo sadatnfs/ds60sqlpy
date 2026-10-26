@@ -3,8 +3,8 @@
 ## Mission and first steps
 
 Maintain one local Docker classroom at `/classroom` for programming, data
-science, statistics, machine learning and systems. The current library has 22
-subjects; derive lesson IDs, variants and readiness from the catalog loaders,
+science, statistics, machine learning and systems. Derive subject and lesson
+IDs, variants and readiness from the catalog loaders,
 not a copied inventory. Historical day numbers are stable labels, not a deadline.
 
 Read [README.md](README.md), [CONTRIBUTING.md](CONTRIBUTING.md), and the closest
@@ -47,9 +47,10 @@ given for the current task rather than asking repeatedly.
 | Historical Python/SQL/bridge identity | `catalog_builder.py`, source artifacts, `curriculum/extensions/`, generated `curriculum/catalog.json` |
 | Original five module plans | `module_plans.py`, `docs/expansion/plans/` |
 | Additive subjects and variants | `courses/<subject>/track.json`, `lessons.json`, `modules.py`, `module_extensions.py` |
-| Statistics tutorial | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters and examples |
+| Statistics tutorial | `courses/statistics-ml/manifest.json`, `coverage.json`, chapters, examples and additive `tutorials/index.json` |
 | Jobs, execution and results | `module_jobs.py`, `module_service.py`, `worker_operations.py`, `classroom_runs.py`, `lab.py` |
-| Static/live reading | `lesson_reader.py`, `reader_math.py`, `reader_content.py`, `classroom_http.py`, `http_server.py` |
+| Static/live reading | `lesson_reader.py`, `reader_math.py`, `reader_tex.py`, `reader_content.py`, `scripts/compile_lesson_tex.py`, `classroom_http.py` |
+| Offline drafts and figures | `module_drafts.py`, `plot_artifacts.py`, `plot_capture.py`, `worker_figures.py`, `worker_figures.R` |
 | Tutoring and legacy progress | `mcp_server.py`, `coaching.py`, `study_plan.py`, repository skills |
 | Portable source packaging | `course_paths.py`, `scripts/course_payload.py`, `scripts/build_starter.py` |
 | Authoring and verification | [content contract](docs/content-authoring.md), [module contract](docs/implementation/ADDING_A_MODULE.md), [validation](docs/validation.md) |
@@ -83,7 +84,9 @@ every subject generator. Never hand-edit `START_HERE.html`, `lesson-pages/` or
 
 Write mathematics with `\(...\)` or `\[...\]` and code in accurately tagged
 fences. Preserve literal program characters. Rendering and highlighting must
-work offline. Prose normalization and statistics-example fence synchronization
+work offline. Compile TeX after prose normalization and before shared readers;
+keep the generated input inventory and compiled output synchronized. Use
+professional factual copy rather than motivational slogans. Prose normalization and statistics-example fence synchronization
 have reviewed contracts; they cannot change executable meaning or create new
 runtime evidence. Use UTF-8 and LF for generated repository text.
 
@@ -136,6 +139,18 @@ and multi-GPU operation are separate evidence. A Mac container does not turn an
 Apple GPU into CUDA. GPU Spark needs compatible components and actual supported
 operator/plan evidence. Never reset a shared GPU automatically after a fault.
 
+DAX is an editable offline workspace. Its ready capability does not authorize a
+Run operation. Preserve drafts when opening hash-bound hand-derived references;
+never call those tables execution output. JAX defaults to CPU. Bayesian tutorials
+use their pinned PyMC/ArviZ API, and R uses prepared Rscript packages. Keep their
+runtime dependencies separate from the core environment.
+
+Python/R plotting captures bounded figures. Plotly metadata and tables are data,
+never trusted page HTML. Validate animation frames and image sources as well as
+the top-level figure, preserve the source-bound receipt, and keep capture/storage
+warnings separate from execution. Plain Python must not eagerly import plotting
+libraries. Browser charts remain opaque offline observations.
+
 The classroom runs trusted local learner code, not arbitrary hosted tenants.
 Preserve Host, origin, token, path, request/output-size, process and resource
 checks. Publish ports to loopback; use `http_server.py` to avoid reverse-DNS
@@ -163,6 +178,7 @@ for the actual change. The shared entrypoints are:
 ./scripts/lint-repo
 uv run --no-sync python scripts/check_modules.py
 uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/compile_lesson_tex.py --check
 uv run --no-sync python scripts/build_lesson_readers.py --check
 uv run --no-sync python -m pytest -n 4 --dist loadgroup
 git diff --check
@@ -170,8 +186,10 @@ git diff --check
 
 These `uv` commands require the prepared contributor environment from
 [CONTRIBUTING](CONTRIBUTING.md). Keep `--dist loadgroup` for shared database
-fixtures. Bound parallelism and keep large Docker builds sequential when disk
-or memory is constrained. Do not weaken assertions or rewrite expected behavior
+fixtures. A classroom controller admits one active module job across all
+profiles. Parallel runtime checks need separate disposable projects. Bound
+parallelism and keep large Docker builds sequential when disk or memory is
+constrained. Do not weaken assertions or rewrite expected behavior
 to conceal a failure. Do not rerun expensive successful checks without a new
 change or unresolved concern.
 
@@ -182,7 +200,7 @@ source-format parity records remain immutable. They do not qualify new behavior.
 Do not place machine-specific image IDs, ports, temporary paths or test-session
 counts into maintained onboarding instructions.
 
-For a genuinely prose-only authorized push, GitHub's `[skip ci]` spelling is
+For a prose-only authorized push, GitHub's `[skip ci]` spelling is
 available under the [documented constraints](docs/validation.md#optional-documentation-only-ci-skip).
 It must not hide implementation, examples, dependencies, workflows or other
 unvalidated commits. A skipped check is not a passed check.

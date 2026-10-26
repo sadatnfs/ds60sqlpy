@@ -1,0 +1,9 @@
+// dax-007 learner draft: Scalar types, operators and measurement units
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Keep a numeric measure numeric and explain why its display label is a separate concern.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a result row containing quantity, revenue and revenue per unit.
+
+EVALUATE
+ROW ( "Numeric amount", BLANK(), "Display label", "Draft" )

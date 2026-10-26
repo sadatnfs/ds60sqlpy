@@ -1,8 +1,8 @@
 # Learning paths, placement, and deliberate practice
 
-> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> **Classroom entrypoint:** the browser opens `/classroom`, where Python, PostgreSQL,
 > the engineering bridge and every module/book subject share one home and
-> individually themed workspaces. Choose any path and set your own pace.
+> individually themed workspaces with saved code and notes.
 > Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
 > saved work and compatibility bookmarks.
 
@@ -74,6 +74,6 @@ Use the catalog for the exact current modules, prerequisites, dependency groups,
 
 Tutorial books, including statistics/ML, teach through complete worked examples
 without mandatory exercises, exams or prediction gates. Read and revisit them at
-your own pace; a reading marker does not assert mastery. Other language and systems
+a chosen schedule; reading markers record review status. Other language and systems
 subjects have their own beginner entry points and explicit project/runtime boundaries.
 Use the common subject chooser and the [documentation map](README.md) to explore them.

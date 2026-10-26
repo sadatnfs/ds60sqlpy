@@ -7,7 +7,7 @@ WORKDIR /opt/worker
 ARG TARGETARCH
 COPY docker/workers/requirements-torch.${TARGETARCH}.lock /tmp/requirements.txt
 RUN python -m pip install --no-cache-dir --require-hashes --only-binary=:all: --index-url https://download.pytorch.org/whl/cpu -r /tmp/requirements.txt
-COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py /opt/worker/src/ds60sqlpy/
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py /opt/worker/src/ds60sqlpy/
 COPY courses/llm-theory/fixtures/ /opt/worker/courses/llm-theory/fixtures/
 ENV PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DS60_WORKER_PROFILE=llm-torch-cpu CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 ENTRYPOINT ["python", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

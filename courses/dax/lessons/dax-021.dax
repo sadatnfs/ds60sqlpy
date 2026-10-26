@@ -1,0 +1,9 @@
+// dax-021 learner draft: SUMX and AVERAGEX choose both an expression and a population
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Derive an iterator result and explain how blank rows affect its denominator.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a customer-level average revenue for customers with sales.
+
+EVALUATE
+ROW ( "Sum of line expressions", BLANK(), "Mean of admitted lines", BLANK() )

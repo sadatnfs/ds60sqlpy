@@ -204,7 +204,7 @@ np.testing.assert_allclose(prob[2],[1/3]*3,atol=1e-12,rtol=0)""",
             "2 targets; NLL log3+log3.",
             """saved=counts.copy(); held=[0,2,1]; nll=-sum(np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:]))
 np.testing.assert_allclose(nll,2*np.log(3),atol=1e-12,rtol=0); assert len(held)-1==2""",
-            "The first probability is AtoC=2/6 and the second is the uniform CtoB=1/3. The mean loss divides their total by two targets.",
+            "The two transition probabilities are \\(p(C\\mid A)=2/6=1/3\\) and \\(p(B\\mid C)=1/3\\). Their negative log probabilities sum to \\(-\\log(1/3)-\\log(1/3)=2\\log 3\\). Dividing this total negative log likelihood by two active targets gives mean loss \\(\\log 3\\).",
         ),
         ex(
             "Prove no assessment update",

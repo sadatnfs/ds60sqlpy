@@ -1,0 +1,19 @@
+// dax-028: Set operations, duplicates and argument order
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-028-a: Intersection and one-sided difference
+// Context: Distinct Paper keys{1,2} and Blue keys{1,3} from the clean model.
+EVALUATE
+VAR PaperKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Category] = "Paper" )
+VAR BlueKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Color] = "Blue" )
+RETURN ROW ( "IntersectionRows", COUNTROWS ( INTERSECT ( PaperKeys, BlueKeys ) ), "PaperOnlyRows", COUNTROWS ( EXCEPT ( PaperKeys, BlueKeys ) ) )
+
+// dax-028-b: UNION keeps repeated membership rows
+// Context: Concatenate the two two-row key tables; key 1 occurs in each input.
+EVALUATE
+VAR PaperKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Category] = "Paper" )
+VAR BlueKeys = CALCULATETABLE ( VALUES ( Product[ProductKey] ), Product[Color] = "Blue" )
+VAR Combined = UNION ( PaperKeys, BlueKeys )
+RETURN ROW ( "CombinedRows", COUNTROWS ( Combined ), "DistinctKeys", COUNTROWS ( DISTINCT ( Combined ) ) )

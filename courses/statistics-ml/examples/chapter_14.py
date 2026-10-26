@@ -1,4 +1,5 @@
 import numpy as np
+import statsmodels.api as sm
 from scipy import stats
 
 
@@ -31,10 +32,40 @@ def ratio_metric():
     print("Ratio of totals:", ratio, "mean user ratio:", np.mean(revenue / visits), "delta SE:", se)
 
 
+def adjusted_randomized_comparison():
+    rng = np.random.default_rng(1407)
+    n = 240
+    baseline = rng.normal(size=n)
+    assigned = rng.permutation(np.repeat([0.0, 1.0], n // 2))
+    outcome = 10 + 2 * assigned + 3 * baseline + rng.normal(size=n)
+    centered = baseline - baseline.mean()
+    design = np.column_stack([np.ones(n), assigned, centered, assigned * centered])
+    fit = sm.OLS(outcome, design).fit(cov_type="HC2")
+    treated, control = outcome[assigned == 1], outcome[assigned == 0]
+    raw = treated.mean() - control.mean()
+    raw_se = np.sqrt(treated.var(ddof=1) / len(treated) + control.var(ddof=1) / len(control))
+    adjusted, se = fit.params[1], fit.bse[1]
+    interval = adjusted + np.array([-1, 1]) * stats.norm.ppf(0.975) * se
+    assert se < raw_se and abs(adjusted - 2) < 0.5
+    assert np.linalg.matrix_rank(design) == 4
+    print(
+        "Assignment effect raw/adjusted:",
+        raw,
+        adjusted,
+        "SE raw/HC2:",
+        raw_se,
+        se,
+        "adjusted approximate 95% CI:",
+        interval,
+    )
+    # This fixture illustrates precision; one interval cannot establish coverage.
+
+
 def main():
     allocation_integrity()
     cuped()
     ratio_metric()
+    adjusted_randomized_comparison()
 
 
 if __name__ == "__main__":

@@ -48,7 +48,7 @@ For a smaller first download and build:
 This prepares the website, PostgreSQL and the Python Core worker. Every subject
 is visible and readable. Languages requiring another worker show what to
 prepare before execution. HTML/CSS and browser JavaScript/D3 previews run in
-your browser. To prepare all sixteen ordinary language/framework workers:
+your browser. To prepare all ordinary language/framework workers:
 
 ```bash
 ./classroom --all

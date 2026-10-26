@@ -303,6 +303,10 @@ if __name__ == "__main__":
 
 - [NIST guidelines for evaluating differential privacy guarantees](https://csrc.nist.gov/pubs/sp/800/226/final)
 
+## Connected worked tutorial
+
+[A complete research synthesis calculation](../tutorials/science/06-research-synthesis.md). Harmonize effect scales, estimate heterogeneity, distinguish mean and prediction intervals, and inspect leave-one-out sensitivity.
+
 ## Reading connections
 
 [Previous chapter](38-product-customer-marketing-and-business-analytics.md) | [Book contents](../README.md) | [Next chapter](40-production-methodology-governance-and-senior-scientific-judgment.md)

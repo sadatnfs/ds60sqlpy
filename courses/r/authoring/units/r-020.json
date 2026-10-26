@@ -1,0 +1,98 @@
+{
+  "id": "r-020",
+  "title": "Debugging, regression checks and reproducible scripts",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-008", "r-012", "r-015", "r-019"],
+  "concepts": ["Minimal reproduction", "Invariant", "Regression check", "Reproducibility record"],
+  "outcome": "Reduce a defect to a small case and build behavioral checks that cover ordinary, boundary and rejected inputs.",
+  "mechanism": "Debugging begins by making the failure reproducible. Preserve the exact input, observed result and intended behavior before changing several things at once. A minimal example removes unrelated data and dependencies while retaining the failing mechanism. In a classroom pad, a self-contained script also avoids hidden session state from an earlier run.\n\nInspect structure as well as printed values. str, typeof, length and dim can reveal a dropped dimension or unintended coercion that rounded console output hides. Add assertions near the boundary where an invariant first becomes necessary. A later nonsensical model result may originate in an earlier ID join, missingness mask or vector-length mismatch.\n\nA regression test should exercise behavior, not simply repeat the implementation's formula. For a weighted mean, check a deliberately unequal group-size example whose expected result is derived independently. Include an empty population, a missing or invalid weight and a zero-total-weight case under the declared policy. Catching every error and returning success would invalidate the test.\n\nReproducibility also includes random-number configuration and package versions. set.seed establishes a repeatable stream for a chosen generator configuration; it does not make different algorithms or arbitrary future package versions identical. sessionInfo records useful environment context. Avoid asserting that one fixed numerical sequence must match across every R version, platform and package change without a supported compatibility contract.",
+  "vocabulary": [
+    {
+      "term": "Minimal reproduction",
+      "definition": "A small self-contained input and program that retains a defect."
+    },
+    {
+      "term": "Invariant",
+      "definition": "A property expected to hold throughout an operation."
+    },
+    {
+      "term": "Regression check",
+      "definition": "A check that prevents a known defect from returning."
+    },
+    {
+      "term": "Reproducibility record",
+      "definition": "Inputs, configuration and version evidence needed to interpret a result."
+    }
+  ],
+  "anatomy": "Use stopifnot for compact behavioral assertions and isTRUE(all.equal(...)) for a justified numeric tolerance. Test an expected error with a narrow handler. Reset the seed immediately before a reproducibility comparison and retain source plus session metadata.",
+  "worked_examples": [
+    {
+      "title": "A behaviorally specified weighted mean",
+      "code": "weighted_average <- function(x, w) {\n  stopifnot(is.numeric(x), is.numeric(w), length(x) == length(w), length(x) > 0L)\n  stopifnot(all(is.finite(x)), all(is.finite(w)), all(w >= 0), sum(w) > 0)\n  sum(x * w) / sum(w)\n}\nstopifnot(weighted_average(c(10, 20), c(1, 3)) == 17.5)\nstopifnot(weighted_average(c(10, 20), c(2, 6)) == 17.5)\nprint(weighted_average(c(10, 20), c(1, 3)))\n",
+      "explanation": "The independent expected amount is \\((10+60)/4=17.5\\). Scaling every weight by the same positive constant is a useful invariant that tests meaning rather than source text.",
+      "expected": "17.5 under both weight scales."
+    },
+    {
+      "title": "Repeat a seeded stream deliberately",
+      "code": "set.seed(17)\nfirst <- runif(4)\nset.seed(17)\nsecond <- runif(4)\nstopifnot(identical(first, second))\nstopifnot(all(first >= 0 & first <= 1))\nprint(list(same_stream = identical(first, second), r_version = getRversion()))\n",
+      "explanation": "Resetting the same seed before each draw reproduces this generator stream in the same environment. The range assertion checks a separate distribution-support property.",
+      "expected": "The two vectors match exactly in this run."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Derive the weighted mean of 10 and 20 with weights 1 and 3.",
+      "hint": "The denominator is total weight, not number of values.",
+      "answer": "The result is 17.5.",
+      "expected": "The result is 17.5."
+    },
+    {
+      "prompt": "Multiply every weight by five.",
+      "hint": "Numerator and denominator scale together.",
+      "answer": "The weighted mean stays 17.5.",
+      "expected": "The weighted mean stays 17.5."
+    },
+    {
+      "prompt": "Add tests for mismatched lengths and zero total weight.",
+      "hint": "They violate different input contracts.",
+      "answer": "Both should be rejected explicitly.",
+      "expected": "Both should be rejected explicitly."
+    },
+    {
+      "prompt": "Diagnose a test comparing a function with the same copied formula.",
+      "hint": "The same mistake can appear on both sides.",
+      "answer": "Add independently derived fixtures and invariants.",
+      "expected": "Add independently derived fixtures and invariants."
+    },
+    {
+      "prompt": "Repeat a random draw under the same seed.",
+      "hint": "Reset before each draw.",
+      "answer": "The vectors match within the declared environment/generator configuration.",
+      "expected": "The vectors match within the declared environment/generator configuration."
+    },
+    {
+      "prompt": "Write a useful bug report for a dropped matrix dimension.",
+      "hint": "Include minimal source, shape before/after and the required contract.",
+      "answer": "A reviewer can reproduce the failure without the original private data or hidden session.",
+      "expected": "A reviewer can reproduce the failure without the original private data or hidden session."
+    }
+  ],
+  "starter": "# r-020: Debugging, regression checks and reproducible scripts\n# Complete the six guide tasks using these local inputs.\nvalues <- c(10, 20)\nweights <- c(1, 3)\n# TODO: implement an explicit weighted-mean contract and regression cases.\nprint(list(values = values, weights = weights))\n",
+  "reference": "weighted_average <- function(x, w) {\n  stopifnot(is.numeric(x), is.numeric(w), length(x) == length(w), length(x) > 0L)\n  stopifnot(all(is.finite(x)), all(is.finite(w)), all(w >= 0), sum(w) > 0)\n  sum(x * w) / sum(w)\n}\nstopifnot(weighted_average(c(10, 20), c(1, 3)) == 17.5)\nstopifnot(weighted_average(c(10, 20), c(5, 15)) == 17.5)\nrejected <- function(x, w) tryCatch(\n  {\n    weighted_average(x, w); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(rejected(c(10, 20), 1), rejected(c(10, 20), c(0, 0)), rejected(numeric(0), numeric(0)))\nstopifnot(rejected(c(10, NA_real_), c(1, 1)))\nset.seed(17); first <- runif(4)\nset.seed(17); second <- runif(4)\nstopifnot(identical(first, second), all(first >= 0 & first <= 1))\ncat(\"r-020 reference checks passed\\n\")\n",
+  "solution_explanation": "The independent expected amount is(10+60)/4. Scaling every weight by the same positive constant is a useful invariant that tests meaning rather than source text.\n\nResetting the same seed before each draw reproduces this generator stream in the same environment. The range assertion checks a separate distribution-support property.",
+  "sources": [
+    {
+      "title": "R debugging",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/debug.html"
+    },
+    {
+      "title": "R random-number generation",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html"
+    },
+    {
+      "title": "R assertions",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/stopifnot.html"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+// dax-015: CALCULATE replaces a filter on the same column
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-015-a: Replace Blue with Red
+// Context: Start with Product.Color = Blue; the inner calculation sets Color = Red.
+EVALUATE CALCULATETABLE ( ROW ( "Original", [NetRevenue], "RedRevenue", CALCULATE ( [NetRevenue], Product[Color] = "Red" ) ), Product[Color] = "Blue" )
+
+// dax-015-b: Add Color while retaining Category
+// Context: Start with Category = Paper; add Color = Blue on a different column.
+EVALUATE CALCULATETABLE ( ROW ( "PaperRevenue", [NetRevenue], "BluePaperRevenue", CALCULATE ( [NetRevenue], Product[Color] = "Blue" ) ), Product[Category] = "Paper" )

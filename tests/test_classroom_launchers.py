@@ -5,17 +5,42 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import time
+import tomllib
 from pathlib import Path
 from typing import Any
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_VERSION: str = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
+IMAGE_ROWS = [
+    line.split()
+    for line in (ROOT / "docker/classroom-images.tsv").read_text().splitlines()
+    if line and not line.startswith("#")
+]
+ORDINARY_PROFILE_SERVICES = [(row[0], row[1]) for row in IMAGE_ROWS if row[5] == "ordinary"]
+PUBLISHED_IMAGE_COUNT = sum(row[5] in {"app", "ordinary"} for row in IMAGE_ROWS)
+
+
+def test_ordered_launcher_arrays_match_the_image_catalog() -> None:
+    source = (ROOT / "scripts/classroom.sh").read_text()
+    profiles = re.search(r"^all_profiles=\(([^)]*)\)$", source, re.M)
+    services = re.search(r"^all_services=\(([^)]*)\)$", source, re.M)
+    assert profiles is not None and services is not None
+    pairs = list(zip(profiles[1].split(), services[1].split(), strict=True))
+    assert pairs == ORDINARY_PROFILE_SERVICES
+    gpu_profiles = re.search(r'^known_profiles=\("\$\{all_profiles\[@\]\}"(.*)\)$', source, re.M)
+    gpu_services = re.search(r'^known_services=\("\$\{all_services\[@\]\}"(.*)\)$', source, re.M)
+    assert gpu_profiles is not None and gpu_services is not None
+    assert list(zip(gpu_profiles[1].split(), gpu_services[1].split(), strict=True)) == [
+        (row[0], row[1]) for row in IMAGE_ROWS if row[5] == "gpu"
+    ]
 
 
 @pytest.fixture
@@ -48,7 +73,7 @@ def launcher(tmp_path: Path) -> Any:
     docker.write_text(
         f"#!{sys.executable}\n"
         + r"""
-import hashlib,json,os,re,sys,signal,time
+import hashlib,json,os,re,sys,signal,time,tomllib
 from pathlib import Path
 a=sys.argv[1:];c=json.loads(Path(os.environ['MOCK']).read_text())
 row={'args':a,'port':os.getenv('DS60_CLASSROOM_PORT'),
@@ -58,13 +83,12 @@ row={'args':a,'port':os.getenv('DS60_CLASSROOM_PORT'),
      'gpu_device':os.getenv('DS60_GPU_DEVICE')}
 if '-' in a and '--hash' in a:row['stdin']=sys.stdin.read()
 with open(os.environ['CALLS'],'a') as f:f.write(json.dumps(row)+'\n')
-images={'lab':'ds60sqlpy-lab:0.4.1','classroom-init':'ds60sqlpy-lab:0.4.1',
- 'postgres':'mirror.gcr.io/library/postgres:17',
- 'python-core-worker':'ds60sqlpy-worker-python-core:0.4.1'}
+version=tomllib.loads((Path.cwd()/'pyproject.toml').read_text())['project']['version']
+images={'postgres':'mirror.gcr.io/library/postgres:17'}
 for line in (Path.cwd()/'docker/classroom-images.tsv').read_text().splitlines():
  if not line or line.startswith('#'):continue
  profile,service,repository,suffix,variable,kind=line.split()
- images[service]=os.getenv(variable,repository+':0.4.1')
+ images[service]=os.getenv(variable,repository+':'+version)
 images['classroom-init']=images['lab']
 containers=c.setdefault('containers',{})
 if c.get('existing'):containers.setdefault('postgres','owned-postgres')
@@ -100,7 +124,7 @@ elif a[:2]==['image','inspect']:
  sys.exit(1 if absent and a[-1] not in c.get('built_images',[]) else 0)
 elif a[:1]==['inspect']:
  fmt=a[2];id=a[-1]
- if fmt=='{{.Config.Image}}':print(c.get('lab_image_name','ds60sqlpy-lab:0.4.1'))
+ if fmt=='{{.Config.Image}}':print(c.get('lab_image_name',images['lab']))
  elif fmt=='{{.Image}}':print(c.get('lab_image_id','sha256:'+'d'*64))
  elif 'config-hash' in fmt:print(c.get('container_hashes',{}).get(id,'a'*64))
  elif '.Config.Env' in fmt:
@@ -269,24 +293,7 @@ def test_default_command_builds_all_profiles_then_starts_health_checks_before_br
     calls = launcher.calls()
     commands = [x["args"] for x in calls]
     builds = [a for a in commands if "build" in a]
-    expected = [
-        "python-core-worker",
-        "cpp-worker",
-        "java-worker",
-        "javascript-worker",
-        "typescript-worker",
-        "tensorflow-worker",
-        "llm-worker",
-        "scala-worker",
-        "spark-scala-worker",
-        "spark-python-worker",
-        "c-worker",
-        "go-worker",
-        "csharp-worker",
-        "rust-worker",
-        "swift-worker",
-        "php-worker",
-    ]
+    expected = [service for _, service in ORDINARY_PROFILE_SERVICES]
     assert built_services(calls) == ["lab", *expected]
     assert commands.index(next(a for a in commands if "pull" in a)) < commands.index(builds[0])
     starts = [a for a in commands if "up" in a]
@@ -816,12 +823,12 @@ def test_replaced_database_repairs_only_app_network_namespace(launcher: Any) -> 
 def test_missing_only_core_build_uses_local_lab_without_compose_rebuilding_it(
     launcher: Any,
 ) -> None:
-    launcher.set(missing_images=["ds60sqlpy-worker-python-core:0.4.1"])
+    launcher.set(missing_images=[f"ds60sqlpy-worker-python-core:{RELEASE_VERSION}"])
     result = launcher.run("--starter", "--no-browser")
     assert result.returncode == 0, result.stdout + result.stderr
     assert built_services(launcher.calls()) == ["python-core-worker"]
     build = next(c["args"] for c in launcher.calls() if "build" in c["args"])
-    assert build[0] == "build" and "DS60_CORE_IMAGE=ds60sqlpy-lab:0.4.1" in build
+    assert build[0] == "build" and f"DS60_CORE_IMAGE=ds60sqlpy-lab:{RELEASE_VERSION}" in build
 
 
 def test_explicit_all_replaces_saved_starter_selection(launcher: Any) -> None:
@@ -918,7 +925,7 @@ def test_missing_app_tag_and_changed_dynamic_port_recover_existing_image_without
     assert resumed.returncode == 0, resumed.stdout + resumed.stderr
     commands = [c["args"] for c in launcher.calls()]
     tags = [c for c in commands if c[:2] == ["image", "tag"]]
-    assert tags == [["image", "tag", "sha256:" + "d" * 64, "ds60sqlpy-lab:0.4.1"]]
+    assert tags == [["image", "tag", "sha256:" + "d" * 64, f"ds60sqlpy-lab:{RELEASE_VERSION}"]]
     assert not any("build" in c or "pull" in c for c in commands)
     replacements = [c for c in commands if "--force-recreate" in c]
     assert len(replacements) == 1 and replacements[0][-1] == "lab"
@@ -961,7 +968,10 @@ def test_present_app_tag_is_never_overwritten_during_network_repair(launcher: An
 def test_missing_core_recovers_its_app_base_without_rebuilding_the_app(launcher: Any) -> None:
     launcher.set(
         containers={s: "old-" + s for s in ("postgres", "lab")},
-        missing_images=["ds60sqlpy-lab:0.4.1", "ds60sqlpy-worker-python-core:0.4.1"],
+        missing_images=[
+            f"ds60sqlpy-lab:{RELEASE_VERSION}",
+            f"ds60sqlpy-worker-python-core:{RELEASE_VERSION}",
+        ],
     )
     result = launcher.run("--starter", "--no-browser")
     assert result.returncode == 0, result.stdout + result.stderr
@@ -1193,10 +1203,12 @@ def test_explicit_local_update_uses_checkout_release_not_saved_older_tag(
     state = _image_state(launcher, "local", "", "0.3.0")
     result = launcher.run(*action, "--starter", "--no-browser")
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "DS60_IMAGE_TAG=0.4.1" in state.read_text()
+    assert f"DS60_IMAGE_TAG={RELEASE_VERSION}" in state.read_text()
     builds = [call for call in launcher.calls() if "build" in call["args"]]
     assert builds
-    assert all(call["image_env"]["DS60_LAB_IMAGE"] == "ds60sqlpy-lab:0.4.1" for call in builds)
+    assert all(
+        call["image_env"]["DS60_LAB_IMAGE"] == f"ds60sqlpy-lab:{RELEASE_VERSION}" for call in builds
+    )
 
 
 def test_hub_rebuild_retains_selected_release_until_tag_explicitly_changes(launcher: Any) -> None:
@@ -1227,6 +1239,50 @@ def test_all_ordinary_profiles_include_php_and_never_select_gpu(launcher: Any) -
     commands = [call["args"] for call in launcher.calls()]
     assert any(command[-1] == "php-worker" for command in commands if "up" in command)
     assert not any("cuda" in command[-1] for command in commands if "up" in command)
+
+
+@pytest.mark.parametrize(
+    ("profile", "service"),
+    [
+        ("jax-cpu", "jax-worker"),
+        ("bayesian-cpu", "bayesian-worker"),
+        ("r-statistics", "r-worker"),
+    ],
+)
+def test_new_cpu_profile_selects_its_worker_and_resumes_without_building(
+    launcher: Any, profile: str, service: str
+) -> None:
+    started = launcher.run("--profile", profile, "--no-browser")
+    assert started.returncode == 0, started.stdout + started.stderr
+    commands = [call["args"] for call in launcher.calls()]
+    assert [command[-1] for command in commands if "up" in command] == [
+        "postgres",
+        "lab",
+        "python-core-worker",
+        service,
+    ]
+    assert not any("cuda" in command[-1] for command in commands if "up" in command)
+    before = len(launcher.calls())
+    resumed = launcher.run("resume", "--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    subsequent = [call["args"] for call in launcher.calls()[before:]]
+    assert any(command[-1] == service for command in subsequent if "start" in command)
+    assert not any("build" in command or "pull" in command for command in subsequent)
+
+
+def test_local_old_release_resume_keeps_its_selected_image_tag(launcher: Any) -> None:
+    saved = _image_state(launcher, "local", "", "0.4.1")
+    original = saved.read_bytes()
+    launcher.set(
+        containers={
+            service: "old-" + service for service in ("postgres", "lab", "python-core-worker")
+        }
+    )
+    resumed = launcher.run("resume", "--starter", "--no-browser")
+    assert resumed.returncode == 0, resumed.stdout + resumed.stderr
+    assert saved.read_bytes() == original
+    assert "Images: local (release 0.4.1)" in resumed.stdout
+    assert not any("build" in call["args"] or "pull" in call["args"] for call in launcher.calls())
 
 
 @pytest.mark.parametrize("profile", ["cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"])
@@ -1281,15 +1337,20 @@ def test_publisher_preview_inspects_all_ordinary_images_without_registry_writes(
 ) -> None:
     result = launcher.publish("--namespace", "exampleuser")
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "Preview only. 17 Linux amd64 images exist locally" in result.stdout
+    assert (
+        f"Preview only. {PUBLISHED_IMAGE_COUNT} Linux amd64 images exist locally" in result.stdout
+    )
     commands = [call["args"] for call in launcher.calls()]
-    assert len([command for command in commands if command[:2] == ["image", "inspect"]]) == 17
+    assert (
+        len([command for command in commands if command[:2] == ["image", "inspect"]])
+        == PUBLISHED_IMAGE_COUNT
+    )
     assert not any(command[:2] in (["image", "tag"], ["image", "push"]) for command in commands)
     assert not any("cuda" in command[-1] for command in commands)
 
 
 def test_publisher_checks_complete_set_before_first_tag_or_push(launcher: Any) -> None:
-    launcher.set(missing_images=["ds60sqlpy-worker-php-cli:0.4.1"])
+    launcher.set(missing_images=[f"ds60sqlpy-worker-php-cli:{RELEASE_VERSION}"])
     result = launcher.publish("--namespace", "exampleuser", "--push")
     assert result.returncode != 0 and "Nothing has been pushed" in result.stderr
     assert not any(
@@ -1304,10 +1365,11 @@ def test_publisher_push_pins_inspected_image_ids_and_architecture_tags(launcher:
     commands = [call["args"] for call in launcher.calls()]
     tags = [command for command in commands if command[:2] == ["image", "tag"]]
     pushes = [command for command in commands if command[:2] == ["image", "push"]]
-    assert len(tags) == len(pushes) == 17
+    assert len(tags) == len(pushes) == PUBLISHED_IMAGE_COUNT
     assert all(command[2] == "sha256:" + "d" * 64 for command in tags)
     assert all(
-        command[-1].startswith("exampleuser/ds60sqlpy:0.4.1-") and command[-1].endswith("-arm64")
+        command[-1].startswith(f"exampleuser/ds60sqlpy:{RELEASE_VERSION}-")
+        and command[-1].endswith("-arm64")
         for command in tags
     )
     last_inspect = max(
@@ -1318,7 +1380,7 @@ def test_publisher_push_pins_inspected_image_ids_and_architecture_tags(launcher:
 
 
 def test_publisher_refuses_mixed_architectures_before_writing_tags(launcher: Any) -> None:
-    launcher.set(image_platforms={"ds60sqlpy-worker-php-cli:0.4.1": "linux arm64"})
+    launcher.set(image_platforms={f"ds60sqlpy-worker-php-cli:{RELEASE_VERSION}": "linux arm64"})
     result = launcher.publish("--namespace", "exampleuser", "--push")
     assert result.returncode != 0 and "mixes architectures" in result.stderr
     assert not any(
@@ -1350,7 +1412,7 @@ def test_publisher_can_preview_one_declared_image_for_manual_workflow(launcher: 
     result = launcher.publish("--namespace", "exampleuser", "--profile", "php-cli")
     assert result.returncode == 0, result.stdout + result.stderr
     commands = [call["args"] for call in launcher.calls()]
-    assert len(commands) == 1 and commands[0][-1] == "ds60sqlpy-worker-php-cli:0.4.1"
+    assert len(commands) == 1 and commands[0][-1] == f"ds60sqlpy-worker-php-cli:{RELEASE_VERSION}"
     assert "Preview only. 1 Linux amd64 images" in result.stdout
 
 

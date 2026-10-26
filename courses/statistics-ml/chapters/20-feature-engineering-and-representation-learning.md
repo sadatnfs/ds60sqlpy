@@ -214,7 +214,7 @@ Training values have mean two. Including a future value 100 changes it to 26.5. 
 
 ### Features must respect label and time boundaries
 
-If every category is unique, a same-row target mean equals the outcome exactly. The leave-one-out global fallback removes the row's own label but remains only a tiny illustration; real category encoders require fold-aware training and smoothing. The temporal example excludes the current row and produces historical means 10,15,20.
+If every category is unique, a same-row target mean equals the outcome exactly. Removing that row from the global fallback is still insufficient here: the mean of the other three balanced binary labels is perfectly inversely related to the held-out label. The program explicitly exposes that relationship, then constructs balanced held-out folds whose independently fitted fallback is .5 for every row. Real category encoders require fold-aware fitting, appropriate smoothing and independent evaluation; the tiny example does not establish a universal encoding guarantee. The temporal example excludes the current row and produces historical means 10,15,20.
 
 ### Complete executable example
 
@@ -259,6 +259,13 @@ def target_and_time_encoding():
     leave_one_out = np.array([np.delete(labels, i).mean() for i in range(4)])
     assert np.array_equal(naive_unique_category, labels)
     assert not np.array_equal(leave_one_out, labels)
+    # Removing the row itself is insufficient: the other labels encode its complement.
+    assert np.isclose(np.corrcoef(leave_one_out, labels)[0, 1], -1)
+    folds = np.array([0, 0, 1, 1])
+    cross_fitted = np.empty_like(labels)
+    for fold in np.unique(folds):
+        cross_fitted[folds == fold] = labels[folds != fold].mean()
+    assert np.allclose(cross_fitted, 0.5)
     values = np.array([10.0, 20.0, 30.0, 40.0])
     lagged_mean = np.array([np.nan] + [values[:i].mean() for i in range(1, 4)])
     assert np.allclose(lagged_mean[1:], [10, 15, 20])
@@ -269,6 +276,7 @@ def target_and_time_encoding():
         leave_one_out,
     )
     print("Strictly prior expanding means:", lagged_mean)
+    print("LOO still reveals labels inversely; balanced held-out-fold fallback:", cross_fitted)
 
 
 def main():
@@ -298,6 +306,10 @@ For implementation of text representations and domain assistants, continue with 
 - [scikit-learn matrix factorization and PCA](https://scikit-learn.org/stable/modules/decomposition.html).
 
 - [scikit-learn target encoder and cross-fitting](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.TargetEncoder.html).
+
+## Connected worked tutorial
+
+[A quantitative PCA counterexample](../tutorials/learning/06-pca-compression-and-prediction.md). Compute discarded reconstruction error and show why nearly perfect variance retention can remove predictive information.
 
 ## Reading connections
 

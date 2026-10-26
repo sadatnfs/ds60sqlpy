@@ -1,0 +1,15 @@
+// dax-029: Active and inactive date roles with USERELATIONSHIP
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-029-a: January order versus shipment attribution
+// Context: Date year 2025/month 1; compare active OrderDate with the explicitly selected ShipDate relationship.
+EVALUATE CALCULATETABLE ( ROW ( "OrderRevenue", [NetRevenue], "ShipRevenue", CALCULATE ( [NetRevenue], USERELATIONSHIP ( Sales[ShipDate], 'Date'[Date] ) ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] = 1 )
+
+// dax-029-b: February absorbs the delayed shipment
+// Context: Date year 2025/month 2 with the same role comparison.
+EVALUATE CALCULATETABLE ( ROW ( "OrderRevenue", [NetRevenue], "ShipRevenue", CALCULATE ( [NetRevenue], USERELATIONSHIP ( Sales[ShipDate], 'Date'[Date] ) ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] = 2 )

@@ -5,9 +5,9 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Inspect leaf and nonleaf state
-# Create leaf w = 0 and intermediate 2 w, retain the intermediate gradient and
-# backpropagate its sum.
-# Expected: w leaf True; intermediate False; gradients 2 and 1.
+# Create a leaf tensor \(w=0\) and intermediate tensor \(u=2w\), retain the intermediate
+# gradient and backpropagate its sum.
+# Expected: `w.is_leaf` is `True`; `u.is_leaf` is `False`; the gradients with respect to \(w\) and \(u\) are 2 and 1.
 
 # Exercise 2: Observe accumulation across fresh graphs
 # Compute (w-2)**2 twice at w=0 without clearing grad.
@@ -28,7 +28,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 6: Show eval is separate
 # Put a Linear module in eval mode, run a differentiable input, and inspect output
 # tracking.
-# Expected: output still requires_grad True.
+# Expected: the output still has `requires_grad=True`.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

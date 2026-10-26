@@ -90,7 +90,7 @@ assert.equal(pattern.test('aa'), false); assert.equal(pattern.lastIndex, 0);
 
 ## Exercise 5: Use Unicode-aware dot matching
 
-Task: Compare /^.$/ and /^.$/u on one emoji.
+Task: Compare `/^.$/` and `/^.$/u` on one emoji.
 
 The u flag changes codepoint handling. It does not guarantee one user-perceived character for every combining sequence.
 

@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
 from ds60sqlpy.http_server import LocalThreadingHTTPServer  # noqa: E402
-from scripts.check_classroom_profiles import classroom_origin  # noqa: E402
+from scripts.check_classroom_profiles import ClassroomClient, classroom_origin  # noqa: E402
 
 SUBJECTS = {
     "python",
@@ -56,6 +56,10 @@ SUBJECTS = {
     "llm-theory",
     "llm-applied",
     "nlp",
+    "jax",
+    "dax",
+    "r",
+    "data-visualization",
 }
 NOTE = "Disposable browser acceptance note, not a learner mastery assessment."
 
@@ -247,9 +251,7 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         audit.screenshot(page, "classroom-home-desktop")
         page.set_viewport_size({"width": 390, "height": 844})
         no_overflow(page)
-        expect(page.locator(".pace-card h2")).to_have_text(
-            "A little time. A meaningful next step.", use_inner_text=True
-        )
+        expect(page.locator(".pace-card h2")).to_have_text("Session duration", use_inner_text=True)
         audit.screenshot(page, "classroom-home-mobile")
         page.set_viewport_size({"width": 1440, "height": 1000})
         page.locator("#subject-cards .subject-card").filter(
@@ -368,6 +370,153 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
         audit.passed("A fresh browser restores server-saved progress, notes, pads and run results")
     finally:
         context.close()
+
+
+def saved_plot_geometry(
+    page: Any, expect: Any, count: int = 2, expected_points: int | None = 3
+) -> None:
+    """Require the SVG itself, not only its parent document, to fit the iframe."""
+    frames = page.locator("#figures iframe.saved-plot")
+    expect(frames).to_have_count(count)
+    for index in range(count):
+        element = frames.nth(index)
+        expect(element).to_be_visible()
+        element.scroll_into_view_if_needed()
+        assert element.get_attribute("sandbox") == "allow-scripts allow-downloads"
+        handle = element.element_handle()
+        assert handle is not None
+        frame = handle.content_frame()
+        assert frame is not None
+        frame.wait_for_function(
+            """() => {
+              const plot = document.getElementById('plot');
+              const layout = plot?._fullLayout;
+              const svgs = [...document.querySelectorAll('#plot .main-svg')];
+              return innerWidth > 0 && innerHeight > 0 && layout && svgs.length > 0 &&
+                Math.abs(layout.width - innerWidth) <= 1 &&
+                Math.abs(layout.height - innerHeight) <= 1 &&
+                document.documentElement.scrollWidth <= innerWidth + 1 &&
+                document.documentElement.scrollHeight <= innerHeight + 1 &&
+                svgs.every(svg =>
+                  Math.abs(Number(svg.getAttribute('width')) - innerWidth) <= 1 &&
+                  Math.abs(Number(svg.getAttribute('height')) - innerHeight) <= 1);
+            }""",
+            timeout=20_000,
+        )
+        expect(frame.locator("#error")).to_have_text("")
+        assert not frame.locator("#error").is_visible()
+        points = frame.locator(".scatterlayer .point")
+        if expected_points is not None:
+            expect(points).to_have_count(expected_points)
+        else:
+            assert points.count() > 0, "The saved chart must contain plotted points."
+        points_fit = points.evaluate_all(
+            """points => points.every(point => {
+              const box = point.getBoundingClientRect();
+              return box.left >= 0 && box.top >= 0 &&
+                box.right <= innerWidth + 1 && box.bottom <= innerHeight + 1;
+            })"""
+        )
+        assert points_fit, "A plotted point is clipped by the saved-chart iframe."
+
+
+def saved_plot_viewer_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> None:
+    """Exercise autosized and explicitly sized saved figures using Python Core."""
+    client = ClassroomClient(origin)
+    lesson_id = "viz-001"
+    original = client.call("module-lesson", lesson_id=lesson_id)
+    original_fields = {
+        key: original["session"].get(key, original["source"] if key == "source" else "")
+        for key in ("source", "prediction", "explanation", "review")
+    }
+    marker = "SAVED_PLOT_VIEWPORT_" + uuid.uuid4().hex
+    source = f"""import plotly.graph_objects as go
+
+for fixed in (False, True):
+    title = "Fixed layout fixture" if fixed else "Autosize fixture"
+    figure = go.Figure(go.Scatter(x=[1, 2, 3], y=[2, 5, 3], mode="markers"))
+    figure.update_layout(
+        title=title,
+        margin=dict(l=40, r=20, t=50, b=40),
+        meta=dict(description=title, table=dict(
+            columns=["Input", "Value"], rows=[[1, 2], [2, 5], [3, 3]])))
+    if fixed:
+        figure.update_layout(width=1100, height=800, autosize=False)
+    figure.show()
+print({marker!r})
+"""
+    context = audit.context(browser, origin)
+    page = context.new_page()
+    touched = False
+    try:
+        page.goto(origin + "/classroom#lesson=" + lesson_id)
+        expect(page.locator('#lessons button[aria-current="page"] small')).to_contain_text(
+            lesson_id
+        )
+        show_code_and_notes(page, expect)
+        page.locator("#source").fill(source)
+        touched = True
+        save(page, expect)
+
+        def submitted(response: Any) -> bool:
+            if "/api/modules" not in response.url or response.request.method != "POST":
+                return False
+            payload = response.request.post_data_json
+            return bool(
+                isinstance(payload, dict)
+                and payload.get("action") == "module-run"
+                and payload.get("lesson_id") == lesson_id
+            )
+
+        with page.expect_response(submitted, timeout=30_000) as response:
+            expect(page.locator("#run")).to_be_enabled()
+            page.locator("#run").click()
+        job_id = response.value.json()["job_id"]
+        expect(page.locator("#output")).to_contain_text(marker, timeout=90_000)
+        expect(page.locator("#job-status")).to_contain_text("succeeded")
+        receipt = client.call("module-job", job_id=job_id)
+        assert receipt["source"] == source and receipt["returncode"] == 0
+        artifacts = receipt["artifacts"]
+        assert [artifact["kind"] for artifact in artifacts] == ["plotly", "plotly"]
+        assert artifacts[1]["figure"]["layout"]["width"] == 1100
+        assert artifacts[1]["figure"]["layout"]["height"] == 800
+        assert artifacts[1]["figure"]["layout"]["autosize"] is False
+        original_artifacts = json.dumps(artifacts, sort_keys=True)
+        for width, height in ((1440, 1000), (390, 844), (1440, 1000)):
+            page.set_viewport_size({"width": width, "height": height})
+            saved_plot_geometry(page, expect)
+            no_overflow(page)
+        page.locator("#figures").evaluate("element => { element.hidden = true; }")
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.locator("#figures").evaluate("element => { element.hidden = false; }")
+        saved_plot_geometry(page, expect)
+        for index, artifact in enumerate(artifacts):
+            figure = page.locator("#figures figure").nth(index)
+            expect(figure.locator("figcaption")).to_have_text(artifact["description"])
+            expect(figure.locator("table tbody tr")).to_have_count(3)
+            with page.expect_download() as download:
+                figure.get_by_role("button", name="Download figure JSON", exact=True).click()
+            with tempfile.TemporaryDirectory(prefix="ds60-plot-export-") as temporary:
+                path = Path(temporary) / "figure.json"
+                download.value.save_as(path)
+                assert json.loads(path.read_text()) == artifact["figure"]
+        assert json.dumps(
+            client.call("module-job", job_id=job_id)["artifacts"], sort_keys=True
+        ) == (original_artifacts)
+        audit.screenshot(page, "saved-plot-viewer-mobile")
+        audit.passed(
+            "Saved Plotly SVGs fit desktop, mobile and reopened panels; original JSON stays exact"
+        )
+    finally:
+        try:
+            if touched:
+                page.locator("#source").fill(original_fields["source"])
+                save(page, expect)
+                client.call("module-save", lesson_id=lesson_id, fields=original_fields)
+                restored = client.call("module-lesson", lesson_id=lesson_id)["session"]
+                assert all(restored.get(key, "") == value for key, value in original_fields.items())
+        finally:
+            context.close()
 
 
 def fixture_checks(browser: Any, audit: Audit, expect: Any) -> None:
@@ -490,6 +639,7 @@ def main(argv: list[str] | None = None) -> int:
             try:
                 if origin is not None and not args.fixtures_only:
                     classroom_checks(browser, origin, audit, api.expect)
+                    saved_plot_viewer_checks(browser, origin, audit, api.expect)
                 fixture_checks(browser, audit, api.expect)
                 audit.clean()
                 complete = True

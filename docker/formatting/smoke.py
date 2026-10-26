@@ -1,5 +1,6 @@
 """Exercise every installed formatter without network or learner files."""
 
+import argparse
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,41 @@ def stable(name: str, command: list[str], source: str, preserved: tuple[str, ...
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--r-only", action="store_true", help="check the isolated R tools image")
+    arguments = parser.parse_args()
+    if arguments.r_only:
+        helper = CONFIG.parents[1] / "scripts/r_source_tools.R"
+        command = ["Rscript", "--vanilla", str(helper)]
+        source = "values<-c(1,2,3)\nlabel<-'  preserve literal spacing  '\n"
+        stable("R", [*command, "format"], source, ("'  preserve literal spacing  '",))
+        formatted = output([*command, "format"], source)
+        subprocess.run([*command, "lint"], input=formatted, text=True, check=True)
+        with tempfile.TemporaryDirectory() as directory:
+            sentinel = Path(directory) / "must-not-exist"
+            program = "writeLines('executed', 'must-not-exist')\n"
+            for operation in ("parse", "format", "lint"):
+                subprocess.run(
+                    [*command, operation],
+                    input=program,
+                    text=True,
+                    cwd=directory,
+                    capture_output=True,
+                    check=True,
+                )
+                if sentinel.exists():
+                    raise RuntimeError("R source checking executed learner code")
+            broken = subprocess.run(
+                [*command, "parse"],
+                input="broken <- function( {",
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            if broken.returncode == 0:
+                raise RuntimeError("R parser accepted incomplete source")
+        print("PASS R parse, AST-preserving format, lint and no execution", flush=True)
+        return
     stable("Python", ["ruff", "format", "-"], "values=[1,2,3]\nprint(values)\n")
     prettier = ["prettier", "--config", str(CONFIG / "prettier.json")]
     for parser, source in (

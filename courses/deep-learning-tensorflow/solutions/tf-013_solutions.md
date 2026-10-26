@@ -14,7 +14,7 @@ A binary logit is an unrestricted score whose sigmoid is a probability under the
 
 ## Reading the implementation
 
-tf.math.sigmoid converts each score independently. sigmoid_cross_entropy_with_logits requires labels and logits of equal shape and computes a loss per entry. reduce_mean chooses the example denominator. Compare probability>=threshold for a declared tie policy. Do not apply sigmoid twice or feed a probability to a function that expects a logit; both can produce finite but incorrectly interpreted losses.
+`tf.math.sigmoid` converts each score independently. `sigmoid_cross_entropy_with_logits` requires labels and logits of equal shape and computes a loss per entry. `reduce_mean` chooses the example denominator. Compare `probability>=threshold` for a declared tie policy. Do not apply sigmoid twice or feed a probability to a function that expects a logit; both can produce finite but incorrectly interpreted losses.
 
 ## Exercise 1: Convert scores
 

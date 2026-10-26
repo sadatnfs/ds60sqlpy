@@ -139,6 +139,7 @@ class WorkerJob:
     output: str = ""
     returncode: int | None = None
     checks: list[dict[str, Any]] = field(default_factory=list)
+    artifacts: list[dict[str, Any]] = field(default_factory=list)
     truncated: bool = False
     detail: str = "Accepted; waiting for the owned execution thread."
     started: float = field(default_factory=time.monotonic)
@@ -156,6 +157,7 @@ class WorkerJob:
             "truncated": self.truncated,
             "elapsed_seconds": round((self.finished or time.monotonic()) - self.started, 3),
             "detail": self.detail,
+            **({"artifacts": self.artifacts} if self.artifacts else {}),
         }
 
 
@@ -291,6 +293,7 @@ class WorkerState:
                 job.output = result.output
                 job.returncode = result.returncode
                 job.checks = result.checks
+                job.artifacts = result.artifacts
                 job.truncated = result.truncated
                 job.detail = result.detail
                 if self.profile in {"cuda-cpp", "cuda-python", "pytorch-cuda", "tensorflow-cuda"}:

@@ -156,7 +156,7 @@ np.testing.assert_array_equal(bn.moving_mean.numpy(), before_mean)
 np.testing.assert_array_equal(bn.moving_variance.numpy(), before_variance)
 expected = (probe.numpy() - before_mean) / np.sqrt(before_variance + 1e-3)
 np.testing.assert_allclose(output, expected, atol=2e-5, rtol=0)""",
-            "Positive epsilon handles a zero-variance row. Keras BatchNorm also has a documented special relationship between trainable=False and inference behavior. This must not be generalized to every layer or copied to PyTorch parameter requires_grad flags, which are separate from module train/eval mode.",
+            "Positive epsilon handles a zero-variance row. Keras BatchNorm also has a documented special relationship between `trainable=False` and inference behavior. This must not be generalized to every layer or copied to PyTorch parameter `requires_grad` flags, which are separate from module train/eval mode.",
         ),
     ],
     (

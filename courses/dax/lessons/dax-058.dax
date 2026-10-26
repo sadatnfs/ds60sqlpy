@@ -1,0 +1,9 @@
+// dax-058 learner draft: Commercial-model capstone: reconcile adjustments and targets
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Produce a reviewable commercial metric specification with explicit populations and adjustment policies.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the capstone's metric and model specification.
+
+EVALUATE
+ROW ( "Core revenue", BLANK(), "Attributed refunds", BLANK(), "Budget variance", BLANK(), "Separate converted USD", BLANK() )

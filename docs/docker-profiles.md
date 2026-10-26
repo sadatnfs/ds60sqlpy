@@ -5,7 +5,7 @@ that executes an artifact. Several subjects can share one profile, and one
 subject can contain reading lessons and multiple language variants.
 
 Start with `./classroom` for the saved selection. A new project prepares all
-sixteen ordinary workers. For a smaller installation:
+the ordinary workers. For a smaller installation:
 
 ```sh
 ./classroom --starter
@@ -29,6 +29,9 @@ Always repeat your custom `--project NAME` if you use one.
 | Profile | Source contract | Typical use |
 | --- | --- | --- |
 | `python-core` | Python source / supported notebook-style cells | Python, NumPy, pandas, statistics, NLP and CPU models |
+| `jax-cpu` | `main.py`, pinned CPU JAX/JAXLIB | Numerical transformations, autodiff, JIT and scientific models |
+| `bayesian-cpu` | `main.py`, pinned PyMC 5/ArviZ 0.23 | Hierarchical fitting, predictive checks and sampling diagnostics |
+| `r-statistics` | `main.R`, Rscript | Statistical programming, S3/S4/R6/S7, base/ggplot2/Plotly graphics |
 | `cpp20` | `main.cpp`, C++20 | C++ language and bounded systems examples |
 | `c17` | `main.c`, C17 | C, memory and POSIX examples |
 | `go` | `main.go` with prepared standard library | Go programs and offline controller models |
@@ -118,3 +121,16 @@ it does not automatically preserve arbitrary temporary caches or checkpoints.
 
 See [offline preparation](setup/offline.md), [image distribution](dockerhub.md)
 and [the launcher guide](one-command-classroom.md) for the corresponding steps.
+
+
+DAX is available in every installation as an offline editor with worked-reference
+tables; it has no worker to build. HTML/CSS and JavaScript/D3/Plotly use the bundled
+browser preview. For a scientific subset, choose:
+
+```sh
+./classroom --profile jax-cpu --profile bayesian-cpu --profile r-statistics
+```
+
+Python Core is included by the launcher. This replaces the saved selection with
+Core and the named profiles. Existing projects preserve their previous selection
+on an ordinary resume; use `--all` when deliberately adding the full current set.

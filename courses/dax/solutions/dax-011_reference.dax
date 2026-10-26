@@ -1,0 +1,16 @@
+// dax-011: DIVIDE, weighted averages and zero denominators
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+
+// dax-011-a: A ratio of sufficient totals
+// Context: All sales; numerator USD and denominator sold units.
+EVALUATE ROW ( "Revenue", [NetRevenue], "Units", [QuantitySold], "NetPerUnit", DIVIDE ( [NetRevenue], [QuantitySold] ) )
+
+// dax-011-b: Explicit undefined-ratio policy
+// Context: Literal values distinguish no denominator from a positive denominator with zero outcome.
+EVALUATE ROW ( "DefaultResult", DIVIDE ( 0, 0 ), "ChosenDisplay", DIVIDE ( 0, 0, 0 ), "ZeroNumerator", DIVIDE ( 0, 5 ) )

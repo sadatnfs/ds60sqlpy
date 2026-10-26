@@ -1,0 +1,98 @@
+{
+  "id": "r-054",
+  "title": "ggplot2 statistics, geometries and grouping",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-053"],
+  "concepts": ["statistic", "geometry", "count bars", "identity bars", "grouping", "binning"],
+  "outcome": "Choose a statistic and grouping contract that matches whether the input contains raw observations or precomputed summaries.",
+  "mechanism": "A ggplot layer may transform data before drawing marks. geom_bar normally counts observations by category, while geom_col uses supplied heights. They can look similar when both happen to produce the same bars, but they expect different data contracts. Confusing raw records with preaggregated counts can count groups twice or discard the intended values.\n\nGrouping determines which observations belong to a connected object or statistical calculation. A line for each person needs a person grouping variable. A single line through all rows can connect unrelated trajectories, especially when several entities share the same x values. Colour mappings can sometimes imply grouping, but an explicit group mapping is clearer when identity matters independently of styling.\n\nHistograms introduce a binning policy. Bin width, boundaries and closure determine which observations enter each bin. A different setting can alter the visual pattern without changing the underlying data. Retain that configuration and distinguish counts from density or other normalized quantities.\n\nInspect the data after the layer's statistic when validating the calculation. A correct bar height, histogram total or number of line groups provides evidence about the chosen transformation. It does not show that the statistic is appropriate for the scientific question or that the displayed plot is readable.\n\nUse the smallest synthetic counterexample that exposes the mistaken contract. Raw category rows versus a three-row count table distinguish count and identity statistics. Two opposing trajectories distinguish entity grouping from row order. Those controls are more informative than a large chart whose transformation choices are difficult to reconstruct.",
+  "vocabulary": [
+    {
+      "term": "Statistic",
+      "definition": "A layer transformation such as counting or binning before geometry is drawn."
+    },
+    {
+      "term": "Identity statistic",
+      "definition": "Using supplied values directly rather than estimating a new summary."
+    },
+    {
+      "term": "Group mapping",
+      "definition": "An assignment of observations to a shared geometric or statistical object."
+    },
+    {
+      "term": "Bin policy",
+      "definition": "The width, boundary and inclusion convention defining histogram membership."
+    }
+  ],
+  "anatomy": "Use geom_bar for raw category records and geom_col for an already summarized height column. Inspect ggplot_build(p)$data[[1]]$count or y to verify the resulting values. For trajectories, map group explicitly and keep the time/order variable defined. Specify histogram binwidth and boundary when the comparison depends on them.",
+  "worked_examples": [
+    {
+      "title": "Raw counts and supplied heights",
+      "code": "d <- data.frame(category = factor(c(\"A\", \"A\", \"B\", \"C\", \"C\", \"C\"), levels = c(\"A\", \"B\", \"C\")))\ncounts <- data.frame(category = factor(c(\"A\", \"B\", \"C\"), levels = c(\"A\", \"B\", \"C\")), n = c(2, 1, 3))\np_count <- ggplot2::ggplot(d, ggplot2::aes(category)) +\n  ggplot2::geom_bar() +\n  ggplot2::labs(y = \"Observation count\")\np_identity <- ggplot2::ggplot(counts, ggplot2::aes(category, n)) +\n  ggplot2::geom_col() +\n  ggplot2::labs(y = \"Supplied count\")\nstopifnot(identical(as.numeric(ggplot2::ggplot_build(p_count)$data[[1]]$y), c(2, 1, 3)))\nstopifnot(identical(as.numeric(ggplot2::ggplot_build(p_identity)$data[[1]]$y), c(2, 1, 3)))\nprint(p_count)\nprint(p_identity)\n",
+      "explanation": "The bars match because the summarized table correctly represents the raw records. Their identical appearance does not make the input contracts interchangeable.",
+      "expected": "Both plots have heights2/1/3, from different declared data representations."
+    },
+    {
+      "title": "Two separate trajectories",
+      "code": "d <- data.frame(time = rep(1:3, 2), value = c(1, 2, 3, 3, 2, 1), person = rep(c(\"A\", \"B\"), each = 3))\np <- ggplot2::ggplot(d, ggplot2::aes(time, value, group = person, colour = person)) +\n  ggplot2::geom_line(linewidth = 1) +\n  ggplot2::geom_point() +\n  ggplot2::labs(x = \"Time\", y = \"Value\", colour = \"Person\")\nbuilt <- ggplot2::ggplot_build(p)$data[[1]]\nstopifnot(length(unique(built$group)) == 2, nrow(built) == 6)\nprint(p)\n",
+      "explanation": "The group mapping preserves entity identity even where trajectories share time coordinates. A line connecting all rows would answer a different and misleading question.",
+      "expected": "Six observations arranged into two line groups."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Count six raw category records with geom_bar.",
+      "hint": "Do not supply a precomputed y height to the count statistic.",
+      "answer": "The three category heights are 2,1,3.",
+      "expected": "Correct count heights."
+    },
+    {
+      "prompt": "Draw an existing count table with geom_col.",
+      "hint": "Use its n column as the identity height.",
+      "answer": "The supplied counts are drawn directly rather than counting the three summary rows.",
+      "expected": "Correct identity heights."
+    },
+    {
+      "prompt": "Diagnose geom_bar(aes(category,n)) with the default statistic.",
+      "hint": "Check the count statistic's input contract.",
+      "answer": "The count statistic does not accept both x and y this way; use geom_col for supplied heights or remove y for raw counting.",
+      "expected": "A specific contract error and repair."
+    },
+    {
+      "prompt": "Construct two person-specific lines over shared times.",
+      "hint": "Map group to person explicitly.",
+      "answer": "The built line layer contains two groups and six observations.",
+      "expected": "Two trajectories."
+    },
+    {
+      "prompt": "Build a histogram with explicit binwidth and boundary and verify total count.",
+      "hint": "Inspect the post-statistic count column.",
+      "answer": "The bin policy is recorded and the bin counts sum to the number of admitted observations.",
+      "expected": "Histogram count conservation."
+    },
+    {
+      "prompt": "Explain why changing bins can change a visual conclusion without changing observations.",
+      "hint": "Separate data from the layer transformation.",
+      "answer": "Different boundaries aggregate observations differently; use a documented policy and sensitivity checks before interpreting a pattern.",
+      "expected": "Binning sensitivity identified."
+    }
+  ],
+  "starter": "# r-054: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(category = factor(c(\"A\", \"A\", \"B\", \"C\", \"C\", \"C\"), levels = c(\"A\", \"B\", \"C\")))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Count six raw category records with geom_bar.\n# TODO: Do not supply a precomputed y height to the count statistic.\n# Exercise 2: Draw an existing count table with geom_col.\n# TODO: Use its n column as the identity height.\n# Exercise 3: Diagnose geom_bar(aes(category,n)) with the default statistic.\n# TODO: Check the count statistic's input contract.\n# Exercise 4: Construct two person-specific lines over shared times.\n# TODO: Map group to person explicitly.\n# Exercise 5: Build a histogram with explicit binwidth and boundary and verify total count.\n# TODO: Inspect the post-statistic count column.\n# Exercise 6: Explain why changing bins can change a visual conclusion without changing observations.\n# TODO: Separate data from the layer transformation.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(category = factor(c(\"A\", \"A\", \"B\", \"C\", \"C\", \"C\"), levels = c(\"A\", \"B\", \"C\")))\ncounts <- data.frame(category = factor(c(\"A\", \"B\", \"C\"), levels = c(\"A\", \"B\", \"C\")), n = c(2, 1, 3))\np <- ggplot2::ggplot(d, ggplot2::aes(category)) +\n  ggplot2::geom_bar()\nidentity <- ggplot2::ggplot(counts, ggplot2::aes(category, n)) +\n  ggplot2::geom_col()\nstopifnot(identical(as.numeric(ggplot2::ggplot_build(p)$data[[1]]$y), c(2, 1, 3)))\nstopifnot(identical(as.numeric(ggplot2::ggplot_build(identity)$data[[1]]$y), c(2, 1, 3)))\nbad <- ggplot2::ggplot(counts, ggplot2::aes(category, n)) +\n  ggplot2::geom_bar()\nstopifnot(inherits(try(ggplot2::ggplot_build(bad), silent = TRUE), \"try-error\"))\npaths <- data.frame(time = rep(1:3, 2), value = c(1, 2, 3, 3, 2, 1), person = rep(c(\"A\", \"B\"), each = 3))\nlines <- ggplot2::ggplot(paths, ggplot2::aes(time, value, group = person, colour = person)) +\n  ggplot2::geom_line() +\n  ggplot2::geom_point()\nstopifnot(length(unique(ggplot2::ggplot_build(lines)$data[[1]]$group)) == 2)\nhistogram <- ggplot2::ggplot(data.frame(value = c(1, 2, 3, 4)), ggplot2::aes(value)) +\n  ggplot2::geom_histogram(binwidth = 2, boundary = 0, closed = \"left\")\nstopifnot(sum(ggplot2::ggplot_build(histogram)$data[[1]]$count) == 4)\nprint(p)\nprint(lines)\ncat(\"r-054 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference verifies the statistic applied by each geometry and includes a deliberate invalid count-layer specification. It keeps raw records and precomputed counts separate even when their final heights match.\n\nThe line-group and histogram checks inspect transformed layer data, not just object classes. Exactly two plots are printed in the reference. Interpretation of patterns and visual accessibility still require the delivered figure to be reviewed.",
+  "sources": [
+    {
+      "title": "Bar and column geometries",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_bar.html"
+    },
+    {
+      "title": "Line geometries",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_path.html"
+    },
+    {
+      "title": "Histogram binning",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_histogram.html"
+    }
+  ]
+}

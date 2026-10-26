@@ -8,11 +8,33 @@ from typing import Any
 from ds60sqlpy.browser_runs import BROWSER_PROFILES, BrowserRunStore, browser_capability
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import reference_relative_path, render_artifact, rendered_targets
+from ds60sqlpy.module_drafts import DRAFT_PROFILES, draft_capability, worked_examples
 from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
 from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
-RUNTIME_GUIDANCE = {
+RUNTIME_GUIDANCE: dict[str, str] = {
+    "jax-cpu": (
+        "The worker executes main.py with pinned JAX/JAXLIB on CPU. JIT and automatic "
+        "differentiation run locally; GPU/TPU and multi-host work require the "
+        "separate environment described in the guide. Default precision follows JAX; "
+        "enable 64-bit mode explicitly where taught."
+    ),
+    "bayesian-cpu": (
+        "The worker runs main.py with pinned PyMC 5 and ArviZ 0.23, using the "
+        "InferenceData API. Sampling is CPU-only and bounded to the selected "
+        "deadline. Review convergence diagnostics; a successful process is not "
+        "evidence of reliable posterior inference."
+    ),
+    "r-statistics": (
+        "The worker executes main.R with Rscript --vanilla in a fresh directory. Base "
+        "R, recommended statistics packages, ggplot2, Plotly, R6 and S7 are "
+        "installed. Explicitly print plotted objects in scripts. At most two bounded "
+        "figures are retained; temporary files are removed after execution. "
+        "Additional packages and multi-file applications use the separate project "
+        "workflow."
+    ),
+    "dax-offline": str(draft_capability("dax-offline")["detail"]),
     "cuda-cpp": (
         "Optional NVIDIA Linux amd64 worker: main.cu is compiled by nvcc as C++20, "
         "then executed on the explicitly selected GPU. Readiness requires a real kernel "
@@ -82,8 +104,9 @@ RUNTIME_GUIDANCE = {
         "UIKit, Apple simulators and app signing use the separate macOS/Xcode labs."
     ),
     "javascript-browser": (
-        "Run this JavaScript in the isolated browser preview with bundled D3 7.9.0. "
-        "The preview provides d3, #chart, #output and captured console output, "
+        "Run this JavaScript in the isolated browser preview "
+        "with bundled D3 7.9.0 and Plotly 4.1.2. "
+        "The preview provides d3, Plotly, #chart, #output and captured console output, "
         "supports top-level await, and blocks network access. Saved browser "
         "observations are not trusted worker-verifier results."
     ),
@@ -180,8 +203,9 @@ class ModuleService:
             }
         if action == "module-readiness":
             profiles = {lesson.runtime_profile for lesson in self.catalog.lessons.values()}
-            ordinary = profiles - BROWSER_PROFILES.keys()
+            ordinary = profiles - BROWSER_PROFILES.keys() - DRAFT_PROFILES
             capabilities = profile_readiness(self.jobs.client, ordinary)
+            capabilities.extend(draft_capability(p) for p in profiles & DRAFT_PROFILES)
             for browser_profile in profiles & BROWSER_PROFILES.keys():
                 capabilities.append(browser_capability(browser_profile))
             return {"profiles": sorted(capabilities, key=lambda row: row["profile"])}
@@ -198,6 +222,10 @@ class ModuleService:
             return {"history": self.browser_runs.history(lesson.id)}
         if action == "module-browser-result":
             return {"receipt": self.browser_runs.get(lesson.id, payload.get("receipt_id"))}
+        if action == "module-worked-examples":
+            if lesson.runtime_profile not in DRAFT_PROFILES or payload.get("reveal") is not True:
+                raise ValueError("Explicitly open an offline worked reference for this lesson.")
+            return worked_examples(self.catalog.root, lesson.id)
         if action == "module-lesson":
             planned = self.catalog.planned[lesson.id]
             session = self.state.read(lesson.id)
@@ -208,9 +236,11 @@ class ModuleService:
                 "learning_mode": lesson.learning_mode,
                 "source_filename": PROFILES[lesson.runtime_profile].filename
                 if lesson.runtime_profile in PROFILES
-                else {"javascript-browser": "main.js", "html-browser": "main.html"}.get(
-                    lesson.runtime_profile, "notes.md"
-                ),
+                else {
+                    "javascript-browser": "main.js",
+                    "html-browser": "main.html",
+                    "dax-offline": "main.dax",
+                }.get(lesson.runtime_profile, "notes.md"),
                 "setup_commands": (
                     [
                         f"./classroom --profile {lesson.runtime_profile}"
@@ -238,16 +268,25 @@ class ModuleService:
                 ),
                 "source": session["source"] if "source" in session else self.catalog.source(lesson),
                 "session": session,
-                "history": self.browser_runs.history(lesson.id)
+                "execution_mode": "draft" if lesson.runtime_profile in DRAFT_PROFILES else "run",
+                "history": []
+                if lesson.runtime_profile in DRAFT_PROFILES
+                else self.browser_runs.history(lesson.id)
                 if lesson.runtime_profile in BROWSER_PROFILES
                 else self.jobs.history(lesson.id),
-                "capability": browser_capability(lesson.runtime_profile)
+                "capability": draft_capability(lesson.runtime_profile)
+                if lesson.runtime_profile in DRAFT_PROFILES
+                else browser_capability(lesson.runtime_profile)
                 if lesson.runtime_profile in BROWSER_PROFILES
                 else self.jobs.client.readiness(lesson.runtime_profile),
             }
         if action == "module-save":
             return {"session": self.state.save(lesson.id, payload.get("fields"))}
         if action == "module-run":
+            if lesson.runtime_profile in DRAFT_PROFILES:
+                raise ValueError(
+                    "Offline DAX supports saved drafts and worked comparisons, not execution."
+                )
             if lesson.runtime_profile in BROWSER_PROFILES:
                 raise ValueError("Use the browser preview for this lesson, not a worker job.")
             return self.jobs.start(

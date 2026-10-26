@@ -323,6 +323,10 @@ if __name__ == "__main__":
 
 - [Hernán and Robins, longitudinal causal methods](https://miguelhernan.org/whatifbook).
 
+## Connected worked tutorial
+
+[Cross-fitting and treatment-confounder feedback](../tutorials/science/README.md). Use the causal and longitudinal cases to connect actual nuisance fits, score inference, sensitivity and sequential treatment assignment.
+
 ## Reading connections
 
 [Previous chapter](16-quasi-experiments-and-causal-study-designs.md) | [Book contents](../README.md) | [Next chapter](18-bayesian-statistics-and-probabilistic-modeling.md)

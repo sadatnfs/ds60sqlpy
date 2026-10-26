@@ -1,0 +1,9 @@
+// dax-057 learner draft: Dynamic RLS needs a complete identity and mapping contract
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Reason about a dynamic region policy, including unmapped identities and policy-table exposure.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a default-deny mapping test matrix.
+
+// Record the synthetic principal and default-deny role assumption in notes.
+EVALUATE ROW ( "Permitted customers", BLANK(), "Visible amount", BLANK() )

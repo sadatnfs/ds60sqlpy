@@ -20,7 +20,7 @@ F.mse_loss accepts prediction and target tensors; a paired-record application sh
 
 ## The denominator determines the gradient
 
-For predictions and targets with identical shape(B, D), let r_bd=prediction_bd-target_bd. The squared-error sum is S=Σ_bΣ_d \({r_{bd}}^{2}\). PyTorch's mean MSE divides byB×D, so \(L=\frac{S}{BD}\). Its derivative with respect to each prediction is 2 \(\frac{r_{bd}}{BD}\). The sum objective instead gives 2 r_bd. This is why changing a reduction changes every gradient even when the forward residuals are identical. [PyTorch 2.9 MSELoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.MSELoss.html).
+For predictions and targets with identical shape(B, D), let \(r_{bd}=\mathrm{prediction}_{bd}-\mathrm{target}_{bd}\). The squared-error sum is \(S=\sum_b\sum_d r_{bd}^2\). PyTorch's mean MSE divides byB×D, so \(L=\frac{S}{BD}\). Its derivative with respect to each prediction is \(\frac{2r_{bd}}{BD}\). The sum objective instead gives 2 r_bd. This is why changing a reduction changes every gradient even when the forward residuals are identical. [PyTorch 2.9 MSELoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.MSELoss.html).
 
 For the residual vector[1, -1, 2], \(S=6\) and \(N=3\). The sum gradient is[2, -2, 4], while the mean gradient is[\(\frac{2}{3}\), \(\frac{-2}{3}\), \(\frac{4}{3}\)]. Duplicating every record doubles the sum and duplicates its derivative contributions. The mean objective remains two because both numerator and denominator double. This argument assumes equal replication of all participating entries; selectively repeating hard examples changes their weighting.
 

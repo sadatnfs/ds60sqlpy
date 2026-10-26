@@ -1,0 +1,22 @@
+// dax-038: Window positions, ordering and row identity
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-038-a: First two positions
+// Context: Whole clean-model Sales relation ordered by unique SaleID; absolute positions 1 through 2.
+EVALUATE SELECTCOLUMNS ( WINDOW ( 1, ABS, 2, ABS, ALL ( Sales[SaleID], Sales[NetAmount] ), ORDERBY ( Sales[SaleID], ASC ) ), "Line", Sales[SaleID], "Amount", Sales[NetAmount] )
+ORDER BY [Line]
+
+// dax-038-b: Last two positions
+// Context: Same explicit relation and ordering; last two absolute positions.
+EVALUATE SELECTCOLUMNS ( WINDOW ( -2, ABS, -1, ABS, ALL ( Sales[SaleID], Sales[NetAmount] ), ORDERBY ( Sales[SaleID], ASC ) ), "Line", Sales[SaleID], "Amount", Sales[NetAmount] )
+ORDER BY [Line]
+
+// dax-038-c: INDEX chooses one absolute position
+// Context: One unpartitioned relation ordered by the unique SaleID; no outer row required.
+EVALUATE INDEX ( 1, ALL ( Sales[SaleID], Sales[NetAmount] ), ORDERBY ( Sales[SaleID], ASC ) )
+
+// dax-038-d: OFFSET identifies a previous row
+// Context: The outer context identifies S4; the relation contains every SaleID in ascending unique order.
+EVALUATE CALCULATETABLE ( OFFSET ( -1, ALL ( Sales[SaleID] ), ORDERBY ( Sales[SaleID], ASC ) ), Sales[SaleID] = "S4" )

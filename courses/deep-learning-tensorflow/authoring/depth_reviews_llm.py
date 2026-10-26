@@ -47,7 +47,7 @@ A successful capstone therefore includes a bounded claim and reproducible interm
 """,
     "llm-015": """## The gradient is a local calculation, not an update
 
-For L(w)=(w-2)^2, the derivative is 2(w-2). At w=0 the loss is 4 and the gradient is -4. backward computes and accumulates that derivative into the leaf tensor's grad field; it does not change w. An optimizer or an explicit update rule would still need to apply w_new=w-learning_rate*gradient. With learning rate 0.1, that rule would move w to 0.4, but the current derivative fixture deliberately keeps the parameter fixed while inspecting gradient state.
+For \\(L(w)=(w-2)^2\\), the derivative is 2(w-2). At w=0 the loss is 4 and the gradient is -4. backward computes and accumulates that derivative into the leaf tensor's grad field; it does not change w. An optimizer or an explicit update rule would still need to apply w_new=w-learning_rate*gradient. With learning rate 0.1, that rule would move w to 0.4, but the current derivative fixture deliberately keeps the parameter fixed while inspecting gradient state.
 
 A central finite difference compares L(h) and L(-h), divided by 2h. For this quadratic the real-arithmetic expression equals -4 for any nonzero h, while floating-point subtraction can still introduce error. More general nonlinear functions have truncation error as well, so a useful check balances a sufficiently small step against cancellation. Float64 makes this small diagnostic easier to inspect than an unnecessarily low-precision calculation.
 
@@ -266,7 +266,7 @@ DEPTH_NOTES.update(
     {
         "llm-029": """## Separate corpus size, tokens processed and training work
 
-In this table, interpret D=10, 000 as the size of the unique available corpus, not as the total number of token presentations made to the optimizer. Both runs can use the same corpus while run B takes twice as many steps. If each step consumes a fixed batch of b nonpadding target tokens, the processed-token count is b*S. Repeatedly visiting a document increases that count without increasing the unique corpus size. These quantities answer different questions about optimization work and information available for generalization.
+In this table, interpret \\(D=10{,}000\\) as the size of the unique available corpus, not as the total number of token presentations made to the optimizer. Both runs can use the same corpus while run B takes twice as many steps. If each step consumes a fixed batch of b nonpadding target tokens, the processed-token count is b*S. Repeatedly visiting a document increases that count without increasing the unique corpus size. These quantities answer different questions about optimization work and information available for generalization.
 
 P is the trainable parameter count, S is the optimizer step count and C is the supplied relative compute budget. The table does not specify enough implementation details to derive C exactly from P, D and S. Multiplying all three can double-count repeated data. A real compute report should state the measured or estimated operation convention, batch size, sequence lengths, forward/backward work and exclusions. Equal wall time is yet another comparison because hardware and implementation affect elapsed time.
 

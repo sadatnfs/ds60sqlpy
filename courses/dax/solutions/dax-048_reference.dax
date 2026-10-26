@@ -1,0 +1,18 @@
+// dax-048: Visual calculations operate on a visual's aggregated shape
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-048-a: Ascending month snapshot
+// Context: A supplied flat visual snapshot in ascending month order; arithmetic expansion only.
+EVALUATE
+VAR VisualRows = DATATABLE ( "Position", INTEGER, "Month", STRING, "Revenue", INTEGER, { { 1, "January2025", 67 }, { 2, "February2025", 56 } } )
+RETURN ADDCOLUMNS ( VisualRows, "RunningRevenue", VAR CurrentPosition = [Position] RETURN SUMX ( FILTER ( VisualRows, [Position] <= CurrentPosition ), [Revenue] ) )
+ORDER BY [Position]
+
+// dax-048-b: Reversed visual order
+// Context: The same monthly values in descending month order; no change to their underlying amounts.
+EVALUATE
+VAR VisualRows = DATATABLE ( "Position", INTEGER, "Month", STRING, "Revenue", INTEGER, { { 1, "February2025", 56 }, { 2, "January2025", 67 } } )
+RETURN ADDCOLUMNS ( VisualRows, "RunningRevenue", VAR CurrentPosition = [Position] RETURN SUMX ( FILTER ( VisualRows, [Position] <= CurrentPosition ), [Revenue] ) )
+ORDER BY [Position]

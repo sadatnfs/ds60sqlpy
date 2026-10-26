@@ -57,7 +57,7 @@ python scripts/course.py catalog
 python scripts/check_modules.py --json
 ```
 
-The current library has 22 subjects, but execution profiles are not a subject
+The catalog determines the subject inventory. Execution profiles are not a subject
 count. Several languages share a worker; CUDA combines reading, CPU and optional
 GPU variants. HTML/CSS and JavaScript/D3 run in browser previews, while PHP CLI
 and the separately prepared HTTP fixture have different contracts.

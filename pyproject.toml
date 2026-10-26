@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ds60sqlpy"
-version = "0.4.1"
+version = "0.5.0"
 description = "Offline-capable classroom for programming, data science and machine learning"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
@@ -106,12 +106,15 @@ ds60-mcp = "ds60sqlpy.mcp_server:main"
 
 [tool.setuptools.package-data]
 ds60sqlpy = [
+  "worker_figures.R",
   "assets/*.html",
   "assets/*.css",
   "assets/*.js",
   "assets/vendor/*.js",
   "assets/vendor/*.txt",
   "assets/vendor/*.json",
+  "assets/vendor/textbook/*",
+  "assets/vendor/textbook/fonts/*.woff2",
 ]
 
 [tool.setuptools.packages.find]

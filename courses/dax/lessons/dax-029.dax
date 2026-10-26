@@ -1,0 +1,9 @@
+// dax-029 learner draft: Active and inactive date roles with USERELATIONSHIP
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Reconcile order-date and ship-date totals without changing the fact amounts.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a clearly named shipment-revenue measure.
+
+EVALUATE
+ROW ( "Order-date amount", BLANK(), "Ship-date amount", BLANK() )

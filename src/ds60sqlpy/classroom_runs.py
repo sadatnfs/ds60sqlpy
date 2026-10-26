@@ -183,7 +183,13 @@ class ClassroomRunStore:
                 raise ValueError("A run figure has invalid base64 content.") from exc
             if len(data) > MAX_FIGURE_BYTES or not data.startswith(b"\x89PNG\r\n\x1a\n"):
                 raise ValueError("A run figure has invalid PNG content or exceeds its size limit.")
-        metadata = {key: value for key, value in result.items() if key != "figures"}
+        if "artifacts" in result:
+            from ds60sqlpy.plot_artifacts import validate_artifacts
+
+            validate_artifacts(result["artifacts"])
+        metadata = {
+            key: value for key, value in result.items() if key not in {"figures", "artifacts"}
+        }
         if len(_encoded(metadata)) > MAX_NON_FIGURE_BYTES:
             raise ValueError("Run result metadata exceeds its stored size limit.")
         encoded = _encoded(result)

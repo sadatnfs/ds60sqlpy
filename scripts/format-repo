@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# One pinned Linux toolchain for contributors on Linux, macOS and Windows/WSL 2.
+# Isolated pinned Linux toolchains for contributors on Linux, macOS and Windows/WSL 2.
 set -euo pipefail
-# The formatter can rewrite this script while Docker runs. Parse the complete
-# function and final compound command before performing any repository writes.
+# Parse these functions and the final compound command before source can be rewritten.
 source_list=""
 cleanup() {
   if [[ -n "$source_list" ]]; then
@@ -11,17 +10,71 @@ cleanup() {
 }
 trap cleanup EXIT
 
+run_tools() {
+  local tool_image=$1
+  shift
+  docker run --rm --init --network=none --read-only --cap-drop=ALL \
+    --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
+    --tmpfs /tmp:rw,nosuid,size=1g --env HOME=/tmp --env PYTHONDONTWRITEBYTECODE=1 \
+    --env PYTHONUTF8=1 --env RUFF_CACHE_DIR=/tmp/ruff --mount "$mount" \
+    ${inventory_args[@]+"${inventory_args[@]}"} --workdir /workspace "$tool_image" \
+    python3 /workspace/scripts/format_repo.py "$@"
+}
+
 main() {
   root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
   force_build=0
   readonly_mount=0
+  list_only=0
+  has_language=0
+  expect_language=0
+  want_r=0
+  want_main=0
   args=()
   for arg in "$@"; do
+    if [[ "$expect_language" == 1 ]]; then
+      [[ -n "$arg" && "$arg" != --* ]] || {
+        echo '--language requires a language name.' >&2
+        exit 2
+      }
+      if [[ "$arg" == r ]]; then want_r=1; else want_main=1; fi
+      args+=("$arg")
+      expect_language=0
+      continue
+    fi
     case "$arg" in
       --build) force_build=1 ;;
-      --check | --list | --lint)
+      --check)
         readonly_mount=1
         args+=("$arg")
+        ;;
+      --list)
+        readonly_mount=1
+        list_only=1
+        args+=("$arg")
+        ;;
+      --lint)
+        readonly_mount=1
+        args+=("$arg")
+        ;;
+      --language)
+        has_language=1
+        expect_language=1
+        args+=("$arg")
+        ;;
+      --language=*)
+        has_language=1
+        selected_language=${arg#--language=}
+        [[ -n "$selected_language" ]] || {
+          echo '--language requires a name.' >&2
+          exit 2
+        }
+        if [[ "$selected_language" == r ]]; then want_r=1; else want_main=1; fi
+        args+=("$arg")
+        ;;
+      --exclude-language* | --only-language*)
+        echo 'Internal language handoff options are not public wrapper arguments.' >&2
+        exit 2
         ;;
       -h | --help)
         cat <<'HELP'
@@ -30,19 +83,33 @@ Usage: ./scripts/format-repo [--check|--lint] [--build] [--list] [--language NAM
 Default: format maintained sources and refresh generated readers.
 --lint        Run static language checks without changing repository files.
 --check       Check sources and generated readers without changing repository files.
---build       Rebuild the formatter tool image with visible Docker build logs.
---list        Print file coverage and preservation reasons without formatting.
+--build       Rebuild selected formatter tool images with visible Docker build logs.
+--list        Print coverage and preservation reasons without running formatters.
 --language    Select one language (repeatable); shared reader refresh is omitted.
 
+R uses a separate pinned R tools image. Other languages use the existing
+Ubuntu formatting image. A full pass checks R first and refreshes shared
+readers only after all source adapters succeed. Listing needs no R tools image.
 Requires Bash and a local Linux Docker engine. Windows users run inside WSL 2.
-Tools are built once per toolchain version, then run offline. This command does
-not start/stop classroom containers, execute lessons, or modify learner state.
+Tools run offline without engine sockets, classroom containers or learner volumes.
 HELP
         exit 0
         ;;
       *) args+=("$arg") ;;
     esac
   done
+  [[ "$expect_language" == 0 ]] || {
+    echo '--language requires a name.' >&2
+    exit 2
+  }
+  if [[ "$has_language" == 0 ]]; then
+    want_r=1
+    want_main=1
+  fi
+  if [[ "$list_only" == 1 ]]; then
+    want_r=0
+    want_main=1
+  fi
   command -v docker >/dev/null 2>&1 || {
     echo 'Docker is required; start your Linux-container engine.' >&2
     exit 2
@@ -55,7 +122,6 @@ HELP
     echo 'Select Linux containers (Windows uses WSL 2).' >&2
     exit 2
   }
-  # Bind mounts refer to the engine host, so a remote daemon cannot safely format this checkout.
   endpoint=${DOCKER_HOST:-}
   if [[ -n "${DOCKER_CONTEXT:-}" ]]; then
     endpoint=$(docker context inspect "$DOCKER_CONTEXT" --format '{{.Endpoints.docker.Host}}')
@@ -69,10 +135,38 @@ HELP
       exit 2
       ;;
   esac
+  mount="type=bind,src=$root,dst=/workspace"
+  if [[ "$readonly_mount" == 1 ]]; then mount="$mount,readonly"; fi
+  inventory_args=()
+  if [[ -e "$root/.git" ]] && command -v git >/dev/null 2>&1; then
+    source_list=$(mktemp "${TMPDIR:-/tmp}/ds60-format-files.XXXXXX")
+    git -C "$root" ls-files --cached --others --exclude-standard -z >"$source_list"
+    inventory_args=(--env DS60_FORMAT_FILE_LIST=/tmp/source-files.bin
+      --mount "type=bind,src=$source_list,dst=/tmp/source-files.bin,readonly")
+  fi
+  if [[ "$want_r" == 1 ]]; then
+    r_fingerprint=$(
+      cd "$root"
+      for file in docker/formatting/Dockerfile.r docker/workers/r/packages.lock.json docker/workers/r/install_packages.py; do
+        cksum "$file" || exit 2
+      done | cksum | awk '{print $1 "-" $2}'
+    )
+    r_image="ds60-formatting-r:$r_fingerprint"
+    if [[ "$force_build" == 1 ]] || ! docker image inspect "$r_image" >/dev/null 2>&1; then
+      echo 'Preparing the isolated R formatting tools from the shared locked R packages.'
+      docker build --progress=plain -f "$root/docker/formatting/Dockerfile.r" -t "$r_image" "$root"
+    fi
+    # Parse every original option before any formatting, then narrow this pass.
+    r_args=(${args[@]+"${args[@]}"} --only-language r)
+    run_tools "$r_image" "${r_args[@]}"
+    # A separate successful R pass permits the Ubuntu process to omit R.
+    args+=(--exclude-language r)
+  fi
+  if [[ "$want_main" == 0 ]]; then return 0; fi
   fingerprint=$(
     cd "$root"
-    # Documentation is excluded from the build context and cannot change tools.
-    find docker/formatting -type f -not -name README.md -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
+    find docker/formatting -type f -not -name README.md -not -name Dockerfile.r \
+      -not -path '*/node_modules/*' -not -path '*/__pycache__/*' -print |
       LC_ALL=C sort | while IFS= read -r file; do cksum "$file"; done | cksum | awk '{print $1 "-" $2}'
   )
   image="ds60-formatting:$fingerprint"
@@ -92,20 +186,7 @@ HELP
     esac
     docker build --progress=plain --build-arg "NPM_REGISTRY=$registry" -t "$image" "$root/docker/formatting"
   fi
-  mount="type=bind,src=$root,dst=/workspace"
-  if [[ "$readonly_mount" == 1 ]]; then mount="$mount,readonly"; fi
-  inventory_args=()
-  if [[ -e "$root/.git" ]] && command -v git >/dev/null 2>&1; then
-    source_list=$(mktemp "${TMPDIR:-/tmp}/ds60-format-files.XXXXXX")
-    git -C "$root" ls-files --cached --others --exclude-standard -z >"$source_list"
-    inventory_args=(--env DS60_FORMAT_FILE_LIST=/tmp/source-files.bin
-      --mount "type=bind,src=$source_list,dst=/tmp/source-files.bin,readonly")
-  fi
-  docker run --rm --init --network=none --read-only --cap-drop=ALL \
-    --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
-    --tmpfs /tmp:rw,nosuid,size=1g --env HOME=/tmp --env PYTHONDONTWRITEBYTECODE=1 \
-    --env PYTHONUTF8=1 --env RUFF_CACHE_DIR=/tmp/ruff --mount "$mount" \
-    ${inventory_args[@]+"${inventory_args[@]}"} --workdir /workspace "$image" python3 /workspace/scripts/format_repo.py ${args[@]+"${args[@]}"}
+  run_tools "$image" ${args[@]+"${args[@]}"}
 }
 
 {

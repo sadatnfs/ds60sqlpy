@@ -1,0 +1,226 @@
+{
+  "schema_version": 1,
+  "id": "unknown-member",
+  "title": "Deliberately unmatched product model",
+  "description": "Original synthetic USD sales. NetAmount = Quantity * UnitPrice - line Discount. No tax or returns are included in NetAmount.",
+  "tables": [
+    {
+      "name": "Product",
+      "path": "courses/dax/models/retail/Product.csv",
+      "sha256": "7c0cf39f0133a5238b1d0bc1b8e6b356e57279604f4416f9bc67cf9d9f89e7a9",
+      "grain": "one row per product",
+      "key": [
+        "ProductKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "ProductKey",
+          "type": "integer"
+        },
+        {
+          "name": "Product",
+          "type": "text"
+        },
+        {
+          "name": "Category",
+          "type": "text"
+        },
+        {
+          "name": "Color",
+          "type": "text"
+        },
+        {
+          "name": "UnitCost",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "path": "courses/dax/models/retail/Customer.csv",
+      "sha256": "2e8ac5aac48f07d1d7eff94d678de397d59473a3ca5a8b552d6bb35bef7156b9",
+      "grain": "one row per customer",
+      "key": [
+        "CustomerKey"
+      ],
+      "row_count": 4,
+      "columns": [
+        {
+          "name": "CustomerKey",
+          "type": "integer"
+        },
+        {
+          "name": "Customer",
+          "type": "text"
+        },
+        {
+          "name": "Region",
+          "type": "text"
+        },
+        {
+          "name": "Segment",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "Sales",
+      "path": "courses/dax/models/unknown-member/Sales.csv",
+      "sha256": "ee31e0d598e7580c4dba074a6c5dcd4520fa88e9c324382bd2fb09044a12697f",
+      "grain": "one sales line; S9 has a deliberately unmatched product",
+      "key": [
+        "SaleID"
+      ],
+      "row_count": 9,
+      "columns": [
+        {
+          "name": "SaleID",
+          "type": "text"
+        },
+        {
+          "name": "OrderID",
+          "type": "integer"
+        },
+        {
+          "name": "ProductKey",
+          "type": "integer"
+        },
+        {
+          "name": "CustomerKey",
+          "type": "integer"
+        },
+        {
+          "name": "OrderDate",
+          "type": "date"
+        },
+        {
+          "name": "ShipDate",
+          "type": "date"
+        },
+        {
+          "name": "Quantity",
+          "type": "integer"
+        },
+        {
+          "name": "UnitPrice",
+          "type": "number"
+        },
+        {
+          "name": "Discount",
+          "type": "number"
+        },
+        {
+          "name": "NetAmount",
+          "type": "number"
+        }
+      ]
+    },
+    {
+      "name": "Date",
+      "path": "courses/dax/models/retail/Date.csv",
+      "sha256": "a83a3b5878431f3145184d345fcffd7c7b74a488b5c539ebf72ac801af1f7d50",
+      "grain": "one calendar day, complete 2024 and 2025",
+      "key": [
+        "Date"
+      ],
+      "row_count": 731,
+      "columns": [
+        {
+          "name": "Date",
+          "type": "date"
+        },
+        {
+          "name": "Year",
+          "type": "integer"
+        },
+        {
+          "name": "MonthNumber",
+          "type": "integer"
+        },
+        {
+          "name": "MonthKey",
+          "type": "integer"
+        },
+        {
+          "name": "YearMonth",
+          "type": "text"
+        },
+        {
+          "name": "DayOfMonth",
+          "type": "integer"
+        },
+        {
+          "name": "FiscalYear",
+          "type": "integer"
+        },
+        {
+          "name": "RetailYear",
+          "type": "integer"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "Product",
+      "from_column": "ProductKey",
+      "to_table": "Sales",
+      "to_column": "ProductKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Customer",
+      "from_column": "CustomerKey",
+      "to_table": "Sales",
+      "to_column": "CustomerKey",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Date",
+      "from_column": "Date",
+      "to_table": "Sales",
+      "to_column": "OrderDate",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": true
+    },
+    {
+      "from_table": "Date",
+      "from_column": "Date",
+      "to_table": "Sales",
+      "to_column": "ShipDate",
+      "cardinality": "one-to-many",
+      "filter_direction": "from_to",
+      "active": false
+    }
+  ],
+  "observation_end": "2025-02-28",
+  "calendar_definitions": [
+    {
+      "name": "RetailCalendar",
+      "table": "Date",
+      "status": "offline specification only; calendar-based time intelligence preview",
+      "tags": {
+        "Day": "Date",
+        "Year": "RetailYear",
+        "Month": "YearMonth"
+      },
+      "year_starts": "February 1"
+    }
+  ],
+  "date_table": {
+    "table": "Date",
+    "column": "Date",
+    "marked": true
+  },
+  "assumptions": [
+    "Dates have no time component.",
+    "All ordinary retail amounts are USD.",
+    "S9 ProductKey 999 is deliberately absent from Product. A regular relationship's synthetic blank member is required in the reference reasoning."
+  ]
+}

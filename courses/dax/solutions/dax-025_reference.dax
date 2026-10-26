@@ -1,0 +1,15 @@
+// dax-025: VALUES, DISTINCT and the model's unknown member
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/unknown-member/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-025-a: Stored keys versus semantic members
+// Context: Unknown-member model; stored Product keys 1..4; Sales also has key 999.
+EVALUATE ROW ( "ValuesMembers", COUNTROWS ( VALUES ( Product[ProductKey] ) ), "StoredDistinctKeys", COUNTROWS ( DISTINCT ( Product[ProductKey] ) ) )
+
+// dax-025-b: Reconcile the unknown amount
+// Context: Unknown-member model; the first expression selects its semantic blank Product member.
+EVALUATE ROW ( "UnknownRevenue", CALCULATE ( [NetRevenue], ISBLANK ( Product[ProductKey] ) ), "AllRevenue", [NetRevenue] )

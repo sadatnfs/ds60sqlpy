@@ -1,0 +1,15 @@
+// dax-034: Rolling windows: calendar days versus event days
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-034-a: A three-calendar-day denominator
+// Context: AnchorFebruary 3,2025; included calendar days February 1,2,3; all observed.
+EVALUATE CALCULATETABLE ( VAR WindowDates = DATESINPERIOD ( 'Date'[Date], MAX ( 'Date'[Date] ), -3, DAY ) VAR RevenueInWindow = CALCULATE ( [NetRevenue], WindowDates ) RETURN ROW ( "Days", COUNTROWS ( WindowDates ), "Revenue", RevenueInWindow, "RevenuePerCalendarDay", DIVIDE ( RevenueInWindow, COUNTROWS ( WindowDates ) ) ), 'Date'[Date] = DATE ( 2025, 2, 3 ) )
+
+// dax-034-b: Two different averages over the same window
+// Context: Same three observed calendar dates; contrast exclusion of BLANK with an explicit zero policy.
+EVALUATE CALCULATETABLE ( VAR WindowDates = DATESINPERIOD ( 'Date'[Date], MAX ( 'Date'[Date] ), -3, DAY ) RETURN ROW ( "SaleDayAverage", AVERAGEX ( WindowDates, [NetRevenue] ), "ObservedCalendarAverage", AVERAGEX ( WindowDates, COALESCE ( [NetRevenue], 0 ) ) ), 'Date'[Date] = DATE ( 2025, 2, 3 ) )

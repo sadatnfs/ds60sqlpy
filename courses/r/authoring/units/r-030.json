@@ -1,0 +1,104 @@
+{
+  "id": "r-030",
+  "title": "Analytical-package capstone with explicit value and data contracts",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-025", "r-026", "r-029"],
+  "concepts": [
+    "data contract",
+    "public API",
+    "S3 summary",
+    "regression test",
+    "analytical package"
+  ],
+  "outcome": "Assemble a tested analytical value object with unique record identity, explicit missingness, compatible aggregation and a documented package continuation.",
+  "mechanism": "A small analytical package should make its scientific data contract visible. This capstone represents a batch of scalar measurements: each row has one unique nonempty identifier, one numeric value and a shared unit. An observed NA is permitted as missing data; NaN and infinities are rejected. The constructor checks equal lengths and stores a value object. These rules prevent accidental recycling, duplicate records and silent changes of measurement scale before a summary is calculated.\n\nThe public operations are metric_batch, summary and combine_batches. The summary method reports row, observed and missing counts, an observed-value mean and the unit. An empty or entirely missing batch has no observed mean and returns NA_real_. The calculation selects observed entries before arithmetic, avoiding the mistaken assumption that multiplying NA by a zero indicator removes it. Missingness is a recorded property of the fixture, not evidence that excluding missing observations yields an unbiased population estimate.\n\nCombining two batches concatenates their records after checking both values and matching units. The constructor then rejects duplicate identifiers across the combined data. This prevents a repeated record from receiving double weight through a convenient concatenation. It does not automatically reconcile conflicting observations, convert units or infer whether two different identifiers describe the same entity. Those policies require additional domain evidence.\n\nA public method validates even a class-labeled object because S3 labels can be forged or fields modified. The helper reconstructs a checked value and the operations return ordinary lists suitable for inspection. No global accumulator is shared between calls. The reference verifies that failed combinations leave the original inputs unchanged and that a saved summary remains a value after later objects are constructed.\n\nThe tests are derived from the contract: known arithmetic, missingness denominators, all-missing and empty inputs, unequal lengths, duplicate IDs, nonfinite values, unit mismatches and forged objects. A final passing marker means these explicit checks passed for this program. It is not an exhaustive proof of correctness or scientific validity. Keep new regression cases when a real defect is discovered rather than asserting only that code runs.\n\nThe single classroom script is a complete local implementation and test fixture. In a separate multi-file package project, place public functions in R/, export metric_batch and combine_batches, register S3method(summary,metric_batch), keep validation helpers internal and add documented tests and examples. Preserve the configuration and input ledger from the preceding lesson. Building, installation, package checks and distribution remain a separate contributor workflow; this pad does not claim to publish or install the package.",
+  "vocabulary": [
+    {
+      "term": "Record identity",
+      "definition": "A declared key used to distinguish observations and detect repeated rows."
+    },
+    {
+      "term": "Data contract",
+      "definition": "Rules for type, shape, units, missingness and meaning at an analytical boundary."
+    },
+    {
+      "term": "Regression test",
+      "definition": "A retained check for a known behavior or previously discovered failure."
+    },
+    {
+      "term": "Public analytical interface",
+      "definition": "The small set of constructors and operations that callers can rely on."
+    }
+  ],
+  "anatomy": "metric_batch(ids,values,unit) creates the validated S3 object. summary.metric_batch participates in base summary dispatch. combine_batches checks equal units and delegates duplicate detection to the constructor. For observed indicators \\(m_i\\), the mean is \\(\\sum_{i:m_i=1}x_i/\\sum_i m_i\\) only when at least one value is observed. The code subsets before summing to preserve NA semantics.",
+  "worked_examples": [
+    {
+      "title": "A summary carries its denominator and units",
+      "code": "metric_batch <- function(ids, values, unit) {\n  if (!is.character(ids) || anyNA(ids) || any(!nzchar(ids)) || anyDuplicated(ids)) {\n    stop(\"ids must be unique nonempty strings\", call. = FALSE)\n  }\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(is.nan(values)) || any(is.infinite(values))) {\n    stop(\"values must be a numeric vector with only finite values or NA\", call. = FALSE)\n  }\n  if (length(ids) != length(values)) stop(\"ids and values must have equal length\", call. = FALSE)\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  structure(list(ids = ids, values = as.double(values), unit = unit), class = \"metric_batch\")\n}\nvalidate_batch <- function(x) {\n  if (!inherits(x, \"metric_batch\")) stop(\"expected a metric_batch\")\n  metric_batch(x$ids, x$values, x$unit)\n}\nsummary.metric_batch <- function(object, ...) {\n  x <- validate_batch(object)\n  observed <- !is.na(x$values)\n  list(\n    rows = length(x$ids), observed = sum(observed), missing = sum(!observed),\n    mean = if (any(observed)) mean(x$values[observed]) else NA_real_, unit = x$unit\n  )\n}\ncombine_batches <- function(x, y) {\n  x <- validate_batch(x)\n  y <- validate_batch(y)\n  if (!identical(x$unit, y$unit)) stop(\"incompatible batch units\")\n  metric_batch(c(x$ids, y$ids), c(x$values, y$values), x$unit)\n}\n\na <- metric_batch(c(\"a\", \"b\", \"c\"), c(2, NA_real_, 6), \"ms\")\ns <- summary(a)\nstopifnot(s$rows == 3L, s$observed == 2L, s$missing == 1L, s$mean == 4, s$unit == \"ms\")\nb <- metric_batch(\"d\", 8, \"ms\")\ncombined <- combine_batches(a, b)\nstopifnot(summary(combined)$rows == 4L, summary(combined)$observed == 3L)\nstopifnot(isTRUE(all.equal(summary(combined)$mean, 16 / 3)))\nprint(summary(combined))\n",
+      "explanation": "The missing row remains in the row count but not in the observed mean denominator. The new record contributes eight milliseconds once. The result describes the admitted records without claiming that missingness is random.",
+      "expected": "Four rows, three observed, one missing; mean 16/3 ms."
+    },
+    {
+      "title": "Duplicate records and incompatible units are explicit failures",
+      "code": "metric_batch <- function(ids, values, unit) {\n  if (!is.character(ids) || anyNA(ids) || any(!nzchar(ids)) || anyDuplicated(ids)) {\n    stop(\"ids must be unique nonempty strings\", call. = FALSE)\n  }\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(is.nan(values)) || any(is.infinite(values))) {\n    stop(\"values must be a numeric vector with only finite values or NA\", call. = FALSE)\n  }\n  if (length(ids) != length(values)) stop(\"ids and values must have equal length\", call. = FALSE)\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  structure(list(ids = ids, values = as.double(values), unit = unit), class = \"metric_batch\")\n}\nvalidate_batch <- function(x) {\n  if (!inherits(x, \"metric_batch\")) stop(\"expected a metric_batch\")\n  metric_batch(x$ids, x$values, x$unit)\n}\nsummary.metric_batch <- function(object, ...) {\n  x <- validate_batch(object)\n  observed <- !is.na(x$values)\n  list(\n    rows = length(x$ids), observed = sum(observed), missing = sum(!observed),\n    mean = if (any(observed)) mean(x$values[observed]) else NA_real_, unit = x$unit\n  )\n}\ncombine_batches <- function(x, y) {\n  x <- validate_batch(x)\n  y <- validate_batch(y)\n  if (!identical(x$unit, y$unit)) stop(\"incompatible batch units\")\n  metric_batch(c(x$ids, y$ids), c(x$values, y$values), x$unit)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\na <- metric_batch(c(\"a\", \"b\"), c(2, 4), \"ms\")\nbefore <- a\nassert_error(combine_batches(a, metric_batch(\"b\", 9, \"ms\")), \"unique nonempty\")\nassert_error(combine_batches(a, metric_batch(\"c\", 1, \"s\")), \"incompatible batch units\")\nstopifnot(identical(a, before))\nmissing <- metric_batch(c(\"m\", \"n\"), c(NA_real_, NA_real_), \"ms\")\nstopifnot(summary(missing)$observed == 0L, is.na(summary(missing)$mean))\nprint(summary(missing))\n",
+      "explanation": "The two failed combinations test different boundaries: duplicate identity and incompatible units. Neither modifies the input. The all-missing case returns missing output deliberately rather than inventing a zero average.",
+      "expected": "Both invalid combinations rejected; all-missing mean NA and observed count 0."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the summary of values c(2,NA,6) with three unique IDs.",
+      "hint": "Keep the row count separate from the observed denominator.",
+      "answer": "Rows 3, observed 2, missing 1, mean 4, with the declared unit.",
+      "expected": "A complete denominator ledger."
+    },
+    {
+      "prompt": "Add one new eight-millisecond record and recompute the summary.",
+      "hint": "Use a new unique ID and the same unit.",
+      "answer": "The combined batch has four rows, three observed values, one missing value and mean 16/3 ms.",
+      "expected": "Known arithmetic 16/3."
+    },
+    {
+      "prompt": "Independently implement and test the duplicate-ID and equal-length constructor rules.",
+      "hint": "Reject before creating a class-labeled value.",
+      "answer": "Duplicate IDs and vectors of unequal length each raise their specific contract error.",
+      "expected": "Two distinct rejected input shapes."
+    },
+    {
+      "prompt": "Diagnose returning zero for an all-missing batch.",
+      "hint": "No observed measurement supports that mean.",
+      "answer": "Return mean NA_real_ and observed 0 while retaining the missing count and unit. Zero is a measured value, not absence of information.",
+      "expected": "Explicit all-missing behavior."
+    },
+    {
+      "prompt": "Test a forged class object and incompatible-unit combination.",
+      "hint": "Public operations validate again and avoid implicit conversion.",
+      "answer": "A forged Inf value fails finite-or-NA validation; a valid seconds batch cannot combine with milliseconds without an explicit conversion. Original inputs remain unchanged.",
+      "expected": "Rejected boundaries without mutation."
+    },
+    {
+      "prompt": "Write the package interface and state the inferential limit of a passing reference.",
+      "hint": "Separate NAMESPACE registration, project workflow and statistical assumptions.",
+      "answer": "Export metric_batch and combine_batches; register S3method(summary,metric_batch); keep helpers internal. Run package checks in a separate multi-file project. These descriptive checks do not establish representativeness or causal effects.",
+      "expected": "A concrete continuation and bounded scientific claim."
+    }
+  ],
+  "starter": "# r-030: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nids <- c(\"a\", \"b\", \"c\")\nvalues <- c(2, NA_real_, 6)\nunit <- \"ms\"\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Predict the summary of values c(2,NA,6) with three unique IDs.\n# TODO: Keep the row count separate from the observed denominator.\n# Exercise 2: Add one new eight-millisecond record and recompute the summary.\n# TODO: Use a new unique ID and the same unit.\n# Exercise 3: Independently implement and test the duplicate-ID and equal-length constructor rules.\n# TODO: Reject before creating a class-labeled value.\n# Exercise 4: Diagnose returning zero for an all-missing batch.\n# TODO: No observed measurement supports that mean.\n# Exercise 5: Test a forged class object and incompatible-unit combination.\n# TODO: Public operations validate again and avoid implicit conversion.\n# Exercise 6: Write the package interface and state the inferential limit of a passing reference.\n# TODO: Separate NAMESPACE registration, project workflow and statistical assumptions.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "metric_batch <- function(ids, values, unit) {\n  if (!is.character(ids) || anyNA(ids) || any(!nzchar(ids)) || anyDuplicated(ids)) {\n    stop(\"ids must be unique nonempty strings\", call. = FALSE)\n  }\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(is.nan(values)) || any(is.infinite(values))) {\n    stop(\"values must be a numeric vector with only finite values or NA\", call. = FALSE)\n  }\n  if (length(ids) != length(values)) stop(\"ids and values must have equal length\", call. = FALSE)\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\", call. = FALSE)\n  }\n  structure(list(ids = ids, values = as.double(values), unit = unit), class = \"metric_batch\")\n}\nvalidate_batch <- function(x) {\n  if (!inherits(x, \"metric_batch\")) stop(\"expected a metric_batch\")\n  metric_batch(x$ids, x$values, x$unit)\n}\nsummary.metric_batch <- function(object, ...) {\n  x <- validate_batch(object)\n  observed <- !is.na(x$values)\n  list(\n    rows = length(x$ids), observed = sum(observed), missing = sum(!observed),\n    mean = if (any(observed)) mean(x$values[observed]) else NA_real_, unit = x$unit\n  )\n}\ncombine_batches <- function(x, y) {\n  x <- validate_batch(x)\n  y <- validate_batch(y)\n  if (!identical(x$unit, y$unit)) stop(\"incompatible batch units\")\n  metric_batch(c(x$ids, y$ids), c(x$values, y$values), x$unit)\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\na <- metric_batch(c(\"a\", \"b\", \"c\"), c(2, NA_real_, 6), \"ms\")\nbefore <- a\ns <- summary(a)\nstopifnot(identical(s, list(rows = 3L, observed = 2L, missing = 1L, mean = 4, unit = \"ms\")))\nb <- combine_batches(a, metric_batch(\"d\", 8, \"ms\"))\nstopifnot(summary(b)$rows == 4L, summary(b)$observed == 3L, summary(b)$missing == 1L)\nstopifnot(isTRUE(all.equal(summary(b)$mean, 16 / 3)))\nassert_error(metric_batch(c(\"a\", \"a\"), c(2, 4), \"ms\"), \"unique nonempty\")\nassert_error(metric_batch(c(\"a\", \"b\"), 2, \"ms\"), \"equal length\")\nassert_error(metric_batch(\"a\", NaN, \"ms\"), \"finite values or NA\")\nassert_error(metric_batch(\"a\", Inf, \"ms\"), \"finite values or NA\")\nall_missing <- metric_batch(c(\"x\", \"y\"), c(NA_real_, NA_real_), \"ms\")\nstopifnot(summary(all_missing)$missing == 2L, summary(all_missing)$observed == 0L, is.na(summary(all_missing)$mean))\nempty <- metric_batch(character(0), numeric(0), \"ms\")\nstopifnot(summary(empty)$rows == 0L, summary(empty)$missing == 0L, is.na(summary(empty)$mean))\nforged <- structure(list(ids = \"a\", values = Inf, unit = \"ms\"), class = \"metric_batch\")\nassert_error(summary(forged), \"finite values or NA\")\nassert_error(combine_batches(a, metric_batch(\"e\", 1, \"s\")), \"incompatible batch units\")\nassert_error(combine_batches(a, metric_batch(\"a\", 9, \"ms\")), \"unique nonempty\")\nstopifnot(identical(a, before), s$mean == 4)\nnamespace <- c(\"export(metric_batch)\", \"export(combine_batches)\", \"S3method(summary,metric_batch)\")\nstopifnot(!any(grepl(\"validate_batch\", namespace, fixed = TRUE)))\nprint(summary(b))\ncat(\"r-030 reference checks passed\\n\")\n",
+  "solution_explanation": "The capstone reference checks independent arithmetic as well as the representation invariant. The equal-length rule prevents recycling; uniqueness prevents a repeated identifier from contributing twice; unit compatibility prevents a silent scale change. Missing observations remain visible in the summary ledger.\n\nThe forged-object test establishes why class labels alone are insufficient. The unchanged-input assertions support the chosen value-object interface, while the proposed NAMESPACE lines identify the optional package boundary. No package has been installed or published by this script, and passing its checks does not make missingness ignorable or supply a causal design.",
+  "sources": [
+    {
+      "title": "R summary generic",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/summary.html"
+    },
+    {
+      "title": "Writing R Extensions: namespaces",
+      "url": "https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Package-namespaces"
+    },
+    {
+      "title": "R missing values",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html"
+    }
+  ]
+}

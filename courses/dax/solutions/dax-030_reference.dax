@@ -1,0 +1,15 @@
+// dax-030: Bridge tables and overlapping audiences
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-030-a: Newsletter's two customers
+// Context: Analytics model; Audience=Newsletter; single-direction relationships into GroupMembership.
+EVALUATE CALCULATETABLE ( ROW ( "RawRevenue", [NetRevenue], "AudienceRevenue", CALCULATE ( [NetRevenue], TREATAS ( VALUES ( GroupMembership[CustomerKey] ), Customer[CustomerKey] ) ) ), Audience[Audience] = "Newsletter" )
+
+// dax-030-b: Prospects overlaps the first audience
+// Context: Analytics model; Audience=Prospects; selected membership keys 20 and 30.
+EVALUATE CALCULATETABLE ( ROW ( "RawRevenue", [NetRevenue], "AudienceRevenue", CALCULATE ( [NetRevenue], TREATAS ( VALUES ( GroupMembership[CustomerKey] ), Customer[CustomerKey] ) ) ), Audience[Audience] = "Prospects" )

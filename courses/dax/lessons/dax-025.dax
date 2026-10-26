@@ -1,0 +1,9 @@
+// dax-025 learner draft: VALUES, DISTINCT and the model's unknown member
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/unknown-member/model.json
+// Goal: Reconcile unmatched facts without confusing the stored dimension with its semantic blank member.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the reconciliation equation for product reporting.
+
+EVALUATE
+ROW ( "Stored product keys", BLANK(), "Relationship values", BLANK(), "Unknown amount", BLANK() )

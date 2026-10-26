@@ -1,0 +1,9 @@
+// dax-011 learner draft: DIVIDE, weighted averages and zero denominators
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Derive a ratio at its declared population and distinguish an undefined ratio from zero.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a measure that leaves undefined rates blank.
+
+EVALUATE
+ROW ( "Net amount", BLANK(), "Quantity", BLANK(), "Amount per unit", BLANK() )

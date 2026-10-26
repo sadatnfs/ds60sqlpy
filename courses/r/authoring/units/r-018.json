@@ -1,0 +1,98 @@
+{
+  "id": "r-018",
+  "title": "Dates, instants and explicit time zones",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-006", "r-016"],
+  "concepts": ["Date", "POSIXct", "Time zone", "Elapsed duration"],
+  "outcome": "Parse dates and timestamps with explicit formats and zones, distinguishing calendar labels from elapsed time.",
+  "mechanism": "A Date describes a calendar date, while a POSIXct object describes an instant with date-time behavior. The same instant can have different displayed clock times in different time zones. Conversely, a local clock label without a time zone may be ambiguous or nonexistent during daylight-saving transitions. Do not silently treat these as interchangeable representations.\n\nParsing is part of the data contract. Use a known format and a declared time zone rather than relying on the host's defaults. These lessons use UTC for deterministic instant examples. A source that supplies local civil time needs its source zone and an explicit ambiguity policy before it can be converted into reliable instants.\n\nCalendar arithmetic and elapsed durations answer different questions. Subtracting Dates counts calendar days. Subtracting date-time instants yields a difftime object whose units should be stated explicitly. A local day can have a different elapsed-hour length around a daylight-saving transition, so adding one day on a calendar is not universally equivalent to adding 24 hours to an instant.\n\nRetain the original timestamp text and parsing diagnostics when ingesting data. Invalid or incomplete text can become NA. A successful parse does not prove that the source zone was correct. Downstream grouping by local date should use a declared display/business zone and should not overwrite the canonical instant used for ordering and elapsed-time calculations.",
+  "vocabulary": [
+    {
+      "term": "Date",
+      "definition": "A calendar date without a time-of-day or time zone."
+    },
+    {
+      "term": "POSIXct",
+      "definition": "An instant represented numerically with date-time behavior."
+    },
+    {
+      "term": "Time zone",
+      "definition": "Rules for displaying and interpreting local civil time."
+    },
+    {
+      "term": "Elapsed duration",
+      "definition": "A difference between instants with explicit units."
+    }
+  ],
+  "anatomy": "as.Date parses calendar dates, as.POSIXct(..., format=..., tz=\"UTC\") parses instants, format(..., tz=...) chooses a display zone, and as.numeric(difftime(a, b, units=\"hours\")) states elapsed units.",
+  "worked_examples": [
+    {
+      "title": "Leap-day calendar arithmetic",
+      "code": "start <- as.Date(\"2024-02-28\")\nend <- as.Date(\"2024-03-01\")\nstopifnot(as.numeric(end - start) == 2)\nstopifnot(format(start + 1, \"%Y-%m-%d\") == \"2024-02-29\")\nprint(seq(start, end, by = \"day\"))\n",
+      "explanation": "The calendar contains leap day. Counting date labels across the boundary therefore gives two days.",
+      "expected": "February 28, February 29, March 1."
+    },
+    {
+      "title": "One instant, two clock displays",
+      "code": "instant <- as.POSIXct(\"2025-01-15 12:00:00\", format = \"%Y-%m-%d %H:%M:%S\", tz = \"UTC\")\nlater <- instant + 90 * 60\nstopifnot(as.numeric(difftime(later, instant, units = \"mins\")) == 90)\nstopifnot(format(instant, \"%H:%M\", tz = \"UTC\") == \"12:00\")\nstopifnot(format(instant, \"%H:%M\", tz = \"America/New_York\") == \"07:00\")\nprint(c(utc = format(instant, tz = \"UTC\"), new_york = format(instant, tz = \"America/New_York\")))\n",
+      "explanation": "Changing the display zone does not change the underlying instant. The elapsed interval is calculated between instants, not by subtracting printed clock strings.",
+      "expected": "12:00 UTC and 07:00 NewYork; elapsed 90 minutes."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the date after 2024-02-28.",
+      "hint": "The year is leap.",
+      "answer": "It is 2024-02-29.",
+      "expected": "It is 2024-02-29."
+    },
+    {
+      "prompt": "Add two hours to a declared UTC instant.",
+      "hint": "An hour is 3600 elapsed seconds here.",
+      "answer": "The instant advances 7200 seconds.",
+      "expected": "The instant advances 7200 seconds."
+    },
+    {
+      "prompt": "Parse an explicit ISO calendar date.",
+      "hint": "Use a Date when time-of-day is not part of the data.",
+      "answer": "as.Date(\"2025-01-15\") retains the calendar date.",
+      "expected": "as.Date(\"2025-01-15\") retains the calendar date."
+    },
+    {
+      "prompt": "Diagnose a local timestamp with no zone near a daylight-saving change.",
+      "hint": "The clock label may be ambiguous or nonexistent.",
+      "answer": "Require the source zone and a defined resolution/rejection policy.",
+      "expected": "Require the source zone and a defined resolution/rejection policy."
+    },
+    {
+      "prompt": "Detect invalid date text.",
+      "hint": "Inspect the parse result rather than assuming success.",
+      "answer": "A failed parse is missing and should be counted or rejected.",
+      "expected": "A failed parse is missing and should be counted or rejected."
+    },
+    {
+      "prompt": "Separate business-date grouping from event ordering.",
+      "hint": "The business zone determines labels; canonical instants determine chronology.",
+      "answer": "Keep both representations with their meanings stated.",
+      "expected": "Keep both representations with their meanings stated."
+    }
+  ],
+  "starter": "# r-018: Dates, instants and explicit time zones\n# Complete the six guide tasks using these local inputs.\ndates <- c(\"2024-02-28\", \"2024-03-01\")\n# TODO: parse dates and distinguish calendar differences from elapsed instants.\nprint(dates)\n",
+  "reference": "stopifnot(as.Date(\"2024-02-28\") + 1 == as.Date(\"2024-02-29\"))\ninstant <- as.POSIXct(\"2025-01-15 12:00:00\", format = \"%Y-%m-%d %H:%M:%S\", tz = \"UTC\")\nstopifnot(as.numeric(difftime(instant + 7200, instant, units = \"hours\")) == 2)\nstopifnot(inherits(as.Date(\"2025-01-15\"), \"Date\"))\nstopifnot(format(instant, \"%H:%M\", tz = \"America/New_York\") == \"07:00\")\ninvalid <- as.Date(\"not-a-date\", format = \"%Y-%m-%d\")\nstopifnot(is.na(invalid))\nstopifnot(as.numeric(instant + 1) > as.numeric(instant))\ncat(\"r-018 reference checks passed\\n\")\n",
+  "solution_explanation": "The calendar contains leap day. Counting date labels across the boundary therefore gives two days.\n\nChanging the display zone does not change the underlying instant. The elapsed interval is calculated between instants, not by subtracting printed clock strings.",
+  "sources": [
+    {
+      "title": "R dates",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Dates.html"
+    },
+    {
+      "title": "R date-time conversion",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/as.POSIXlt.html"
+    },
+    {
+      "title": "R time differences",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/difftime.html"
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+{
+  "id": "r-047",
+  "title": "Decision trees, complexity and held-out decisions",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-046"],
+  "concepts": [
+    "recursive partitioning",
+    "leaf",
+    "complexity parameter",
+    "class probability",
+    "extrapolation"
+  ],
+  "outcome": "Fit a small rpart classifier and distinguish its partition, probability output, complexity policy and generalization limits.",
+  "mechanism": "A decision tree partitions predictor space through a sequence of rules. A terminal leaf stores an outcome summary for the observations reaching that region. The resulting prediction is piecewise constant, which gives trees useful nonlinear behavior but also limits how they extrapolate beyond the observed range.\n\nThe rpart interface supports several response types, so specify the method rather than relying on a response's accidental storage type. A factor response with method=\"class\" defines a classification problem. Splitting criteria, class priors, loss policies and complexity controls affect the fitted tree and should be retained with the result.\n\nThe authored fixture places four low-class observations before four high-class observations along one predictor. A depth-one tree can separate them with an exact threshold. This makes the split and class probabilities inspectable. Perfect training predictions on this constructed pattern are a software/mechanism check, not evidence of broad predictive quality.\n\nComplexity controls change the model family. A larger depth or smaller penalty can fit more detailed training patterns. Pruning returns a simpler tree according to a defined complexity criterion. Selecting that criterion using held-out performance requires a development protocol; repeatedly choosing it on the final assessment set invalidates a clean final comparison.\n\nMissing predictors have package-specific handling, including surrogate behavior. If an application instead requires complete predictors, enforce that policy in an explicit admission wrapper rather than attributing it to the package. New factor levels, unexpected types and observation ownership also need a declared prediction contract.\n\nFinally, a leaf probability is a fitted frequency-like model output, not a calibrated guarantee. Evaluate probability quality, decisions and subgroup behavior independently on appropriate held-out units. A prediction at x=1000 can be confidently assigned to the same terminal region as x=8 without establishing that the real-world outcome rule remains valid there.",
+  "vocabulary": [
+    {
+      "term": "Leaf",
+      "definition": "A terminal region of the predictor partition with its fitted outcome summary."
+    },
+    {
+      "term": "Complexity parameter",
+      "definition": "A control used to restrict or prune splits under the tree-fitting criterion."
+    },
+    {
+      "term": "Surrogate split",
+      "definition": "An alternative predictor rule used by the tree implementation when the primary splitting value is unavailable."
+    },
+    {
+      "term": "Piecewise constant prediction",
+      "definition": "A prediction that stays fixed within a terminal region rather than extending a linear slope."
+    }
+  ],
+  "anatomy": "Fit rpart::rpart with method=\"class\" and explicit rpart.control settings. Inspect frame$var, predict(type=\"class\") and predict(type=\"prob\"). A pruned tree is another model object. Check factor levels and probability-column names before interpreting output. Keep a complete-input wrapper separate from the package's native missing-value behavior.",
+  "worked_examples": [
+    {
+      "title": "An inspectable two-leaf classifier",
+      "code": "d <- data.frame(x = 1:8, label = factor(rep(c(\"low\", \"high\"), each = 4), levels = c(\"low\", \"high\")))\nfit <- rpart::rpart(label ~ x, data = d, method = \"class\", control = rpart::rpart.control(minsplit = 2, minbucket = 1, maxdepth = 1, cp = 0, xval = 0))\nclasses <- predict(fit, data.frame(x = c(2, 7)), type = \"class\")\nprob <- predict(fit, data.frame(x = c(2, 7)), type = \"prob\")\nstopifnot(identical(as.character(classes), c(\"low\", \"high\")))\nstopifnot(sum(fit$frame$var == \"<leaf>\") == 2, max(abs(rowSums(prob) - 1)) < 1e-12)\nprint(prob)\n",
+      "explanation": "The one-dimensional fixture is deliberately separable. It validates class identity and normalized probability output without claiming calibrated performance on unseen populations.",
+      "expected": "Two leaves; classes low/high; probability rows sum to 1."
+    },
+    {
+      "title": "Pruning changes the model",
+      "code": "d <- data.frame(x = 1:8, label = factor(rep(c(\"low\", \"high\"), each = 4)))\nfit <- rpart::rpart(label ~ x, data = d, method = \"class\", control = rpart::rpart.control(minsplit = 2, minbucket = 1, maxdepth = 1, cp = 0, xval = 0))\nsmall <- rpart::prune(fit, cp = 1)\nstopifnot(nrow(small$frame) == 1, sum(small$frame$var == \"<leaf>\") == 1)\nprint(small)\n",
+      "explanation": "The strong complexity threshold collapses this tree to one leaf. This demonstrates a model change, not a claim that the pruned or unpruned candidate is universally preferable.",
+      "expected": "One terminal root after pruning."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Fit the declared depth-one classifier and predict x = 2 and x = 7.",
+      "hint": "Retain explicit response levels and method.",
+      "answer": "The predictions are low and high, matching the two learned regions.",
+      "expected": "low/high."
+    },
+    {
+      "prompt": "Inspect the probability matrix and its column identities.",
+      "hint": "Do not treat column position as an undocumented class label.",
+      "answer": "Rows sum toone and columns identify the factor levels.",
+      "expected": "Named low/high probabilities."
+    },
+    {
+      "prompt": "Prune with cp 1 and count terminal leaves.",
+      "hint": "Inspect the returned object rather than the original fit.",
+      "answer": "The simplified model has one terminal root.",
+      "expected": "One leaf."
+    },
+    {
+      "prompt": "Diagnose using perfect training accuracy to choose a complex tree.",
+      "hint": "Separate fit from independent evaluation.",
+      "answer": "A tree can fit authored or noisy training patterns without generalizing. Complexity selection belongs on development resamples, followed by a distinct final assessment.",
+      "expected": "No unsupported generalization claim."
+    },
+    {
+      "prompt": "Implement a complete-finite-predictor admission policy for this application.",
+      "hint": "Check new inputs before calling predict.",
+      "answer": "Reject NA or infinite x values explicitly while acknowledging that rpart has its own different native missingness mechanisms.",
+      "expected": "Invalid input rejected by the wrapper."
+    },
+    {
+      "prompt": "Predict at x = 1000 and explain the extrapolation limit.",
+      "hint": "Follow the terminal region beyond the training maximum.",
+      "answer": "The tree returns the high region rather than extending a numerical trend. This is a model output outside observed support, not proof of the real-world label.",
+      "expected": "high with a bounded interpretation."
+    }
+  ],
+  "starter": "# r-047: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(x = 1:8, label = factor(rep(c(\"low\", \"high\"), each = 4), levels = c(\"low\", \"high\")))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Fit the declared depth-one classifier and predict x = 2 and x = 7.\n# TODO: Retain explicit response levels and method.\n# Exercise 2: Inspect the probability matrix and its column identities.\n# TODO: Do not treat column position as an undocumented class label.\n# Exercise 3: Prune with cp 1 and count terminal leaves.\n# TODO: Inspect the returned object rather than the original fit.\n# Exercise 4: Diagnose using perfect training accuracy to choose a complex tree.\n# TODO: Separate fit from independent evaluation.\n# Exercise 5: Implement a complete-finite-predictor admission policy for this application.\n# TODO: Check new inputs before calling predict.\n# Exercise 6: Predict at x = 1000 and explain the extrapolation limit.\n# TODO: Follow the terminal region beyond the training maximum.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(x = 1:8, label = factor(rep(c(\"low\", \"high\"), each = 4), levels = c(\"low\", \"high\")))\nfit <- rpart::rpart(label ~ x, data = d, method = \"class\", control = rpart::rpart.control(minsplit = 2, minbucket = 1, maxdepth = 1, cp = 0, xval = 0))\nnew <- data.frame(x = c(2, 7))\nstopifnot(identical(as.character(predict(fit, new, type = \"class\")), c(\"low\", \"high\")))\nprob <- predict(fit, new, type = \"prob\")\nstopifnot(identical(colnames(prob), c(\"low\", \"high\")), max(abs(rowSums(prob) - 1)) < 1e-12)\nsmall <- rpart::prune(fit, cp = 1)\nstopifnot(nrow(small$frame) == 1, sum(small$frame$var == \"<leaf>\") == 1)\npredict_complete <- function(x) {\n  if (anyNA(x) || any(!is.finite(x))) stop(\"complete finite x required\")\n  predict(fit, data.frame(x = x), type = \"class\")\n}\nstopifnot(inherits(try(predict_complete(NA_real_), silent = TRUE), \"try-error\"))\nstopifnot(as.character(predict_complete(1000)) == \"high\")\nstopifnot(all(as.character(predict(fit, d, type = \"class\")) == as.character(d$label)))\ncat(\"r-047 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference validates the fitted partition and the response identities in probability output. It intentionally uses an easy separable fixture so the model mechanics are independently inspectable. The pruning case changes the actual model object and retains a separate leaf count.\n\nThe complete-input policy belongs to the wrapper, not to a false assertion about rpart's native capabilities. Prediction outside the training range is labeled as a model extrapolation. Real complexity selection, calibration and group-aware validation require a separate study.",
+  "sources": [
+    {
+      "title": "R rpart",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.html"
+    },
+    {
+      "title": "R tree controls",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/rpart.control.html"
+    },
+    {
+      "title": "R pruning",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/prune.rpart.html"
+    }
+  ]
+}

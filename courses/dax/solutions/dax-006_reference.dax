@@ -1,0 +1,14 @@
+// dax-006: Model quality capstone: duplicates, missing keys and unknown members
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/unknown-member/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-006-a: A duplicate-key diagnostic, not a loaded dimension
+// Context: A query-local candidate table; it is not related to Sales.
+EVALUATE
+VAR Candidate = DATATABLE ( "Key", INTEGER, "Label", STRING, { { 1, "Notebook" }, { 1, "Other label" }, { 2, "Pen" } } )
+RETURN ROW ( "Rows", COUNTROWS ( Candidate ), "UniqueKeys", COUNTROWS ( DISTINCT ( SELECTCOLUMNS ( Candidate, "Key", [Key] ) ) ) )
+
+// dax-006-b: An unmatched fact key
+// Context: Unknown-member model; no filters; S9 references absent ProductKey 999.
+EVALUATE EXCEPT ( VALUES ( Sales[ProductKey] ), DISTINCT ( Product[ProductKey] ) )

@@ -1,0 +1,12 @@
+// dax-042: Currency conversion belongs at the rate's grain
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-042-a: Convert each transaction before adding
+// Context: Analytics model; three ForeignSales rows; each date/currency rate key exists exactly once.
+EVALUATE ROW ( "ConvertedUSD", SUMX ( ForeignSales, ForeignSales[LocalAmount] * LOOKUPVALUE ( ExchangeRate[USDPerUnit], ExchangeRate[RateDate], ForeignSales[SaleDate], ExchangeRate[Currency], ForeignSales[Currency] ) ) )
+
+// dax-042-b: A latest-rate shortcut changes the policy
+// Context: EUR-only transactions; contrast transaction-date rates with one selected maximum rate in this tiny increasing-rate fixture.
+EVALUATE CALCULATETABLE ( ROW ( "LocalEUR", SUM ( ForeignSales[LocalAmount] ), "CorrectUSD", SUMX ( ForeignSales, ForeignSales[LocalAmount] * LOOKUPVALUE ( ExchangeRate[USDPerUnit], ExchangeRate[RateDate], ForeignSales[SaleDate], ExchangeRate[Currency], ForeignSales[Currency] ) ), "NaiveLatestRateUSD", SUM ( ForeignSales[LocalAmount] ) * MAXX ( FILTER ( ExchangeRate, ExchangeRate[Currency] = "EUR" ), ExchangeRate[USDPerUnit] ) ), ForeignSales[Currency] = "EUR" )

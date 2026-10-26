@@ -1,0 +1,94 @@
+{
+  "id": "r-015",
+  "title": "Errors, warnings and structured recovery",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-012", "r-013"],
+  "concepts": ["Error", "Warning", "Exiting handler", "Cleanup"],
+  "outcome": "Recover from expected input failures without concealing programming defects or dropping diagnostics.",
+  "mechanism": "An error and a warning are different observations. stop signals an error; warning can report a concern while allowing evaluation to continue. Replacing both with a generic success result would erase information the caller may need. A robust interface states which failures are expected and which should propagate for investigation.\n\ntryCatch can turn an expected error into a structured result. A parser might return list(ok=FALSE, value=NULL, message=...) for an invalid record, while valid records return the same field names with ok=TRUE. The caller can then count and inspect rejected records. Returning zero for every failure is dangerous when zero is also a legitimate measured value.\n\nwithCallingHandlers observes a warning while the signaled computation is still active. It can retain the warning and invoke a documented restart to suppress repeated console noise. This is different from an exiting handler that abandons the expression. Only muffle a condition after recording or deliberately handling it; blanket suppression can hide new compatibility or data-quality problems.\n\nResource cleanup belongs to the function that acquires the resource. on.exit can close a connection or restore an option even when later code errors. In a fresh classroom process, an operating-system cleanup may eventually occur anyway, but reusable functions should not depend on process exit to release files or restore configuration. Keep recoverable input errors separate from silent catches around arbitrary application code.",
+  "vocabulary": [
+    {
+      "term": "Error",
+      "definition": "A condition that interrupts normal evaluation unless handled."
+    },
+    {
+      "term": "Warning",
+      "definition": "A condition that reports a concern while evaluation may continue."
+    },
+    {
+      "term": "Exiting handler",
+      "definition": "A handler such as tryCatch that returns control outside the failed expression."
+    },
+    {
+      "term": "Cleanup",
+      "definition": "Work that must occur when leaving an operation."
+    }
+  ],
+  "anatomy": "tryCatch(expr, error=function(e) ...) handles an error result. conditionMessage extracts its text. withCallingHandlers can record warnings; invokeRestart(\"muffleWarning\") continues after suppressing that recorded warning. on.exit(..., add=TRUE) registers cleanup in the current function.",
+  "worked_examples": [
+    {
+      "title": "A parser returns an explicit rejection",
+      "code": "parse_count <- function(text) {\n  if (!is.character(text) || length(text) != 1L || is.na(text) || !grepl(\"^[0-9]+$\", text)) stop(\"count must contain digits\", call. = FALSE)\n  as.integer(text)\n}\nsafe_count <- function(text) tryCatch(list(ok = TRUE, value = parse_count(text), message = NULL), error = function(e) list(ok = FALSE, value = NULL, message = conditionMessage(e)))\nvalid <- safe_count(\"12\")\ninvalid <- safe_count(\"twelve\")\nstopifnot(valid$ok, valid$value == 12L, !invalid$ok, is.null(invalid$value))\nprint(invalid)\n",
+      "explanation": "The rejected input remains distinguishable from a valid count of zero. Its diagnostic is retained for the caller.",
+      "expected": "okFALSE with the digit-only diagnostic."
+    },
+    {
+      "title": "Record a warning without abandoning its value",
+      "code": "warnings_seen <- character()\nvalue <- withCallingHandlers(\n  {\n    warning(\"synthetic review notice\"); 4\n  },\n  warning = function(w) {\n    warnings_seen <<- c(warnings_seen, conditionMessage(w))\n    invokeRestart(\"muffleWarning\")\n  }\n)\nstopifnot(value == 4, identical(warnings_seen, \"synthetic review notice\"))\nprint(list(value = value, warnings = warnings_seen))\n",
+      "explanation": "The calling handler records this known warning and permits the expression to finish. The retained warning remains evidence alongside the value.",
+      "expected": "Value 4 and one recorded notice."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Distinguish a valid zero from a rejected count.",
+      "hint": "Keep an explicit status field.",
+      "answer": "Both cannot be represented by the same unexplained numeric zero.",
+      "expected": "Both cannot be represented by the same unexplained numeric zero."
+    },
+    {
+      "prompt": "Add a valid digit-only input \"0\".",
+      "hint": "The domain includes zero.",
+      "answer": "The result is successful with value 0.",
+      "expected": "The result is successful with value 0."
+    },
+    {
+      "prompt": "Return structured status, value and diagnostic fields.",
+      "hint": "Use the same field names on success and failure.",
+      "answer": "Callers can aggregate rejection rates without parsing arbitrary console output.",
+      "expected": "Callers can aggregate rejection rates without parsing arbitrary console output."
+    },
+    {
+      "prompt": "Diagnose tryCatch(..., error=function(e)0) around a whole pipeline.",
+      "hint": "It can conceal programming and dependency defects.",
+      "answer": "Catch only expected failures at a narrow boundary and retain diagnostics.",
+      "expected": "Catch only expected failures at a narrow boundary and retain diagnostics."
+    },
+    {
+      "prompt": "Restore a changed option after an error.",
+      "hint": "Register cleanup before the operation can fail.",
+      "answer": "on.exit restores the original option when the function exits.",
+      "expected": "on.exit restores the original option when the function exits."
+    },
+    {
+      "prompt": "Explain when suppressing a warning is justified.",
+      "hint": "A suppressed condition still needs a known policy.",
+      "answer": "Handle or record a specifically understood warning; do not silence all new warnings by default.",
+      "expected": "Handle or record a specifically understood warning; do not silence all new warnings by default."
+    }
+  ],
+  "starter": "# r-015: Errors, warnings and structured recovery\n# Complete the six guide tasks using these local inputs.\ninputs <- c(\"12\", \"0\", \"bad\")\n# TODO: retain status and diagnostics for each parse attempt.\nprint(inputs)\n",
+  "reference": "parse_count <- function(text) {\n  if (!is.character(text) || length(text) != 1L || is.na(text) || !grepl(\"^[0-9]+$\", text)) stop(\"invalid count\", call. = FALSE)\n  value <- suppressWarnings(as.integer(text))\n  if (is.na(value)) stop(\"count exceeds integer range\", call. = FALSE)\n  value\n}\nsafe <- function(text) tryCatch(list(ok = TRUE, value = parse_count(text), message = NULL), error = function(e) list(ok = FALSE, value = NULL, message = conditionMessage(e)))\nstopifnot(safe(\"0\")$ok, safe(\"0\")$value == 0L, !safe(\"bad\")$ok)\nstopifnot(!safe(\"999999999999999999999\")$ok, !safe(12)$ok)\nold <- getOption(\"digits\")\nchange_then_fail <- function() {\n  previous <- options(digits = 3); on.exit(options(previous), add = TRUE); stop(\"intentional\")\n}\ntryCatch(change_then_fail(), error = function(e) NULL)\nstopifnot(identical(getOption(\"digits\"), old))\ncat(\"r-015 reference checks passed\\n\")\n",
+  "solution_explanation": "The rejected input remains distinguishable from a valid count of zero. Its diagnostic is retained for the caller.\n\nThe calling handler records this known warning and permits the expression to finish. The retained warning remains evidence alongside the value.",
+  "sources": [
+    {
+      "title": "R condition handling",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/conditions.html"
+    },
+    {
+      "title": "R function-exit cleanup",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/on.exit.html"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+// dax-026 learner draft: Virtual tables have row-retention and column contracts
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Predict which rows survive a projection, an extension and a grouped summary.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write an intermediate-table ledger for a revenue-threshold calculation.
+
+EVALUATE
+ADDCOLUMNS ( VALUES ( Product[Category] ), "Category amount", BLANK() )

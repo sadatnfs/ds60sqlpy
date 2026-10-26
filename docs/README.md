@@ -60,3 +60,17 @@ systems. [Inside a Transformer](learning/inside-a-transformer.md) gives a numeri
 explanation. [Professional routes](professional-paths.md) deepen Python, SQL and
 cross-language engineering. All subject entrances are in the front README and
 classroom chooser.
+
+
+## Numerical, statistical and visualization extensions
+
+[JAX](../courses/jax/README.md) covers CPU numerical transformations and explicit
+optional accelerator workflows. [R](../courses/r/README.md) adds statistical
+programming and graphics. [DAX](../courses/dax/README.md) is an offline source and
+worked-reference course. The [statistics tutorials](../courses/statistics-ml/tutorials/README.md)
+connect experimentation, learning theory and scientific analysis to executable
+cases. [Data visualization](../courses/data-visualization/README.md) pairs Python
+and JavaScript implementations.
+
+See [textbook rendering](textbook-rendering.md) for TeX and typography and
+[plotting](plotting.md) for captured figures, interactive charts and saved results.

@@ -281,6 +281,10 @@ if __name__ == "__main__":
 
 - [SciPy linear sum assignment](https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.linear_sum_assignment.html)
 
+## Connected worked tutorial
+
+[Resource allocation under effect uncertainty](../tutorials/science/05-ranking-policy-and-allocation.md). Compare expected-value and conservative allocation scenarios while preserving feasibility and intervention meaning.
+
 ## Reading connections
 
 [Previous chapter](35-bandits-reinforcement-learning-and-adaptive-decisions.md) | [Book contents](../README.md) | [Next chapter](37-simulation-and-computational-statistics.md)

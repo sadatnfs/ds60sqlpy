@@ -1057,7 +1057,7 @@
       ]
     },
     {
-      "source": ".95\u00b2=.9025",
+      "source": ".95²=.9025",
       "latex": "{0.95}^{2}=0.9025",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-032.md",
@@ -1115,7 +1115,7 @@
       "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
-      "source": "0.1*w\u00b2",
+      "source": "0.1*w²",
       "latex": "0.1\\cdot {w}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-017.md",
@@ -1322,7 +1322,7 @@
       ]
     },
     {
-      "source": "1.5\u00d70.95^198",
+      "source": "1.5×0.95^198",
       "latex": "1.5\\cdot {0.95}^{198}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-012.md",
@@ -1330,7 +1330,7 @@
       ]
     },
     {
-      "source": "1.5\u00d70.95^200",
+      "source": "1.5×0.95^200",
       "latex": "1.5\\cdot {0.95}^{200}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-012.md",
@@ -1356,7 +1356,7 @@
       "paths": ["courses/llm-applied/guides/llm-applied-017.md"]
     },
     {
-      "source": "1.80\u00d710^308",
+      "source": "1.80×10^308",
       "latex": "1.8\\cdot {10}^{308}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-029.md",
@@ -1939,7 +1939,7 @@
       "paths": ["courses/deep-learning-tensorflow/guides/tf-008.md"]
     },
     {
-      "source": "16\u00d76\u00d73=288",
+      "source": "16×6×3=288",
       "latex": "16\\cdot 6\\cdot 3=288",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-006.md",
@@ -1955,12 +1955,12 @@
       ]
     },
     {
-      "source": "1^t",
-      "latex": "{1}^{t}",
+      "source": "1-beta1^t",
+      "latex": "1-\\beta_1^t",
       "paths": ["courses/llm-applied/guides/llm-applied-015.md"]
     },
     {
-      "source": "1\u00d71+2\u00d70+4\u00d70+5\u00d7(-1)=-4",
+      "source": "1×1+2×0+4×0+5×(-1)=-4",
       "latex": "1\\cdot 1+2\\cdot 0+4\\cdot 0+5\\cdot (-1)=-4",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-019.md",
@@ -2023,7 +2023,7 @@
       ]
     },
     {
-      "source": "2*B*Hq*T\u00b2*d",
+      "source": "2*B*Hq*T²*d",
       "latex": "2\\cdot B\\cdot H_q\\cdot {T}^{2}\\cdot d",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -2397,12 +2397,12 @@
       ]
     },
     {
-      "source": "2^t",
-      "latex": "{2}^{t}",
+      "source": "1-beta2^t",
+      "latex": "1-\\beta_2^t",
       "paths": ["courses/llm-applied/guides/llm-applied-015.md"]
     },
     {
-      "source": "2\u00d712=24",
+      "source": "2×12=24",
       "latex": "2\\cdot 12=24",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-026.md",
@@ -2410,7 +2410,7 @@
       ]
     },
     {
-      "source": "2\u00d71\u00d72\u00d72=8",
+      "source": "2×1×2×2=8",
       "latex": "2\\cdot 1\\cdot 2\\cdot 2=8",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-019.md",
@@ -2481,7 +2481,7 @@
       ]
     },
     {
-      "source": "3*x\u00b2",
+      "source": "3*x²",
       "latex": "3\\cdot {x}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-026.md",
@@ -2516,7 +2516,7 @@
       ]
     },
     {
-      "source": "3.39\u00d710^38",
+      "source": "3.39×10^38",
       "latex": "3.39\\cdot {10}^{38}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-029.md",
@@ -2524,7 +2524,7 @@
       ]
     },
     {
-      "source": "3.40\u00d710^38",
+      "source": "3.40×10^38",
       "latex": "3.4\\cdot {10}^{38}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-029.md",
@@ -2649,7 +2649,7 @@
       ]
     },
     {
-      "source": "4*B*T\u00b2*D",
+      "source": "4*B*T²*D",
       "latex": "4\\cdot B\\cdot {T}^{2}\\cdot D",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -2880,7 +2880,7 @@
       "paths": ["courses/llm-theory/guides/llm-032.md"]
     },
     {
-      "source": "8*512\u00b2*4",
+      "source": "8*512²*4",
       "latex": "8\\cdot {512}^{2}\\cdot 4",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -2888,7 +2888,7 @@
       ]
     },
     {
-      "source": "8*B*T*D\u00b2",
+      "source": "8*B*T*D²",
       "latex": "8\\cdot B\\cdot T\\cdot {D}^{2}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -3082,7 +3082,7 @@
       ]
     },
     {
-      "source": "B*Hq*T\u00b2",
+      "source": "B*Hq*T²",
       "latex": "B\\cdot H_q\\cdot {T}^{2}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -3090,7 +3090,7 @@
       ]
     },
     {
-      "source": "B*Hq*T\u00b2*s",
+      "source": "B*Hq*T²*s",
       "latex": "B\\cdot H_q\\cdot {T}^{2}\\cdot s",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
@@ -3318,8 +3318,8 @@
       ]
     },
     {
-      "source": "D=10",
-      "latex": "D=10",
+      "source": "D=10,000",
+      "latex": "D=10{,}000",
       "paths": ["courses/llm-theory/guides/llm-029.md"]
     },
     {
@@ -3578,7 +3578,7 @@
       "paths": ["courses/nlp/guides/nlp-022.md"]
     },
     {
-      "source": "J=I/r-xxT/(d*r\u00b3)",
+      "source": "J=I/r-xxT/(d*r³)",
       "latex": "J=\\frac{I}{r}-\\frac{xx^{\\mathsf T}}{d\\cdot {r}^{3}}",
       "paths": [
         "courses/llm-theory/guides/llm-045.md",
@@ -3599,7 +3599,7 @@
       ]
     },
     {
-      "source": "Jx=epsilon*x/r\u00b3",
+      "source": "Jx=epsilon*x/r³",
       "latex": "Jx=\\frac{\\epsilon\\cdot x}{{r}^{3}}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-045.md",
@@ -3688,7 +3688,7 @@
       "paths": ["courses/deep-learning-tensorflow/guides/tf-006.md"]
     },
     {
-      "source": "L=(a-1)\u00b2",
+      "source": "L=(a-1)²",
       "latex": "L={\\left(a-1\\right)}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-006.md",
@@ -3696,8 +3696,8 @@
       ]
     },
     {
-      "source": "L=-log",
-      "latex": "L=-\\mathrm{log}",
+      "source": "L=-log p_y",
+      "latex": "L=-\\log p_y",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-033.md",
         "courses/llm-theory/guides/llm-002.md",
@@ -4001,7 +4001,7 @@
     },
     {
       "source": "QK^T",
-      "latex": "{QK}^{T}",
+      "latex": "QK^{\\mathsf T}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-025.md",
         "courses/llm-theory/guides/llm-025.md"
@@ -4009,7 +4009,7 @@
     },
     {
       "source": "QWD^T",
-      "latex": "{QWD}^{T}",
+      "latex": "QWD^{\\mathsf T}",
       "paths": [
         "courses/llm-applied/guides/llm-applied-020.md",
         "courses/llm-applied/solutions/llm-applied-020_solutions.md"
@@ -4065,7 +4065,7 @@
     },
     {
       "source": "S=QK^T/sqrt(d)",
-      "latex": "S=\\frac{{QK}^{T}}{\\sqrt{d}}",
+      "latex": "S=\\frac{QK^{\\mathsf T}}{\\sqrt{d}}",
       "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
@@ -4083,7 +4083,7 @@
     },
     {
       "source": "S_score=QK^T/sqrt(d_k)",
-      "latex": "S_{\\mathrm{score}}=\\frac{{QK}^{T}}{\\sqrt{d_{k}}}",
+      "latex": "S_{\\mathrm{score}}=\\frac{QK^{\\mathsf T}}{\\sqrt{d_{k}}}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-022.md",
         "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
@@ -4275,7 +4275,7 @@
       "paths": ["courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md"]
     },
     {
-      "source": "Var(y)=x\u00b2*p/q",
+      "source": "Var(y)=x²*p/q",
       "latex": "\\operatorname{Var}(y)=\\frac{{x}^{2}\\cdot p}{q}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-017.md",
@@ -4399,7 +4399,7 @@
     },
     {
       "source": "XB^T",
-      "latex": "{XB}^{T}",
+      "latex": "XB^{\\mathsf T}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-027.md",
         "courses/deep-learning-pytorch/solutions/torch-027_solutions.md"
@@ -4443,7 +4443,7 @@
       ]
     },
     {
-      "source": "Y_j\u00b2",
+      "source": "Y_j²",
       "latex": "{Y_{j}}^{2}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-032.md",
@@ -4852,7 +4852,7 @@
       ]
     },
     {
-      "source": "a=z\u00b2",
+      "source": "a=z²",
       "latex": "a={z}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-006.md",
@@ -5074,7 +5074,7 @@
       ]
     },
     {
-      "source": "beta\u00b2*sigmoid(z)*sigmoid(-z)",
+      "source": "beta²*sigmoid(z)*sigmoid(-z)",
       "latex": "{\\beta}^{2}\\cdot \\sigma(z)\\cdot \\sigma(-z)",
       "paths": [
         "courses/llm-applied/guides/llm-applied-019.md",
@@ -5148,7 +5148,7 @@
       ]
     },
     {
-      "source": "c_i\u00b2",
+      "source": "c_i²",
       "latex": "{c_{i}}^{2}",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-045.md",
@@ -5253,8 +5253,8 @@
       ]
     },
     {
-      "source": "dL/dA=G",
-      "latex": "\\frac{\\partial L}{\\partial A}=G",
+      "source": "dL/dA=G V^T",
+      "latex": "\\frac{\\partial L}{\\partial A}=GV^{\\mathsf T}",
       "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
@@ -5266,8 +5266,8 @@
       ]
     },
     {
-      "source": "dL/dE=S^T",
-      "latex": "\\frac{\\partial L}{\\partial E}={S}^{T}",
+      "source": "dL/dE=S^T G",
+      "latex": "\\frac{\\partial L}{\\partial E}=S^{\\mathsf T}G",
       "paths": ["courses/llm-theory/guides/llm-008.md"]
     },
     {
@@ -5284,29 +5284,29 @@
       ]
     },
     {
-      "source": "dL/dK=sX^T",
-      "latex": "\\frac{\\partial L}{\\partial K}={sX}^{T}",
+      "source": "dL/dK=sX^T G",
+      "latex": "\\frac{\\partial L}{\\partial K}=sX^{\\mathsf T}G",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-026.md",
         "courses/deep-learning-pytorch/solutions/torch-026_solutions.md"
       ]
     },
     {
-      "source": "dL/dP=G",
-      "latex": "\\frac{\\partial L}{\\partial P}=G",
+      "source": "dL/dP=G V^T",
+      "latex": "\\frac{\\partial L}{\\partial P}=GV^{\\mathsf T}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-022.md",
         "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
       ]
     },
     {
-      "source": "dL/dV=A^T",
-      "latex": "\\frac{\\partial L}{\\partial V}={A}^{T}",
+      "source": "dL/dV=A^T G",
+      "latex": "\\frac{\\partial L}{\\partial V}=A^{\\mathsf T}G",
       "paths": ["courses/llm-theory/guides/llm-043.md"]
     },
     {
-      "source": "dL/dV=P^T",
-      "latex": "\\frac{\\partial L}{\\partial V}={P}^{T}",
+      "source": "dL/dV=P^T G",
+      "latex": "\\frac{\\partial L}{\\partial V}=P^{\\mathsf T}G",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-022.md",
         "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
@@ -5322,7 +5322,7 @@
     },
     {
       "source": "dL/dX=G+sGK^T",
-      "latex": "\\frac{\\partial L}{\\partial X}=G+{sGK}^{T}",
+      "latex": "\\frac{\\partial L}{\\partial X}=G+sGK^{\\mathsf T}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-026.md",
         "courses/deep-learning-pytorch/solutions/torch-026_solutions.md"
@@ -5342,17 +5342,17 @@
       ]
     },
     {
-      "source": "dL/ds_j=a_j",
-      "latex": "\\frac{\\partial L}{\\partial s_{j}}=a_{j}",
+      "source": "dL/ds_j=a_j g^T(v_j-o)",
+      "latex": "\\frac{\\partial L}{\\partial s_j}=a_jg^{\\mathsf T}(v_j-o)",
       "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
-      "source": "dL/dv_j=a_j",
-      "latex": "\\frac{\\partial L}{\\partial v_{j}}=a_{j}",
+      "source": "dL/dv_j=a_j g",
+      "latex": "\\frac{\\partial L}{\\partial v_j}=a_jg",
       "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
-      "source": "dL/dw=6\u00d74\u00d72=48",
+      "source": "dL/dw=6×4×2=48",
       "latex": "\\frac{\\partial L}{\\partial w}=6\\cdot 4\\cdot 2=48",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-006.md",
@@ -5753,7 +5753,7 @@
       ]
     },
     {
-      "source": "fan_in\u00d7Var(weight)\u00d7Var(input)",
+      "source": "fan_in×Var(weight)×Var(input)",
       "latex": "\\mathrm{fan}_{\\mathrm{in}}\\cdot \\operatorname{Var}(\\mathrm{weight})\\cdot \\operatorname{Var}(\\mathrm{input})",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-016.md",
@@ -6510,7 +6510,7 @@
       ]
     },
     {
-      "source": "loss=(a-1)\u00b2",
+      "source": "loss=(a-1)²",
       "latex": "\\mathrm{loss}={\\left(a-1\\right)}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-006.md",
@@ -6681,7 +6681,7 @@
       "paths": ["courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md"]
     },
     {
-      "source": "mean(x\u00b2)",
+      "source": "mean(x²)",
       "latex": "\\operatorname{mean}({x}^{2})",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-009.md",
@@ -7331,13 +7331,13 @@
       "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
-      "source": "r=sqrt(mean(x\u00b2)+epsilon)",
+      "source": "r=sqrt(mean(x²)+epsilon)",
       "latex": "r=\\sqrt{\\operatorname{mean}({x}^{2})+\\epsilon}",
       "paths": ["courses/llm-theory/guides/llm-045.md"]
     },
     {
-      "source": "r=y-X",
-      "latex": "r=y-X",
+      "source": "r=y-X beta",
+      "latex": "r=y-X\\beta",
       "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
@@ -7354,7 +7354,7 @@
       ]
     },
     {
-      "source": "r_bd\u00b2",
+      "source": "r_bd²",
       "latex": "{r_{bd}}^{2}",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-004.md",
@@ -7535,8 +7535,8 @@
       ]
     },
     {
-      "source": "s_ij=q_i^T",
-      "latex": "s_{ij}={q_{i}}^{T}",
+      "source": "s_ij=q_i^T k_j/sqrt(d_k)",
+      "latex": "s_{ij}=\\frac{q_i^{\\mathsf T}k_j}{\\sqrt{d_k}}",
       "paths": ["courses/llm-theory/guides/llm-009.md"]
     },
     {
@@ -7789,7 +7789,7 @@
       "paths": ["courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md"]
     },
     {
-      "source": "sum(w\u00b2)",
+      "source": "sum(w²)",
       "latex": "\\operatorname{sum}({w}^{2})",
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-017.md",
@@ -8123,7 +8123,7 @@
       ]
     },
     {
-      "source": "x/sqrt(mean(x\u00b2)+eps)",
+      "source": "x/sqrt(mean(x²)+eps)",
       "latex": "\\frac{x}{\\sqrt{\\operatorname{mean}({x}^{2})+\\epsilon}}",
       "paths": [
         "courses/llm-theory/guides/llm-045.md",
@@ -8453,8 +8453,8 @@
       ]
     },
     {
-      "source": "z_i=w^T",
-      "latex": "z_{i}={w}^{T}",
+      "source": "z_i=w^T h_i+b",
+      "latex": "z_i=w^{\\mathsf T}h_i+b",
       "paths": [
         "courses/llm-theory/authoring/textbook_advanced/llm-026.md",
         "courses/llm-theory/guides/llm-026.md"
@@ -8493,7 +8493,7 @@
       "latex": "\\log\\!\\left(\\frac{0.8}{0.2}\\right)=\\log4"
     },
     {
-      "source": "p_c=exp(z_c)/\u03a3_j exp(z_j)",
+      "source": "p_c=exp(z_c)/Σ_j exp(z_j)",
       "latex": "p_c=\\frac{e^{z_c}}{\\sum_j e^{z_j}}"
     },
     {
@@ -8553,7 +8553,7 @@
       "latex": "a^{\\mathsf T}[-c,0]"
     },
     {
-      "source": "grad_output\u00d73x^2",
+      "source": "grad_output×3x^2",
       "latex": "\\mathrm{grad\\_output}\\times3x^2"
     },
     {
@@ -8573,7 +8573,7 @@
       "latex": "\\frac{\\sum_r n_rg_r}{N}"
     },
     {
-      "source": "L_r=(R/N)\u00d7sum_i loss_ri",
+      "source": "L_r=(R/N)×sum_i loss_ri",
       "latex": "L_r=\\frac{R}{N}\\sum_i\\ell_{ri}"
     },
     {
@@ -8777,7 +8777,7 @@
       "latex": "\\frac{\\partial L}{\\partial b}=\\frac1N\\sum_i(p_i-y_i)"
     },
     {
-      "source": "sum_i(c_i-a_i)\u00b2/N",
+      "source": "sum_i(c_i-a_i)²/N",
       "latex": "\\frac1N\\sum_i(c_i-a_i)^2"
     },
     {
@@ -8797,7 +8797,7 @@
       "latex": "L=-\\frac{\\sum_t m_t\\log p_t(y_t)}{\\sum_t m_t}"
     },
     {
-      "source": "L=(1/8)sum_j Y_j\u00b2",
+      "source": "L=(1/8)sum_j Y_j²",
       "latex": "L=\\frac18\\sum_jY_j^2"
     },
     {
@@ -8889,11 +8889,11 @@
       "latex": "\\mu=\\frac1d\\sum_ix_i"
     },
     {
-      "source": "v=(1/d)sum_i c_i\u00b2",
+      "source": "v=(1/d)sum_i c_i²",
       "latex": "v=\\frac1d\\sum_ic_i^2"
     },
     {
-      "source": "x/sqrt[(1/d)sum_i x_i\u00b2+epsilon]",
+      "source": "x/sqrt[(1/d)sum_i x_i²+epsilon]",
       "latex": "\\frac{x}{\\sqrt{\\frac1d\\sum_ix_i^2+\\epsilon}}"
     },
     {
@@ -8913,15 +8913,15 @@
       "latex": "\\operatorname{SiLU}(g)=g\\operatorname{sigmoid}(g)"
     },
     {
-      "source": "r=sqrt[(1/d)sum_j x_j\u00b2+epsilon]",
+      "source": "r=sqrt[(1/d)sum_j x_j²+epsilon]",
       "latex": "r=\\sqrt{\\frac1d\\sum_jx_j^2+\\epsilon}"
     },
     {
-      "source": "J=I/r-xx^T/(d r\u00b3)",
+      "source": "J=I/r-xx^T/(d r³)",
       "latex": "J=\\frac{I}{r}-\\frac{xx^{\\mathsf T}}{dr^3}"
     },
     {
-      "source": "(x-mean(x))/sqrt(mean((x-mean(x))\u00b2)+eps)",
+      "source": "(x-mean(x))/sqrt(mean((x-mean(x))²)+eps)",
       "latex": "\\frac{x-\\operatorname{mean}(x)}{\\sqrt{\\operatorname{mean}((x-\\operatorname{mean}(x))^2)+\\epsilon}}"
     },
     {
@@ -8997,7 +8997,7 @@
       "latex": "1-\\sum_i\\min(p_i,q_i)"
     },
     {
-      "source": "1+a+a\u00b2+...+a^gamma",
+      "source": "1+a+a²+...+a^gamma",
       "latex": "1+a+a^2+\\cdots+a^\\gamma"
     },
     {
@@ -9093,7 +9093,7 @@
       "latex": "O(n\\log n)"
     },
     {
-      "source": "O(n\u00b2)",
+      "source": "O(n²)",
       "latex": "O(n^2)"
     },
     {
@@ -9125,15 +9125,15 @@
       "latex": "O(nm)"
     },
     {
-      "source": "J=I/r-xx^T/(d*r\u00b3)",
+      "source": "J=I/r-xx^T/(d*r³)",
       "latex": "J=\\frac{I}{r}-\\frac{xx^{\\mathsf T}}{dr^3}"
     },
     {
-      "source": "P/r-cc^T/(d*r\u00b3)",
+      "source": "P/r-cc^T/(d*r³)",
       "latex": "\\frac{P}{r}-\\frac{cc^{\\mathsf T}}{dr^3}"
     },
     {
-      "source": "-x_i*x_j/(d*r\u00b3)",
+      "source": "-x_i*x_j/(d*r³)",
       "latex": "-\\frac{x_ix_j}{dr^3}"
     },
     {
@@ -9498,6 +9498,884 @@
       "paths": [
         "courses/deep-learning-pytorch/guides/torch-030.md",
         "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "D=10, 000",
+      "latex": "D=10{,}000",
+      "paths": ["courses/llm-theory/guides/llm-029.md"]
+    },
+    {
+      "source": "v_t=beta 2*v_(t-1)+(1-beta 2)*g_t²",
+      "latex": "v_t=\\beta_2v_{t-1}+(1-\\beta_2)g_t^2"
+    },
+    {
+      "source": "H(q,p)=H(q)+KL(q||p)",
+      "latex": "H(q,p)=H(q)+D_{\\mathrm{KL}}(q\\Vert p)"
+    },
+    {
+      "source": "D_1(j)=log pi_j+log b_j(x_1)",
+      "latex": "D_1(j)=\\log\\pi_j+\\log b_j(x_1)",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "D_t(j)=log b_j(x_t)+max_i[D_(t-1)(i)+log a_ij]",
+      "latex": "D_t(j)=\\log b_j(x_t)+\\max_i\\left[D_{t-1}(i)+\\log a_{ij}\\right]",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "PMI(i,j)=log[(C_ij/N)/((C_i+/N)*(C_+j/N))]=log[C_ij*N/(C_i+*C_+j)]",
+      "latex": "\\operatorname{PMI}(i,j)=\\log\\frac{C_{ij}/N}{(C_{i+}/N)(C_{+j}/N)}=\\log\\frac{C_{ij}N}{C_{i+}C_{+j}}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "M=U*diag(s)*V_transpose",
+      "latex": "M=U\\operatorname{diag}(s)V^{\\mathsf T}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "U_k*diag(s_k)",
+      "latex": "U_k\\operatorname{diag}(s_k)",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "IDF(q)*tf*(k1+1)/(tf+k1*(1-b+b*length/average_length))",
+      "latex": "\\operatorname{IDF}(q)\\frac{\\mathrm{tf}(k_1+1)}{\\mathrm{tf}+k_1(1-b+b\\,\\mathrm{length}/\\mathrm{average\\_length})}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "y_hat = 2x + (x-1)(x-2)(x-3)",
+      "latex": "\\widehat y=2x+(x-1)(x-2)(x-3)",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "y_hat = 2x",
+      "latex": "\\widehat y=2x",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "e_next = (1 - 28 eta/3)e",
+      "latex": "e_{\\mathrm{next}}=\\left(1-\\frac{28\\eta}{3}\\right)e",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "w_1=28/15",
+      "latex": "w_1=\\frac{28}{15}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "w_2=448/225",
+      "latex": "w_2=\\frac{448}{225}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "v_next = 0.9v + g",
+      "latex": "v_{\\mathrm{next}}=0.9v+g",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "w_next = w - 0.1v_next",
+      "latex": "w_{\\mathrm{next}}=w-0.1v_{\\mathrm{next}}",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "Y = X + XW",
+      "latex": "Y=X+XW",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "y=a*x+b",
+      "latex": "y=ax+b",
+      "paths": [
+        "courses/llm-theory/guides/llm-043.md",
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-001.md",
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-023.md",
+        "courses/deep-learning-tensorflow/guides/tf-026.md",
+        "courses/deep-learning-tensorflow/guides/tf-028.md",
+        "courses/nlp/guides/nlp-010.md",
+        "courses/nlp/guides/nlp-012.md",
+        "courses/nlp/guides/nlp-022.md",
+        "courses/nlp/solutions/nlp-012_solutions.md",
+        "courses/cuda/cpp/guides/cuda-064.md",
+        "courses/cuda/cpp/lessons/cuda-064.md",
+        "courses/cuda/cpp/solutions/cuda-064_solutions.md",
+        "courses/cuda/python/guides/cuda-100.md"
+      ]
+    },
+    {
+      "source": "r_bd=prediction_bd-target_bd",
+      "latex": "r_{bd}=\\mathrm{prediction}_{bd}-\\mathrm{target}_{bd}",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-004.md",
+        "courses/deep-learning-pytorch/solutions/torch-004_solutions.md"
+      ]
+    },
+    {
+      "source": "S=Σ_bΣ_d r_bd²",
+      "latex": "S=\\sum_b\\sum_d r_{bd}^2",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-004.md",
+        "courses/deep-learning-pytorch/solutions/torch-004_solutions.md"
+      ]
+    },
+    {
+      "source": "2r_bd/(BD)",
+      "latex": "\\frac{2r_{bd}}{BD}",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-004.md",
+        "courses/deep-learning-pytorch/solutions/torch-004_solutions.md"
+      ]
+    },
+    {
+      "source": "L=16w⁴-8w²+1",
+      "latex": "L=16w^4-8w^2+1",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-006.md",
+        "courses/deep-learning-pytorch/solutions/torch-006_solutions.md"
+      ]
+    },
+    {
+      "source": "64w³-16w",
+      "latex": "64w^3-16w",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-006.md",
+        "courses/deep-learning-pytorch/solutions/torch-006_solutions.md"
+      ]
+    },
+    {
+      "source": "64 w³-16w",
+      "latex": "64w^3-16w",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-006.md",
+        "courses/deep-learning-pytorch/solutions/torch-006_solutions.md"
+      ]
+    },
+    {
+      "source": "w_new=w-ηg=28/15",
+      "latex": "w_{\\mathrm{new}}=w-\\eta g=\\frac{28}{15}",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md"
+      ]
+    },
+    {
+      "source": "e_new=(1-28η/3)e",
+      "latex": "e_{\\mathrm{new}}=\\left(1-\\frac{28\\eta}{3}\\right)e",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md"
+      ]
+    },
+    {
+      "source": "|1-28η/3|<1",
+      "latex": "\\left|1-\\frac{28\\eta}{3}\\right|<1",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md"
+      ]
+    },
+    {
+      "source": "0<η<3/14",
+      "latex": "0<\\eta<\\frac{3}{14}",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md"
+      ]
+    },
+    {
+      "source": "r_t=(1-a)r_(t-1)+a*b",
+      "latex": "r_t=(1-a)r_{t-1}+ab",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-018.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md"
+      ]
+    },
+    {
+      "source": "k_eff=d(k-1)+1",
+      "latex": "k_{\\mathrm{eff}}=d(k-1)+1",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-019.md",
+        "courses/deep-learning-pytorch/solutions/torch-019_solutions.md"
+      ]
+    },
+    {
+      "source": "floor((W+2p-k_eff)/s)+1",
+      "latex": "\\left\\lfloor\\frac{W+2p-k_{\\mathrm{eff}}}{s}\\right\\rfloor+1",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-019.md",
+        "courses/deep-learning-pytorch/solutions/torch-019_solutions.md"
+      ]
+    },
+    {
+      "source": "h_new=(1-z)n+z h_old",
+      "latex": "h_{\\mathrm{new}}=(1-z)n+zh_{\\mathrm{old}}",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-021.md",
+        "courses/deep-learning-pytorch/solutions/torch-021_solutions.md"
+      ]
+    },
+    {
+      "source": "dL/dz_tj=(p_tj-1[j=y_t])/3",
+      "latex": "\\frac{\\partial L}{\\partial z_{tj}}=\\frac{p_{tj}-\\mathbf{1}_{\\{j=y_t\\}}}{3}",
+      "paths": [
+        "courses/llm-theory/authoring/textbook_advanced/llm-031.md",
+        "courses/llm-theory/guides/llm-031.md"
+      ]
+    },
+    {
+      "source": "dL/dz_j=p_j-1[j=y]",
+      "latex": "\\frac{\\partial L}{\\partial z_j}=p_j-\\mathbf{1}_{\\{j=y\\}}",
+      "paths": ["courses/llm-theory/guides/llm-002.md"]
+    },
+    {
+      "source": "S = Q K^T / sqrt(Dk)",
+      "latex": "S=\\frac{QK^{\\mathsf T}}{\\sqrt{D_k}}",
+      "paths": [
+        "courses/llm-theory/guides/llm-010.md",
+        "courses/llm-theory/solutions/llm-010_solutions.md"
+      ]
+    },
+    {
+      "source": "exp(old_max-new_max)",
+      "latex": "\\exp(m_{\\mathrm{old}}-m_{\\mathrm{new}})",
+      "paths": ["courses/cuda/cpp/solutions/cuda-054_solutions.md"]
+    },
+    {
+      "source": "optimizer.zero_grad(set_to_none=True)",
+      "text": "`optimizer.zero_grad(set_to_none=True)`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/guides/torch-009.md",
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-009_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "F.binary_cross_entropy_with_logits",
+      "text": "`F.binary_cross_entropy_with_logits`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-013.md",
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/solutions/torch-013_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md"
+      ]
+    },
+    {
+      "source": "autograd.grad(f, w)",
+      "text": "`autograd.grad(f, w)`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md"
+      ]
+    },
+    {
+      "source": "requires_grad=True",
+      "text": "`requires_grad=True`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-030.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "requires_grad=False",
+      "text": "`requires_grad=False`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-018.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md"
+      ]
+    },
+    {
+      "source": "track_running_stats=False",
+      "text": "`track_running_stats=False`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-018.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md"
+      ]
+    },
+    {
+      "source": "mask_zero=True",
+      "text": "`mask_zero=True`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-021.md",
+        "courses/deep-learning-pytorch/solutions/torch-021_solutions.md"
+      ]
+    },
+    {
+      "source": "dropout_p=0",
+      "text": "`dropout_p=0`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
+      ]
+    },
+    {
+      "source": "set_to_none=True",
+      "text": "`set_to_none=True`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/guides/torch-009.md",
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-009_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "error_if_nonfinite=True",
+      "text": "`error_if_nonfinite=True`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md"
+      ]
+    },
+    {
+      "source": "correction=0",
+      "text": "`correction=0`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md"
+      ]
+    },
+    {
+      "source": "grad=None",
+      "text": "`grad=None`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md"
+      ]
+    },
+    {
+      "source": "probability>=threshold",
+      "text": "`probability>=threshold`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-013.md",
+        "courses/deep-learning-pytorch/solutions/torch-013_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-013.md",
+        "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md"
+      ]
+    },
+    {
+      "source": "trainable=False",
+      "text": "`trainable=False`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-018.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md",
+        "courses/deep-learning-tensorflow/guides/tf-018.md",
+        "courses/deep-learning-tensorflow/solutions/tf-018_solutions.md"
+      ]
+    },
+    {
+      "source": "autograd.grad",
+      "text": "`autograd.grad`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/guides/torch-030.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "torch.sigmoid",
+      "text": "`torch.sigmoid`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-013.md",
+        "courses/deep-learning-pytorch/solutions/torch-013_solutions.md"
+      ]
+    },
+    {
+      "source": "tf.math.sigmoid",
+      "text": "`tf.math.sigmoid`",
+      "paths": [
+        "courses/deep-learning-tensorflow/guides/tf-013.md",
+        "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md"
+      ]
+    },
+    {
+      "source": "sigmoid_cross_entropy_with_logits",
+      "text": "`sigmoid_cross_entropy_with_logits`",
+      "paths": [
+        "courses/deep-learning-tensorflow/guides/tf-013.md",
+        "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md"
+      ]
+    },
+    {
+      "source": "reduce_mean",
+      "text": "`reduce_mean`",
+      "paths": [
+        "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "courses/deep-learning-tensorflow/guides/tf-013.md",
+        "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md"
+      ]
+    },
+    {
+      "source": "margin=beta*(policy_difference-reference_difference)",
+      "text": "`margin=beta*(policy_difference-reference_difference)`",
+      "paths": [
+        "courses/llm-applied/guides/llm-applied-019.md",
+        "courses/llm-applied/solutions/llm-applied-019_solutions.md"
+      ]
+    },
+    {
+      "source": "loss=softplus(-margin)",
+      "text": "`loss=softplus(-margin)`",
+      "paths": [
+        "courses/llm-applied/guides/llm-applied-019.md",
+        "courses/llm-applied/solutions/llm-applied-019_solutions.md"
+      ]
+    },
+    {
+      "source": "E_token[ids] + E_position[position]",
+      "text": "`E_token[ids] + E_position[position]`",
+      "paths": ["courses/llm-theory/guides/llm-016.md"]
+    },
+    {
+      "source": "Attention(LayerNorm1(x))",
+      "text": "`Attention(LayerNorm1(x))`",
+      "paths": ["courses/llm-theory/guides/llm-016.md"]
+    },
+    {
+      "source": "h = x + projected_attention",
+      "text": "`h = x + projected_attention`",
+      "paths": ["courses/llm-theory/guides/llm-016.md"]
+    },
+    {
+      "source": "Linear2(ReLU(Linear1(LayerNorm2(h))))",
+      "text": "`Linear2(ReLU(Linear1(LayerNorm2(h))))`",
+      "paths": ["courses/llm-theory/guides/llm-016.md"]
+    },
+    {
+      "source": "TinyDecoder",
+      "text": "`TinyDecoder`",
+      "paths": ["courses/llm-theory/guides/llm-016.md"]
+    },
+    {
+      "source": "dp[:,None]+log_transition",
+      "text": "`dp[:,None]+log_transition`",
+      "paths": ["courses/nlp/guides/nlp-010.md"]
+    },
+    {
+      "source": "argmax(axis=0)",
+      "text": "`argmax(axis=0)`",
+      "paths": ["courses/nlp/guides/nlp-010.md"]
+    },
+    {
+      "source": "CountVectorizer",
+      "text": "`CountVectorizer`",
+      "paths": ["courses/nlp/guides/nlp-013.md"]
+    },
+    {
+      "source": "TfidfTransformer",
+      "text": "`TfidfTransformer`",
+      "paths": ["courses/nlp/guides/nlp-013.md"]
+    },
+    {
+      "source": "TruncatedSVD",
+      "text": "`TruncatedSVD`",
+      "paths": ["courses/nlp/guides/nlp-013.md"]
+    },
+    {
+      "source": "n_components=2",
+      "text": "`n_components=2`",
+      "paths": ["courses/nlp/guides/nlp-013.md"]
+    },
+    {
+      "source": "density=True",
+      "text": "`density=True`",
+      "paths": [
+        "python/ds-60day/solutions/day31_probability_basics/day31_solutions.ipynb",
+        "python/ds-60day/solutions/day31_probability_basics/day31_solutions.md"
+      ]
+    },
+    {
+      "source": "ddof=0",
+      "text": "`ddof=0`",
+      "paths": [
+        "python/ds-60day/solutions/day31_probability_basics/day31_solutions.ipynb",
+        "python/ds-60day/solutions/day31_probability_basics/day31_solutions.md"
+      ]
+    },
+    {
+      "source": "axis=0",
+      "text": "`axis=0`",
+      "paths": [
+        "courses/deep-learning-tensorflow/solutions/tf-018_solutions.md",
+        "courses/llm-theory/guides/llm-010.md",
+        "courses/llm-theory/guides/llm-046.md",
+        "courses/nlp/guides/nlp-010.md"
+      ]
+    },
+    {
+      "source": "padding_idx",
+      "text": "`padding_idx`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-021.md",
+        "courses/deep-learning-pytorch/solutions/torch-021_solutions.md"
+      ]
+    },
+    {
+      "source": "dropout_p",
+      "text": "`dropout_p`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
+      ]
+    },
+    {
+      "source": "module.eval",
+      "text": "`module.eval`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-022.md",
+        "courses/deep-learning-pytorch/solutions/torch-022_solutions.md"
+      ]
+    },
+    {
+      "source": "requires_grad",
+      "text": "`requires_grad`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-018.md",
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/guides/torch-030.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-018_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md",
+        "courses/deep-learning-tensorflow/solutions/tf-018_solutions.md"
+      ]
+    },
+    {
+      "source": "w.grad",
+      "text": "`w.grad`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/guides/torch-030.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "leaf.grad",
+      "text": "`leaf.grad`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-005.md",
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-009.md",
+        "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md"
+      ]
+    },
+    {
+      "source": "zero_grad(set_to_none=True)",
+      "text": "`zero_grad(set_to_none=True)`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-007.md",
+        "courses/deep-learning-pytorch/guides/torch-008.md",
+        "courses/deep-learning-pytorch/guides/torch-009.md",
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/guides/torch-027.md",
+        "courses/deep-learning-pytorch/solutions/torch-007_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-008_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-009_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
+    },
+    {
+      "source": "Embedding(mask_zero=True)",
+      "text": "`Embedding(mask_zero=True)`",
+      "paths": ["courses/deep-learning-pytorch/guides/torch-021.md"]
+    },
+    {
+      "source": "x.std(dim=0, correction=0)",
+      "text": "`x.std(dim=0, correction=0)`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-024.md",
+        "courses/deep-learning-pytorch/solutions/torch-024_solutions.md"
+      ]
+    },
+    {
+      "source": "loss.requires_grad",
+      "text": "`loss.requires_grad`",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-023.md",
+        "courses/deep-learning-pytorch/solutions/torch-023_solutions.md"
       ]
     }
   ]

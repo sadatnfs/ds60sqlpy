@@ -1,0 +1,12 @@
+// dax-039: Inventory balances are semi-additive
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-039-a: Two states are not one closing balance
+// Context: Analytics model; January and February 2025; all products; complete snapshots on January 31 and February 28.
+EVALUATE CALCULATETABLE ( ROW ( "SummedSnapshots", SUM ( Inventory[Units] ), "ClosingUnits", CALCULATE ( SUM ( Inventory[Units] ), LASTDATE ( 'Date'[Date] ) ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] IN { 1, 2 } )
+
+// dax-039-b: An explicitly carried-forward subset
+// Context: Notebook and Mug only; as-of February 15; carry the last eligible snapshot under an explicit policy.
+EVALUATE CALCULATETABLE ( ROW ( "CarriedUnits", SUMX ( VALUES ( Product[ProductKey] ), VAR Cutoff = DATE ( 2025, 2, 15 ) VAR LastKnown = CALCULATE ( MAX ( Inventory[SnapshotDate] ), REMOVEFILTERS ( 'Date' ), Inventory[SnapshotDate] <= Cutoff ) RETURN CALCULATE ( SUM ( Inventory[Units] ), REMOVEFILTERS ( 'Date' ), Inventory[SnapshotDate] = LastKnown ) ) ), Product[ProductKey] IN { 1, 3 } )

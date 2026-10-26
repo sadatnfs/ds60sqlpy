@@ -1,0 +1,9 @@
+// dax-054 learner draft: Optimization capstone: prove the grouping assumption first
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Review a grouped cost rewrite under explicit assumptions before proposing a performance measurement.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a release decision for this proposed rewrite.
+
+EVALUATE
+ROW ( "Line-grain cost", BLANK(), "Equivalent grouped cost", BLANK() )

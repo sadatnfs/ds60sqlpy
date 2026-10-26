@@ -1,0 +1,786 @@
+{
+  "schema_version": 1,
+  "track_id": "r",
+  "lessons": [
+    {
+      "id": "r-001",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-001.md",
+      "source_path": "courses/r/lessons/r-001.R",
+      "solution_paths": [
+        "courses/r/solutions/r-001_reference.R",
+        "courses/r/solutions/r-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-002",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-002.md",
+      "source_path": "courses/r/lessons/r-002.R",
+      "solution_paths": [
+        "courses/r/solutions/r-002_reference.R",
+        "courses/r/solutions/r-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-003",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-003.md",
+      "source_path": "courses/r/lessons/r-003.R",
+      "solution_paths": [
+        "courses/r/solutions/r-003_reference.R",
+        "courses/r/solutions/r-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-004",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-004.md",
+      "source_path": "courses/r/lessons/r-004.R",
+      "solution_paths": [
+        "courses/r/solutions/r-004_reference.R",
+        "courses/r/solutions/r-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-005",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-005.md",
+      "source_path": "courses/r/lessons/r-005.R",
+      "solution_paths": [
+        "courses/r/solutions/r-005_reference.R",
+        "courses/r/solutions/r-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-006",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-006.md",
+      "source_path": "courses/r/lessons/r-006.R",
+      "solution_paths": [
+        "courses/r/solutions/r-006_reference.R",
+        "courses/r/solutions/r-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-007",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-007.md",
+      "source_path": "courses/r/lessons/r-007.R",
+      "solution_paths": [
+        "courses/r/solutions/r-007_reference.R",
+        "courses/r/solutions/r-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-008",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-008.md",
+      "source_path": "courses/r/lessons/r-008.R",
+      "solution_paths": [
+        "courses/r/solutions/r-008_reference.R",
+        "courses/r/solutions/r-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-009",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-009.md",
+      "source_path": "courses/r/lessons/r-009.R",
+      "solution_paths": [
+        "courses/r/solutions/r-009_reference.R",
+        "courses/r/solutions/r-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-010",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-010.md",
+      "source_path": "courses/r/lessons/r-010.R",
+      "solution_paths": [
+        "courses/r/solutions/r-010_reference.R",
+        "courses/r/solutions/r-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-011",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-011.md",
+      "source_path": "courses/r/lessons/r-011.R",
+      "solution_paths": [
+        "courses/r/solutions/r-011_reference.R",
+        "courses/r/solutions/r-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-012",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-012.md",
+      "source_path": "courses/r/lessons/r-012.R",
+      "solution_paths": [
+        "courses/r/solutions/r-012_reference.R",
+        "courses/r/solutions/r-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-013",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-013.md",
+      "source_path": "courses/r/lessons/r-013.R",
+      "solution_paths": [
+        "courses/r/solutions/r-013_reference.R",
+        "courses/r/solutions/r-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-014",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-014.md",
+      "source_path": "courses/r/lessons/r-014.R",
+      "solution_paths": [
+        "courses/r/solutions/r-014_reference.R",
+        "courses/r/solutions/r-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-015",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-015.md",
+      "source_path": "courses/r/lessons/r-015.R",
+      "solution_paths": [
+        "courses/r/solutions/r-015_reference.R",
+        "courses/r/solutions/r-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-016",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-016.md",
+      "source_path": "courses/r/lessons/r-016.R",
+      "solution_paths": [
+        "courses/r/solutions/r-016_reference.R",
+        "courses/r/solutions/r-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-017",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-017.md",
+      "source_path": "courses/r/lessons/r-017.R",
+      "solution_paths": [
+        "courses/r/solutions/r-017_reference.R",
+        "courses/r/solutions/r-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-018",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-018.md",
+      "source_path": "courses/r/lessons/r-018.R",
+      "solution_paths": [
+        "courses/r/solutions/r-018_reference.R",
+        "courses/r/solutions/r-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-019",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-019.md",
+      "source_path": "courses/r/lessons/r-019.R",
+      "solution_paths": [
+        "courses/r/solutions/r-019_reference.R",
+        "courses/r/solutions/r-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-020",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-020.md",
+      "source_path": "courses/r/lessons/r-020.R",
+      "solution_paths": [
+        "courses/r/solutions/r-020_reference.R",
+        "courses/r/solutions/r-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-021",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-021.md",
+      "source_path": "courses/r/lessons/r-021.R",
+      "solution_paths": [
+        "courses/r/solutions/r-021_reference.R",
+        "courses/r/solutions/r-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-022",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-022.md",
+      "source_path": "courses/r/lessons/r-022.R",
+      "solution_paths": [
+        "courses/r/solutions/r-022_reference.R",
+        "courses/r/solutions/r-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-023",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-023.md",
+      "source_path": "courses/r/lessons/r-023.R",
+      "solution_paths": [
+        "courses/r/solutions/r-023_reference.R",
+        "courses/r/solutions/r-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-024",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-024.md",
+      "source_path": "courses/r/lessons/r-024.R",
+      "solution_paths": [
+        "courses/r/solutions/r-024_reference.R",
+        "courses/r/solutions/r-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-025",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-025.md",
+      "source_path": "courses/r/lessons/r-025.R",
+      "solution_paths": [
+        "courses/r/solutions/r-025_reference.R",
+        "courses/r/solutions/r-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-026",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-026.md",
+      "source_path": "courses/r/lessons/r-026.R",
+      "solution_paths": [
+        "courses/r/solutions/r-026_reference.R",
+        "courses/r/solutions/r-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-027",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-027.md",
+      "source_path": "courses/r/lessons/r-027.R",
+      "solution_paths": [
+        "courses/r/solutions/r-027_reference.R",
+        "courses/r/solutions/r-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-028",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-028.md",
+      "source_path": "courses/r/lessons/r-028.R",
+      "solution_paths": [
+        "courses/r/solutions/r-028_reference.R",
+        "courses/r/solutions/r-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-029",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-029.md",
+      "source_path": "courses/r/lessons/r-029.R",
+      "solution_paths": [
+        "courses/r/solutions/r-029_reference.R",
+        "courses/r/solutions/r-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-030",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-030.md",
+      "source_path": "courses/r/lessons/r-030.R",
+      "solution_paths": [
+        "courses/r/solutions/r-030_reference.R",
+        "courses/r/solutions/r-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-031",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-031.md",
+      "source_path": "courses/r/lessons/r-031.R",
+      "solution_paths": [
+        "courses/r/solutions/r-031_reference.R",
+        "courses/r/solutions/r-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-032",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-032.md",
+      "source_path": "courses/r/lessons/r-032.R",
+      "solution_paths": [
+        "courses/r/solutions/r-032_reference.R",
+        "courses/r/solutions/r-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-033",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-033.md",
+      "source_path": "courses/r/lessons/r-033.R",
+      "solution_paths": [
+        "courses/r/solutions/r-033_reference.R",
+        "courses/r/solutions/r-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-034",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-034.md",
+      "source_path": "courses/r/lessons/r-034.R",
+      "solution_paths": [
+        "courses/r/solutions/r-034_reference.R",
+        "courses/r/solutions/r-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-035",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-035.md",
+      "source_path": "courses/r/lessons/r-035.R",
+      "solution_paths": [
+        "courses/r/solutions/r-035_reference.R",
+        "courses/r/solutions/r-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-036",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-036.md",
+      "source_path": "courses/r/lessons/r-036.R",
+      "solution_paths": [
+        "courses/r/solutions/r-036_reference.R",
+        "courses/r/solutions/r-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-037",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-037.md",
+      "source_path": "courses/r/lessons/r-037.R",
+      "solution_paths": [
+        "courses/r/solutions/r-037_reference.R",
+        "courses/r/solutions/r-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-038",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-038.md",
+      "source_path": "courses/r/lessons/r-038.R",
+      "solution_paths": [
+        "courses/r/solutions/r-038_reference.R",
+        "courses/r/solutions/r-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-039",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-039.md",
+      "source_path": "courses/r/lessons/r-039.R",
+      "solution_paths": [
+        "courses/r/solutions/r-039_reference.R",
+        "courses/r/solutions/r-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-040",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-040.md",
+      "source_path": "courses/r/lessons/r-040.R",
+      "solution_paths": [
+        "courses/r/solutions/r-040_reference.R",
+        "courses/r/solutions/r-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-041",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-041.md",
+      "source_path": "courses/r/lessons/r-041.R",
+      "solution_paths": [
+        "courses/r/solutions/r-041_reference.R",
+        "courses/r/solutions/r-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-042",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-042.md",
+      "source_path": "courses/r/lessons/r-042.R",
+      "solution_paths": [
+        "courses/r/solutions/r-042_reference.R",
+        "courses/r/solutions/r-042_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-043",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-043.md",
+      "source_path": "courses/r/lessons/r-043.R",
+      "solution_paths": [
+        "courses/r/solutions/r-043_reference.R",
+        "courses/r/solutions/r-043_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-044",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-044.md",
+      "source_path": "courses/r/lessons/r-044.R",
+      "solution_paths": [
+        "courses/r/solutions/r-044_reference.R",
+        "courses/r/solutions/r-044_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-045",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-045.md",
+      "source_path": "courses/r/lessons/r-045.R",
+      "solution_paths": [
+        "courses/r/solutions/r-045_reference.R",
+        "courses/r/solutions/r-045_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-046",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-046.md",
+      "source_path": "courses/r/lessons/r-046.R",
+      "solution_paths": [
+        "courses/r/solutions/r-046_reference.R",
+        "courses/r/solutions/r-046_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-047",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-047.md",
+      "source_path": "courses/r/lessons/r-047.R",
+      "solution_paths": [
+        "courses/r/solutions/r-047_reference.R",
+        "courses/r/solutions/r-047_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-048",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-048.md",
+      "source_path": "courses/r/lessons/r-048.R",
+      "solution_paths": [
+        "courses/r/solutions/r-048_reference.R",
+        "courses/r/solutions/r-048_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-049",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-049.md",
+      "source_path": "courses/r/lessons/r-049.R",
+      "solution_paths": [
+        "courses/r/solutions/r-049_reference.R",
+        "courses/r/solutions/r-049_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-050",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-050.md",
+      "source_path": "courses/r/lessons/r-050.R",
+      "solution_paths": [
+        "courses/r/solutions/r-050_reference.R",
+        "courses/r/solutions/r-050_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-051",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-051.md",
+      "source_path": "courses/r/lessons/r-051.R",
+      "solution_paths": [
+        "courses/r/solutions/r-051_reference.R",
+        "courses/r/solutions/r-051_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-052",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-052.md",
+      "source_path": "courses/r/lessons/r-052.R",
+      "solution_paths": [
+        "courses/r/solutions/r-052_reference.R",
+        "courses/r/solutions/r-052_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-053",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-053.md",
+      "source_path": "courses/r/lessons/r-053.R",
+      "solution_paths": [
+        "courses/r/solutions/r-053_reference.R",
+        "courses/r/solutions/r-053_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-054",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-054.md",
+      "source_path": "courses/r/lessons/r-054.R",
+      "solution_paths": [
+        "courses/r/solutions/r-054_reference.R",
+        "courses/r/solutions/r-054_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-055",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-055.md",
+      "source_path": "courses/r/lessons/r-055.R",
+      "solution_paths": [
+        "courses/r/solutions/r-055_reference.R",
+        "courses/r/solutions/r-055_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-056",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-056.md",
+      "source_path": "courses/r/lessons/r-056.R",
+      "solution_paths": [
+        "courses/r/solutions/r-056_reference.R",
+        "courses/r/solutions/r-056_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-057",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-057.md",
+      "source_path": "courses/r/lessons/r-057.R",
+      "solution_paths": [
+        "courses/r/solutions/r-057_reference.R",
+        "courses/r/solutions/r-057_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-058",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-058.md",
+      "source_path": "courses/r/lessons/r-058.R",
+      "solution_paths": [
+        "courses/r/solutions/r-058_reference.R",
+        "courses/r/solutions/r-058_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-059",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-059.md",
+      "source_path": "courses/r/lessons/r-059.R",
+      "solution_paths": [
+        "courses/r/solutions/r-059_reference.R",
+        "courses/r/solutions/r-059_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "r-060",
+      "status": "authored",
+      "language": "r",
+      "runtime_profile": "r-statistics",
+      "guide_path": "courses/r/guides/r-060.md",
+      "source_path": "courses/r/lessons/r-060.R",
+      "solution_paths": [
+        "courses/r/solutions/r-060_reference.R",
+        "courses/r/solutions/r-060_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

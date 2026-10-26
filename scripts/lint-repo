@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Use the shared pinned Docker toolchain for read-only source lint checks.
+# Use the isolated pinned Docker toolchains for read-only source lint checks.
 set -euo pipefail
 for arg in "$@"; do
   case "$arg" in
@@ -7,14 +7,15 @@ for arg in "$@"; do
       cat <<'HELP'
 Usage: ./scripts/lint-repo [--build] [--list] [--language NAME]
 
-Run read-only static and syntax checks with the pinned Docker toolchain.
---build       Rebuild the shared tool image with visible Docker build logs.
+Run read-only static and syntax checks with the pinned Docker toolchains.
+--build       Rebuild selected tool images with visible Docker build logs.
 --list        Print source coverage and preservation reasons without linting.
 --language    Select one language (repeatable); omit for all supported checks.
 
 Requires a local Linux Docker engine. Windows users run inside WSL 2.
 This command does not change source files, run lessons or modify learner state.
 Static and syntax checks supplement compilation, tests and runtime verification.
+R uses its separate locked R image; no engine socket enters either tool container.
 HELP
       exit 0
       ;;

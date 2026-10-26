@@ -1,0 +1,17 @@
+// dax-005: DAX query shape, names and deterministic result tables
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-005-a: A scalar wrapped as a table
+// Context: No filters; one named scalar in a one-row query result.
+EVALUATE ROW ( "RevenueUSD", [NetRevenue] )
+
+// dax-005-b: A projected two-row result
+// Context: No filters; smallest two unique SaleID values, then explicit output ordering.
+EVALUATE
+SELECTCOLUMNS ( TOPN ( 2, Sales, Sales[SaleID], ASC ), "Line", Sales[SaleID], "Amount", Sales[NetAmount] )
+ORDER BY [Line] ASC

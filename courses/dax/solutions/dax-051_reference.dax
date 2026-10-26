@@ -1,0 +1,15 @@
+// dax-051: A faster-looking rewrite must preserve filter semantics
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-051-a: An unfiltered agreement case
+// Context: No existing Quantity filter; all three forms select quantity at least two.
+EVALUATE ROW ( "TableFilter", CALCULATE ( [NetRevenue], FILTER ( Sales, Sales[Quantity] >= 2 ) ), "ColumnFilter", CALCULATE ( [NetRevenue], Sales[Quantity] >= 2 ), "IntersectingColumn", CALCULATE ( [NetRevenue], KEEPFILTERS ( Sales[Quantity] >= 2 ) ) )
+
+// dax-051-b: The same-column selection exposes a difference
+// Context: Incoming Sales.Quantity=1; compare filtering current rows with replacing or intersecting that column selection.
+EVALUATE CALCULATETABLE ( ROW ( "TableFilter", CALCULATE ( [NetRevenue], FILTER ( Sales, Sales[Quantity] >= 2 ) ), "ColumnFilter", CALCULATE ( [NetRevenue], Sales[Quantity] >= 2 ), "IntersectingColumn", CALCULATE ( [NetRevenue], KEEPFILTERS ( Sales[Quantity] >= 2 ) ) ), Sales[Quantity] = 1 )

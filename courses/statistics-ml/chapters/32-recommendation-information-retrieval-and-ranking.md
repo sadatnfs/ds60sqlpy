@@ -235,6 +235,10 @@ if __name__ == "__main__":
 
 - [scikit-learn NDCG API and gain conventions](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.ndcg_score.html)
 
+## Connected worked tutorial
+
+[From ranking to policy value](../tutorials/science/05-ranking-policy-and-allocation.md). Connect query-level gain, logged exposure probabilities and constrained decisions.
+
 ## Reading connections
 
 [Previous chapter](31-network-and-graph-analysis.md) | [Book contents](../README.md) | [Next chapter](33-deep-learning-language-and-generative-modeling.md)

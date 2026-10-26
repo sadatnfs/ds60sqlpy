@@ -1,0 +1,445 @@
+{
+  "schema_version": 1,
+  "track_id": "jax",
+  "lessons": [
+    {
+      "id": "jax-001",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-001.md",
+      "source_path": "courses/jax/lessons/jax-001.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-001_solution.py",
+        "courses/jax/solutions/jax-001_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-002",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-002.md",
+      "source_path": "courses/jax/lessons/jax-002.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-002_solution.py",
+        "courses/jax/solutions/jax-002_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-003",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-003.md",
+      "source_path": "courses/jax/lessons/jax-003.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-003_solution.py",
+        "courses/jax/solutions/jax-003_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-004",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-004.md",
+      "source_path": "courses/jax/lessons/jax-004.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-004_solution.py",
+        "courses/jax/solutions/jax-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-005",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-005.md",
+      "source_path": "courses/jax/lessons/jax-005.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-005_solution.py",
+        "courses/jax/solutions/jax-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-006",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-006.md",
+      "source_path": "courses/jax/lessons/jax-006.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-006_solution.py",
+        "courses/jax/solutions/jax-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-007",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-007.md",
+      "source_path": "courses/jax/lessons/jax-007.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-007_solution.py",
+        "courses/jax/solutions/jax-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-008",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-008.md",
+      "source_path": "courses/jax/lessons/jax-008.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-008_solution.py",
+        "courses/jax/solutions/jax-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-009",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-009.md",
+      "source_path": "courses/jax/lessons/jax-009.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-009_solution.py",
+        "courses/jax/solutions/jax-009_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-010.md",
+      "source_path": "courses/jax/lessons/jax-010.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-010_solution.py",
+        "courses/jax/solutions/jax-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-011.md",
+      "source_path": "courses/jax/lessons/jax-011.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-011_solution.py",
+        "courses/jax/solutions/jax-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-012.md",
+      "source_path": "courses/jax/lessons/jax-012.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-012_solution.py",
+        "courses/jax/solutions/jax-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-013.md",
+      "source_path": "courses/jax/lessons/jax-013.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-013_solution.py",
+        "courses/jax/solutions/jax-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-014.md",
+      "source_path": "courses/jax/lessons/jax-014.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-014_solution.py",
+        "courses/jax/solutions/jax-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-015.md",
+      "source_path": "courses/jax/lessons/jax-015.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-015_solution.py",
+        "courses/jax/solutions/jax-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-016.md",
+      "source_path": "courses/jax/lessons/jax-016.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-016_solution.py",
+        "courses/jax/solutions/jax-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-017.md",
+      "source_path": "courses/jax/lessons/jax-017.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-017_solution.py",
+        "courses/jax/solutions/jax-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-018.md",
+      "source_path": "courses/jax/lessons/jax-018.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-018_solution.py",
+        "courses/jax/solutions/jax-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-019.md",
+      "source_path": "courses/jax/lessons/jax-019.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-019_solution.py",
+        "courses/jax/solutions/jax-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-020.md",
+      "source_path": "courses/jax/lessons/jax-020.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-020_solution.py",
+        "courses/jax/solutions/jax-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-021.md",
+      "source_path": "courses/jax/lessons/jax-021.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-021_solution.py",
+        "courses/jax/solutions/jax-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-022.md",
+      "source_path": "courses/jax/lessons/jax-022.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-022_solution.py",
+        "courses/jax/solutions/jax-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-023.md",
+      "source_path": "courses/jax/lessons/jax-023.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-023_solution.py",
+        "courses/jax/solutions/jax-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-024.md",
+      "source_path": "courses/jax/lessons/jax-024.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-024_solution.py",
+        "courses/jax/solutions/jax-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-025.md",
+      "source_path": "courses/jax/lessons/jax-025.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-025_solution.py",
+        "courses/jax/solutions/jax-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-026.md",
+      "source_path": "courses/jax/lessons/jax-026.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-026_solution.py",
+        "courses/jax/solutions/jax-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-027.md",
+      "source_path": "courses/jax/lessons/jax-027.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-027_solution.py",
+        "courses/jax/solutions/jax-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-028.md",
+      "source_path": "courses/jax/lessons/jax-028.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-028_solution.py",
+        "courses/jax/solutions/jax-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-029.md",
+      "source_path": "courses/jax/lessons/jax-029.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-029_solution.py",
+        "courses/jax/solutions/jax-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-030",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-030.md",
+      "source_path": "courses/jax/lessons/jax-030.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-030_solution.py",
+        "courses/jax/solutions/jax-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "jax-cpu",
+      "guide_path": "courses/jax/guides/jax-031.md",
+      "source_path": "courses/jax/lessons/jax-031.py",
+      "solution_paths": [
+        "courses/jax/solutions/jax-031_solution.py",
+        "courses/jax/solutions/jax-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-032",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/jax/guides/jax-032.md",
+      "source_path": "courses/jax/lessons/jax-032.md",
+      "solution_paths": [
+        "courses/jax/solutions/jax-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-033",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/jax/guides/jax-033.md",
+      "source_path": "courses/jax/lessons/jax-033.md",
+      "solution_paths": [
+        "courses/jax/solutions/jax-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "jax-034",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/jax/guides/jax-034.md",
+      "source_path": "courses/jax/lessons/jax-034.md",
+      "solution_paths": [
+        "courses/jax/solutions/jax-034_solutions.md"
+      ],
+      "verification_id": null
+    }
+  ]
+}

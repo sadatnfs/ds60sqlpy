@@ -1,0 +1,9 @@
+// dax-016 learner draft: Filter arguments are not an imperative sequence
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why sibling filter arguments differ from deliberately nested evaluation.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a context ledger for each sibling expression.
+
+EVALUATE
+ROW ( "Sibling filter interpretation", BLANK(), "Nested interpretation", BLANK() )

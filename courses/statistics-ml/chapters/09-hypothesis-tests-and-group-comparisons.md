@@ -367,6 +367,10 @@ if __name__ == "__main__":
 
 - [SciPy permutation test](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.permutation_test.html).
 
+## Connected worked tutorial
+
+[Plan power and interpret an interval](../tutorials/experimentation/04-power-and-duration.md). Connect alternative effects, allocation and mature traffic to a defensible fixed-horizon analysis.
+
 ## Reading connections
 
 [Previous chapter](08-estimation-and-statistical-inference.md) | [Book contents](../README.md) | [Next chapter](10-multiple-testing-sequential-inference-and-selective-inference.md)

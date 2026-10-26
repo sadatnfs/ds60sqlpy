@@ -11,6 +11,6 @@ COPY docker/workers/gpu/requirements-${DS60_GPU_PROFILE}.lock /tmp/gpu-requireme
 RUN /opt/gpu/bin/python -m pip install --no-cache-dir --require-hashes --only-binary=:all: -r /tmp/gpu-requirements.txt
 ENV PATH=/opt/gpu/bin:${PATH} PYTHONPATH=/opt/worker/src PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /opt/worker
-COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/gpu_runtime.py /opt/worker/src/ds60sqlpy/
+COPY src/ds60sqlpy/__init__.py src/ds60sqlpy/http_server.py src/ds60sqlpy/module_worker.py src/ds60sqlpy/worker_operations.py src/ds60sqlpy/plot_artifacts.py src/ds60sqlpy/plot_capture.py src/ds60sqlpy/worker_figures.py src/ds60sqlpy/gpu_runtime.py /opt/worker/src/ds60sqlpy/
 ENV DS60_WORKER_PROFILE=${DS60_GPU_PROFILE}
 ENTRYPOINT ["python3", "-m", "ds60sqlpy.module_worker", "--host", "0.0.0.0", "--port", "8081"]

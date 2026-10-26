@@ -23,8 +23,8 @@ requested_port=''
 requested_db_port=''
 gpu_device=''
 profiles=()
-all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli)
-all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker)
+all_profiles=(python-core cpp20 java21 javascript-node typescript-node tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python c17 go csharp-dotnet rust-stable swift-linux php-cli jax-cpu bayesian-cpu r-statistics)
+all_services=(python-core-worker cpp-worker java-worker javascript-worker typescript-worker tensorflow-worker llm-worker scala-worker spark-scala-worker spark-python-worker c-worker go-worker csharp-worker rust-worker swift-worker php-worker jax-worker bayesian-worker r-worker)
 known_profiles=("${all_profiles[@]}" cuda-cpp cuda-python pytorch-cuda tensorflow-cuda)
 known_services=("${all_services[@]}" cuda-cpp-worker cuda-python-worker pytorch-cuda-worker tensorflow-cuda-worker)
 usage() {
@@ -32,18 +32,18 @@ usage() {
 Usage: ./classroom [up|resume|build|pull|stop|status|logs|doctor] [options]
 
 With no arguments: resume this project's containers and saved profile selection.
-A first launch prepares all sixteen ordinary workers, building only missing images.
+A first launch prepares all ordinary workers, building only missing images.
 Progress stays in this project's Docker volumes. Updates require --rebuild.
 The host needs Bash and a local Linux-container Docker engine with Compose 2.28.0+.
 Windows: use Ubuntu in WSL 2 with your Docker engine's integration enabled.
 
   --starter                 Select only the app, PostgreSQL and Python Core
-  --all                     Select all sixteen ordinary workers
+  --all                     Select all ordinary workers
   --profile PROFILE         Add a selected profile (repeatable; includes Core)
   --no-build                Like resume: never build or pull missing images
   --rebuild                 Rebuild local images, or refresh Hub images; apply updates
   --from-hub USER           Pull matching architecture tags from USER/ds60sqlpy
-  --tag VERSION             Select a published/local release (default: 0.4.1)
+  --tag VERSION             Select a published/local release (default: 0.5.0)
   --local-build             Return this project to locally built images
   --gpu-device ID           Explicit NVIDIA device index/UUID for optional CUDA profiles
   --no-browser              Print the ready URL without opening it

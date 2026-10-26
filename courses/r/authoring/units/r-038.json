@@ -1,0 +1,99 @@
+{
+  "id": "r-038",
+  "title": "Finite probability tables and conditional reasoning",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-008", "r-032", "r-037"],
+  "concepts": [
+    "Joint probability",
+    "Marginal probability",
+    "Conditional probability",
+    "Bayes rule"
+  ],
+  "outcome": "Compute and reconcile conditional probabilities from a finite original table without confusing the conditioning direction.",
+  "mechanism": "A finite probability table makes the population and denominator visible. The joint cells describe combinations of two variables, such as segment and alert status. Marginal probabilities sum over one variable. A conditional probability restricts the population first, then renormalizes within that selected event.\n\nConditioning direction matters. The fraction of alerted records within segment A is not generally the fraction of segment A among alerted records. The first denominator counts all A records; the second counts all alerted records. This difference is often hidden when both quantities are described vaguely as an accuracy or likelihood.\n\nBayes rule follows from the same joint table: P(A given alert) equals P(alert given A) times P(A), divided by P(alert), when the alert event has positive probability. It is not a separate source of evidence. A changed base rate can change the reverse conditional probability even when segment-specific alert rates remain fixed.\n\nThese synthetic counts describe the admitted population. Interpreting them as estimates for another population requires sampling and stability assumptions. A zero denominator makes a conditional probability undefined, not automatically zero. Keep exact counts beside proportions and use an explicit missing result or rejection for an impossible conditioning event.",
+  "vocabulary": [
+    {
+      "term": "Joint probability",
+      "definition": "Probability assigned to a combination of outcomes."
+    },
+    {
+      "term": "Marginal probability",
+      "definition": "Probability after summing over another variable."
+    },
+    {
+      "term": "Conditional probability",
+      "definition": "Probability within an explicitly selected event."
+    },
+    {
+      "term": "Bayes rule",
+      "definition": "A relationship reversing conditioning through joint and marginal probabilities."
+    }
+  ],
+  "anatomy": "Use matrix row/column names to state event meaning, rowSums/colSums for margins, and an explicit selected total for a conditional denominator. In math, \\(P(A\\mid B)=P(A\\cap B)/P(B)\\) when \\(P(B)>0\\).",
+  "worked_examples": [
+    {
+      "title": "Reverse conditionals use different denominators",
+      "code": "counts <- matrix(c(30, 70, 10, 90), nrow = 2, byrow = TRUE, dimnames = list(segment = c(\"A\", \"B\"), alert = c(\"yes\", \"no\")))\nalert_given_a <- counts[\"A\", \"yes\"] / sum(counts[\"A\", ])\na_given_alert <- counts[\"A\", \"yes\"] / sum(counts[, \"yes\"])\nstopifnot(alert_given_a == 0.3, a_given_alert == 0.75)\nprint(c(alert_given_a = alert_given_a, a_given_alert = a_given_alert))\n",
+      "explanation": "Thirty of one hundred A records are alerted, while thirty of forty alerted records are A. Both calculations are correct for different questions.",
+      "expected": "0.3 versus 0.75."
+    },
+    {
+      "title": "Reconstruct the reverse conditional",
+      "code": "p_a <- 0.5\np_alert_a <- 0.3\np_alert_b <- 0.1\np_alert <- p_alert_a * p_a + p_alert_b * (1 - p_a)\nposterior <- p_alert_a * p_a / p_alert\nstopifnot(isTRUE(all.equal(p_alert, 0.2)), isTRUE(all.equal(posterior, 0.75)))\nprint(c(alert_probability = p_alert, a_given_alert = posterior))\n",
+      "explanation": "The total alert probability combines both segments. Bayes rule reconstructs the same finite-table conditional rather than introducing new observations.",
+      "expected": "Alert probability 0.2; reverse conditional 0.75."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Identify the denominator for P(A given alert).",
+      "hint": "Restrict to alerted records first.",
+      "answer": "The denominator is 40 in the supplied table.",
+      "expected": "The denominator is 40 in the supplied table."
+    },
+    {
+      "prompt": "Change the A base rate to 0.2 with alert rates unchanged.",
+      "hint": "Recompute the total alert probability.",
+      "answer": "P(alert)=0.14 and P(A given alert)=3/7.",
+      "expected": "P(alert)=0.14 and P(A given alert)=3/7."
+    },
+    {
+      "prompt": "Construct joint probabilities from the count table.",
+      "hint": "Divide every cell by the total count.",
+      "answer": "The four cells sum to one.",
+      "expected": "The four cells sum to one."
+    },
+    {
+      "prompt": "Diagnose swapping P(alert given A) with P(A given alert).",
+      "hint": "The selected populations differ.",
+      "answer": "Keep event and conditioning event explicit in names and denominators.",
+      "expected": "Keep event and conditioning event explicit in names and denominators."
+    },
+    {
+      "prompt": "Handle a conditioning event with zero count.",
+      "hint": "Division by zero does not define a probability.",
+      "answer": "Return a missing result or reject the query under a stated policy.",
+      "expected": "Return a missing result or reject the query under a stated policy."
+    },
+    {
+      "prompt": "Explain the limit of exporting these proportions to a new population.",
+      "hint": "The table may not represent that population.",
+      "answer": "Assess sampling, base rates and stable conditional mechanisms before generalizing.",
+      "expected": "Assess sampling, base rates and stable conditional mechanisms before generalizing."
+    }
+  ],
+  "starter": "# r-038: Finite probability tables and conditional reasoning\n# Complete the six guide tasks using these local inputs.\ncounts <- matrix(c(30, 70, 10, 90), nrow = 2, byrow = TRUE, dimnames = list(c(\"A\", \"B\"), c(\"yes\", \"no\")))\n# TODO: label joint, marginal and conditional denominators.\nprint(counts)\n",
+  "reference": "counts <- matrix(c(30, 70, 10, 90), nrow = 2, byrow = TRUE)\nstopifnot(sum(counts[, 1]) == 40, counts[1, 1] / sum(counts[, 1]) == 0.75)\np_a <- 0.2; p_alert <- 0.3 * p_a + 0.1 * (1 - p_a)\nstopifnot(isTRUE(all.equal(p_alert, 0.14)), isTRUE(all.equal(0.3 * p_a / p_alert, 3 / 7)))\njoint <- counts / sum(counts)\nstopifnot(isTRUE(all.equal(sum(joint), 1)))\nconditional <- function(numerator, denominator) if (denominator > 0) numerator / denominator else NA_real_\nstopifnot(is.na(conditional(0, 0)), conditional(30, 100) == 0.3)\nstopifnot(conditional(30, 100) != conditional(30, 40))\ncat(\"r-038 reference checks passed\\n\")\n",
+  "solution_explanation": "Thirty of one hundred A records are alerted, while thirty of forty alerted records are A. Both calculations are correct for different questions.\n\nThe total alert probability combines both segments. Bayes rule reconstructs the same finite-table conditional rather than introducing new observations.",
+  "sources": [
+    {
+      "title": "R table proportions",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/proportions.html"
+    },
+    {
+      "title": "R row and column sums",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/colSums.html"
+    }
+  ]
+}

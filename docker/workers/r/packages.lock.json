@@ -1,0 +1,599 @@
+{
+  "schema_version": 1,
+  "r_version": "4.6.1",
+  "roots": ["ggplot2", "plotly", "R6", "S7", "jsonlite", "styler", "lintr"],
+  "packages": [
+    {
+      "name": "cli",
+      "version": "3.6.6",
+      "sha256": "b2b58d6dd82f5798b335e39c00591686a01fd3e94399ef898e146173e36f18f9",
+      "url": "https://cloud.r-project.org/src/contrib/cli_3.6.6.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/cli/cli_3.6.6.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "glue",
+      "version": "1.8.1",
+      "sha256": "1c55905d3efc3d5c199ceb0bd12218e97f0d4c64df6038ff41ecef415478a122",
+      "url": "https://cloud.r-project.org/src/contrib/glue_1.8.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/glue/glue_1.8.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "rlang",
+      "version": "1.3.0",
+      "sha256": "80aa537d49e72265f443a15e8936128af583caa5e572086518b503cbf064279c",
+      "url": "https://cloud.r-project.org/src/contrib/rlang_1.3.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/rlang/rlang_1.3.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "lifecycle",
+      "version": "1.0.5",
+      "sha256": "61841e3e6edba056a88355a3f1d6698ab8d5d9cb3c05f2af0ec5a44ab516f8ee",
+      "url": "https://cloud.r-project.org/src/contrib/lifecycle_1.0.5.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/lifecycle/lifecycle_1.0.5.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "gtable",
+      "version": "0.3.6",
+      "sha256": "d305a5fa11278b649d2d8edc5288bf28009be888a42be58ff8714018e49de0ef",
+      "url": "https://cloud.r-project.org/src/contrib/gtable_0.3.6.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/gtable/gtable_0.3.6.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "cpp11",
+      "version": "0.5.5",
+      "sha256": "72486beb0605c1229bf3d422cd536224af8dc09bd389a3116f62f4c7705c62f4",
+      "url": "https://cloud.r-project.org/src/contrib/cpp11_0.5.5.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/cpp11/cpp11_0.5.5.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "isoband",
+      "version": "0.3.0",
+      "sha256": "fe8d3d58ca75bbee32f389152ac0058818f3f76f09c9867949531de7abc424ac",
+      "url": "https://cloud.r-project.org/src/contrib/isoband_0.3.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/isoband/isoband_0.3.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "S7",
+      "version": "0.2.2",
+      "sha256": "6f33245dde05b74265b1c4d379e034bc3a8923d41e7b52e6e75a75ce97d42af7",
+      "url": "https://cloud.r-project.org/src/contrib/S7_0.2.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/S7/S7_0.2.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "farver",
+      "version": "2.1.2",
+      "sha256": "528823b95daab4566137711f1c842027a952bea1b2ae6ff098e2ca512b17fe25",
+      "url": "https://cloud.r-project.org/src/contrib/farver_2.1.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/farver/farver_2.1.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "labeling",
+      "version": "0.4.3",
+      "sha256": "c62f4fc2cc74377d7055903c5f1913b7295f7587456fe468592738a483e264f2",
+      "url": "https://cloud.r-project.org/src/contrib/labeling_0.4.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/labeling/labeling_0.4.3.tar.gz",
+      "license": "MIT + file LICENSE | Unlimited"
+    },
+    {
+      "name": "R6",
+      "version": "2.6.1",
+      "sha256": "59c6eba8b1b912eb7e104f65053235604be853425ee67c152ac4e86a1f2073b4",
+      "url": "https://cloud.r-project.org/src/contrib/R6_2.6.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/R6/R6_2.6.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "RColorBrewer",
+      "version": "1.1-3",
+      "sha256": "4f42f5423c45688b39f492c7892d93f37b4541831c8ffb140364d2bd89031ac0",
+      "url": "https://cloud.r-project.org/src/contrib/RColorBrewer_1.1-3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/RColorBrewer/RColorBrewer_1.1-3.tar.gz",
+      "license": "Apache License 2.0"
+    },
+    {
+      "name": "viridisLite",
+      "version": "0.4.3",
+      "sha256": "433be9bde66234dc76301fb4ffbbc9fc74bab5c14f4548d8ef2fc0065e121ef5",
+      "url": "https://cloud.r-project.org/src/contrib/viridisLite_0.4.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/viridisLite/viridisLite_0.4.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "scales",
+      "version": "1.4.0",
+      "sha256": "d55ef5f08c92652d7a95cfa27584024723ab17873f1b2577dd488cb7c883ceee",
+      "url": "https://cloud.r-project.org/src/contrib/scales_1.4.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/scales/scales_1.4.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "vctrs",
+      "version": "0.7.3",
+      "sha256": "b45078413e06ac624dddb7221a3a43908b405c8abec09822cb86638d30b0435b",
+      "url": "https://cloud.r-project.org/src/contrib/vctrs_0.7.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/vctrs/vctrs_0.7.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "withr",
+      "version": "3.0.3",
+      "sha256": "d86c6454164fc85678bfc85e2a6cce42f7461d45fa9a87de71f376e7956c991e",
+      "url": "https://cloud.r-project.org/src/contrib/withr_3.0.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/withr/withr_3.0.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "ggplot2",
+      "version": "4.0.3",
+      "sha256": "690224bd61642b6222adb109470988e87f786e193cca77a15c0923cf9da73fa5",
+      "url": "https://cloud.r-project.org/src/contrib/ggplot2_4.0.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/ggplot2/ggplot2_4.0.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "curl",
+      "version": "8.1.0",
+      "sha256": "ab3907ac4f063d614c778b8540d7e2e7b108dc6ab82c42e471cff2a1ca21205b",
+      "url": "https://cloud.r-project.org/src/contrib/curl_8.1.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/curl/curl_8.1.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "jsonlite",
+      "version": "2.0.0",
+      "sha256": "75eb910c82b350ec33f094779da0f87bff154c232e4ae39c9896a9b89f3ac82d",
+      "url": "https://cloud.r-project.org/src/contrib/jsonlite_2.0.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/jsonlite/jsonlite_2.0.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "mime",
+      "version": "0.13",
+      "sha256": "7132834cf3c3388eff12bad376d69fbcf8275acc37d36c290e59174fe3c7f3eb",
+      "url": "https://cloud.r-project.org/src/contrib/mime_0.13.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/mime/mime_0.13.tar.gz",
+      "license": "GPL"
+    },
+    {
+      "name": "sys",
+      "version": "3.4.3",
+      "sha256": "051e7332e3074db826efef9059067721864f9d70adc55bbcae3a72e5ae83913a",
+      "url": "https://cloud.r-project.org/src/contrib/sys_3.4.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/sys/sys_3.4.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "askpass",
+      "version": "1.2.1",
+      "sha256": "6c2106a74c44a748f2cea795d9686e27a0058a90debcfd8558b62b06aec0c7dd",
+      "url": "https://cloud.r-project.org/src/contrib/askpass_1.2.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/askpass/askpass_1.2.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "openssl",
+      "version": "2.4.2",
+      "sha256": "1fc030ad0a008472eac7f086666a7623bdbe6d27c5fdb07b5510f56545d2f4e7",
+      "url": "https://cloud.r-project.org/src/contrib/openssl_2.4.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/openssl/openssl_2.4.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "httr",
+      "version": "1.4.9",
+      "sha256": "4adf8cea7a24012ec883da1723eaade26c69455e0a3200bdc12f2f9f8515982c",
+      "url": "https://cloud.r-project.org/src/contrib/httr_1.4.9.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/httr/httr_1.4.9.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "magrittr",
+      "version": "2.0.5",
+      "sha256": "3f5b5b1d4e6d12807a95c50b6c88cb1d8af2c5eb5213f08bfe58f278eca2ed23",
+      "url": "https://cloud.r-project.org/src/contrib/magrittr_2.0.5.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/magrittr/magrittr_2.0.5.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "digest",
+      "version": "0.6.39",
+      "sha256": "8bf048b49b2d17077138fae758bda56bbd53278d9437f2fdeaedf979c90a13c9",
+      "url": "https://cloud.r-project.org/src/contrib/digest_0.6.39.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/digest/digest_0.6.39.tar.gz",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "name": "base64enc",
+      "version": "0.1-6",
+      "sha256": "3c7e9d22f7409fa2989008fa6e980c3dd8e2693eb20676acf2470ae7addb0816",
+      "url": "https://cloud.r-project.org/src/contrib/base64enc_0.1-6.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/base64enc/base64enc_0.1-6.tar.gz",
+      "license": "GPL-2 | GPL-3"
+    },
+    {
+      "name": "fastmap",
+      "version": "1.2.0",
+      "sha256": "b1da04a2915d1d057f3c2525e295ef15016a64e6667eac83a14641bbd83b9246",
+      "url": "https://cloud.r-project.org/src/contrib/fastmap_1.2.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/fastmap/fastmap_1.2.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "htmltools",
+      "version": "0.5.9",
+      "sha256": "19308618da485818f69dcfeeadd2ddc81d43a736a74519df7b3fd98e13128afd",
+      "url": "https://cloud.r-project.org/src/contrib/htmltools_0.5.9.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/htmltools/htmltools_0.5.9.tar.gz",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "name": "evaluate",
+      "version": "1.0.5",
+      "sha256": "47aac79f889a828a5f8b4756cb972d7c2966bb984cbae17a4bd2389a73270794",
+      "url": "https://cloud.r-project.org/src/contrib/evaluate_1.0.5.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/evaluate/evaluate_1.0.5.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "xfun",
+      "version": "0.62",
+      "sha256": "56102222347f91ef0446dfb203016ff5935d6d6b0bff3b8776673c5e46a94baf",
+      "url": "https://cloud.r-project.org/src/contrib/xfun_0.62.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/xfun/xfun_0.62.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "highr",
+      "version": "0.12",
+      "sha256": "e8e1d6460022a9948799602d6b95dc78fbfa318ff6f0627e95c20b7190fc612b",
+      "url": "https://cloud.r-project.org/src/contrib/highr_0.12.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/highr/highr_0.12.tar.gz",
+      "license": "GPL"
+    },
+    {
+      "name": "yaml",
+      "version": "2.3.12",
+      "sha256": "80ccf3dde851133ef3e333b818a817c296c6ccdacfc4709cd466995289cd556c",
+      "url": "https://cloud.r-project.org/src/contrib/yaml_2.3.12.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/yaml/yaml_2.3.12.tar.gz",
+      "license": "BSD_3_clause + file LICENSE"
+    },
+    {
+      "name": "knitr",
+      "version": "1.52",
+      "sha256": "bdd66a02dfba08a4c644b38a6ae08f6ba915c16d6b6ab6a188ec193c35905ff2",
+      "url": "https://cloud.r-project.org/src/contrib/knitr_1.52.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/knitr/knitr_1.52.tar.gz",
+      "license": "GPL"
+    },
+    {
+      "name": "cachem",
+      "version": "1.1.0",
+      "sha256": "550839fc2ae5d865db475ba2c1714144f07fa0c052c72135b0e4a70287492e21",
+      "url": "https://cloud.r-project.org/src/contrib/cachem_1.1.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/cachem/cachem_1.1.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "jquerylib",
+      "version": "0.1.4",
+      "sha256": "f0bcc11dcde3a6ff180277e45c24642d3da3c8690900e38f44495efbc9064411",
+      "url": "https://cloud.r-project.org/src/contrib/jquerylib_0.1.4.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/jquerylib/jquerylib_0.1.4.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "memoise",
+      "version": "2.0.1",
+      "sha256": "f85034ee98c8ca07fb3cd826142c1cd1e1e5747075a94c75a45783bbc4fe2deb",
+      "url": "https://cloud.r-project.org/src/contrib/memoise_2.0.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/memoise/memoise_2.0.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "fs",
+      "version": "2.1.0",
+      "sha256": "7088af1117d65c4ceb144b532e323f197fc8243b1d704bf6edf40774789829cd",
+      "url": "https://cloud.r-project.org/src/contrib/fs_2.1.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/fs/fs_2.1.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "rappdirs",
+      "version": "0.3.4",
+      "sha256": "2320ebc9ef3b1a32a1e63f94a6ce2c1c34d66782221a6531e786804f681abc66",
+      "url": "https://cloud.r-project.org/src/contrib/rappdirs_0.3.4.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/rappdirs/rappdirs_0.3.4.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "sass",
+      "version": "0.4.10",
+      "sha256": "4adb4c243f74d811276529e346deaa064bce28dbfbb837208fc85f2c47b79b30",
+      "url": "https://cloud.r-project.org/src/contrib/sass_0.4.10.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/sass/sass_0.4.10.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "bslib",
+      "version": "0.12.0",
+      "sha256": "26fc11793dc1fdccd6d8d2fc1d638c29c47aa0c2e5cbadc6a35af3819f5446d1",
+      "url": "https://cloud.r-project.org/src/contrib/bslib_0.12.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/bslib/bslib_0.12.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "fontawesome",
+      "version": "0.5.3",
+      "sha256": "1b1909d0fad5ec4c658f5c628a195b9bd93d544afa957e68e897224cfb81fb4f",
+      "url": "https://cloud.r-project.org/src/contrib/fontawesome_0.5.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/fontawesome/fontawesome_0.5.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "tinytex",
+      "version": "0.61",
+      "sha256": "78300dc6163911c7de3efbe225c3bf455287c67886ed0e5a04fd347c6eaf2680",
+      "url": "https://cloud.r-project.org/src/contrib/tinytex_0.61.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/tinytex/tinytex_0.61.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "rmarkdown",
+      "version": "2.32",
+      "sha256": "f7fab8ae670d18a4b91409d11e4275b565c4081d77c4522443d01f94a8c2acee",
+      "url": "https://cloud.r-project.org/src/contrib/rmarkdown_2.32.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/rmarkdown/rmarkdown_2.32.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "htmlwidgets",
+      "version": "1.6.4",
+      "sha256": "7cb08f0b30485dac26f72e4056ec4ed8825d1398e8b9f25ed63db228fe3a0ed0",
+      "url": "https://cloud.r-project.org/src/contrib/htmlwidgets_1.6.4.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/htmlwidgets/htmlwidgets_1.6.4.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "generics",
+      "version": "0.1.4",
+      "sha256": "bbe95a097792d38fc3b7e677738af1b95b66ea5e5017e33b8beac6a6088d0801",
+      "url": "https://cloud.r-project.org/src/contrib/generics_0.1.4.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/generics/generics_0.1.4.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "utf8",
+      "version": "1.2.6",
+      "sha256": "4589f8b72291329e70b7f3a8c20f2feb4e7764eebad2e6976bc9a3eee7686ce9",
+      "url": "https://cloud.r-project.org/src/contrib/utf8_1.2.6.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/utf8/utf8_1.2.6.tar.gz",
+      "license": "Apache License (== 2.0) | file LICENSE"
+    },
+    {
+      "name": "pillar",
+      "version": "1.11.1",
+      "sha256": "056ce154238c9b5b8d5dcbcb52e1bc51d33870ce08c8a9ca9496478bd59f4653",
+      "url": "https://cloud.r-project.org/src/contrib/pillar_1.11.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/pillar/pillar_1.11.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "pkgconfig",
+      "version": "2.0.3",
+      "sha256": "330fef440ffeb842a7dcfffc8303743f1feae83e8d6131078b5a44ff11bc3850",
+      "url": "https://cloud.r-project.org/src/contrib/pkgconfig_2.0.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/pkgconfig/pkgconfig_2.0.3.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "tibble",
+      "version": "3.3.1",
+      "sha256": "fb309f8a1939021b237c7e85ff7ad6e8ff5acd57a6230d220a452094b492b28f",
+      "url": "https://cloud.r-project.org/src/contrib/tibble_3.3.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/tibble/tibble_3.3.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "tidyselect",
+      "version": "1.2.1",
+      "sha256": "169e97ba0bbfbcdf4a80534322751f87a04370310c40e27f04aac6525d45903c",
+      "url": "https://cloud.r-project.org/src/contrib/tidyselect_1.2.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/tidyselect/tidyselect_1.2.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "dplyr",
+      "version": "1.2.1",
+      "sha256": "18d66fe2f24cda8b619c177326d39dd015229ab99695fa67d3fa31e4569390e0",
+      "url": "https://cloud.r-project.org/src/contrib/dplyr_1.2.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/dplyr/dplyr_1.2.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "purrr",
+      "version": "1.2.2",
+      "sha256": "ac3bc0fc0e789510042522e6c4294336c71447be8f6921b5ef78b9a9fb86617d",
+      "url": "https://cloud.r-project.org/src/contrib/purrr_1.2.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/purrr/purrr_1.2.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "stringi",
+      "version": "1.8.9",
+      "sha256": "427fcebd281d7ea850becce75e0807576dd394a723a814b2d487419b93275a33",
+      "url": "https://cloud.r-project.org/src/contrib/stringi_1.8.9.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/stringi/stringi_1.8.9.tar.gz",
+      "license": "file LICENSE"
+    },
+    {
+      "name": "stringr",
+      "version": "1.6.0",
+      "sha256": "24f2fc5df980a7eb888659e22b9744d2316c558624015c7a7cd8c3ce3e370064",
+      "url": "https://cloud.r-project.org/src/contrib/stringr_1.6.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/stringr/stringr_1.6.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "tidyr",
+      "version": "1.3.2",
+      "sha256": "04c0e6daf0af682af73763a42c027d7171761cdbdbf9ff7a77a0e421343d665a",
+      "url": "https://cloud.r-project.org/src/contrib/tidyr_1.3.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/tidyr/tidyr_1.3.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "lazyeval",
+      "version": "0.2.3",
+      "sha256": "c65db1997b195a7bb0ab3afbb834345ea277b428b2736eeded4242629e86adcb",
+      "url": "https://cloud.r-project.org/src/contrib/lazyeval_0.2.3.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/lazyeval/lazyeval_0.2.3.tar.gz",
+      "license": "GPL-3"
+    },
+    {
+      "name": "crosstalk",
+      "version": "1.2.2",
+      "sha256": "804def71ea7508cada0eec7aa6d35b487db17a8f9e38dca34fffc236691e36fc",
+      "url": "https://cloud.r-project.org/src/contrib/crosstalk_1.2.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/crosstalk/crosstalk_1.2.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "data.table",
+      "version": "1.18.6.1",
+      "sha256": "f2846f45fbbdfe886f05fa7489314a56ae0f3352ae5bc1070b0cdd4f44ffa1f5",
+      "url": "https://cloud.r-project.org/src/contrib/data.table_1.18.6.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/data.table/data.table_1.18.6.1.tar.gz",
+      "license": "MPL-2.0 | file LICENSE"
+    },
+    {
+      "name": "Rcpp",
+      "version": "1.1.2",
+      "sha256": "2746cf2fb188e5f0a84dbf5c8f68915b54564ed33e5754572f174e7b32e7f4f3",
+      "url": "https://cloud.r-project.org/src/contrib/Rcpp_1.1.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/Rcpp/Rcpp_1.1.2.tar.gz",
+      "license": "GPL (>= 2)"
+    },
+    {
+      "name": "later",
+      "version": "1.4.8",
+      "sha256": "ce5d88b3fd1df409eaa21aa53bf20b1a9331f75cd69e7e9b2a27b40d2290d219",
+      "url": "https://cloud.r-project.org/src/contrib/later_1.4.8.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/later/later_1.4.8.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "otel",
+      "version": "0.2.0",
+      "sha256": "ef8afe5a1bc8074bbeb8a84134699ef348a1f8ac629ffba25ee43ea7bcd8dd17",
+      "url": "https://cloud.r-project.org/src/contrib/otel_0.2.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/otel/otel_0.2.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "promises",
+      "version": "1.5.0",
+      "sha256": "bb68fd4065cc072996aed416f0b2388f58738797a3a38024720c29d67164747d",
+      "url": "https://cloud.r-project.org/src/contrib/promises_1.5.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/promises/promises_1.5.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "plotly",
+      "version": "4.12.1",
+      "sha256": "16c7d796ec788d5755b6e2ac601f504dc085a8e46689dbb0c153c2b3e4ac99f4",
+      "url": "https://cloud.r-project.org/src/contrib/plotly_4.12.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/plotly/plotly_4.12.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "R.methodsS3",
+      "version": "1.8.2",
+      "sha256": "822d5e61dad4c91e8883be2b38d7b89f87492046d0fe345704eb5d2658927c2e",
+      "url": "https://cloud.r-project.org/src/contrib/R.methodsS3_1.8.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/R.methodsS3/R.methodsS3_1.8.2.tar.gz",
+      "license": "LGPL (>= 2.1)"
+    },
+    {
+      "name": "R.oo",
+      "version": "1.27.1",
+      "sha256": "5faf599cc1f027d8b80e1270aa6a43e29dccd6fee8287953f13e7ab3d94270f5",
+      "url": "https://cloud.r-project.org/src/contrib/R.oo_1.27.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/R.oo/R.oo_1.27.1.tar.gz",
+      "license": "LGPL (>= 2.1)"
+    },
+    {
+      "name": "R.utils",
+      "version": "2.13.0",
+      "sha256": "ab2043c34e129928ff85a037ce7a3f7791f245f49a55ee9a95bd7df0813bcf25",
+      "url": "https://cloud.r-project.org/src/contrib/R.utils_2.13.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/R.utils/R.utils_2.13.0.tar.gz",
+      "license": "LGPL (>= 2.1)"
+    },
+    {
+      "name": "R.cache",
+      "version": "0.17.0",
+      "sha256": "e265953212edd15be12cdfcc4fa8829cc0dcf3b06ab3e0aa1758108544822d21",
+      "url": "https://cloud.r-project.org/src/contrib/R.cache_0.17.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/R.cache/R.cache_0.17.0.tar.gz",
+      "license": "LGPL (>= 2.1)"
+    },
+    {
+      "name": "rprojroot",
+      "version": "2.1.1",
+      "sha256": "473989bbef45fd9cd68f68dc317b14c9f42de5cea4b55fd6ba9011f25e0517e9",
+      "url": "https://cloud.r-project.org/src/contrib/rprojroot_2.1.1.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/rprojroot/rprojroot_2.1.1.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "styler",
+      "version": "1.11.0",
+      "sha256": "f08760782b2ead047dd8f166a7cd5e01ace8d713087712bf61d193f610fbfe18",
+      "url": "https://cloud.r-project.org/src/contrib/styler_1.11.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/styler/styler_1.11.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "rex",
+      "version": "1.2.2",
+      "sha256": "5c6a6f9bc45507038ae528e71a7f6cd69a77c24c2fed86383a34fd5c86c2ee48",
+      "url": "https://cloud.r-project.org/src/contrib/rex_1.2.2.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/rex/rex_1.2.2.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "xml2",
+      "version": "1.6.0",
+      "sha256": "b0660edab0a839866a0cccd44721c54d497000fd6577a25106a33280318bf579",
+      "url": "https://cloud.r-project.org/src/contrib/xml2_1.6.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/xml2/xml2_1.6.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "xmlparsedata",
+      "version": "1.0.5",
+      "sha256": "766034ab5e9728609bd240c9954d23ca0cdb881a98a31b9d3e1c8767c7b7cbb0",
+      "url": "https://cloud.r-project.org/src/contrib/xmlparsedata_1.0.5.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/xmlparsedata/xmlparsedata_1.0.5.tar.gz",
+      "license": "MIT + file LICENSE"
+    },
+    {
+      "name": "lintr",
+      "version": "3.4.0",
+      "sha256": "54144e68b70289edff7eed4fc8d00efacd1ddd51c032dc1e88bfb657c10a89dc",
+      "url": "https://cloud.r-project.org/src/contrib/lintr_3.4.0.tar.gz",
+      "archive_url": "https://cloud.r-project.org/src/contrib/Archive/lintr/lintr_3.4.0.tar.gz",
+      "license": "MIT + file LICENSE"
+    }
+  ]
+}

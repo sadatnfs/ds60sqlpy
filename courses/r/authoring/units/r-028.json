@@ -1,0 +1,102 @@
+{
+  "id": "r-028",
+  "title": "Bounded local parallelism and task-owned random streams",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-015", "r-020", "r-027"],
+  "concepts": ["PSOCK worker", "serialization", "task purity", "resource cleanup", "random stream"],
+  "outcome": "Execute fixed independent tasks with two local PSOCK workers, preserve deterministic task results and close worker processes on every ordinary exit path.",
+  "mechanism": "Parallel evaluation is appropriate when tasks can compute independently and the cost of starting workers and transferring inputs is justified. A PSOCK cluster launches separate R processes and communicates over sockets. Workers do not inherit the caller's whole interactive workspace. Send small explicit inputs and use self-contained task functions; avoid hidden global state, shared output files and dependencies that were never prepared in the worker.\n\nThe classroom example uses exactly two local PSOCK workers. The integer worker count denotes local processes, and master is fixed to loopback 127.0.0.1. The job has two CPUs, a three-gigabyte memory limit, a 128-process limit, a 32 MiB scratch allowance and a total deadline of at most 120 seconds. These are resource boundaries for this prepared profile, not an invitation to launch remote workers or allocate one worker per detected host core. The fixed tiny fixtures need no external service or package installation.\n\nAn owning function starts the cluster, immediately registers on.exit(stopCluster(...)), evaluates a callback and returns its result. That handler covers normal return and ordinary R errors. A forced timeout or cancellation can terminate the R process before an R cleanup handler runs, so the supervisor must also terminate and reap descendants. The prepared isolated runtime was separately checked for success and forced-timeout cleanup. The lesson's on.exit pattern alone is not proof of that runtime behavior.\n\nparLapply returns results in input order. Its static scheduling and the load-balanced parLapplyLB can assign tasks to different worker processes. A pure deterministic function gives the same result either way. A function using worker-local random state may not: changing task assignment changes which stream a task consumes. clusterSetRNGStream assigns streams to workers, which is useful for a fixed assignment, but does not by itself promise task identity across arbitrary schedules.\n\nThe second example assigns an L'Ecuyer-CMRG stream to each task before dispatch. Each task carries an integer identifier and its complete stream state, then resets its worker's RNG to that stream before drawing. Results are reordered by task identifier for comparison. Reversing dispatch order or using load balancing now preserves each task's random values under the same prepared runtime. This is reproducibility of a declared computation, not a claim that arbitrary numerical algorithms are bit-identical across versions and architectures.\n\nTiny examples are intentionally poor speed benchmarks: process startup can exceed the numerical work. Their purpose is to establish explicit inputs, scheduling-independent identity, bounded concurrency and resource ownership. Profile a real equivalent workload before choosing parallel execution, and retain a sequential reference for debugging. Errors should be surfaced as failed tasks rather than converted silently to zero-valued results.",
+  "vocabulary": [
+    {
+      "term": "PSOCK cluster",
+      "definition": "Separate R processes communicating through sockets."
+    },
+    {
+      "term": "Task purity",
+      "definition": "A task result depends on explicit inputs rather than shared mutable effects."
+    },
+    {
+      "term": "Serialization",
+      "definition": "Encoding inputs and results for transfer between R processes."
+    },
+    {
+      "term": "Task-owned RNG stream",
+      "definition": "A random-number stream assigned to a task identity instead of a worker identity."
+    },
+    {
+      "term": "Cleanup handler",
+      "definition": "An on.exit action that releases a function-owned resource on ordinary return or error."
+    }
+  ],
+  "anatomy": "makePSOCKcluster(2L,master=\"127.0.0.1\",rscript_args=\"--vanilla\") starts exactly two local fresh R workers. parLapply(cluster,tasks,fun) maps a self-contained function. on.exit(stopCluster(cluster),add=TRUE) belongs immediately after successful construction. nextRNGStream supplies the next L'Ecuyer stream; each task installs its own complete .Random.seed before drawing.",
+  "worked_examples": [
+    {
+      "title": "Compare a deterministic parallel result with a serial reference",
+      "code": "with_two_workers <- function(fun) {\n  cluster <- parallel::makePSOCKcluster(2L,\n    master = \"127.0.0.1\",\n    rscript_args = \"--vanilla\", setup_timeout = 10, timeout = 30\n  )\n  on.exit(parallel::stopCluster(cluster), add = TRUE)\n  fun(cluster)\n}\n\ntasks <- list(1:3, 4:6)\nserial <- lapply(tasks, function(x) sum(x^2))\nparallel_result <- with_two_workers(function(cluster) {\n  parallel::parLapply(cluster, tasks, function(x) sum(x^2))\n})\nstopifnot(identical(serial, parallel_result), identical(unlist(parallel_result), c(14, 77)))\nprint(unlist(parallel_result))\n",
+      "explanation": "Each task receives its own small vector and returns a scalar. No worker reads an unexported global name. The owning function stops both workers before the result is used. This checks equivalence rather than claiming a speedup.",
+      "expected": "Squared-sum results 14 and 77, equal to the serial computation."
+    },
+    {
+      "title": "Random values remain attached to task identities",
+      "code": "with_two_workers <- function(fun) {\n  cluster <- parallel::makePSOCKcluster(2L,\n    master = \"127.0.0.1\",\n    rscript_args = \"--vanilla\", setup_timeout = 10, timeout = 30\n  )\n  on.exit(parallel::stopCluster(cluster), add = TRUE)\n  fun(cluster)\n}\nmake_tasks <- function(n, seed) {\n  old_kind <- RNGkind()\n  had_seed <- exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)\n  if (had_seed) old_seed <- get(\".Random.seed\", envir = .GlobalEnv)\n  on.exit(\n    {\n      do.call(RNGkind, as.list(old_kind))\n      if (had_seed) assign(\".Random.seed\", old_seed, envir = .GlobalEnv)\n      else if (exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)) rm(\".Random.seed\", envir = .GlobalEnv)\n    },\n    add = TRUE\n  )\n  RNGkind(\"L'Ecuyer-CMRG\")\n  set.seed(seed)\n  stream <- .Random.seed\n  tasks <- vector(\"list\", n)\n  for (i in seq_len(n)) {\n    tasks[[i]] <- list(id = i, seed = stream)\n    stream <- parallel::nextRNGStream(stream)\n  }\n  tasks\n}\ndraw_task <- function(task) {\n  assign(\".Random.seed\", task$seed, envir = .GlobalEnv)\n  list(id = task$id, values = stats::rnorm(4))\n}\norder_results <- function(results) {\n  results[order(vapply(results, function(x) x$id, integer(1)))]\n}\n\ntasks <- make_tasks(4L, 2026)\nresults <- with_two_workers(function(cluster) {\n  static <- parallel::parLapply(cluster, tasks, draw_task)\n  balanced <- parallel::parLapplyLB(cluster, rev(tasks), draw_task)\n  list(static = order_results(static), balanced = order_results(balanced))\n})\nstopifnot(identical(results$static, results$balanced))\nstopifnot(!identical(results$static[[1]]$values, results$static[[2]]$values))\nprint(vapply(results$static, function(x) mean(x$values), numeric(1)))\n",
+      "explanation": "The same task streams are sent under two scheduling choices and opposite input orders. Sorting by the returned identifier makes the comparison about task identity. Distinct task streams also prevent the mistake of resetting every task to the same seed.",
+      "expected": "Four task means; exact equality by identity across the two schedules."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the squared sums for tasks 1:3 and 4:6.",
+      "hint": "Compute the serial arithmetic first.",
+      "answer": "The results are 14 and 77.",
+      "expected": "Two known scalar outputs."
+    },
+    {
+      "prompt": "Add a third deterministic task c(2,2) without increasing the worker count.",
+      "hint": "Worker count and task count are different.",
+      "answer": "Exactly two workers process three tasks and return 14,77,8 in input order.",
+      "expected": "Three results, two workers."
+    },
+    {
+      "prompt": "Implement a self-contained task that returns count and squared sum.",
+      "hint": "Return a named list instead of console text or shared-file writes.",
+      "answer": "Each task returns list(count=length(x),sum_squares=sum(x^2)); the first task has count 3 and squared sum 14.",
+      "expected": "Structured, serial-equivalent task results."
+    },
+    {
+      "prompt": "Diagnose assigning the same set.seed value inside every simulation task.",
+      "hint": "Deterministic can still mean wrongly identical simulations.",
+      "answer": "Every task would repeat the same random sequence. Assign distinct task streams and retain task identifiers.",
+      "expected": "Distinct streams with reproducible task results."
+    },
+    {
+      "prompt": "Compare static scheduling and reversed load-balanced scheduling.",
+      "hint": "Carry stream state with each task and reorder results by identifier.",
+      "answer": "The per-task random vectors are identical even if the task-to-worker assignment changes.",
+      "expected": "Equality by task ID."
+    },
+    {
+      "prompt": "Explain cleanup for an ordinary R error versus a forced deadline.",
+      "hint": "An R handler cannot run after every possible external kill.",
+      "answer": "on.exit stops workers during ordinary unwinding; the prepared supervisor separately terminates and reaps descendants after timeout. Do not catch a task error and replace it with a fabricated numerical success.",
+      "expected": "Both ownership layers and their limits are stated."
+    }
+  ],
+  "starter": "# r-028: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\ntasks <- list(1:3, 4:6, c(2, 2))\nworker_count <- 2L\n\n# Exercise 1: Predict the squared sums for tasks 1:3 and 4:6.\n# TODO: Compute the serial arithmetic first.\n# Exercise 2: Add a third deterministic task c(2,2) without increasing the worker count.\n# TODO: Worker count and task count are different.\n# Exercise 3: Implement a self-contained task that returns count and squared sum.\n# TODO: Return a named list instead of console text or shared-file writes.\n# Exercise 4: Diagnose assigning the same set.seed value inside every simulation task.\n# TODO: Deterministic can still mean wrongly identical simulations.\n# Exercise 5: Compare static scheduling and reversed load-balanced scheduling.\n# TODO: Carry stream state with each task and reorder results by identifier.\n# Exercise 6: Explain cleanup for an ordinary R error versus a forced deadline.\n# TODO: An R handler cannot run after every possible external kill.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "with_two_workers <- function(fun) {\n  cluster <- parallel::makePSOCKcluster(2L,\n    master = \"127.0.0.1\",\n    rscript_args = \"--vanilla\", setup_timeout = 10, timeout = 30\n  )\n  on.exit(parallel::stopCluster(cluster), add = TRUE)\n  fun(cluster)\n}\nmake_tasks <- function(n, seed) {\n  old_kind <- RNGkind()\n  had_seed <- exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)\n  if (had_seed) old_seed <- get(\".Random.seed\", envir = .GlobalEnv)\n  on.exit(\n    {\n      do.call(RNGkind, as.list(old_kind))\n      if (had_seed) assign(\".Random.seed\", old_seed, envir = .GlobalEnv)\n      else if (exists(\".Random.seed\", envir = .GlobalEnv, inherits = FALSE)) rm(\".Random.seed\", envir = .GlobalEnv)\n    },\n    add = TRUE\n  )\n  RNGkind(\"L'Ecuyer-CMRG\")\n  set.seed(seed)\n  stream <- .Random.seed\n  tasks <- vector(\"list\", n)\n  for (i in seq_len(n)) {\n    tasks[[i]] <- list(id = i, seed = stream)\n    stream <- parallel::nextRNGStream(stream)\n  }\n  tasks\n}\ndraw_task <- function(task) {\n  assign(\".Random.seed\", task$seed, envir = .GlobalEnv)\n  list(id = task$id, values = stats::rnorm(4))\n}\norder_results <- function(results) {\n  results[order(vapply(results, function(x) x$id, integer(1)))]\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\ntasks <- list(1:3, 4:6, c(2, 2))\nsummary_task <- function(x) list(count = length(x), sum_squares = sum(x^2))\nserial <- lapply(tasks, summary_task)\nparallel_result <- with_two_workers(function(cluster) parallel::parLapply(cluster, tasks, summary_task))\nstopifnot(identical(serial, parallel_result))\nstopifnot(identical(vapply(parallel_result, function(x) x$sum_squares, numeric(1)), c(14, 77, 8)))\nstopifnot(parallel_result[[1]]$count == 3L)\nstreams <- make_tasks(4L, 2026)\nrandom_results <- with_two_workers(function(cluster) {\n  a <- parallel::parLapply(cluster, streams, draw_task)\n  b <- parallel::parLapplyLB(cluster, rev(streams), draw_task)\n  list(a = order_results(a), b = order_results(b))\n})\nstopifnot(identical(random_results$a, random_results$b))\nstopifnot(!identical(random_results$a[[1]]$values, random_results$a[[2]]$values))\nassert_error(with_two_workers(function(cluster) {\n  parallel::parLapply(cluster, list(1L, 2L), function(x) stop(\"deliberate task failure\"))\n}), \"deliberate task failure\")\ncat(\"r-028 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference uses three tasks while keeping concurrency fixed at two. It compares a structured result with a sequential oracle and independent arithmetic 14,77,8. The RNG comparison changes both schedule policy and task order, then compares by explicit identifier.\n\nA deliberately failed task is propagated through the owning function, exercising ordinary on.exit cleanup. The separate runtime qualification covers forced timeout and descendant reaping; this script does not claim that catching an error or reaching a final marker proves that every external termination path is safe. Small fixtures demonstrate contracts rather than parallel speed.",
+  "sources": [
+    {
+      "title": "R PSOCK cluster construction",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/makeCluster.html"
+    },
+    {
+      "title": "R cluster apply operations",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/clusterApply.html"
+    },
+    {
+      "title": "R independent RNG streams",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/parallel/html/RngStream.html"
+    }
+  ]
+}

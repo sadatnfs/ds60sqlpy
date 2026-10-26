@@ -52,7 +52,8 @@ Per-project `images.env` stores source, namespace and version; architecture tags
 match the engine. Resume never pulls or builds. Publication is an explicit
 separate script and optional manual workflow, not a side effect of startup.
 
-The shared renderer provides offline MathML and syntax highlighting. Reviewed
+The shared renderer provides build-compiled TeX, accessible MathML, bundled
+Latin Modern typography and syntax highlighting. Reviewed
 prose normalization runs before reader generation; copying a code block must
 preserve source characters. The generated static library remains available
 without the application server. The old design-preview renderer and native launchers are retired. The five
@@ -64,6 +65,26 @@ Practice lessons have progressive exercises, hints and separate solutions.
 The statistics book is a theory-and-code tutorial with directly available
 worked examples and answered interview discussions. Reading markers and
 learner-confirmed completion do not certify understanding.
+
+## Additional scientific and offline workspaces
+
+JAX uses a dedicated CPU worker with fixed JAX/JAXLIB versions. R uses a pinned
+Rscript worker with reviewed CRAN package hashes. Bayesian tutorials use a
+separate PyMC/ArviZ environment, preserving the InferenceData API expected by
+those examples. Profiles and subjects remain separate; optional hardware work
+must state its own preparation and qualification limits.
+
+DAX is an editable offline workspace. It saves source and notes, exposes named
+hand-derived references with bound model/source hashes, and rejects execution
+requests. Reference tables are never converted to run receipts.
+
+The statistics book's original chapter manifest and topic outline remain stable.
+Additional worked tutorials use tutorials/index.json and validated direct
+prerequisites. The paired data-visualization subject reuses Python Core and the
+browser JavaScript profile. Python and R figure documents are bounded and
+validated before storage; Plotly data renders in an opaque offline iframe.
+History displays stored figures without rerunning the source. See
+[plotting](../plotting.md) and [textbook rendering](../textbook-rendering.md).
 
 ## Runtime and storage boundaries
 

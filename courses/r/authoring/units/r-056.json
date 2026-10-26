@@ -1,0 +1,104 @@
+{
+  "id": "r-056",
+  "title": "Statistical graphics for model diagnosis",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-055", "r-043"],
+  "concepts": [
+    "residual plot",
+    "Q-Q plot",
+    "heteroskedasticity",
+    "diagnostic evidence",
+    "model assumptions"
+  ],
+  "outcome": "Construct diagnostic graphics from fitted quantities and explain which model concerns they can investigate without treating a plot as proof.",
+  "mechanism": "A diagnostic graphic asks a specific question about a fitted model or its assumptions. Residuals versus fitted values can reveal systematic mean patterns or changing spread. A normal Q-Q plot compares ordered residuals with a reference distribution's quantiles. Neither graphic automatically decides whether an analysis is scientifically valid.\n\nBuild diagnostics from explicit fitted quantities. Retain observation identity so a surprising point can be traced back to its source. The same residual can arise from a measurement issue, a missing predictor, a nonlinear relationship or an unusual but legitimate observation. A visual pattern suggests further investigation rather than authorizing deletion by appearance alone.\n\nThe first fixture has a known linear trend and small authored errors chosen to be orthogonal to the design. This gives exact coefficient and residual checks before plotting. The diagnostic layers are then tied to the same numerical residuals, avoiding a chart that accidentally uses stale or differently ordered data.\n\nA second fixture creates spread that grows with the predictor. Its residual magnitudes increase systematically even though the conditional mean is correctly represented. This distinguishes a variance-model concern from a wrong mean slope. It also explains why a low overall error can hide important subgroup or range-specific behavior.\n\nQ-Q departures have several possible explanations, and fitted residuals are not an independent random sample of unobserved errors. Sample size, leverage, model fitting and dependence affect interpretation. Use diagnostics with substantive knowledge, sensitivity analyses and an appropriate validation design. A visually straight segment or nonsignificant test is not a universal assumption certificate.",
+  "vocabulary": [
+    {
+      "term": "Residual diagnostic",
+      "definition": "An examination of observed-minus-fitted values for a specified model concern."
+    },
+    {
+      "term": "Q-Q plot",
+      "definition": "A comparison of ordered sample values with theoretical or empirical reference quantiles."
+    },
+    {
+      "term": "Heteroskedasticity",
+      "definition": "Variation in conditional error spread across predictor values or groups."
+    },
+    {
+      "term": "Diagnostic hypothesis",
+      "definition": "A proposed explanation of a pattern that requires further evidence rather than automatic acceptance."
+    }
+  ],
+  "anatomy": "Fit lm, then create an explicit data frame containing IDs, fitted values and residuals. Plot residual versus fitted with a zero reference line. For a Q-Q display, map sample to residual and use stat_qq plus an appropriate reference line. Inspect built layer values to ensure the plotted quantities match the fitted model.",
+  "worked_examples": [
+    {
+      "title": "Tie diagnostic marks to fitted residuals",
+      "code": "d <- data.frame(id = 1:8, x = 0:7)\nd$y <- 1 + 2 * d$x + c(-0.3, 0.2, 0.1, -0.2, 0.4, -0.1, 0.2, -0.3)\nfit <- lm(y ~ x, data = d)\ndiagnostic <- data.frame(id = d$id, fitted = fitted(fit), residual = residuals(fit))\np <- ggplot2::ggplot(diagnostic, ggplot2::aes(fitted, residual)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_hline(yintercept = 0, linetype = \"dashed\") +\n  ggplot2::labs(x = \"Fitted response\", y = \"Residual\", title = \"Residuals from the declared linear fit\")\nstopifnot(max(abs(unname(coef(fit)) - c(1, 2))) < 1e-10)\nstopifnot(max(abs(ggplot2::ggplot_build(p)$data[[1]]$y - diagnostic$residual)) < 1e-12)\nprint(p)\n",
+      "explanation": "The numerical oracle validates the fit and the actual residual values passed to the layer. The plot then supports inspection of patterns rather than replacing those calculations.",
+      "expected": "Coefficients1/2 and eight correctly paired residual marks."
+    },
+    {
+      "title": "Separate mean fit from changing spread",
+      "code": "d <- data.frame(x = rep(1:4, each = 2))\nd$y <- 2 * d$x + rep(c(-1, 1), 4) * d$x\nfit <- lm(y ~ x, data = d)\ndiagnostic <- data.frame(fitted = fitted(fit), residual = residuals(fit))\nstopifnot(abs(coef(fit)[[\"x\"]] - 2) < 1e-10)\nstopifnot(abs(cor(abs(diagnostic$residual), diagnostic$fitted) - 1) < 1e-10)\np <- ggplot2::ggplot(diagnostic, ggplot2::aes(fitted, residual)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_hline(yintercept = 0) +\n  ggplot2::labs(x = \"Fitted response\", y = \"Residual\", title = \"Authored spread increases with the predictor\")\nprint(p)\n",
+      "explanation": "Each predictor value has symmetric errors, preserving the mean line, while their magnitudes grow. This controlled construction isolates a spread concern without claiming a real dataset follows this mechanism.",
+      "expected": "Slope 2 with residual magnitude increasing exactly with fitted value."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Fit the authored linear fixture and retain IDs with fitted values and residuals.",
+      "hint": "Keep one diagnostic row per original observation.",
+      "answer": "The fit recovers intercept 1 and slope 2, and the diagnostic table has eight aligned records.",
+      "expected": "Correct coefficients and row identities."
+    },
+    {
+      "prompt": "Check that the residual plot uses the model's actual residual vector.",
+      "hint": "Inspect the first built layer.",
+      "answer": "Its y coordinates agree with residuals(fit) in the retained row order.",
+      "expected": "Layer-to-model parity."
+    },
+    {
+      "prompt": "Construct a normal Q-Q graphic of those residuals.",
+      "hint": "Map the sample aesthetic to the residual column.",
+      "answer": "The layer contains one ordered sample value per residual, with a clearly labeled reference comparison.",
+      "expected": "Eight Q-Q sample values."
+    },
+    {
+      "prompt": "Diagnose increasing residual magnitude in the symmetric spread fixture.",
+      "hint": "Separate the mean line from conditional spread.",
+      "answer": "The slope can be correct while error spread varies; investigate variance assumptions and uncertainty procedures separately.",
+      "expected": "A spread concern, not an automatic slope failure."
+    },
+    {
+      "prompt": "Explain why deleting a visually unusual residual is not an automatic valid repair.",
+      "hint": "Trace its source and scientific role.",
+      "answer": "It may represent legitimate variation, a measurement issue or model misspecification. Any exclusion needs an explicit justified policy and sensitivity analysis.",
+      "expected": "No appearance-only deletion rule."
+    },
+    {
+      "prompt": "State what a Q-Q plot cannot prove from eight fitted residuals.",
+      "hint": "Consider fitting, dependence and sample size.",
+      "answer": "The display is diagnostic evidence, not a proof of normal independent errors or of predictive/causal validity.",
+      "expected": "Bounded interpretation."
+    }
+  ],
+  "starter": "# r-056: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(id = 1:8, x = 0:7)\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Fit the authored linear fixture and retain IDs with fitted values and residuals.\n# TODO: Keep one diagnostic row per original observation.\n# Exercise 2: Check that the residual plot uses the model's actual residual vector.\n# TODO: Inspect the first built layer.\n# Exercise 3: Construct a normal Q-Q graphic of those residuals.\n# TODO: Map the sample aesthetic to the residual column.\n# Exercise 4: Diagnose increasing residual magnitude in the symmetric spread fixture.\n# TODO: Separate the mean line from conditional spread.\n# Exercise 5: Explain why deleting a visually unusual residual is not an automatic valid repair.\n# TODO: Trace its source and scientific role.\n# Exercise 6: State what a Q-Q plot cannot prove from eight fitted residuals.\n# TODO: Consider fitting, dependence and sample size.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(id = 1:8, x = 0:7)\nd$y <- 1 + 2 * d$x + c(-0.3, 0.2, 0.1, -0.2, 0.4, -0.1, 0.2, -0.3)\nfit <- lm(y ~ x, data = d)\nz <- data.frame(id = d$id, fitted = fitted(fit), residual = residuals(fit))\nstopifnot(nrow(z) == 8, !anyDuplicated(z$id), max(abs(unname(coef(fit)) - c(1, 2))) < 1e-10)\np <- ggplot2::ggplot(z, ggplot2::aes(fitted, residual)) +\n  ggplot2::geom_point() +\n  ggplot2::geom_hline(yintercept = 0, linetype = \"dashed\")\nstopifnot(max(abs(ggplot2::ggplot_build(p)$data[[1]]$y - z$residual)) < 1e-12)\nqq <- ggplot2::ggplot(z, ggplot2::aes(sample = residual)) +\n  ggplot2::stat_qq() +\n  ggplot2::stat_qq_line() +\n  ggplot2::labs(x = \"Normal reference quantile\", y = \"Ordered residual\")\nstopifnot(nrow(ggplot2::ggplot_build(qq)$data[[1]]) == 8)\nf <- data.frame(x = rep(1:4, each = 2)); f$y <- 2 * f$x + rep(c(-1, 1), 4) * f$x\nff <- lm(y ~ x, data = f)\nstopifnot(abs(coef(ff)[[\"x\"]] - 2) < 1e-10, abs(cor(abs(residuals(ff)), fitted(ff)) - 1) < 1e-10)\nprint(p)\nprint(qq)\ncat(\"r-056 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference keeps diagnostic observations aligned with the fitted model and verifies the actual values supplied to each graphic. It prints one residual plot and one Q-Q plot, staying within the two-figure contract.\n\nThe symmetric spread fixture provides an independent example of heteroskedastic structure with the correct mean slope. Its role is explanatory. Diagnostics should guide further checks and sensitivity analysis rather than certify assumptions or justify deleting points without a substantive rule.",
+  "sources": [
+    {
+      "title": "ggplot Q-Q statistics",
+      "url": "https://ggplot2.tidyverse.org/reference/geom_qq.html"
+    },
+    {
+      "title": "R linear-model diagnostics",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/plot.lm.html"
+    },
+    {
+      "title": "R residuals",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/residuals.html"
+    }
+  ]
+}

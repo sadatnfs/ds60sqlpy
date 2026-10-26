@@ -21,11 +21,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: initial loss still 56/3, but gradient-16.
 
 # Exercise 5: Check a finite-difference gradient
-# Use a plain NumPy scalar objective around w = 0 with h.001.
+# Use a plain NumPy scalar objective around \(w=0\) with finite-difference step
+# \(h=0.001\).
 # Expected: slope-56/3 within 1e-9.
 
 # Exercise 6: Clear the consumed gradient
-# Call optimizer.zero_grad(set_to_none=True) after the step and inspect state.
+# Call `optimizer.zero_grad(set_to_none=True)` after the step and inspect state.
 # Expected: w.grad None; updated weight unchanged.
 
 if __name__ == "__main__":

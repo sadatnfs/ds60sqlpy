@@ -24,6 +24,7 @@ generate:
 	$(PYTHON) scripts/audit_practice.py --write-report
 	$(PYTHON) scripts/audit_lesson_depth.py --write-report
 	$(PYTHON) scripts/build_course_guide.py
+	$(PYTHON) scripts/compile_lesson_tex.py
 	$(PYTHON) scripts/build_lesson_readers.py
 
 format:
@@ -39,6 +40,7 @@ check: format-check lint
 	$(PYTHON) scripts/check_public_release.py
 	$(PYTHON) scripts/check_repository_guidance.py
 	$(PYTHON) scripts/normalize_lesson_prose.py
+	$(PYTHON) scripts/compile_lesson_tex.py --check
 	$(PYTHON) scripts/check_content_rendering.py
 	$(PYTHON) scripts/check_published_links.py
 	$(PYTHON) scripts/course.py validate

@@ -1,0 +1,16 @@
+// dax-044: Calculation items transform selected measures
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+
+// dax-044-a: Current measures before an item
+// Context: No calculation item applied; baseline measure definitions.
+EVALUATE ROW ( "Revenue", [NetRevenue], "Units", [QuantitySold] )
+
+// dax-044-b: Expanded guarded fee item
+// Context: Algebraic expansion of the named revenue-only item; no live calculation-group execution.
+EVALUATE ROW ( "RevenueAfterFee", [NetRevenue] * 0.9, "UnitsUnchanged", [QuantitySold] )

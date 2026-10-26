@@ -1,0 +1,9 @@
+// dax-060 learner draft: Delivery capstone: a model specification and an evidence ledger
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Assemble a reviewable model change with expected role/context results and explicit unperformed deployment checks.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Produce an offline change-review packet for the grouped-cost rewrite.
+
+// Record role, model version, freshness and numerical equivalence separately.
+EVALUATE ROW ( "Role-specific revenue", BLANK(), "Baseline cost", BLANK(), "Rewritten cost", BLANK() )

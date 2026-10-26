@@ -1,0 +1,9 @@
+// dax-050 learner draft: Intermediate tables can grow before aggregation
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Estimate candidate-table size without confusing a logical table with measured physical work.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Choose a population for a complete customer/product coverage matrix.
+
+EVALUATE
+ROW ( "Candidate combinations", BLANK(), "Observed combinations", BLANK() )

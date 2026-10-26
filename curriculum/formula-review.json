@@ -1,0 +1,606 @@
+{
+  "schema_version": 1,
+  "review_scope": "Complete notation corrections and representative independent derivations, not a proof of all curriculum mathematics.",
+  "notation_corrections": [
+    {
+      "id": "adam-complete-moments",
+      "path_prefixes": ["courses/llm-applied/", "courses/deep-learning-pytorch/"],
+      "original_patterns": ["v_t=beta", "1-beta", "m_t=beta"],
+      "contract": "The powers apply to beta_1 and beta_2; each moment recurrence and denominator is one complete expression."
+    },
+    {
+      "id": "matrix-transpose-factor-scope",
+      "path_prefixes": [
+        "courses/llm-theory/",
+        "courses/llm-applied/",
+        "courses/deep-learning-pytorch/",
+        "courses/cuda/"
+      ],
+      "original_patterns": [
+        "{QK}^{T}",
+        "{QWD}^{T}",
+        "{XB}^{T}",
+        "{sGK}^{T}",
+        "QK^T",
+        "QWD^T",
+        "XB^T"
+      ],
+      "contract": "Transpose binds to the intended final factor, with nonsquare shapes as an independent check."
+    },
+    {
+      "id": "complete-equation-boundaries",
+      "path_prefixes": ["courses/llm-theory/", "courses/deep-learning-pytorch/"],
+      "original_patterns": [
+        "\\) G",
+        "\\) h_i+b",
+        "\\) p_y",
+        "\\(D=10\\), 000",
+        "query gradients are H",
+        "key gradients are"
+      ],
+      "contract": "Keep multiplication operands and numeric groups inside the complete equation."
+    },
+    {
+      "id": "nlp-recurrences-and-objectives",
+      "path_prefixes": ["courses/nlp/"],
+      "original_patterns": [
+        "D_1(j)=log",
+        "D_t(j)=log",
+        "PMI(i,j)=log",
+        "M=U*diag(s)*V_transpose",
+        "IDF(q)*tf*"
+      ],
+      "contract": "Viterbi, PMI, SVD and BM25 notation includes complete operators, index scopes and denominators."
+    },
+    {
+      "id": "tensorflow-recurrence-notation",
+      "path_prefixes": ["courses/deep-learning-tensorflow/"],
+      "original_patterns": [
+        "y_hat = 2x",
+        "e_next = (1 - 28 eta/3)e",
+        "w_1=28/15",
+        "w_2=448/225",
+        "v_next = 0.9v + g",
+        "w_next = w - 0.1v_next",
+        "Y = X + XW"
+      ],
+      "contract": "Express the complete prediction and update recurrence without changing runnable examples."
+    },
+    {
+      "id": "literal-regex-anchors",
+      "path_prefixes": ["courses/javascript-typescript/"],
+      "original_patterns": ["Compare /^.$/ and /^.$/u"],
+      "contract": "Regular expressions are code literals; their dollar anchors are not mathematics delimiters."
+    },
+    {
+      "id": "complete-finite-difference-derivation",
+      "path_prefixes": ["courses/deep-learning-pytorch/", "courses/deep-learning-tensorflow/"],
+      "original_patterns": ["f'(w)=", "D_h =", "0 < eta <"],
+      "contract": "Define complete objective, derivative, numerical probe and update expressions, and identify the parameter at which a gradient was evaluated."
+    },
+    {
+      "id": "complete-online-attention-and-router-derivatives",
+      "path_prefixes": ["courses/llm-theory/"],
+      "original_patterns": [
+        "denominator ell=sum",
+        "numerator n=sum",
+        "first derivative is(",
+        "one token's score derivative is"
+      ],
+      "contract": "Keep summation operands, weighted values and router gradient factors inside complete expressions; preserve fixed-assignment qualification."
+    },
+    {
+      "id": "bigram-negative-log-aggregation",
+      "path_prefixes": ["courses/llm-theory/"],
+      "original_patterns": ["The mean loss divides their total by two targets."],
+      "contract": "Average negative log probabilities, not probabilities; two one-third transitions have total NLL 2 log(3) and mean loss log(3)."
+    }
+  ],
+  "sampled_derivations": [
+    "Nonuniform scaled attention and blockwise softmax rescaling",
+    "Cross entropy, forward KL and active-target loss masking",
+    "Fixed-compute scaling under the stated toy power-law model",
+    "RoPE relative-angle expansion and ALiBi mass ratios",
+    "LoRA row-vector factor gradients and first-step scales",
+    "DPO adjusted margin, scalar derivative and curvature"
+  ],
+  "unresolved_scope": [
+    "Raw-candidate categorization is heuristic and requires editorial review before rewriting.",
+    "No line-by-line proof of every derivation, exercise or runtime implementation is claimed.",
+    "Statistics source corrections have a separate owner and evidence record.",
+    "Renderer/browser accessibility, layout and actual hardware execution are separate acceptance gates."
+  ],
+  "remaining_candidate_review": {
+    "scope": "Manual review of the 59 current-source candidates supplied by the main task. Includes neighboring expressions named in the correction ledger. Does not certify all 4318 raw candidates or all curriculum derivations.",
+    "original_candidate_inventory_count": 4318,
+    "reviewed_subset_count": 59,
+    "unique_subset_files": 47,
+    "classification_counts": {
+      "unchanged_valid": 5,
+      "code_only_presentation_corrected": 33,
+      "previously_corrected_retained": 7,
+      "corrected_mathematical_notation": 13,
+      "corrected_semantic_explanation": 1
+    },
+    "records": [
+      {
+        "row": 1,
+        "path": "courses/cuda/python/guides/cuda-074.md",
+        "original_line": 7,
+        "current_anchor_line": 7,
+        "classification": "unchanged_valid",
+        "review_note": "Named input n=17 is a valid launch-size scenario, not a broken equation."
+      },
+      {
+        "row": 2,
+        "path": "courses/cuda/python/guides/cuda-074.md",
+        "original_line": 81,
+        "current_anchor_line": 81,
+        "classification": "unchanged_valid",
+        "review_note": "Repeated learning objective states the same valid n=17 scenario."
+      },
+      {
+        "row": 3,
+        "path": "courses/cuda/python/guides/cuda-108.md",
+        "original_line": 21,
+        "current_anchor_line": 21,
+        "classification": "unchanged_valid",
+        "review_note": "Skip-null grouped sums A=2 and B=5 are correct for the three literal rows."
+      },
+      {
+        "row": 4,
+        "path": "courses/cuda/python/solutions/cuda-074_solutions.md",
+        "original_line": 9,
+        "current_anchor_line": 9,
+        "classification": "unchanged_valid",
+        "review_note": "The n=17 objective remains valid in the explanation."
+      },
+      {
+        "row": 5,
+        "path": "courses/cuda/python/solutions/cuda-076_solutions.md",
+        "original_line": 37,
+        "current_anchor_line": 37,
+        "classification": "unchanged_valid",
+        "review_note": "n=blocksize+1 deliberately exercises a partial block; literal test-input shorthand is valid."
+      },
+      {
+        "row": 6,
+        "path": "courses/deep-learning-pytorch/guides/torch-005.md",
+        "original_line": 13,
+        "current_anchor_line": 13,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "requires_grad=True and autograd.grad are literal API syntax; derivative/update distinction is valid."
+      },
+      {
+        "row": 7,
+        "path": "courses/deep-learning-pytorch/guides/torch-005.md",
+        "original_line": 45,
+        "current_anchor_line": 45,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Quadratic derivative and central difference are correct; API calls are displayed as complete code literals."
+      },
+      {
+        "row": 8,
+        "path": "courses/deep-learning-pytorch/guides/torch-005.md",
+        "original_line": 129,
+        "current_anchor_line": 129,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task already completed learning-rate, gradient and initial-weight notation; retained unchanged."
+      },
+      {
+        "row": 9,
+        "path": "courses/deep-learning-pytorch/guides/torch-007.md",
+        "original_line": 9,
+        "current_anchor_line": 9,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Defined intermediate u=2w explicitly, separated leaf flags and gradients, and formatted the API flag."
+      },
+      {
+        "row": 10,
+        "path": "courses/deep-learning-pytorch/guides/torch-008.md",
+        "original_line": 137,
+        "current_anchor_line": 137,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task already corrected the probe step to h=0.001; retained unchanged."
+      },
+      {
+        "row": 11,
+        "path": "courses/deep-learning-pytorch/guides/torch-008.md",
+        "original_line": 141,
+        "current_anchor_line": 141,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "The complete zero_grad call is API syntax, not an equation."
+      },
+      {
+        "row": 12,
+        "path": "courses/deep-learning-pytorch/guides/torch-009.md",
+        "original_line": 51,
+        "current_anchor_line": 51,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task already restored 2 mean(x^2)(w-2) as the complete derivative; retained unchanged."
+      },
+      {
+        "row": 13,
+        "path": "courses/deep-learning-pytorch/guides/torch-013.md",
+        "original_line": 45,
+        "current_anchor_line": 45,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Binary-logit objective, reporting sigmoid and threshold tie policy are correct; marked API literals."
+      },
+      {
+        "row": 14,
+        "path": "courses/deep-learning-pytorch/guides/torch-018.md",
+        "original_line": 63,
+        "current_anchor_line": 63,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Variance 1 for normalization and unbiased estimate 2 for running state are correct; fixed array spacing and API literal."
+      },
+      {
+        "row": 15,
+        "path": "courses/deep-learning-pytorch/guides/torch-021.md",
+        "original_line": 55,
+        "current_anchor_line": 55,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Padding-gradient and downstream masking distinction is correct; marked API literals."
+      },
+      {
+        "row": 16,
+        "path": "courses/deep-learning-pytorch/guides/torch-022.md",
+        "original_line": 15,
+        "current_anchor_line": 15,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Functional attention dropout argument must be explicit at evaluation; marked API literals."
+      },
+      {
+        "row": 17,
+        "path": "courses/deep-learning-pytorch/guides/torch-023.md",
+        "original_line": 60,
+        "current_anchor_line": 60,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Independent fraction calculation confirms accumulated gradient -896/45 and next weight 868/225; marked API literal."
+      },
+      {
+        "row": 18,
+        "path": "courses/deep-learning-pytorch/guides/torch-023.md",
+        "original_line": 70,
+        "current_anchor_line": 70,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Clipping does not bound every optimizer displacement; nonfinite refusal flag is API syntax."
+      },
+      {
+        "row": 19,
+        "path": "courses/deep-learning-pytorch/guides/torch-024.md",
+        "original_line": 51,
+        "current_anchor_line": 51,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Population variance 2.5 versus sample variance 10/3 is correct; marked correction=0 as API syntax."
+      },
+      {
+        "row": 20,
+        "path": "courses/deep-learning-pytorch/guides/torch-027.md",
+        "original_line": 13,
+        "current_anchor_line": 13,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Freezing gradient construction does not erase stored optimizer gradients or freeze buffers; marked API literal."
+      },
+      {
+        "row": 21,
+        "path": "courses/deep-learning-pytorch/guides/torch-027.md",
+        "original_line": 57,
+        "current_anchor_line": 57,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Missing and allocated-zero gradients have different optimizer semantics; marked literals and .grad field."
+      },
+      {
+        "row": 22,
+        "path": "courses/deep-learning-pytorch/guides/torch-030.md",
+        "original_line": 128,
+        "current_anchor_line": 128,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Clarified four inputs, y=2x and shards of sizes 1 and 3; gradient is -30 at w=0."
+      },
+      {
+        "row": 23,
+        "path": "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "original_line": 7,
+        "current_anchor_line": 7,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same derivative/API explanation as row 6, checked in its emitted companion."
+      },
+      {
+        "row": 24,
+        "path": "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "original_line": 19,
+        "current_anchor_line": 19,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same quadratic and central-difference syntax as row 7, checked in its companion."
+      },
+      {
+        "row": 25,
+        "path": "courses/deep-learning-pytorch/solutions/torch-005_solutions.md",
+        "original_line": 75,
+        "current_anchor_line": 75,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task already corrected this companion update prompt; retained unchanged."
+      },
+      {
+        "row": 26,
+        "path": "courses/deep-learning-pytorch/solutions/torch-009_solutions.md",
+        "original_line": 25,
+        "current_anchor_line": 25,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task already corrected the companion batch derivative; retained unchanged."
+      },
+      {
+        "row": 27,
+        "path": "courses/deep-learning-pytorch/solutions/torch-013_solutions.md",
+        "original_line": 19,
+        "current_anchor_line": 19,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same binary-logit API distinction as row 13, checked in its companion."
+      },
+      {
+        "row": 28,
+        "path": "courses/deep-learning-pytorch/solutions/torch-018_solutions.md",
+        "original_line": 37,
+        "current_anchor_line": 37,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same valid variance calculation as row 14, checked in its companion."
+      },
+      {
+        "row": 29,
+        "path": "courses/deep-learning-pytorch/solutions/torch-021_solutions.md",
+        "original_line": 29,
+        "current_anchor_line": 29,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same padding-gradient and masking distinction as row 15, checked in its companion."
+      },
+      {
+        "row": 30,
+        "path": "courses/deep-learning-pytorch/solutions/torch-022_solutions.md",
+        "original_line": 9,
+        "current_anchor_line": 9,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same evaluation dropout contract as row 16, checked in its companion."
+      },
+      {
+        "row": 31,
+        "path": "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "original_line": 34,
+        "current_anchor_line": 34,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same accumulated-gradient arithmetic as row 17, checked in its companion."
+      },
+      {
+        "row": 32,
+        "path": "courses/deep-learning-pytorch/solutions/torch-023_solutions.md",
+        "original_line": 44,
+        "current_anchor_line": 44,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same clipping and nonfinite flag contract as row 18, checked in its companion."
+      },
+      {
+        "row": 33,
+        "path": "courses/deep-learning-pytorch/solutions/torch-024_solutions.md",
+        "original_line": 25,
+        "current_anchor_line": 25,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same variance conventions as row 19, checked in its companion."
+      },
+      {
+        "row": 34,
+        "path": "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "original_line": 7,
+        "current_anchor_line": 7,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same freeze policy as row 20, checked in its companion."
+      },
+      {
+        "row": 35,
+        "path": "courses/deep-learning-pytorch/solutions/torch-027_solutions.md",
+        "original_line": 31,
+        "current_anchor_line": 31,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same stored-gradient distinction as row 21, checked in its companion."
+      },
+      {
+        "row": 36,
+        "path": "courses/deep-learning-tensorflow/guides/tf-006.md",
+        "original_line": 67,
+        "current_anchor_line": 67,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped q(w)=w^2+3w and q prime(w)=2w+3; branch contributions 2+3=5 at w=1 are correct."
+      },
+      {
+        "row": 37,
+        "path": "courses/deep-learning-tensorflow/guides/tf-008.md",
+        "original_line": 107,
+        "current_anchor_line": 107,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped loss, derivative, error variable and contraction interval 0<eta<3/14; independent fractions confirm eta=.1 and .25 traces."
+      },
+      {
+        "row": 38,
+        "path": "courses/deep-learning-tensorflow/guides/tf-013.md",
+        "original_line": 31,
+        "current_anchor_line": 31,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Sigmoid, logit cross entropy, mean reduction and threshold are literal API syntax; explanation is valid."
+      },
+      {
+        "row": 39,
+        "path": "courses/deep-learning-tensorflow/solutions/tf-013_solutions.md",
+        "original_line": 17,
+        "current_anchor_line": 17,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same API and loss convention as row 38, checked in its companion."
+      },
+      {
+        "row": 40,
+        "path": "courses/deep-learning-tensorflow/solutions/tf-018_solutions.md",
+        "original_line": 175,
+        "current_anchor_line": 175,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Keras BatchNorm trainable=False has special inference behavior; marked literal flags, retained framework distinction."
+      },
+      {
+        "row": 41,
+        "path": "courses/llm-applied/guides/llm-applied-019.md",
+        "original_line": 85,
+        "current_anchor_line": 85,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "The DPO scalar margin and softplus loss are code-shaped pseudocode with correct sign; marked complete literals."
+      },
+      {
+        "row": 42,
+        "path": "courses/llm-applied/solutions/llm-applied-019_solutions.md",
+        "original_line": 21,
+        "current_anchor_line": 21,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Same DPO pseudocode as row 41; additionally repaired joined oneSGD wording."
+      },
+      {
+        "row": 43,
+        "path": "courses/llm-theory/authoring/textbook_advanced/llm-034.md",
+        "original_line": 5,
+        "current_anchor_line": 5,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Symmetric signed int8 scheme intentionally uses -127..127; grouped clipping/rounding expression and spaced endpoints."
+      },
+      {
+        "row": 44,
+        "path": "courses/llm-theory/authoring/textbook_advanced/llm-040.md",
+        "original_line": 5,
+        "current_anchor_line": 5,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped paired losses and difference d_i=ell_A(i)-ell_B(i); negative difference favors A under the stated loss convention."
+      },
+      {
+        "row": 45,
+        "path": "courses/llm-theory/authoring/textbook_advanced/llm-048.md",
+        "original_line": 9,
+        "current_anchor_line": 9,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped p_i, q_i and proposal X=i; acceptance min(1,p_i/q_i) for q_i>0 is correct."
+      },
+      {
+        "row": 46,
+        "path": "courses/llm-theory/guides/llm-010.md",
+        "original_line": 69,
+        "current_anchor_line": 69,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Row means/variances are correct and unaffected row remains mean 2, variance 1; axis=0 is API syntax."
+      },
+      {
+        "row": 47,
+        "path": "courses/llm-theory/guides/llm-016.md",
+        "original_line": 94,
+        "current_anchor_line": 94,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Decoder indexing and function composition are pseudocode; preserved complete code spans and pre-normalization residual ordering."
+      },
+      {
+        "row": 48,
+        "path": "courses/llm-theory/guides/llm-034.md",
+        "original_line": 19,
+        "current_anchor_line": 19,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Same valid quantization scheme as row 43, checked in the emitted guide."
+      },
+      {
+        "row": 49,
+        "path": "courses/llm-theory/guides/llm-040.md",
+        "original_line": 19,
+        "current_anchor_line": 19,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Same paired-loss notation as row 44, checked in the emitted guide."
+      },
+      {
+        "row": 50,
+        "path": "courses/llm-theory/guides/llm-046.md",
+        "original_line": 81,
+        "current_anchor_line": 81,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped complete processed-key sums for denominator and weighted numerator; retained consistent rescaling recurrence."
+      },
+      {
+        "row": 51,
+        "path": "courses/llm-theory/guides/llm-047.md",
+        "original_line": 93,
+        "current_anchor_line": 93,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped full expert derivatives -3/16 and +3/16; independent finite differences agree."
+      },
+      {
+        "row": 52,
+        "path": "courses/llm-theory/guides/llm-047.md",
+        "original_line": 103,
+        "current_anchor_line": 103,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Grouped full auxiliary derivative with alpha*N/T factor; independent finite differences confirm +.000525 and -.000525."
+      },
+      {
+        "row": 53,
+        "path": "courses/llm-theory/guides/llm-048.md",
+        "original_line": 23,
+        "current_anchor_line": 23,
+        "classification": "corrected_mathematical_notation",
+        "review_note": "Same valid speculative acceptance notation as row 45, checked in the emitted guide."
+      },
+      {
+        "row": 54,
+        "path": "courses/llm-theory/solutions/llm-014_solutions.md",
+        "original_line": 56,
+        "current_anchor_line": 23,
+        "classification": "corrected_semantic_explanation",
+        "review_note": "Corrected ambiguous mean-loss wording: divide summed negative log probabilities, not the sum of probabilities; exact result is log(3)."
+      },
+      {
+        "row": 55,
+        "path": "courses/nlp/guides/nlp-010.md",
+        "original_line": 27,
+        "current_anchor_line": 27,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Viterbi broadcasting and argmax(axis=0) are code syntax; predecessor axis and deterministic tie convention are valid."
+      },
+      {
+        "row": 56,
+        "path": "courses/nlp/guides/nlp-013.md",
+        "original_line": 25,
+        "current_anchor_line": 25,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "Model class names and n_components=2 are APIs; SVD no-centering and capacity interpretation are valid."
+      },
+      {
+        "row": 57,
+        "path": "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md",
+        "original_line": 13,
+        "current_anchor_line": 13,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task replaced the interaction sentence with a complete conditional-mean/slope derivation. Read and retained it; no statistics edit."
+      },
+      {
+        "row": 58,
+        "path": "courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md",
+        "original_line": 17,
+        "current_anchor_line": 39,
+        "classification": "previously_corrected_retained",
+        "review_note": "Main task replaced logistic loss, gradient and Hessian with complete dimensionally valid equations and summed-loss convention. Read and retained them; no statistics edit."
+      },
+      {
+        "row": 59,
+        "path": "python/ds-60day/solutions/day31_probability_basics/day31_solutions.md",
+        "original_line": 141,
+        "current_anchor_line": 141,
+        "classification": "code_only_presentation_corrected",
+        "review_note": "density=True and ddof=0 are literal plotting/variance arguments. Marked code in Markdown and notebook Markdown only."
+      }
+    ],
+    "primary_references": [
+      "https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html",
+      "https://docs.pytorch.org/docs/2.9/generated/torch.nn.functional.scaled_dot_product_attention.html",
+      "https://keras.io/api/layers/normalization_layers/batch_normalization/",
+      "https://jmlr.org/papers/v23/21-0998.html"
+    ]
+  }
+}

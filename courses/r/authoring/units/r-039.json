@@ -1,0 +1,98 @@
+{
+  "id": "r-039",
+  "title": "Formulas, design matrices and identifiability",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-008", "r-017", "r-020"],
+  "concepts": ["Formula", "Design matrix", "Interaction", "Rank deficiency"],
+  "outcome": "Inspect the numeric design implied by a formula before interpreting coefficients or fitting a model.",
+  "mechanism": "An R formula describes terms rather than directly performing ordinary arithmetic. The formula y ~ x + group requests a response and additive predictor terms. An intercept is included by default in many modeling functions. The expression x * group expands into main effects and an interaction, while x:group requests the interaction term alone. Read the formula language before interpreting its symbols as raw numerical operators.\n\nmodel.matrix turns predictor terms into numeric columns. An unordered factor commonly creates contrast columns relative to a baseline; an interaction multiplies or combines the relevant encoded columns. Inspect column names and a few rows so the coefficient meanings are concrete. A displayed category name is not itself a numeric column until an encoding rule is chosen.\n\nThe design can be rank deficient. Including both x and twice_x alongside an intercept does not create two independently identifiable effects because the columns carry the same information. qr(X)$rank diagnoses a numerical rank for the declared tolerance. A regression function may drop or mark coefficients, but that behavior is not a scientific resolution of the redundant specification.\n\nA full-rank tiny design still does not establish a valid statistical model. Response distribution, error dependence, selection and out-of-sample behavior need separate analysis. This chapter prepares the representation needed for later lm and glm lessons; it does not turn a solved matrix into evidence of causality or generalization.",
+  "vocabulary": [
+    {
+      "term": "Formula",
+      "definition": "A symbolic specification of a modeled relationship."
+    },
+    {
+      "term": "Design matrix",
+      "definition": "Numeric columns produced from a model formula and data."
+    },
+    {
+      "term": "Interaction",
+      "definition": "A term allowing one predictor effect to depend on another."
+    },
+    {
+      "term": "Rank deficiency",
+      "definition": "A design whose columns do not provide independent information for every coefficient."
+    }
+  ],
+  "anatomy": "model.matrix(~ x + group, data) builds predictors, including an intercept under this formula. Use ~ x * group for main effects plus interaction and inspect colnames. qr(X)$rank should be compared with ncol(X), with a documented tolerance for numerical decisions.",
+  "worked_examples": [
+    {
+      "title": "Inspect an interaction design",
+      "code": "data <- data.frame(x = c(0, 1, 0, 1), group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\ndesign <- model.matrix(~ x * group, data = data)\nstopifnot(identical(colnames(design), c(\"(Intercept)\", \"x\", \"groupB\", \"x:groupB\")))\nstopifnot(qr(design)$rank == 4L)\nprint(design)\n",
+      "explanation": "The interaction is zero for A and follows x for B, allowing a different slope in the two groups under this encoding.",
+      "expected": "Four identifiable columns for these four distinct rows."
+    },
+    {
+      "title": "A redundant predictor cannot identify a separate effect",
+      "code": "data <- data.frame(x = 0:3)\ndata$twice_x <- 2 * data$x\ndesign <- model.matrix(~ x + twice_x, data = data)\nstopifnot(ncol(design) == 3L, qr(design)$rank == 2L)\nprint(c(columns = ncol(design), rank = qr(design)$rank))\n",
+      "explanation": "twice_x is exactly determined by x. More column names do not create more independent information.",
+      "expected": "Three columns, rank two."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "List the columns of ~ x + group for a two-level factor.",
+      "hint": "The default includes an intercept and one treatment contrast.",
+      "answer": "Intercept, x and groupB under the declared levels/contrasts.",
+      "expected": "Intercept, x and groupB under the declared levels/contrasts."
+    },
+    {
+      "prompt": "Add x:group through the * expansion.",
+      "hint": "Main effects remain present.",
+      "answer": "The design also includes x:groupB.",
+      "expected": "The design also includes x:groupB."
+    },
+    {
+      "prompt": "Inspect and validate a design before fitting.",
+      "hint": "Check names, dimensions and rank.",
+      "answer": "Document the numeric meaning of every requested coefficient.",
+      "expected": "Document the numeric meaning of every requested coefficient."
+    },
+    {
+      "prompt": "Diagnose simultaneous x and 2*x predictors.",
+      "hint": "Their columns are linearly dependent.",
+      "answer": "Separate coefficients are not identifiable from this design.",
+      "expected": "Separate coefficients are not identifiable from this design."
+    },
+    {
+      "prompt": "Handle a factor level absent from training data.",
+      "hint": "The fitted contrast/design contract needs an explicit prediction policy.",
+      "answer": "Do not silently invent a learned effect for an unseen category.",
+      "expected": "Do not silently invent a learned effect for an unseen category."
+    },
+    {
+      "prompt": "Separate algebraic fit from model validity.",
+      "hint": "A solvable design does not establish sampling or error assumptions.",
+      "answer": "Use diagnostics and held-out evaluation after defining the statistical question.",
+      "expected": "Use diagnostics and held-out evaluation after defining the statistical question."
+    }
+  ],
+  "starter": "# r-039: Formulas, design matrices and identifiability\n# Complete the six guide tasks using these local inputs.\ndata <- data.frame(x = c(0, 1, 0, 1), group = factor(c(\"A\", \"A\", \"B\", \"B\")))\n# TODO: inspect a formula-generated design before fitting.\nprint(data)\n",
+  "reference": "data <- data.frame(x = c(0, 1, 0, 1), group = factor(c(\"A\", \"A\", \"B\", \"B\"), levels = c(\"A\", \"B\")))\nadditive <- model.matrix(~ x + group, data)\nstopifnot(identical(colnames(additive), c(\"(Intercept)\", \"x\", \"groupB\")))\ninteraction <- model.matrix(~ x * group, data)\nstopifnot(identical(colnames(interaction), c(\"(Intercept)\", \"x\", \"groupB\", \"x:groupB\")))\nstopifnot(qr(interaction)$rank == ncol(interaction))\nredundant <- model.matrix(~ x + I(2 * x), data)\nstopifnot(qr(redundant)$rank < ncol(redundant))\nstopifnot(!(\"C\" %in% levels(data$group)))\ncat(\"r-039 reference checks passed\\n\")\n",
+  "solution_explanation": "The interaction is zero for A and follows x for B, allowing a different slope in the two groups under this encoding.\n\ntwice_x is exactly determined by x. More column names do not create more independent information.",
+  "sources": [
+    {
+      "title": "R model matrices",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/model.matrix.html"
+    },
+    {
+      "title": "R formulas",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/formula.html"
+    },
+    {
+      "title": "R QR decomposition",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/qr.html"
+    }
+  ]
+}

@@ -18,9 +18,13 @@ from urllib.parse import urlsplit
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 from ds60sqlpy.modules import MAX_SOURCE_BYTES, ModuleCatalog, ModuleState
+from ds60sqlpy.plot_artifacts import validate_artifacts
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 SERVICES = {
+    "jax-cpu": "jax-worker",
+    "bayesian-cpu": "bayesian-worker",
+    "r-statistics": "r-worker",
     "php-cli": "php-worker",
     "cuda-cpp": "cuda-cpp-worker",
     "cuda-python": "cuda-python-worker",
@@ -46,7 +50,8 @@ SERVICES = {
 TERMINAL = frozenset({"succeeded", "failed", "cancelled", "timed_out", "interrupted", "blocked"})
 PHASES = TERMINAL | {"queued", "preparing", "compiling", "running", "verifying"}
 IDENTIFIER = re.compile(r"[0-9a-f]{32}\Z")
-MAX_RESPONSE = 512_000
+# UTF-8 control characters can expand sixfold in JSON, alongside checks and plots.
+MAX_RESPONSE = 2_000_000
 
 
 class WorkerError(ValueError):
@@ -203,6 +208,8 @@ class ModuleJobs:
         ):
             raise ValueError("Invalid module job receipt; preserve it for recovery.")
         self.catalog.get(value.get("lesson_id"))
+        if "artifacts" in value:
+            value["artifacts"] = validate_artifacts(value["artifacts"])
         return value
 
     def _update(self, key: str, change: dict[str, Any]) -> dict[str, Any]:
@@ -267,12 +274,19 @@ class ModuleJobs:
             "truncated": bool(value.get("truncated")) or len(output.encode()) > 128_000,
             "elapsed_seconds": elapsed,
             "detail": str(value.get("detail", ""))[:4000],
+            **(
+                {"artifacts": validate_artifacts(value["artifacts"])}
+                if "artifacts" in value
+                else {}
+            ),
         }
 
     def start(
         self, lesson_id: object, source: object, timeout: object, request_id: object
     ) -> dict[str, Any]:
         lesson = self.catalog.get(lesson_id)
+        if lesson.runtime_profile == "dax-offline":
+            raise ValueError("Offline DAX drafts cannot create execution jobs.")
         if lesson.runtime_profile == "reading":
             raise ValueError("This is a reading lesson. Save reasoning instead of running it.")
         if (

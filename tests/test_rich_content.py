@@ -169,7 +169,8 @@ def test_math_delimiters_do_not_change_code_currency_links_or_emphasis(tmp_path:
     value = resolver(tmp_path)
     source = r"**Mean** \(\bar{x}\); $x_i^2$; cost $5 or $10. `**x** $x$ \(x\)` [help](https://example.com)."
     document = render_inline(source, value)
-    assert document.count("<math ") == 2
+    assert document.count("<math ") == 1
+    assert "$x_i^2$" in document
     assert "<strong>Mean</strong>" in document
     assert "cost $5 or $10." in document
     assert "<code>**x** $x$ \\(x\\)</code>" in document
@@ -221,10 +222,31 @@ def test_notebook_language_metadata_and_sql_magic_are_highlighted(tmp_path: Path
     assert "syntax-keyword" in document
 
 
-def test_shared_css_needs_no_external_resource() -> None:
+def test_shared_css_uses_only_bundled_font_resources() -> None:
+    import base64
+    import hashlib
+    import re
+    from importlib.resources import files
+
+    from ds60sqlpy.reader_tex import font_stylesheet, public_font_names
+
     css = rich_content_styles()
     assert ".math-display" in css and ".syntax-keyword" in css
     assert "@import" not in css and "url(" not in css
+    fonts = font_stylesheet()
+    assets = files("ds60sqlpy").joinpath("assets/vendor/textbook")
+    assert fonts == assets.joinpath("fonts.css").read_text("utf-8")
+    urls = re.findall(r'url\("([^"\)]+)"\)', fonts)
+    assert urls and "@import" not in fonts
+    expected = {
+        hashlib.sha256(assets.joinpath(name).read_bytes()).hexdigest()
+        for name in public_font_names()
+    }
+    for url in urls:
+        assert url.startswith("data:font/woff2;base64,")
+        data = base64.b64decode(url.split(",", 1)[1], validate=True)
+        assert data.startswith(b"wOF2")
+        assert hashlib.sha256(data).hexdigest() in expected
 
 
 @pytest.mark.parametrize("opening,closing", [("```", "````"), ("~~~~", "~~~~~")])
@@ -279,3 +301,17 @@ def test_token_classification_cache_is_bounded_and_preserves_subtypes() -> None:
         assert _token_class.cache_info().hits == previous_hits + 1
     finally:
         _token_class.cache_clear()
+
+
+def test_regex_currency_and_shell_dollars_remain_literal(tmp_path: Path) -> None:
+    source = "Compare /^.$/ and /^.$/u on one emoji. Costs $5 or $10; use $PORT."
+    document = render_inline(source, resolver(tmp_path))
+    assert "<math" not in document
+    assert "".join(parse(document).text) == source
+
+
+def test_dax_highlighting_retains_quoted_identifiers_and_comments() -> None:
+    source = "VAR x = SUMX('Sales data', [Price] * [Qty]) // context\nRETURN DIVIDE(x, 2)\n"
+    rendered = highlight_source(source, "dax")
+    assert "syntax-keyword" in rendered and "syntax-function" in rendered
+    assert "".join(parse(rendered).text) == source

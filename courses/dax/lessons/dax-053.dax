@@ -1,0 +1,9 @@
+// dax-053 learner draft: Read timing evidence without inventing a benchmark
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Interpret a supplied timing scenario while separating it from an actual DAX execution receipt.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a real benchmark protocol without running it here.
+
+// These are supplied scenario numbers, not measured engine timings.
+EVALUATE DATATABLE ( "Trial", INTEGER, "Milliseconds", INTEGER, { { 1, 20 }, { 2, 21 }, { 3, 19 } } )

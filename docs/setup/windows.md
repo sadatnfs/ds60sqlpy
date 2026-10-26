@@ -109,7 +109,7 @@ wsl --set-default Ubuntu
 
 Use the actual distribution name from `wsl --list --verbose`. The wrapper
 retains the selected course directory. A new default project selects all
-sixteen ordinary workers; running `./classroom --starter` once in Ubuntu saves
+the ordinary workers; running `./classroom --starter` once in Ubuntu saves
 the smaller selection for subsequent launches.
 
 ## Return without rebuilding

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import posixpath
 import re
 from dataclasses import replace
 from html.parser import HTMLParser
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import pytest
 
@@ -51,6 +52,46 @@ def _visible_text(document: str) -> str:
     return "".join(parser.parts)
 
 
+class _StylesheetParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.hrefs: list[str | None] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = dict(attrs)
+        if tag == "link" and "stylesheet" in (values.get("rel") or "").lower().split():
+            assert len(values) == len(attrs), "Duplicate stylesheet attributes are ambiguous"
+            self.hrefs.append(values.get("href"))
+
+
+def _assert_local_font_stylesheet(document: str, relative_path: str) -> None:
+    parser = _StylesheetParser()
+    parser.feed(document)
+    parser.close()
+    expected = posixpath.relpath(
+        "src/ds60sqlpy/assets/vendor/textbook/fonts.css",
+        start=PurePosixPath(relative_path).parent.as_posix(),
+    )
+    assert parser.hrefs == [expected], "Readers permit exactly the shared local font stylesheet"
+
+
+@pytest.mark.parametrize(
+    "links",
+    [
+        '<link rel="stylesheet" href="https://example.invalid/fonts.css">',
+        '<link rel="stylesheet" href="//example.invalid/fonts.css">',
+        '<link rel="stylesheet" href="../other.css">',
+        '<link rel="stylesheet" href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">'
+        '<link rel="stylesheet" href="https://example.invalid/extra.css">',
+        '<link rel="stylesheet" href="https://example.invalid/first.css" '
+        'href="../src/ds60sqlpy/assets/vendor/textbook/fonts.css">',
+    ],
+)
+def test_reader_font_contract_rejects_external_extra_or_ambiguous_stylesheets(links: str) -> None:
+    with pytest.raises(AssertionError):
+        _assert_local_font_stylesheet(links, "lesson-pages/fixture.html")
+
+
 def test_every_catalog_entry_has_a_current_portable_reader() -> None:
     catalog = Catalog.load(REPO_ROOT)
     expected = build_reader_files(catalog)
@@ -69,7 +110,7 @@ def test_every_catalog_entry_has_a_current_portable_reader() -> None:
         assert lesson.guide_path in rendered
         assert lesson.lesson_path in rendered
         assert '<script src="' not in rendered
-        assert '<link rel="stylesheet"' not in rendered
+        _assert_local_font_stylesheet(rendered, relative)
         assert 'const SERVER_TOKEN = "";' in rendered
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
         assert LEAKED_AUTHORING_COMMENT.search(_visible_text(rendered)) is None
@@ -365,7 +406,7 @@ def test_rendered_references_cover_recursive_local_markdown_and_sql_links() -> N
         assert RAW_LOCAL_ARTIFACT_HREF.search(rendered) is None
         assert LEAKED_AUTHORING_COMMENT.search(_visible_text(rendered)) is None
         assert '<script src="' not in rendered
-        assert '<link rel="stylesheet"' not in rendered
+        _assert_local_font_stylesheet(rendered, relative_path)
         assert rendered.endswith("\n")
         assert all(line == line.rstrip() for line in rendered.splitlines())
 

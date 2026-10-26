@@ -127,6 +127,17 @@ def syntax_errors(path: str, root: Path, language: str) -> list[str]:
         elif language == "sql":
             parser = importlib.import_module("pglast")
             parser.parse_sql(sql_for_parser(source.decode("utf-8")))
+        elif language == "r":
+            result = subprocess.run(
+                ["Rscript", "--vanilla", str(root / "scripts/r_source_tools.R"), "parse"],
+                input=source,
+                cwd=root,
+                capture_output=True,
+                check=False,
+            )
+            if result.returncode:
+                diagnostic = result.stderr.decode("utf-8", errors="replace")
+                return [f"{path}: {diagnostic.strip() or 'R parser rejected source'}"]
         elif suffix == ".json":
             json.loads(source)
         elif suffix in {".yaml", ".yml"}:
@@ -154,12 +165,29 @@ def lint_group(language: str, paths: list[str], root: Path) -> bool:
     for path in paths:
         # Swift and Scala use their own parsers below because Tree-sitter rejects
         # valid result-builder and inline-lambda syntax in the taught dialects.
-        if language in {"swift", "scala"}:
+        if language in {"swift", "scala", "r"}:
             continue
         for error in syntax_errors(path, root, language):
             print(error, file=sys.stderr)
             success = False
-    if language == "python":
+    if language == "r":
+        for path in paths:
+            try:
+                result = subprocess.run(
+                    ["Rscript", "--vanilla", str(root / "scripts/r_source_tools.R"), "lint"],
+                    input=(root / path).read_bytes(),
+                    cwd=root,
+                    capture_output=True,
+                    check=False,
+                )
+            except FileNotFoundError:
+                print("Missing Rscript. Use ./scripts/lint-repo.", file=sys.stderr)
+                return False
+            if result.returncode:
+                diagnostic = (result.stdout + result.stderr).decode("utf-8", errors="replace")
+                print(f"{path}: {diagnostic.strip()}", file=sys.stderr)
+                success = False
+    elif language == "python":
         notebooks = [path for path in paths if path.endswith(".ipynb")]
         for batch in batches(notebooks):
             # Ruff understands IPython/JupySQL magics. Unfinished exercises are
@@ -257,6 +285,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--language", choices=LANGUAGES, action="append")
     parser.add_argument(
+        "--exclude-language", choices=LANGUAGES, action="append", default=[], help=argparse.SUPPRESS
+    )
+    parser.add_argument(
         "--list", action="store_true", help="List source coverage without running lint"
     )
     arguments = parser.parse_args(argv)
@@ -268,7 +299,8 @@ def main(argv: list[str] | None = None) -> int:
     selected = [
         language
         for language in LANGUAGES
-        if not arguments.language or language in arguments.language
+        if (not arguments.language or language in arguments.language)
+        and language not in arguments.exclude_language
     ]
     print(
         "Static/syntax coverage: "

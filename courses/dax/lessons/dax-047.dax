@@ -1,0 +1,9 @@
+// dax-047 learner draft: UDF value versus expression parameters
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Predict whether a UDF receives a precomputed value or an expression evaluated under its own modifier.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write documentation warning callers about context changes.
+
+// Compare the same amount passed as VAL and as EXPR.
+EVALUATE ROW ( "Eager value", BLANK(), "Deferred expression", BLANK() )

@@ -1,0 +1,104 @@
+{
+  "id": "r-025",
+  "title": "Object interoperability and public data contracts",
+  "level": "intermediate",
+  "minutes": 150,
+  "prerequisites": ["r-022", "r-023", "r-024"],
+  "concepts": [
+    "adapter",
+    "public interface",
+    "representation",
+    "interoperability",
+    "version-aware API"
+  ],
+  "outcome": "Convert S3, S4, R6 and S7 values through validated adapters and inspect ggplot2 through public build interfaces.",
+  "mechanism": "Interoperability begins with a data contract, not a choice of class system. A consumer needs to know the type and shape of its inputs, their units and missingness policy, and whether reading them can mutate shared state. This lesson defines one ordinary record with a finite numeric vector and a unit string. Every adapter returns that contract, so the numerical summary does not need to know which object system produced it.\n\nAn adapter is an explicit translation at a boundary. For an S3 value it reads the documented fields, for an S4 value the declared slots, for an R6 object public read methods, and for an S7 object declared properties. It validates the extracted values again. This is useful when a domain object is supplied by a different package or when an older representation remains in circulation. Silent unclass calls are insufficient because removing a label does not preserve or verify units, scale, missingness or reference ownership.\n\nThe common record uses ordinary numeric values and a character scalar. The adapter converts integer input to double deliberately but does not convert physical units. Empty vectors have a missing mean and count zero. Two records with the same mean but different units are not interchangeable measurements. A conversion between seconds and milliseconds must be an explicitly tested transformation outside this adapter.\n\nR6 requires extra attention to ownership. The example exposes a numeric snapshot through a public method, then constructs a record from it. Mutating that returned numeric record does not change the source object's private vector. This narrow observation does not imply that every R6 getter returns a deep copy; a getter returning an environment could expose shared mutable state. The adapter contract must exclude or handle such references.\n\nPackage internals evolve. ggplot2 4.0.0 changed central objects to S7, and this environment prepares ggplot2 4.0.3. Existing examples that assume every plot is a simple S3 list, mutate internal attributes or apply S4 slot introspection can therefore be brittle. Build a plot with exported ggplot2 functions, then inspect documented ggplot_build or layer_data results. Do not make an internal class spelling the core assertion of an analytical test.\n\nThe worked build checks one point layer against the input coordinates without rendering a figure. A successful build verifies layer data for this fixture. It does not verify a browser display, visual accessibility or a causal interpretation of plotted values. Subsequent plotting lessons add explicit print calls and output checks. Keep the representation, numerical data and rendered figure as separate evidence.",
+  "vocabulary": [
+    {
+      "term": "Adapter",
+      "definition": "A function translating a public source interface into a validated target contract."
+    },
+    {
+      "term": "Snapshot",
+      "definition": "A value representing state at a point in time, with an explicit ownership policy."
+    },
+    {
+      "term": "Public API",
+      "definition": "Documented operations intended for callers to depend on."
+    },
+    {
+      "term": "Representation detail",
+      "definition": "An internal storage choice that may change without preserving direct access patterns."
+    }
+  ],
+  "anatomy": "Use named adapter functions such as from_s4 rather than guessing from identical-looking syntax. The result list(values=...,unit=...) is revalidated before calculation. ggplot2::ggplot_build(plot)$data[[1]] exposes built layer data; packageVersion(\"ggplot2\") records the prepared API version without implying compatibility with every future version.",
+  "worked_examples": [
+    {
+      "title": "Two representations produce the same checked record",
+      "code": "measurement_record <- function(values, unit) {\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(!is.finite(values))) stop(\"values must be a finite numeric vector\")\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\")\n  }\n  list(values = as.double(values), unit = unit)\n}\nrecord_mean <- function(record) {\n  checked <- measurement_record(record$values, record$unit)\n  list(\n    mean = if (length(checked$values)) mean(checked$values) else NA_real_,\n    count = length(checked$values), unit = checked$unit\n  )\n}\n\ns3_value <- structure(list(values = c(2, 4), unit = \"ms\"), class = \"measure_s3\")\nmethods::setClass(\"MeasureS4\", slots = c(values = \"numeric\", unit = \"character\"))\ns4_value <- methods::new(\"MeasureS4\", values = c(2, 4), unit = \"ms\")\nfrom_s3 <- function(x) {\n  stopifnot(inherits(x, \"measure_s3\"))\n  measurement_record(x$values, x$unit)\n}\nfrom_s4 <- function(x) {\n  stopifnot(methods::is(x, \"MeasureS4\"))\n  measurement_record(x@values, x@unit)\n}\na <- from_s3(s3_value)\nb <- from_s4(s4_value)\nstopifnot(identical(a, b), identical(record_mean(a), list(mean = 3, count = 2L, unit = \"ms\")))\nprint(record_mean(a))\n",
+      "explanation": "Both adapters read their declared representation and validate the common boundary. Equality of resulting records, rather than similar class labels, makes the summary interchangeable for this contract.",
+      "expected": "Mean 3, count 2, unit ms for both representations."
+    },
+    {
+      "title": "Inspect built ggplot2 data through an exported operation",
+      "code": "data <- data.frame(time = c(1, 2, 3), latency = c(8, 5, 6))\nplot <- ggplot2::ggplot(data, ggplot2::aes(x = time, y = latency)) +\n  ggplot2::geom_point()\nbuilt <- ggplot2::ggplot_build(plot)\nlayer <- built$data[[1]]\nstopifnot(identical(layer$x, data$time), identical(layer$y, data$latency))\ncat(\"ggplot2\", as.character(utils::packageVersion(\"ggplot2\")), \"\\n\")\nprint(layer[c(\"x\", \"y\")])\n",
+      "explanation": "The public builder produces the point coordinates. The assertions test those data, not undocumented internal plot slots. No print(plot) call is made, so this example intentionally checks construction without claiming that a figure was displayed.",
+      "expected": "Coordinates(1,8),(2,5),(3,6) and the prepared package version."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the record summary for values c(2,4) and unit ms.",
+      "hint": "Retain count and unit alongside the mean.",
+      "answer": "The result is list(mean=3,count=2L,unit=\"ms\").",
+      "expected": "All three fields are preserved."
+    },
+    {
+      "prompt": "Write an R6 adapter using public values() and unit() methods.",
+      "hint": "Do not read private environments.",
+      "answer": "Pass x$values() and x$unit() through measurement_record; verify the numeric record can change without mutating the source.",
+      "expected": "The adapted record satisfies the public contract."
+    },
+    {
+      "prompt": "Write an S7 adapter using its declared properties.",
+      "hint": "@ notation alone does not select the correct object system.",
+      "answer": "Validate the expected S7 class with S7::S7_inherits, then pass values and unit to measurement_record.",
+      "expected": "S7 and other valid inputs have equal records."
+    },
+    {
+      "prompt": "Diagnose unclass on an object whose numbers are seconds while callers assume milliseconds.",
+      "hint": "A representation change is not a unit conversion.",
+      "answer": "Removing class does not multiply values or preserve unit semantics. Require explicit source unit and conversion, or reject the mismatch.",
+      "expected": "No silent scale change."
+    },
+    {
+      "prompt": "Change the plotted latency values and inspect the built y coordinates.",
+      "hint": "Test ggplot_build output rather than an internal object layout.",
+      "answer": "Using c(4,7,9) gives built y coordinates 4,7,9. The assertion says nothing about screen rendering.",
+      "expected": "Exact new coordinates and bounded interpretation."
+    },
+    {
+      "prompt": "Test an empty record and explain why its mean is missing.",
+      "hint": "Count zero supplies no observed average.",
+      "answer": "Return count 0, mean NA_real_ and the declared unit; do not manufacture a zero mean.",
+      "expected": "An explicit empty-input result."
+    }
+  ],
+  "starter": "# r-025: independent practice\n# Supplied inputs only; implement the contracts and add independent assertions.\n\nvalues <- c(2, 4)\nunit <- \"ms\"\nplot_data <- data.frame(time = c(1, 2, 3), latency = c(4, 7, 9))\n\n# Exercise 1: Predict the record summary for values c(2,4) and unitms.\n# TODO: Retain count and unit alongside the mean.\n# Exercise 2: Write an R6 adapter using public values() and unit() methods.\n# TODO: Do not read private environments.\n# Exercise 3: Write an S7 adapter using its declared properties.\n# TODO: @ notation alone does not select the correct object system.\n# Exercise 4: Diagnose unclass on an object whose numbers are seconds while callers assume milliseconds.\n# TODO: A representation change is not a unit conversion.\n# Exercise 5: Change the plotted latency values and inspect the built y coordinates.\n# TODO: Test ggplot_build output rather than an internal object layout.\n# Exercise 6: Test an empty record and explain why its mean is missing.\n# TODO: Count zero supplies no observed average.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "measurement_record <- function(values, unit) {\n  if (!is.numeric(values) || is.complex(values) || !is.null(dim(values)) ||\n    any(!is.finite(values))) stop(\"values must be a finite numeric vector\")\n  if (!is.character(unit) || length(unit) != 1L || is.na(unit) || !nzchar(unit)) {\n    stop(\"unit must be one nonempty string\")\n  }\n  list(values = as.double(values), unit = unit)\n}\nrecord_mean <- function(record) {\n  checked <- measurement_record(record$values, record$unit)\n  list(\n    mean = if (length(checked$values)) mean(checked$values) else NA_real_,\n    count = length(checked$values), unit = checked$unit\n  )\n}\nassert_error <- function(expr, pattern) {\n  message <- tryCatch(\n    {\n      force(expr); NULL\n    },\n    error = conditionMessage\n  )\n  stopifnot(is.character(message), length(message) == 1L, grepl(pattern, message))\n}\n\ns3 <- structure(list(values = c(2, 4), unit = \"ms\"), class = \"measure_s3\")\nfrom_s3 <- function(x) {\n  stopifnot(inherits(x, \"measure_s3\"))\n  measurement_record(x$values, x$unit)\n}\nmethods::setClass(\"MeasureS4\", slots = c(values = \"numeric\", unit = \"character\"))\ns4 <- methods::new(\"MeasureS4\", values = c(2, 4), unit = \"ms\")\nfrom_s4 <- function(x) {\n  stopifnot(methods::is(x, \"MeasureS4\"))\n  measurement_record(x@values, x@unit)\n}\nStore <- R6::R6Class(\"Store\", private = list(data = NULL, label = NULL), public = list(\n  initialize = function(values, unit) {\n    record <- measurement_record(values, unit)\n    private$data <- record$values\n    private$label <- record$unit\n  },\n  values = function() private$data,\n  unit = function() private$label\n))\nr6 <- Store$new(c(2, 4), \"ms\")\nfrom_r6 <- function(x) measurement_record(x$values(), x$unit())\nSeries <- S7::new_class(\"Series\", properties = list(values = S7::class_numeric, unit = S7::class_character))\ns7 <- Series(values = c(2, 4), unit = \"ms\")\nfrom_s7 <- function(x) {\n  stopifnot(S7::S7_inherits(x, Series))\n  measurement_record(x@values, x@unit)\n}\nrecords <- list(from_s3(s3), from_s4(s4), from_r6(r6), from_s7(s7))\nstopifnot(all(vapply(records, identical, logical(1), records[[1]])))\nstopifnot(identical(record_mean(records[[1]]), list(mean = 3, count = 2L, unit = \"ms\")))\ncopy <- from_r6(r6)\ncopy$values[[1]] <- 100\nstopifnot(r6$values()[[1]] == 2)\nassert_error(measurement_record(c(1, Inf), \"ms\"), \"finite numeric\")\nempty <- record_mean(measurement_record(numeric(0), \"ms\"))\nstopifnot(empty$count == 0L, is.na(empty$mean), empty$unit == \"ms\")\ndata <- data.frame(time = c(1, 2, 3), latency = c(4, 7, 9))\nplot <- ggplot2::ggplot(data, ggplot2::aes(x = time, y = latency)) +\n  ggplot2::geom_point()\nlayer <- ggplot2::ggplot_build(plot)$data[[1]]\nstopifnot(identical(layer$x, data$time), identical(layer$y, data$latency))\ncat(\"r-025 reference checks passed\\n\")\n",
+  "solution_explanation": "All four adapters converge on one ordinary record. The equal-record assertion compares values, type normalization and units, rather than merely comparing a final mean. The R6 copy test is intentionally limited to a returned numeric vector.\n\nThe ggplot2 test exercises a public builder and checks actual layer coordinates. It remains valid without relying on the central plot object's internal S3 or S7 layout. Empty values and nonfinite values take different paths under the declared contract: one yields a missing summary, the other is rejected.",
+  "sources": [
+    {
+      "title": "S7 compatibility",
+      "url": "https://rconsortium.github.io/S7/articles/compatibility.html"
+    },
+    {
+      "title": "ggplot2 build API",
+      "url": "https://ggplot2.tidyverse.org/reference/ggplot_build.html"
+    },
+    {
+      "title": "ggplot2 release history",
+      "url": "https://ggplot2.tidyverse.org/news/index.html"
+    }
+  ]
+}

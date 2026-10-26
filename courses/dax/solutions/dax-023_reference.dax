@@ -1,0 +1,17 @@
+// dax-023: Grand totals reevaluate the measure
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+
+// dax-023-a: Category-level prices
+// Context: One group per Category; no outer filters; all-blank Travel group omitted by this summary.
+EVALUATE SUMMARIZECOLUMNS ( Product[Category], "Revenue", [NetRevenue], "Units", [QuantitySold], "NetPerUnit", DIVIDE ( [NetRevenue], [QuantitySold] ) )
+ORDER BY Product[Category]
+
+// dax-023-b: The total and an intentionally different measure
+// Context: No category grouping for the pooled total; a separate iterator explicitly sums category ratios.
+EVALUATE ROW ( "PooledNetPerUnit", DIVIDE ( [NetRevenue], [QuantitySold] ), "SumOfCategoryRatios", SUMX ( VALUES ( Product[Category] ), DIVIDE ( [NetRevenue], [QuantitySold] ) ) )

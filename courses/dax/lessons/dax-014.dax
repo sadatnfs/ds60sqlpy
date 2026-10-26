@@ -1,0 +1,9 @@
+// dax-014 learner draft: Filter context is the full question, not just one slicer
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Record a complete context ledger and explain two cells with the same measure definition.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a context ledger for North, Home and 2025.
+
+EVALUATE
+ROW ( "Selected products", BLANK(), "Selected customers", BLANK(), "Visible amount", BLANK() )

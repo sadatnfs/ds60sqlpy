@@ -273,6 +273,10 @@ if __name__ == "__main__":
 
 - [Pearl, Causal inference in statistics: An overview](https://ftp.cs.ucla.edu/pub/stat_ser/r350.pdf).
 
+## Connected worked tutorial
+
+[Identification through a fitted causal estimator](../tutorials/science/01-causal-estimation-and-sensitivity.md). Carry a known synthetic mechanism through cross-fitted nuisance models, overlap, AIPW uncertainty and a transparent bias sensitivity analysis.
+
 ## Reading connections
 
 [Previous chapter](14-online-experimentation-and-a-b-testing.md) | [Book contents](../README.md) | [Next chapter](16-quasi-experiments-and-causal-study-designs.md)

@@ -1,0 +1,99 @@
+{
+  "id": "r-037",
+  "title": "Simulation, Monte Carlo error and reproducible randomness",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-008", "r-020", "r-029", "r-036"],
+  "concepts": [
+    "Simulation model",
+    "Monte Carlo estimate",
+    "Monte Carlo standard error",
+    "Seeded stream"
+  ],
+  "outcome": "Use a small simulation to investigate a probability while separating simulation error from model uncertainty.",
+  "mechanism": "Simulation begins with a model, not a random-number call. State the outcome space, probabilities and independence assumptions. Drawing four independent fair coin flips is a specific mechanism; drawing four correlated user events is a different one. A simulation can be internally correct and still answer the wrong real-world question if its generative assumptions do not fit.\n\nA Monte Carlo probability estimate is the fraction of simulated repetitions satisfying an event. More repetitions generally reduce numerical sampling variation, but they do not repair a misspecified model. For independent Bernoulli event indicators with probability p, the estimator's standard error is approximately \\(\\sqrt{p(1-p)/B}\\), where B is the number of repetitions. The estimated p can provide a practical approximation when its limitations are understood.\n\nSet a seed for reproducibility, then report the number of repetitions and the generator context. Do not keep trying seeds until a preferred result appears. A deterministic reference should test a broad justified approximation bound or compare with an exact small-case calculation, rather than asserting one arbitrary simulated decimal as a scientific truth.\n\nSimulation output also has a unit. A repetition may represent a trial, a user, a whole experiment or a time series. Accidentally treating every internal draw as an independent replication changes the uncertainty calculation. Keep repetitions and within-repetition observations separate in array dimensions and summaries. Later bootstrap and resampling chapters build on this distinction.",
+  "vocabulary": [
+    {
+      "term": "Simulation model",
+      "definition": "An explicit mechanism generating synthetic outcomes."
+    },
+    {
+      "term": "Monte Carlo estimate",
+      "definition": "A numerical estimate obtained by repeated simulated draws."
+    },
+    {
+      "term": "Monte Carlo standard error",
+      "definition": "Variation from finite simulation repetitions under a stated model."
+    },
+    {
+      "term": "Seeded stream",
+      "definition": "A reproducible pseudorandom sequence under a declared generator configuration."
+    }
+  ],
+  "anatomy": "Use rbinom(B, size, prob) for B binomial outcomes under the stated independent-trial model. Compute event indicators, their mean and a Monte Carlo error estimate. The mathematical standard error is \\(\\sqrt{p(1-p)/B}\\) for independent indicators.",
+  "worked_examples": [
+    {
+      "title": "Compare a simulated event with an exact probability",
+      "code": "set.seed(41)\nrepetitions <- 20000L\nheads <- rbinom(repetitions, size = 4, prob = 0.5)\nestimate <- mean(heads >= 3)\nexact <- 5 / 16\nmcse <- sqrt(estimate * (1 - estimate) / repetitions)\nstopifnot(abs(estimate - exact) < 0.02, mcse < 0.005)\nprint(c(estimate = estimate, exact = exact, mcse = mcse))\n",
+      "explanation": "There are four ways to obtain exactly three heads and one way to obtain four, among sixteen equally likely sequences. The simulation approximates that model probability.",
+      "expected": "Estimate near 0.3125 with finite simulation error."
+    },
+    {
+      "title": "Repetition size and estimator precision",
+      "code": "p <- 0.3\nsmall <- sqrt(p * (1 - p) / 100)\nlarge <- sqrt(p * (1 - p) / 400)\nstopifnot(isTRUE(all.equal(large, small / 2)))\nprint(c(repetitions100 = small, repetitions400 = large))\n",
+      "explanation": "Quadrupling independent repetitions halves this standard error. It does not imply that a biased real-world model becomes correct.",
+      "expected": "Approximately 0.0458 and 0.0229."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Derive the probability of at least three heads in four fair flips.",
+      "hint": "Count three-head and four-head sequences.",
+      "answer": "It is 5/16.",
+      "expected": "It is 5/16."
+    },
+    {
+      "prompt": "Quadruple the number of independent simulation repetitions.",
+      "hint": "Monte Carlo standard error scales with inverse square root.",
+      "answer": "The standard error is halved under the same model.",
+      "expected": "The standard error is halved under the same model."
+    },
+    {
+      "prompt": "Simulate an event and retain seed, B, estimate and error estimate.",
+      "hint": "Separate the event indicator from internal draws.",
+      "answer": "The report states both the model and finite-repetition uncertainty.",
+      "expected": "The report states both the model and finite-repetition uncertainty."
+    },
+    {
+      "prompt": "Diagnose choosing a seed because it produces a desired conclusion.",
+      "hint": "The seed is a reproducibility control, not an optimization target.",
+      "answer": "Fix a declared seed policy and evaluate the model honestly.",
+      "expected": "Fix a declared seed policy and evaluate the model honestly."
+    },
+    {
+      "prompt": "Explain p equal to zero or one.",
+      "hint": "The Bernoulli event has no variation under that exact model.",
+      "answer": "The model-based Monte Carlo variance is zero, which is not proof that an uncertain real-world probability is known exactly.",
+      "expected": "The model-based Monte Carlo variance is zero, which is not proof that an uncertain real-world probability is known exactly."
+    },
+    {
+      "prompt": "Separate more simulation from better scientific assumptions.",
+      "hint": "Numerical precision and model validity are different.",
+      "answer": "Increasing B reduces simulation noise but does not remove misspecification or observational bias.",
+      "expected": "Increasing B reduces simulation noise but does not remove misspecification or observational bias."
+    }
+  ],
+  "starter": "# r-037: Simulation, Monte Carlo error and reproducible randomness\n# Complete the six guide tasks using these local inputs.\nrepetitions <- 20000L\nset.seed(41)\n# TODO: define the generative model, event and simulation report.\nprint(repetitions)\n",
+  "reference": "exact <- sum(choose(4, 3:4)) / 2^4\nstopifnot(exact == 5 / 16)\nset.seed(41)\nrepetitions <- 20000L\nestimate <- mean(rbinom(repetitions, 4, 0.5) >= 3)\nstopifnot(abs(estimate - exact) < 0.02)\np <- 0.3\nstopifnot(isTRUE(all.equal(sqrt(p * (1 - p) / 400), sqrt(p * (1 - p) / 100) / 2)))\nstopifnot(all(rbinom(10, 4, 0) == 0), all(rbinom(10, 4, 1) == 4))\nset.seed(41); first <- rbinom(5, 4, 0.5)\nset.seed(41); second <- rbinom(5, 4, 0.5)\nstopifnot(identical(first, second))\ncat(\"r-037 reference checks passed\\n\")\n",
+  "solution_explanation": "There are four ways to obtain exactly three heads and one way to obtain four, among sixteen equally likely sequences. The simulation approximates that model probability.\n\nQuadrupling independent repetitions halves this standard error. It does not imply that a biased real-world model becomes correct.",
+  "sources": [
+    {
+      "title": "R binomial distribution",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/Binomial.html"
+    },
+    {
+      "title": "R random-number generation",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/Random.html"
+    }
+  ]
+}

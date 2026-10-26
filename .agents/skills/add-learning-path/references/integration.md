@@ -202,3 +202,22 @@ the prepared worker and real UI when those contracts change. One platform's
 success is not cross-platform acceptance. Do not alter a human's current pads
 to test persistence; use an explicitly disposable test project and keep volumes
 unless deleting them was authorized.
+
+
+## Scientific runtimes, drafts and figures
+
+R uses main.R and the r-statistics worker; its formatting runs in a separate
+compatible R tools image. JAX and Bayesian Python have separate pinned CPU
+profiles. Register source suffixes as well as language/profile names in modules.py.
+
+DAX is a draft capability with no worker service. Its references are validated
+against exact source and model bytes and contain typed hand-derived tables.
+Never route its ready editing capability into ModuleJobs.start or infer execution
+from a matching draft hash. Additive statistics tutorials use tutorials/index.json,
+not another arbitrary manifest format.
+
+Use plot_artifacts.py for bounded figures, and the existing opaque Plotly renderer
+for chart data. Never store an arbitrary HTML page as a trusted worker result.
+Test metadata escaping, frame/image restrictions, plot storage failures, lazy
+Python imports and saved-result readback. Compile TeX before shared reader
+publication and preserve source/code byte contracts.

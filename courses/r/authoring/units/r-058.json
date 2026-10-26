@@ -1,0 +1,104 @@
+{
+  "id": "r-058",
+  "title": "Hover, view controls and accessible alternatives",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-057"],
+  "concepts": [
+    "hover template",
+    "custom data",
+    "visibility control",
+    "static alternative",
+    "interaction evidence"
+  ],
+  "outcome": "Encode a bounded interactive view while preserving observation identity and a non-hover-dependent explanation.",
+  "mechanism": "Interaction can help a reader inspect a figure, but it should not be the only way to obtain essential information. Hover text can expose observation identity and units, while a printed table or concise static summary provides an alternative for readers who cannot use the same pointer interaction.\n\nStable IDs belong with the points. A point's array position can change after filtering, sorting or splitting into traces. customdata can retain an identity separate from displayed x and y values. A hover template should state the relevant quantities rather than producing an unlabeled list of numbers or relying on colour alone.\n\nA visibility button changes the view of existing traces. It does not delete their underlying data, apply access control or necessarily recompute any statistical summary. If a displayed denominator or mean should change with a selection, that computation requires an explicit interaction contract. A static label calculated before filtering can otherwise become misleading.\n\nThe example defines two group traces and buttons for all groups or group A only. The figure specification can be inspected in R to verify that those controls target the intended trace identities. That source check does not prove a button actually worked in the delivered browser, nor does it establish keyboard navigation or screen-reader behavior.\n\nAccessibility requires more than choosing a palette. Use meaningful labels, redundant encodings where appropriate, clear units and a noninteractive description or table. Actual interaction and assistive-technology checks belong to the final browser acceptance. This lesson encodes and validates the intended contract while keeping that unperformed observation explicit.",
+  "vocabulary": [
+    {
+      "term": "Hover template",
+      "definition": "A declared presentation of point values and metadata when the renderer exposes a point."
+    },
+    {
+      "term": "Custom data",
+      "definition": "Point-associated metadata retained independently of displayed coordinate values."
+    },
+    {
+      "term": "Visibility control",
+      "definition": "A view operation that shows or hides existing traces."
+    },
+    {
+      "term": "Static alternative",
+      "definition": "A table or textual explanation that conveys essential information without requiring hover or pointer interaction."
+    }
+  ],
+  "anatomy": "Attach stable IDs through customdata and define hovertemplate with labeled fields. Add layout updatemenus with explicit restyle visibility arguments tied to trace order. Inspect the built button arguments and trace metadata, then print the plot. Also print a small source table or summary so the main information is available outside hover.",
+  "worked_examples": [
+    {
+      "title": "Retain identity and encode a view button",
+      "code": "d <- data.frame(id = c(\"A1\", \"A2\", \"B1\", \"B2\"), group = c(\"A\", \"A\", \"B\", \"B\"), x = c(1, 2, 1, 2), y = c(2, 3, 4, 6))\np <- plotly::plot_ly()\nfor (g in c(\"A\", \"B\")) {\n  part <- d[d$group == g, ]\n  p <- plotly::add_trace(p, data = part, x = ~x, y = ~y, customdata = ~id, type = \"scatter\", mode = \"markers\", name = g, hovertemplate = \"ID: %{customdata}<br>Input: %{x}<br>Value: %{y}<extra>%{fullData.name}</extra>\")\n}\np <- plotly::layout(p, xaxis = list(title = \"Input\"), yaxis = list(title = \"Value\"), updatemenus = list(list(type = \"buttons\", buttons = list(list(label = \"All groups\", method = \"restyle\", args = list(\"visible\", list(TRUE, TRUE))), list(label = \"Group A\", method = \"restyle\", args = list(\"visible\", list(TRUE, FALSE)))))))\nbuilt <- plotly::plotly_build(p)\nstopifnot(length(built$x$data) == 2)\nstopifnot(identical(as.character(built$x$data[[1]]$customdata), c(\"A1\", \"A2\")))\nstopifnot(identical(unlist(built$x$layout$updatemenus[[1]]$buttons[[2]]$args[[2]]), c(TRUE, FALSE)))\nprint(d)\nprint(p)\n",
+      "explanation": "The table supplies a static alternative and the trace metadata retains point identity. The button arguments encode the intended view operation; actual clicking and keyboard behavior still require browser testing.",
+      "expected": "Two traces, retained IDs, an All/Group A control and a printed four-row table."
+    },
+    {
+      "title": "A prefiltered figure has a different data payload",
+      "code": "d <- data.frame(id = c(\"A1\", \"A2\", \"B1\", \"B2\"), group = c(\"A\", \"A\", \"B\", \"B\"), x = c(1, 2, 1, 2), y = c(2, 3, 4, 6))\nselected <- d[d$group == \"A\", ]\np <- plotly::plot_ly(selected, x = ~x, y = ~y, customdata = ~id, type = \"scatter\", mode = \"markers\", name = \"Group A\")\nbuilt <- plotly::plotly_build(p)$x$data[[1]]\nstopifnot(length(built$x) == 2, identical(as.character(built$customdata), c(\"A1\", \"A2\")))\nprint(selected)\nprint(p)\n",
+      "explanation": "Filtering the data before construction produces a two-point payload. This differs from hiding a trace in a four-point payload; neither operation should be mislabeled as an authorization boundary.",
+      "expected": "Two retained observations in the actual figure data."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Attach stable observation IDs independently of x/y coordinates.",
+      "hint": "Use customdata rather than inferring identity from array position.",
+      "answer": "Each trace retains the IDs belonging to its points even when the data is grouped.",
+      "expected": "Correct point-associated IDs."
+    },
+    {
+      "prompt": "Define a hover template with labels and units.",
+      "hint": "State what each displayed field means.",
+      "answer": "The template identifies ID, input and measured value rather than presenting anonymous numbers.",
+      "expected": "Readable field contract."
+    },
+    {
+      "prompt": "Encode All and Group A visibility buttons for two known traces.",
+      "hint": "Keep the visibility vector aligned with trace order.",
+      "answer": "All uses TRUE/TRUE and Group A uses TRUE/FALSE.",
+      "expected": "Correct button argument vectors."
+    },
+    {
+      "prompt": "Diagnose a global mean label that remains unchanged when a view hides one group.",
+      "hint": "Determine whether the control recomputes statistics.",
+      "answer": "A visibility toggle does not automatically recompute the mean. Label it as the full-data mean or implement an explicit selection-dependent calculation.",
+      "expected": "Denominator/selection semantics clarified."
+    },
+    {
+      "prompt": "Provide a non-hover-dependent table or summary.",
+      "hint": "Keep essential IDs and values visible in another channel.",
+      "answer": "A small printed table preserves the core information without requiring pointer interaction.",
+      "expected": "Static alternative supplied."
+    },
+    {
+      "prompt": "Explain what remains unverified after inspecting the figure specification in R.",
+      "hint": "Separate encoded controls from observed browser behavior.",
+      "answer": "Clicking, keyboard use, hover readability, resizing and assistive-technology behavior require actual browser checks.",
+      "expected": "No unsupported interaction-success claim."
+    }
+  ],
+  "starter": "# r-058: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(id = c(\"A1\", \"A2\", \"B1\", \"B2\"), group = c(\"A\", \"A\", \"B\", \"B\"), x = c(1, 2, 1, 2), y = c(2, 3, 4, 6))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Attach stable observation IDs independently of x/y coordinates.\n# TODO: Use customdata rather than inferring identity from array position.\n# Exercise 2: Define a hover template with labels and units.\n# TODO: State what each displayed field means.\n# Exercise 3: Encode All and Group A visibility buttons for two known traces.\n# TODO: Keep the visibility vector aligned with trace order.\n# Exercise 4: Diagnose a global mean label that remains unchanged when a view hides one group.\n# TODO: Determine whether the control recomputes statistics.\n# Exercise 5: Provide a non-hover-dependent table or summary.\n# TODO: Keep essential IDs and values visible in another channel.\n# Exercise 6: Explain what remains unverified after inspecting the figure specification in R.\n# TODO: Separate encoded controls from observed browser behavior.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(id = c(\"A1\", \"A2\", \"B1\", \"B2\"), group = c(\"A\", \"A\", \"B\", \"B\"), x = c(1, 2, 1, 2), y = c(2, 3, 4, 6))\np <- plotly::plot_ly()\nfor (g in c(\"A\", \"B\")) {\n  part <- d[d$group == g, ]\n  p <- plotly::add_trace(p, data = part, x = ~x, y = ~y, customdata = ~id, type = \"scatter\", mode = \"markers\", name = g, hovertemplate = \"ID: %{customdata}<br>Input: %{x}<br>Value: %{y}<extra>%{fullData.name}</extra>\")\n}\nbuttons <- list(list(label = \"All groups\", method = \"restyle\", args = list(\"visible\", list(TRUE, TRUE))), list(label = \"Group A\", method = \"restyle\", args = list(\"visible\", list(TRUE, FALSE))))\np <- plotly::layout(p, updatemenus = list(list(type = \"buttons\", buttons = buttons)), xaxis = list(title = \"Input\"), yaxis = list(title = \"Value\"))\nb <- plotly::plotly_build(p)\nstopifnot(length(b$x$data) == 2, identical(as.character(b$x$data[[1]]$customdata), c(\"A1\", \"A2\")))\nstopifnot(identical(as.character(b$x$data[[2]]$customdata), c(\"B1\", \"B2\")))\nstopifnot(identical(unlist(b$x$layout$updatemenus[[1]]$buttons[[2]]$args[[2]]), c(TRUE, FALSE)))\nstopifnot(nrow(d) == 4, mean(d$y) == 3.75, mean(d$y[d$group == \"A\"]) == 2.5)\nselected <- d[d$group == \"A\", ]\nstopifnot(nrow(selected) == 2, all(selected$id %in% c(\"A1\", \"A2\")))\nprint(d)\nprint(p)\ncat(\"r-058 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference validates the identity metadata and the exact visibility vectors used by the controls. It also compares the full-data and selected-group means to demonstrate why a view change cannot silently inherit a full-data statistical label.\n\nA static table accompanies the figure. The R and worker-capture checks can establish that these structures were emitted, but they cannot prove accessibility or interaction behavior in a browser. Those observations remain part of the separate classroom delivery qualification.",
+  "sources": [
+    {
+      "title": "Plotly hover text",
+      "url": "https://plotly.com/r/hover-text-and-formatting/"
+    },
+    {
+      "title": "Plotly buttons",
+      "url": "https://plotly.com/r/custom-buttons/"
+    },
+    {
+      "title": "Plotly R package manual",
+      "url": "https://cran.r-project.org/web/packages/plotly/plotly.pdf"
+    }
+  ]
+}

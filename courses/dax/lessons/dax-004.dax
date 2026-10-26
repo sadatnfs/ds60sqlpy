@@ -1,0 +1,9 @@
+// dax-004 learner draft: Relationships are filter rules, not materialized joins
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Predict asymmetric filter propagation and identify when a SQL join analogy breaks.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a query returning both populations with unambiguous labels.
+
+EVALUATE
+ROW ( "Dimension products", BLANK(), "Products sold", BLANK() )

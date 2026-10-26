@@ -1,0 +1,10 @@
+# r-018: complete reference for the declared synthetic inputs.
+stopifnot(as.Date("2024-02-28") + 1 == as.Date("2024-02-29"))
+instant <- as.POSIXct("2025-01-15 12:00:00", format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
+stopifnot(as.numeric(difftime(instant + 7200, instant, units = "hours")) == 2)
+stopifnot(inherits(as.Date("2025-01-15"), "Date"))
+stopifnot(format(instant, "%H:%M", tz = "America/New_York") == "07:00")
+invalid <- as.Date("not-a-date", format = "%Y-%m-%d")
+stopifnot(is.na(invalid))
+stopifnot(as.numeric(instant + 1) > as.numeric(instant))
+cat("r-018 reference checks passed\n")

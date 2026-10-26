@@ -1,0 +1,9 @@
+// dax-040 learner draft: Cohorts, retention denominators and unobserved ages
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/analytics/model.json
+// Goal: Separate enrolled members, active members and unavailable follow-up periods.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a cohort metric contract.
+
+EVALUATE
+ROW ( "Eligible members", BLANK(), "Observed active members", BLANK(), "Retention", BLANK() )

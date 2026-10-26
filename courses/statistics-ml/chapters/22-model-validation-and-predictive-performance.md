@@ -346,6 +346,10 @@ The [structured extraction and contract lesson](../../llm-applied/guides/llm-app
 
 - [scikit-learn cross-validation](https://scikit-learn.org/stable/modules/cross_validation.html).
 
+## Connected worked tutorial
+
+[Evaluate the complete learning procedure](../tutorials/learning/07-validation-as-a-procedure.md). Contrast identity leakage with grouped evaluation and execute nested preprocessing and model selection.
+
 ## Reading connections
 
 [Previous chapter](21-unsupervised-learning-and-multivariate-analysis.md) | [Book contents](../README.md) | [Next chapter](23-uncertainty-quantification-and-distribution-shift.md)

@@ -13,8 +13,8 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: global mean 5.
 
 # Exercise 3: Accumulate one full-batch gradient
-# At w = 0, usex 1..4, y = 2x, accumulate squared-loss sums forshards 1 and 3, and divide
-# by 4.
+# At \(w=0\), use \(x=(1, 2, 3, 4)\) and \(y=2x\), accumulate squared-loss sums for shards
+# of sizes 1 and 3, and divide by the total sample count 4.
 # Expected: gradient-30, matching full-batch mean.
 
 # Exercise 4: Apply one accumulated update

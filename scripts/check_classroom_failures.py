@@ -34,6 +34,9 @@ from scripts.check_classroom_profiles import (  # noqa: E402
 )
 
 INVALID_SOURCE = {
+    "jax-cpu": "def broken(:\n    pass\n",
+    "bayesian-cpu": "def broken(:\n    pass\n",
+    "r-statistics": "broken <-\n",
     "php-cli": "<?php $broken = ;\n",
     "python-core": "def broken(:\n    pass\n",
     "tensorflow-cpu": "def broken(:\n    pass\n",
@@ -52,6 +55,9 @@ INVALID_SOURCE = {
     "spark-local-scala": "object Main { def main(args: Array[String]): Unit = { val broken = } }\n",
 }
 DIAGNOSTICS = {
+    "jax-cpu": ("main.py", "syntaxerror"),
+    "bayesian-cpu": ("main.py", "syntaxerror"),
+    "r-statistics": ("main.r", "error"),
     "php-cli": ("main.php", "parse error"),
     "python-core": ("main.py", "syntaxerror"),
     "tensorflow-cpu": ("main.py", "syntaxerror"),

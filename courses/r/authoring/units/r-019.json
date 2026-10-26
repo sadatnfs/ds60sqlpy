@@ -1,0 +1,102 @@
+{
+  "id": "r-019",
+  "title": "Local files, CSV, JSON and RDS contracts",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-010", "r-015", "r-016", "r-017"],
+  "concepts": ["Serialization", "CSV schema", "JSON shape", "RDS"],
+  "outcome": "Round-trip small local data through appropriate formats while verifying types, missingness and cleanup.",
+  "mechanism": "A file format has a data contract. CSV is a text table and does not inherently preserve R classes, factor levels or every missing-value distinction. A reader can infer types, but inference may interpret an identifier as a number or a literal label as a missing marker. Supply relevant column classes and missing-value rules for a stable interface.\n\nJSON represents objects, arrays, nulls and primitives. The prepared jsonlite package can convert between R objects and JSON, but simplification and scalar unboxing affect shape. A one-element vector and a scalar may need different JSON representations in an external API. State those choices rather than relying on whichever example happens to contain multiple values.\n\nRDS stores one R object with its structure and attributes. It is useful for local R-specific artifacts, while CSV and JSON are generally more interoperable. A binary round trip does not establish that a serialized object is safe or compatible with every future version. Load only trusted artifacts and avoid pretending that a local serialization format is a public schema specification.\n\nThe classroom run directory is temporary. Files created by a script are useful inside that run, but arbitrary outputs do not automatically become permanent learner documents. Saved source, notes and captured figures use the classroom's separate persistence contract. These examples use temporary paths, verify the round trip and clean up; they do not require host directories or external network access.",
+  "vocabulary": [
+    {
+      "term": "Serialization",
+      "definition": "Encoding an object into a stored or transmitted representation."
+    },
+    {
+      "term": "CSV schema",
+      "definition": "A declared column/type/missingness contract for a text table."
+    },
+    {
+      "term": "JSON shape",
+      "definition": "The distinction among objects, arrays, nulls and primitive values."
+    },
+    {
+      "term": "RDS",
+      "definition": "R-specific single-object serialization retaining R structure."
+    }
+  ],
+  "anatomy": "tempfile creates a unique path, write.csv(..., row.names=FALSE) avoids an accidental index column, read.csv(..., colClasses=...) states types, and unlink removes owned temporary files. jsonlite::toJSON/fromJSON use explicit namespaced calls. saveRDS/readRDS retain one R object.",
+  "worked_examples": [
+    {
+      "title": "A typed CSV round trip",
+      "code": "path <- tempfile(fileext = \".csv\")\noriginal <- data.frame(id = c(\"001\", \"002\"), amount = c(2, NA_real_))\nwrite.csv(original, path, row.names = FALSE, na = \"\")\nrestored <- read.csv(path, colClasses = c(\"character\", \"numeric\"), na.strings = \"\")\nstopifnot(identical(original, restored))\nunlink(path)\nprint(restored)\n",
+      "explanation": "The ID remains character, and the empty missing marker is a deliberate part of this synthetic CSV contract.",
+      "expected": "IDs 001,002; second amountNA."
+    },
+    {
+      "title": "JSON for interchange, RDS for R structure",
+      "code": "record <- list(id = \"A\", values = c(2, 4))\nencoded <- jsonlite::toJSON(record, auto_unbox = TRUE)\nrestored <- jsonlite::fromJSON(encoded)\nstopifnot(restored$id == \"A\", identical(as.numeric(restored$values), c(2, 4)))\npath <- tempfile(fileext = \".rds\")\nvalue <- factor(c(\"A\", \"B\"), levels = c(\"A\", \"B\", \"C\"))\nsaveRDS(value, path)\nstopifnot(identical(readRDS(path), value))\nunlink(path)\nprint(encoded)\n",
+      "explanation": "The JSON contract contains a scalar ID and an array of values. The RDS round trip additionally retains factor levels, including the unused level.",
+      "expected": "JSONrecord and exact factor round trip."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Explain why row.names=FALSE matters in a CSV export.",
+      "hint": "An implicit row index is usually not a business field.",
+      "answer": "It prevents an unintended extra column.",
+      "expected": "It prevents an unintended extra column."
+    },
+    {
+      "prompt": "Preserve an ID with leading zeros.",
+      "hint": "Declare character input on read.",
+      "answer": "The restored ID stays\"001\" rather than numeric 1.",
+      "expected": "The restored ID stays\"001\" rather than numeric 1."
+    },
+    {
+      "prompt": "Round-trip one trusted R object with attributes.",
+      "hint": "Use the single-object R format.",
+      "answer": "saveRDS/readRDS preserve the intended local R structure.",
+      "expected": "saveRDS/readRDS preserve the intended local R structure."
+    },
+    {
+      "prompt": "Diagnose default type inference as a schema guarantee.",
+      "hint": "Observed samples do not define every future valid input.",
+      "answer": "Specify and validate required column types and missing markers.",
+      "expected": "Specify and validate required column types and missing markers."
+    },
+    {
+      "prompt": "State the JSON shape of a one-element measurement vector.",
+      "hint": "Scalar unboxing can change the external contract.",
+      "answer": "Choose array versus scalar explicitly and test that representation.",
+      "expected": "Choose array versus scalar explicitly and test that representation."
+    },
+    {
+      "prompt": "Explain whether a temporary output survives a later classroom run.",
+      "hint": "The run filesystem and saved classroom state have separate contracts.",
+      "answer": "Do not rely on arbitrary temporary files; retain source and supported captured artifacts through the documented UI.",
+      "expected": "Do not rely on arbitrary temporary files; retain source and supported captured artifacts through the documented UI."
+    }
+  ],
+  "starter": "# r-019: Local files, CSV, JSON and RDS contracts\n# Complete the six guide tasks using these local inputs.\nrecords <- data.frame(id = c(\"001\", \"002\"), amount = c(2, NA_real_))\n# TODO: use an owned temporary path and verify a typed round trip.\nprint(records)\n",
+  "reference": "path <- tempfile(fileext = \".csv\")\noriginal <- data.frame(id = c(\"001\", \"002\"), amount = c(2, NA_real_))\nwrite.csv(original, path, row.names = FALSE, na = \"\")\nrestored <- read.csv(path, colClasses = c(\"character\", \"numeric\"), na.strings = \"\")\nstopifnot(identical(restored, original), identical(names(restored), c(\"id\", \"amount\")))\nunlink(path)\npath <- tempfile(fileext = \".rds\")\nx <- structure(c(1, 2), names = c(\"A\", \"B\")); saveRDS(x, path)\nstopifnot(identical(readRDS(path), x)); unlink(path)\nencoded <- jsonlite::toJSON(list(values = I(c(2))), auto_unbox = TRUE)\nrestored <- jsonlite::fromJSON(encoded, simplifyVector = FALSE)\nstopifnot(is.list(restored$values), restored$values[[1]] == 2)\ncat(\"r-019 reference checks passed\\n\")\n",
+  "solution_explanation": "The ID remains character, and the empty missing marker is a deliberate part of this synthetic CSV contract.\n\nThe JSON contract contains a scalar ID and an array of values. The RDS round trip additionally retains factor levels, including the unused level.",
+  "sources": [
+    {
+      "title": "R table input",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html"
+    },
+    {
+      "title": "R single-object serialization",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/readRDS.html"
+    },
+    {
+      "title": "R temporary paths",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/tempfile.html"
+    },
+    {
+      "title": "jsonlite package documentation",
+      "url": "https://jeroen.r-universe.dev/jsonlite/doc/manual.html"
+    }
+  ]
+}

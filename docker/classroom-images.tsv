@@ -20,3 +20,6 @@ cuda-cpp cuda-cpp-worker ds60sqlpy-worker-cuda-cpp worker-cuda-cpp DS60_WORKER_C
 cuda-python cuda-python-worker ds60sqlpy-worker-cuda-python worker-cuda-python DS60_WORKER_CUDA_PYTHON_IMAGE gpu
 pytorch-cuda pytorch-cuda-worker ds60sqlpy-worker-pytorch-cuda worker-pytorch-cuda DS60_WORKER_PYTORCH_CUDA_IMAGE gpu
 tensorflow-cuda tensorflow-cuda-worker ds60sqlpy-worker-tensorflow-cuda worker-tensorflow-cuda DS60_WORKER_TENSORFLOW_CUDA_IMAGE gpu
+jax-cpu jax-worker ds60sqlpy-worker-jax-cpu worker-jax-cpu DS60_WORKER_JAX_CPU_IMAGE ordinary
+bayesian-cpu bayesian-worker ds60sqlpy-worker-bayesian-cpu worker-bayesian-cpu DS60_WORKER_BAYESIAN_CPU_IMAGE ordinary
+r-statistics r-worker ds60sqlpy-worker-r-statistics worker-r-statistics DS60_WORKER_R_STATISTICS_IMAGE ordinary

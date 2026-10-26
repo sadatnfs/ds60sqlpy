@@ -1,0 +1,12 @@
+// dax-054: Optimization capstone: prove the grouping assumption first
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-054-a: Whole-model parity under a constant product cost
+// Context: Clean retail model; UnitCost is constant per product and unique on ProductKey.
+EVALUATE ROW ( "LineCost", SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) ), "GroupedCost", SUMX ( VALUES ( Product[ProductKey] ), CALCULATE ( SUM ( Sales[Quantity] ) ) * CALCULATE ( MAX ( Product[UnitCost] ) ) ) )
+
+// dax-054-b: Parity under a region and year selection
+// Context: North and order year 2025 remain active while the grouped expression iterates product keys.
+EVALUATE CALCULATETABLE ( ROW ( "LineCost", SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) ), "GroupedCost", SUMX ( VALUES ( Product[ProductKey] ), CALCULATE ( SUM ( Sales[Quantity] ) ) * CALCULATE ( MAX ( Product[UnitCost] ) ) ) ), Customer[Region] = "North", 'Date'[Year] = 2025 )

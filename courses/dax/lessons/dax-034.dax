@@ -1,0 +1,10 @@
+// dax-034 learner draft: Rolling windows: calendar days versus event days
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why a mean over observed sale days differs from revenue per eligible calendar day.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a complete rolling-window contract.
+
+EVALUATE
+VAR Anchor = DATE ( 2025, 2, 3 )
+RETURN ROW ( "Anchor", Anchor, "Calendar-day window", BLANK(), "Observed-day mean", BLANK() )

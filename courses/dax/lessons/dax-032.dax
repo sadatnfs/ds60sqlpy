@@ -1,0 +1,9 @@
+// dax-032 learner draft: Year-to-date means a specific included-date set
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Derive a YTD measure by enumerating its date boundary and eligible fact rows.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a YTD audit ledger.
+
+EVALUATE
+ROW ( "Current period", BLANK(), "Year to date", BLANK() )

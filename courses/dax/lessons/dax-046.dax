@@ -1,0 +1,9 @@
+// dax-046 learner draft: DAX UDFs: explicit parameters and a reusable scalar rule
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Define a small reusable function with a clear parameter domain and default behavior.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a function contract with units and domain.
+
+// Declare a numeric fee function and its input policy above the query.
+EVALUATE ROW ( "Default fee", BLANK(), "Boundary fee", BLANK() )

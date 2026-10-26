@@ -53,7 +53,7 @@ np.testing.assert_allclose(prob[2],[1/3]*3,atol=1e-12,rtol=0)
 
 The question is: Evaluate held-out sequenceA,C,B using the frozen table.
 
-The first probability is AtoC=2/6 and the second is the uniform CtoB=1/3. The mean loss divides their total by two targets.
+The two transition probabilities are \(p(C\mid A)=2/6=1/3\) and \(p(B\mid C)=1/3\). Their negative log probabilities sum to \(-\log(1/3)-\log(1/3)=2\log 3\). Dividing this total negative log likelihood by two active targets gives mean loss \(\log 3\).
 
 ```python
 saved=counts.copy(); held=[0,2,1]; nll=-sum(np.log(prob[a,b]) for a,b in zip(held[:-1],held[1:]))

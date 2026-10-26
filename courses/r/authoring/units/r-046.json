@@ -1,0 +1,94 @@
+{
+  "id": "r-046",
+  "title": "PCA, scaling and reconstruction",
+  "level": "advanced",
+  "minutes": 140,
+  "prerequisites": ["r-045"],
+  "concepts": ["principal component", "centering", "scaling", "loading", "reconstruction"],
+  "outcome": "Fit and inspect PCA while preserving its preprocessing, orientation and interpretation contracts.",
+  "mechanism": "Principal component analysis finds orthogonal directions of variation in a numerical representation. The representation includes centering and scaling choices. Measuring one feature in much larger units can make it dominate an unscaled covariance analysis even when it contains the same underlying pattern as another feature.\n\nR's prcomp uses a singular-value decomposition of the centered and optionally scaled data. Its rotation matrix contains loading directions, while its x component contains observation scores. Their shapes and orientation matter when reconstructing the original data. A plot of scores without the preprocessing and feature definitions is incomplete evidence.\n\nA loading vector's sign is not uniquely determined. Reversing one loading direction and the corresponding score coordinate leaves the reconstruction unchanged. Tests should therefore compare explained variance, subspaces or reconstructed values rather than demand a particular arbitrary sign across implementations.\n\nScaling to unit variance changes the question from variation in original units to variation relative to each feature's spread. Neither choice is universally correct. A feature with zero variance cannot be standardized by dividing by its standard deviation, so it needs an explicit removal or modeling policy before scaling.\n\nPCA used inside a predictive procedure must be fitted on training data only. New observations are transformed using the retained training center, scale and loadings. Recomputing those quantities on held-out data changes the fitted representation and can leak assessment information. Finally, high explained variance is not proof that a component is scientifically meaningful, causal or useful for a downstream target.",
+  "vocabulary": [
+    {
+      "term": "Loading",
+      "definition": "A coordinate direction in feature space."
+    },
+    {
+      "term": "Score",
+      "definition": "An observation coordinate after projection into the component basis."
+    },
+    {
+      "term": "Explained variance",
+      "definition": "The variation assigned to a retained component under the declared preprocessing."
+    },
+    {
+      "term": "Sign indeterminacy",
+      "definition": "The equivalent reversal of a loading and its corresponding score coordinate."
+    }
+  ],
+  "anatomy": "Use prcomp(x, center=TRUE, scale.=...) and inspect center, scale, rotation, sdev and x. For an unscaled full-rank representation, scores %*% t(rotation) reconstructs centered data. With scaling, multiply reconstructed columns by the stored scale and add the stored center. predict(pc, newdata=...) applies the fitted transformation to new observations.",
+  "worked_examples": [
+    {
+      "title": "Units change an unscaled direction",
+      "code": "x <- cbind(short = c(-2, -1, 1, 2), long = c(-20, -10, 10, 20))\nraw <- prcomp(x, center = TRUE, scale. = FALSE)\nstandardized <- prcomp(x, center = TRUE, scale. = TRUE)\nstopifnot(abs(abs(raw$rotation[\"long\", 1]) - 10 / sqrt(101)) < 1e-10)\nstopifnot(max(abs(abs(standardized$rotation[, 1]) - rep(1 / sqrt(2), 2))) < 1e-10)\nstopifnot(raw$sdev[2] < 1e-10)\nprint(abs(raw$rotation[, 1]))\nprint(abs(standardized$rotation[, 1]))\n",
+      "explanation": "The two features are exactly proportional. Their scale difference dominates the unscaled loading, while standardization gives equal-magnitude coordinates. Absolute values avoid testing an arbitrary sign.",
+      "expected": "Raw large-unit loading magnitude10/sqrt101; standardized magnitudes1/sqrt2."
+    },
+    {
+      "title": "Reconstruct with retained preprocessing",
+      "code": "x <- cbind(a = c(1, 2, 4, 5), b = c(2, 1, 5, 4))\npc <- prcomp(x, center = TRUE, scale. = TRUE)\nscaled_reconstruction <- pc$x %*% t(pc$rotation)\nreconstructed <- sweep(sweep(scaled_reconstruction, 2, pc$scale, \"*\"), 2, pc$center, \"+\")\nstopifnot(max(abs(reconstructed - x)) < 1e-10)\nstopifnot(max(abs(crossprod(pc$rotation) - diag(2))) < 1e-10)\nprint(pc$sdev^2 / sum(pc$sdev^2))\n",
+      "explanation": "Using every component recovers the admitted data up to rounding. The calculation explicitly reverses scaling and centering rather than treating scores as original-unit measurements.",
+      "expected": "Near-exact reconstruction and orthonormal loading columns."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Compare scaled and unscaled PCA for the proportional two-feature fixture.",
+      "hint": "Separate feature units from information content.",
+      "answer": "The larger-unit column dominates the raw loading; standardization yields equal-magnitude loadings.",
+      "expected": "Expected loading magnitudes."
+    },
+    {
+      "prompt": "Reconstruct a full two-component standardized fit.",
+      "hint": "Undo the projection, scale and center in the correct order.",
+      "answer": "Multiply scores by rotation transpose, restore column scales, then add centers.",
+      "expected": "Maximum reconstruction error below 1e-10."
+    },
+    {
+      "prompt": "Reverse the first loading and score signs together.",
+      "hint": "Compare the resulting reconstruction.",
+      "answer": "The reconstructed data is unchanged, showing why signs alone are not a stable comparison target.",
+      "expected": "Equivalent reconstruction."
+    },
+    {
+      "prompt": "Diagnose a constant feature under scale.=TRUE.",
+      "hint": "Inspect its standard deviation.",
+      "answer": "Division by zero makes standardization undefined; reject or remove the constant feature under a declared policy.",
+      "expected": "The attempted standardization raises an error."
+    },
+    {
+      "prompt": "Transform a new row using predict and the saved center/scale/rotation.",
+      "hint": "Do not refit PCA on the new row.",
+      "answer": "The manual training-parameter transformation equals predict(pc,newdata).",
+      "expected": "Matching new-row scores."
+    },
+    {
+      "prompt": "Explain why nearly 100% explained variance is not a downstream prediction-quality result.",
+      "hint": "Ask whether the target participated in the objective.",
+      "answer": "PCA optimizes representation variance, not target prediction or causal identification. A held-out downstream task needs separate evaluation.",
+      "expected": "Scope of the PCA claim stated."
+    }
+  ],
+  "starter": "# r-046: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nx <- cbind(short = c(-2, -1, 1, 2), long = c(-20, -10, 10, 20))\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Compare scaled and unscaled PCA for the proportional two-feature fixture.\n# TODO: Separate feature units from information content.\n# Exercise 2: Reconstruct a full two-component standardized fit.\n# TODO: Undo the projection, scale and center in the correct order.\n# Exercise 3: Reverse the first loading and score signs together.\n# TODO: Compare the resulting reconstruction.\n# Exercise 4: Diagnose a constant feature under scale.=TRUE.\n# TODO: Inspect its standard deviation.\n# Exercise 5: Transform a new row using predict and the saved center/scale/rotation.\n# TODO: Do not refit PCA on the new row.\n# Exercise 6: Explain why nearly 100% explained variance is not a downstream prediction-quality result.\n# TODO: Ask whether the target participated in the objective.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "x <- cbind(short = c(-2, -1, 1, 2), long = c(-20, -10, 10, 20))\nraw <- prcomp(x, center = TRUE, scale. = FALSE)\nscaled <- prcomp(x, center = TRUE, scale. = TRUE)\nstopifnot(abs(abs(raw$rotation[2, 1]) - 10 / sqrt(101)) < 1e-10)\nstopifnot(max(abs(abs(scaled$rotation[, 1]) - 1 / sqrt(2))) < 1e-10)\ny <- cbind(a = c(1, 2, 4, 5), b = c(2, 1, 5, 4))\npc <- prcomp(y, center = TRUE, scale. = TRUE)\nrebuild <- function(scores, rotation) sweep(sweep(scores %*% t(rotation), 2, pc$scale, \"*\"), 2, pc$center, \"+\")\nstopifnot(max(abs(rebuild(pc$x, pc$rotation) - y)) < 1e-10)\nscores <- pc$x; rotation <- pc$rotation\nscores[, 1] <- -scores[, 1]; rotation[, 1] <- -rotation[, 1]\nstopifnot(max(abs(rebuild(scores, rotation) - y)) < 1e-10)\nstopifnot(inherits(try(prcomp(cbind(v = 1:4, constant = rep(1, 4)), scale. = TRUE), silent = TRUE), \"try-error\"))\nnew <- matrix(c(3, 2), nrow = 1, dimnames = list(NULL, colnames(y)))\nmanual <- sweep(sweep(new, 2, pc$center, \"-\"), 2, pc$scale, \"/\") %*% pc$rotation\nstopifnot(max(abs(manual - predict(pc, newdata = new))) < 1e-10)\nstopifnot(abs(sum(pc$sdev^2 / sum(pc$sdev^2)) - 1) < 1e-12)\ncat(\"r-046 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference compares sign-invariant quantities and reconstructs the original data using saved preprocessing. It does not assume one implementation's arbitrary loading signs are authoritative. The constant-feature failure and new-row transformation exercise the admission and application boundaries separately.\n\nExplained variance is computed from squared component standard deviations under the selected scaling. It describes this feature representation. A predictive or scientific interpretation must connect it to an independent question and evaluation design.",
+  "sources": [
+    {
+      "title": "R prcomp",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/prcomp.html"
+    },
+    {
+      "title": "R scale",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/scale.html"
+    }
+  ]
+}

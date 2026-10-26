@@ -38,6 +38,13 @@ def target_and_time_encoding():
     leave_one_out = np.array([np.delete(labels, i).mean() for i in range(4)])
     assert np.array_equal(naive_unique_category, labels)
     assert not np.array_equal(leave_one_out, labels)
+    # Removing the row itself is insufficient: the other labels encode its complement.
+    assert np.isclose(np.corrcoef(leave_one_out, labels)[0, 1], -1)
+    folds = np.array([0, 0, 1, 1])
+    cross_fitted = np.empty_like(labels)
+    for fold in np.unique(folds):
+        cross_fitted[folds == fold] = labels[folds != fold].mean()
+    assert np.allclose(cross_fitted, 0.5)
     values = np.array([10.0, 20.0, 30.0, 40.0])
     lagged_mean = np.array([np.nan] + [values[:i].mean() for i in range(1, 4)])
     assert np.allclose(lagged_mean[1:], [10, 15, 20])
@@ -48,6 +55,7 @@ def target_and_time_encoding():
         leave_one_out,
     )
     print("Strictly prior expanding means:", lagged_mean)
+    print("LOO still reveals labels inversely; balanced held-out-fold fallback:", cross_fitted)
 
 
 def main():

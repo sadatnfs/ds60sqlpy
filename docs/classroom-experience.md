@@ -1,8 +1,8 @@
-# Learn in one classroom
+# Classroom interface
 
 Start your local Linux-container engine, run `./classroom` in the course
 folder and open the URL it prints. The `/classroom` home lets you choose any
-registered subject and return to it at your own pace.
+registered subject and return to its saved code and notes.
 
 ## Choose a path
 

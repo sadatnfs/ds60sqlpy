@@ -347,6 +347,9 @@ def wrapper(tmp_path: Path) -> Any:
     (root / "scripts").mkdir(parents=True)
     shutil.copyfile(ROOT / "scripts/format-repo", root / "scripts/format-repo")
     put(root, "docker/formatting/Dockerfile", "FROM example\n")
+    put(root, "docker/formatting/Dockerfile.r", "FROM r-example\n")
+    put(root, "docker/workers/r/packages.lock.json", '{"schema_version": 1}\n')
+    put(root, "docker/workers/r/install_packages.py", "# locked installer\n")
     binaries = tmp_path / "fake-tools"
     binaries.mkdir()
     calls = tmp_path / "docker-calls.jsonl"
@@ -364,6 +367,9 @@ elif args[:2] == ["context", "inspect"]:
     print(os.environ.get("FORMAT_TEST_ENDPOINT", "unix:///fake/docker.sock"))
 elif args[:2] == ["image", "inspect"]:
     sys.exit(0 if os.environ.get("FORMAT_TEST_IMAGE", "present") == "present" else 1)
+elif (args[:1] == ["run"] and os.environ.get("FORMAT_TEST_FAIL_R")
+      and any(a.startswith("ds60-formatting-r:") for a in args)):
+    sys.exit(int(os.environ["FORMAT_TEST_FAIL_R"]))
 elif args[:1] == ["run"] and os.environ.get("FORMAT_TEST_REWRITE"):
     target = Path(os.environ["FORMAT_TEST_REWRITE"])
     original = target.read_text()
@@ -411,11 +417,13 @@ def test_wrapper_reuses_cached_image_and_mounts_checks_readonly(wrapper: Any, op
     result, calls = invoke(option)
     assert result.returncode == 0, result.stderr
     assert not any(command[0] == "build" for command in calls)
-    run = next(command for command in calls if command[0] == "run")
-    assert "--network=none" in run and "--read-only" in run and "--cap-drop=ALL" in run
-    mount = run[run.index("--mount") + 1]
-    assert str(root) in mount and mount.endswith(",readonly")
-    assert run[-1] == option
+    runs = [command for command in calls if command[0] == "run"]
+    assert len(runs) == (1 if option == "--list" else 2)
+    for run in runs:
+        assert "--network=none" in run and "--read-only" in run and "--cap-drop=ALL" in run
+        mount = run[run.index("--mount") + 1]
+        assert str(root) in mount and mount.endswith(",readonly")
+        assert option in run
     assert not any(command[0] in {"stop", "rm", "compose", "prune"} for command in calls)
 
 
@@ -424,8 +432,9 @@ def test_wrapper_prepares_missing_tools_with_visible_logs_then_formats(wrapper: 
     result, calls = invoke(settings={"FORMAT_TEST_IMAGE": "missing"})
     assert result.returncode == 0, result.stderr
     builds = [command for command in calls if command[0] == "build"]
-    assert len(builds) == 1 and "--progress=plain" in builds[0]
-    assert builds[0][-1] == str(root / "docker/formatting")
+    assert len(builds) == 2 and all("--progress=plain" in build for build in builds)
+    assert builds[0][-1] == str(root)
+    assert builds[1][-1] == str(root / "docker/formatting")
     run = next(command for command in calls if command[0] == "run")
     assert not run[run.index("--mount") + 1].endswith(",readonly")
 
@@ -436,13 +445,71 @@ def test_tool_image_tracks_build_inputs_but_not_documentation(wrapper: Any) -> N
     def selected_image() -> str:
         result, calls = invoke("--check")
         assert result.returncode == 0, result.stderr
-        return str(next(call[2] for call in calls if call[:2] == ["image", "inspect"]))
+        return str(
+            next(
+                call[2]
+                for call in calls
+                if call[:2] == ["image", "inspect"] and call[2].startswith("ds60-formatting:")
+            )
+        )
 
     original = selected_image()
     put(root, "docker/formatting/README.md", "Clarified contributor instructions.\n")
     assert selected_image() == original
     put(root, "docker/formatting/Dockerfile", "FROM changed-toolchain\n")
     assert selected_image() != original
+
+
+def test_r_only_uses_its_isolated_image_and_list_needs_no_r_image(wrapper: Any) -> None:
+    _root, invoke = wrapper
+    result, calls = invoke("--language", "r", "--check")
+    assert result.returncode == 0, result.stderr
+    runs = [call for call in calls if call[0] == "run"]
+    assert len(runs) == 1 and any(value.startswith("ds60-formatting-r:") for value in runs[0])
+    assert runs[0][-2:] == ["--only-language", "r"]
+    result, calls = invoke("--language=r", "--list")
+    assert result.returncode == 0, result.stderr
+    assert not any(any(value.startswith("ds60-formatting-r:") for value in call) for call in calls)
+    assert len([call for call in calls if call[0] == "run"]) == 1
+
+
+def test_r_failure_prevents_other_source_writes_and_shared_regeneration(wrapper: Any) -> None:
+    _root, invoke = wrapper
+    result, calls = invoke(settings={"FORMAT_TEST_FAIL_R": "9"})
+    assert result.returncode == 9
+    assert len([call for call in calls if call[0] == "run"]) == 1
+    assert not any(
+        call[:2] == ["image", "inspect"] and call[2].startswith("ds60-formatting:")
+        for call in calls
+    )
+
+
+def test_r_tool_fingerprint_uses_lock_inputs_not_lesson_sources(wrapper: Any) -> None:
+    root, invoke = wrapper
+
+    def selected_image() -> str:
+        result, calls = invoke("--language", "r", "--check")
+        assert result.returncode == 0, result.stderr
+        image = next(call[2] for call in calls if call[:2] == ["image", "inspect"])
+        assert isinstance(image, str)
+        return image
+
+    original = selected_image()
+    put(root, "courses/r/lessons/r-001.R", "value <- 1\n")
+    assert selected_image() == original
+    put(root, "docker/workers/r/packages.lock.json", '{"schema_version": 2}\n')
+    assert selected_image() != original
+
+
+def test_mixed_language_handoff_validates_then_excludes_already_checked_r(wrapper: Any) -> None:
+    _root, invoke = wrapper
+    result, calls = invoke("--check", "--language", "r", "--language", "python")
+    assert result.returncode == 0, result.stderr
+    runs = [call for call in calls if call[0] == "run"]
+    assert len(runs) == 2
+    assert runs[0][-2:] == ["--only-language", "r"]
+    assert runs[1][-2:] == ["--exclude-language", "r"]
+    assert "--check" in runs[0] and "--check" in runs[1]
 
 
 @pytest.mark.parametrize(

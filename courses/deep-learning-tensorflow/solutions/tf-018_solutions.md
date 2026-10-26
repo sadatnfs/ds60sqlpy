@@ -172,7 +172,7 @@ np.testing.assert_allclose(keras_first, torch_matched_formula, atol=1e-12, rtol=
 
 The question is: Normalize a constant row, then freeze a trained Keras BatchNorm layer and call it with training=True.
 
-Positive epsilon handles a zero-variance row. Keras BatchNorm also has a documented special relationship between trainable=False and inference behavior. This must not be generalized to every layer or copied to PyTorch parameter requires_grad flags, which are separate from module train/eval mode.
+Positive epsilon handles a zero-variance row. Keras BatchNorm also has a documented special relationship between `trainable=False` and inference behavior. This must not be generalized to every layer or copied to PyTorch parameter `requires_grad` flags, which are separate from module train/eval mode.
 
 ```python
 ln = tf.keras.layers.LayerNormalization(axis=-1, epsilon=1e-3)

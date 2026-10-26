@@ -957,7 +957,7 @@ add(
         ),
         ex(
             "Use Unicode-aware dot matching",
-            "Compare /^.$/ and /^.$/u on one emoji.",
+            "Compare `/^.$/` and `/^.$/u` on one emoji.",
             "without u false; with u true.",
             "assert.equal(/^.$/.test('🙂'), false);\nassert.equal(/^.$/u.test('🙂'), true);",
             (

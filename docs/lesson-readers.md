@@ -15,8 +15,10 @@ files become escaped, highlighted listings. Even an HTML lesson is shown as sour
 in a reader. It executes only in the explicit browser preview. Building or opening
 a reader never executes code or notebook outputs.
 
-Explicit LaTeX renders to offline MathML. Syntax highlighting is bundled locally,
-and copying code preserves its characters. Maintainer-only Markdown HTML comments
+Explicit TeX is compiled during the build into offline KaTeX HTML and accessible
+MathML. Prose uses bundled Latin Modern fonts. Display equations have sequence
+numbers and an expandable TeX source view. Syntax highlighting is local, and
+copying code preserves its characters. See [textbook rendering](textbook-rendering.md). Maintainer-only Markdown HTML comments
 are omitted while code comments remain escaped text. Unsafe URL schemes and source
 outside the repository are rejected.
 
@@ -52,6 +54,7 @@ Edit durable subject sources, then regenerate shared views in a prepared environ
 make generate
 uv run --no-sync python scripts/build_course_guide.py --check
 uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python scripts/compile_lesson_tex.py --check
 uv run --no-sync python scripts/check_content_rendering.py
 uv run --no-sync python scripts/check_published_links.py
 ```

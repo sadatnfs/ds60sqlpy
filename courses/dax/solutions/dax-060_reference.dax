@@ -1,0 +1,19 @@
+// dax-060: Delivery capstone: a model specification and an evidence ledger
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+    MEASURE Sales[QuantitySold] = SUM ( Sales[Quantity] )
+    MEASURE Sales[GrossRevenue] = SUMX ( Sales, Sales[Quantity] * Sales[UnitPrice] )
+    MEASURE Sales[OrderCount] = DISTINCTCOUNT ( Sales[OrderID] )
+    MEASURE Sales[Cost] = SUMX ( Sales, Sales[Quantity] * RELATED ( Product[UnitCost] ) )
+
+// dax-060-a: Expected NorthViewer regression row
+// Context: Assume enforced NorthViewer policy on the analytical model; all available dates; constant UnitCost per product.
+EVALUATE ROW ( "Revenue", [NetRevenue], "LineCost", [Cost], "GroupedCost", SUMX ( VALUES ( Product[ProductKey] ), CALCULATE ( SUM ( Sales[Quantity] ) ) * CALCULATE ( MAX ( Product[UnitCost] ) ) ), "AfterCustomerFilterRemoval", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Customer ) ) )
+
+// dax-060-b: Expected SouthViewer regression row
+// Context: Assume enforced SouthViewer policy; the same model and measure definitions with a different allowed Customer population.
+EVALUATE ROW ( "Revenue", [NetRevenue], "LineCost", [Cost], "GroupedCost", SUMX ( VALUES ( Product[ProductKey] ), CALCULATE ( SUM ( Sales[Quantity] ) ) * CALCULATE ( MAX ( Product[UnitCost] ) ) ), "AfterCustomerFilterRemoval", CALCULATE ( [NetRevenue], REMOVEFILTERS ( Customer ) ) )

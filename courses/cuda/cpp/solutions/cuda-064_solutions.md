@@ -8,7 +8,7 @@ The separate [CPU reference](../references/cuda-064_cpu.py) checks the chapter's
 
 ## Exercise 1
 
-For affine y=a*x+b with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
+For affine \(y=ax+b\) with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
 
 ## Exercise 2
 

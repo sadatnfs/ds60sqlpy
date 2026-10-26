@@ -2,7 +2,7 @@
 # Sourced by the launcher. Values are data, never evaluated as shell code.
 image_source=local
 image_namespace=''
-release_version=0.4.1
+release_version=0.5.0
 image_tag="$release_version"
 image_source_explicit=0
 image_tag_explicit=0
@@ -10,7 +10,7 @@ image_arch=''
 
 validate_image_selection() {
   case "$image_source" in local | hub) ;; *) fail 'Image source must be local or hub.' ;; esac
-  [[ "$image_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9][a-zA-Z0-9.-]*)?$ ]] || fail 'Use a release tag such as 0.4.1, not latest or a shell expression.'
+  [[ "$image_tag" =~ ^[0-9]+\.[0-9]+\.[0-9]+([.-][a-zA-Z0-9][a-zA-Z0-9.-]*)?$ ]] || fail 'Use a release tag such as 0.5.0, not latest or a shell expression.'
   if [ "$image_source" = hub ]; then
     [[ "$image_namespace" =~ ^[a-z0-9][a-z0-9_-]{1,38}$ ]] || fail 'Use a Docker Hub username or organization, without a URL, password or slash.'
   else

@@ -1,0 +1,12 @@
+# r-017: complete reference for the declared synthetic inputs.
+stopifnot(identical(as.numeric(factor(c("5", "9"))), c(1, 2)))
+group <- factor(c("A", "B", "A"), levels = c("A", "B", "C"))
+stopifnot(levels(relevel(group, ref = "B"))[[1]] == "B")
+stopifnot(unname(table(group)["C"]) == 0L)
+ordered_group <- ordered(c("low", "high"), levels = c("low", "medium", "high"))
+stopifnot(is.ordered(ordered_group))
+unknown <- factor("D", levels = c("A", "B", "C"))
+stopifnot(is.na(unknown))
+design <- model.matrix(~group)
+stopifnot(identical(colnames(design), c("(Intercept)", "groupB", "groupC")))
+cat("r-017 reference checks passed\n")

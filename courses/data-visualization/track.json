@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "id": "data-visualization",
+  "title": "Scientific visualization with Plotly: Python and JavaScript",
+  "summary": "Eight paired lessons on data encodings, distributions, uncertainty, interactive inspection, forecasting, model comparisons, bounded rendering and accessible figure evidence.",
+  "lessons": [
+    {
+      "id": "viz-001",
+      "title": "Data, traces and honest encodings",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": ["python-16"],
+      "runtime": "python-core",
+      "concepts": ["records", "traces", "layout", "units"],
+      "outcome": "Preserve record identity, units and exact values while sorting and rendering a chart.",
+      "lab": "Use the supplied fixture to complete the six data, traces and honest encodings tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-001 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-002",
+      "title": "Distributions, bins and missingness",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": ["viz-001"],
+      "runtime": "python-core",
+      "concepts": ["histogram", "density", "ECDF", "missingness"],
+      "outcome": "Explain bin boundaries, density normalization and tied empirical CDF values from the same records.",
+      "lab": "Use the supplied fixture to complete the six distributions, bins and missingness tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-002 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-003",
+      "title": "Uncertainty and effect displays",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": ["viz-002", "statistics-008"],
+      "runtime": "python-core",
+      "concepts": ["confidence interval", "error bars", "practical margin", "multiplicity"],
+      "outcome": "Render interval endpoints correctly and distinguish statistical from practical effect claims.",
+      "lab": "Use the supplied fixture to complete the six uncertainty and effect displays tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-003 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-004",
+      "title": "Filters and linked record inspection",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": ["viz-001", "viz-003"],
+      "runtime": "python-core",
+      "concepts": ["customdata", "visibility", "selection", "keyboard controls"],
+      "outcome": "Implement reversible filters and preserve point identity with a readable complete source table.",
+      "lab": "Use the supplied fixture to complete the six filters and linked record inspection tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-004 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-005",
+      "title": "Time series and forecast evidence",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": ["viz-003", "viz-004", "statistics-027"],
+      "runtime": "python-core",
+      "concepts": ["forecast cutoff", "prediction band", "time order", "availability"],
+      "outcome": "Separate available history, frozen predictions and later outcomes while labeling uncertainty honestly.",
+      "lab": "Use the supplied fixture to complete the six time series and forecast evidence tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-005 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-006",
+      "title": "Paired comparisons and subplot design",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": ["viz-003", "viz-005", "statistics-022"],
+      "runtime": "python-core",
+      "concepts": ["paired loss", "shared axes", "subplots", "evaluation grain"],
+      "outcome": "Link model predictions to paired losses under common data and axis definitions.",
+      "lab": "Use the supplied fixture to complete the six paired comparisons and subplot design tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-006 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-007",
+      "title": "Bounded rendering and representative reduction",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": ["viz-004", "viz-005", "viz-006"],
+      "runtime": "python-core",
+      "concepts": ["downsampling", "extrema", "SVG", "lifecycle"],
+      "outcome": "Reduce displayed marks with a stated preservation property and test its limitations.",
+      "lab": "Use the supplied fixture to complete the six bounded rendering and representative reduction tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-007 Plotly complete after creating its figure."
+    },
+    {
+      "id": "viz-008",
+      "title": "Accessible output and reviewable figure export",
+      "level": "advanced",
+      "minutes": 90,
+      "prerequisites": ["viz-006", "viz-007"],
+      "runtime": "python-core",
+      "concepts": ["semantic table", "caption", "JSON", "provenance"],
+      "outcome": "Preserve data meaning and accessible exact values through a figure-specification round-trip.",
+      "lab": "Use the supplied fixture to complete the six accessible output and reviewable figure export tasks and compare the numerical and visual evidence.",
+      "verification": "Check the named values and failure case in the guide; the reference prints viz-008 Plotly complete after creating its figure."
+    }
+  ]
+}

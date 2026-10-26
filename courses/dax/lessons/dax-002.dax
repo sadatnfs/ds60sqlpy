@@ -1,0 +1,9 @@
+// dax-002 learner draft: Grain, keys and why rows are not orders
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Distinguish sales lines, orders and customers before selecting an aggregation.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write the average revenue per order measure.
+
+EVALUATE
+ROW ( "Order lines", BLANK(), "Distinct orders", BLANK() )

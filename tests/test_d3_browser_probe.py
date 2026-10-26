@@ -20,7 +20,7 @@ def observation() -> dict[str, Any]:
         "lesson_id": "js-043",
         "profile": "javascript-browser",
         "language": "javascript",
-        "library": "d3@7.9.0",
+        "library": "d3@7.9.0+plotly@4.1.2",
         "verification_kind": "browser_observation",
         "verified": False,
         "checks": [],

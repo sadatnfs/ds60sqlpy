@@ -1,0 +1,9 @@
+// dax-037 learner draft: Ranking, ties and an exact-sized Top N
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Specify tie behavior separately from deterministic ordering and selection size.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a ranking specification including its comparison population.
+
+EVALUATE
+ADDCOLUMNS ( VALUES ( Product[ProductKey] ), "Amount", BLANK(), "Dense rank", BLANK() )

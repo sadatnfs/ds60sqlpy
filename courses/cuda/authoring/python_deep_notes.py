@@ -84,7 +84,7 @@ Backward also has memory and stream contracts. Saved forward intermediates must 
 For one head, queries have shape \((L_q,d)\), keys \((L_k,d)\), and values \((L_k,d_v)\). Scores have shape \((L_q,L_k)\). The operation is:
 
 \[
-S=QK^{\mathsf T}/\sqrt d,\quad
+S=QK^{\mathsf T}/\sqrt{d},\quad
 P=\operatorname{softmax}(S+M),\quad
 O=PV.
 \]

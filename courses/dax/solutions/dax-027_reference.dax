@@ -1,0 +1,19 @@
+// dax-027: Lineage and TREATAS: equal values can filter differently
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-027-a: A direct key projection retains its model identity
+// Context: No outer filters; direct projection of the two Paper ProductKey values.
+EVALUATE
+VAR PaperKeys = SELECTCOLUMNS ( FILTER ( Product, Product[Category] = "Paper" ), "Key", Product[ProductKey] )
+RETURN ROW ( "CandidateRows", COUNTROWS ( PaperKeys ), "Revenue", CALCULATE ( [NetRevenue], PaperKeys ) )
+
+// dax-027-b: Restore an explicitly detached mapping
+// Context: Expression-derived values {1,2}; compare a lineage-free table filter with an explicit target mapping.
+EVALUATE
+VAR DetachedKeys = SELECTCOLUMNS ( FILTER ( Product, Product[Category] = "Paper" ), "Key", Product[ProductKey] + 0 )
+RETURN ROW ( "WithoutTarget", CALCULATE ( [NetRevenue], DetachedKeys ), "WithTarget", CALCULATE ( [NetRevenue], TREATAS ( DetachedKeys, Product[ProductKey] ) ) )

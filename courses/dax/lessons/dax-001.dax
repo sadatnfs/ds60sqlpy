@@ -1,0 +1,9 @@
+// dax-001 learner draft: A semantic model, a question and a worked result
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain what a revenue number means by identifying the model, grain and eligible rows.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a one-row query that names the output QuantitySold.
+
+EVALUATE
+ROW ( "Visible sales lines", BLANK(), "Net revenue", BLANK() )

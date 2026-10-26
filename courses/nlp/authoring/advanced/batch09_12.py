@@ -266,7 +266,7 @@ Viterbi decoding finds the single highest-probability complete path. It does not
     [
         (
             "Derive the recurrence and its complexity",
-            """Let D_t(j) be the log probability of the best partial path ending in state j at position t. Initialization is D_1(j)=log pi_j+log b_j(x_1). The recurrence is D_t(j)=log b_j(x_t)+max_i[D_(t-1)(i)+log a_ij]. Store the maximizing predecessor i for every j and t. After selecting the largest final score, walk those backpointers in reverse to recover the path.
+            """Let D_t(j) be the log probability of the best partial path ending in state j at position t. Initialization is \\(D_1(j)=\\log\\pi_j+\\log b_j(x_1)\\). The recurrence is \\(D_t(j)=\\log b_j(x_t)+\\max_i\\left[D_{t-1}(i)+\\log a_{ij}\\right]\\). Store the maximizing predecessor i for every j and t. After selecting the largest final score, walk those backpointers in reverse to recover the path.
 
 The recurrence keeps only the best partial path ending in each state because future factors depend on the current state, not the whole earlier history. This is the dynamic-programming optimal-substructure argument. It reduces an exponential K^T enumeration to O(T*K^2) work for a dense K-state transition matrix, plus backpointer storage. A sparse transition graph can reduce work further.
 
@@ -274,11 +274,7 @@ Products of many probabilities underflow easily. Summing logs preserves ordering
         ),
         (
             "Interpret arrays and deterministic ties",
-            """The emission array in this lesson has one row per observed token position and one column per candidate state. Its entry is the emission probability of that observed token under that state. Rows need not sum to one: they compare different conditional distributions for one observation. By contrast, the initial-state probabilities sum to one, and each transition row sums to one over next states.
-
-The expression dp[:,None]+log_transition broadcasts the previous state scores into a previous-state-by-next-state matrix. argmax(axis=0) selects the best predecessor for each next state. The reference chooses the first state index for exact ties, making a repeated fixture deterministic. A different tie convention can yield a different path with the same score; record that policy rather than claiming the path is uniquely preferred.
-
-The empty observation sequence returns an empty path with log probability zero, corresponding to probability one for an empty product. This is an explicit API convention. Invalid probability ranges, incompatible shapes and impossible observations are rejected separately.""",
+            "The emission array in this lesson has one row per observed token position and one column per candidate state. Its entry is the emission probability of that observed token under that state. Rows need not sum to one: they compare different conditional distributions for one observation. By contrast, the initial-state probabilities sum to one, and each transition row sums to one over next states.\n\nThe expression `dp[:,None]+log_transition` broadcasts the previous state scores into a previous-state-by-next-state matrix. `argmax(axis=0)` selects the best predecessor for each next state. The reference chooses the first state index for exact ties, making a repeated fixture deterministic. A different tie convention can yield a different path with the same score; record that policy rather than claiming the path is uniquely preferred.\n\nThe empty observation sequence returns an empty path with log probability zero, corresponding to probability one for an empty product. This is an explicit API convention. Invalid probability ranges, incompatible shapes and impossible observations are rejected separately.",
         ),
         (
             "BIO constraints and the evaluation unit",
@@ -626,7 +622,7 @@ Window size controls a tradeoff between local syntactic patterns and broader top
         ),
         (
             "Derive PMI and positive PMI",
-            """Let N be the sum of all context-pair counts, C_i+ the row total and C_+j the column total. Pointwise mutual information is PMI(i,j)=log[(C_ij/N)/((C_i+/N)*(C_+j/N))]=log[C_ij*N/(C_i+*C_+j)]. It compares observed co-occurrence with the independence expectation. Positive PMI replaces negative values with zero.
+            """Let N be the sum of all context-pair counts, C_i+ the row total and C_+j the column total. Pointwise mutual information is \\(\\operatorname{PMI}(i,j)=\\log\\frac{C_{ij}/N}{(C_{i+}/N)(C_{+j}/N)}=\\log\\frac{C_{ij}N}{C_{i+}C_{+j}}\\). It compares observed co-occurrence with the independence expectation. Positive PMI replaces negative values with zero.
 
 A zero count has undefined negative-infinite log ratio, so the implementation explicitly leaves it at zero in the PPMI matrix. An all-zero row remains a zero vector. Do not add an arbitrary epsilon everywhere without recognizing that this changes the estimator. Rare pair estimates can have large positive PMI from little evidence; smoothing or shifted weighting are possible deliberate alternatives.
 
@@ -634,7 +630,7 @@ The fixture count matrix [[4,3,0],[3,4,0],[0,0,6]] totals twenty. Its first cell
         ),
         (
             "Compress with SVD and interpret similarity",
-            """Singular-value decomposition writes M=U*diag(s)*V_transpose. Retaining the largest k singular values gives a rank-k reconstruction with a precise least-squares approximation property for the matrix. The embedding used here is U_k*diag(s_k), with V_k_transpose used to reconstruct. Other conventions distribute singular-value powers differently and therefore change cosine geometry.
+            """Singular-value decomposition writes \\(M=U\\operatorname{diag}(s)V^{\\mathsf T}\\). Retaining the largest k singular values gives a rank-k reconstruction with a precise least-squares approximation property for the matrix. The embedding used here is \\(U_k\\operatorname{diag}(s_k)\\), with V_k_transpose used to reconstruct. Other conventions distribute singular-value powers differently and therefore change cosine geometry.
 
 Cosine similarity is the dot product divided by the product of vector norms. It measures direction rather than magnitude and is undefined for a zero vector. The reference returns None for that boundary so missing representation is not mislabeled as meaningful dissimilarity. A normalized dot product and an unnormalized dot product answer different retrieval questions.
 

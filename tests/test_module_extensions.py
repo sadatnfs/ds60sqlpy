@@ -131,3 +131,12 @@ def test_new_subject_rejects_unregistered_runtime(tmp_path: Path) -> None:
     )
     with pytest.raises(ValueError, match="runtime"):
         load_extra_plans(tmp_path, {"java21"})
+
+
+def test_registered_languages_have_source_admission_rules() -> None:
+    from ds60sqlpy.modules import LANGUAGES, SOURCE_SUFFIXES
+
+    languages = {language for supported in LANGUAGES.values() for language in supported}
+    assert languages <= SOURCE_SUFFIXES.keys()
+    assert SOURCE_SUFFIXES["dax"] == {".dax"}
+    assert ".R" in SOURCE_SUFFIXES["r"]

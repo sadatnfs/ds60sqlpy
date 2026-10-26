@@ -20,6 +20,10 @@ from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 LANGUAGES = {
     "reading": frozenset({"markdown"}),
+    "dax-offline": frozenset({"dax"}),
+    "jax-cpu": frozenset({"python"}),
+    "bayesian-cpu": frozenset({"python"}),
+    "r-statistics": frozenset({"r"}),
     "python-core": frozenset({"python"}),
     "tensorflow-cpu": frozenset({"python"}),
     "llm-torch-cpu": frozenset({"python"}),
@@ -53,6 +57,26 @@ VERIFIERS = frozenset(
         "k8s-readiness-v1",
     }
 )
+SOURCE_SUFFIXES = {
+    "python": {".py"},
+    "r": {".R", ".r"},
+    "dax": {".dax"},
+    "cpp": {".cpp", ".cc", ".cxx"},
+    "c": {".c"},
+    "go": {".go"},
+    "csharp": {".cs"},
+    "rust": {".rs"},
+    "swift": {".swift"},
+    "scala": {".scala"},
+    "java": {".java"},
+    "javascript": {".mjs", ".js"},
+    "typescript": {".mts", ".ts"},
+    "yaml": {".yaml", ".yml"},
+    "markdown": {".md"},
+    "html": {".html"},
+    "php": {".php"},
+}
+
 MAX_SOURCE_BYTES = 48_000
 
 
@@ -116,6 +140,8 @@ class ModuleCatalog:
                 language_title = {
                     "scala": "Scala",
                     "python": "Python",
+                    "r": "R",
+                    "dax": "DAX",
                     "cpp": "C++",
                     "c": "C",
                     "go": "Go",
@@ -243,25 +269,9 @@ class ModuleCatalog:
                 if verifier is not None and profile not in verifier_profiles[verifier]:
                     raise ValueError(f"{key} verifier does not match its runtime profile.")
                 source = self.root / paths[1]
-                suffixes = {
-                    "python": {".py"},
-                    "cpp": {".cpp", ".cc", ".cxx"},
-                    "c": {".c"},
-                    "go": {".go"},
-                    "csharp": {".cs"},
-                    "rust": {".rs"},
-                    "swift": {".swift"},
-                    "scala": {".scala"},
-                    "java": {".java"},
-                    "javascript": {".mjs", ".js"},
-                    "typescript": {".mts", ".ts"},
-                    "yaml": {".yaml", ".yml"},
-                    "markdown": {".md"},
-                    "html": {".html"},
-                    "php": {".php"},
-                }
                 if (
-                    source.suffix not in ({".cu"} if profile == "cuda-cpp" else suffixes[language])
+                    source.suffix
+                    not in ({".cu"} if profile == "cuda-cpp" else SOURCE_SUFFIXES[language])
                     or source.stat().st_size > MAX_SOURCE_BYTES
                 ):
                     raise ValueError(f"Invalid source format/size for {key}.")

@@ -1,0 +1,9 @@
+// dax-052 learner draft: Expanded tables and existing combinations
+// Offline editing only. No execution or automatic grading occurs here.
+// Model: courses/dax/models/retail/model.json
+// Goal: Explain why broad filter removal and same-table combinations need model-aware reasoning.
+// Keep a prediction and row/filter-context trace beside your edits.
+// TODO: Write a denominator-debugging ledger.
+
+EVALUATE
+ROW ( "Requested pairs", BLANK(), "Existing pairs", BLANK() )

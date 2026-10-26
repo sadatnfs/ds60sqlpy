@@ -1,0 +1,100 @@
+{
+  "id": "r-045",
+  "title": "Structured validation and training-only preprocessing",
+  "level": "intermediate",
+  "minutes": 140,
+  "prerequisites": ["r-044"],
+  "concepts": [
+    "group split",
+    "temporal split",
+    "leakage",
+    "cross-validation",
+    "training-only preprocessing"
+  ],
+  "outcome": "Construct validation procedures whose partitions and preprocessing match the intended transfer claim.",
+  "mechanism": "A validation split defines what kind of new information the assessment represents. Randomly splitting rows can be appropriate for some independent-observation questions, but it can leak information when several rows belong to the same person, document family, device or time-linked episode. A new row from a known family is not the same transfer question as a new family.\n\nKeep group identity with the data and enforce the intended separation explicitly. A split can have no duplicate row IDs yet still share all of its source families. Conversely, a group-aware split may be harder because it asks the model to generalize across the units that matter scientifically. Choose the unit from the intended use rather than selecting whichever partition gives the best score.\n\nPreprocessing belongs inside the training portion of each split. A mean, scale, imputation value or feature-selection rule calculated using held-out observations allows assessment data to influence the fitted system. Even when labels are untouched, that information can change the evaluated procedure. Fit the transformation on training rows and apply the retained parameters to validation rows.\n\nTemporal prediction adds an ordering requirement. Features and model choices must use information available by the prediction origin. Random shuffling can move future observations into the training set for an earlier prediction. A rolling-origin evaluation makes those information boundaries visible and can reveal changes in behavior over time.\n\nCross-validation scores also have an aggregation rule. Unequal folds can be weighted equally or by observation count, and those summaries answer different questions. Retain fold counts and error sums so the chosen summary can be reconstructed. Hyperparameter tuning and final evaluation are separate roles; repeatedly inspecting the final set to choose a method changes the meaning of that final score.",
+  "vocabulary": [
+    {
+      "term": "Group-aware split",
+      "definition": "A partition that keeps all rows from a declared related unit together."
+    },
+    {
+      "term": "Leakage",
+      "definition": "Information from an assessment target or held-out unit entering the fitted procedure in a way inconsistent with the intended prediction task."
+    },
+    {
+      "term": "Training-only transformation",
+      "definition": "A preprocessing rule whose estimated parameters are fitted using training rows only."
+    },
+    {
+      "term": "Rolling origin",
+      "definition": "A temporal evaluation in which each prediction uses only observations available before its origin."
+    }
+  ],
+  "anatomy": "Create train/test indices from stable group IDs or time order, then assert disjointness at the intended unit. Store centering/scaling values before applying them to held-out data. In a fold loop, refit both preprocessing and the estimator inside each training partition. Return error sums and counts rather than only an unlabeled average score.",
+  "worked_examples": [
+    {
+      "title": "Rows can differ while groups leak",
+      "code": "d <- data.frame(id = 1:8, group = rep(LETTERS[1:4], each = 2), x = 0:7)\nrow_train <- c(1, 3, 5, 7)\nrow_test <- c(2, 4, 6, 8)\nstopifnot(length(intersect(d$id[row_train], d$id[row_test])) == 0)\nstopifnot(length(intersect(d$group[row_train], d$group[row_test])) == 4)\ngroup_train <- d$group %in% c(\"A\", \"B\")\nstopifnot(length(intersect(d$group[group_train], d$group[!group_train])) == 0)\nprint(list(row_split_shared_groups = 4, group_split_shared_groups = 0))\n",
+      "explanation": "The first split has distinct row IDs but shares every family. The second asks a different transfer question by holding out complete families.",
+      "expected": "No shared row IDs can coexist with four shared groups; group split has zero shared groups."
+    },
+    {
+      "title": "Fit preprocessing on the training partition",
+      "code": "train <- c(0, 2)\nheldout <- c(100, 102)\ncenter <- mean(train)\ntransformed <- heldout - center\nstopifnot(center == 1, identical(transformed, c(99, 101)))\nleaked_center <- mean(c(train, heldout))\nstopifnot(leaked_center == 51, leaked_center != center)\nprint(c(training_center = center, leaked_center = leaked_center))\n",
+      "explanation": "The transformation parameters are part of the fitted procedure. Including held-out values changes the centering rule even without using labels.",
+      "expected": "Training center1; global center51; valid held-out transformed values 99/101."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Construct a group-disjoint split for four two-row families.",
+      "hint": "Partition families before selecting their rows.",
+      "answer": "Assign A/B to training and C/D to assessment; assert no group intersection.",
+      "expected": "Zero shared groups."
+    },
+    {
+      "prompt": "Demonstrate why an odd/even row split leaks the same families.",
+      "hint": "Compare family sets as well as row IDs.",
+      "answer": "Every family appears in both partitions even though row IDs differ.",
+      "expected": "Four shared families."
+    },
+    {
+      "prompt": "Perform leave-one-group-out prediction for the exact rule y=1+2x.",
+      "hint": "Refit the model using only the other groups.",
+      "answer": "Each fold has disjoint families and recovers the exact authored affine relationship; retain fold counts and error sums.",
+      "expected": "Near-zero error with explicit fold counts."
+    },
+    {
+      "prompt": "Diagnose centering with the full dataset before splitting.",
+      "hint": "Ask which observations estimated the center.",
+      "answer": "Held-out covariates have influenced the fitted transformation. Recompute the center within each training partition.",
+      "expected": "Training-only center restored."
+    },
+    {
+      "prompt": "Define the temporal split at day 4 in days 1 through 6.",
+      "hint": "Keep every training date earlier than every assessment date.",
+      "answer": "Train on 1:4 and evaluate on 5:6; no future row is used to fit the earlier predictor.",
+      "expected": "max(train day)<min(test day)."
+    },
+    {
+      "prompt": "Aggregate folds with error sums 2 and 12 and counts 1 and 3.",
+      "hint": "Choose observation weighting explicitly.",
+      "answer": "The observation mean is 14/4=3.5; the equal-fold mean of 2 and 4 is 3.",
+      "expected": "Both quantities labeled; observation mean 3.5."
+    }
+  ],
+  "starter": "# r-045: independent practice\n# Supplied input fixture only; fill results and add independent assertions.\n\nd <- data.frame(id = 1:8, group = rep(LETTERS[1:4], each = 2), x = 0:7)\nresults <- vector(\"list\", 6L)\n\n# Exercise 1: Construct a group-disjoint split for four two-row families.\n# TODO: Partition families before selecting their rows.\n# Exercise 2: Demonstrate why an odd/even row split leaks the same families.\n# TODO: Compare family sets as well as row IDs.\n# Exercise 3: Perform leave-one-group-out prediction for the exact rule y=1+2x.\n# TODO: Refit the model using only the other groups.\n# Exercise 4: Diagnose centering with the full dataset before splitting.\n# TODO: Ask which observations estimated the center.\n# Exercise 5: Define the temporal split at day 4 in days 1 through 6.\n# TODO: Keep every training date earlier than every assessment date.\n# Exercise 6: Aggregate folds with error sums 2 and 12 and counts 1 and 3.\n# TODO: Choose observation weighting explicitly.\n\ncat(\"Scaffold initialized; complete the six tasks and their checks.\\n\")\n",
+  "reference": "d <- data.frame(id = 1:8, group = rep(LETTERS[1:4], each = 2), x = 0:7)\nd$y <- 1 + 2 * d$x\ntrain <- d$group %in% c(\"A\", \"B\")\nstopifnot(length(intersect(d$group[train], d$group[!train])) == 0)\nstopifnot(length(intersect(d$group[c(1, 3, 5, 7)], d$group[c(2, 4, 6, 8)])) == 4)\nfolds <- lapply(unique(d$group), function(g) {\n  train <- d$group != g\n  stopifnot(length(intersect(d$group[train], d$group[!train])) == 0)\n  fit <- lm(y ~ x, data = d[train, ])\n  error <- d$y[!train] - predict(fit, d[!train, ])\n  data.frame(group = g, n = sum(!train), squared_error_sum = sum(error^2))\n})\nfolds <- do.call(rbind, folds)\nstopifnot(sum(folds$n) == 8, sum(folds$squared_error_sum) < 1e-20)\ncenter <- mean(c(0, 2))\nstopifnot(center == 1, mean(c(0, 2, 100, 102)) == 51)\nday <- 1:6\nstopifnot(max(day[day <= 4]) < min(day[day > 4]))\nstopifnot((2 + 12) / (1 + 3) == 3.5, mean(c(2 / 1, 12 / 3)) == 3)\ncat(\"r-045 reference checks passed\\n\")\n",
+  "solution_explanation": "The reference checks disjointness at the family level and refits inside each fold. Its perfect synthetic affine predictions test implementation mechanics, not the credibility of real-world validation. The training-only centering example isolates a preprocessing leak without mixing it with model error.\n\nThe final aggregation preserves both sums and counts, allowing the observation-weighted result to be reconstructed. Temporal ordering is checked independently. A complete applied study must also reserve model-selection decisions for development data and retain a final assessment that was not reused for tuning.",
+  "sources": [
+    {
+      "title": "R lm",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/lm.html"
+    },
+    {
+      "title": "R model frames",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/stats/html/model.frame.html"
+    }
+  ]
+}

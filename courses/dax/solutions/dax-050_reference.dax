@@ -1,0 +1,12 @@
+// dax-050: Intermediate tables can grow before aggregation
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/retail/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+// dax-050-a: Possible customer/product pairs
+// Context: No filters; dimension population 4 products by 4 customers; observed pair grain from Sales.
+EVALUATE ROW ( "CandidatePairs", COUNTROWS ( CROSSJOIN ( VALUES ( Product[ProductKey] ), VALUES ( Customer[CustomerKey] ) ) ), "ObservedPairs", COUNTROWS ( SUMMARIZE ( Sales, Sales[ProductKey], Sales[CustomerKey] ) ) )
+
+// dax-050-b: Adding a complete calendar dimension
+// Context: Whole two-year Date dimension has 731 days; compare possible versus observed product/customer/date cells.
+EVALUATE ROW ( "CandidateCells", COUNTROWS ( CROSSJOIN ( VALUES ( Product[ProductKey] ), VALUES ( Customer[CustomerKey] ), VALUES ( 'Date'[Date] ) ) ), "ObservedCells", COUNTROWS ( SUMMARIZE ( Sales, Sales[ProductKey], Sales[CustomerKey], Sales[OrderDate] ) ) )

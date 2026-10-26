@@ -1,0 +1,15 @@
+// dax-041: Budget comparisons require compatible grains
+// Offline reference. These formulas have not been executed by this classroom.
+// Model contract: courses/dax/models/analytics/model.json
+// Result cases and source/model hashes: courses/dax/reference-results.json
+
+DEFINE
+    MEASURE Sales[NetRevenue] = SUM ( Sales[NetAmount] )
+
+// dax-041-a: A comparable full-month category
+// Context: FullJanuary 2025 and Paper category; Budget is monthly/category-grained and disconnected.
+EVALUATE CALCULATETABLE ( VAR FullMonth = HASONEVALUE ( 'Date'[MonthKey] ) && COUNTROWS ( VALUES ( 'Date'[Date] ) ) = DAY ( EOMONTH ( MAX ( 'Date'[Date] ), 0 ) ) VAR Target = IF ( FullMonth, CALCULATE ( SUM ( Budget[Amount] ), TREATAS ( VALUES ( 'Date'[MonthKey] ), Budget[MonthKey] ), TREATAS ( VALUES ( Product[Category] ), Budget[Category] ) ) ) RETURN ROW ( "Actual", [NetRevenue], "ComparableBudget", Target, "Variance", IF ( NOT ISBLANK ( Target ), [NetRevenue] - Target ) ), 'Date'[Year] = 2025, 'Date'[MonthNumber] = 1, Product[Category] = "Paper" )
+
+// dax-041-b: A daily selection is not assigned the monthly target
+// Context: One observed day in January 2025; no daily budget allocation policy exists.
+EVALUATE CALCULATETABLE ( VAR FullMonth = HASONEVALUE ( 'Date'[MonthKey] ) && COUNTROWS ( VALUES ( 'Date'[Date] ) ) = DAY ( EOMONTH ( MAX ( 'Date'[Date] ), 0 ) ) VAR Target = IF ( FullMonth, CALCULATE ( SUM ( Budget[Amount] ), TREATAS ( VALUES ( 'Date'[MonthKey] ), Budget[MonthKey] ), TREATAS ( VALUES ( Product[Category] ), Budget[Category] ) ) ) RETURN ROW ( "Actual", [NetRevenue], "ComparableBudget", Target ), 'Date'[Date] = DATE ( 2025, 1, 2 ), Product[Category] = "Paper" )

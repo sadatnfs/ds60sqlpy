@@ -1,0 +1,94 @@
+{
+  "id": "r-014",
+  "title": "Functional iteration, typed results and the base pipe",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-009", "r-012", "r-013"],
+  "concepts": ["Mapping", "lapply", "vapply", "Pipe"],
+  "outcome": "Map a validated computation over records and retain predictable output types with readable data flow.",
+  "mechanism": "Functional iteration separates the operation on one element from the traversal over a collection. lapply applies a function to each input element and returns a list, retaining heterogeneous results when necessary. This is useful when each group produces a structured summary rather than one number.\n\nSimplification needs a contract. sapply may simplify a result into a vector, matrix or list depending on what it receives. That convenience can make edge cases surprising. vapply asks for an expected result prototype, such as numeric(1), and rejects an incompatible output. A pipeline using one numeric scalar per group should make that requirement explicit.\n\nThe base pipe |> makes a sequence of calls readable by passing the left-hand value to the next call. It does not make an operation lazy, distributed or automatically vectorized. A function still receives and returns ordinary R objects. Anonymous functions can adapt argument order or perform a short named step when a simple first-argument call does not fit.\n\nAvoid mapping solely to hide a complex stateful loop. If each iteration depends on prior mutation, a clear bounded loop may communicate the algorithm better. For independent group summaries, a small pure function and an explicit output contract make testing easier. Include empty collections and groups with missing observations in the interface rather than assuming every group resembles the first.",
+  "vocabulary": [
+    {
+      "term": "Mapping",
+      "definition": "Applying a function to each element of a collection."
+    },
+    {
+      "term": "lapply",
+      "definition": "Mapping that returns a list."
+    },
+    {
+      "term": "vapply",
+      "definition": "Mapping with an explicit expected result type and length."
+    },
+    {
+      "term": "Pipe",
+      "definition": "Syntax passing an intermediate result into the next call."
+    }
+  ],
+  "anatomy": "lapply(groups, summarize) returns one object per group. vapply(groups, function(x) sum(x), numeric(1)) requires one double-compatible scalar per group. The base pipe sends the left value into the first argument of a normal call unless explicitly adapted.",
+  "worked_examples": [
+    {
+      "title": "One typed total per group",
+      "code": "groups <- list(A = c(1, 2), B = c(4, 6))\ntotals <- vapply(groups, sum, numeric(1))\nstopifnot(identical(totals, c(A = 3, B = 10)))\nprint(totals)\n",
+      "explanation": "The prototype states that every group produces one numeric total. Group names remain available for interpretation.",
+      "expected": "A3, B10."
+    },
+    {
+      "title": "Structured mapping and a readable pipeline",
+      "code": "groups <- list(A = c(1, 2), B = c(4, 6))\nsummaries <- lapply(groups, function(x) list(n = length(x), total = sum(x)))\nstopifnot(summaries$B$n == 2L, summaries$B$total == 10)\nresult <- c(3, 1, 2) |>\n  sort() |>\n  head(2)\nstopifnot(identical(result, c(1, 2)))\nprint(result)\n",
+      "explanation": "A list is appropriate for structured group outputs. The pipe is ordinary sequential evaluation with an inspectable intermediate order.",
+      "expected": "1,2."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict vapply(list(c(1,2), c(3)), sum, numeric(1)).",
+      "hint": "Each list element produces one total.",
+      "answer": "The result is 3,3.",
+      "expected": "The result is 3,3."
+    },
+    {
+      "prompt": "Add an empty group to a sum mapping.",
+      "hint": "The empty sum convention is zero.",
+      "answer": "The new group total is zero, under that declared policy.",
+      "expected": "The new group total is zero, under that declared policy."
+    },
+    {
+      "prompt": "Map count and mean into a list per group.",
+      "hint": "The outputs have multiple fields.",
+      "answer": "Use lapply and explicitly handle all-missing or empty means.",
+      "expected": "Use lapply and explicitly handle all-missing or empty means."
+    },
+    {
+      "prompt": "Diagnose a mapped function returning two numbers under numeric(1).",
+      "hint": "The output prototype is a contract.",
+      "answer": "vapply raises an incompatibility instead of changing shape silently.",
+      "expected": "vapply raises an incompatibility instead of changing shape silently."
+    },
+    {
+      "prompt": "Map an empty collection.",
+      "hint": "There are no groups to summarize.",
+      "answer": "vapply with numeric(1) returns an empty numeric result.",
+      "expected": "vapply with numeric(1) returns an empty numeric result."
+    },
+    {
+      "prompt": "Explain why a pipe does not accelerate a computation automatically.",
+      "hint": "It rewrites data flow, not the algorithm or backend.",
+      "answer": "Measure an actual equivalent workload before making a performance claim.",
+      "expected": "Measure an actual equivalent workload before making a performance claim."
+    }
+  ],
+  "starter": "# r-014: Functional iteration, typed results and the base pipe\n# Complete the six guide tasks using these local inputs.\ngroups <- list(A = c(1, 2), B = c(4, 6), empty = numeric(0))\n# TODO: map a function with an explicit result contract.\nprint(names(groups))\n",
+  "reference": "stopifnot(identical(vapply(list(c(1, 2), c(3)), sum, numeric(1)), c(3, 3)))\ngroups <- list(A = c(1, 2), empty = numeric(0))\nstopifnot(vapply(groups, sum, numeric(1))[[\"empty\"]] == 0)\nsummary <- lapply(groups, function(x) list(n = length(x), mean = if (length(x)) mean(x) else NA_real_))\nstopifnot(summary$A$mean == 1.5, is.na(summary$empty$mean))\nbad <- tryCatch(\n  {\n    vapply(list(1), function(x) c(x, x), numeric(1)); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(bad, identical(vapply(list(), sum, numeric(1)), numeric(0)))\nstopifnot(identical(c(3, 1, 2) |> sort() |> head(2), c(1, 2)))\ncat(\"r-014 reference checks passed\\n\")\n",
+  "solution_explanation": "The prototype states that every group produces one numeric total. Group names remain available for interpretation.\n\nA list is appropriate for structured group outputs. The pipe is ordinary sequential evaluation with an inspectable intermediate order.",
+  "sources": [
+    {
+      "title": "R apply over lists",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/lapply.html"
+    },
+    {
+      "title": "R base pipe",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/pipeOp.html"
+    }
+  ]
+}

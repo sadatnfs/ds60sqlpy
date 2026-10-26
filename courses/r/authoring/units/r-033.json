@@ -1,0 +1,94 @@
+{
+  "id": "r-033",
+  "title": "Joins, key uniqueness and unmatched records",
+  "level": "intermediate",
+  "minutes": 120,
+  "prerequisites": ["r-010", "r-020", "r-031"],
+  "concepts": ["Join cardinality", "Many-to-one lookup", "Unmatched key", "Join multiplication"],
+  "outcome": "Perform a validated many-to-one lookup and detect duplicate or unmatched keys before they change totals.",
+  "mechanism": "Joining tables is a data-model operation, not merely a convenient way to append columns. Declare the grain on both sides and the expected match cardinality. A sales-line table can have many rows for one product, while a product dimension should have one row per product key. Duplicate dimension keys can multiply fact rows and inflate a later sum.\n\nFor a many-to-one lookup, match can return one index per left-hand key while preserving the left table's order. This is useful only after verifying that the right-hand key is unique. match returns the first match when duplicates exist, which can hide an inconsistent dimension rather than expose it. Check uniqueness before trusting that apparent convenience.\n\nUnmatched records need an explicit policy. Rejecting them, retaining them with missing dimension values and routing them to a diagnostic set are different choices. A left join that preserves all facts can still create missing attributes. Distinguish an unknown product key from a known product whose optional label is itself missing.\n\nBase merge supports relational joins, but its output order and row count should be treated explicitly. A many-to-many relationship can legitimately expand rows when the model calls for it; it is a defect only relative to the stated contract. Always reconcile counts and additive totals around the join. A plausible-looking output table is not sufficient evidence that each fact appeared exactly once.",
+  "vocabulary": [
+    {
+      "term": "Join cardinality",
+      "definition": "The relationship between matches on the left and right sides."
+    },
+    {
+      "term": "Many-to-one lookup",
+      "definition": "Many fact records mapped to at most one dimension record per key."
+    },
+    {
+      "term": "Unmatched key",
+      "definition": "A key without a corresponding record on the other side."
+    },
+    {
+      "term": "Join multiplication",
+      "definition": "Extra result rows created by multiple matching records."
+    }
+  ],
+  "anatomy": "Validate !anyDuplicated(dimension$key) and !anyNA for required keys. match(fact$key, dimension$key) returns positions or NA. Use merge(..., by=..., all.x=TRUE) only with understood cardinality, and explicitly reorder results when presentation order matters.",
+  "worked_examples": [
+    {
+      "title": "A validated dimension lookup preserves fact order",
+      "code": "facts <- data.frame(line = c(\"L1\", \"L2\", \"L3\"), product = c(\"B\", \"A\", \"B\"), amount = c(10, 20, 30))\ndimension <- data.frame(product = c(\"A\", \"B\"), category = c(\"Paper\", \"Home\"))\nstopifnot(!anyDuplicated(dimension$product), !anyNA(dimension$product))\nindex <- match(facts$product, dimension$product)\nstopifnot(!anyNA(index))\nfacts$category <- dimension$category[index]\nstopifnot(identical(facts$category, c(\"Home\", \"Paper\", \"Home\")), sum(facts$amount) == 60)\nprint(facts)\n",
+      "explanation": "The lookup adds exactly one category per fact and retains the original line order. Key validation makes the first-match behavior safe for this contract.",
+      "expected": "Three rows, total 60."
+    },
+    {
+      "title": "Duplicate matches inflate a naive join",
+      "code": "facts <- data.frame(product = c(\"A\", \"B\"), amount = c(10, 20))\nbad_dimension <- data.frame(product = c(\"A\", \"A\", \"B\"), category = c(\"X\", \"Y\", \"Z\"))\njoined <- merge(facts, bad_dimension, by = \"product\", all.x = TRUE)\nstopifnot(nrow(joined) == 3L, sum(joined$amount) == 40)\nstopifnot(anyDuplicated(bad_dimension$product) > 0L)\nprint(joined)\n",
+      "explanation": "The A fact appears twice. A duplicate-key guard would reject the dimension before the incorrect total becomes a report.",
+      "expected": "Three rows, total 40 instead of 30."
+    }
+  ],
+  "exercises": [
+    {
+      "prompt": "Predict the category sequence for fact keys B, A, B.",
+      "hint": "Use the validated dimension mapping.",
+      "answer": "Home, Paper, Home.",
+      "expected": "Home, Paper, Home."
+    },
+    {
+      "prompt": "Add an unmatched key C.",
+      "hint": "match reports no corresponding index.",
+      "answer": "The missing index must be rejected or retained under an explicit diagnostic policy.",
+      "expected": "The missing index must be rejected or retained under an explicit diagnostic policy."
+    },
+    {
+      "prompt": "Write a many-to-one join guard.",
+      "hint": "Validate right-hand uniqueness and all required matches.",
+      "answer": "No duplicated dimension key and no unmatched required fact key are admitted.",
+      "expected": "No duplicated dimension key and no unmatched required fact key are admitted."
+    },
+    {
+      "prompt": "Diagnose a total rising after a dimension join.",
+      "hint": "Inspect duplicate matches before changing the aggregate.",
+      "answer": "The join may have multiplied fact records.",
+      "expected": "The join may have multiplied fact records."
+    },
+    {
+      "prompt": "Join an empty fact table.",
+      "hint": "The result should preserve a zero-row schema.",
+      "answer": "No facts or additive amounts should be created.",
+      "expected": "No facts or additive amounts should be created."
+    },
+    {
+      "prompt": "Transfer the checks to SQL or Spark.",
+      "hint": "The same grain/cardinality rules apply across engines.",
+      "answer": "Declare join keys, expected matches, unmatched policy and before/after reconciliation.",
+      "expected": "Declare join keys, expected matches, unmatched policy and before/after reconciliation."
+    }
+  ],
+  "starter": "# r-033: Joins, key uniqueness and unmatched records\n# Complete the six guide tasks using these local inputs.\nfacts <- data.frame(product = c(\"B\", \"A\", \"C\"), amount = c(10, 20, 30))\ndimension <- data.frame(product = c(\"A\", \"B\"), category = c(\"Paper\", \"Home\"))\n# TODO: validate cardinality and retain unmatched-key evidence.\nprint(facts)\n",
+  "reference": "dimension <- data.frame(product = c(\"A\", \"B\"), category = c(\"Paper\", \"Home\"))\nfacts <- data.frame(product = c(\"B\", \"A\", \"B\"), amount = c(10, 20, 30))\nlookup <- function(facts, dimension) {\n  stopifnot(!anyNA(dimension$product), !anyDuplicated(dimension$product))\n  index <- match(facts$product, dimension$product)\n  stopifnot(!anyNA(index))\n  facts$category <- dimension$category[index]\n  facts\n}\nresult <- lookup(facts, dimension)\nstopifnot(identical(result$category, c(\"Home\", \"Paper\", \"Home\")), sum(result$amount) == 60)\nunmatched <- tryCatch(\n  {\n    lookup(data.frame(product = \"C\", amount = 1), dimension); FALSE\n  },\n  error = function(e) TRUE\n)\nduplicated <- tryCatch(\n  {\n    lookup(facts, rbind(dimension, dimension[1, ])); FALSE\n  },\n  error = function(e) TRUE\n)\nstopifnot(unmatched, duplicated)\nempty <- lookup(facts[integer(0), , drop = FALSE], dimension)\nstopifnot(nrow(empty) == 0L, identical(names(empty), c(\"product\", \"amount\", \"category\")))\ncat(\"r-033 reference checks passed\\n\")\n",
+  "solution_explanation": "The lookup adds exactly one category per fact and retains the original line order. Key validation makes the first-match behavior safe for this contract.\n\nThe A fact appears twice. A duplicate-key guard would reject the dimension before the incorrect total becomes a report.",
+  "sources": [
+    {
+      "title": "R matching",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/match.html"
+    },
+    {
+      "title": "R merging tables",
+      "url": "https://stat.ethz.ch/R-manual/R-devel/library/base/html/merge.html"
+    }
+  ]
+}
