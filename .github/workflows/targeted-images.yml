@@ -13,7 +13,7 @@ concurrency:
     ${{ contains(github.event.head_commit.message, '[publish-') &&
     'classroom-dockerhub-publication' ||
     format('classroom-docker-build-test-{0}', github.ref) }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ contains(github.event.head_commit.message, '[build-test-') && !contains(github.event.head_commit.message, '[publish-') }}
 
 jobs:
   intent:

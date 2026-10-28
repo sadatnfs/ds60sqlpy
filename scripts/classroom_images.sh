@@ -26,6 +26,8 @@ valid_image_version() {
 known_image_profile() {
   [ "$1" = app ] && return 0
   local profile _service _local_name _suffix _variable kind
+  # classroom.sh resolves repo_dir before sourcing this helper.
+  # shellcheck disable=SC2154
   while read -r profile _service _local_name _suffix _variable kind; do
     [ "$profile" != "$1" ] || {
       [ "$kind" = ordinary ]
@@ -94,6 +96,8 @@ validate_image_tag_compatibility() {
   [ "$app_tag" = latest ] || valid_image_version "$app_tag" || fail 'The app image needs a release version or latest.'
   if [ "$app_tag" = latest ] || ! valid_image_version "$app_tag"; then return 0; fi
   app_line="${app_tag%.*}"
+  # classroom.sh populates selected_profiles before calling this check.
+  # shellcheck disable=SC2154
   for profile in "${selected_profiles[@]}"; do
     worker_tag="$(image_tag_for "$profile")"
     [ "$worker_tag" = latest ] && continue
@@ -326,6 +330,8 @@ verify_mixed_worker_release_metadata() {
     worker_tag="$(image_tag_for "$profile")"
     [ "$worker_tag" != "$image_tag" ] || continue
     [ "$image_layout" = manifest ] || fail "Mixed image versions require combined Hub indexes; $profile uses $worker_tag. Saved volumes are retained."
+    # classroom.sh sets no_build before calling release verification.
+    # shellcheck disable=SC2154
     if [ "$no_build" -eq 1 ]; then
       [ -n "$image_selection_revision" ] || fail "The mixed $profile image selection has not been verified. Resume cannot query the registry; run ordinary ./classroom to validate it. Saved volumes are retained."
       continue

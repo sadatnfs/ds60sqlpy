@@ -23,7 +23,11 @@ def test_workflow_keeps_build_test_free_of_hub_secrets_and_uploads() -> None:
     )
     jobs = workflow["jobs"]
     concurrency = workflow["concurrency"]
-    assert concurrency["cancel-in-progress"] == "false"
+    expected_cancel = (
+        "${{ contains(github.event.head_commit.message, '[build-test-') "
+        "&& !contains(github.event.head_commit.message, '[publish-') }}"
+    )
+    assert concurrency["cancel-in-progress"] == expected_cancel
     assert "classroom-dockerhub-publication" in concurrency["group"]
     assert "classroom-docker-build-test-{0}" in concurrency["group"]
     assert "contains(github.event.head_commit.message, '[publish-')" in concurrency["group"]
