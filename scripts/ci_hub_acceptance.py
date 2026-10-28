@@ -690,12 +690,48 @@ _READ_MARKER = (
 )
 
 
+def learner_user(container_id: str, root: Path = ROOT) -> str:
+    """Select the non-root UID/GID that Compose assigned the learner volume."""
+    raw = run_output(
+        [
+            "docker",
+            "inspect",
+            "--format",
+            "{{range .Config.Env}}{{println .}}{{end}}",
+            container_id,
+        ],
+        root=root,
+    )
+    try:
+        lines = raw.decode("utf-8", "strict").splitlines()
+    except UnicodeError:
+        raise ReleaseError("Hosted learner identity metadata is not valid UTF-8") from None
+    values: list[int] = []
+    for key in ("DS60_UID", "DS60_GID"):
+        matches = [line.split("=", 1)[1] for line in lines if line.startswith(key + "=")]
+        if len(matches) != 1 or re.fullmatch(r"[1-9][0-9]{0,4}", matches[0]) is None:
+            raise ReleaseError("Hosted App has no single non-root learner UID/GID")
+        value = int(matches[0])
+        if value > 65535:
+            raise ReleaseError("Hosted learner UID/GID is outside its supported range")
+        values.append(value)
+    return f"{values[0]}:{values[1]}"
+
+
 def write_learning_marker(container_id: str, marker: str, root: Path = ROOT) -> None:
-    run_output(["docker", "exec", container_id, "python", "-c", _WRITE_MARKER, marker], root=root)
+    user = learner_user(container_id, root)
+    run_output(
+        ["docker", "exec", "--user", user, container_id, "python", "-c", _WRITE_MARKER, marker],
+        root=root,
+    )
 
 
 def read_learning_marker(container_id: str, marker: str, root: Path = ROOT) -> None:
-    actual = run_output(["docker", "exec", container_id, "python", "-c", _READ_MARKER], root=root)
+    user = learner_user(container_id, root)
+    actual = run_output(
+        ["docker", "exec", "--user", user, container_id, "python", "-c", _READ_MARKER],
+        root=root,
+    )
     if actual != marker.encode("ascii"):
         raise ReleaseError("Hosted learner volume lost its saved marker across stop/resume")
 

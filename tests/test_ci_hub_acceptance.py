@@ -607,6 +607,76 @@ def test_app_identity_reads_exact_image_id_and_one_public_port(
         hub.lab_image_and_port("container-id")
 
 
+def test_learning_marker_exec_uses_validated_non_root_learner_identity(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    marker = "ds60-hub-acceptance:" + REVISION + ":amd64"
+    commands: list[list[str]] = []
+
+    def output(args: list[str], **kwargs: Any) -> bytes:
+        commands.append(args)
+        if args[:2] == ["docker", "inspect"]:
+            return b"HOME=/workspace\nDS60_UID=1000\nDS60_GID=1000\n"
+        assert args[:5] == ["docker", "exec", "--user", "1000:1000", "lab-id"]
+        assert "/workspace/.learning/.ds60-hub-acceptance-marker" in args[7]
+        return marker.encode() if len(args) == 8 else b""
+
+    monkeypatch.setattr(hub, "run_output", output)
+    hub.write_learning_marker("lab-id", marker)
+    hub.read_learning_marker("lab-id", marker)
+    assert [args[:2] for args in commands] == [
+        ["docker", "inspect"],
+        ["docker", "exec"],
+        ["docker", "inspect"],
+        ["docker", "exec"],
+    ]
+    assert commands[1][-1] == marker
+
+
+@pytest.mark.parametrize(
+    ("environment", "message"),
+    [
+        (b"DS60_UID=0\nDS60_GID=1000\n", "non-root learner UID/GID"),
+        (b"DS60_UID=1000\nDS60_GID=0\n", "non-root learner UID/GID"),
+        (b"DS60_UID=1000\nDS60_UID=1001\nDS60_GID=1000\n", "single non-root"),
+        (b"DS60_UID=1000\nDS60_GID=100000\n", "non-root learner UID/GID"),
+        (b"DS60_UID=1000\n", "single non-root"),
+        (b"DS60_UID=1000\nDS60_GID=1000\xff\n", "UTF-8"),
+    ],
+)
+def test_marker_rejects_untrusted_or_missing_learner_identity_before_exec(
+    environment: bytes, message: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    commands: list[list[str]] = []
+
+    def output(args: list[str], **kwargs: Any) -> bytes:
+        commands.append(args)
+        return environment
+
+    monkeypatch.setattr(hub, "run_output", output)
+    with pytest.raises(ReleaseError, match=message):
+        hub.write_learning_marker("lab-id", "fixed-marker")
+    assert len(commands) == 1 and commands[0][:2] == ["docker", "inspect"]
+
+
+def test_marker_permission_failure_never_falls_back_to_root(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    commands: list[list[str]] = []
+
+    def output(args: list[str], **kwargs: Any) -> bytes:
+        commands.append(args)
+        if args[:2] == ["docker", "inspect"]:
+            return b"DS60_UID=1000\nDS60_GID=1000\n"
+        raise ReleaseError("Hosted Docker command failed: docker exec")
+
+    monkeypatch.setattr(hub, "run_output", output)
+    with pytest.raises(ReleaseError, match="docker exec"):
+        hub.write_learning_marker("lab-id", "fixed-marker")
+    assert len(commands) == 2
+    assert commands[1][:5] == ["docker", "exec", "--user", "1000:1000", "lab-id"]
+
+
 def test_failed_start_retains_diagnostics_before_owned_cleanup(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
