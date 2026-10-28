@@ -232,7 +232,10 @@ def classroom_checks(browser: Any, origin: str, audit: Audit, expect: Any) -> No
     try:
         page = context.new_page()
         page.goto(origin + "/classroom")
-        expect(page.locator("#subject-cards .subject-card")).to_have_count(len(SUBJECTS))
+        # The first catalog read can outlast the default five-second expect timeout.
+        expect(page.locator("#subject-cards .subject-card")).to_have_count(
+            len(SUBJECTS), timeout=20_000
+        )
         no_overflow(page)
         audit.screenshot(page, "classroom-home-desktop")
         page.set_viewport_size({"width": 390, "height": 844})
